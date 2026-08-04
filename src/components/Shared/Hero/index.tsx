@@ -1,13 +1,18 @@
 'use client';
 
 import React from 'react';
-import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
+import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import { twJoin } from 'tailwind-merge';
 import { Typograph } from '../Generics/Typograph';
 
 interface HeroGeneralProps {
     title: React.ReactNode;
-    breadcrumbItems?: { label: string; url: string }[];
+    /** Render the route-derived breadcrumb. Default `true`. */
+    hasBreadcrumb?: boolean;
+    /** Label overrides for intermediate dynamic segments, keyed by raw segment. */
+    breadcrumbOverrides?: Record<string, React.ReactNode>;
+    /** Label for the last crumb (a CMS/API title). */
+    breadcrumbCurrentLabel?: React.ReactNode;
     description?: React.ReactNode;
     className?: string;
     darkMode?: boolean;
@@ -15,7 +20,9 @@ interface HeroGeneralProps {
 
 export default function Hero({
     title,
-    breadcrumbItems,
+    hasBreadcrumb = true,
+    breadcrumbOverrides,
+    breadcrumbCurrentLabel,
     description,
     className = '',
     darkMode = false,
@@ -26,10 +33,11 @@ export default function Hero({
             <div className='w-full flex flex-col items-center justify-center'>
                 <div className="container flex flex-col gap-64 py-64">
                     {/* Breadcrumbs Section */}
-                    {breadcrumbItems && breadcrumbItems.length > 0 && (
-                        <Breadcrumb
+                    {hasBreadcrumb && (
+                        <BreadcrumbDynamic
                             darkMode={!darkMode}
-                            items={breadcrumbItems}
+                            overrides={breadcrumbOverrides}
+                            currentLabel={breadcrumbCurrentLabel}
                         />
                     )}
                     {/* Content Section (Title & description) */}

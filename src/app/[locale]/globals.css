@@ -144,6 +144,11 @@ body {
   color: rgb(255 255 255);
 }
 
+.admin-breadcrumb-static a {
+  cursor: default;
+  pointer-events: none;
+}
+
 /* Hide languages selector (temporarily) */
 header.sticky .languages-panel-menu {
   display: none !important;

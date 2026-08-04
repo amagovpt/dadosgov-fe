@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import { UserFollowing } from "@/service/types/identity";
@@ -15,10 +16,12 @@ const CLASS_TO_PATH: Record<string, string> = {
 };
 
 export function SubscriptionsTab({ subscriptions, isLoading }: SubscriptionsTabProps) {
+  const { t } = useTranslation("admin-profile");
+
   if (isLoading) {
     return (
       <div className="mt-24">
-        <p className="text-base text-neutral-900">A carregar subscrições...</p>
+        <p className="text-base text-neutral-900">{t("subscriptions.loading")}</p>
       </div>
     );
   }
@@ -30,8 +33,8 @@ export function SubscriptionsTab({ subscriptions, isLoading }: SubscriptionsTabP
           className="admin-page__empty"
           position="center"
           icon={<Icon name="agora-line-bell" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem subscrições"
-          description="Não segue conteúdos"
+          title={t("subscriptions.emptyTitle")}
+          description={t("subscriptions.emptyDescription")}
           hasAnchor={false}
         />
       </div>

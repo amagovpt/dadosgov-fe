@@ -1,14 +1,18 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, CardGeneral, StatusCard } from "@ama-pt/agora-design-system";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import type { Dataservice } from "@/service/types/dataservice";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ApiRegistrationPublishStepProps {
   createdDataservice: Dataservice | null;
   apiName: string;
   apiDescription: string;
+  createdCard?: AdminCard;
   apiError?: string | null;
   isPublishing: boolean;
   onPublish: () => void;
@@ -19,24 +23,29 @@ export default function ApiRegistrationPublishStep({
   createdDataservice,
   apiName,
   apiDescription,
+  createdCard,
   apiError,
   isPublishing,
   onPublish,
   onSaveDraft,
 }: ApiRegistrationPublishStepProps) {
+  const { t } = useTranslation("admin-dataservices");
+
   return (
     <>
-      <StatusCard
-        variant="success"
-        showIcon
-        description={
-          <>
-            <strong>A sua API foi criada!</strong>
-            <br />
-            Agora pode publicar ou guardar como rascunho.
-          </>
-        }
-      />
+      {createdCard ? (
+        <StatusCard
+          variant="success"
+          showIcon
+          description={
+            <>
+              <strong>{createdCard.title}</strong>
+              <br />
+              {formatHtmlParagraphs(createdCard.description)}
+            </>
+          }
+        />
+      ) : null}
 
       {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
@@ -46,8 +55,10 @@ export default function ApiRegistrationPublishStep({
         isBlockedLink
         iconDefault="agora-line-layers-menu"
         iconHover="agora-solid-layers-menu"
-        titleText={createdDataservice?.title || apiName || "Sem título"}
-        descriptionText={createdDataservice?.description || apiDescription || "Sem descrição"}
+        titleText={createdDataservice?.title || apiName || t("form.untitled")}
+        descriptionText={
+          createdDataservice?.description || apiDescription || t("form.noDescription")
+        }
         anchor={{
           href: createdDataservice ? `/dataservices/${createdDataservice.id}` : "#",
           children: "",
@@ -63,10 +74,10 @@ export default function ApiRegistrationPublishStep({
           onClick={onSaveDraft}
           disabled={isPublishing}
         >
-          Salvar rascunho
+          {t("form.saveDraft")}
         </Button>
         <Button variant="primary" onClick={onPublish} disabled={isPublishing || !createdDataservice}>
-          {isPublishing ? "A publicar..." : "Publicar API"}
+          {isPublishing ? t("form.publishing") : t("form.publishApi")}
         </Button>
       </div>
     </>

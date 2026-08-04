@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { DropdownOption, DropdownSection, InputSelect } from "@ama-pt/agora-design-system";
 import AdminExternalUrlFields from "@/components/admin/forms/AdminExternalUrlFields";
 
@@ -23,15 +24,17 @@ export default function DataserviceDatasetLinksSection({
   onRemoveDatasetLink,
   onAddDatasetLink,
 }: DataserviceDatasetLinksSectionProps) {
+  const { t } = useTranslation("admin-dataservices");
+
   return (
     <>
       <InputSelect
-        label="Pesquisar um conjunto de dados"
-        placeholder="Procurando um conjunto de dados..."
+        label={t("datasetLinks.searchLabel")}
+        placeholder={t("datasetLinks.searchPlaceholder")}
         id="dataset-search"
       >
         <DropdownSection name="datasets">
-          <DropdownOption value="dataset1">Conjunto de dados 1</DropdownOption>
+          <DropdownOption value="dataset1">{t("datasetLinks.sampleDataset")}</DropdownOption>
         </DropdownSection>
       </InputSelect>
 
@@ -39,13 +42,13 @@ export default function DataserviceDatasetLinksSection({
         entries={datasetLinks}
         errors={datasetLinkErrors}
         idPrefix="dataset-url"
-        label="Link para o conjunto de dados"
-        placeholder="Insira o URL aqui"
+        label={t("datasetLinks.linkLabel")}
+        placeholder={t("fields.urlPlaceholder")}
         itemClassName="mt-16"
         removeButtonAppearance="link"
         onEntryChange={onDatasetUrlChange}
         onRemoveEntry={onRemoveDatasetLink}
-        addLabel="Adicionar"
+        addLabel={t("datasetLinks.add")}
         onAddEntry={onAddDatasetLink}
       />
     </>

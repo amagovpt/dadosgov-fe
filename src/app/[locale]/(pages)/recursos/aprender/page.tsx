@@ -44,11 +44,6 @@ export default async function page() {
           updatedAt: hero.updatedAt,
           title: hero.title,
           description: hero.description,
-          breadcrumbItems: [
-            { label: "Início", url: "/" },
-            { label: "Recursos", url: "/recursos/" },
-            { label: "Aprender", url: "/recursos/aprender/" },
-          ],
         }}
       />
 

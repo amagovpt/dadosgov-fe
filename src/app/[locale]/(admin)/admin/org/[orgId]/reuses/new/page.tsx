@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
-import OrgReusesNewClient from "@/components/admin/reuses/views/OrgReusesNewClient";
+import ReusesNewClient from "@/components/admin/reuses/views/ReusesNewClient";
+import { getBoReuses, getBoReusesMetadata } from "@/service/queries/admin/reuses";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-export const metadata: Metadata = {
-  title: "Nova reutilização - Organização - Admin - dados.gov.pt",
-  description: "Publique uma nova reutilização da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoReusesMetadata(locale);
 
-export default function OrgReusesNewPage() {
-  return <OrgReusesNewClient />;
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
+
+export default async function OrgReusesNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoReuses(locale);
+
+  return <ReusesNewClient pageContent={pageContent} />;
 }

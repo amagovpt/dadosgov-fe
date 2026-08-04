@@ -2,15 +2,18 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button, Pill } from "@ama-pt/agora-design-system";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 
 function ReusePreviewContent() {
+  const { t } = useTranslation("common");
+  const { t: tR } = useTranslation("reuses");
   const searchParams = useSearchParams();
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const title = searchParams.get("title") || "Sem título";
-  const description = searchParams.get("description") || "Sem descrição";
+  const title = searchParams.get("title") || tR("detail.untitled");
+  const description = searchParams.get("description") || tR("detail.noDescription");
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -18,15 +21,15 @@ function ReusePreviewContent() {
         <div className="flex justify-between items-center ">
           <Breadcrumb
             items={[
-              { label: "Início", url: "/" },
-              { label: "Reutilizações", url: "/admin/me/reuses" },
+              { label: t("breadcrumbs.home"), url: "/" },
+              { label: t("breadcrumbs.reuses"), url: "/admin/me/reuses" },
               { label: title, url: "#" },
             ]}
           />
         </div>
 
         <div className="flex justify-end items-center gap-16 ">
-          <Pill variant="warning">Rascunho</Pill>
+          <Pill variant="warning">{tR("detail.draft")}</Pill>
           <Button
             variant="primary"
             appearance={isFavorite ? "solid" : "outline"}
@@ -36,7 +39,7 @@ function ReusePreviewContent() {
             className="flex-shrink-0"
             onClick={() => setIsFavorite(!isFavorite)}
           >
-            {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            {isFavorite ? tR("detail.removeFavorite") : tR("detail.addFavorite")}
           </Button>
         </div>
 

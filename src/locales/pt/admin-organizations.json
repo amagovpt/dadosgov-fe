@@ -1,0 +1,43 @@
+{
+  "title": "Organizações",
+  "columns": {
+    "name": "Nome",
+    "createdAt": "Criado em",
+    "datasets": "Conjuntos de dados",
+    "reuses": "Reutilizações",
+    "members": "Membros",
+    "deleteAriaLabel": "Eliminar {{name}}"
+  },
+  "delete": {
+    "title": "Tem a certeza que quer eliminar esta organização?",
+    "description": "Esta ação é irreversível.",
+    "closeAriaLabel": "Fechar"
+  },
+  "form": {
+    "nameRequired": "Indique o nome da organização.",
+    "descriptionRequired": "Descreva a organização.",
+    "createError": "Erro ao criar a organização.",
+    "fileTooLarge": "O ficheiro excede o tamanho máximo de 4 MB.",
+    "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
+    "organizationLabel": "Organização",
+    "organizationPlaceholder": "Pesquisar uma organização em dados.gov.pt...",
+    "searchInputPlaceholder": "Escreva para pesquisar...",
+    "noResults": "Nenhum resultado encontrado",
+    "or": "ou",
+    "createOrganization": "Criar uma organização",
+    "descriptionSectionTitle": "Descrição",
+    "nameField": "Nome *",
+    "namePlaceholder": "Insira o nome aqui",
+    "acronymField": "Sigla",
+    "acronymPlaceholder": "Insira a sigla aqui",
+    "descriptionField": "Descrição *",
+    "descriptionPlaceholder": "Insira a descrição aqui",
+    "websiteField": "Website",
+    "websitePlaceholder": "Insira o URL aqui",
+    "logoSectionTitle": "Logotipo",
+    "logoFileLabel": "Ficheiro",
+    "logoPreviewAlt": "Pré-visualização do logotipo",
+    "logoPreviewLabel": "Pré-visualização:",
+    "previous": "Anterior"
+  }
+}

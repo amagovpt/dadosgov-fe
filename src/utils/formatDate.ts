@@ -38,7 +38,8 @@ export function formatDateToDMY(dateStr: string | null | undefined, fallback: st
   return `${d}/${m}/${y}`;
 }
 
-const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
+/** BCP-47 tag for each supported UI locale, for `Intl` / `toLocaleString`. */
+export const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
 
 export function formatDateLong(dateStr: string, locale: "pt" | "en" = "pt") {
   const date = new Date(dateStr);
@@ -48,4 +49,16 @@ export function formatDateLong(dateStr: string, locale: "pt" | "en" = "pt") {
     month: "long",
     day: "numeric",
   });
+}
+
+/** Locale-aware "month year" (e.g. "julho de 2024" / "July 2024"). */
+export function formatMonthYear(
+  dateStr: string | null | undefined,
+  locale: "pt" | "en" = "pt",
+  fallback = "—"
+) {
+  if (!dateStr) return fallback;
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return date.toLocaleDateString(INTL_LOCALES[locale], { month: "long", year: "numeric" });
 }

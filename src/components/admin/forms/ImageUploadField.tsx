@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 
 interface ImageUploadFieldProps {
@@ -29,14 +30,14 @@ interface ImageUploadFieldProps {
 }
 
 export default function ImageUploadField({
-  label = "Imagem de capa",
+  label,
   required = false,
-  uploaderLabel = "Ficheiros",
+  uploaderLabel,
   onChange,
   onSecurityError,
   error = null,
   previewSrc,
-  previewAlt = "Imagem de capa",
+  previewAlt,
   previewPlacement = "after",
   previewLabel,
   previewLabelClassName = "mb-2 text-sm text-neutral-600",
@@ -44,42 +45,56 @@ export default function ImageUploadField({
   previewImageClassName = "max-w-[200px] max-h-[150px] object-contain border border-neutral-200 rounded",
   uploaderWrapperClassName = "mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit",
   files,
-  dragAndDropLabel = "Arraste e largue o ficheiro aqui",
-  inputLabel = "Selecione ou arraste o ficheiro",
+  dragAndDropLabel,
+  inputLabel,
   accept = ".jpg,.jpeg,.png",
   maxSize = 4194304,
-  extensionsInstructions = "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
-  maxSizeExceededErrorLabel = "O ficheiro excede o tamanho máximo de 4 MB.",
-  forbiddenExtensionErrorLabel = "Formato de ficheiro não permitido.",
+  extensionsInstructions,
+  maxSizeExceededErrorLabel,
+  forbiddenExtensionErrorLabel,
 }: ImageUploadFieldProps) {
+  const { t } = useTranslation("admin-common");
+
+  const resolvedLabel = label ?? t("forms.imageUpload.coverImage");
+  const resolvedUploaderLabel = uploaderLabel ?? t("forms.imageUpload.files");
+  const resolvedPreviewAlt = previewAlt ?? t("forms.imageUpload.coverImage");
+  const resolvedDragAndDropLabel = dragAndDropLabel ?? t("forms.imageUpload.dragAndDrop");
+  const resolvedInputLabel = inputLabel ?? t("forms.imageUpload.selectOrDrag");
+  const resolvedExtensionsInstructions =
+    extensionsInstructions ?? t("forms.imageUpload.extensionsInstructions");
+  const resolvedMaxSizeExceededErrorLabel =
+    maxSizeExceededErrorLabel ?? t("forms.imageUpload.maxSizeExceeded");
+  const resolvedForbiddenExtensionErrorLabel =
+    forbiddenExtensionErrorLabel ?? t("forms.imageUpload.forbiddenExtension");
+
   const preview = previewSrc ? (
     <div className={previewWrapperClassName}>
       {previewLabel ? <p className={previewLabelClassName}>{previewLabel}</p> : null}
-      <img src={previewSrc} alt={previewAlt} className={previewImageClassName} />
+      <img src={previewSrc} alt={resolvedPreviewAlt} className={previewImageClassName} />
     </div>
   ) : null;
 
   return (
     <div>
       <span className="text-primary-900 text-base font-medium leading-7">
-        {label}
+        {resolvedLabel}
         {required ? " *" : ""}
       </span>
       {previewPlacement === "before" ? preview : null}
       <div className={uploaderWrapperClassName}>
         <DragAndDropUploader
-          label={uploaderLabel}
-          dragAndDropLabel={dragAndDropLabel}
-          inputLabel={inputLabel}
-          selectedFilesLabel="ficheiro selecionado"
-          removeFileButtonLabel="Remover ficheiro"
-          replaceFileButtonLabel="Substituir ficheiro"
-          extensionsInstructions={extensionsInstructions}
+          label={resolvedUploaderLabel}
+          dragAndDropLabel={resolvedDragAndDropLabel}
+          inputLabel={resolvedInputLabel}
+          selectedFilesLabel={t("forms.imageUpload.selectedFile")}
+          removeFileButtonLabel={t("forms.imageUpload.removeFile")}
+          replaceFileButtonLabel={t("forms.imageUpload.replaceFile")}
+          extensionsInstructions={resolvedExtensionsInstructions}
           accept={accept}
           maxSize={maxSize}
           maxCount={1}
-          maxSizeExceededErrorLabel={maxSizeExceededErrorLabel}
-          forbiddenExtensionErrorLabel={forbiddenExtensionErrorLabel}
+          maxSizeExceededErrorLabel={resolvedMaxSizeExceededErrorLabel}
+          forbiddenExtensionErrorLabel={resolvedForbiddenExtensionErrorLabel}
           files={files}
           hasError={!!error}
           hasFeedback={!!error}

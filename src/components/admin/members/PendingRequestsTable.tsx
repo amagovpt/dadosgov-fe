@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
@@ -30,10 +31,12 @@ export function PendingRequestsTable({
   onAccept,
   onRefuse,
 }: PendingRequestsTableProps) {
+  const { t } = useTranslation("admin-members");
+
   return (
     <div className="mb-32">
       <h2 className="mb-16 text-base font-semibold text-neutral-900">
-        Pedidos de adesão pendentes ({requests.length})
+        {t("pendingRequests.title", { count: requests.length })}
       </h2>
       {requestError && (
         <div className="mb-16">
@@ -43,16 +46,16 @@ export function PendingRequestsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHeaderCell>Utilizador</TableHeaderCell>
-            <TableHeaderCell>Comentário</TableHeaderCell>
-            <TableHeaderCell>Data do pedido</TableHeaderCell>
-            <TableHeaderCell>Ações</TableHeaderCell>
+            <TableHeaderCell>{t("pendingRequests.user")}</TableHeaderCell>
+            <TableHeaderCell>{t("pendingRequests.comment")}</TableHeaderCell>
+            <TableHeaderCell>{t("pendingRequests.requestDate")}</TableHeaderCell>
+            <TableHeaderCell>{t("pendingRequests.actions")}</TableHeaderCell>
           </TableRow>
         </TableHeader>
         <TableBody>
           {requests.map((request) => (
             <TableRow key={request.id}>
-              <TableCell headerLabel="Utilizador">
+              <TableCell headerLabel={t("pendingRequests.user")}>
                 <div className="flex items-center gap-8">
                   {request.user.avatar_thumbnail ? (
                     <img
@@ -68,11 +71,13 @@ export function PendingRequestsTable({
                   </TextLink>
                 </div>
               </TableCell>
-              <TableCell headerLabel="Comentário">{request.comment || "-"}</TableCell>
-              <TableCell headerLabel="Data do pedido">
+              <TableCell headerLabel={t("pendingRequests.comment")}>
+                {request.comment || "-"}
+              </TableCell>
+              <TableCell headerLabel={t("pendingRequests.requestDate")}>
                 {formatDateToDMY(request.created)}
               </TableCell>
-              <TableCell headerLabel="Ações">
+              <TableCell headerLabel={t("pendingRequests.actions")}>
                 <div className="flex gap-8">
                   <Button
                     variant="primary"
@@ -81,7 +86,9 @@ export function PendingRequestsTable({
                     disabled={requestAction === request.id}
                   >
                     <span className="underline">
-                      {requestAction === request.id ? "A aceitar..." : "Aceitar"}
+                      {requestAction === request.id
+                        ? t("pendingRequests.accepting")
+                        : t("pendingRequests.accept")}
                     </span>
                   </Button>
                   <Button
@@ -90,7 +97,7 @@ export function PendingRequestsTable({
                     onClick={() => onRefuse(request)}
                     disabled={requestAction === request.id}
                   >
-                    <span className="underline">Recusar</span>
+                    <span className="underline">{t("pendingRequests.refuse")}</span>
                   </Button>
                 </div>
               </TableCell>

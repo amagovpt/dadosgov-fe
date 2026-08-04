@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Accordion,
   AccordionGroup,
@@ -20,12 +21,16 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Resource } from "@/service/types/dataset";
 import { Pagination } from "@/components/Pagination";
+import { formatDateLong } from "@/utils/formatDate";
 import { CopyField } from "./CopyField";
-import { DEFAULT_PAGE_SIZE, RESOURCE_TYPE_LABELS, SPREADSHEET_FORMATS, TABULAR_FORMATS } from "./constants";
-import { buildTabularData, downloadUrl, formatBytes, formatDate, parseCsv, translateExtrasKey, translateExtrasValue } from "./utils";
+import { DEFAULT_PAGE_SIZE, SPREADSHEET_FORMATS, TABULAR_FORMATS } from "./constants";
+import { buildTabularData, downloadUrl, formatBytes, parseCsv, translateExtrasKey, translateExtrasValue } from "./utils";
 import { SpreadsheetPreview, TabularData } from "./types";
 
 export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource }) => {
+  const { i18n } = useTranslation("common");
+  const { t: tds } = useTranslation("datasets");
+  const locale = i18n.language as "pt" | "en";
   const [tabularData, setTabularData] = useState<TabularData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,8 +50,8 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
   useEffect(() => {
     if (!isTabular) return;
     const unavailableMessage = isRemote
-      ? "Pré-visualização não disponível para ficheiros externos."
-      : "Não foi possível carregar os dados para pré-visualização.";
+      ? tds("resources.preview.unavailableRemote")
+      : tds("resources.preview.loadError");
 
     async function fetchData() {
       setIsLoading(true);
@@ -78,7 +83,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
       }
     }
     fetchData();
-  }, [resource.id, isTabular, isSpreadsheet, isRemote]);
+  }, [resource.id, isTabular, isSpreadsheet, isRemote, tds]);
 
   const FlexTabs = Tabs as React.FC<Omit<React.ComponentProps<typeof Tabs>, "children"> & { children: React.ReactNode }>;
 
@@ -89,27 +94,26 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
         <FlexTabs>
           {isTabular && (
           <Tab>
-            <TabHeader>Pré-visualização</TabHeader>
+            <TabHeader>{tds("resources.tabs.preview")}</TabHeader>
             <TabBody>
               <div className="py-16">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-16">
-                    <LoaderDialog title="A carregar pré-visualização..." />
+                    <LoaderDialog title={tds("resources.preview.loading")} />
                   </div>
                 ) : error || !tabularData ? (
                   <p className="text-neutral-900 text-sm">
-                    {error || "Pré-visualização não disponível para este recurso."}
+                    {error || tds("resources.preview.unavailable")}
                   </p>
                 ) : (
                   <div className="space-y-16">
                     <div className="hidden bg-primary-100 rounded-8 p-24 flex items-center gap-16" style={{ marginBottom: "24px" }}>
                       <div className="flex-1">
                         <p className="font-bold text-neutral-900 text-sm">
-                          Explore os dados em detalhes.
+                          {tds("resources.preview.exploreTitle")}
                         </p>
                         <p className="text-neutral-900 text-xs mt-4">
-                          Utilize esta ferramenta para obter uma visão geral dos dados, aprender
-                          mais sobre as diferentes colunas ou realizar filtros e classificações.
+                          {tds("resources.preview.exploreDescription")}
                         </p>
                       </div>
                       <Button
@@ -120,7 +124,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                         trailingIconHover="agora-solid-external-link"
                         onClick={() => window.open(resource.url, '_blank')}
                       >
-                        Explore os dados
+                        {tds("resources.preview.exploreCta")}
                       </Button>
                     </div>
                     <div className="overflow-x-auto">
@@ -157,17 +161,18 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                       onPageChange={setPage}
                     />
                     <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
-                      Última atualização da pré-visualização:{" "}
-                      {tabularData.lastModified
-                        ? new Date(tabularData.lastModified).toLocaleDateString("pt-PT", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
-                        : formatDate(resource.last_modified || resource.created_at)}{" "}
-                      — {tabularData.totalCols} colunas — {tabularData.totalRows} linhas
+                      {tds("resources.preview.footer", {
+                        date: formatDateLong(
+                          tabularData.lastModified ||
+                            resource.last_modified ||
+                            resource.created_at,
+                          locale
+                        ),
+                        cols: tabularData.totalCols,
+                        rows: tabularData.totalRows,
+                      })}
                       {tabularData.rows.length < tabularData.totalRows &&
-                        ` (pré-visualização limitada a ${tabularData.rows.length} linhas)`}
+                        tds("resources.preview.limited", { count: tabularData.rows.length })}
                     </p>
                   </div>
                 )}
@@ -177,16 +182,16 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
           )}
           {isTabular && (
           <Tab>
-            <TabHeader>Estrutura de dados</TabHeader>
+            <TabHeader>{tds("resources.tabs.structure")}</TabHeader>
             <TabBody>
               <div className="py-16">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-16">
-                    <LoaderDialog title="A carregar estrutura..." />
+                    <LoaderDialog title={tds("resources.preview.loadingStructure")} />
                   </div>
                 ) : error || !tabularData ? (
                   <p className="text-neutral-900 text-sm">
-                    {error || "Estrutura de dados não disponível para este recurso."}
+                    {error || tds("resources.preview.structureUnavailable")}
                   </p>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-24">
@@ -205,14 +210,14 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
           </Tab>
           )}
           <Tab>
-            <TabHeader>Metadados</TabHeader>
+            <TabHeader>{tds("resources.tabs.metadata")}</TabHeader>
             <TabBody>
               <div className="py-16 space-y-32">
-                <CopyField label="URL" value={resource.url} />
+                <CopyField label={tds("resources.metadata.url")} value={resource.url} />
                 {resource.latest && (
-                  <CopyField label="URL estável" value={resource.latest} />
+                  <CopyField label={tds("resources.metadata.stableUrl")} value={resource.latest} />
                 )}
-                <CopyField label="Identificador" value={resource.id} />
+                <CopyField label={tds("resources.metadata.identifier")} value={resource.id} />
                 {resource.checksum && (
                   <CopyField
                     label={resource.checksum.type}
@@ -222,38 +227,48 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px 64px", paddingTop: "32px" }}>
                   <div>
-                    <h5 className="font-bold text-sm text-neutral-900 mb-4">Criado em</h5>
+                    <h5 className="font-bold text-sm text-neutral-900 mb-4">
+                      {tds("resources.metadata.createdAt")}
+                    </h5>
                     <p className="text-neutral-900 text-sm">
-                      {formatDate(resource.created_at)}
+                      {formatDateLong(resource.created_at, locale)}
                     </p>
                   </div>
                   {resource.filesize !== undefined && resource.filesize > 0 && (
                     <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">Tamanho</h5>
+                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
+                        {tds("resources.metadata.size")}
+                      </h5>
                       <p className="text-neutral-900 text-sm">
-                        {formatBytes(resource.filesize)}
+                        {formatBytes(resource.filesize, locale)}
                       </p>
                     </div>
                   )}
                   {resource.last_modified && (
                     <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">Modificado em</h5>
+                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
+                        {tds("resources.metadata.modifiedAt")}
+                      </h5>
                       <p className="text-neutral-900 text-sm">
-                        {formatDate(resource.last_modified)}
+                        {formatDateLong(resource.last_modified, locale)}
                       </p>
                     </div>
                   )}
                   {resource.type && (
                     <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">Tipo</h5>
+                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
+                        {tds("resources.metadata.type")}
+                      </h5>
                       <p className="text-neutral-900 text-sm">
-                        {RESOURCE_TYPE_LABELS[resource.type] || resource.type}
+                        {tds(`resources.types.${resource.type}`, { defaultValue: resource.type })}
                       </p>
                     </div>
                   )}
                   {resource.mime && (
                     <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">Tipo MIME</h5>
+                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
+                        {tds("resources.metadata.mime")}
+                      </h5>
                       <code className="bg-neutral-100 px-8 py-4 rounded text-sm text-neutral-900">
                         {resource.mime}
                       </code>
@@ -267,7 +282,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                       <Accordion
                         headingTitle={
                           <span className="font-bold text-sm text-neutral-900">
-                            Recursos extras
+                            {tds("resources.metadata.extras")}
                           </span>
                         }
                         headingLevel="h5"
@@ -276,10 +291,10 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                           {Object.entries(resource.extras).map(([key, value]) => (
                             <div key={key}>
                               <h6 className="font-bold text-sm text-neutral-900 mb-8">
-                                {translateExtrasKey(key)}
+                                {translateExtrasKey(tds, key)}
                               </h6>
                               <p className="text-neutral-900 text-sm break-all">
-                                {translateExtrasValue(value)}
+                                {translateExtrasValue(tds, value)}
                               </p>
                             </div>
                           ))}
@@ -292,12 +307,12 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
             </TabBody>
           </Tab>
           <Tab>
-            <TabHeader>Downloads</TabHeader>
+            <TabHeader>{tds("resources.tabs.downloads")}</TabHeader>
             <TabBody>
               <div style={{ padding: "16px 0", display: "flex", flexDirection: "column", gap: "24px" }}>
                 <div>
                   <p className="text-sm text-neutral-900 font-bold" style={{ marginBottom: "12px" }}>
-                    Formato original
+                    {tds("resources.downloads.originalFormat")}
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <a
@@ -309,15 +324,17 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                       style={{ gap: "8px" }}
                     >
                       <Icon name="agora-line-download" aria-hidden="true" />
-                      Formato {(resource.format || "").toUpperCase()}
+                      {tds("resources.format", {
+                        format: (resource.format || "").toUpperCase(),
+                      })}
                       {resource.filesize !== undefined && resource.filesize > 0
-                        ? ` - ${formatBytes(resource.filesize)}`
+                        ? ` - ${formatBytes(resource.filesize, locale)}`
                         : ""}
                     </a>
                     <button
                       type="button"
                       className="text-primary-600 hover:text-primary-800 cursor-pointer shrink-0"
-                      title="Copiar URL"
+                      title={tds("resources.downloads.copyUrl")}
                       onClick={() => navigator.clipboard.writeText(resource.url)}
                     >
                       <svg

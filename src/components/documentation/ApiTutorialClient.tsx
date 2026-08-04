@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import { Icon } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 
 declare global {
   interface Window {
@@ -10,6 +11,11 @@ declare global {
 }
 
 const SWAGGER_JSON_URL = "/api/1/swagger.json";
+// The API root serves the backend's standalone Swagger UI (Flask-RestX). Both
+// URLs are same-origin: `/api/` is forwarded to the backend by the Next proxy
+// (see `src/proxy.ts`), which keeps the `download` attribute working.
+const SWAGGER_UI_URL = "/api/1/";
+const SWAGGER_JSON_FILENAME = "dados-gov-api-swagger.json";
 const SWAGGER_CSS_ID = "swagger-ui-css";
 const SWAGGER_SCRIPT_ID = "swagger-ui-script";
 
@@ -86,14 +92,7 @@ export default function ApiTutorialClient() {
       <main className="flex-grow pb-64 pt-32">
         <div className="container mx-auto px-4">
           <div className="mb-64 pt-32">
-            <Breadcrumb
-              items={[
-                { label: "Início", url: "/" },
-                { label: "Recursos", url: "/recursos" },
-                { label: "Desenvolvimento", url: "/recursos/desenvolvimento" },
-                { label: "Referência API", url: "/recursos/desenvolvimento/referencia-api" },
-              ]}
-            />
+            <BreadcrumbDynamic darkMode={false} />
           </div>
 
           <h1 className="mb-32 max-w-[800px] text-2xl-medium leading-tight text-[#021C51]">
@@ -187,9 +186,30 @@ export default function ApiTutorialClient() {
               {/* Referência */}
               <section>
                 <h2 className="mb-16 text-[20px] font-bold text-[#021C51]">Referência</h2>
-                <p className="mb-24 text-m-regular leading-7 text-[#2b363c]">
-                  Explore os endpoints disponíveis na documentação interativa abaixo.
+                <p className="mb-16 text-m-regular leading-7 text-[#2b363c]">
+                  Explore os endpoints disponíveis na documentação interativa abaixo, abra-a no
+                  Swagger UI ou descarregue a especificação OpenAPI para a utilizar nas suas
+                  ferramentas.
                 </p>
+                <div className="mb-24 flex flex-wrap items-center gap-24">
+                  <a
+                    href={SWAGGER_UI_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-8 text-primary-600 hover:underline"
+                  >
+                    <Icon name="agora-line-external-link" className="w-6 h-6" />
+                    <span>Abrir no Swagger UI</span>
+                  </a>
+                  <a
+                    href={SWAGGER_JSON_URL}
+                    download={SWAGGER_JSON_FILENAME}
+                    className="inline-flex items-center gap-8 text-primary-600 hover:underline"
+                  >
+                    <Icon name="agora-line-download" className="w-6 h-6" />
+                    <span>Descarregar especificação (JSON)</span>
+                  </a>
+                </div>
               </section>
             </div>
 

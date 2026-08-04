@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   InputTextArea,
@@ -19,6 +20,7 @@ export function ApproveHarvesterPopupContent({
   onClose,
   onConfirm,
 }: ValidationPopupProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function ApproveHarvesterPopupContent({
       await onConfirm(comment.trim());
     } catch (err) {
       const e = err as { data?: { message?: string }; message?: string };
-      setError(e?.data?.message || e?.message || "Falha ao aprovar o harvester.");
+      setError(e?.data?.message || e?.message || t("admin-harvesters:validation.popup.approveError"));
       setSubmitting(false);
     }
   };
@@ -38,11 +40,10 @@ export function ApproveHarvesterPopupContent({
   return (
     <div className="flex flex-col gap-[16px]">
       <p>
-        Pretende aprovar o harvester &quot;{harvester.name}&quot;? O proprietário
-        será notificado.
+        {t("admin-harvesters:validation.popup.approveDescription", { name: harvester.name })}
       </p>
       <InputTextArea
-        label="Comentário (opcional)"
+        label={t("admin-harvesters:validation.popup.optionalComment")}
         value={comment}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           setComment(e.target.value)
@@ -57,7 +58,7 @@ export function ApproveHarvesterPopupContent({
           onClick={onClose}
           disabled={submitting}
         >
-          Cancelar
+          {t("admin-common:actions.cancel")}
         </Button>
         <Button
           variant="primary"
@@ -67,7 +68,7 @@ export function ApproveHarvesterPopupContent({
           leadingIcon="agora-line-check-circle"
           leadingIconHover="agora-solid-check-circle"
         >
-          {submitting ? "A aprovar..." : "Aprovar"}
+          {submitting ? t("admin-harvesters:actions.approving") : t("admin-harvesters:actions.approve")}
         </Button>
       </div>
     </div>
@@ -79,6 +80,7 @@ export function RejectHarvesterPopupContent({
   onClose,
   onConfirm,
 }: ValidationPopupProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export function RejectHarvesterPopupContent({
 
   const handleConfirm = async () => {
     if (isInvalid) {
-      setError("É obrigatório indicar o motivo da rejeição.");
+      setError(t("admin-harvesters:validation.popup.rejectReasonRequired"));
       return;
     }
     setSubmitting(true);
@@ -97,7 +99,7 @@ export function RejectHarvesterPopupContent({
       await onConfirm(trimmed);
     } catch (err) {
       const e = err as { data?: { message?: string }; message?: string };
-      setError(e?.data?.message || e?.message || "Falha ao rejeitar o harvester.");
+      setError(e?.data?.message || e?.message || t("admin-harvesters:validation.popup.rejectError"));
       setSubmitting(false);
     }
   };
@@ -105,11 +107,10 @@ export function RejectHarvesterPopupContent({
   return (
     <div className="flex flex-col gap-[16px]">
       <p>
-        Pretende rejeitar o harvester &quot;{harvester.name}&quot;? O motivo abaixo
-        será comunicado ao proprietário.
+        {t("admin-harvesters:validation.popup.rejectDescription", { name: harvester.name })}
       </p>
       <InputTextArea
-        label="Motivo da rejeição"
+        label={t("admin-harvesters:validation.popup.rejectionReason")}
         value={comment}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           setComment(e.target.value)
@@ -125,7 +126,7 @@ export function RejectHarvesterPopupContent({
           onClick={onClose}
           disabled={submitting}
         >
-          Cancelar
+          {t("admin-common:actions.cancel")}
         </Button>
         <Button
           variant="danger"
@@ -135,7 +136,7 @@ export function RejectHarvesterPopupContent({
           leadingIcon="agora-line-x-circle"
           leadingIconHover="agora-solid-x-circle"
         >
-          {submitting ? "A rejeitar..." : "Rejeitar"}
+          {submitting ? t("admin-harvesters:actions.rejecting") : t("admin-harvesters:actions.reject")}
         </Button>
       </div>
     </div>

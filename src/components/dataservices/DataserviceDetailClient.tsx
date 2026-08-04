@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button, Icon, Pill } from "@ama-pt/agora-design-system";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Dataservice } from "@/service/types/dataservice";
 import { fetchDataservice, fetchSwaggerSpec } from "@/service/api/dataservices";
 import { DataserviceSwagger } from "@/components/dataservices/DataserviceSwagger";
@@ -13,6 +14,7 @@ import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followe
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { formatMetricValue } from "@/utils/formatNumber";
+import { formatDateLong } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 import { DataserviceTabs } from "@/components/dataservices/DataserviceTabs";
@@ -32,6 +34,9 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   const { user, isAdmin } = useAuth();
   const { organizations } = useActiveOrganization();
   const router = useRouter();
+  const { t, i18n } = useTranslation("common");
+  const { t: tDs } = useTranslation("dataservices");
+  const language = i18n.language as "pt" | "en";
   const [dataservice, setDataservice] = useState<Dataservice | null>(null);
   const [swagger, setSwagger] = useState<ParsedSwagger | null>(null);
   const [swaggerOpen, setSwaggerOpen] = useState(false);
@@ -107,7 +112,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   if (!dataservice) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-neutral-500">API não encontrada.</p>
+        <p className="text-neutral-500">{tDs("detail.notFound")}</p>
       </div>
     );
   }
@@ -124,7 +129,9 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
 
   const accessType = dataservice.access_type;
   const accessPillLabel = accessType
-    ? ACCESS_TYPE_PILL_LABELS[accessType] ?? accessType.toUpperCase()
+    ? tDs(`access.pill.${accessType}`, {
+        defaultValue: ACCESS_TYPE_PILL_LABELS[accessType] ?? accessType.toUpperCase(),
+      })
     : null;
   const accessPillVariant = accessType
     ? ACCESS_TYPE_PILL_VARIANTS[accessType] ?? "neutral"
@@ -135,19 +142,19 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   const restrictionReason =
     accessType === "restricted"
       ? dataservice.access_type_reason_category
-        ? RESTRICTION_REASON_LABELS[dataservice.access_type_reason_category] ??
-          dataservice.access_type_reason_category
+        ? tDs(`access.restrictionReason.${dataservice.access_type_reason_category}`, {
+            defaultValue:
+              RESTRICTION_REASON_LABELS[dataservice.access_type_reason_category] ??
+              dataservice.access_type_reason_category,
+          })
         : dataservice.access_type_reason ?? null
       : null;
 
   // Authentication method derived from the access type, so users immediately
   // know whether a key/account is needed before reading the technical details.
-  const AUTH_LABELS: Record<string, string> = {
-    open: "Nenhuma (acesso público)",
-    open_with_account: "Conta de utilizador necessária",
-    restricted: "Mediante autorização",
-  };
-  const authLabel = accessType ? AUTH_LABELS[accessType] ?? null : null;
+  const authLabel = accessType
+    ? tDs(`access.auth.${accessType}`, { defaultValue: "" }) || null
+    : null;
 
   // Only render the technical box when at least one technical field exists.
   const hasTechnical = Boolean(
@@ -159,16 +166,14 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
       swagger
   );
 
-  const NOT_PROVIDED = "Não comunicado";
+  const NOT_PROVIDED = tDs("detail.notProvided");
 
   // The list endpoint exposes the modification timestamp as metadata_modified_at;
   // last_modified can be absent (which rendered "Invalid Date").
   const formatLongDate = (value?: string | null) => {
     if (!value) return null;
     const d = new Date(value);
-    return isNaN(d.getTime())
-      ? null
-      : d.toLocaleDateString("pt-PT", { day: "numeric", month: "long", year: "numeric" });
+    return isNaN(d.getTime()) ? null : formatDateLong(value, language);
   };
   const lastUpdate =
     formatLongDate(dataservice.metadata_modified_at) ||
@@ -178,19 +183,13 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
     <main className="flex w-full flex-col items-center justify-center gap-64">
       {/* Breadcrumb */}
       <div className="container flex items-center justify-between py-64">
-        <Breadcrumb
-          items={[
-            { label: "Home", url: "/" },
-            { label: "APIs", url: "/dataservices" },
-            { label: dataservice.title, url: `/dataservices/${dataservice.slug}` },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={dataservice.title} />
       </div>
 
       {/* Actions */}
       <div className="container flex items-center justify-end gap-16">
-        {dataservice.private && <Pill variant="warning">Rascunho</Pill>}
-        {dataservice.archived_at && <Pill variant="neutral">Arquivado</Pill>}
+        {dataservice.private && <Pill variant="warning">{tDs("detail.draft")}</Pill>}
+        {dataservice.archived_at && <Pill variant="neutral">{tDs("detail.archived")}</Pill>}
         <Button
           variant="neutral"
           appearance="link"
@@ -201,7 +200,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
           onClick={handleToggleFavorite}
           disabled={isTogglingFavorite}
         >
-          {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          {isFavorite ? tDs("detail.removeFavorite") : tDs("detail.addFavorite")}
         </Button>
         {canEdit && (
           <Link href={`/admin/dataservices/edit?id=${dataservice.id}`}>
@@ -211,7 +210,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
               leadingIcon="agora-line-edit"
               leadingIconHover="agora-solid-edit"
             >
-              Editar
+              {tDs("detail.edit")}
             </Button>
           </Link>
         )}
@@ -269,12 +268,12 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                       {ownerFullName}
                     </Link>
                   ) : (
-                    "Sem autor"
+                    tDs("detail.noAuthor")
                   )}
                 </div>
                 {lastUpdate && (
                   <div className="text-sm text-neutral-900">
-                    <span className="text-m-semibold">Última atualização:</span> {lastUpdate}
+                    <span className="text-m-semibold">{tDs("detail.lastUpdate")}</span> {lastUpdate}
                   </div>
                 )}
               </div>
@@ -282,10 +281,10 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
 
             {/* Access conditions box */}
             <div className="mb-16 flex flex-col gap-16 rounded-4 bg-[#F2F6FF] p-32">
-              <div className="text-m-semibold text-neutral-500">Condições de Acesso</div>
+              <div className="text-m-semibold text-neutral-500">{tDs("detail.accessConditions")}</div>
 
               <div className="text-sm text-neutral-900">
-                <div className="mb-4">Acesso</div>
+                <div className="mb-4">{tDs("detail.access")}</div>
                 {accessPillLabel ? (
                   <Pill variant={accessPillVariant}>{accessPillLabel}</Pill>
                 ) : (
@@ -294,30 +293,35 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
               </div>
 
               <div className="text-sm text-neutral-900">
-                <div className="mb-4">Autenticação</div>
+                <div className="mb-4">{tDs("detail.authentication")}</div>
                 <div className="text-m-semibold">{authLabel ?? NOT_PROVIDED}</div>
               </div>
 
               {accessType === "restricted" && (
                 <div className="text-sm text-neutral-900">
-                  <div className="mb-4">Públicos elegíveis</div>
+                  <div className="mb-4">{tDs("detail.eligibleAudiences")}</div>
                   {audiences.length > 0 ? (
                     <ul className="list-disc pl-20">
                       {audiences.map((a) => (
                         <li key={a.role}>
-                          {AUDIENCE_ROLE_LABELS[a.role] ?? a.role}:{" "}
-                          {AUDIENCE_CONDITION_LABELS[a.condition] ?? a.condition}
+                          {tDs(`access.audienceRole.${a.role}`, {
+                            defaultValue: AUDIENCE_ROLE_LABELS[a.role] ?? a.role,
+                          })}
+                          :{" "}
+                          {tDs(`access.audienceCondition.${a.condition}`, {
+                            defaultValue: AUDIENCE_CONDITION_LABELS[a.condition] ?? a.condition,
+                          })}
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    "Não especificado"
+                    tDs("detail.notSpecified")
                   )}
                 </div>
               )}
               {restrictionReason && (
                 <div className="text-sm text-neutral-900">
-                  <span className="text-m-semibold">Motivo da restrição:</span>{" "}
+                  <span className="text-m-semibold">{tDs("detail.restrictionReason")}</span>{" "}
                   {restrictionReason}
                 </div>
               )}
@@ -335,7 +339,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                       )
                     }
                   >
-                    Pedir acesso
+                    {tDs("detail.requestAccess")}
                   </Button>
                 </div>
               )}
@@ -344,11 +348,11 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
             {/* Technical characteristics box */}
             {hasTechnical && (
             <div className="mb-16 flex flex-col gap-16 rounded-4 bg-[#F2F6FF] p-32">
-              <div className="text-m-semibold text-neutral-500">Características técnicas</div>
+              <div className="text-m-semibold text-neutral-500">{tDs("detail.technicalCharacteristics")}</div>
 
               {dataservice.base_api_url && (
                 <div className="text-sm text-neutral-900">
-                  <div className="mb-4">URL base da API</div>
+                  <div className="mb-4">{tDs("detail.baseApiUrl")}</div>
                   <div className="rounded-4 bg-neutral-200 px-12 py-8 font-mono text-sm break-all text-neutral-900">
                     {dataservice.base_api_url}
                   </div>
@@ -356,7 +360,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
               )}
               {dataservice.rate_limiting && (
                 <div className="text-sm text-neutral-900">
-                  <div className="mb-4">Limite de chamadas</div>
+                  <div className="mb-4">{tDs("detail.rateLimit")}</div>
                   {dataservice.rate_limiting_url ? (
                     <TextLink href={dataservice.rate_limiting_url}>
                       {dataservice.rate_limiting}
@@ -368,7 +372,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
               )}
               {dataservice.availability != null && (
                 <div className="text-sm text-neutral-900">
-                  <div className="mb-4">Disponibilidade</div>
+                  <div className="mb-4">{tDs("detail.availability")}</div>
                   <span className="text-m-semibold">{`${dataservice.availability}%`}</span>
                 </div>
               )}
@@ -377,7 +381,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                 dataservice.business_documentation_url ||
                 swagger) && (
                 <div className="text-sm text-neutral-900">
-                  <div className="mb-8">Documentação</div>
+                  <div className="mb-8">{tDs("detail.documentation")}</div>
                   <div className="flex flex-col items-start gap-8">
                     {dataservice.technical_documentation_url && (
                       <Button
@@ -393,7 +397,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                           )
                         }
                       >
-                        Documentação técnica
+                        {tDs("detail.technicalDocumentation")}
                       </Button>
                     )}
                     {dataservice.business_documentation_url && (
@@ -410,7 +414,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                           )
                         }
                       >
-                        Documentação funcional
+                        {tDs("detail.functionalDocumentation")}
                       </Button>
                     )}
                     {swagger && (
@@ -427,7 +431,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                             ?.scrollIntoView({ behavior: "smooth" });
                         }}
                       >
-                        Swagger
+                        {tDs("detail.swagger")}
                       </Button>
                     )}
                   </div>
@@ -439,13 +443,13 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
             {/* Metrics */}
             <div className="mb-16 grid grid-cols-2 gap-16">
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-8">Visualizações</div>
+                <div className="text-sm mb-8">{t("card.views")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataservice.metrics?.views)}
                 </div>
               </div>
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-8">Favoritos</div>
+                <div className="text-sm mb-8">{t("card.favorites")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataservice.metrics?.followers)}
                 </div>

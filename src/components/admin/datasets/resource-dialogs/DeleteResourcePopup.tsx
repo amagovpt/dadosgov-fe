@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { Resource } from "@/service/types/dataset";
 import { deleteResource } from "@/service/api/datasets";
@@ -16,6 +17,7 @@ export default function DeleteResourcePopup({
   resource,
   onDeleted,
 }: DeleteResourcePopupProps) {
+  const { t } = useTranslation("admin-datasets");
   const { hide } = usePopupContext();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -34,23 +36,13 @@ export default function DeleteResourcePopup({
 
   return (
     <div className="flex flex-col gap-24">
-      <p className="text-neutral-700 text-sm">
-        Tem a certeza que deseja eliminar o ficheiro{" "}
-        <strong className="text-neutral-900">&quot;{resource.title}&quot;</strong>?
+      <p className="text-sm text-neutral-700">
+        {t("edit.resourceDeleteConfirm", { title: resource.title })}
       </p>
-      <StatusCard
-        variant="warning"
-        showIcon
-        description="Esta ação é irreversível e não pode ser desfeita."
-      />
+      <StatusCard variant="warning" showIcon description={t("edit.resourceDeleteWarning")} />
       <div className="flex justify-end gap-16">
-        <Button
-          variant="primary"
-          appearance="outline"
-          onClick={hide}
-          disabled={isDeleting}
-        >
-          Cancelar
+        <Button variant="primary" appearance="outline" onClick={hide} disabled={isDeleting}>
+          {t("edit.cancel")}
         </Button>
         <Button
           variant="danger"
@@ -61,7 +53,7 @@ export default function DeleteResourcePopup({
           onClick={handleDelete}
           disabled={isDeleting}
         >
-          {isDeleting ? "A eliminar..." : "Eliminar"}
+          {isDeleting ? t("edit.deleting") : t("edit.confirmDelete")}
         </Button>
       </div>
     </div>

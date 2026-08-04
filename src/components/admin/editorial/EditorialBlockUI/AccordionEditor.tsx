@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import type { AccordionData } from "../editorial-blocks";
 
 export function AccordionEditor({
@@ -9,6 +10,7 @@ export function AccordionEditor({
   data: AccordionData;
   onChange: (d: AccordionData) => void;
 }) {
+  const { t } = useTranslation(["admin-common", "admin-editorial"]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const addItem = () => {
@@ -31,14 +33,14 @@ export function AccordionEditor({
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Os meus acordeões"
+        placeholder={t("accordion.titlePlaceholder")}
         className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
         value={data.description}
         onChange={(e) => onChange({ ...data, description: e.target.value })}
-        placeholder="Adicione uma descrição"
+        placeholder={t("accordion.descriptionPlaceholder")}
         className="text-sm mb-[20px] w-full border-none text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
 
@@ -51,7 +53,7 @@ export function AccordionEditor({
                   type="text"
                   value={item.title}
                   onChange={(e) => updateItem(index, "title", e.target.value)}
-                  placeholder="Título do item"
+                  placeholder={t("accordion.itemTitlePlaceholder")}
                   className="text-sm flex-1 border-none text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
                 />
               </div>
@@ -60,6 +62,7 @@ export function AccordionEditor({
                   type="button"
                   onClick={() => removeItem(index)}
                   className="rounded hover:bg-red-100 text-red-600 p-4"
+                  title={t("admin-common:actions.delete")}
                 >
                   <Icon name="agora-line-trash" className="h-[14px] w-[14px]" />
                 </button>
@@ -67,6 +70,7 @@ export function AccordionEditor({
                   type="button"
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
                   className="rounded p-4 text-neutral-500 hover:bg-neutral-100"
+                  title={openIndex === index ? t("collapse") : t("expand")}
                 >
                   <Icon
                     name={openIndex === index ? "agora-line-chevron-up" : "agora-line-chevron-down"}
@@ -80,7 +84,7 @@ export function AccordionEditor({
                 <textarea
                   value={item.content}
                   onChange={(e) => updateItem(index, "content", e.target.value)}
-                  placeholder="Conteúdo do item..."
+                  placeholder={t("accordion.itemContentPlaceholder")}
                   rows={3}
                   className="text-sm w-full resize-y rounded-6 border border-neutral-200 px-12 py-8 text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
                 />
@@ -96,7 +100,7 @@ export function AccordionEditor({
         className="text-xs mt-12 inline-flex items-center gap-4 font-medium text-primary-600 hover:text-primary-800"
       >
         <Icon name="agora-line-plus-circle" className="h-[14px] w-[14px]" />
-        Adicionar item
+        {t("accordion.addItem")}
       </button>
     </div>
   );

@@ -3,6 +3,7 @@
 import React from "react";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
 import { Button, InputText } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
 
 interface ChecksumSectionProps {
@@ -36,10 +37,14 @@ export default function ChecksumSection({
   onChecksumTypeChange,
   onChecksumValueChange,
 }: ChecksumSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+
   return (
     <>
       <div className="flex flex-col items-start gap-12">
-        <h2 className="admin-page__section-title mb-0">Selo de verificação</h2>
+        <h2 className="admin-page__section-title mb-0">
+          {t("admin-community-resources:form.checksumSectionTitle")}
+        </h2>
         {showChecksum ? (
           <Button
             variant="danger"
@@ -49,7 +54,7 @@ export default function ChecksumSection({
             leadingIconHover="agora-solid-trash"
             onClick={onRemoveChecksum}
           >
-            Eliminar
+            {t("admin-common:actions.delete")}
           </Button>
         ) : (
           <Button
@@ -60,7 +65,7 @@ export default function ChecksumSection({
             leadingIconHover="agora-solid-plus"
             onClick={onShowChecksum}
           >
-            Adicionar
+            {t("admin-community-resources:form.addChecksum")}
           </Button>
         )}
       </div>
@@ -69,7 +74,7 @@ export default function ChecksumSection({
         <div className="admin-page__fields-group">
           <AdminSelectAdapter
             key={`checksum-${resourceId}-${saveCount}`}
-            label="Tipo de soma de verificação"
+            label={t("admin-community-resources:form.checksumTypeField")}
             placeholder="SHA1"
             id="checksum-type"
             initialValue={checksumType}
@@ -80,15 +85,15 @@ export default function ChecksumSection({
           </AdminSelectAdapter>
 
           <InputText
-            label="Valor de checksum *"
-            placeholder="Introduza o valor do hash"
+            label={t("admin-community-resources:form.checksumValueField")}
+            placeholder={t("admin-community-resources:form.checksumValuePlaceholder")}
             id="checksum-value"
             value={checksumValue}
             onChange={onChecksumValueChange}
             hasError={hasChecksumValueError}
             hasFeedback={hasChecksumValueError}
             feedbackState="danger"
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={t("admin-common:forms.requiredField")}
           />
         </div>
       )}

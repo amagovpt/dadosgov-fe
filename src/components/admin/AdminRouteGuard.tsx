@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { stripLocale } from "@/utils/stripLocale";
 
@@ -9,6 +10,7 @@ const ADMIN_DEFAULT_ROUTE = "/admin/me/datasets";
 const LOGIN_ROUTE = "/login";
 
 export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation("admin-common");
   const { user, isLoading, isAdmin, hasOrganization } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -42,7 +44,7 @@ export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
-        <p className="text-neutral-600">A carregar...</p>
+        <p className="text-neutral-600">{t("loading")}</p>
       </div>
     );
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -17,8 +18,15 @@ import {
   sortCommunityResources,
 } from "@/components/admin/community-resources/config/communityResourcesListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
-export default function OrgCommunityResourcesClient() {
+interface OrgCommunityResourcesClientProps {
+  orgId?: string;
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunityResourcesClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -70,16 +78,30 @@ export default function OrgCommunityResourcesClient() {
       createCommunityResourceColumns({
         titleCellStyle: "primary",
         showOwnerOnLastModified: true,
+        titleHeader: t("admin-community-resources:columns.title"),
+        labels: {
+          title: t("admin-community-resources:columns.title"),
+          status: t("admin-community-resources:columns.status"),
+          format: t("admin-community-resources:columns.format"),
+          createdAt: t("admin-community-resources:columns.createdAt"),
+          modifiedAt: t("admin-community-resources:columns.modifiedAt"),
+          lastModified: t("admin-community-resources:columns.lastModified"),
+          action: t("admin-community-resources:columns.action"),
+          actions: t("admin-community-resources:columns.actions"),
+          deleted: t("admin-community-resources:status.deleted"),
+          archived: t("admin-community-resources:status.archived"),
+          published: t("admin-community-resources:status.published"),
+        },
         editHref: (resource) => `/admin/community-resources/edit?resource_id=${resource.id}`,
       }),
-    []
+    [t]
   );
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
       <AdminEmptyState
         icon="agora-line-buildings"
-        description="Não pertence a nenhuma organização."
+        description={t("admin-community-resources:empty.noOrganization")}
       />
     );
   }
@@ -87,11 +109,11 @@ export default function OrgCommunityResourcesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "Recursos comunitários" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-community-resources:title") },
       ]}
-      title="Recursos comunitários"
+      title={t("admin-community-resources:title")}
       isLoading={isLoading}
       count={resources.length}
       currentPage={currentPage}
@@ -99,15 +121,12 @@ export default function OrgCommunityResourcesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: "Pesquisar recursos comunitários",
-        ariaLabel: "Pesquisar recursos comunitários",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-buildings"
-          title="Sem recursos comunitários"
-          description="A organização ainda não tem recursos comunitários."
-        />
+        <AdminEmptyState noResults={pageContent.orgNoResults} />
       }
     >
       <AdminListTable

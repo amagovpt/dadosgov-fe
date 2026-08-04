@@ -5,27 +5,32 @@ import AppIcon from "../Primitives/AppIcon";
 import Button from "../Primitives/Button";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import type { FoListPageNoResults } from "@/service/types/shared";
 
 export interface AdminEmptyStateI {
-  icon: IconName;
+  icon?: IconName;
   title?: string;
   description?: string;
+  noResults?: FoListPageNoResults;
   createUrl?: string;
   createTitle?: string;
 }
 
-export default function AdminEmptyState({
-  icon,
-  title = "Sem publicações",
-  description = "Ainda não publicou uma API.",
-  createUrl,
-  createTitle = "Publique no portal",
-}: AdminEmptyStateI) {
+export default function AdminEmptyState(props: AdminEmptyStateI) {
+  const { icon, title, description, noResults, createUrl, createTitle } = props;
+  const { t } = useTranslation("admin-common");
   const routerNav = useRouter();
-
   const handleNavigation = useCallback(() => {
     if (createUrl) routerNav.push(createUrl);
   }, [createUrl, routerNav]);
+
+  if ("noResults" in props && !noResults) return null;
+
+  const emptyIcon = (noResults?.icon || icon || "agora-line-search") as IconName;
+  const emptyTitle = noResults?.title ?? title ?? t("emptyState.title");
+  const emptyDescription = noResults?.description ?? description ?? t("emptyState.description");
+  const actionTitle = createTitle ?? t("emptyState.create");
 
   return (
     <>
@@ -34,15 +39,15 @@ export default function AdminEmptyState({
           <CardNoResults
             className="admin-page__empty"
             position="center"
-            icon={<AppIcon name={icon} className="icon-xl h-12 w-12 text-primary-500" />}
-            title={title}
-            description={description}
+            icon={<AppIcon name={emptyIcon} className="icon-xl h-12 w-12 text-primary-500" />}
+            title={emptyTitle}
+            description={emptyDescription}
             hasAnchor={false}
             extraDescription={
               createUrl && (
                 <div className="mt-24">
                   <Button variant="primary" appearance="outline" onClick={() => handleNavigation()}>
-                    {createTitle}
+                    {actionTitle}
                   </Button>
                 </div>
               )

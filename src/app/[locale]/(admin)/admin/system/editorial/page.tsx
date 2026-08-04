@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
 import SystemEditorialClient from "@/components/admin/editorial/SystemEditorialClient";
+import { getBoEditorial, getBoEditorialMetadata } from "@/service/queries/admin/editorial";
 
-export const metadata: Metadata = {
-  title: "Editorial - Sistema - Admin - dados.gov.pt",
-  description: "Gestão editorial do sistema no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoEditorialMetadata(locale);
 
-export default function SystemEditorialPage() {
-  return <SystemEditorialClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function SystemEditorialPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoEditorial(locale);
+
+  return <SystemEditorialClient pageContent={pageContent} />;
 }

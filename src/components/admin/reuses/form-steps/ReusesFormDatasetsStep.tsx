@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   type DropdownSectionProps,
@@ -11,8 +12,12 @@ import {
 import ReuseExternalDatasetFields from "@/components/admin/reuses/form-sections/ReuseExternalDatasetFields";
 import type { Dataset } from "@/service/types/dataset";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ReusesFormDatasetsStepProps {
+  datasetAssociationInfo?: AdminHelpBlock;
+  datasetAssociationWarning?: AdminHelpBlock;
   apiError: string | null;
   producerId: string;
   datasetOptions:
@@ -37,6 +42,8 @@ interface ReusesFormDatasetsStepProps {
 }
 
 export default function ReusesFormDatasetsStep({
+  datasetAssociationInfo,
+  datasetAssociationWarning,
   apiError,
   producerId,
   datasetOptions,
@@ -57,22 +64,48 @@ export default function ReusesFormDatasetsStep({
   onNextStep,
   isSubmitting,
 }: ReusesFormDatasetsStepProps) {
+  const { t } = useTranslation("admin-reuses");
+
   return (
     <>
-      <div className="mb-24">
-        <StatusCard
-          variant="informative"
-          showIcon
-          description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização. Escolha uma das formas de associar os conjuntos de dados: ou publicados neste portal; ou em alternativa indicar links para conjuntos de dados publicados noutros portais."
-        />
-      </div>
-      <div className="mb-24">
-        <StatusCard
-          variant="warning"
-          showIcon
-          description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
-        />
-      </div>
+      {datasetAssociationInfo ? (
+        <div className="mb-24">
+          <StatusCard
+            variant="informative"
+            showIcon
+            description={
+              datasetAssociationInfo.title ? (
+                <>
+                  <strong>{datasetAssociationInfo.title}</strong>
+                  <br />
+                  {formatHtmlParagraphs(datasetAssociationInfo.description)}
+                </>
+              ) : (
+                formatHtmlParagraphs(datasetAssociationInfo.description)
+              )
+            }
+          />
+        </div>
+      ) : null}
+      {datasetAssociationWarning ? (
+        <div className="mb-24">
+          <StatusCard
+            variant="warning"
+            showIcon
+            description={
+              datasetAssociationWarning.title ? (
+                <>
+                  <strong>{datasetAssociationWarning.title}</strong>
+                  <br />
+                  {formatHtmlParagraphs(datasetAssociationWarning.description)}
+                </>
+              ) : (
+                formatHtmlParagraphs(datasetAssociationWarning.description)
+              )
+            }
+          />
+        </div>
+      ) : null}
       {apiError && (
         <div className="mb-16 mt-32">
           <StatusCard variant="danger" showIcon description={apiError} />
@@ -89,13 +122,13 @@ export default function ReusesFormDatasetsStep({
       >
         <InputSelect
           key={`dataset-select-${producerId}`}
-          label="Pesquisar um conjunto de dados"
-          placeholder="Selecione conjuntos de dados..."
+          label={t("form.datasetSearchLabel")}
+          placeholder={t("form.datasetSearchPlaceholder")}
           id="reuse-dataset-search"
           type="checkbox"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("form.datasetSearchInputPlaceholder")}
+          searchNoResultsText={t("form.noResults")}
           onSearchInputChange={onDatasetSearch}
           onChange={(options) => {
             const selectedIds = new Set(options.map((option) => option.value as string));
@@ -121,7 +154,7 @@ export default function ReusesFormDatasetsStep({
             {selectedDatasets.map((dataset) => (
               <Tag
                 key={dataset.id}
-                aria-label={`Remover ${dataset.title}`}
+                aria-label={t("form.removeDataset", { title: dataset.title })}
                 onClick={() => onSelectedDatasetRemove(dataset.id)}
               >
                 {dataset.title}
@@ -131,7 +164,7 @@ export default function ReusesFormDatasetsStep({
         )}
 
         <div className="admin-page__divider-or">
-          <span className="admin-page__divider-or-text">ou</span>
+          <span className="admin-page__divider-or-text">{t("form.or")}</span>
         </div>
 
         <ReuseExternalDatasetFields
@@ -155,7 +188,7 @@ export default function ReusesFormDatasetsStep({
             leadingIconHover="agora-solid-plus-circle"
             onClick={onDatasetLinkAdd}
           >
-            Adicionar
+            {t("form.addDatasetLink")}
           </Button>
         </div>
 
@@ -169,7 +202,7 @@ export default function ReusesFormDatasetsStep({
             leadingIconHover="agora-solid-arrow-left-circle"
             onClick={onPreviousStep}
           >
-            Anterior
+            {t("form.previous")}
           </Button>
           <Button
             type="submit"
@@ -179,7 +212,7 @@ export default function ReusesFormDatasetsStep({
             trailingIconHover="agora-solid-arrow-right-circle"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "A associar..." : "Seguinte"}
+            {isSubmitting ? t("form.associating") : t("form.next")}
           </Button>
         </div>
       </form>

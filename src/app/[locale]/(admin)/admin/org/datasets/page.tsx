@@ -1,21 +1,21 @@
-"use client";
+import type { Metadata } from "next";
+import { getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoDatasetsMetadata(locale, "orgListMetadata");
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
 
 export default function OrgDatasetsRedirect() {
-  const router = useRouter();
-  const { activeOrg, isLoading } = useActiveOrganization();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (activeOrg) {
-      router.replace(`/admin/org/${activeOrg.id}/datasets`);
-    } else {
-      router.replace("/admin");
-    }
-  }, [activeOrg, isLoading, router]);
-
-  return null;
+  return <AdminOrgRedirect targetPath="/admin/org/{orgId}/datasets" />;
 }

@@ -62,11 +62,6 @@ export default async function PublicationsPage({
       <HeroGeneral
         title={hero.title}
         backgroundImageUrl="/Banner/hero-bg.png"
-        breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: "Recursos", url: "/recursos" },
-          { label: "Publicações", url: "/publicacoes" },
-        ]}
       >
         <div className="text-white">{parseHtmlToParagraphs(hero.description)}</div>
       </HeroGeneral>

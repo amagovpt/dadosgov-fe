@@ -1,5 +1,8 @@
+"use client";
+
 import type { ComponentProps } from "react";
 import { Table } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import type { CreatePaginationPropsOptions } from "@/utils/createPaginationProps";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
@@ -22,6 +25,8 @@ export default function AdminPaginatedTable({
   setPageSize,
   paginationOptions,
 }: AdminPaginatedTableProps) {
+  const { t } = useTranslation("admin-common");
+
   return (
     <Table
       paginationProps={createPaginationProps(
@@ -30,7 +35,14 @@ export default function AdminPaginatedTable({
         currentPage,
         setCurrentPage,
         setPageSize,
-        paginationOptions
+        {
+          itemsPerPageLabel: t("pagination.itemsPerPage"),
+          buttonDropdownAriaLabel: t("pagination.selectItemsPerPage"),
+          dropdownListAriaLabel: t("pagination.itemsPerPageOptions"),
+          prevButtonAriaLabel: t("pagination.previous"),
+          nextButtonAriaLabel: t("pagination.next"),
+          ...paginationOptions,
+        }
       )}
     >
       {children}

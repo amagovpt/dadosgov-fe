@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   CardNoResults,
@@ -14,17 +15,6 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import type { HarvestJob, HarvestItem, HarvestError } from "@/service/types/harvester";
-
-const JOB_STATUS_LABELS: Record<string, string> = {
-  pending: "Pendente",
-  initializing: "A inicializar",
-  initialized: "Inicializado",
-  started: "Iniciado",
-  processing: "Em processamento",
-  done: "Terminado",
-  "done-errors": "Falhado",
-  failed: "Falhado",
-};
 
 const TOTAL_COLUMNS = 11;
 
@@ -41,6 +31,7 @@ function extractDatasetId(errors: HarvestItem["errors"]): string | null {
 }
 
 function JobLogsPanel({ job }: { job: HarvestJob }) {
+  const { t } = useTranslation("admin-harvesters");
   // The list endpoint sends only the failed items in `error_items`; the detail
   // endpoint sends the full `items` array. Support both.
   const itemsWithErrors = (job.error_items ?? job.items ?? []).filter(
@@ -51,7 +42,7 @@ function JobLogsPanel({ job }: { job: HarvestJob }) {
   const hasContent = jobErrors.length > 0 || itemsWithErrors.length > 0;
 
   if (!hasContent) {
-    return <p className="text-sm text-neutral-500 italic">Sem logs disponíveis.</p>;
+    return <p className="text-sm text-neutral-500 italic">{t("jobDetail.jobs.noLogs")}</p>;
   }
 
   return (
@@ -59,7 +50,7 @@ function JobLogsPanel({ job }: { job: HarvestJob }) {
       {jobErrors.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-neutral-700 mb-8 uppercase tracking-wide">
-            Erros do trabalho ({jobErrors.length})
+            {t("jobDetail.jobs.jobErrors")} ({jobErrors.length})
           </p>
           <ul className="flex flex-col gap-4">
             {jobErrors.map((err, i) => {
@@ -78,7 +69,7 @@ function JobLogsPanel({ job }: { job: HarvestJob }) {
       {itemsWithErrors.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-neutral-700 mb-8 uppercase tracking-wide">
-            Erros por dataset ({itemsWithErrors.length})
+            {t("jobDetail.jobs.datasetErrors")} ({itemsWithErrors.length})
           </p>
           <ul className="flex flex-col gap-8">
             {itemsWithErrors.map((item, i) => {
@@ -104,17 +95,21 @@ function JobLogsPanel({ job }: { job: HarvestJob }) {
                       </span>
                     )}
                     <span className="ml-auto shrink-0 text-xs text-red-700 font-medium">
-                      {item.errors.length} erro{item.errors.length !== 1 ? "s" : ""}
+                      {t("jobDetail.jobs.errorsCount", { count: item.errors.length })}
                     </span>
                   </div>
                   <div className="mb-8 flex flex-wrap gap-16 rounded border border-red-100 bg-white px-10 py-6 text-[11px] font-mono">
                     <span>
-                      <span className="font-sans text-neutral-400 mr-4">ID Remoto:</span>
+                      <span className="font-sans text-neutral-400 mr-4">
+                        {t("jobDetail.table.remoteId")}:
+                      </span>
                       <span className="text-neutral-700">{item.remote_id}</span>
                     </span>
                     {internalId && (
                       <span>
-                        <span className="font-sans text-neutral-400 mr-4">ID dados.gov:</span>
+                        <span className="font-sans text-neutral-400 mr-4">
+                          {t("jobDetail.table.dadosGovId")}:
+                        </span>
                         <span className="text-neutral-700">{internalId}</span>
                       </span>
                     )}
@@ -160,7 +155,18 @@ export function HarvesterJobsTable({
   setJobsPageSize,
   slug,
 }: HarvesterJobsTableProps) {
+  const { t } = useTranslation("admin-harvesters");
   const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
+  const jobStatusLabels: Record<string, string> = {
+    pending: t("jobDetail.jobStatus.pending"),
+    initializing: t("jobDetail.jobStatus.initializing"),
+    initialized: t("jobDetail.jobStatus.initialized"),
+    started: t("jobDetail.jobStatus.started"),
+    processing: t("jobDetail.jobStatus.processing"),
+    done: t("status.done"),
+    "done-errors": t("jobDetail.jobStatus.doneErrors"),
+    failed: t("jobDetail.jobStatus.failed"),
+  };
 
   const toggleExpand = (jobId: string) => {
     setExpandedJobs((prev) => {
@@ -175,13 +181,13 @@ export function HarvesterJobsTable({
     return (
       <CardNoResults
         icon={<Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />}
-        title="Sem trabalhos no momento"
+        title={t("jobDetail.jobs.emptyTitle")}
         position="center"
         hasAnchor={false}
         extraDescription={
           <div className="mt-24">
             <Button variant="primary" appearance="outline">
-              Aceda às configurações
+              {t("jobDetail.jobs.settings")}
             </Button>
           </div>
         }
@@ -199,12 +205,12 @@ export function HarvesterJobsTable({
     >
       <TableHeader>
         <TableRow>
-          <TableHeaderCell>ID de tarefa</TableHeaderCell>
-          <TableHeaderCell>Status</TableHeaderCell>
-          <TableHeaderCell>Começou em</TableHeaderCell>
-          <TableHeaderCell>Concluído em</TableHeaderCell>
-          <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
-          <TableHeaderCell>API</TableHeaderCell>
+          <TableHeaderCell>{t("jobDetail.table.taskId")}</TableHeaderCell>
+          <TableHeaderCell>{t("jobDetail.table.status")}</TableHeaderCell>
+          <TableHeaderCell>{t("jobDetail.startedAt")}</TableHeaderCell>
+          <TableHeaderCell>{t("jobDetail.table.completedAt")}</TableHeaderCell>
+          <TableHeaderCell>{t("columns.datasets")}</TableHeaderCell>
+          <TableHeaderCell>{t("columns.api")}</TableHeaderCell>
           <TableHeaderCell>
             <Icon name="agora-line-check" className="w-16 h-16" />
           </TableHeaderCell>
@@ -212,12 +218,12 @@ export function HarvesterJobsTable({
             <Icon name="agora-line-eye-off" className="w-16 h-16" />
           </TableHeaderCell>
           <TableHeaderCell>
-            <img src="/Icons/box.svg" alt="Arquivados" className="w-24 h-24" />
+            <img src="/Icons/box.svg" alt={t("jobDetail.table.archived")} className="w-24 h-24" />
           </TableHeaderCell>
           <TableHeaderCell>
             <Icon name="agora-line-x" className="w-16 h-16" />
           </TableHeaderCell>
-          <TableHeaderCell>Logs</TableHeaderCell>
+          <TableHeaderCell>{t("jobDetail.table.logs")}</TableHeaderCell>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -238,7 +244,7 @@ export function HarvesterJobsTable({
           return (
             <React.Fragment key={job.id}>
               <TableRow>
-                <TableCell headerLabel="ID de tarefa">
+                <TableCell headerLabel={t("jobDetail.table.taskId")}>
                   <a
                     href={`/admin/harvesters/${slug}/jobs/${job.id}`}
                     className="text-primary-600 underline uppercase text-xs"
@@ -246,7 +252,7 @@ export function HarvesterJobsTable({
                     {job.id}
                   </a>
                 </TableCell>
-                <TableCell headerLabel="Status">
+                <TableCell headerLabel={t("jobDetail.table.status")}>
                   <StatusDot
                     variant={
                       job.status === "done"
@@ -256,10 +262,10 @@ export function HarvesterJobsTable({
                           : "informative"
                     }
                   >
-                    {JOB_STATUS_LABELS[job.status] || job.status}
+                    {jobStatusLabels[job.status] || job.status}
                   </StatusDot>
                 </TableCell>
-                <TableCell headerLabel="Começou em">
+                <TableCell headerLabel={t("jobDetail.startedAt")}>
                   {job.started
                     ? new Date(job.started).toLocaleString("pt-PT", {
                         day: "numeric",
@@ -270,7 +276,7 @@ export function HarvesterJobsTable({
                       })
                     : "—"}
                 </TableCell>
-                <TableCell headerLabel="Concluído em">
+                <TableCell headerLabel={t("jobDetail.table.completedAt")}>
                   {job.ended
                     ? new Date(job.ended).toLocaleString("pt-PT", {
                         day: "numeric",
@@ -281,18 +287,22 @@ export function HarvesterJobsTable({
                       })
                     : "—"}
                 </TableCell>
-                <TableCell headerLabel="Conjuntos de dados">{totalCount}</TableCell>
-                <TableCell headerLabel="API">{job.errors?.length || 0}</TableCell>
-                <TableCell headerLabel="Concluídos">{doneCount}</TableCell>
-                <TableCell headerLabel="Ignorados">{skippedCount}</TableCell>
-                <TableCell headerLabel="Arquivados">{archivedCount}</TableCell>
-                <TableCell headerLabel="Falhados">{failedCount}</TableCell>
-                <TableCell headerLabel="Logs">
+                <TableCell headerLabel={t("columns.datasets")}>{totalCount}</TableCell>
+                <TableCell headerLabel={t("columns.api")}>{job.errors?.length || 0}</TableCell>
+                <TableCell headerLabel={t("jobDetail.table.completed")}>{doneCount}</TableCell>
+                <TableCell headerLabel={t("jobDetail.table.skipped")}>{skippedCount}</TableCell>
+                <TableCell headerLabel={t("jobDetail.table.archived")}>{archivedCount}</TableCell>
+                <TableCell headerLabel={t("jobDetail.table.failed")}>{failedCount}</TableCell>
+                <TableCell headerLabel={t("jobDetail.table.logs")}>
                   {failed && (
                     <button
                       type="button"
                       onClick={() => toggleExpand(job.id)}
-                      title={expanded ? "Fechar logs" : "Ver logs"}
+                      title={
+                        expanded
+                          ? t("jobDetail.table.closeLogs")
+                          : t("jobDetail.jobs.viewLogs")
+                      }
                       className="flex items-center gap-4 text-xs text-primary-600 hover:text-primary-800 transition-colors"
                     >
                       <Icon
@@ -307,7 +317,7 @@ export function HarvesterJobsTable({
               {failed && expanded && (
                 <TableRow>
                   <TableCell
-                    headerLabel="Logs"
+                    headerLabel={t("jobDetail.table.logs")}
                     colSpan={TOTAL_COLUMNS}
                     className="bg-neutral-50 px-24 py-16"
                   >

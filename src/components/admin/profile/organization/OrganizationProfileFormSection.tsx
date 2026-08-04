@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Accordion,
   AccordionGroup,
@@ -58,6 +59,8 @@ export default function OrganizationProfileFormSection({
   onLogoSecurityError,
   onSave,
 }: OrganizationProfileFormSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-profile"]);
+
   return (
     <form
       className="admin-page__form"
@@ -67,7 +70,7 @@ export default function OrganizationProfileFormSection({
         onSave();
       }}
     >
-      <h2 className="admin-page__section-title hidden">EDITAR ORGANIZAÇÃO</h2>
+      <h2 className="admin-page__section-title hidden">{t("admin-profile:organization.form.sectionTitle")}</h2>
 
       <div className="admin-page__fields-group pt-32">
         {saveStatus && (
@@ -76,29 +79,29 @@ export default function OrganizationProfileFormSection({
             showIcon
             description={
               saveStatus === "success"
-                ? "Perfil da organização atualizado com sucesso."
-                : "Ocorreu um erro ao guardar. Por favor, tente novamente."
+                ? t("admin-profile:organization.form.saveSuccess")
+                : t("admin-profile:organization.form.saveError")
             }
           />
         )}
 
         <InputText
-          label="Nome *"
-          placeholder="Insira o nome aqui"
+          label={t("admin-profile:organization.form.nameLabel")}
+          placeholder={t("admin-profile:organization.form.namePlaceholder")}
           id="org-name"
           value={name}
           onChange={onNameChange}
           hasError={nameError}
           hasFeedback={nameError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
           readOnly={!canEdit}
           disabled={!canEdit}
         />
 
         <InputText
-          label="Sigla"
-          placeholder="Insira a sigla aqui"
+          label={t("admin-profile:organization.form.acronymLabel")}
+          placeholder={t("admin-profile:organization.form.acronymPlaceholder")}
           id="org-acronym"
           value={acronym}
           onChange={onAcronymChange}
@@ -107,8 +110,8 @@ export default function OrganizationProfileFormSection({
         />
 
         <InputTextArea
-          label="Descrição *"
-          placeholder="Insira a descrição aqui"
+          label={t("admin-profile:organization.form.descriptionLabel")}
+          placeholder={t("admin-profile:organization.form.descriptionPlaceholder")}
           id="org-description"
           rows={4}
           value={description}
@@ -116,14 +119,14 @@ export default function OrganizationProfileFormSection({
           hasError={descriptionError}
           hasFeedback={descriptionError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
           readOnly={!canEdit}
           disabled={!canEdit}
         />
 
         <InputText
-          label="Website"
-          placeholder="Insira o URL aqui"
+          label={t("admin-profile:organization.form.websiteLabel")}
+          placeholder={t("admin-profile:organization.form.websitePlaceholder")}
           id="org-url"
           value={url}
           onChange={onUrlChange}
@@ -133,7 +136,7 @@ export default function OrganizationProfileFormSection({
 
         {Object.keys(availableBadges).length > 0 && (
           <AccordionGroup>
-            <Accordion headingTitle="Emblemas" headingLevel="h3">
+            <Accordion headingTitle={t("admin-profile:organization.form.badges")} headingLevel="h3">
               <div className="flex flex-col gap-8 p-16">
                 {Object.entries(availableBadges).map(([kind, label]) => (
                   <Checkbox
@@ -156,14 +159,14 @@ export default function OrganizationProfileFormSection({
         {canEdit && (
           <div>
             <ImageUploadField
-              label="Logotipo"
-              uploaderLabel="Ficheiro"
+              label={t("admin-profile:organization.form.logoLabel")}
+              uploaderLabel={t("admin-profile:organization.form.logoUploaderLabel")}
               onChange={onLogoUpload}
               onSecurityError={onLogoSecurityError}
               error={logoError}
               maxSize={512000}
-              extensionsInstructions="Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG."
-              maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 500 KB."
+              extensionsInstructions={t("admin-profile:organization.form.logoExtensions")}
+              maxSizeExceededErrorLabel={t("admin-profile:organization.form.logoMaxSizeExceeded")}
             />
           </div>
         )}
@@ -178,7 +181,7 @@ export default function OrganizationProfileFormSection({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSaving}
             >
-              {isSaving ? "A guardar..." : "Guardar"}
+              {isSaving ? t("admin-common:actions.saving") : t("admin-common:actions.save")}
             </Button>
           </div>
         )}

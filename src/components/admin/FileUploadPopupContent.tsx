@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchAllowedExtensions } from "@/service/api/datasets";
@@ -16,6 +17,7 @@ export default function FileUploadPopupContent({
   onConfirm,
   allowedExtensions: initialExtensions = null,
 }: FileUploadPopupContentProps) {
+  const { t } = useTranslation("admin-common");
   const { hide } = usePopupContext();
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [extensionErrors, setExtensionErrors] = useState<string[]>([]);
@@ -41,11 +43,11 @@ export default function FileUploadPopupContent({
         <div className="[&_.download-icon]:hidden [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
           <DragAndDropUploader
             multiple
-            label="Ficheiros"
-            inputLabel="Selecione ou arraste os ficheiros"
-            selectedFilesLabel="ficheiros selecionados"
-            removeFileButtonLabel="Remover ficheiro"
-            replaceFileButtonLabel="Substituir ficheiro"
+            label={t("fileUpload.files.label")}
+            inputLabel={t("fileUpload.files.selectOrDrag")}
+            selectedFilesLabel={t("fileUpload.files.selectedFiles")}
+            removeFileButtonLabel={t("fileUpload.files.removeFile")}
+            replaceFileButtonLabel={t("fileUpload.files.replaceFile")}
             files={pendingFiles}
             onChange={(e) => {
               const picked = Array.from((e.target as HTMLInputElement).files || []);
@@ -69,10 +71,11 @@ export default function FileUploadPopupContent({
               <Icon name="agora-solid-alert-triangle" dimensions="s" aria-hidden={true} />
             </span>
             <p className="feedback-text feedback-text-light">
-              Tipo de ficheiro inválido.{" "}
               {extensionErrors.length === 1
-                ? `"${extensionErrors[0]}" não foi adicionado.`
-                : `Os seguintes ficheiros não foram adicionados: ${extensionErrors.join(", ")}`}
+                ? t("fileUpload.files.invalidSingle", { name: extensionErrors[0] })
+                : t("fileUpload.files.invalidMultiple", {
+                    names: extensionErrors.join(", "),
+                  })}
             </p>
           </div>
         )}
@@ -82,7 +85,7 @@ export default function FileUploadPopupContent({
               <Icon name="agora-solid-alert-triangle" dimensions="s" aria-hidden={true} />
             </span>
             <p className="feedback-text feedback-text-light">
-              O ficheiro contém código malicioso ou scripts não autorizados que comprometem a segurança do sistema.
+              {t("fileUpload.files.securityError")}
             </p>
           </div>
         )}
@@ -90,10 +93,10 @@ export default function FileUploadPopupContent({
 
       <div className="flex justify-end gap-[18px]">
         <Button appearance="outline" variant="neutral" onClick={hide}>
-          Cancelar
+          {t("actions.cancel")}
         </Button>
         <Button variant="primary" onClick={handleConfirm}>
-          Confirmar
+          {t("fileUpload.actions.confirm")}
         </Button>
       </div>
     </div>

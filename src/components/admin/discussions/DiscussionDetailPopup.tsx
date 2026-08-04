@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { Avatar, Button, Icon, InputTextArea, usePopupContext } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/service/types/dataset";
 import { Discussion } from "@/service/types/discussion";
@@ -28,6 +29,7 @@ const formatMetric = (value: number | undefined) => {
 };
 
 function SubjectCard({ subject }: { subject: Subject }) {
+  const { t } = useTranslation("admin-discussions");
   if (!subject) return null;
 
   const isDataset = "quality" in subject;
@@ -48,7 +50,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
         {logo ? (
           <img
             src={logo}
-            alt={subject.organization?.name || "Organização"}
+            alt={subject.organization?.name || t("organizationFallback")}
             className="max-h-[56px] w-auto object-contain"
           />
         ) : (
@@ -57,12 +59,12 @@ function SubjectCard({ subject }: { subject: Subject }) {
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-4 bg-primary-100 p-16">
         <p className="text-xs truncate font-medium text-primary-600">
-          {subject.organization?.name || "Sem Organização"}
+          {subject.organization?.name || t("withoutOrganization")}
         </p>
         <p className="text-sm font-bold leading-tight text-neutral-900">{subject.title}</p>
         <p className="text-xs line-clamp-2 text-neutral-700">{subject.description}</p>
         <div className="text-xs mt-4 flex flex-wrap items-center gap-8 text-neutral-600">
-          <div className="flex items-center gap-4" title="Visualizações">
+          <div className="flex items-center gap-4" title={t("metrics.views")}>
             <Icon
               name="agora-solid-eye"
               dimensions="xs"
@@ -71,7 +73,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
             />
             <span>{formatMetric(subject.metrics?.views)}</span>
           </div>
-          <div className="flex items-center gap-4" title="Downloads">
+          <div className="flex items-center gap-4" title={t("metrics.downloads")}>
             <Icon
               name="agora-solid-download"
               dimensions="xs"
@@ -80,7 +82,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
             />
             <span>{formatMetric(subject.metrics?.resources_downloads)}</span>
           </div>
-          <div className="flex items-center gap-4" title="Reutilizações">
+          <div className="flex items-center gap-4" title={t("metrics.reuses")}>
             <svg
               width="14"
               height="14"
@@ -92,7 +94,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
             </svg>
             <span>{subject.metrics?.reuses || 0}</span>
           </div>
-          <div className="flex items-center gap-4" title="Favoritos">
+          <div className="flex items-center gap-4" title={t("metrics.favorites")}>
             <Icon
               name="agora-solid-star"
               dimensions="xs"
@@ -119,6 +121,7 @@ export default function DiscussionDetailPopup({
   onUpdated,
   onDeleted,
 }: DiscussionDetailPopupProps) {
+  const { t } = useTranslation("admin-discussions");
   const { hide } = usePopupContext();
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -218,7 +221,7 @@ export default function DiscussionDetailPopup({
 
       {!discussion.closed && (
         <InputTextArea
-          label="Escreva o seu comentário"
+          label={t("commentLabel")}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
@@ -238,7 +241,7 @@ export default function DiscussionDetailPopup({
               leadingIcon="agora-line-trash"
               leadingIconHover="agora-solid-trash"
             >
-              Eliminar
+              {t("actions.delete")}
             </Button>
           )}
           {!discussion.closed && (
@@ -249,7 +252,7 @@ export default function DiscussionDetailPopup({
                 onClick={handleReply}
                 disabled={isSubmitting || !comment.trim()}
               >
-                Adicionar comentário
+                {t("actions.addComment")}
               </Button>
               <Button
                 variant="primary"
@@ -257,7 +260,7 @@ export default function DiscussionDetailPopup({
                 onClick={handleCloseWithComment}
                 disabled={isSubmitting || !comment.trim()}
               >
-                Comentar e fechar
+                {t("actions.commentAndClose")}
               </Button>
             </>
           )}

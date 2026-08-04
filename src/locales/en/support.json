@@ -1,0 +1,106 @@
+{
+  "hero": {
+    "links": [
+      {
+        "children": "What is dados.gov.pt",
+        "href": "/recursos/como-usar-o-portal/o-que-e-dados-gov-pt",
+        "icon": "agora-line-arrow-right-circle"
+      },
+      {
+        "children": "Learn more about open data",
+        "href": "/recursos/como-usar-o-portal/sobre-dados-abertos",
+        "icon": "agora-line-arrow-right-circle"
+      }
+    ]
+  },
+  "sidebar": {
+    "currentPage": "On this page"
+  },
+  "anchors": {
+    "currentPage": "current-page",
+    "help": "help"
+  },
+  "faq": {
+    "title": "Frequently asked questions"
+  },
+  "legalAnswers": {
+    "personalDataTitle": "Personal Data Protection / GDPR",
+    "contactPrefix": "Contact",
+    "cnpdLink": "National Data Protection Commission",
+    "removalRequestTitle": "Personal data removal request",
+    "supportPrefix": "Contact the dados.gov.pt team on the",
+    "supportLink": "Support"
+  },
+  "help": {
+    "title": "Help",
+    "optionIntro": "If you still need support, select the most suitable option:"
+  },
+  "toggles": {
+    "question": "I have a question",
+    "bug": "Report a problem",
+    "feedback": "Send your feedback",
+    "dataset": "Request a dataset"
+  },
+  "form": {
+    "title": {
+      "question": "I have a question",
+      "bug": "Report a problem",
+      "feedback": "Send your feedback"
+    },
+    "prefix": {
+      "question": "Question",
+      "bug": "Problem",
+      "feedback": "Feedback"
+    },
+    "subjectLabel": {
+      "question": "Subject *",
+      "bug": "Problem subject *",
+      "feedback": "Feedback subject *"
+    },
+    "contentLabel": {
+      "question": "Message *",
+      "bug": "Problem description *",
+      "feedback": "Message *"
+    },
+    "categories": {
+      "question": [
+        "Data",
+        "Publication",
+        "Reuse",
+        "API",
+        "User account",
+        "Other"
+      ],
+      "bug": [
+        "Portal error",
+        "Form error",
+        "Search error",
+        "Authentication error",
+        "Other"
+      ],
+      "feedback": [
+        "Suggestion",
+        "Improvement",
+        "Content",
+        "User experience",
+        "Other"
+      ]
+    },
+    "success": {
+      "question": "Your question has been sent successfully.",
+      "bug": "The problem has been reported successfully.",
+      "feedback": "Your feedback has been sent successfully."
+    },
+    "emailLabel": "Your email *",
+    "categoryLabel": "Category *",
+    "categoryPlaceholder": "Select a category...",
+    "problemUrlLabel": "Page or URL where the problem occurred",
+    "problemUrlPlaceholder": "https://dados.gov.pt/...",
+    "problemDateTimeLabel": "Approximate date/time",
+    "problemDateTimePlaceholder": "E.g.: 05/06/2026 14:30",
+    "submit": "Send",
+    "sending": "Sending...",
+    "requiredField": "Required field",
+    "submitError": "It was not possible to send your request. Please try again in a few moments."
+  }
+}

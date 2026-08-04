@@ -38,6 +38,21 @@ export function createDateSorter<T>(getValue: (item: T) => string | null | undef
   };
 }
 
+export interface ResourceStatusSortItem {
+  deleted?: boolean | string | null;
+  archived?: boolean | string | null;
+  deleted_at?: boolean | string | null;
+  archived_at?: boolean | string | null;
+  private?: boolean | string | null;
+}
+
+export function getResourceStatusSortValue(item: ResourceStatusSortItem): number {
+  if (item.deleted || item.deleted_at) return 3;
+  if (item.archived || item.archived_at) return 2;
+  if (item.private) return 1;
+  return 0;
+}
+
 export function buildApiSortParam<TField extends string>(
   sortField: TField | null,
   sortOrder: SortOrder,

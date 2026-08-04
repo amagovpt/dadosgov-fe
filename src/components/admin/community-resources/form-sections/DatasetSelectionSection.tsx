@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
 import { InputSelect } from "@ama-pt/agora-design-system";
 import type { Dataset } from "@/service/types/dataset";
@@ -25,10 +26,12 @@ export default function DatasetSelectionSection({
   onDatasetChange,
   onRemoveSelectedDataset,
 }: DatasetSelectionSectionProps) {
+  const { t } = useTranslation("admin-community-resources");
+
   return (
     <>
       <h2 className="admin-page__section-title">
-        Associe um conjunto de dados {!datasetId && "*"}
+        {t("form.datasetAssociation")} {!datasetId && "*"}
       </h2>
 
       {activeDataset && (
@@ -41,12 +44,12 @@ export default function DatasetSelectionSection({
 
       {!datasetId && !activeDataset && (
         <InputSelect
-          label="Pesquisar um conjunto de dados *"
-          placeholder="Procurando um conjunto de dados..."
+          label={t("form.datasetSearchLabel")}
+          placeholder={t("form.datasetSearchPlaceholder")}
           id="community-resource-dataset-search"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("form.schemaSearchInputPlaceholder")}
+          searchNoResultsText={t("form.noDatasetResults")}
           hasError={hasDatasetError}
           onChange={onDatasetChange}
         >

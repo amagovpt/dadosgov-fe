@@ -1,12 +1,16 @@
 import React from "react";
 import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ReusesEditMetadataDangerZoneProps {
   archived: boolean;
   isSubmitting: boolean;
-  // Backend-computed authorization. Archiving is an edit; deleting needs delete.
   canEdit?: boolean;
   canDelete?: boolean;
+  archiveCard?: AdminCard;
+  unarchiveCard?: AdminCard;
+  deleteCard?: AdminCard;
   onArchiveReuse: () => void | Promise<void>;
   onUnarchiveReuse: () => void | Promise<void>;
   onOpenDeletePopup: () => void;
@@ -17,27 +21,36 @@ export default function ReusesEditMetadataDangerZone({
   isSubmitting,
   canEdit = true,
   canDelete = true,
+  archiveCard,
+  unarchiveCard,
+  deleteCard,
   onArchiveReuse,
   onUnarchiveReuse,
   onOpenDeletePopup,
 }: ReusesEditMetadataDangerZoneProps) {
+  const archiveActionCard = archived ? unarchiveCard : archiveCard;
+
   return (
     <AdminDangerActions
-      primaryHeading={
-        !canEdit
-          ? undefined
-          : archived
-            ? "Esta reutilização está arquivada. Pode desarquivar para voltar a indexá-la no portal."
-            : "Uma reutilização arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."
-      }
-      primaryActionLabel={
-        canEdit ? (archived ? "Desarquivar a reutilização" : "Arquivar a reutilização") : undefined
-      }
-      onPrimaryAction={
-        canEdit ? () => (archived ? onUnarchiveReuse() : onArchiveReuse()) : undefined
-      }
-      dangerActionLabel={canDelete ? "Eliminar a reutilização" : undefined}
-      onDangerAction={canDelete ? () => onOpenDeletePopup() : undefined}
+      actions={[
+        {
+          variant: "warning",
+          heading: canEdit ? archiveActionCard?.title : undefined,
+          description: canEdit ? formatHtmlParagraphs(archiveActionCard?.description) : undefined,
+          actionLabel: canEdit ? archiveActionCard?.anchor?.children : undefined,
+          onAction:
+            canEdit && archiveActionCard
+              ? () => (archived ? onUnarchiveReuse() : onArchiveReuse())
+              : undefined,
+        },
+        {
+          variant: "danger",
+          heading: canDelete ? (deleteCard?.title ?? "") : undefined,
+          description: canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined,
+          actionLabel: canDelete ? deleteCard?.anchor?.children : undefined,
+          onAction: canDelete ? () => onOpenDeletePopup() : undefined,
+        },
+      ]}
       disabled={isSubmitting}
     />
   );

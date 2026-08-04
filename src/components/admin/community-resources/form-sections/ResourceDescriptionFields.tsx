@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
 import { InputText, InputTextArea } from "@ama-pt/agora-design-system";
 import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
@@ -38,38 +39,40 @@ export default function ResourceDescriptionFields({
   onDescriptionChange,
   onTypeChange,
 }: ResourceDescriptionFieldsProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+
   return (
     <>
       <InputText
-        label="Título *"
-        placeholder="Insira o título aqui"
+        label={t("admin-community-resources:form.titleField")}
+        placeholder={t("admin-community-resources:form.titlePlaceholder")}
         id="resource-title"
         value={title}
         onChange={onTitleChange}
         hasError={hasTitleError}
         hasFeedback={hasTitleError}
         feedbackState="danger"
-        errorFeedbackText="Campo obrigatório"
+        errorFeedbackText={t("admin-common:forms.requiredField")}
       />
 
       <AdminSelectAdapter
         key={typeSelectKey}
-        label="Tipo *"
-        placeholder="Ficheiros principais"
+        label={t("admin-community-resources:form.typeField")}
+        placeholder={t("admin-community-resources:form.mainFilesPlaceholder")}
         id="resource-type"
         initialValue={typeInitialValue}
         valueRef={selectedTypeRef}
         onValueChange={onTypeChange}
         hasError={hasTypeError}
-        errorMessage="Campo obrigatório"
+        errorMessage={t("admin-common:forms.requiredField")}
         renderErrorBelow={renderTypeErrorBelow}
       >
         {typeOptions}
       </AdminSelectAdapter>
 
       <InputTextArea
-        label="Descrição"
-        placeholder="Insira a descrição aqui"
+        label={t("admin-community-resources:form.descriptionField")}
+        placeholder={t("admin-community-resources:form.descriptionPlaceholder")}
         id="resource-description"
         rows={descriptionRows}
         value={description}

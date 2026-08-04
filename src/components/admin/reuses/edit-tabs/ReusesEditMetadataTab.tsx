@@ -1,14 +1,22 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
 import ReusesEditMetadataDangerZone from "@/components/admin/reuses/edit-sections/ReusesEditMetadataDangerZone";
 import { can } from "@/utils/permissions";
 import ReusesEditMetadataDetailsSection from "@/components/admin/reuses/edit-sections/ReusesEditMetadataDetailsSection";
-import { getReuseAuxiliarItems } from "@/components/admin/reuses/config/reusesAuxiliarItems";
+import { getEditReuseAuxiliarItems } from "@/components/admin/reuses/config/reusesAuxiliarItems";
 import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
+import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 type ReusesEditMetadataTabProps = {
+  auxiliaryItems?: AdminAuxiliaryItem[];
+  visibilityCard?: AdminCard;
+  archiveCard?: AdminCard;
+  unarchiveCard?: AdminCard;
+  deleteCard?: AdminCard;
   reuse: Reuse;
   isSubmitting: boolean;
   featured: boolean;
@@ -48,6 +56,11 @@ type ReusesEditMetadataTabProps = {
 };
 
 export default function ReusesEditMetadataTab({
+  auxiliaryItems,
+  visibilityCard,
+  archiveCard,
+  unarchiveCard,
+  deleteCard,
   reuse,
   isSubmitting,
   featured,
@@ -83,23 +96,30 @@ export default function ReusesEditMetadataTab({
   onUnarchiveReuse,
   onOpenDeletePopup,
 }: ReusesEditMetadataTabProps) {
-  // Authorization is decided by the backend (single source of truth).
+  const { t } = useTranslation("admin-reuses");
   const canEdit = can(reuse, "edit");
   const canDelete = can(reuse, "delete");
+  const auxiliarItems = getEditReuseAuxiliarItems({
+    items: auxiliaryItems,
+  });
+
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        {reuse.private && canEdit && (
+        {reuse.private && canEdit && visibilityCard && (
           <AdminVisibilityBanner
             description={
               <>
-                <strong>Modifique a visibilidade da reutilização.</strong>
-                <br />
-                Esta reutilização encontra-se atualmente em <strong>modo rascunho</strong>.
-                Apenas o produtor e os membros da organização a podem visualizar e editar.
+                <strong>{visibilityCard.title}</strong>
+                {visibilityCard.description && (
+                  <>
+                    <br />
+                    {formatHtmlParagraphs(visibilityCard.description)}
+                  </>
+                )}
               </>
             }
-            actionLabel="Publicar reutilização"
+            actionLabel={visibilityCard.anchor?.children ?? ""}
             disabled={isSubmitting}
             onAction={onPublishReuse}
           />
@@ -113,9 +133,7 @@ export default function ReusesEditMetadataTab({
             void onSaveMetadata();
           }}
         >
-          <p className="text-neutral-900 text-base leading-7">
-            Os campos marcados com um asterisco ( * ) são obrigatórios.
-          </p>
+          <p className="text-neutral-900 text-base leading-7">{t("edit.draftInfo")}</p>
 
           <ReusesEditMetadataDetailsSection
             reuse={reuse}
@@ -148,7 +166,7 @@ export default function ReusesEditMetadataTab({
             onImageSecurityError={onImageSecurityError}
           />
 
-          <div className="admin-page__actions flex justify-end mt-24">
+          <div className="admin-page__actions mt-24 flex justify-end">
             <Button
               type="submit"
               variant="primary"
@@ -157,7 +175,7 @@ export default function ReusesEditMetadataTab({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "A guardar..." : "Guardar"}
+              {isSubmitting ? t("edit.saving") : t("edit.save")}
             </Button>
           </div>
 
@@ -166,6 +184,9 @@ export default function ReusesEditMetadataTab({
             isSubmitting={isSubmitting}
             canEdit={canEdit}
             canDelete={canDelete}
+            archiveCard={archiveCard}
+            unarchiveCard={unarchiveCard}
+            deleteCard={deleteCard}
             onArchiveReuse={onArchiveReuse}
             onUnarchiveReuse={onUnarchiveReuse}
             onOpenDeletePopup={onOpenDeletePopup}
@@ -173,15 +194,7 @@ export default function ReusesEditMetadataTab({
         </form>
       </div>
 
-      <AdminAuxiliarySidebar
-        items={getReuseAuxiliarItems({
-          title: !!formErrors.title,
-          link: !!formErrors.url,
-          type: !!formErrors.type,
-          topic: !!formErrors.topic,
-          description: !!formErrors.description,
-        })}
-      />
+      {auxiliarItems.length > 0 && <AdminAuxiliarySidebar items={auxiliarItems} />}
     </div>
   );
 }

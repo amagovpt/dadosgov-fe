@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
 import { fetchSpatialZonesByIds, updateDataset } from "@/service/api/datasets";
 import type { SpatialZone } from "@/service/types/catalog";
@@ -62,15 +63,24 @@ export function useDatasetMetadataActions({
   showApiSuccess,
   focusAfterSave,
 }: UseDatasetMetadataActionsParams) {
+  const { t } = useTranslation("admin-datasets");
+
   async function handleSaveMetadata() {
     if (!dataset) return;
 
-    const errors = validateDatasetEditMetadata({
-      title,
-      description,
-      temporalStart,
-      temporalEnd,
-    });
+    const errors = validateDatasetEditMetadata(
+      {
+        title,
+        description,
+        temporalStart,
+        temporalEnd,
+      },
+      {
+        titleRequired: t("edit.fieldRequired"),
+        descriptionRequired: t("edit.fieldRequired"),
+        invalidRange: t("edit.invalidTemporalRange"),
+      },
+    );
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       focusFirstError();
@@ -153,7 +163,7 @@ export function useDatasetMetadataActions({
       );
 
       setDataset(updated);
-      showApiSuccess("Conjunto de dados atualizado com sucesso.");
+      showApiSuccess(t("edit.metadataSaved"));
       focusAfterSave();
     } catch (error: unknown) {
       const err = error as { data?: Record<string, unknown> };
@@ -173,7 +183,7 @@ export function useDatasetMetadataActions({
           .join(", ");
         setApiError(messages);
       } else {
-        setApiError("Erro ao atualizar o conjunto de dados.");
+        setApiError(t("edit.metadataSaveError"));
       }
     } finally {
       setIsSubmitting(false);

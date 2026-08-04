@@ -1,5 +1,6 @@
 import { InputSelect } from "@ama-pt/agora-design-system";
 import { DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 type HarvestersStatusFilterSelectProps = {
   statusFilter: string;
@@ -12,13 +13,15 @@ export default function HarvestersStatusFilterSelect({
   statusFilter,
   onChange,
   id = "filter-status",
-  placeholder = "Filtrar por estado",
+  placeholder,
 }: HarvestersStatusFilterSelectProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
+
   return (
     <InputSelect
       label=""
       hideLabel
-      placeholder={placeholder}
+      placeholder={placeholder ?? t("admin-common:filters.statusPlaceholder")}
       id={id}
       onChange={(options) => {
         onChange(options.length > 0 ? (options[0].value as string) : "");
@@ -26,22 +29,22 @@ export default function HarvestersStatusFilterSelect({
     >
       <DropdownSection name="status">
         <DropdownOption value="" selected={statusFilter === ""}>
-          Todos
+          {t("admin-harvesters:filters.options.all")}
         </DropdownOption>
         <DropdownOption value="pending" selected={statusFilter === "pending"}>
-          Em espera de validação
+          {t("admin-harvesters:filters.options.pending")}
         </DropdownOption>
         <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
-          Validado
+          {t("admin-harvesters:filters.options.accepted")}
         </DropdownOption>
         <DropdownOption value="refused" selected={statusFilter === "refused"}>
-          Recusado
+          {t("admin-harvesters:filters.options.refused")}
         </DropdownOption>
         <DropdownOption value="done" selected={statusFilter === "done"}>
-          Terminado
+          {t("admin-harvesters:filters.options.done")}
         </DropdownOption>
         <DropdownOption value="failed" selected={statusFilter === "failed"}>
-          Falhado
+          {t("admin-harvesters:filters.options.failed")}
         </DropdownOption>
       </DropdownSection>
     </InputSelect>

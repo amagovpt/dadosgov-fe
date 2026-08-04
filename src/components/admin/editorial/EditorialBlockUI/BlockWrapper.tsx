@@ -1,4 +1,5 @@
 import { Icon, usePopupContext } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import type { Dataset } from "@/service/types/dataset";
 import type { Reuse } from "@/service/types/reuse";
 import type { BlockData, ContentBlock } from "../editorial-blocks";
@@ -30,6 +31,7 @@ export function BlockWrapper({
   onDatasetNameMapUpdate?: (dataset: Dataset) => void;
   onReuseNameMapUpdate?: (reuse: Reuse) => void;
 }) {
+  const { t } = useTranslation(["admin-common", "admin-editorial"]);
   const { show, hide } = usePopupContext();
 
   const handleRemove = () => {
@@ -42,8 +44,8 @@ export function BlockWrapper({
         }}
       />,
       {
-        title: "Elimine o bloco",
-        closeAriaLabel: "Fechar",
+        title: t("admin-editorial:blockActions.deleteBlockTitle"),
+        closeAriaLabel: t("admin-common:fileUpload.popup.close"),
         dimensions: "m",
       }
     );
@@ -57,7 +59,7 @@ export function BlockWrapper({
           onClick={onMoveUp}
           disabled={index === 0}
           className="rounded p-4 text-neutral-500 hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-          title="Mover para cima"
+          title={t("admin-editorial:blockActions.moveUp")}
         >
           <Icon name="agora-line-chevron-up" className="h-16 w-16" />
         </button>
@@ -66,7 +68,7 @@ export function BlockWrapper({
           onClick={onMoveDown}
           disabled={index === total - 1}
           className="rounded p-4 text-neutral-500 hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-          title="Mover para baixo"
+          title={t("admin-editorial:blockActions.moveDown")}
         >
           <Icon name="agora-line-chevron-down" className="h-16 w-16" />
         </button>
@@ -74,7 +76,7 @@ export function BlockWrapper({
           type="button"
           onClick={handleRemove}
           className="rounded group p-4"
-          title="Remover bloco"
+          title={t("admin-editorial:blockActions.remove")}
         >
           <Icon
             name="agora-line-trash"

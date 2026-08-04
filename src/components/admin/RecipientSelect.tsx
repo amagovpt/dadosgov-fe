@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "./IsolatedSelect";
 import { suggestOrganizations } from "@/service/api/organizations";
@@ -33,6 +34,7 @@ export default function RecipientSelect({
   hasError,
   errorFeedbackText,
 }: RecipientSelectProps) {
+  const { t } = useTranslation("admin-common");
   const [users, setUsers] = useState<UserSuggestion[]>([]);
   const [orgs, setOrgs] = useState<OrganizationSuggestion[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,14 +92,14 @@ export default function RecipientSelect({
         class: "User",
         id: u.id,
         label: `${u.first_name} ${u.last_name}`.trim(),
-      })
+      }),
     );
     orgs.forEach((o) =>
       next.set(`Organization:${o.id}`, {
         class: "Organization",
         id: o.id,
         label: o.name,
-      })
+      }),
     );
     indexRef.current = next;
   }, [users, orgs]);
@@ -112,11 +114,11 @@ export default function RecipientSelect({
 
   const noResultsText = useMemo(() => {
     if (searchQuery.trim().length < MIN_QUERY_LENGTH) {
-      return "Escreva pelo menos 2 caracteres para procurar...";
+      return t("recipient.minChars", { count: MIN_QUERY_LENGTH });
     }
-    if (isSearching) return "A pesquisar...";
-    return "Nenhum utilizador ou organização encontrado";
-  }, [searchQuery, isSearching]);
+    if (isSearching) return t("recipient.searching");
+    return t("recipient.noResults");
+  }, [isSearching, searchQuery, t]);
 
   return (
     <IsolatedSelect
@@ -126,21 +128,21 @@ export default function RecipientSelect({
       id={id}
       onChangeRef={valueRef}
       searchable
-      searchInputPlaceholder="Escreva para procurar..."
+      searchInputPlaceholder={t("recipient.searchPlaceholder")}
       searchNoResultsText={noResultsText}
       hasError={hasError}
       errorFeedbackText={errorFeedbackText}
       onChangeCallback={handleChange}
       onSearchCallback={setSearchQuery}
     >
-      <DropdownSection name="Utilizadores">
+      <DropdownSection name={t("recipient.usersSection")}>
         {users.map((u) => (
           <DropdownOption key={`user-${u.id}`} value={`User:${u.id}`}>
             {`${u.first_name} ${u.last_name}`.trim()}
           </DropdownOption>
         ))}
       </DropdownSection>
-      <DropdownSection name="Organizações">
+      <DropdownSection name={t("recipient.organizationsSection")}>
         {orgs.map((o) => (
           <DropdownOption key={`org-${o.id}`} value={`Organization:${o.id}`}>
             {o.name}

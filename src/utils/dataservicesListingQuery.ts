@@ -7,10 +7,8 @@ export const DATASERVICE_SORT_OPTIONS: Record<string, string> = {
   recentes: "-created",
 };
 
-export const DATASERVICE_SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  recentes: "Mais recentes",
-};
+// Sort labels are translated at render time inside DataservicesClient
+// (built from the `dataservices` namespace `sort.*` keys).
 
 const DATASERVICE_SORT_REVERSE_MAP: Record<string, string> = {
   "-created": "recentes",

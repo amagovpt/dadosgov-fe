@@ -92,19 +92,7 @@ export default async function Page({
     return (
         <div className='w-full h-full flex flex-col items-center justify-center gap-32'>
             <Hero
-                breadcrumbItems={[
-                    {
-                        label: "Home",
-                        url: '/'
-                    }, {
-                        label: "Áreas Tématicas",
-                        url: "/areas-tematicas"
-                    },
-                    {
-                        label: title,
-                        url: "#"
-                    }
-                ]}
+                breadcrumbCurrentLabel={title}
                 title={title}
                 description={parseHtmlToParagraphs(description)}
             />

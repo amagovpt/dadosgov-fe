@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { usePopupContext } from "@ama-pt/agora-design-system";
 import { deleteReuse, fetchReuse, updateReuse } from "@/service/api/reuses";
 import type { Reuse } from "@/service/types/reuse";
@@ -26,6 +27,8 @@ export function useReuseLifecycleActions({
   setApiSuccess,
   showApiSuccess,
 }: UseReuseLifecycleActionsParams) {
+  const { t } = useTranslation("admin-reuses");
+
   async function handlePublishReuse() {
     if (!reuse) return;
 
@@ -37,9 +40,9 @@ export function useReuseLifecycleActions({
         private: false,
       });
       setReuse(updated);
-      showApiSuccess("Reutilização publicada com sucesso.");
+      showApiSuccess(t("edit.publishSuccess"));
     } catch {
-      setApiError("Erro ao publicar a reutilização.");
+      setApiError(t("edit.publishError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -55,7 +58,7 @@ export function useReuseLifecycleActions({
       push("/admin/me/reuses");
     } catch (error) {
       console.error("Error deleting reuse:", error);
-      setApiError("Erro ao eliminar a reutilização.");
+      setApiError(t("edit.deleteError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -68,8 +71,8 @@ export function useReuseLifecycleActions({
     if (!reuse) return;
 
     show(renderPopup(handleDeleteReuse), {
-      title: "Elimine a reutilização",
-      closeAriaLabel: "Fechar",
+      title: t("edit.deleteModalTitle"),
+      closeAriaLabel: t("edit.closeAriaLabel"),
       dimensions: "m",
     });
   }
@@ -85,10 +88,10 @@ export function useReuseLifecycleActions({
         archived: new Date().toISOString(),
       });
       setReuse(updated);
-      showApiSuccess("Reutilização arquivada com sucesso.");
+      showApiSuccess(t("edit.archiveSuccess"));
     } catch (error) {
       console.error("Error archiving reuse:", error);
-      setApiError("Erro ao arquivar a reutilização.");
+      setApiError(t("edit.archiveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,10 +106,10 @@ export function useReuseLifecycleActions({
     try {
       const updated = await updateReuse(reuse.id, { archived: null });
       setReuse(updated);
-      showApiSuccess("Reutilização desarquivada com sucesso.");
+      showApiSuccess(t("edit.unarchiveSuccess"));
     } catch (error) {
       console.error("Error unarchiving reuse:", error);
-      setApiError("Erro ao desarquivar a reutilização.");
+      setApiError(t("edit.unarchiveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -128,12 +131,12 @@ export function useReuseLifecycleActions({
       await uploadReuseImage(reuse.id, file);
       const updated = await fetchReuse(reuse.id);
       setReuse(updated);
-      showApiSuccess("Imagem de capa atualizada com sucesso.");
+      showApiSuccess(t("edit.imageUpdated"));
     } catch (error) {
       if (error instanceof Error && error.message === "MAX_FILE_SIZE") {
         throw error;
       }
-      setApiError("Erro ao carregar imagem de capa.");
+      setApiError(t("edit.imageUploadError"));
     } finally {
       setIsSubmitting(false);
     }

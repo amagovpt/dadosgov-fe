@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button, InputText, StatusCard } from "@ama-pt/agora-design-system";
 
 interface EmailSectionProps {
@@ -27,13 +28,15 @@ export function EmailSection({
   onConfirm,
   onCancel,
 }: EmailSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-profile"]);
+
   return (
     <>
       {emailChangeSuccess && (
         <StatusCard
           variant="success"
           showIcon
-          description={`E-mail de confirmação enviado para ${pendingEmail}. Verifique a sua caixa de entrada e clique no link para concluir.`}
+          description={t("admin-profile:email.success", { email: pendingEmail })}
         />
       )}
 
@@ -41,16 +44,16 @@ export function EmailSection({
         <div className="flex-1">
           {isEditingEmail ? (
             <InputText
-              label="Novo endereço de e-mail"
-              placeholder="Insira o novo e-mail aqui"
+              label={t("admin-profile:email.newEmailLabel")}
+              placeholder={t("admin-profile:email.newEmailPlaceholder")}
               id="new-email"
               value={newEmail}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => onNewEmailChange(e.target.value)}
             />
           ) : (
             <InputText
-              label="Endereço de e-mail"
-              placeholder="Insira o e-mail aqui"
+              label={t("admin-profile:email.emailLabel")}
+              placeholder={t("admin-profile:email.emailPlaceholder")}
               id="email"
               value={emailChangeSuccess ? pendingEmail : email}
               readOnly
@@ -66,15 +69,14 @@ export function EmailSection({
             leadingIconHover="agora-solid-edit"
             onClick={onStartEdit}
           >
-            Alterar e-mail
+            {t("admin-profile:email.changeButton")}
           </Button>
         )}
       </div>
 
       {emailChangeSuccess && !isEditingEmail && (
         <p className="text-sm text-neutral-600">
-          Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é{" "}
-          <strong>{email}</strong>
+          {t("admin-profile:email.pendingConfirmation", { email })}
         </p>
       )}
 
@@ -88,7 +90,7 @@ export function EmailSection({
               isChangingEmail || !newEmail || newEmail === email || newEmail === pendingEmail
             }
           >
-            {isChangingEmail ? "A enviar..." : "Confirmar"}
+            {isChangingEmail ? t("admin-profile:email.sending") : t("admin-profile:email.confirm")}
           </Button>
           <Button
             appearance="outline"
@@ -96,7 +98,7 @@ export function EmailSection({
             onClick={onCancel}
             disabled={isChangingEmail}
           >
-            Cancelar
+            {t("admin-common:actions.cancel")}
           </Button>
         </div>
       )}

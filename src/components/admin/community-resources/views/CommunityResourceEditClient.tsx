@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import {
@@ -40,6 +41,7 @@ import { can } from "@/utils/permissions";
 import FormStatusMessages from "@/components/admin/community-resources/form-ui/FormStatusMessages";
 import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/form-ui/CommunityResourceAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
 type CommunityResourceEditField =
   | "url"
@@ -48,7 +50,14 @@ type CommunityResourceEditField =
   | "format"
   | "checksumValue";
 
-export default function CommunityResourceEditClient() {
+interface CommunityResourceEditClientProps {
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function CommunityResourceEditClient({
+  pageContent,
+}: CommunityResourceEditClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
@@ -101,12 +110,15 @@ export default function CommunityResourceEditClient() {
     clearError: () => setApiError(null),
     clearSuccess: () => setSuccessMessage(null),
     onError: (error) => {
-      const normalized = normalizeApiError(error, "Erro ao atualizar recurso comunitário.");
+      const normalized = normalizeApiError(
+        error,
+        t("admin-community-resources:form.updateError")
+      );
       if (normalized.status === 401) {
-        setApiError("Sessão expirada. Faça login novamente.");
+        setApiError(t("admin-community-resources:form.sessionExpired"));
         return;
       }
-      setApiError(normalized.message || "Erro ao atualizar recurso comunitário.");
+      setApiError(normalized.message || t("admin-community-resources:form.updateError"));
     },
     scrollToTopOnStart: true,
   });
@@ -291,14 +303,14 @@ export default function CommunityResourceEditClient() {
         setSchemas(availableSchemas);
       } catch (error) {
         console.error("Error loading community resource:", error);
-        setApiError("Erro ao carregar recurso comunitário.");
+        setApiError(t("admin-community-resources:form.loadError"));
       } finally {
         setIsLoading(false);
       }
     }
 
     void loadData();
-  }, [resourceId]);
+  }, [resourceId, t]);
 
   const handleSave = async () => {
     const errors = getValidationErrors();
@@ -315,7 +327,7 @@ export default function CommunityResourceEditClient() {
       const updated = await updateCommunityResource(resourceId, buildUpdatePayload());
       applyResourceToForm(updated);
       setSaveCount((count) => count + 1);
-      showSuccessMessage("Recurso comunitário atualizado com sucesso.");
+      showSuccessMessage(t("admin-community-resources:form.updateSuccess"));
     });
   };
 
@@ -324,7 +336,7 @@ export default function CommunityResourceEditClient() {
       await deleteCommunityResource(resourceId);
       router.push("/admin/system/community-resources");
     } catch {
-      setApiError("Erro ao eliminar recurso comunitário.");
+      setApiError(t("admin-community-resources:form.deleteError"));
     }
   };
 
@@ -349,15 +361,13 @@ export default function CommunityResourceEditClient() {
   );
 
   const auxiliarItems = getEditCommunityResourceAuxiliaryItems({
-    hasUrlError: hasError("url"),
-    hasTitleError: hasError("title"),
-    hasTypeError: hasError("type"),
+    items: pageContent.editAuxiliaryItems,
   });
 
   if (isLoading) {
     return (
       <div className="admin-page">
-        <p className="text-neutral-600">A carregar...</p>
+        <p className="text-neutral-600">{t("admin-common:loading")}</p>
       </div>
     );
   }
@@ -368,7 +378,7 @@ export default function CommunityResourceEditClient() {
         <StatusCard
           variant="danger"
           showIcon
-          description="Recurso comunitário não encontrado."
+          description={t("admin-community-resources:edit.notFound")}
         />
       </div>
     );
@@ -377,12 +387,15 @@ export default function CommunityResourceEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Recursos comunitários", url: "/admin/system/community-resources" },
-        { label: "Editar" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        {
+          label: t("admin-community-resources:title"),
+          url: "/admin/system/community-resources",
+        },
+        { label: t("admin-community-resources:edit.breadcrumb") },
       ]}
-      title="Metadados do arquivo"
+      title={t("admin-community-resources:edit.title")}
       headerAction={null}
     >
       <div className="admin-page__body">
@@ -398,7 +411,7 @@ export default function CommunityResourceEditClient() {
             }}
           >
             <p className="text-base leading-7 text-neutral-900">
-              Os campos marcados com um asterisco ( * ) são obrigatórios.
+              {t("admin-community-resources:form.requiredFields")}
             </p>
 
             <ResourceLinkSection
@@ -458,7 +471,7 @@ export default function CommunityResourceEditClient() {
 
             <AdminStepActions
               previousAction={{
-                label: "Anterior",
+                label: t("admin-community-resources:form.previous"),
                 appearance: "outline",
                 variant: "primary",
                 hasIcon: true,
@@ -467,7 +480,9 @@ export default function CommunityResourceEditClient() {
                 onClick: () => router.push("/admin/system/community-resources"),
               }}
               primaryAction={{
-                label: isSubmitting ? "A guardar..." : "Guardar",
+                label: isSubmitting
+                  ? t("admin-common:actions.saving")
+                  : t("admin-common:actions.save"),
                 type: "submit",
                 hasIcon: true,
                 trailingIcon: "agora-line-check-circle",
@@ -479,12 +494,15 @@ export default function CommunityResourceEditClient() {
             <DangerZoneSection
               isSubmitting={isSubmitting}
               canDelete={can(resource, "delete")}
+              deleteCard={pageContent.deleteCard}
               onDelete={handleDelete}
             />
           </form>
         </div>
 
-        <CommunityResourceAuxiliarySidebar items={auxiliarItems} />
+        {auxiliarItems.length > 0 ? (
+          <CommunityResourceAuxiliarySidebar items={auxiliarItems} />
+        ) : null}
       </div>
     </AdminLayout>
   );

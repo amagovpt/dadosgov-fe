@@ -1,0 +1,113 @@
+{
+  "hero": {
+    "title": "APIs",
+    "subtitleCount": "Pesquise através de {{count, number}} APIs em dados.gov.pt",
+    "subtitleEmpty": "Não existem resultados disponíveis para a sua pesquisa",
+    "subtitleText": "Explore as APIs partilhadas por organizações que prestam serviço público, e integre dados abertos, de forma automatizada, nos seus serviços e aplicações."
+  },
+  "search": {
+    "placeholder": "Pesquisar APIs...",
+    "examples": "Exemplos: \"geolocalização\", \"transportes\", \"saúde\""
+  },
+  "sort": {
+    "relevancia": "Relevância",
+    "recentes": "Mais recentes",
+    "ariaLabel": "Ordenar por {{label}}"
+  },
+  "noResults": {
+    "title": "Não encontrou o que procurava?",
+    "subtitle": "Tente redefinir os filtros para ampliar a sua pesquisa.",
+    "description": "Explore a nossa lista completa de APIs de dados abertos."
+  },
+  "filters": {
+    "orgType": {
+      "title": "Tipo de organização",
+      "publicService": "Serviço público"
+    },
+    "accessType": {
+      "title": "Tipo de acesso",
+      "open": "Aberto",
+      "openWithAccount": "Aberto com conta",
+      "restricted": "Restrito"
+    }
+  },
+  "detail": {
+    "notFound": "API não encontrada.",
+    "untitled": "Sem título",
+    "noDescription": "Sem descrição",
+    "draft": "Rascunho",
+    "archived": "Arquivado",
+    "addFavorite": "Adicionar aos favoritos",
+    "removeFavorite": "Remover dos favoritos",
+    "edit": "Editar",
+    "noAuthor": "Sem autor",
+    "lastUpdate": "Última atualização:",
+    "accessConditions": "Condições de Acesso",
+    "access": "Acesso",
+    "authentication": "Autenticação",
+    "eligibleAudiences": "Públicos elegíveis",
+    "notSpecified": "Não especificado",
+    "restrictionReason": "Motivo da restrição:",
+    "requestAccess": "Pedir acesso",
+    "technicalCharacteristics": "Características técnicas",
+    "baseApiUrl": "URL base da API",
+    "rateLimit": "Limite de chamadas",
+    "availability": "Disponibilidade",
+    "documentation": "Documentação",
+    "technicalDocumentation": "Documentação técnica",
+    "functionalDocumentation": "Documentação funcional",
+    "swagger": "Swagger",
+    "notProvided": "Não comunicado"
+  },
+  "access": {
+    "auth": {
+      "open": "Nenhuma (acesso público)",
+      "open_with_account": "Conta de utilizador necessária",
+      "restricted": "Mediante autorização"
+    },
+    "pill": {
+      "open": "ABERTO",
+      "open_with_account": "ABERTO COM CONTA",
+      "restricted": "RESTRITO"
+    },
+    "audienceRole": {
+      "local_authority_and_administration": "Comunidade e Administração",
+      "company_and_association": "Negócios e Associações",
+      "private": "Especial"
+    },
+    "audienceCondition": {
+      "yes": "Sim",
+      "no": "Não",
+      "under_condition": "Sujeito a condições"
+    },
+    "restrictionReason": {
+      "confidentiality_of_proceedings_of_public_authorities": "Confidencialidade dos procedimentos das autoridades públicas",
+      "international_relations_public_security_or_national_defence": "Relações internacionais, segurança pública ou defesa nacional",
+      "course_of_justice_or_fair_trial": "Curso da justiça",
+      "confidentiality_of_commercial_or_industrial_information": "Confidencialidade comercial ou industrial",
+      "intellectual_property_rights": "Direitos de propriedade intelectual",
+      "confidentiality_of_personal_data": "Confidencialidade dos dados pessoais",
+      "protection_of_voluntary_information_suppliers": "Proteção dos fornecedores voluntários de informações",
+      "protection_of_environment": "Proteção ambiental",
+      "other": "Outro"
+    }
+  },
+  "tabs": {
+    "info": "Informações",
+    "relatedDatasetsCount_one": "{{count}} CONJUNTO DE DADOS RELACIONADO",
+    "relatedDatasetsCount_other": "{{count}} CONJUNTOS DE DADOS RELACIONADOS",
+    "noRelatedTitle": "Sem conjuntos de dados relacionados",
+    "noRelatedDesc": "Esta API ainda não tem conjuntos de dados associados.",
+    "technicalInfo": "Informações técnicas",
+    "lastUpdate": "Última atualização",
+    "createdAt": "Data de criação",
+    "identifier": "Identificador",
+    "discussions": "Discussões ({{count}})"
+  },
+  "swagger": {
+    "versionLabel": "Versão",
+    "openInSwaggerUi": "Abrir no Swagger UI ↗",
+    "baseUrl": "Base URL",
+    "models": "Modelos"
+  }
+}

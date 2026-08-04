@@ -10,11 +10,6 @@ import {
 import type { OrganizationMember } from "@/service/types/identity";
 import { formatDateToDMY } from "@/utils/formatDate";
 
-const roleLabels: Record<string, string> = {
-  admin: "Administrador",
-  editor: "Editor",
-};
-
 const rolePillVariant = (role: string) => {
   switch (role) {
     case "admin":
@@ -30,6 +25,16 @@ export type MemberSortField = "name" | "since";
 
 interface MemberColumnsOptions {
   isOrgAdmin: boolean;
+  labels: {
+    member: string;
+    role: string;
+    since: string;
+    actions: string;
+    editRole: string;
+    removeMember: string;
+    adminRole: string;
+    editorRole: string;
+  };
   onEditRole: (member: OrganizationMember) => void;
   onRemoveMember: (member: OrganizationMember) => void;
 }
@@ -49,14 +54,20 @@ export function sortMembers(
 
 export function createMemberColumns({
   isOrgAdmin,
+  labels,
   onEditRole,
   onRemoveMember,
 }: MemberColumnsOptions): AdminListColumn<OrganizationMember, MemberSortField>[] {
+  const roleLabels: Record<string, string> = {
+    admin: labels.adminRole,
+    editor: labels.editorRole,
+  };
+
   const columns: AdminListColumn<OrganizationMember, MemberSortField>[] = [
     {
       id: "member",
-      header: "Membros",
-      headerLabel: "Membros",
+      header: labels.member,
+      headerLabel: labels.member,
       sortField: "name",
       sortType: "string",
       renderCell: (member) => (
@@ -80,7 +91,7 @@ export function createMemberColumns({
     },
     {
       id: "role",
-      header: "Estatuto",
+      header: labels.role,
       renderCell: (member) => (
         <StatusDot variant={rolePillVariant(member.role)}>
           {roleLabels[member.role] || member.role}
@@ -89,7 +100,7 @@ export function createMemberColumns({
     },
     {
       id: "since",
-      header: "Membro desde",
+      header: labels.since,
       sortField: "since",
       sortType: "date",
       renderCell: (member) => formatDateToDMY(member.since),
@@ -99,17 +110,17 @@ export function createMemberColumns({
   if (isOrgAdmin) {
     columns.push({
       id: "actions",
-      header: "Ações",
-      headerLabel: "Ações",
+      header: labels.actions,
+      headerLabel: labels.actions,
       renderCell: (member) => (
         <div className="flex gap-8">
-          <button onClick={() => onEditRole(member)} title="Editar papel">
+          <button onClick={() => onEditRole(member)} title={labels.editRole}>
             <Icon
               name="agora-line-edit"
               className="h-[20px] w-[20px] cursor-pointer text-primary-600"
             />
           </button>
-          <button onClick={() => onRemoveMember(member)} title="Remover membro">
+          <button onClick={() => onRemoveMember(member)} title={labels.removeMember}>
             <Icon
               name="agora-line-trash"
               className="h-[20px] w-[20px] cursor-pointer text-danger-600"
@@ -122,4 +133,3 @@ export function createMemberColumns({
 
   return columns;
 }
-
