@@ -112,7 +112,7 @@ export default async function RootLayout({
 
   let headerNavigation: HeaderNavigationData;
   try {
-    headerNavigation = await getHeaderNavigation("pt");
+    headerNavigation = await getHeaderNavigation(locale);
   } catch (error) {
     console.error("Error fetching header navigation:", error);
     headerNavigation = {} as HeaderNavigationData;
