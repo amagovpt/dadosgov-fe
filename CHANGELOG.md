@@ -6,6 +6,17 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(documentation): link the Swagger UI and the OpenAPI JSON on the API reference page** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The reference page embedded the interactive documentation but offered no way
+    out of it: the old portal had a link to the Swagger and a download link for
+    the spec, both of which had been lost. The "Referência" section now shows
+    "Abrir no Swagger UI" (`/api/1/`, the backend's standalone Flask-RestX page,
+    opened in a new tab) and "Descarregar especificação (JSON)"
+    (`/api/1/swagger.json`, saved as `dados-gov-api-swagger.json`).
+  - Both URLs are same-origin — `/api/` is forwarded to the backend by the Next
+    proxy — so the `download` attribute is honoured by the browser instead of
+    being ignored as a cross-origin navigation.
+
 - **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The "nova API" producer step no longer offers personal ("Eu próprio")
     publishing and lists only the user's organizations carrying the
