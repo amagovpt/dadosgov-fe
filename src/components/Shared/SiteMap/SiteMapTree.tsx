@@ -14,45 +14,60 @@ interface SiteMapTreeProps {
 const externalProps = (node: SitemapNode) =>
   node.external ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
-/** Link de nível 1 (top-level ou título de secção que também navega): a bold. */
-function TopLink({ node, active }: { node: SitemapNode; active: boolean }) {
-  return (
-    <span className={`flex flex-col ${!active && 'xl:pl-32'}`}>
-      <Anchor
-        appearance="link"
-        variant="neutral"
-        href={node.href}
-        aria-current={active ? "page" : undefined}
-        {...externalProps(node)}
-        className={`!justify-start !px-16 !py-16 [&_.children-wrapper]:!text-m-bold ${active
-          ? "bg-primary-100 border-l-4 border-l-primary-600 [&_.children-wrapper]:!text-primary-600"
-          : ""
-          }`}
-      >
-        {node.label}
-      </Anchor>
-    </span>
-  );
-}
+function SiteMapNode({
+  node,
+  depth,
+  isActive,
+}: {
+  node: SitemapNode;
+  depth: number;
+  isActive: (href?: string) => boolean;
+}) {
+  const active = isActive(node.href);
+  const isTop = depth === 0;
+  const weightClass = isTop
+    ? "[&_.children-wrapper]:!text-m-bold"
+    : "[&_.children-wrapper]:!text-m-regular";
 
-/** Sub-página (children): indentada, peso normal, cor mais suave. */
-function SubLink({ node, active }: { node: SitemapNode; active: boolean }) {
   return (
-    <span className={`flex flex-col ${!active && 'xl:pl-32'}`}>
-      <Anchor
-        appearance="link"
-        variant="neutral"
-        href={node.href}
-        aria-current={active ? "page" : undefined}
-        {...externalProps(node)}
-        className={`!justify-start !px-16 !py-16 pl-32 [&_.children-wrapper]:!text-m-regular ${active
-          ? "bg-primary-100 border-l-4 border-l-primary-600 [&_.children-wrapper]:!text-primary-600"
-          : "[&_.children-wrapper]:!text-neutral-700"
+    <li className="flex flex-col">
+      {node.href ? (
+        <span className="flex flex-col">
+          <Anchor
+            appearance="link"
+            variant="neutral"
+            href={node.href}
+            aria-current={active ? "page" : undefined}
+            {...externalProps(node)}
+            className={`!justify-start !px-16 !py-16 ${weightClass} ${
+              active
+                ? "bg-primary-100 border-l-4 border-l-primary-600 [&_.children-wrapper]:!text-primary-600"
+                : isTop
+                  ? ""
+                  : "[&_.children-wrapper]:!text-neutral-700"
+            }`}
+          >
+            {node.label}
+          </Anchor>
+        </span>
+      ) : (
+        <span
+          className={`px-16 py-16 ${
+            isTop ? "text-m-bold text-neutral-900" : "text-m-regular text-neutral-700"
           }`}
-      >
-        {node.label}
-      </Anchor>
-    </span>
+        >
+          {node.label}
+        </span>
+      )}
+
+      {node.children?.length ? (
+        <ul className="flex flex-col pl-24">
+          {node.children.map((child) => (
+            <SiteMapNode key={child.id} node={child} depth={depth + 1} isActive={isActive} />
+          ))}
+        </ul>
+      ) : null}
+    </li>
   );
 }
 
@@ -67,30 +82,11 @@ export default function SiteMapTree({ nodes, title }: SiteMapTreeProps) {
   return (
     <nav aria-label={title ?? t("breadcrumbs.sitemap")} className="container flex flex-col gap-16">
       {title && <span className="text-l-bold">{title}</span>}
-      <div className="xl:pl-56 flex w-full max-w-md flex-col">
-        {nodes.map((node) =>
-          node.children?.length ? (
-            <div key={node.id} className="flex flex-col">
-              {node.href ? (
-                <TopLink node={node} active={isActive(node.href)} />
-              ) : (
-                <span className="pl-48 py-16 text-m-bold text-neutral-900">{node.label}</span>
-              )}
-              {node.children.map((child) => (
-                <span className="flex flex-col ml-16" key={child.id}>
-                  <SubLink node={child} active={isActive(child.href)} />
-                </span>
-              ))}
-            </div>
-          ) : node.href ? (
-            <TopLink key={node.id} node={node} active={isActive(node.href)} />
-          ) : (
-            <span key={node.id} className="px-16 py-16 text-m-bold text-neutral-900">
-              {node.label}
-            </span>
-          )
-        )}
-      </div>
+      <ul className="xl:pl-56 flex w-full max-w-md flex-col">
+        {nodes.map((node) => (
+          <SiteMapNode key={node.id} node={node} depth={0} isActive={isActive} />
+        ))}
+      </ul>
     </nav>
   );
 }
