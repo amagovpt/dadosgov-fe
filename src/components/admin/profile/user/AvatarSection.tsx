@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 
 interface AvatarSectionProps {
@@ -13,24 +14,28 @@ export function AvatarSection({
   onAvatarChange,
   onSecurityError,
 }: AvatarSectionProps) {
+  const { t } = useTranslation("admin-profile");
+
   return (
     <div>
-      <span className="text-base font-medium leading-7 text-primary-900">Foto de perfil</span>
+      <span className="text-base font-medium leading-7 text-primary-900">
+        {t("avatar.label")}
+      </span>
       <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
         <DragAndDropUploader
           key={avatarUploaderKey}
-          label="Ficheiros"
-          dragAndDropLabel="Arraste e largue o ficheiro aqui"
-          inputLabel="Selecione ou arraste o ficheiro"
-          selectedFilesLabel="ficheiro selecionado"
-          removeFileButtonLabel="Remover ficheiro"
-          replaceFileButtonLabel="Substituir ficheiro"
-          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
+          label={t("avatar.filesLabel")}
+          dragAndDropLabel={t("avatar.dragAndDropLabel")}
+          inputLabel={t("avatar.inputLabel")}
+          selectedFilesLabel={t("avatar.selectedFilesLabel")}
+          removeFileButtonLabel={t("avatar.removeFileButtonLabel")}
+          replaceFileButtonLabel={t("avatar.replaceFileButtonLabel")}
+          extensionsInstructions={t("avatar.extensionsInstructions")}
           accept=".jpg,.jpeg,.png"
           maxSize={4194304}
           maxCount={1}
-          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+          maxSizeExceededErrorLabel={t("avatar.maxSizeExceededErrorLabel")}
+          forbiddenExtensionErrorLabel={t("avatar.forbiddenExtensionErrorLabel")}
           hasError={!!avatarError}
           hasFeedback={!!avatarError}
           feedbackState="danger"

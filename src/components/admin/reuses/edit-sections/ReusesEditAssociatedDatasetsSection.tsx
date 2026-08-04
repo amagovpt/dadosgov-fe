@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, Icon } from "@ama-pt/agora-design-system";
 import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
@@ -17,6 +18,8 @@ export default function ReusesEditAssociatedDatasetsSection({
   onRemoveAssociatedDataset,
   onRemoveAllAssociatedDatasets,
 }: ReusesEditAssociatedDatasetsSectionProps) {
+  const { t } = useTranslation("admin-reuses");
+
   if (associatedDatasets.length === 0) {
     return null;
   }
@@ -33,12 +36,12 @@ export default function ReusesEditAssociatedDatasetsSection({
           disabled={isSubmitting}
           onClick={onRemoveAllAssociatedDatasets}
         >
-          Eliminar todos
+          {t("edit.removeAllDatasets")}
         </Button>
       </div>
       <div className="grid grid-cols-2 gap-16">
         {associatedDatasets.map((dataset) => (
-          <div key={dataset.id} className="relative group/card">
+          <div key={dataset.id} className="group/card relative">
             <CardMetrics
               link={`/datasets/${dataset.slug}`}
               title={dataset.title}
@@ -60,7 +63,7 @@ export default function ReusesEditAssociatedDatasetsSection({
               disabled={isSubmitting}
               onClick={() => onRemoveAssociatedDataset(dataset.id)}
               className="rounded group absolute right-8 top-8 z-10 p-4"
-              title="Eliminar"
+              title={t("edit.removeDataset")}
             >
               <Icon
                 name="agora-line-trash"

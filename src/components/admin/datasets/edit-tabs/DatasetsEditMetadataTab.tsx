@@ -1,7 +1,8 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps, Switch } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
-import { getDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
+import { getEditDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
 import type { SpatialZone } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
 import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
@@ -10,8 +11,16 @@ import DatasetsEditAccessTimeSection from "@/components/admin/datasets/edit-sect
 import DatasetsEditSpaceSection from "@/components/admin/datasets/edit-sections/DatasetsEditSpaceSection";
 import DatasetsEditDangerZone from "@/components/admin/datasets/edit-sections/DatasetsEditDangerZone";
 import { can } from "@/utils/permissions";
+import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 type DatasetsEditMetadataTabProps = {
+  auxiliaryItems?: AdminAuxiliaryItem[];
+  visibilityCard?: AdminCard;
+  transferCard?: AdminCard;
+  archiveCard?: AdminCard;
+  unarchiveCard?: AdminCard;
+  deleteCard?: AdminCard;
   dataset: Dataset;
   featured: boolean;
   isSubmitting: boolean;
@@ -64,11 +73,18 @@ type DatasetsEditMetadataTabProps = {
   onSpatialSearch: (query: string) => void;
   onRemoveSpatialZone: (zoneId: string) => void;
   onSaveMetadata: () => void | Promise<void>;
+  onOpenTransferPopup: (e: React.MouseEvent) => void;
   onToggleArchive: (e: React.MouseEvent) => void | Promise<void>;
   onOpenDeletePopup: (e: React.MouseEvent) => void;
 };
 
 export default function DatasetsEditMetadataTab({
+  auxiliaryItems,
+  visibilityCard,
+  transferCard,
+  archiveCard,
+  unarchiveCard,
+  deleteCard,
   dataset,
   featured,
   isSubmitting,
@@ -111,26 +127,34 @@ export default function DatasetsEditMetadataTab({
   onSpatialSearch,
   onRemoveSpatialZone,
   onSaveMetadata,
+  onOpenTransferPopup,
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditMetadataTabProps) {
-  // Authorization is decided by the backend (single source of truth).
+  const { t } = useTranslation("admin-datasets");
   const canEdit = can(dataset, "edit");
   const canDelete = can(dataset, "delete");
+  const auxiliarItems = getEditDatasetAuxiliarItems({
+    items: auxiliaryItems,
+  });
+
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        {dataset.private && canEdit && (
+        {dataset.private && canEdit && visibilityCard && (
           <AdminVisibilityBanner
             description={
               <>
-                <strong>Modifique a visibilidade do conjunto de dados.</strong>
-                <br />
-                Este conjunto de dados encontra-se atualmente em <strong>modo privado</strong>.
-                Apenas os membros da organização o podem visualizar e editar.
+                <strong>{visibilityCard.title}</strong>
+                {visibilityCard.description && (
+                  <>
+                    <br />
+                    {formatHtmlParagraphs(visibilityCard.description)}
+                  </>
+                )}
               </>
             }
-            actionLabel="Publicar o conjunto de dados"
+            actionLabel={visibilityCard.anchor?.children ?? ""}
             disabled={isSubmitting}
             onAction={onPublishDataset}
           />
@@ -144,17 +168,15 @@ export default function DatasetsEditMetadataTab({
             void onSaveMetadata();
           }}
         >
-          <p className="text-neutral-900 text-base leading-7">
-            Os campos marcados com um asterisco ( * ) são obrigatórios.
-          </p>
+          <p className="text-neutral-900 text-base leading-7">{t("edit.requiredFields")}</p>
 
           <div>
             <h2 className="admin-page__section-title admin-page__section-title--no-top">
-              Destaque
+              {t("edit.featuredSectionTitle")}
             </h2>
             <Switch
               id="edit-featured"
-              label="Destaque"
+              label={t("edit.featuredLabel")}
               checked={featured}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFeaturedChange(e.target.checked)}
             />
@@ -215,7 +237,7 @@ export default function DatasetsEditMetadataTab({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "A guardar..." : "Guardar"}
+              {isSubmitting ? t("edit.saving") : t("edit.save")}
             </Button>
           </div>
 
@@ -224,18 +246,18 @@ export default function DatasetsEditMetadataTab({
             isSubmitting={isSubmitting}
             canEdit={canEdit}
             canDelete={canDelete}
+            transferCard={transferCard}
+            archiveCard={archiveCard}
+            unarchiveCard={unarchiveCard}
+            deleteCard={deleteCard}
+            onOpenTransferPopup={onOpenTransferPopup}
             onToggleArchive={onToggleArchive}
             onOpenDeletePopup={onOpenDeletePopup}
           />
         </form>
       </div>
 
-      <AdminAuxiliarySidebar
-        items={getDatasetAuxiliarItems({
-          title: !!formErrors.title,
-          description: !!formErrors.description,
-        })}
-      />
+      {auxiliarItems.length > 0 && <AdminAuxiliarySidebar items={auxiliarItems} />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, InputText, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { changePassword } from "@/service/api/profile";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
@@ -8,6 +9,7 @@ import { useFormErrors } from "@/hooks/forms/useFormErrors";
 type PasswordField = "currentPassword" | "newPassword" | "confirmPassword";
 
 export function ChangePasswordPopupContent() {
+  const { t } = useTranslation(["admin-common", "admin-profile"]);
   const { hide } = usePopupContext();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -22,12 +24,12 @@ export function ChangePasswordPopupContent() {
 
   const validate = () => {
     const newErrors: Partial<Record<PasswordField, string>> = {
-      currentPassword: !currentPassword ? "Campo obrigatório" : "",
-      newPassword: !newPassword ? "Campo obrigatório" : "",
+      currentPassword: !currentPassword ? t("admin-profile:changePassword.requiredField") : "",
+      newPassword: !newPassword ? t("admin-profile:changePassword.requiredField") : "",
       confirmPassword: !confirmPassword
-        ? "Campo obrigatório"
+        ? t("admin-profile:changePassword.requiredField")
         : newPassword && confirmPassword && newPassword !== confirmPassword
-          ? "As senhas não coincidem"
+          ? t("admin-profile:changePassword.passwordMismatch")
           : "",
     };
     setErrors(newErrors);
@@ -46,9 +48,7 @@ export function ChangePasswordPopupContent() {
       setTimeout(() => hide(), 2000);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Erro ao alterar a senha. Verifique os dados e tente novamente."
+        err instanceof Error ? err.message : t("admin-profile:changePassword.error")
       );
     } finally {
       setIsSubmitting(false);
@@ -65,13 +65,13 @@ export function ChangePasswordPopupContent() {
       }}
     >
       {success ? (
-        <StatusCard variant="success" showIcon description="Senha alterada com sucesso." />
+        <StatusCard variant="success" showIcon description={t("admin-profile:changePassword.success")} />
       ) : (
         <>
           {error && <StatusCard variant="danger" showIcon description={error} />}
 
           <InputText
-            label="Senha atual *"
+            label={t("admin-profile:changePassword.currentPasswordLabel")}
             placeholder=""
             id="current-password"
             type="password"
@@ -85,7 +85,7 @@ export function ChangePasswordPopupContent() {
           />
 
           <InputText
-            label="Nova Senha *"
+            label={t("admin-profile:changePassword.newPasswordLabel")}
             placeholder=""
             id="new-password"
             type="password"
@@ -99,7 +99,7 @@ export function ChangePasswordPopupContent() {
           />
 
           <InputText
-            label="Confirme a nova senha *"
+            label={t("admin-profile:changePassword.confirmPasswordLabel")}
             placeholder=""
             id="confirm-password"
             type="password"
@@ -114,7 +114,7 @@ export function ChangePasswordPopupContent() {
 
           <div className="flex gap-16">
             <Button type="button" appearance="outline" variant="neutral" onClick={() => hide()}>
-              Cancelar
+              {t("admin-common:actions.cancel")}
             </Button>
             <Button
               type="submit"
@@ -122,7 +122,7 @@ export function ChangePasswordPopupContent() {
               variant="primary"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "A alterar..." : "Altere a sua senha"}
+              {isSubmitting ? t("admin-profile:changePassword.submitting") : t("admin-profile:changePassword.submit")}
             </Button>
           </div>
         </>

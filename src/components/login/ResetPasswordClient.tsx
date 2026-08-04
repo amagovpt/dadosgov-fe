@@ -3,16 +3,11 @@
 import React, { useState } from "react";
 import {
   Button,
-  Breadcrumb,
   InputPassword,
   StatusCard,
   Icon,
 } from "@ama-pt/agora-design-system";
-
-const breadcrumbItems = [
-  { label: "Início", url: "/" },
-  { label: "Redefinir palavra-passe", url: "#" },
-];
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 
 interface Props {
   token: string;
@@ -61,7 +56,8 @@ export function ResetPasswordClient({ token }: Props) {
     <main className="flex-grow bg-white min-h-screen relative">
       <div className="container mx-auto px-16 pt-32 pb-64 max-w-7xl">
         <div className="mb-32">
-          <Breadcrumb items={breadcrumbItems} />
+          {/* The reset token is a credential: keep it out of the trail. */}
+          <BreadcrumbDynamic darkMode={false} path="/reset-password" />
         </div>
 
         <div className="grid xl:grid-cols-12 gap-32">

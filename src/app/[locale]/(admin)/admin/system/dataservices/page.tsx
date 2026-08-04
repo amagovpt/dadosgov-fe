@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
+import { getBoDataservices, getBoDataservicesMetadata } from "@/service/queries/admin/dataservices";
 import SystemDataservicesClient from "@/components/admin/dataservices/views/SystemDataservicesClient";
 
-export const metadata: Metadata = {
-  title: "API - Sistema - Admin - dados.gov.pt",
-  description: "Gestão de APIs do sistema no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoDataservicesMetadata(locale, "systemMetadata");
 
-export default function SystemDataservicesPage() {
-  return <SystemDataservicesClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function SystemDataservicesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoDataservices(locale);
+
+  return <SystemDataservicesClient pageContent={pageContent} />;
 }

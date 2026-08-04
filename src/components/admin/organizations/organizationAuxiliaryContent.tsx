@@ -1,28 +1,17 @@
 "use client";
 
-import React from "react";
 import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
+import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface OrganizationAuxiliaryContentParams {
-  hasNameError: boolean;
-  hasDescriptionError: boolean;
+  items?: AdminAuxiliaryItem[];
 }
 
 export function getOrganizationAuxiliaryItems({
-  hasNameError,
-  hasDescriptionError,
+  items,
 }: OrganizationAuxiliaryContentParams): AuxiliarItem[] {
-  return [
-    {
-      title: "Dar um nome à sua organização",
-      content: "Nome público da sua organização.",
-      hasError: hasNameError,
-    },
-    {
-      title: "Adicionar uma sigla",
-      content: "A sigla da sua organização, se houver.",
-    },
-    /* {
+  /* {
       title: "Por que fornecer um número SIRET?",
       content: (
         <>
@@ -43,20 +32,11 @@ export function getOrganizationAuxiliaryItems({
         </>
       ),
     }, */
-    {
-      title: "Descrever a organização",
-      content:
-        "Descreva de forma clara a atividade e missão da sua organização. Inclua também informações de contacto essenciais, como e-mail, morada ou redes sociais. Estas informações ajudam os utilizadores a compreender o papel da sua organização e a contactá-la facilmente, sempre que necessário.",
-      hasError: hasDescriptionError,
-    },
-    {
-      title: "Adicionar o site",
-      content: "Se a sua organização possui um site, inclua o endereço URL.",
-    },
-    {
-      title: "Escolher o logotipo",
-      content:
-        'Se a sua organização tiver um logótipo ou imagem de perfil, adicione-o. Para carregar o ficheiro, clique em "Selecione ou arraste o ficheiro". São aceites os seguintes formatos de imagem: JPG, JPEG e PNG.',
-    },
-  ];
+
+  return (
+    items?.filter((item) => item.enabled !== false).map((item) => ({
+      title: item.title,
+      content: formatHtmlParagraphs(item.description, "auxiliar-list__content !p-0"),
+    })) ?? []
+  );
 }

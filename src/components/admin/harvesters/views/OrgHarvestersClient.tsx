@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -19,8 +20,15 @@ import {
   sortHarvesters,
   type HarvesterSortField,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
+import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 
-export default function OrgHarvestersClient() {
+interface OrgHarvestersClientProps {
+  orgId?: string;
+  pageContent: BoHarvestersPage;
+}
+
+export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const params = useParams();
   const orgIdFromUrl = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading, selectOrganization } = useActiveOrganization();
@@ -90,16 +98,42 @@ export default function OrgHarvestersClient() {
     () =>
       createOrgHarvesterColumns({
         editHref: (harvester) => `/admin/org/${orgId}/harvesters/${harvester.id}`,
+        labels: {
+          name: t("admin-harvesters:columns.name"),
+          status: t("admin-harvesters:columns.status"),
+          implementation: t("admin-harvesters:columns.implementation"),
+          createdAt: t("admin-harvesters:columns.createdAt"),
+          lastJob: t("admin-harvesters:columns.lastJob"),
+          datasets: t("admin-harvesters:columns.datasets"),
+          api: t("admin-harvesters:columns.api"),
+          actions: t("admin-harvesters:columns.actions"),
+          notYet: t("admin-harvesters:columns.notYet"),
+        },
+        statusLabels: {
+          pendingValidation: t("admin-harvesters:status.pendingValidation"),
+          accepted: t("admin-harvesters:status.accepted"),
+          refused: t("admin-harvesters:status.refused"),
+          pending: t("admin-harvesters:status.pending"),
+          initializing: t("admin-harvesters:status.initializing"),
+          initialized: t("admin-harvesters:status.initialized"),
+          processing: t("admin-harvesters:status.processing"),
+          done: t("admin-harvesters:status.done"),
+          doneErrors: t("admin-harvesters:status.doneErrors"),
+          failed: t("admin-harvesters:status.failed"),
+          started: t("admin-harvesters:status.started"),
+          noCurrentJob: t("admin-harvesters:status.noCurrentJob"),
+          noExecution: t("admin-harvesters:status.noExecution"),
+        },
       }),
-    [orgId]
+    [orgId, t]
   );
 
   if (!isOrgLoading && !orgId) {
     return (
       <AdminEmptyState
         icon="agora-line-buildings"
-        title="Sem organizações"
-        description="Não pertence a nenhuma organização."
+        title={t("admin-harvesters:empty.noOrganizationsTitle")}
+        description={t("admin-harvesters:empty.noOrganizationsDescription")}
       />
     );
   }
@@ -107,19 +141,20 @@ export default function OrgHarvestersClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "Harvesters", url: `/admin/org/${orgId}/harvesters` },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-harvesters:title"), url: `/admin/org/${orgId}/harvesters` },
       ]}
-      title="Harvesters"
+      title={t("admin-harvesters:title")}
       isLoading={isLoading}
       count={filteredHarvesters.length}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       search={{
-        placeholder: "Pesquise o nome do harvester",
-        ariaLabel: "Pesquisar harvesters",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -128,11 +163,7 @@ export default function OrgHarvestersClient() {
         />
       }
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-buildings"
-          title="Sem harvesters"
-          description="A organização ainda não tem harvesters."
-        />
+        <AdminEmptyState noResults={pageContent.orgNoResults} />
       }
     >
       <AdminListTable

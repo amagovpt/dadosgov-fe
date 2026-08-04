@@ -1,0 +1,13 @@
+{
+  "title": "Notifications",
+  "read": "read",
+  "markAsRead": "Mark as read",
+  "harvesterValidation": {
+    "title": "Harvester validation — {{status}}",
+    "sourceUnavailable": "Source unavailable (it may have been deleted).",
+    "viewHarvester": "View harvester"
+  },
+  "generic": {
+    "title": "New notification"
+  }
+}

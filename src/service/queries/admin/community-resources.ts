@@ -1,0 +1,190 @@
+import {
+  BoCommunityResourcesMetadata,
+  BoCommunityResourcesMetadataField,
+  BoCommunityResourcesPage,
+} from "@/service/types/admin/community-resources";
+import apolloClient from "@/service/utils/apollo-client";
+import { flattenData } from "@/utils/flattenObject";
+import { gql } from "@apollo/client";
+
+export async function getBoCommunityResourcesMetadata(
+  locale: string = "pt",
+  field: BoCommunityResourcesMetadataField = "createMetadata"
+): Promise<BoCommunityResourcesMetadata> {
+  const query = gql(/* GraphQL */ `
+    query getBoCommunityResourcesMetadata {
+      findBoCommunityResourcesSingleton {
+        data {
+          ${field} {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  const { data, error } = await apolloClient.query<{
+    findBoCommunityResourcesSingleton: BoCommunityResourcesPage;
+  }>({
+    query,
+  });
+
+  if (!data || error) {
+    console.error("Error fetching bo-community-resources metadata:", error);
+    throw new Error("Failed to fetch bo-community-resources metadata");
+  }
+
+  return flattenData(data)
+    .findBoCommunityResourcesSingleton as BoCommunityResourcesMetadata;
+}
+
+export async function getBoCommunityResources(
+  locale: string = "pt"
+): Promise<BoCommunityResourcesPage> {
+  const query = gql(/* GraphQL */ `
+    query getBoCommunityResources {
+      findBoCommunityResourcesSingleton {
+        data {
+          createMetadata {
+            ${locale} {
+              title
+              description
+            }
+          }
+          createHero {
+            ${locale} {
+              title
+              description
+            }
+          }
+          search {
+            ${locale} {
+              label
+              placeholder
+              hint
+            }
+          }
+          myNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
+          orgNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
+          systemNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
+          steps {
+            ${locale} {
+              title
+            }
+          }
+          introduction {
+            ${locale} {
+              title
+              description {
+                html
+              }
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          producerHelper {
+            ${locale} {
+              title
+              description {
+                html
+              }
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          createdCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          deleteCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          createAuxiliaryItems {
+            ${locale} {
+              enabled
+              title
+              description {
+                html
+              }
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          editAuxiliaryItems {
+            ${locale} {
+              enabled
+              title
+              description {
+                html
+              }
+              anchor {
+                href
+                children
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  const { data, error } = await apolloClient.query<{
+    findBoCommunityResourcesSingleton: BoCommunityResourcesPage;
+  }>({
+    query,
+  });
+
+  if (!data || error) {
+    console.error("Error fetching bo-community-resources content:", error);
+    throw new Error("Failed to fetch bo-community-resources content");
+  }
+
+  return flattenData(data).findBoCommunityResourcesSingleton as BoCommunityResourcesPage;
+}

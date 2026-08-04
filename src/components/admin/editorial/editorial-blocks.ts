@@ -15,51 +15,55 @@ export interface BlockDefinition {
   category: string;
 }
 
-export const BLOCK_DEFINITIONS: BlockDefinition[] = [
-  {
-    type: "hero",
-    label: "Herói",
-    description: "Banner de cabeçalho com título e descrição",
-    icon: "agora-line-home",
-    category: "LAYOUT",
-  },
-  {
-    type: "accordion",
-    label: "Acordeão",
-    description: "Sumário expansível (FAQ, etc.)",
-    icon: "agora-line-folder",
-    category: "LAYOUT",
-  },
-  {
-    type: "featured-datasets",
-    label: "Dados em destaque",
-    description: "Destaque até 4 conjuntos de dados",
-    icon: "agora-line-layers-menu",
-    category: "CONTEÚDO EM DESTAQUE",
-  },
-  {
-    type: "featured-reuses",
-    label: "Reutilização em destaque",
-    description: "Destaque até 4 reutilizações",
-    icon: "agora-line-bar-chart",
-    iconImg: "/Icons/bar_chart_primary.svg",
-    category: "CONTEÚDO EM DESTAQUE",
-  },
-  {
-    type: "featured-links",
-    label: "Links em destaque",
-    description: "Destaque até 4 links",
-    icon: "agora-line-external-link",
-    category: "CONTEÚDO EM DESTAQUE",
-  },
-  {
-    type: "markdown",
-    label: "Bloco Markdown",
-    description: "Adicionar conteúdo de texto formatado",
-    icon: "agora-line-document",
-    category: "TEXTO",
-  },
-];
+type TranslateFn = (key: string) => string;
+
+export function getBlockDefinitions(t: TranslateFn): BlockDefinition[] {
+  return [
+    {
+      type: "hero",
+      label: t("blockPicker.blocks.hero.label"),
+      description: t("blockPicker.blocks.hero.description"),
+      icon: "agora-line-home",
+      category: t("blockPicker.categories.layout"),
+    },
+    {
+      type: "accordion",
+      label: t("blockPicker.blocks.accordion.label"),
+      description: t("blockPicker.blocks.accordion.description"),
+      icon: "agora-line-folder",
+      category: t("blockPicker.categories.layout"),
+    },
+    {
+      type: "featured-datasets",
+      label: t("blockPicker.blocks.featuredDatasets.label"),
+      description: t("blockPicker.blocks.featuredDatasets.description"),
+      icon: "agora-line-layers-menu",
+      category: t("blockPicker.categories.featuredContent"),
+    },
+    {
+      type: "featured-reuses",
+      label: t("blockPicker.blocks.featuredReuses.label"),
+      description: t("blockPicker.blocks.featuredReuses.description"),
+      icon: "agora-line-bar-chart",
+      iconImg: "/Icons/bar_chart_primary.svg",
+      category: t("blockPicker.categories.featuredContent"),
+    },
+    {
+      type: "featured-links",
+      label: t("blockPicker.blocks.featuredLinks.label"),
+      description: t("blockPicker.blocks.featuredLinks.description"),
+      icon: "agora-line-external-link",
+      category: t("blockPicker.categories.featuredContent"),
+    },
+    {
+      type: "markdown",
+      label: t("blockPicker.blocks.markdown.label"),
+      description: t("blockPicker.blocks.markdown.description"),
+      icon: "agora-line-document",
+      category: t("blockPicker.categories.text"),
+    },
+  ];
+}
 
 export interface HeroData {
   title: string;

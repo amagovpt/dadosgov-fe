@@ -60,10 +60,6 @@ export default function DataStoriesClient({
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        breadcrumbItems={[
-          { label: t("home"), url: "/" },
-          { label: t("datastories"), url: "/datastories" },
-        ]}
         title={pageContent.hero.title}
         subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
       />

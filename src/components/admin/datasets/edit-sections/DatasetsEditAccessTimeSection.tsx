@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InputDate, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 
@@ -33,13 +34,15 @@ export default function DatasetsEditAccessTimeSection({
   onTemporalStartChange,
   onTemporalEndChange,
 }: DatasetsEditAccessTimeSectionProps) {
+  const { t } = useTranslation("admin-datasets");
+
   return (
     <>
-      <h2 className="admin-page__section-title">Acesso</h2>
+      <h2 className="admin-page__section-title">{t("edit.accessSectionTitle")}</h2>
       <div className="admin-page__fields-group">
         <IsolatedSelect
-          label="Licença"
-          placeholder="Selecione uma licença..."
+          label={t("edit.licenseField")}
+          placeholder={t("edit.licensePlaceholder")}
           id="edit-license"
           defaultValue={loadedLicense}
           onChangeRef={selectedLicenseRef}
@@ -48,11 +51,11 @@ export default function DatasetsEditAccessTimeSection({
         </IsolatedSelect>
       </div>
 
-      <h2 className="admin-page__section-title">Tempo</h2>
+      <h2 className="admin-page__section-title">{t("edit.timeSectionTitle")}</h2>
       <div className="admin-page__fields-group">
         <IsolatedSelect
-          label="Frequência de atualização *"
-          placeholder="Selecione uma frequência..."
+          label={t("edit.frequencyField")}
+          placeholder={t("edit.frequencyPlaceholder")}
           id="edit-frequency"
           defaultValue={loadedFrequency}
           onChangeRef={selectedFrequencyRef}
@@ -63,46 +66,46 @@ export default function DatasetsEditAccessTimeSection({
         <div className="flex gap-[18px] [&>*]:flex-1">
           <InputDate
             key={`date-start-${temporalStart}`}
-            label="Cobertura temporal (Data de início)"
+            label={t("edit.temporalStartField")}
             id="edit-date-start"
             defaultValue={temporalStart}
-            dayInputPlaceholder="dd"
-            monthInputPlaceholder="mm"
-            yearInputPlaceholder="aaaa"
-            calendarIconAriaLabel="Abrir calendário"
-            previousYearAriaLabel="Ano anterior"
-            previousMonthAriaLabel="Mês anterior"
-            nextMonthAriaLabel="Próximo mês"
-            nextYearAriaLabel="Próximo ano"
-            selectedDayAriaLabel="Dia selecionado"
-            todayDayAriaLabel="Hoje"
-            todayLabel="Hoje"
-            cancelLabel="Cancelar"
-            okLabel="OK"
+            dayInputPlaceholder={t("edit.date.day")}
+            monthInputPlaceholder={t("edit.date.month")}
+            yearInputPlaceholder={t("edit.date.year")}
+            calendarIconAriaLabel={t("edit.date.openCalendar")}
+            previousYearAriaLabel={t("edit.date.previousYear")}
+            previousMonthAriaLabel={t("edit.date.previousMonth")}
+            nextMonthAriaLabel={t("edit.date.nextMonth")}
+            nextYearAriaLabel={t("edit.date.nextYear")}
+            selectedDayAriaLabel={t("edit.date.selectedDay")}
+            todayDayAriaLabel={t("edit.date.todayDay")}
+            todayLabel={t("edit.date.today")}
+            cancelLabel={t("edit.date.cancel")}
+            okLabel={t("edit.date.ok")}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onTemporalStartChange(event.target.value)
             }
           />
           <InputDate
             key={`date-end-${temporalEnd}`}
-            label="Data de fim"
+            label={t("edit.temporalEndField")}
             id="edit-date-end"
             defaultValue={temporalEnd}
             hasError={!!formErrors.temporalEnd}
-            errorFeedbackText="A data de fim tem de ser posterior à data de início"
-            dayInputPlaceholder="dd"
-            monthInputPlaceholder="mm"
-            yearInputPlaceholder="aaaa"
-            calendarIconAriaLabel="Abrir calendário"
-            previousYearAriaLabel="Ano anterior"
-            previousMonthAriaLabel="Mês anterior"
-            nextMonthAriaLabel="Próximo mês"
-            nextYearAriaLabel="Próximo ano"
-            selectedDayAriaLabel="Dia selecionado"
-            todayDayAriaLabel="Hoje"
-            todayLabel="Hoje"
-            cancelLabel="Cancelar"
-            okLabel="OK"
+            errorFeedbackText={t("edit.invalidTemporalRange")}
+            dayInputPlaceholder={t("edit.date.day")}
+            monthInputPlaceholder={t("edit.date.month")}
+            yearInputPlaceholder={t("edit.date.year")}
+            calendarIconAriaLabel={t("edit.date.openCalendar")}
+            previousYearAriaLabel={t("edit.date.previousYear")}
+            previousMonthAriaLabel={t("edit.date.previousMonth")}
+            nextMonthAriaLabel={t("edit.date.nextMonth")}
+            nextYearAriaLabel={t("edit.date.nextYear")}
+            selectedDayAriaLabel={t("edit.date.selectedDay")}
+            todayDayAriaLabel={t("edit.date.todayDay")}
+            todayLabel={t("edit.date.today")}
+            cancelLabel={t("edit.date.cancel")}
+            okLabel={t("edit.date.ok")}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onTemporalEndChange(event.target.value)
             }

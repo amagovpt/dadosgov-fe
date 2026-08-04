@@ -1,0 +1,29 @@
+{
+  "title": "Logs",
+  "actions": {
+    "stopAutoRefresh": "Parar auto-atualizar",
+    "autoRefresh": "Auto-atualizar (10s)",
+    "refresh": "Atualizar",
+    "download": "Descarregar"
+  },
+  "loadingFiles": "A carregar ficheiros de log...",
+  "select": {
+    "label": "Ficheiro de log",
+    "placeholder": "Selecionar ficheiro"
+  },
+  "summary": {
+    "file": "Ficheiro:",
+    "size": "Tamanho:",
+    "modified": "Modificado:",
+    "truncated": "A mostrar apenas o final do ficheiro",
+    "updatedAt": "Atualizado às {{time}}"
+  },
+  "errors": {
+    "contentLoad": "Não foi possível carregar o conteúdo do ficheiro."
+  },
+  "viewer": {
+    "ariaLabel": "Conteúdo do ficheiro de log",
+    "loading": "A carregar conteúdo...",
+    "empty": "Ficheiro vazio."
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import StatusDot from "./StatusDot";
 
 export type ResourceStatusItem = {
@@ -19,6 +20,7 @@ export interface ResourceStatusBadgeI {
 type ResourceStatusVariant = "danger" | "neutral" | "warning" | "success";
 
 export function ResourceStatusBadge({ item }: ResourceStatusBadgeI) {
+  const { t } = useTranslation("admin-common");
   const isDeleted = item.deleted || item.deleted_at;
   const isArchived = item.archived || item.archived_at;
 
@@ -30,10 +32,10 @@ export function ResourceStatusBadge({ item }: ResourceStatusBadgeI) {
   };
 
   const getStatusLabel = (): string => {
-    if (isDeleted) return "Excluído";
-    if (isArchived) return "Arquivado";
-    if (item.private) return "Rascunho";
-    return "Público";
+    if (isDeleted) return t("status.deleted");
+    if (isArchived) return t("status.archived");
+    if (item.private) return t("status.draft");
+    return t("status.public");
   };
 
   return <StatusDot variant={getStatusVariant()}>{getStatusLabel()}</StatusDot>;

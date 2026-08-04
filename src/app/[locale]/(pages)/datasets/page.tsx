@@ -2,9 +2,11 @@ import { fetchDatasetsListing } from "@/service/api/datasets";
 import { DatasetFilters } from "@/service/types/dataset";
 import DatasetsClient from "@/components/datasets/DatasetsClient";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
-import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 import { Metadata } from "next";
-import { getDatasets, getDatasetsMetadata } from "@/service/queries/datasets/datasets";
+import { getFrontOfficeMetadata, getFrontOfficePage } from "@/service/queries/common";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
+import { FrontOfficePage } from "@/service/types/shared/common";
+
 
 export async function generateMetadata({
   params,
@@ -14,7 +16,8 @@ export async function generateMetadata({
   const { locale } = await params;
 
   try {
-    const metadata = await getDatasetsMetadata(locale);
+    const metadata = await getFrontOfficeMetadata("datasets", locale);
+
     return {
       title: metadata.title,
       description: stripHtmlTags(metadata.description),
@@ -73,8 +76,16 @@ export default async function Page({
   const forwarded = await serverForwardedHeaders();
   const data = await fetchDatasetsListing(page, 20, apiFilters, forwarded);
 
-  // get page content (hero, search, noResults) from the CMS
-  const { pageContent } = await getDatasets(locale);
+  // Get page content (hero, search, noResults) from the CMS. The CMS is the
+  // source of truth, but it must not be able to take the listing down: on error
+  // we hand `undefined` to the client, which falls back to the `datasets`
+  // namespace for every string.
+  let pageContent: FrontOfficePage | undefined;
+  try {
+    pageContent = await getFrontOfficePage("datasets", locale);
+  } catch (error) {
+    console.error("Error fetching datasets page content:", error);
+  }
 
   return (
     <DatasetsClient

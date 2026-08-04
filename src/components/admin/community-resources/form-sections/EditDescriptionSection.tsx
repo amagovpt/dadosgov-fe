@@ -3,6 +3,7 @@
 import React from "react";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
 import { InputText } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
 import ResourceDescriptionFields from "@/components/admin/community-resources/form-sections/ResourceDescriptionFields";
 
@@ -55,9 +56,13 @@ export default function EditDescriptionSection({
   onTypeChange,
   onFormatChange,
 }: EditDescriptionSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+
   return (
     <>
-      <h2 className="admin-page__section-title">Descrição</h2>
+      <h2 className="admin-page__section-title">
+        {t("admin-community-resources:form.descriptionSectionTitle")}
+      </h2>
 
       <div className="admin-page__fields-group">
         <ResourceDescriptionFields
@@ -78,21 +83,21 @@ export default function EditDescriptionSection({
 
         <AdminSelectAdapter
           key={`format-${resourceId}-${saveCount}`}
-          label="Formato *"
-          placeholder="Selecione o formato"
+          label={t("admin-community-resources:form.formatField")}
+          placeholder={t("admin-community-resources:form.formatPlaceholder")}
           id="resource-format"
           initialValue={format}
           valueRef={selectedFormatRef}
           onValueChange={onFormatChange}
           hasError={hasFormatError}
-          errorMessage="Campo obrigatório"
+          errorMessage={t("admin-common:forms.requiredField")}
           renderErrorBelow
         >
           {formatOptions}
         </AdminSelectAdapter>
 
         <InputText
-          label="Tipo de recurso"
+          label={t("admin-community-resources:form.mimeTypeField")}
           placeholder="application/pdf"
           id="resource-mime"
           value={mimeType}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   DropdownOption,
@@ -25,6 +26,7 @@ export function AddMemberPopupContent({
   onMemberAdded,
   openKey,
 }: AddMemberPopupContentProps) {
+  const { t } = useTranslation(["admin-common", "admin-members"]);
   const { hide } = usePopupContext();
   const selectedUserIdRef = useRef("");
   const [selectedRole, setSelectedRole] = useState<MemberRole>(DEFAULT_MEMBER_ROLE);
@@ -58,7 +60,7 @@ export function AddMemberPopupContent({
     } catch (error) {
       console.error("Error adding member:", error);
       const message = error instanceof Error ? error.message : null;
-      setAddError(message || "Ocorreu um erro ao adicionar o membro. Tente novamente.");
+      setAddError(message || t("admin-members:addPopup.addError"));
     }
   };
 
@@ -78,25 +80,29 @@ export function AddMemberPopupContent({
         <StatusCard
           variant="informative"
           showIcon
-          description="Este utilizador já foi convidado para esta organização. O convite encontra-se pendente de aceitação."
+          description={t("admin-members:addPopup.pendingInvite")}
         />
       )}
       <div className="flex flex-col gap-4">
         <span className="text-base font-medium leading-7 text-primary-900">
-          Utilizador <span className="text-danger-600">*</span>
+          {t("admin-members:addPopup.userLabel")} <span className="text-danger-600">*</span>
         </span>
         <IsolatedSelect
           key={`user-${openKey}`}
-          label="Utilizador"
+          label={t("admin-members:addPopup.userLabel")}
           hideLabel
-          placeholder="Pesquisar um utilizador"
+          placeholder={t("admin-members:addPopup.searchPlaceholder")}
           id="member-user"
           onChangeRef={selectedUserIdRef}
           searchable
-          searchInputPlaceholder="Escreva pelo menos 2 caracteres..."
-          searchNoResultsText={isSearching ? "A pesquisar..." : "Nenhum utilizador encontrado"}
+          searchInputPlaceholder={t("admin-members:addPopup.searchInputPlaceholder")}
+          searchNoResultsText={
+            isSearching
+              ? t("admin-members:addPopup.searching")
+              : t("admin-members:addPopup.noResults")
+          }
           hasError={alreadyMember}
-          errorFeedbackText="Utilizador já está associado a esta organização"
+          errorFeedbackText={t("admin-members:addPopup.alreadyMember")}
           onChangeCallback={onUserChangeCallback}
           onSearchCallback={setSearchQuery}
         >
@@ -106,7 +112,7 @@ export function AddMemberPopupContent({
 
       <div className="flex flex-col gap-12">
         <span className="text-base font-medium leading-7 text-primary-900">
-          Papel do membro <span className="text-danger-600">*</span>
+          {t("admin-members:addPopup.roleLabel")} <span className="text-danger-600">*</span>
         </span>
         <MemberRoleRadioGroup
           value={selectedRole}
@@ -121,10 +127,10 @@ export function AddMemberPopupContent({
 
       <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
-          Cancelar
+          {t("admin-common:actions.cancel")}
         </Button>
         <Button variant="primary" onClick={handleAdd} disabled={!canSubmit}>
-          Adicionar
+          {t("admin-members:addPopup.add")}
         </Button>
       </div>
     </div>

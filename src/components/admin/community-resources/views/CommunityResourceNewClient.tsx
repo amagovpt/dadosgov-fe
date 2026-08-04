@@ -2,13 +2,23 @@
 
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import CommunityResourceFormClient from "@/components/admin/community-resources/views/CommunityResourceFormClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
-export default function CommunityResourceNewClient() {
+interface CommunityResourceNewClientProps {
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function CommunityResourceNewClient({
+  pageContent,
+}: CommunityResourceNewClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { displayName } = useCurrentUser();
@@ -16,20 +26,20 @@ export default function CommunityResourceNewClient() {
   const totalSteps = 2;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [publicPageUrl, setPublicPageUrl] = useState<string | null>(null);
-
-  const stepTitles: Record<number, string> = {
-    1: "Descreva o recurso da sua comunidade.",
-    2: "Finalizar a publicação",
-  };
+  const pageTitle = pageContent.createHero?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Recursos comunitários", url: "/admin/me/community-resources" },
+        {
+          label: t("admin-community-resources:title"),
+          url: "/admin/me/community-resources",
+        },
       ]}
-      title="Formulário de inscrição"
+      title={pageTitle}
     >
       {currentStep === 2 && publicPageUrl && (
         <div className="flex justify-end mb-16">
@@ -41,7 +51,7 @@ export default function CommunityResourceNewClient() {
             leadingIconHover="agora-solid-eye"
             onClick={() => router.push(publicPageUrl)}
           >
-            Veja a página pública
+            {t("admin-community-resources:form.viewPublicPage")}
           </Button>
         </div>
       )}
@@ -49,7 +59,7 @@ export default function CommunityResourceNewClient() {
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        stepTitle={stepTitles[currentStep]}
+        stepTitle={stepTitle}
         labelWord="Etapa"
         labelFormat="de"
       />
@@ -68,6 +78,7 @@ export default function CommunityResourceNewClient() {
             `/admin/community-resources/new?dataset_id=${datasetId}&step=${currentStep - 1}`
           )
         }
+        pageContent={pageContent}
       />
     </AdminLayout>
   );

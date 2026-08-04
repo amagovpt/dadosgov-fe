@@ -1,4 +1,5 @@
 import { Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import type { FeaturedLinksData } from "../editorial-blocks";
 
 export function FeaturedLinksEditor({
@@ -8,6 +9,8 @@ export function FeaturedLinksEditor({
   data: FeaturedLinksData;
   onChange: (d: FeaturedLinksData) => void;
 }) {
+  const { t } = useTranslation(["admin-common", "admin-editorial"]);
+
   const addParagraph = () => {
     onChange({ ...data, paragraphs: [...data.paragraphs, ""] });
   };
@@ -23,14 +26,14 @@ export function FeaturedLinksEditor({
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Os meus links"
+        placeholder={t("admin-editorial:featuredLinks.titlePlaceholder")}
         className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
         value={data.legend}
         onChange={(e) => onChange({ ...data, legend: e.target.value })}
-        placeholder="Adicionar legenda"
+        placeholder={t("admin-editorial:featuredLinks.legendPlaceholder")}
         className="text-sm mb-[20px] w-full border-none text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
 
@@ -47,6 +50,7 @@ export function FeaturedLinksEditor({
                   })
                 }
                 className="rounded hover:bg-red-100 hover:text-red-600 mt-[2px] p-4 text-neutral-400"
+                title={t("admin-common:actions.delete")}
               >
                 <Icon name="agora-line-trash" className="h-[14px] w-[14px]" />
               </button>
@@ -58,7 +62,7 @@ export function FeaturedLinksEditor({
                   paragraphs[index] = e.target.value;
                   onChange({ ...data, paragraphs });
                 }}
-                placeholder="Texto do parágrafo"
+                placeholder={t("admin-editorial:featuredLinks.paragraphPlaceholder")}
                 className="text-sm flex-1 border-none text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
               />
             </div>
@@ -70,7 +74,7 @@ export function FeaturedLinksEditor({
             className="text-xs inline-flex items-center gap-4 font-medium text-neutral-400 hover:text-neutral-600"
           >
             <Icon name="agora-line-plus-circle" className="h-[14px] w-[14px]" />
-            Adicione um parágrafo
+            {t("admin-editorial:featuredLinks.addParagraph")}
           </button>
 
           <button
@@ -79,7 +83,7 @@ export function FeaturedLinksEditor({
             className="text-xs inline-flex items-center gap-4 font-medium text-neutral-400 hover:text-neutral-600"
           >
             <Icon name="agora-line-plus-circle" className="h-[14px] w-[14px]" />
-            Adicionar um link
+            {t("admin-editorial:featuredLinks.addLink")}
           </button>
 
           <div className="mt-8">
@@ -88,7 +92,7 @@ export function FeaturedLinksEditor({
                 type="text"
                 value={data.buttonLabel}
                 onChange={(e) => onChange({ ...data, buttonLabel: e.target.value })}
-                placeholder="Título do botão"
+                placeholder={t("admin-editorial:featuredLinks.buttonTitlePlaceholder")}
                 className="border-none bg-transparent text-white placeholder-white/60 outline-none"
               />
             </span>
@@ -97,7 +101,7 @@ export function FeaturedLinksEditor({
                 type="text"
                 value={data.buttonUrl}
                 onChange={(e) => onChange({ ...data, buttonUrl: e.target.value })}
-                placeholder="URL do botão"
+                placeholder={t("admin-editorial:featuredLinks.buttonUrlPlaceholder")}
                 className="text-sm border-orange-400 w-[250px] max-w-full rounded-6 border px-12 py-6 placeholder-neutral-400 outline-none"
               />
             </div>
@@ -119,7 +123,7 @@ export function FeaturedLinksEditor({
                         links[index] = { ...links[index], label: e.target.value };
                         onChange({ ...data, links });
                       }}
-                      placeholder="Título do link"
+                      placeholder={t("admin-editorial:featuredLinks.linkTitlePlaceholder")}
                       className="text-lg border-none font-bold text-primary-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
                     />
                     <Icon
@@ -137,6 +141,7 @@ export function FeaturedLinksEditor({
                         })
                       }
                       className="rounded hover:bg-red-100 hover:text-red-600 p-[2px] text-neutral-400"
+                      title={t("admin-common:actions.delete")}
                     >
                       <Icon name="agora-line-trash" className="h-[14px] w-[14px]" />
                     </button>
@@ -148,7 +153,7 @@ export function FeaturedLinksEditor({
                         links[index] = { ...links[index], url: e.target.value };
                         onChange({ ...data, links });
                       }}
-                      placeholder="URL"
+                      placeholder={t("admin-editorial:featuredLinks.linkUrlPlaceholder")}
                       className="text-sm rounded-4 border border-neutral-300 px-8 py-4 text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
                     />
                   </div>
@@ -163,7 +168,7 @@ export function FeaturedLinksEditor({
                 className="text-xs inline-flex items-center gap-4 font-medium text-neutral-400 hover:text-neutral-600"
               >
                 <Icon name="agora-line-plus-circle" className="h-[14px] w-[14px]" />
-                Adicionar um link
+                {t("admin-editorial:featuredLinks.addLink")}
               </button>
             )}
           </div>

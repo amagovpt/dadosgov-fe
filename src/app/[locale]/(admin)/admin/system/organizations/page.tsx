@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
+import { getBoOrganizations, getBoOrganizationsMetadata } from "@/service/queries/admin/organizations";
 import SystemOrganizationsClient from "@/components/admin/organizations/SystemOrganizationsClient";
 
-export const metadata: Metadata = {
-  title: "Organizações - Sistema - Admin - dados.gov.pt",
-  description: "Gestão de organizações do sistema no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoOrganizationsMetadata(locale, "systemMetadata");
 
-export default function SystemOrganizationsPage() {
-  return <SystemOrganizationsClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function SystemOrganizationsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoOrganizations(locale);
+
+  return <SystemOrganizationsClient pageContent={pageContent} />;
 }

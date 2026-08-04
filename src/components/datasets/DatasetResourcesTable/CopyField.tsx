@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const CopyField: React.FC<{ label: string; value: string; mono?: boolean }> = ({
   label,
   value,
   mono = true,
 }) => {
+  const { t: tds } = useTranslation("datasets");
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -23,7 +25,7 @@ export const CopyField: React.FC<{ label: string; value: string; mono?: boolean 
           type="button"
           onClick={handleCopy}
           className="text-primary-600 hover:text-primary-800 cursor-pointer shrink-0"
-          aria-label={`Copiar ${label}`}
+          aria-label={tds("resources.copy", { label })}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -42,7 +44,7 @@ export const CopyField: React.FC<{ label: string; value: string; mono?: boolean 
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
           </svg>
         </button>
-        {copied && <span className="text-xs text-green-600">Copiado!</span>}
+        {copied && <span className="text-xs text-green-600">{tds("resources.copied")}</span>}
       </div>
       <code
         className={`block bg-neutral-100 px-12 py-8 rounded text-sm text-neutral-900 break-all ${mono ? "font-mono" : ""}`}

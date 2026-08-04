@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
 import DatasetsNewClient from "@/components/admin/datasets/views/DatasetsNewClient";
+import { getBoDatasets, getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-export const metadata: Metadata = {
-  title: "Publique em dados.gov.pt - Admin - dados.gov.pt",
-  description: "Escolha como publicar os seus dados no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoDatasetsMetadata(locale);
 
-export default function DatasetsNewPage() {
-  return <DatasetsNewClient />;
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
+
+export default async function DatasetsNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoDatasets(locale);
+
+  return <DatasetsNewClient pageContent={pageContent} />;
 }

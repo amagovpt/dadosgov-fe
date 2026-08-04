@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
+import { getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
 import HarvestJobDetailClient from "@/components/admin/harvesters/views/HarvestJobDetailClient";
 
-export const metadata: Metadata = {
-  title: "Detalhe do trabalho - Admin - dados.gov.pt",
-  description: "Detalhe de um trabalho de harvesting no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoHarvestersMetadata(locale, "jobDetailMetadata");
 
-export default async function HarvestJobDetailPage({
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function HarvesterJobDetailPage({
   params,
 }: {
   params: Promise<{ slug: string; jobId: string }>;

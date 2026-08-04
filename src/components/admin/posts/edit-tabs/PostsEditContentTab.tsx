@@ -1,12 +1,18 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import dynamic from "next/dynamic";
 import { Button } from "@ama-pt/agora-design-system";
 
+function LoadingEditorFallback() {
+  const { t } = useTranslation("admin-posts");
+  return <p>{t("edit.loadingEditor")}</p>;
+}
+
 const RichTextEditor = dynamic(() => import("@/components/admin/posts/form-ui/RichTextEditor"), {
   ssr: false,
-  loading: () => <p>A carregar editor...</p>,
+  loading: () => <LoadingEditorFallback />,
 });
 
 interface PostsEditContentTabProps {
@@ -24,6 +30,8 @@ export default function PostsEditContentTab({
   onContentChange,
   onSaveContent,
 }: PostsEditContentTabProps) {
+  const { t } = useTranslation(["admin-common", "admin-posts"]);
+
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
@@ -37,9 +45,13 @@ export default function PostsEditContentTab({
         >
           <div className="admin-page__fields-group">
             <div className="flex flex-col gap-8">
-              <span className="text-primary-900 text-base font-medium leading-7">Conteúdo *</span>
+              <span className="text-primary-900 text-base font-medium leading-7">
+                {t("admin-posts:contentForm.label")}
+              </span>
               <RichTextEditor content={articleContent} onChange={onContentChange} />
-              {hasContentError && <p className="text-sm text-danger-500">Campo obrigatório</p>}
+              {hasContentError && (
+                <p className="text-sm text-danger-500">{t("admin-common:forms.requiredField")}</p>
+              )}
             </div>
           </div>
 
@@ -52,7 +64,7 @@ export default function PostsEditContentTab({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSaving}
             >
-              {isSaving ? "A guardar..." : "Guardar"}
+              {isSaving ? t("admin-common:actions.saving") : t("admin-common:actions.save")}
             </Button>
           </div>
         </form>

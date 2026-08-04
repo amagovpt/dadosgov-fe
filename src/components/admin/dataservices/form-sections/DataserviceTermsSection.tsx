@@ -1,4 +1,5 @@
 import { InputText } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 export type DataserviceTermsSectionI = {
   rateLimiting: string;
@@ -13,20 +14,22 @@ export default function DataserviceTermsSection({
   onRateLimitingChange,
   onRateLimitingUrlChange,
 }: DataserviceTermsSectionI) {
+  const { t } = useTranslation("admin-dataservices");
+
   return (
     <>
-      <h2 className="admin-page__section-title">Termos de uso</h2>
+      <h2 className="admin-page__section-title">{t("fields.termsOfUse")}</h2>
       <div className="admin-page__fields-group">
         <InputText
-          label="Limite de chamadas"
-          placeholder="Insira aqui"
+          label={t("fields.rateLimiting")}
+          placeholder={t("fields.shortPlaceholder")}
           id="api-rate-limit"
           value={rateLimiting}
           onChange={onRateLimitingChange}
         />
         <InputText
-          label="Link para a documentação sobre limites de chamadas"
-          placeholder="Insira o URL aqui"
+          label={t("fields.rateLimitingUrl")}
+          placeholder={t("fields.urlPlaceholder")}
           id="api-rate-limit-url"
           value={rateLimitingUrl}
           onChange={onRateLimitingUrlChange}

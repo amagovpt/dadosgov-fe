@@ -1,21 +1,27 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { getBoHarvesters, getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
 import HarvesterDetailClient from "@/components/admin/harvesters/views/HarvesterDetailClient";
 
-export const metadata: Metadata = {
-  title: "Detalhe do harvester - Admin - dados.gov.pt",
-  description: "Detalhe de um harvester no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoHarvestersMetadata(locale, "detailMetadata");
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
 
 export default async function HarvesterDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  return (
-    <Suspense>
-      <HarvesterDetailClient slug={slug} />
-    </Suspense>
-  );
+  const { locale, slug } = await params;
+  const pageContent = await getBoHarvesters(locale);
+  return <HarvesterDetailClient slug={slug} pageContent={pageContent} />;
 }

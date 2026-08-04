@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAllCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
@@ -15,8 +16,16 @@ import {
   sortCommunityResources,
 } from "@/components/admin/community-resources/config/communityResourcesListConfig";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
-export default function SystemCommunityResourcesClient() {
+interface SystemCommunityResourcesClientProps {
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function SystemCommunityResourcesClient({
+  pageContent,
+}: SystemCommunityResourcesClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const resourceId = searchParams.get("resource_id");
 
@@ -47,12 +56,25 @@ export default function SystemCommunityResourcesClient() {
     () =>
       createCommunityResourceColumns({
         includeFormat: true,
-        titleHeader: "Título do recurso",
+        titleHeader: t("admin-community-resources:columns.resourceTitle"),
         showDatasetLink: true,
         useSystemStatusDot: true,
+        labels: {
+          title: t("admin-community-resources:columns.title"),
+          status: t("admin-community-resources:columns.status"),
+          format: t("admin-community-resources:columns.format"),
+          createdAt: t("admin-community-resources:columns.createdAt"),
+          modifiedAt: t("admin-community-resources:columns.modifiedAt"),
+          lastModified: t("admin-community-resources:columns.lastModified"),
+          action: t("admin-community-resources:columns.action"),
+          actions: t("admin-community-resources:columns.actions"),
+          deleted: t("admin-community-resources:status.deleted"),
+          archived: t("admin-community-resources:status.archived"),
+          published: t("admin-community-resources:status.published"),
+        },
         editHref: (resource) => `/admin/system/community-resources?resource_id=${resource.id}`,
       }),
-    []
+    [t]
   );
 
   useEffect(() => {
@@ -85,34 +107,27 @@ export default function SystemCommunityResourcesClient() {
   }, [resourceId]);
 
   if (resourceId) {
-    return <CommunityResourceEditClient />;
+    return <CommunityResourceEditClient pageContent={pageContent} />;
   }
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Recursos comunitários", url: "/admin/system/community-resources" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        {
+          label: t("admin-community-resources:title"),
+          url: "/admin/system/community-resources",
+        },
       ]}
-      title="Recursos comunitários"
+      title={t("admin-community-resources:title")}
       isLoading={isLoading}
       count={resources.length}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
-      emptyState={
-        <CardNoResults
-          position="center"
-          icon={
-            <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
-          }
-          title="Sem recursos comunitários"
-          description="Nenhum recurso comunitário encontrado."
-          hasAnchor={false}
-        />
-      }
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={paginatedResources}

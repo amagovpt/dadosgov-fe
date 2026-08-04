@@ -1,13 +1,18 @@
 "use client";
 
 import React from "react";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 type UserAdminProfileDangerZoneProps = {
   userActive: boolean;
   isDeleting: boolean;
   onToggleActive: (event: React.MouseEvent) => void;
   onOpenDeletePopup: (event: React.MouseEvent) => void;
+  activateCard?: AdminCard;
+  deactivateCard?: AdminCard;
+  deleteCard?: AdminCard;
 };
 
 export default function UserAdminProfileDangerZone({
@@ -15,56 +20,31 @@ export default function UserAdminProfileDangerZone({
   isDeleting,
   onToggleActive,
   onOpenDeletePopup,
+  activateCard,
+  deactivateCard,
+  deleteCard,
 }: UserAdminProfileDangerZoneProps) {
+  const accountStatusCard = userActive ? deactivateCard : activateCard;
+
   return (
-    <div className="dataset-edit-danger-actions">
-      <StatusCard
-        variant="warning"
-        showIcon
-        description={
-          <>
-            <strong>
-              {userActive
-                ? "Uma conta desativada impede o utilizador de iniciar sessão no portal, mas os seus dados permanecem acessíveis."
-                : "Esta conta está desativada. O utilizador não consegue iniciar sessão no portal."}
-            </strong>
-            <br />
-            <Button
-              type="button"
-              appearance="link"
-              variant="primary"
-              hasIcon
-              trailingIcon="agora-line-arrow-right-circle"
-              trailingIconHover="agora-solid-arrow-right-circle"
-              onClick={onToggleActive}
-            >
-              {userActive ? "Desativar conta" : "Ativar conta"}
-            </Button>
-          </>
-        }
-      />
-      <StatusCard
-        variant="danger"
-        showIcon
-        description={
-          <>
-            <strong>Atenção esta ação é irreversível.</strong>
-            <br />
-            <Button
-              type="button"
-              appearance="link"
-              variant="primary"
-              hasIcon
-              trailingIcon="agora-line-arrow-right-circle"
-              trailingIconHover="agora-solid-arrow-right-circle"
-              onClick={onOpenDeletePopup}
-              disabled={isDeleting}
-            >
-              Eliminar o perfil
-            </Button>
-          </>
-        }
-      />
-    </div>
+    <AdminDangerActions
+      actions={[
+        {
+          variant: "warning",
+          heading: accountStatusCard?.title,
+          description: formatHtmlParagraphs(accountStatusCard?.description),
+          actionLabel: accountStatusCard?.anchor?.children,
+          onAction: onToggleActive,
+        },
+        {
+          variant: "danger",
+          heading: deleteCard?.title ?? "",
+          description: formatHtmlParagraphs(deleteCard?.description),
+          actionLabel: deleteCard?.anchor?.children,
+          onAction: onOpenDeletePopup,
+        },
+      ]}
+      disabled={isDeleting}
+    />
   );
 }

@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
 import SystemUsersClient from "@/components/admin/users/SystemUsersClient";
+import { getBoUsers, getBoUsersMetadata } from "@/service/queries/admin/users";
 
-export const metadata: Metadata = {
-  title: "Utilizadores - Sistema - Admin - dados.gov.pt",
-  description: "Gestão de utilizadores do sistema no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoUsersMetadata(locale, "systemMetadata");
 
-export default function SystemUsersPage() {
-  return <SystemUsersClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function SystemUsersPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoUsers(locale);
+
+  return <SystemUsersClient pageContent={pageContent} />;
 }

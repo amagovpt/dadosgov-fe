@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { usePopupContext } from "@ama-pt/agora-design-system";
 import { fetchDataset, uploadResource } from "@/service/api/datasets";
 import type { ResourceType } from "@/service/types/catalog";
@@ -40,9 +41,9 @@ export function useDatasetResourceActions({
   showApiSuccess,
   isUploadingRef,
 }: UseDatasetResourceActionsParams) {
-  // Bumped on every edit-popup open so React remounts a fresh instance instead
-  // of reusing the previous one (whose `useState` was seeded from the old
-  // resource), which would otherwise show stale field values on reopen.
+  const { t } = useTranslation("admin-datasets");
+  // Force a fresh edit popup instance on each open so local state is re-seeded
+  // from the current resource instead of reusing stale values from a prior open.
   const editPopupSeqRef = useRef(0);
 
   async function refreshDataset() {
@@ -66,11 +67,7 @@ export function useDatasetResourceActions({
           await uploadResource(dataset.id, file);
         }
       } catch (error) {
-        const err = error as {
-          status?: number;
-          data?: Record<string, unknown>;
-          message?: string;
-        };
+        const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
         console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
 
         if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
@@ -90,20 +87,16 @@ export function useDatasetResourceActions({
               .map(([key, value]) => `${key}: ${flattenValue(value)}`)
               .join(", ");
 
-          setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(message)}`);
+          setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(message)}`);
         } else if (err.message) {
-          setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(err.message)}`);
+          setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(err.message)}`);
         } else {
           const statusHint = err.status ? ` (HTTP ${err.status})` : "";
-          setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
+          setFileUploadError(`${t("edit.resourceUploadError")}${statusHint}. ${t("edit.resourceUploadRetry")}`);
         }
         return;
       }
 
-      // Upload succeeded (the files are stored on the backend). The dataset
-      // refresh below is best-effort: a transient failure here must NOT be
-      // reported as an upload error, otherwise a network blip on the refresh
-      // makes a successful upload look failed.
       try {
         const updated = await fetchDataset(slug);
         setDataset(updated);
@@ -111,7 +104,7 @@ export function useDatasetResourceActions({
         console.error("Resource uploaded but dataset refresh failed:", refreshError);
       }
       setUploaderKey((currentKey) => currentKey + 1);
-      showApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
+      showApiSuccess(t("edit.resourceUploadSuccess"));
     } finally {
       isUploadingRef.current = false;
       setIsSubmitting(false);
@@ -132,16 +125,16 @@ export function useDatasetResourceActions({
                   ...previousDataset,
                   resources: previousDataset.resources.filter((item) => item.id !== resource.id),
                 }
-              : previousDataset
+              : previousDataset,
           );
-          showApiSuccess("Ficheiro eliminado com sucesso.");
+          showApiSuccess(t("edit.resourceDeleted"));
         }}
       />,
       {
-        title: "Eliminar ficheiro",
-        closeAriaLabel: "Fechar",
+        title: t("edit.resourceDeleteModalTitle"),
+        closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "m",
-      }
+      },
     );
   }
 
@@ -156,15 +149,15 @@ export function useDatasetResourceActions({
         resourceTypes={resourceTypes}
         onSaved={async () => {
           await refreshDataset();
-          showApiSuccess("Recurso atualizado com sucesso.");
+          showApiSuccess(t("edit.resourceUpdated"));
         }}
         onCancel={hide}
       />,
       {
         title: resource.title,
-        closeAriaLabel: "Fechar",
+        closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "l",
-      }
+      },
     );
   }
 
@@ -182,15 +175,15 @@ export function useDatasetResourceActions({
             resourceTypes={resourceTypes}
             onSaved={async () => {
               await refreshDataset();
-              showApiSuccess("Recurso atualizado com sucesso.");
+              showApiSuccess(t("edit.resourceUpdated"));
             }}
             onCancel={hide}
           />,
           {
             title: resource.title,
-            closeAriaLabel: "Fechar",
+            closeAriaLabel: t("edit.closeAriaLabel"),
             dimensions: "l",
-          }
+          },
         );
       }, 100);
     };
@@ -211,9 +204,9 @@ export function useDatasetResourceActions({
       />,
       {
         title: resource.title,
-        closeAriaLabel: "Fechar",
+        closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "l",
-      }
+      },
     );
   }
 

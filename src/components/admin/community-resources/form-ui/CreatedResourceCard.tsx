@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Button, CardLinks, Icon } from "@ama-pt/agora-design-system";
 import type { CommunityResource } from "@/service/types/community-resource";
 
@@ -8,18 +9,20 @@ interface CreatedResourceCardProps {
 }
 
 export default function CreatedResourceCard({ resource }: CreatedResourceCardProps) {
+  const { t } = useTranslation("admin-community-resources");
+
   return (
     <>
       <CardLinks
         onClick={() => {}}
         className="cursor-pointer text-neutral-900"
         variant="transparent"
-        category={resource.format ? resource.format.toUpperCase() : "Recurso"}
+        category={resource.format ? resource.format.toUpperCase() : t("form.resourceCategory")}
         title={<div className="text-xl-bold underline">{resource.title}</div>}
         description={
           <div className="mt-8 flex flex-col gap-4 pb-32">
             <p className="text-sm text-neutral-900">
-              Atualizado hoje
+              {t("form.updatedToday")}
               {resource.format ? ` –  ${resource.format.toUpperCase()}` : ""}
               {resource.filesize
                 ? ` (${
@@ -34,7 +37,7 @@ export default function CreatedResourceCard({ resource }: CreatedResourceCardPro
             {resource.url && (
               <p className="text-sm mt-8 flex items-center gap-8 text-neutral-900">
                 <Icon name="agora-line-map-pin" className="h-16 w-16" />
-                Localização:{" "}
+                {t("form.location")}:{" "}
                 {(() => {
                   try {
                     return new URL(resource.url).hostname;
@@ -47,12 +50,12 @@ export default function CreatedResourceCard({ resource }: CreatedResourceCardPro
             {resource.checksum && (
               <p className="text-sm mt-8 flex items-center gap-8 text-neutral-900">
                 <Icon name="agora-line-code" className="h-16 w-16" />
-                Soma de verificação: {resource.checksum.value}
+                {t("form.checksum")}: {resource.checksum.value}
               </p>
             )}
           </div>
         }
-        date={<span className="font-[300]">Atualizado hoje</span>}
+        date={<span className="font-[300]">{t("form.updatedToday")}</span>}
         blockedLink={true}
       />
       <div className="admin-page__actions mt-8 flex justify-end gap-[18px]">
@@ -65,7 +68,7 @@ export default function CreatedResourceCard({ resource }: CreatedResourceCardPro
             trailingIconHover="agora-solid-external-link"
             onClick={() => window.open(resource.dataset!.page, "_blank")}
           >
-            Ver na página pública
+            {t("form.viewOnPublicPage")}
           </Button>
         )}
       </div>

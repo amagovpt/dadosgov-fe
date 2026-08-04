@@ -2,23 +2,18 @@
 
 import React from "react";
 import {
+  Button,
+  DropdownOption,
+  DropdownSection,
   InputText,
   InputTextArea,
-  Button,
   StatusCard,
-  DropdownSection,
-  DropdownOption,
 } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import {
-  TOGGLE_TITLE_MAP,
-  TOGGLE_INFO_MESSAGE_MAP,
-  TOGGLE_SUBJECT_LABEL_MAP,
-  TOGGLE_CONTENT_LABEL_MAP,
-  TOGGLE_CATEGORIES_MAP,
-  TOGGLE_PREFIX_MAP,
-} from "../constants";
-import type { SupportFormErrors } from "../types";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import type { SupportCardContent } from "@/service/types/support";
+import type { SupportFormErrors } from "../hooks/useSupportForm";
 
 interface SupportFormProps {
   selectedToggle: string;
@@ -39,6 +34,7 @@ interface SupportFormProps {
   setProblemDateTime: (v: string) => void;
   setErrors: React.Dispatch<React.SetStateAction<SupportFormErrors>>;
   handleSubmit: () => Promise<void>;
+  infoCard?: SupportCardContent | null;
 }
 
 export function SupportForm({
@@ -60,29 +56,39 @@ export function SupportForm({
   setProblemDateTime,
   setErrors,
   handleSubmit,
+  infoCard,
 }: SupportFormProps) {
-  const prefix = TOGGLE_PREFIX_MAP[selectedToggle];
+  const { t } = useTranslation("support");
+  const prefix = t(`form.prefix.${selectedToggle}`);
+  const categories = t(`form.categories.${selectedToggle}`, {
+    returnObjects: true,
+  }) as string[];
 
   return (
     <div className="mt-32 max-w-2xl">
       <h3 className="mb-24 text-[20px] font-bold text-[#021C51]">
-        {TOGGLE_TITLE_MAP[selectedToggle]}
+        {t(`form.title.${selectedToggle}`)}
       </h3>
 
-      {TOGGLE_INFO_MESSAGE_MAP[selectedToggle] && (
+      {infoCard ? (
         <div className="mb-24">
           <StatusCard
             variant="informative"
             showIcon
-            description={TOGGLE_INFO_MESSAGE_MAP[selectedToggle]}
+            description={
+              <div className="flex flex-col gap-8">
+                {infoCard.title ? <p className="font-bold">{infoCard.title}</p> : null}
+                {formatHtmlParagraphs(infoCard.description ?? "")}
+              </div>
+            }
           />
         </div>
-      )}
+      ) : null}
 
       <div>
         <div className="mt-[20px]">
           <InputText
-            label="O seu e-mail *"
+            label={t("form.emailLabel")}
             type="email"
             required
             value={email}
@@ -98,8 +104,8 @@ export function SupportForm({
         <div className="mt-[20px]">
           <IsolatedSelect
             key={`category-${selectedToggle}`}
-            label="Categoria *"
-            placeholder="Selecione uma categoria..."
+            label={t("form.categoryLabel")}
+            placeholder={t("form.categoryPlaceholder")}
             id="support-category"
             defaultValue={category}
             required
@@ -111,7 +117,7 @@ export function SupportForm({
             }}
           >
             <DropdownSection name="categories">
-              {(TOGGLE_CATEGORIES_MAP[selectedToggle] ?? []).map((cat) => (
+              {categories.map((cat) => (
                 <DropdownOption key={cat} value={cat}>
                   {cat}
                 </DropdownOption>
@@ -122,7 +128,7 @@ export function SupportForm({
 
         <div className="mt-[20px]">
           <InputText
-            label={TOGGLE_SUBJECT_LABEL_MAP[selectedToggle]}
+            label={t(`form.subjectLabel.${selectedToggle}`)}
             value={`${prefix} - ${subjectBody}`}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const pfx = `${prefix} - `;
@@ -148,12 +154,12 @@ export function SupportForm({
           />
         </div>
 
-        {selectedToggle === "bug" && (
+        {selectedToggle === "bug" ? (
           <>
             <div className="mt-[20px]">
               <InputText
-                label="Página ou URL onde ocorreu o problema"
-                placeholder="https://dados.gov.pt/..."
+                label={t("form.problemUrlLabel")}
+                placeholder={t("form.problemUrlPlaceholder")}
                 value={problemUrl}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setProblemUrl(e.target.value)
@@ -163,8 +169,8 @@ export function SupportForm({
 
             <div className="mt-[20px]">
               <InputText
-                label="Data/hora aproximada"
-                placeholder="Ex.: 05/06/2026 14:30"
+                label={t("form.problemDateTimeLabel")}
+                placeholder={t("form.problemDateTimePlaceholder")}
                 value={problemDateTime}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setProblemDateTime(e.target.value)
@@ -172,11 +178,11 @@ export function SupportForm({
               />
             </div>
           </>
-        )}
+        ) : null}
 
         <div className="mt-[20px]">
           <InputTextArea
-            label={TOGGLE_CONTENT_LABEL_MAP[selectedToggle]}
+            label={t(`form.contentLabel.${selectedToggle}`)}
             required
             rows={5}
             value={description}
@@ -191,15 +197,15 @@ export function SupportForm({
 
         <div className="mt-[20px]">
           <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "A enviar..." : "Enviar"}
+            {isSubmitting ? t("form.sending") : t("form.submit")}
           </Button>
         </div>
 
-        {errorMessage && (
+        {errorMessage ? (
           <div className="mt-[20px]">
             <StatusCard variant="danger" description={errorMessage} />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

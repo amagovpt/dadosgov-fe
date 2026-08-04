@@ -2,9 +2,11 @@
 
 import React, { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { createPost, publishPost, uploadPostImage } from "@/service/api/posts";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import PostsNewContentStep from "@/components/admin/posts/form-steps/PostsNewContentStep";
 import PostsNewMetadataStep from "@/components/admin/posts/form-steps/PostsNewMetadataStep";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -16,8 +18,14 @@ import {
   validatePostContent,
   validatePostMetadata,
 } from "@/components/admin/posts/form-state/postFormModel";
+import type { BoPostsPage } from "@/service/types/admin/posts";
 
-export default function PostsNewClient() {
+interface PostsNewClientProps {
+  pageContent: BoPostsPage;
+}
+
+export default function PostsNewClient({ pageContent }: PostsNewClientProps) {
+  const { t } = useTranslation("admin-posts");
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 2;
@@ -43,7 +51,7 @@ export default function PostsNewClient() {
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
     if (file && file.size > 4194304) {
-      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      setImageError(t("new.imageMaxSize"));
       setImageFile(null);
       return;
     }
@@ -77,6 +85,9 @@ export default function PostsNewClient() {
       title: articleTitle,
       header: articleHeader,
       requireHeader: true,
+    }, {
+      titleRequired: t("validation.titleRequired"),
+      headerRequired: t("validation.headerRequired"),
     });
 
     if (Object.keys(errors).length > 0) {
@@ -89,7 +100,9 @@ export default function PostsNewClient() {
   }
 
   async function handleSave(publish: boolean) {
-    const errors = validatePostContent(articleContent);
+    const errors = validatePostContent(articleContent, {
+      contentRequired: t("validation.contentRequired"),
+    });
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       focusFirstError();
@@ -119,28 +132,28 @@ export default function PostsNewClient() {
         }
         router.push("/admin/system/posts");
       } else {
-        setSaveError("Erro ao guardar o artigo. Verifique a autenticação.");
+        setSaveError(t("new.saveAuthError"));
       }
     } catch {
-      setSaveError("Erro ao guardar o artigo.");
+      setSaveError(t("new.saveError"));
     } finally {
       setPendingAction(null);
     }
   }
 
   const stepTitles: Record<number, string> = {
-    1: "Crie o seu artigo",
-    2: "Conteúdo",
+    1: getAdminStepTitle(pageContent.steps?.[0]),
+    2: getAdminStepTitle(pageContent.steps?.[1]),
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Bem-vindo", url: "/admin" },
-        { label: "Artigos", url: "/admin/system/posts" },
-        { label: "Formulário de publicação de um artigo", url: "/admin/system/posts/new" },
+        { label: t("new.breadcrumbsHome"), url: "/admin" },
+        { label: t("title"), url: "/admin/system/posts" },
+        { label: pageContent.createHero?.title ?? "", url: "/admin/system/posts/new" },
       ]}
-      title="Formulário de publicação de um artigo"
+      title={pageContent.createHero?.title ?? ""}
     >
       <AdminStepper
         currentStep={currentStep}

@@ -31,7 +31,7 @@ interface ReusesClientProps {
   currentPage: number;
   filterCounts?: Record<string, number>;
   allOrganizations?: Organization[];
-  dataCms?: FrontOfficePage;
+  pageContent?: FrontOfficePage;
 }
 
 export default function ReusesClient({
@@ -39,7 +39,7 @@ export default function ReusesClient({
   currentPage,
   filterCounts = {},
   allOrganizations = [],
-  dataCms,
+  pageContent,
 }: ReusesClientProps) {
   const { t, i18n } = useTranslation("common");
   const { t: tr } = useTranslation("reuses");
@@ -73,12 +73,8 @@ export default function ReusesClient({
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title={dataCms?.hero.title ?? t("reuses")}
-        breadcrumbItems={[
-          { label: t("home"), url: "/" },
-          { label: t("reuses"), url: "/reuses" },
-        ]}
-        subtitle={<p className="max-w-[592px] text-primary-100">{dataCms?.hero.subtitle ?? tr("hero.subtitle")}</p>}
+        title={pageContent?.hero.title ?? t("reuses")}
+        subtitle={<p className="max-w-[592px] text-primary-100">{pageContent?.hero.subtitle ?? tr("hero.subtitle")}</p>}
       >
         <PublishDropdown darkMode={true} outline={false} />
       </HeroGeneral>
@@ -241,11 +237,11 @@ export default function ReusesClient({
                   <div className="col-span-full">
                     <CardNoResults
                       icon={
-                        <Icon name={dataCms?.noResults.icon ?? "agora-line-search"} className="h-12 w-12 text-primary-500" />
+                        <Icon name={pageContent?.noResults.icon ?? "agora-line-search"} className="h-12 w-12 text-primary-500" />
                       }
-                      title={dataCms?.noResults.title ?? tr("noResults.title")}
-                      subtitle={<span className="font-bold">{dataCms?.noResults.subtitle ?? tr("noResults.subtitle")}</span>}
-                      description={dataCms?.noResults.description ?? tr("noResults.description")}
+                      title={pageContent?.noResults.title ?? tr("noResults.title")}
+                      subtitle={<span className="font-bold">{pageContent?.noResults.subtitle ?? tr("noResults.subtitle")}</span>}
+                      description={pageContent?.noResults.description ?? tr("noResults.description")}
                       position="center"
                       hasAnchor={true}
                       valueAnchor={t("filters.reset")}

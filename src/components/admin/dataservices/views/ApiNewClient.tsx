@@ -2,36 +2,42 @@
 
 import React from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import ApiRegistrationClient from "@/components/admin/dataservices/views/ApiRegistrationClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
-export default function ApiNewClient() {
+interface ApiNewClientProps {
+  pageContent: BoDataservicesPage;
+}
+
+export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { displayName } = useCurrentUser();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const stepTitles: Record<number, string> = {
-    1: "Descreva a sua API",
-    2: "Vincular conjuntos de dados",
-    3: "Finalizar a publicação",
-  };
+  const pageTitle = pageContent.createHero?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "API", url: "/admin/dataservices" },
+        { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
       ]}
-      title="Formulário de inscrição"
+      title={pageTitle}
     >
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        stepTitle={stepTitles[currentStep]}
+        labelWord={t("admin-common:stepper.step")}
+        stepTitle={stepTitle}
       />
 
       <ApiRegistrationClient
@@ -42,6 +48,7 @@ export default function ApiNewClient() {
         onPreviousStep={() =>
           router.push(`/admin/dataservices/new?step=${currentStep - 1}`)
         }
+        pageContent={pageContent}
       />
     </AdminLayout>
   );

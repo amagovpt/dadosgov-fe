@@ -1,7 +1,8 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RadioButton } from "@ama-pt/agora-design-system";
-import { ROLE_LABELS, type MemberRole } from "./membersConstants";
+import type { MemberRole } from "./membersConstants";
 
 interface MemberRoleRadioGroupProps {
   value: string;
@@ -20,13 +21,15 @@ export function MemberRoleRadioGroup({
   editorId,
   gapClass = "gap-24",
 }: MemberRoleRadioGroupProps) {
+  const { t } = useTranslation("admin-members");
+
   return (
     <div className={`flex ${gapClass}`}>
       <RadioButton
         id={adminId}
         name={name}
         value="admin"
-        label={ROLE_LABELS.admin}
+        label={t("roles.admin")}
         checked={value === "admin"}
         onChange={() => onChange("admin")}
       />
@@ -34,7 +37,7 @@ export function MemberRoleRadioGroup({
         id={editorId}
         name={name}
         value="editor"
-        label={ROLE_LABELS.editor}
+        label={t("roles.editor")}
         checked={value === "editor"}
         onChange={() => onChange("editor")}
       />

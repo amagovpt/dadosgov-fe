@@ -1,0 +1,9 @@
+{
+  "title": "Temas",
+  "columns": {
+    "name": "Nome",
+    "createdAt": "Criado em",
+    "datasets": "Conjuntos de dados",
+    "reuses": "Reutilizações"
+  }
+}

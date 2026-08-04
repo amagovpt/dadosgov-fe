@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   DropdownOption,
@@ -17,15 +18,16 @@ import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
 import type { HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
+import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
+import { getEditHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 const FILTER_KEY_LABELS: Record<string, string> = {
-  Organization: "Organização",
-  Tag: "Etiqueta",
-  Publisher: "Editor",
-  "Remote ID": "ID Remoto",
+  Organization: "organization",
+  Tag: "tag",
+  Publisher: "publisher",
+  "Remote ID": "remoteId",
 };
-
-const localizeFilterLabel = (label: string) => FILTER_KEY_LABELS[label] ?? label;
 
 // Schedule ("Planeamento") is a cron expression with exactly 5 fields
 // (minuto hora dia mês dia-da-semana), each field being a number or "*".
@@ -33,18 +35,14 @@ const localizeFilterLabel = (label: string) => FILTER_KEY_LABELS[label] ?? label
 const SCHEDULE_MAX_LENGTH = 14;
 const SCHEDULE_FIELD_COUNT = 5;
 const SCHEDULE_FIELD_PATTERN = /^(\d+|\*)$/;
-const SCHEDULE_ERROR_MESSAGE =
-  "O planeamento tem de ter exatamente 5 campos separados por espaços, cada campo sendo um número ou * " +
-  "(minuto  hora  dia-do-mês  mês  dia-da-semana).";
-
 // Returns an error message when the value is a non-empty, invalid cron
 // expression. An empty value is valid (it unschedules the harvester).
-function validateSchedule(value: string): string | null {
+function validateSchedule(value: string, errorMessage: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
   const fields = trimmed.split(/\s+/);
-  if (fields.length !== SCHEDULE_FIELD_COUNT) return SCHEDULE_ERROR_MESSAGE;
-  if (!fields.every((field) => SCHEDULE_FIELD_PATTERN.test(field))) return SCHEDULE_ERROR_MESSAGE;
+  if (fields.length !== SCHEDULE_FIELD_COUNT) return errorMessage;
+  if (!fields.every((field) => SCHEDULE_FIELD_PATTERN.test(field))) return errorMessage;
   return null;
 }
 
@@ -85,6 +83,8 @@ interface HarvesterConfigFormProps {
   // only preview. Default true for the create flow (no source yet).
   canEdit?: boolean;
   canDelete?: boolean;
+  deleteCard?: AdminCard;
+  auxiliaryItems?: AdminAuxiliaryItem[];
   // Whether the "advanced" fields (URL, implementation type, schedule, toggles)
   // may be edited. In the organization context an org-admin may only edit the
   // basic fields (name, description, filters), so `canEditAdvanced` is false for
@@ -127,9 +127,17 @@ export function HarvesterConfigForm({
   onDelete,
   canEdit = true,
   canDelete = true,
+  deleteCard,
+  auxiliaryItems,
   canEditAdvanced,
 }: HarvesterConfigFormProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
+  const scheduleErrorMessage = t("admin-harvesters:form.scheduleError");
+  const localizeFilterLabel = (label: string) => {
+    const key = FILTER_KEY_LABELS[label];
+    return key ? t(`admin-harvesters:form.filterLabels.${key}`) : label;
+  };
 
   // Basic fields (name, description, filters) follow `canEdit`; advanced fields
   // (URL, implementation type, schedule, toggles) follow `canEditAdvanced`,
@@ -139,7 +147,7 @@ export function HarvesterConfigForm({
 
   const handleScheduleChange = (value: string) => {
     setHarvesterSchedule(value);
-    setScheduleError(validateSchedule(value));
+    setScheduleError(validateSchedule(value, scheduleErrorMessage));
   };
 
   const typeOptions = useMemo(
@@ -172,30 +180,9 @@ export function HarvesterConfigForm({
     [filters, activeFilterKeys],
   );
 
-  const auxiliarItems = [
-    {
-      title: "Dar um nome",
-      content:
-        "Dê um nome ao seu harvester. Esta é uma referência interna que o ajudará a identificá-lo caso crie vários harvesters. O nome do seu harvester não será público.",
-      hasError: !!formErrors.harvesterName,
-    },
-    {
-      title: "Descrever o seu harvester",
-      content:
-        "Adicione detalhes no campo de descrição para seu uso interno. A descrição é opcional.",
-    },
-    {
-      title: "Adicionar o URL",
-      content:
-        "Insira aqui o URL do portal que deseja recolher. Normalmente, trata-se do URL da página inicial do seu portal de dados abertos. O URL permite que o harvester navegue e recupere todos os seus conjuntos de dados.",
-      hasError: !!formErrors.harvesterUrl,
-    },
-    {
-      title: "Identificar o tipo de implementação",
-      content:
-        "Escolha o formato dos metadados (por exemplo, DCAT, CKAN, etc.). Esse formato permite que o harvester saiba como ler e interpretar os seus metadados, para que possam ser transcritos corretamente em dados.gov.pt.",
-    },
-  ];
+  const auxiliarItems = getEditHarvesterAuxiliaryItems({
+    items: auxiliaryItems,
+  });
 
   return (
     <div className="admin-page__body">
@@ -209,8 +196,10 @@ export function HarvesterConfigForm({
           }}
         >
           <p className="pt-32 text-base leading-7 text-neutral-900">
-            Os campos marcados com um asterisco ( <span className="text-red-600">*</span> ) são
-            obrigatórios.
+            {t("admin-harvesters:form.requiredFieldsRichPrefix")}{" "}
+            <span className="text-red-600">*</span>
+            {" "}
+            {t("admin-harvesters:form.requiredFieldsRichSuffix")}
           </p>
 
           <HarvesterDescriptionSection
@@ -220,7 +209,7 @@ export function HarvesterConfigForm({
             hasHarvesterNameError={!!formErrors.harvesterName}
             hasHarvesterUrlError={!!formErrors.harvesterUrl}
             namePlaceholder=""
-            descriptionLabel="Descrição *"
+            descriptionLabel={t("admin-harvesters:fields.descriptionRequired")}
             descriptionPlaceholder=""
             urlPlaceholder=""
             nameDisabled={basicDisabled}
@@ -237,19 +226,21 @@ export function HarvesterConfigForm({
             }}
           />
 
-          <h2 className="admin-page__section-title">Implementação</h2>
+          <h2 className="admin-page__section-title">
+            {t("admin-harvesters:detail.fields.implementation")}
+          </h2>
 
           <div className="admin-page__fields-group">
             <InputSelect
               key={`harvester-type-${selectedBackend}`}
-              label="Tipo *"
+              label={t("admin-harvesters:form.typeField")}
               placeholder=""
               id="harvester-type"
               defaultValue={selectedBackend}
               disabled={advancedDisabled}
               searchable
-              searchInputPlaceholder="Escreva para pesquisar..."
-              searchNoResultsText="Nenhum resultado encontrado"
+              searchInputPlaceholder={t("admin-harvesters:form.searchInputPlaceholder")}
+              searchNoResultsText={t("admin-harvesters:form.noResults")}
               onChange={(options) => {
                 if (options.length > 0) setSelectedBackend(options[0].value as string);
               }}
@@ -259,7 +250,9 @@ export function HarvesterConfigForm({
 
             {(activeBackendFilters.length > 0 || orphanFilters.length > 0) && (
               <div>
-                <p className="text-base font-medium leading-7 text-primary-900">Filtros</p>
+                <p className="text-base font-medium leading-7 text-primary-900">
+                  {t("admin-harvesters:form.filtersTitle")}
+                </p>
 
                 {activeBackendFilters.length > 0 &&
                   filters.map((filter, index) => {
@@ -273,7 +266,7 @@ export function HarvesterConfigForm({
                         <div className="flex items-center gap-8">
                           <InputSelect
                             key={`filter-mode-select-${index}`}
-                            label="Modo"
+                            label={t("admin-harvesters:form.filterModeField")}
                             placeholder=""
                             id={`filter-mode-${index}`}
                             defaultValue={filter.mode}
@@ -285,17 +278,17 @@ export function HarvesterConfigForm({
                           >
                             <DropdownSection name="mode">
                               <DropdownOption value="include" selected={filter.mode === "include"}>
-                                Incluir
+                                {t("admin-harvesters:form.filterModeInclude")}
                               </DropdownOption>
                               <DropdownOption value="exclude" selected={filter.mode === "exclude"}>
-                                Excluir
+                                {t("admin-harvesters:form.filterModeExclude")}
                               </DropdownOption>
                             </DropdownSection>
                           </InputSelect>
                           <InputSelect
                             key={`filter-type-select-${index}-${selectedBackend}`}
-                            label="Chave do filtro"
-                            placeholder="Selecione uma chave"
+                            label={t("admin-harvesters:form.filterKeyField")}
+                            placeholder={t("admin-harvesters:form.filterKeyPlaceholder")}
                             id={`filter-type-${index}`}
                             defaultValue={filter.type}
                             disabled={basicDisabled}
@@ -337,12 +330,12 @@ export function HarvesterConfigForm({
                             variant="danger"
                             hasIcon
                             iconOnly
-                            leadingIcon="agora-line-trash"
-                            leadingIconHover="agora-solid-trash"
-                            onClick={() => removeFilter(index)}
-                            disabled={basicDisabled}
-                            aria-label="Excluir filtro"
-                          >
+                          leadingIcon="agora-line-trash"
+                          leadingIconHover="agora-solid-trash"
+                          onClick={() => removeFilter(index)}
+                          aria-label={t("admin-harvesters:form.removeFilter")}
+                          disabled={basicDisabled}
+                        >
                             {" "}
                           </Button>
                         </div>
@@ -361,7 +354,7 @@ export function HarvesterConfigForm({
                     onClick={addFilter}
                     disabled={basicDisabled}
                   >
-                    Adicionar um filtro
+                    {t("admin-harvesters:form.addFilter")}
                   </Button>
                 )}
 
@@ -370,7 +363,7 @@ export function HarvesterConfigForm({
                     <StatusCard
                       variant="warning"
                       showIcon
-                      description="Os filtros abaixo não são suportados pela implementação selecionada e não serão guardados. Remova-os ou escolha uma implementação compatível."
+                      description={t("admin-harvesters:form.orphanFiltersWarning")}
                     />
                     {orphanFilters.map((filter) => (
                       <div
@@ -380,7 +373,9 @@ export function HarvesterConfigForm({
                         <span className="text-sm text-neutral-800">
                           <strong>{filter.type}</strong>
                           {filter.value ? `: ${filter.value}` : ""}
-                          {filter.mode === "exclude" ? " (excluir)" : " (incluir)"}
+                          {filter.mode === "exclude"
+                            ? t("admin-harvesters:form.filterModeExcludeInline")
+                            : t("admin-harvesters:form.filterModeIncludeInline")}
                         </span>
                         <Button
                           type="button"
@@ -390,8 +385,8 @@ export function HarvesterConfigForm({
                           leadingIcon="agora-line-trash"
                           leadingIconHover="agora-solid-trash"
                           onClick={() => removeFilter(filter.index)}
+                          aria-label={t("admin-harvesters:form.removeUnsupportedFilter")}
                           disabled={basicDisabled}
-                          aria-label="Remover filtro não suportado"
                         >
                           {" "}
                         </Button>
@@ -404,13 +399,13 @@ export function HarvesterConfigForm({
 
             <div className="flex gap-48">
               <Switch
-                label="Ativado"
+                label={t("admin-harvesters:form.enabled")}
                 checked={isEnabled}
                 onChange={() => setIsEnabled((v) => !v)}
                 disabled={advancedDisabled}
               />
               <Switch
-                label="Arquivamento automático"
+                label={t("admin-harvesters:form.autoArchive")}
                 checked={isAutoArchive}
                 onChange={() => setIsAutoArchive((v) => !v)}
                 disabled={advancedDisabled}
@@ -418,12 +413,14 @@ export function HarvesterConfigForm({
             </div>
           </div>
 
-          <h2 className="admin-page__section-title">Avançado</h2>
+          <h2 className="admin-page__section-title">
+            {t("admin-harvesters:form.advancedTitle")}
+          </h2>
 
           <div className="admin-page__fields-group">
             <IsolatedInput
-              label="Planeamento"
-              placeholder="Máscara: * * * * * (exemplo: 0 12 * * *)"
+              label={t("admin-harvesters:detail.fields.schedule")}
+              placeholder={t("admin-harvesters:form.schedulePlaceholder")}
               id="harvester-schedule"
               defaultValue={loadedSchedule}
               maxLength={SCHEDULE_MAX_LENGTH}
@@ -437,7 +434,9 @@ export function HarvesterConfigForm({
           </div>
 
           {saveSuccess && (
-            <p className="text-sm text-green-600 text-right">Guardado com sucesso.</p>
+            <p className="text-sm text-green-600 text-right">
+              {t("admin-harvesters:form.saveSuccess")}
+            </p>
           )}
           {saveError && <p className="text-sm text-red-600 text-right">{saveError}</p>}
 
@@ -449,7 +448,9 @@ export function HarvesterConfigForm({
               disabled={isPreviewing || !!scheduleError}
               onClick={onPreview}
             >
-              {isPreviewing ? "A pré-visualizar..." : "Pré-visualizar"}
+              {isPreviewing
+                ? t("admin-harvesters:actions.previewing")
+                : t("admin-harvesters:actions.preview")}
             </Button>
             {canEdit && (
               <Button
@@ -460,7 +461,9 @@ export function HarvesterConfigForm({
                 trailingIconHover="agora-solid-check-circle"
                 disabled={isSaving || !!scheduleError}
               >
-                {isSaving ? "A guardar..." : "Guardar"}
+                {isSaving
+                  ? t("admin-harvesters:actions.saving")
+                  : t("admin-harvesters:actions.save")}
               </Button>
             )}
           </div>
@@ -470,28 +473,33 @@ export function HarvesterConfigForm({
               isPreviewing={isPreviewing}
               previewJob={previewJob}
               previewError={previewError}
-              title="Resultado da pré-visualização"
+              title={t("admin-harvesters:form.previewResultTitle")}
               className="mt-24 flex flex-col gap-12"
             />
           ) : null}
         </form>
 
         <AdminDangerActions
-          dangerActionLabel={canDelete ? "Eliminar o harvester" : undefined}
-          onDangerAction={
-            canDelete
-              ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete();
-                }
-              : undefined
-          }
+          actions={[
+            {
+              variant: "danger",
+              heading: canDelete ? (deleteCard?.title ?? "") : undefined,
+              description: canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined,
+              actionLabel: canDelete ? deleteCard?.anchor?.children : undefined,
+              onAction: canDelete && deleteCard
+                ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete();
+                  }
+                : undefined,
+            },
+          ]}
         />
       </div>
 
       {/* Auxiliar sidebar */}
-      <AdminAuxiliarySidebar items={auxiliarItems} />
+      {auxiliarItems.length > 0 ? <AdminAuxiliarySidebar items={auxiliarItems} /> : null}
     </div>
   );
 }

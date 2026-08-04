@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { CardNoResults, Icon, Pill } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -15,22 +16,26 @@ export default function DataservicesEditDiscussionsTab({
   discussionsLoading,
   discussionsLoaded,
 }: DataservicesEditDiscussionsTabProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+
   return (
     <div className="mt-24">
-      {discussionsLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
+      {discussionsLoading && (
+        <p className="text-neutral-700 text-sm">{t("admin-common:loading")}</p>
+      )}
       {discussionsLoaded && discussions.length === 0 && (
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-chat" className="w-12 h-12 text-primary-500 icon-xl" />}
-          title="Sem discussões"
-          description="Ainda não existem discussões nesta API."
+          title={t("admin-dataservices:edit.discussionsEmptyTitle")}
+          description={t("admin-dataservices:edit.discussionsEmptyDescription")}
           hasAnchor={false}
         />
       )}
       {discussionsLoaded && discussions.length > 0 && (
         <div>
           <h2 className="font-medium text-neutral-900 text-base mb-16">
-            {discussions.length} {discussions.length === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
+            {t("admin-dataservices:edit.discussionCount", { count: discussions.length })}
           </h2>
           <div className="space-y-16">
             {discussions.map((discussion) => (
@@ -42,14 +47,16 @@ export default function DataservicesEditDiscussionsTab({
                       <span className="text-primary-600 font-medium">
                         {discussion.user.first_name} {discussion.user.last_name}
                       </span>
-                      {" — Publicado em "}
+                      {` - ${t("admin-dataservices:edit.publishedAt")} `}
                       {format(new Date(discussion.created), "d 'de' MMMM 'de' yyyy", {
                         locale: pt,
                       })}
                     </p>
                   </div>
                   <Pill variant={discussion.closed ? "neutral" : "informative"}>
-                    {discussion.closed ? "Fechada" : "Aberta"}
+                    {discussion.closed
+                      ? t("admin-dataservices:edit.closed")
+                      : t("admin-dataservices:edit.open")}
                   </Pill>
                 </div>
                 {discussion.discussion.length > 0 && (
@@ -65,7 +72,7 @@ export default function DataservicesEditDiscussionsTab({
                           <span className="text-primary-600 font-medium">
                             {message.posted_by.first_name} {message.posted_by.last_name}
                           </span>
-                          {" — "}
+                          {" - "}
                           {format(new Date(message.posted_on), "d 'de' MMMM 'de' yyyy", {
                             locale: pt,
                           })}

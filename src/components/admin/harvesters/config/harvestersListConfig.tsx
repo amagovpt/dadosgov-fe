@@ -11,15 +11,21 @@ import {
 import type { HarvestSource } from "@/service/types/harvester";
 import { can } from "@/utils/permissions";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { getHarvesterStatus } from "@/utils/harvesterStatus";
+import { getHarvesterStatus, type HarvesterStatusLabels } from "@/utils/harvesterStatus";
 
-export type HarvesterSortField = "name" | "created_at" | "last_job";
+export type HarvesterSortField = "name" | "status" | "created_at" | "last_job";
 
 export function getLastJobTimestamp(harvester: HarvestSource): number {
   const job = harvester.last_job;
   if (!job) return 0;
   const value = job.started ?? job.ended ?? job.created;
   return value ? Date.parse(value) : 0;
+}
+
+function getHarvesterStatusSortValue(harvester: HarvestSource): string {
+  const validationState = harvester.validation?.state ?? "pending";
+  const lastJobStatus = harvester.last_job?.status ?? "no_job";
+  return `${validationState}:${lastJobStatus}`;
 }
 
 export function filterHarvestersByStatus(harvesters: HarvestSource[], statusFilter: string) {
@@ -44,6 +50,7 @@ export function sortHarvesters(
 ) {
   return sortItems(harvesters, sortField, sortOrder, {
     name: createLocaleStringSorter((harvester) => harvester.name),
+    status: createLocaleStringSorter(getHarvesterStatusSortValue),
     created_at: createDateSorter((harvester) => harvester.created_at),
     last_job: (a, b) => getLastJobTimestamp(a) - getLastJobTimestamp(b),
   });
@@ -51,68 +58,96 @@ export function sortHarvesters(
 
 interface OrgHarvesterColumnsOptions {
   editHref: (harvester: HarvestSource) => string;
+  labels: HarvesterColumnLabels;
+  statusLabels: HarvesterStatusLabels;
 }
 
 interface SystemHarvesterColumnsOptions {
   onApprove: (harvester: HarvestSource) => void;
   onReject: (harvester: HarvestSource) => void;
+  labels: HarvesterColumnLabels;
+  statusLabels: HarvesterStatusLabels;
+  actions: HarvesterActionLabels;
+}
+
+interface HarvesterColumnLabels {
+  name: string;
+  status: string;
+  implementation: string;
+  createdAt: string;
+  lastJob: string;
+  datasets: string;
+  api: string;
+  actions: string;
+  notYet: string;
+}
+
+interface HarvesterActionLabels {
+  approveHarvester: string;
+  rejectHarvester: string;
+  approveHarvesterNamed: (name: string) => string;
+  rejectHarvesterNamed: (name: string) => string;
 }
 
 export function createOrgHarvesterColumns({
   editHref,
+  labels,
+  statusLabels,
 }: OrgHarvesterColumnsOptions): AdminListColumn<HarvestSource, HarvesterSortField>[] {
   return [
     {
       id: "name",
-      header: "Nome",
+      header: labels.name,
       sortField: "name",
       sortType: "string",
       renderCell: (harvester) => <TextLink href={editHref(harvester)}>{harvester.name}</TextLink>,
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (harvester) => {
-        const status = getHarvesterStatus(harvester);
+        const status = getHarvesterStatus(harvester, statusLabels);
         return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
       },
     },
     {
       id: "implementation",
-      header: "Implementação",
+      header: labels.implementation,
       renderCell: (harvester) => harvester.backend,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at",
       sortType: "date",
       renderCell: (harvester) => formatDateToDMY(harvester.created_at),
     },
     {
       id: "last_job",
-      header: "Última execução",
+      header: labels.lastJob,
       sortField: "last_job",
       sortType: "date",
       renderCell: (harvester) =>
         harvester.last_job
           ? formatDateToDMY(harvester.last_job.started ?? harvester.last_job.ended ?? "")
-          : "Ainda não",
+          : labels.notYet,
     },
     {
       id: "datasets",
-      header: "Conjuntos de dados",
+      header: labels.datasets,
       renderCell: (harvester) => harvester.datasets_count ?? 0,
     },
     {
       id: "api",
-      header: "API",
+      header: labels.api,
       renderCell: (harvester) => harvester.backend,
     },
     {
       id: "actions",
-      header: "Ações",
-      headerLabel: "Ações",
+      header: labels.actions,
+      headerLabel: labels.actions,
       // Edit/run/delete require org-admin (HarvestSourceAdminPermission); an
       // editor only gets preview, so show a read-only view link instead.
       renderCell: (harvester) => (
@@ -130,61 +165,66 @@ export function createOrgHarvesterColumns({
 export function createSystemHarvesterColumns({
   onApprove,
   onReject,
-}: SystemHarvesterColumnsOptions): AdminListColumn<HarvestSource>[] {
+  labels,
+  statusLabels,
+  actions,
+}: SystemHarvesterColumnsOptions): AdminListColumn<HarvestSource, HarvesterSortField>[] {
   return [
     {
       id: "name",
-      header: "Nome",
+      header: labels.name,
       renderCell: (harvester) => (
         <TextLink href={`/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
       ),
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (harvester) => {
-        const status = getHarvesterStatus(harvester);
+        const status = getHarvesterStatus(harvester, statusLabels);
         return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
       },
     },
     {
       id: "implementation",
-      header: "Implementação",
+      header: labels.implementation,
       renderCell: (harvester) => harvester.backend,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       renderCell: (harvester) => formatDateToDMY(harvester.created_at),
     },
     {
       id: "last_job",
-      header: "Última execução",
+      header: labels.lastJob,
       renderCell: (harvester) =>
-        harvester.last_job?.ended ? formatDateToDMY(harvester.last_job.ended) : "Ainda não",
+        harvester.last_job?.ended ? formatDateToDMY(harvester.last_job.ended) : labels.notYet,
     },
     {
       id: "datasets",
-      header: "Conjuntos de dados",
+      header: labels.datasets,
       renderCell: (harvester) => harvester.datasets_count ?? 0,
     },
     {
       id: "api",
-      header: "API",
+      header: labels.api,
       renderCell: () => "0",
     },
     {
       id: "actions",
-      header: "Ações",
-      headerLabel: "Ações",
+      header: labels.actions,
+      headerLabel: labels.actions,
       renderCell: (harvester) => (
         <div className="flex items-center gap-[12px]">
           {can(harvester, "validate") && harvester.validation?.state === "pending" && (
             <>
               <button
                 type="button"
-                aria-label={`Aprovar harvester ${harvester.name}`}
-                title="Aprovar harvester"
+                aria-label={actions.approveHarvesterNamed(harvester.name)}
+                title={actions.approveHarvester}
                 onClick={(event) => {
                   event.stopPropagation();
                   onApprove(harvester);
@@ -197,8 +237,8 @@ export function createSystemHarvesterColumns({
               </button>
               <button
                 type="button"
-                aria-label={`Rejeitar harvester ${harvester.name}`}
-                title="Rejeitar harvester"
+                aria-label={actions.rejectHarvesterNamed(harvester.name)}
+                title={actions.rejectHarvester}
                 onClick={(event) => {
                   event.stopPropagation();
                   onReject(harvester);

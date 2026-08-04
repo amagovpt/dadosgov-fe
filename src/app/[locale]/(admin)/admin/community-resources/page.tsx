@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
+import { getBoCommunityResources, getBoCommunityResourcesMetadata } from "@/service/queries/admin/community-resources";
 import CommunityResourcesClient from "@/components/admin/community-resources/views/CommunityResourcesClient";
 
-export const metadata: Metadata = {
-  title: "Recursos comunitários - Admin - dados.gov.pt",
-  description: "Gestão de recursos comunitários no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoCommunityResourcesMetadata(locale, "listMetadata");
 
-export default function CommunityResourcesPage() {
-  return <CommunityResourcesClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function CommunityResourcesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoCommunityResources(locale);
+
+  return <CommunityResourcesClient pageContent={pageContent} />;
 }

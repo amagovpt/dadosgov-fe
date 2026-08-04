@@ -1,21 +1,21 @@
-"use client";
+import type { Metadata } from "next";
+import { getBoCommunityResourcesMetadata } from "@/service/queries/admin/community-resources";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoCommunityResourcesMetadata(locale, "orgRedirectMetadata");
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
 
 export default function OrgCommunityResourcesRedirect() {
-  const router = useRouter();
-  const { activeOrg, isLoading } = useActiveOrganization();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (activeOrg) {
-      router.replace(`/admin/org/${activeOrg.id}/community-resources`);
-    } else {
-      router.replace("/admin");
-    }
-  }, [activeOrg, isLoading, router]);
-
-  return null;
+  return <AdminOrgRedirect targetPath="/admin/org/{orgId}/community-resources" />;
 }

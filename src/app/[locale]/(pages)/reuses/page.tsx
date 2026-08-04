@@ -65,7 +65,7 @@ export default async function ReusesPage({
     const forwarded = await serverForwardedHeaders();
     const data = await fetchReusesListing(page, 12, apiFilters, forwarded);
 
-    const dataCms = await getFrontOfficePage("reuses","pt");
+    const pageContent = await getFrontOfficePage("reuses","pt");
 
     return (
         <ReusesClient
@@ -73,7 +73,7 @@ export default async function ReusesPage({
             currentPage={page}
             filterCounts={data.filter_counts}
             allOrganizations={data.organizations}
-            dataCms={dataCms}
+            pageContent={pageContent}
         />
     );
 }

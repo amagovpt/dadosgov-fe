@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import type { Activity } from "@/service/types/catalog";
 import TextLink from "@/components/Primitives/TextLink";
@@ -16,26 +17,28 @@ export default function DatasetsEditActivitiesTab({
   activities,
   translateActivityLabel,
 }: DatasetsEditActivitiesTabProps) {
+  const { t } = useTranslation("admin-datasets");
+
   return (
     <div className="mt-24">
-      {activitiesLoading && <p className="text-sm text-neutral-700">A carregar...</p>}
+      {activitiesLoading && <p className="text-sm text-neutral-700">{t("edit.loading")}</p>}
       {activitiesLoaded && activities.length === 0 && (
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem atividades"
-          description="Ainda não existem atividades registadas neste conjunto de dados."
+          title={t("edit.activitiesEmptyTitle")}
+          description={t("edit.activitiesEmptyDescription")}
           hasAnchor={false}
         />
       )}
       {activitiesLoaded && activities.length > 0 && (
         <>
           <h2 className="mb-16 text-base font-medium text-neutral-900">
-            {activities.length} ATIVIDADES
+            {activities.length} {t("edit.activitiesCount")}
           </h2>
           <div className="flex flex-col gap-12">
             {activities.map((activity, index) => (
-              <div key={index} className="rounded-lg flex items-start gap-12 bg-neutral-50 p-12">
+              <div key={index} className="flex items-start gap-12 rounded-lg bg-neutral-50 p-12">
                 <Avatar
                   avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
                   srcPath={
@@ -51,7 +54,7 @@ export default function DatasetsEditActivitiesTab({
                     </TextLink>{" "}
                     {translateActivityLabel(activity.label)}
                   </p>
-                  <p className="text-xs mt-4 text-neutral-600">
+                  <p className="mt-4 text-xs text-neutral-600">
                     {new Date(activity.created_at).toLocaleDateString("pt-PT", {
                       day: "2-digit",
                       month: "2-digit",

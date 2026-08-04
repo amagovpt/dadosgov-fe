@@ -5,6 +5,7 @@ export const PAGELESS_BREADCRUMB_PATHS: string[] = [
   "/recursos",
   "/recursos/como-usar-o-portal",
   "/recursos/desenvolvimento",
+  "/users",
 ];
 
 function stripQueryAndHash(path: string): string {
@@ -68,13 +69,26 @@ export function prettifySegment(segment: string): string {
 }
 
 /**
+ * i18n key prefix for route-segment labels. Segment labels live under their own
+ * object (`breadcrumbs.datasets`, …) rather than at the top level of the
+ * namespace because several top-level keys are objects (`search`, `filters`,
+ * `discussions`, `pagination`) that a raw `t(segment)` lookup would collide
+ * with, and because the route segment (`noticias`) does not always match the
+ * existing content key (`news`).
+ */
+const BREADCRUMB_KEY_PREFIX = "breadcrumbs";
+
+/**
  * Builds breadcrumb items from a route path. Pure (no React/hooks) so it can be
  * reused by the `BreadcrumbDynamic` client component and unit-tested in isolation.
  *
  * - Strips the leading locale segment via {@link stripLocale}.
- * - Resolves each segment's label through `t(segment, { defaultValue })`, using
+ * - Resolves each segment's label through `t("breadcrumbs.<segment>")`, using
  *   {@link prettifySegment} as the fallback, unless an entry in `overrides`
  *   (keyed by the raw segment) provides a label (e.g. a dataset id → its title).
+ * - `currentLabel` wins for the last crumb whatever the segment turns out to be
+ *   — detail routes such as `reuses/[rid]` may carry either a slug or an id, so
+ *   a value-keyed `overrides` entry cannot be relied on there.
  * - The last item gets an empty `url` (current page, not a link); intermediate
  *   "pageless" paths are blanked later by `sanitizeBreadcrumbItems` in the
  *   `Breadcrumb` primitive.
@@ -83,11 +97,13 @@ export function buildBreadcrumbItems({
   path,
   t,
   overrides,
+  currentLabel,
   includeHome = true,
 }: {
   path: string;
   t: (key: string, options?: { defaultValue?: string }) => string;
   overrides?: Record<string, ReactNode>;
+  currentLabel?: ReactNode;
   includeHome?: boolean;
 }): DynamicBreadcrumbItem[] {
   const segments = stripLocale(path).split("/").filter(Boolean);
@@ -96,11 +112,16 @@ export function buildBreadcrumbItems({
     const url = "/" + segments.slice(0, index + 1).join("/");
     const isLast = index === segments.length - 1;
     const label =
-      overrides?.[segment] ?? t(segment, { defaultValue: prettifySegment(segment) });
+      (isLast ? currentLabel : undefined) ??
+      overrides?.[segment] ??
+      t(`${BREADCRUMB_KEY_PREFIX}.${segment}`, { defaultValue: prettifySegment(segment) });
     return { label, url: isLast ? "" : url };
   });
 
   if (!includeHome) return items;
 
-  return [{ label: t("home", { defaultValue: "Início" }), url: "/" }, ...items];
+  return [
+    { label: t(`${BREADCRUMB_KEY_PREFIX}.home`, { defaultValue: "Início" }), url: "/" },
+    ...items,
+  ];
 }
