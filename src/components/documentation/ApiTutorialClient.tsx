@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import type { ApiReferencePage } from "@/service/types/documentation/api-reference";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -14,6 +16,11 @@ declare global {
   }
 }
 
+// The API root serves the backend's standalone Swagger UI (Flask-RestX). Both
+// URLs are same-origin: `/api/` is forwarded to the backend by the Next proxy
+// (see `src/proxy.ts`), which keeps the `download` attribute working.
+const SWAGGER_UI_URL = "/api/1/";
+const SWAGGER_JSON_FILENAME = "dados-gov-api-swagger.json";
 const SWAGGER_CSS_ID = "swagger-ui-css";
 const SWAGGER_SCRIPT_ID = "swagger-ui-script";
 
@@ -46,6 +53,7 @@ const markdownComponents: Components = {
 
 export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) {
   const swaggerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation("documentation");
 
   useEffect(() => {
     let cancelled = false;
@@ -161,6 +169,25 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
                     </ReactMarkdown>
                   </section>
                 ))}
+              <div className="mb-24 flex flex-wrap items-center gap-24">
+                <a
+                  href={SWAGGER_UI_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-8 text-primary-600 hover:underline"
+                >
+                  <Icon name="agora-line-external-link" className="h-6 w-6" />
+                  <span>{t("apiReference.openSwagger")}</span>
+                </a>
+                <a
+                  href={page.swaggerSpecUrl}
+                  download={SWAGGER_JSON_FILENAME}
+                  className="inline-flex items-center gap-8 text-primary-600 hover:underline"
+                >
+                  <Icon name="agora-line-download" className="h-6 w-6" />
+                  <span>{t("apiReference.downloadSpecification")}</span>
+                </a>
+              </div>
             </div>
 
             {/* Swagger UI */}
