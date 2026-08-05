@@ -7,10 +7,10 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string[] }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const datastorySlug = slug.join("/");
 
-  const datastory = await getDatastoryMetadata(datastorySlug, "pt");
+  const datastory = await getDatastoryMetadata(datastorySlug, locale);
 
   return {
     title: datastory.title,
@@ -23,10 +23,10 @@ export default async function DataStoryDetailPage({
 }: {
   params: Promise<{ locale: string; slug: string[] }>;
 }) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const datastorySlug = slug.join("/");
 
-  const datastory = await getDatastory(datastorySlug, "pt");
+  const datastory = await getDatastory(datastorySlug, locale);
 
   return <DatastoryDetailsPage datastory={datastory} />;
 }

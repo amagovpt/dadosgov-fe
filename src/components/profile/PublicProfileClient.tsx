@@ -27,7 +27,7 @@ import { fetchMyReuses, fetchReuses } from "@/service/api/reuses";
 import { fetchUserProfile } from "@/service/api/users";
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
 import AppIcon from "../Primitives/AppIcon";
 import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
@@ -36,6 +36,7 @@ import { useTranslation } from "react-i18next";
 
 export default function PublicProfileClient() {
   const { i18n } = useTranslation("common");
+  const { t } = useTranslation("profile");
   const { user, isLoading: isAuthLoading } = useAuth();
   const params = useParams();
   const router = useRouter();
@@ -177,7 +178,9 @@ export default function PublicProfileClient() {
 
   const formatShortDate = (dateStr: string) => {
     try {
-      return format(new Date(dateStr), "dd/MM/yyyy");
+      return new Intl.DateTimeFormat(i18n.language === "en" ? "en-GB" : "pt-PT").format(
+        new Date(dateStr)
+      );
     } catch {
       return dateStr;
     }
@@ -193,10 +196,10 @@ export default function PublicProfileClient() {
   return (
     <div className="container mx-auto mb-64">
       <div className="pb-64">
-        <BreadcrumbDynamic darkMode={false} currentLabel={userName || "Perfil"} />
+        <BreadcrumbDynamic darkMode={false} currentLabel={userName || t("title")} />
       </div>
 
-      <h1 className="text-2xl-bold text-brand-blue-secondary mt-64 mb-32 max-w-[696px]">Perfil</h1>
+      <h1 className="text-2xl-bold text-brand-blue-secondary mt-64 mb-32 max-w-[696px]">{t("title")}</h1>
 
       {/* Profile Card */}
       <div className="profile-card">
@@ -250,7 +253,7 @@ export default function PublicProfileClient() {
                 onClick={handleToggleSubscriptions}
               >
                 {subscriptionsTotal}{" "}
-                {subscriptionsTotal === 1 ? "Subscrição" : "Subscrições"}
+                {t("subscriptions", { count: subscriptionsTotal })}
               </Button>
             )}
             <Button
@@ -262,7 +265,7 @@ export default function PublicProfileClient() {
               onClick={handleToggleFollowers}
             >
               {followersTotal}{" "}
-              {followersTotal === 1 ? "Acompanhamento" : "Acompanhamentos"}
+              {t("followers", { count: followersTotal })}
             </Button>
           </div>
 
@@ -276,7 +279,7 @@ export default function PublicProfileClient() {
                 leadingIconHover="agora-solid-edit"
                 onClick={() => router.push("/admin/me/profile")}
               >
-                Editar o meu perfil
+                {t("editProfile")}
               </Button>
             </div>
           )}
@@ -286,7 +289,7 @@ export default function PublicProfileClient() {
       {/* Biography Section */}
       {(displayUser as UserPublic)?.about && (
         <div className="mt-32">
-          <p className="font-medium text-neutral-900 text-base uppercase mb-8">Biografia</p>
+          <p className="font-medium text-neutral-900 text-base uppercase mb-8">{t("biography")}</p>
           <p className="text-neutral-900 text-base leading-7">{(displayUser as UserPublic).about}</p>
         </div>
       )}
@@ -296,7 +299,7 @@ export default function PublicProfileClient() {
         <div className="mt-48">
           <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
             {displayUser.organizations.length}{" "}
-            {displayUser.organizations.length === 1 ? "Organização" : "Organizações"}
+            {t("organizations", { count: displayUser.organizations.length })}
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
@@ -313,7 +316,7 @@ export default function PublicProfileClient() {
                       org.logo || "/images/placeholders/organization.png",
                     alt: org.name,
                   }}
-                  category="Organização"
+                  category={t("organization")}
                   title={
                     <div className="underline text-xl-bold">{org.name}</div>
                   }
@@ -327,7 +330,7 @@ export default function PublicProfileClient() {
                   date={
                     org.last_modified ? (
                       <span className="font-[300]">
-                        {`Atualizado há ${formatDistanceToNow(new Date(org.last_modified), { locale: pt })}`}
+                        {t("updatedAgo", { time: formatDistanceToNow(new Date(org.last_modified), { locale: i18n.language === "en" ? enGB : pt }) })}
                       </span>
                     ) : undefined
                   }
@@ -349,7 +352,7 @@ export default function PublicProfileClient() {
                             ? (org.metrics.views / 1000).toFixed(0) + " mil"
                             : String(org.metrics.views)
                         : "0",
-                      title: "Visualizações",
+                      title: t("views"),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -362,7 +365,7 @@ export default function PublicProfileClient() {
                       trailingIconHover: "",
                       trailingIconActive: "",
                       children: String(org.metrics?.datasets || 0),
-                      title: "Datasets",
+                      title: t("datasets", { count: 2 }),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -379,7 +382,7 @@ export default function PublicProfileClient() {
                           <span>{org.metrics?.reuses || 0}</span>
                         </span>
                       ),
-                      title: "Reutilizações",
+                      title: t("reuses", { count: 2 }),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -392,7 +395,7 @@ export default function PublicProfileClient() {
                       trailingIconHover: "",
                       trailingIconActive: "",
                       children: String(org.metrics?.followers || 0),
-                      title: "Favoritos",
+                      title: t("favorites"),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -415,11 +418,11 @@ export default function PublicProfileClient() {
         <div className="mt-48">
           <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
             {subscriptionsTotal}{" "}
-            {subscriptionsTotal === 1 ? "Subscrição" : "Subscrições"}
+            {t("subscriptions", { count: subscriptionsTotal })}
           </h2>
 
           {isLoadingSubscriptions ? (
-            <p className="text-neutral-900">A carregar...</p>
+            <p className="text-neutral-900">{t("loading")}</p>
           ) : subscriptions.length === 0 ? (
             <CardNoResults
               position="center"
@@ -429,8 +432,8 @@ export default function PublicProfileClient() {
                   className="w-40 h-40 text-primary-500 icon-xl"
                 />
               }
-              title="Sem subscrições"
-              description="Ainda não segue nenhum conteúdo."
+              title={t("noSubscriptions")}
+              description={t("noSubscriptionsDescription")}
               hasAnchor={false}
             />
           ) : (
@@ -472,11 +475,11 @@ export default function PublicProfileClient() {
         <div className="mt-48">
           <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
             {followersTotal}{" "}
-            {followersTotal === 1 ? "Acompanhamento" : "Acompanhamentos"}
+            {t("followers", { count: followersTotal })}
           </h2>
 
           {isLoadingFollowers ? (
-            <p className="text-neutral-900">A carregar...</p>
+            <p className="text-neutral-900">{t("loading")}</p>
           ) : followers.length === 0 ? (
             <CardNoResults
               position="center"
@@ -486,8 +489,8 @@ export default function PublicProfileClient() {
                   className="w-40 h-40 text-primary-500 icon-xl"
                 />
               }
-              title="Sem acompanhamentos"
-              description="Ninguém segue este utilizador ainda."
+              title={t("noFollowers")}
+              description={t("noFollowersDescription")}
               hasAnchor={false}
             />
           ) : (
@@ -524,17 +527,17 @@ export default function PublicProfileClient() {
       {/* Datasets Section */}
       <div className="mt-48">
         <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
-          {datasets.length} {datasets.length === 1 ? "Conjunto de dados" : "Conjuntos de dados"}
+          {datasets.length} {t("datasets", { count: datasets.length })}
         </h2>
 
         {isLoading ? (
-          <p className="text-neutral-900">A carregar...</p>
+          <p className="text-neutral-900">{t("loading")}</p>
         ) : datasets.length === 0 ? (
           <CardNoResults
             position="center"
             icon={<Icon name="agora-line-file" className="w-40 h-40 text-primary-500 icon-xl" />}
-            title="Sem conjuntos de dados"
-            description="Não publicou conjuntos de dados"
+            title={t("noDatasets")}
+            description={t("noDatasetsDescription")}
             hasAnchor={false}
           />
         ) : (
@@ -554,18 +557,18 @@ export default function PublicProfileClient() {
             <TableHeader>
               <TableRow>
                 <TableHeaderCell sortType="string">
-                  Título do conjunto de dados
+                  {t("datasetTitle")}
                 </TableHeaderCell>
-                <TableHeaderCell>Ficheiros</TableHeaderCell>
+                <TableHeaderCell>{t("files")}</TableHeaderCell>
                 <TableHeaderCell sortType="string">
-                  Sigla da Entidade
+                  {t("entityAcronym")}
                 </TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
+                <TableHeaderCell>{t("status")}</TableHeaderCell>
                 <TableHeaderCell sortType="date">
-                  Data de criação
+                  {t("createdAt")}
                 </TableHeaderCell>
                 <TableHeaderCell sortType="date">
-                  Data de alteração
+                  {t("updatedAt")}
                 </TableHeaderCell>
                 <TableHeaderCell>{""}</TableHeaderCell>
               </TableRow>
@@ -573,26 +576,26 @@ export default function PublicProfileClient() {
             <TableBody>
               {paginatedDatasets.map((dataset) => (
                 <TableRow key={dataset.id}>
-                  <TableCell headerLabel="Título">
+                  <TableCell headerLabel={t("datasetTitle")}>
                     {dataset.title}
                   </TableCell>
-                  <TableCell headerLabel="Ficheiros">
+                  <TableCell headerLabel={t("files")}>
                     {dataset.resources?.length || 0}
                   </TableCell>
-                  <TableCell headerLabel="Sigla da Entidade">
+                  <TableCell headerLabel={t("entityAcronym")}>
                     {dataset.organization?.acronym || dataset.organization?.name || "—"}
                   </TableCell>
-                  <TableCell headerLabel="Estado">
+                  <TableCell headerLabel={t("status")}>
                     {dataset.private ? (
-                      <StatusDot variant="warning">Rascunho</StatusDot>
+                      <StatusDot variant="warning">{t("draft")}</StatusDot>
                     ) : (
-                      <StatusDot variant="success">Público</StatusDot>
+                      <StatusDot variant="success">{t("public")}</StatusDot>
                     )}
                   </TableCell>
-                  <TableCell headerLabel="Data de criação">
+                  <TableCell headerLabel={t("createdAt")}>
                     {formatShortDate(dataset.created_at)}
                   </TableCell>
-                  <TableCell headerLabel="Data de alteração">
+                  <TableCell headerLabel={t("updatedAt")}>
                     {formatShortDate(dataset.last_modified || dataset.created_at)}
                   </TableCell>
                   <TableCell headerLabel="">
@@ -610,17 +613,17 @@ export default function PublicProfileClient() {
       {/* Reuses Section */}
       <div className="mt-48">
         <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
-          {reuses.length} {reuses.length === 1 ? "Reutilização" : "Reutilizações"}
+          {reuses.length} {t("reuses", { count: reuses.length })}
         </h2>
 
         {isLoading ? (
-          <p className="text-neutral-900">A carregar...</p>
+          <p className="text-neutral-900">{t("loading")}</p>
         ) : reuses.length === 0 ? (
           <CardNoResults
             position="center"
             icon={<img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />}
-            title="Sem reutilizações"
-            description="Não publicou reutilizações"
+            title={t("noReuses")}
+            description={t("noReusesDescription")}
             hasAnchor={false}
           />
         ) : (
@@ -646,8 +649,7 @@ export default function PublicProfileClient() {
                   }
                   date={
                     <span className="font-[300]">
-                      Atualizado{" "}
-                      {formatDateLong(
+                      {t("updated")} {formatDateLong(
                         reuse.last_modified || reuse.created_at,
                         i18n.language as "pt" | "en"
                       )}
@@ -662,8 +664,8 @@ export default function PublicProfileClient() {
                       trailingIcon: "",
                       trailingIconHover: "",
                       trailingIconActive: "",
-                      children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
-                      title: "Visualizações",
+                      children: reuse.metrics?.views?.toLocaleString(i18n.language) || "0",
+                      title: t("views"),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -676,7 +678,7 @@ export default function PublicProfileClient() {
                       trailingIconHover: "",
                       trailingIconActive: "",
                       children: reuse.metrics?.followers || 0,
-                      title: "Favoritos",
+                      title: t("favorites"),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },

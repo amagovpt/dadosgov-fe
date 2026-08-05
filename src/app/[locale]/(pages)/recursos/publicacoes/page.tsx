@@ -13,8 +13,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { hero } = await getPublicationsPage("pt");
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const { hero } = await getPublicationsPage(locale);
 
   return {
     title: `${hero.title} - Dados Gov PT`,
@@ -24,14 +25,17 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PublicationsPage({
   searchParams,
+  params,
 }: {
   searchParams: Promise<{ page?: string; sort?: string }>;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const { page: pageParam, sort: sortParam } = await searchParams;
   const sort = parsePublicationsSort(sortParam);
   const currentPage = Math.max(1, Number(pageParam) || 1);
 
-  const { hero, publications } = await getPublicationsPage("pt");
+  const { hero, publications } = await getPublicationsPage(locale);
 
   const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
     if (pdfDocument === "#") return null;

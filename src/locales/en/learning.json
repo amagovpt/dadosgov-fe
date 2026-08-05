@@ -1,0 +1,23 @@
+{
+  "errorLoading": "Unable to load page data.",
+  "updatedAt": "Updated on {{date}}",
+  "dateUnavailable": "Update date unavailable",
+  "publishedAt": "Published on {{date}}",
+  "learnImageAlt": "Learn",
+  "courseImageAlt": "Course",
+  "miniCoursesImageAlt": "Mini courses",
+  "miniCourseNotFound": "Mini course not found.",
+  "stepNotFound": "Step not found.",
+  "startCourse": "Start course",
+  "searchTitle": "Which mini course are you looking for?",
+  "searchLabel": "Search mini courses",
+  "searchPlaceholder": "Search by course name, technical area or profile",
+  "stepImageAlt": "Step image",
+  "next": "Next",
+  "seeMoreCourses": "See more courses",
+  "sort": "Sort",
+  "results": "{{shown}} of {{total}} results",
+  "sortOptions": { "asc": "Alphabetical order A-Z", "desc": "Alphabetical order Z-A", "newest": "Most recent" },
+  "previous": "Previous",
+  "shareMiniCourse": "Share this mini course"
+}

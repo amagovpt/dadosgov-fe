@@ -9,7 +9,7 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
         findFooterSingleton {
             data {
                 title {
-                    pt
+                    ${locale}
                 }
                 groups {
                     ${locale} {
@@ -23,7 +23,7 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
                     }
                 }
                 description {
-                    pt
+                    ${locale}
                 }
                 logos {
                     ${locale} {
@@ -45,7 +45,7 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
                     }
                 }
                 copyright {
-                    pt
+                    ${locale}
                 }
             }
         }

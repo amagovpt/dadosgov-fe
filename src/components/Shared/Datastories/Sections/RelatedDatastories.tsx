@@ -4,6 +4,7 @@ import { InfoBlock } from "../../InfoBlock";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { formatDateLong } from "@/utils/formatDate";
 import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
+import { useTranslation } from "react-i18next";
 
 // ----------------------------------------------------------------------------------------------------------------
 
@@ -14,13 +15,17 @@ type DatastoryCardI = RelatedDatastoriesI["datastories"][number];
 // ----------------------------------------------------------------------------------------------------------------
 
 function DatastoryCard({ createdAt, title, description, slug }: DatastoryCardI) {
+  const { t, i18n } = useTranslation("common");
+
   return (
     <CardGeneral
       variant="white"
       isCardHorizontal={false}
       isBlockedLink={false}
       pillText="Datastory"
-      subtitleText={`Publicado a ${formatDateLong(createdAt)}`}
+      subtitleText={t("publishedAt", {
+        date: formatDateLong(createdAt, i18n.language as "pt" | "en"),
+      })}
       titleText={title}
       descriptionText={formatHtmlParagraphs(description) as string[]}
       anchor={{

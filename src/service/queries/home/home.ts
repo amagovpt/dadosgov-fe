@@ -41,7 +41,7 @@ export async function getHome(locale: string = "pt"): Promise<Home> {
               iv {
                 data {
                   alt {
-                    pt
+                    ${locale}
                   }
                   anchor {
                     iv {

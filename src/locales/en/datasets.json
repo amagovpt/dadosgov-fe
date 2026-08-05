@@ -115,6 +115,8 @@
     "communityDisclaimer": "These resources are published by the community and are not the responsibility of the data producer."
   },
   "info": {
+    "links": "Links",
+    "contact": "Contact",
     "title": "Information",
     "keywords": "Keywords",
     "identifier": "Identifier",

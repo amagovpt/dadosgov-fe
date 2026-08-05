@@ -32,10 +32,12 @@ const notoSansMono = Noto_Sans_Mono({
 const namespaces = [
   "common",
   "footer",
-  "home",
   "datastories",
   "datasets",
   "login",
+  "learning",
+  "documentation",
+  "profile",
   "reuses",
   "organizations",
   "dataservices",
@@ -113,7 +115,7 @@ export default async function RootLayout({
 
   let headerNavigation: HeaderNavigationData;
   try {
-    headerNavigation = await getHeaderNavigation("pt");
+    headerNavigation = await getHeaderNavigation(locale);
   } catch (error) {
     console.error("Error fetching header navigation:", error);
     headerNavigation = {} as HeaderNavigationData;

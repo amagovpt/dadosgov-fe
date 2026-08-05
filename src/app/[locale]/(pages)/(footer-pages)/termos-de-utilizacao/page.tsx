@@ -3,6 +3,7 @@ import { getFaqs } from "@/service/queries/faqs/faqs";
 
 import { Metadata } from "next";
 import MarkDownRender from "@/components/Shared/MarkDownRender";
+import initTranslations from "@/app/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export async function generateMetadata(
 
 export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  const { t } = await initTranslations({ locale, namespaces: ["common"] });
   const { title, body } = await getFaqs("termos-de-utilizacao", locale);
 
   return (
@@ -40,7 +42,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
               </div>
             ) : (
               <p className="text-m-regular leading-7 text-[#2b363c]">
-                Não foi possível carregar o conteúdo.
+                {t("contentLoadError")}
               </p>
             )}
           </div>

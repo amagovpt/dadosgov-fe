@@ -46,7 +46,7 @@ export const OrganizationsFilters = ({
   orgBadgeCounts = {},
   allOrganizations = [],
 }: OrganizationsFiltersProps) => {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const { t: tOrg } = useTranslation("organizations");
 
   const router = useRouter();
@@ -191,7 +191,7 @@ export const OrganizationsFilters = ({
         param: "badge",
         data: badgeEntries.map((entry) => ({
           id: entry.id,
-          name: `${entry.label} (${entry.count.toLocaleString("pt-PT")})`,
+          name: `${entry.label} (${entry.count.toLocaleString(i18n.language)})`,
         })),
         searchable: badgeEntries.length > 10,
         searchPlaceholder: t("search.label"),
