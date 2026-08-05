@@ -170,7 +170,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
                     </ReactMarkdown>
                   </section>
                 ))}
-              <div className="mb-24 flex flex-wrap items-center gap-24">
+              <div className="mb-24 flex flex-wrap items-center gap-24 -mt-32">
                 <a
                   href={SWAGGER_UI_URL}
                   target="_blank"
