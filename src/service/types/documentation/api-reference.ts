@@ -19,5 +19,4 @@ export interface ApiReferencePage {
   metadata: ApiReferenceMetadata;
   hero: ApiReferenceHero;
   sections: ApiReferenceSection[];
-  swaggerSpecUrl: string;
 }

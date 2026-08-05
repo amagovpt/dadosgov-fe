@@ -30,9 +30,6 @@ export async function getApiReferencePage(locale: string = "pt"): Promise<ApiRef
               }
             }
           }
-          swaggerSpecUrl {
-            ${locale}
-          }
         }
       }
     }

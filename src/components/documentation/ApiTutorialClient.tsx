@@ -20,6 +20,7 @@ declare global {
 // URLs are same-origin: `/api/` is forwarded to the backend by the Next proxy
 // (see `src/proxy.ts`), which keeps the `download` attribute working.
 const SWAGGER_UI_URL = "/api/1/";
+const SWAGGER_JSON_URL = "/api/1/swagger.json";
 const SWAGGER_JSON_FILENAME = "dados-gov-api-swagger.json";
 const SWAGGER_CSS_ID = "swagger-ui-css";
 const SWAGGER_SCRIPT_ID = "swagger-ui-script";
@@ -80,7 +81,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
       // different ports in development.
       let spec: Record<string, unknown> | undefined;
       try {
-        const res = await fetch(page.swaggerSpecUrl);
+        const res = await fetch(SWAGGER_JSON_URL);
         if (res.ok) {
           spec = await res.json();
           if (spec) {
@@ -96,7 +97,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
       if (cancelled || !swaggerRef.current) return;
 
       window.SwaggerUIBundle({
-        ...(spec ? { spec } : { url: page.swaggerSpecUrl }),
+        ...(spec ? { spec } : { url: SWAGGER_JSON_URL }),
         domNode: swaggerRef.current,
         docExpansion: "none",
         deepLinking: false,
@@ -129,7 +130,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
       cancelled = true;
       existingScript?.removeEventListener("load", handleScriptLoad);
     };
-  }, [page.swaggerSpecUrl]);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-white font-sans">
@@ -180,7 +181,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
                   <span>{t("apiReference.openSwagger")}</span>
                 </a>
                 <a
-                  href={page.swaggerSpecUrl}
+                  href={SWAGGER_JSON_URL}
                   download={SWAGGER_JSON_FILENAME}
                   className="inline-flex items-center gap-8 text-primary-600 hover:underline"
                 >
@@ -193,7 +194,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
             {/* Swagger UI */}
             <div
               ref={swaggerRef}
-              className="swagger-ui-container rounded-lg shadow-sm bg-white p-16 -mt-24"
+              className="swagger-ui-container rounded-lg shadow-sm bg-white p-16"
             />
           </div>
         </div>
