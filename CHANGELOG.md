@@ -81,7 +81,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     for any remaining uncaught render error — the likely source of the
     intermittent PRD 500s.
 
-- **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **feat(dataservices): restrict API creation to public-service organizations**
   - The "nova API" producer step no longer offers personal ("Eu próprio")
     publishing and lists only the user's organizations carrying the
     "Serviço público" badge. When the user belongs to no eligible
@@ -90,7 +90,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     API is always org-owned. Mirrors the backend enforcement (LEDG-2190),
     which is the source of truth (also covers direct API calls).
 
-- **fix(dataservices): show the real associated-datasets count on the API listing cards** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): show the real associated-datasets count on the API listing cards**
   - The card read `datasets.length`, but the API serializes a dataservice's
     `datasets` as a paginated subsection reference (`{ rel, href, total, type }`),
     not an array — so the count always rendered `0`. Use `datasets.total` (fixed
@@ -100,7 +100,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     partilhadas por organizações que prestam serviço público, e integre dados
     abertos, de forma automatizada, nos seus serviços e aplicações."
 
-- **feat(datasets): translate the public datasets area, mirroring the `reuses` i18n pattern** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+- **feat(datasets): translate the public datasets area, mirroring the `reuses` i18n pattern**
   - The listing and its filters already used the `datasets` namespace, but the
     whole detail page (`DatasetDetailClient`, `DatasetTabs`, `DatasetInfo`,
     `DatasetResourcesTable/*`) was hardcoded PT, so `/en/datasets/<slug>`
@@ -138,7 +138,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     `ExpandableMarkdownDescription` now use `common:readMore`/`readLess` (new),
     which also fixes organizations, dataservices and the reuse detail page.
 
-- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route**
   - New `BreadcrumbDynamic` client component + pure `buildBreadcrumbItems` helper
     derive the crumbs from `usePathname()` / `stripLocale` instead of hand-built
     arrays, translating each segment via the `common` namespace with a slug
@@ -149,7 +149,7 @@ This project has no version tags, so entries are grouped by month (newest first)
   - Migrated the datasets listing hero to derive its breadcrumb from the route
     instead of a hardcoded `[home, datasets]` array.
 
-- **refactor(i18n): make the `formatDate` date helpers locale-aware** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **refactor(i18n): make the `formatDate` date helpers locale-aware**
   - `formatDateToTimeAgo` now selects the date-fns locale from the passed
     `locale` (`pt` → `pt`, `en` → `en-GB`, previously silently `en-US`) and
     strips both the Portuguese and English fuzzy prefixes (`cerca de`,
@@ -181,7 +181,7 @@ This project has no version tags, so entries are grouped by month (newest first)
   - Pairs with the backend change that stops generating `/pages/...` links in
     mails, model `self_web_url` and SAML redirects.
 
-- **fix(harvesters): create the organization harvester detail/config page and gate editing by role** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(harvesters): create the organization harvester detail/config page and gate editing by role**
   - On the org harvesters list, clicking the name or the edit pencil navigated
     to `/admin/org/harvesters/{id}` — a route that never existed (the link was
     also missing the `{orgId}` segment) — returning a 404. Added the route
@@ -196,7 +196,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     new `canEditAdvanced` prop on `HarvesterConfigForm` and per-field `disabled`
     wiring (basic vs advanced).
 
-- **feat(dataservices): add a Swagger section to the API detail page** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **feat(dataservices): add a Swagger section to the API detail page**
   - Mirrors data.gouv.fr: when an API exposes a `machine_documentation_url`,
     the detail page now shows a "Swagger" button in the technical box and a
     "Swagger" accordion with the spec version, base URL (copy), endpoints
@@ -206,14 +206,14 @@ This project has no version tags, so entries are grouped by month (newest first)
     small OpenAPI 3.x / Swagger 2.0 reader. Non-JSON (e.g. YAML) specs are
     skipped gracefully (the section is hidden).
 
-- **fix(dataservices): revise the API form auxiliary texts on the create flow** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): revise the API form auxiliary texts on the create flow**
   - The live "nova API" page (`views/ApiRegistrationClient` → shared
     `dataserviceAuxiliaryContent` config) still showed the old pt-BR help
     texts and "O que é uma API?" intro, while the edit page already had the
     revised pt-PT copy. Updated the create-flow intro and all auxiliary items
     to the reviewed wording (LEDG-2022), matching the edit flow.
 
-- **fix(dataservices): fix the admin "Modificado em" column across all three API listings** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): fix the admin "Modificado em" column across all three API listings**
   - The column showed `NaN/NaN/NaN` and was inconsistent between the Meu
     perfil / Organização / Sistema listings, and org-owned APIs showed no
     author. Root cause: an earlier fix (LEDG-1935) edited dead root-level
@@ -228,7 +228,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     (`DataservicesClient`/`OrgDataservicesClient`/`SystemDataservicesClient`)
     that no page imported.
 
-- **fix(dataservices): stop the native "fill this field" validation on the API edit datasets tab** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): stop the native "fill this field" validation on the API edit datasets tab**
   - Editing an API → "Conjuntos de dados associados" tab: clicking Guardar
     fired the browser's "Preencha este campo" bubble on the empty (optional)
     "Link para o conjunto de dados" input, even though the save went through.
@@ -259,7 +259,7 @@ This project has no version tags, so entries are grouped by month (newest first)
   - Also fixed a wrong comment claiming chunk parts were already idempotent on
     the backend (they weren't — a retried part used to 500 with `FileExists`).
 
-- **fix(dataservices): remove the "Palavras-chave" (keywords) filter from the API listing** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): remove the "Palavras-chave" (keywords) filter from the API listing**
   - Dataservices have no author-facing way to be tagged (the admin exposes no
     keyword input), and the filter's typeahead pulled suggestions from the
     `Tag` collection, which is populated only from datasets and reuses — never
@@ -270,7 +270,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     wiring; the remaining filters (access type, update date, organization
     type, organizations) now match the upstream set. Backend untouched.
 
-- **refactor(reuses,datasets): fetch the detail pages server-side with the visitor's session** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+- **refactor(reuses,datasets): fetch the detail pages server-side with the visitor's session**
   - The reuse and dataset detail pages fetched their entity (and, for reuses,
     each associated dataset) in a client `useEffect`, so the content was absent
     from the initial server HTML and flashed a loading state. The `[rid]` /
@@ -301,7 +301,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     Dropped the source mount and kept only `./logs:/logs` and
     `./.next/cache:/app/.next/cache`, so the image serves its own built `/app`.
 
-- **feat(analytics): add Google Analytics (GA4) tag to the shared layout** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **feat(analytics): add Google Analytics (GA4) tag to the shared layout**
   - Loads `gtag.js` for measurement ID `G-6EQQ3VB8JY` from the root
     `[locale]/layout.tsx` (common to every page) via `next/script`
     (`afterInteractive`). Both the loader and the `gtag('config', ...)` init
@@ -322,7 +322,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     types (still present on the job detail endpoint). Pairs with the udata-pt
     backend change.
 
-- **fix(resources): resolve CMS base URL from runtime env in the assets proxy** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(resources): resolve CMS base URL from runtime env in the assets proxy**
   - The `/assets/[...path]` proxy route read `NEXT_PUBLIC_API_URL`, which
     webpack inlines at `docker build` time and can't be corrected once the
     image is deployed to a VM with a different CMS URL. It now prefers the
