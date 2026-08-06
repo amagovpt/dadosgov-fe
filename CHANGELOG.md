@@ -6,6 +6,20 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(datasets): add the "Inspire" option to the listing "Tipo de dados" filter** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - New "Inspire" option below "Conjuntos de dados de Elevado Valor", filtering
+    on `?badge=inspire`. The INSPIRE badge is the curated signal: it is granted
+    from the `inspire` tag, which the DCAT harvester sets when a dataset carries
+    a GEMET INSPIRE theme. The backend serves the matching sidebar count.
+  - The group's options now live in a single `ROTULO_FILTER_MAP` carrying the
+    query param each one filters on, so the option list, the URL-state detection
+    and the param writer can no longer drift apart. Switching option only clears
+    the values this group owns, leaving tags and badges picked in the advanced
+    filters untouched. "Elevado Valor" keeps filtering on `?tag=hvd`; its badge
+    covers only datasets of certified public-service organizations, so moving it
+    is handled separately. The group stays single-select, as the other sidebar
+    toggle groups do.
+
 - **feat(documentation): link the Swagger UI and the OpenAPI JSON on the API reference page** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The reference page embedded the interactive documentation but offered no way
     out of it: the old portal had a link to the Swagger and a download link for
