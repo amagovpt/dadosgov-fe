@@ -24,8 +24,9 @@ interface ToggleFilterSectionsProps {
 }
 
 function renderCountLabel(count: number | string, locale: string): string {
+  const localeToUse = locale === "pt" ? "pt-PT" : locale === "en" ? "en-GB" : locale;
   if (typeof count === "number") {
-    return count.toLocaleString(locale);
+    return count.toLocaleString(localeToUse);
   }
   return count;
 }
