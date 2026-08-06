@@ -1,5 +1,8 @@
 import ApiTutorialClient from "@/components/documentation/ApiTutorialClient";
-import { getApiReferencePage } from "@/service/queries/documentation/api-reference";
+import {
+  getApiReferenceMetadata,
+  getApiReferencePage,
+} from "@/service/queries/documentation/api-reference";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -8,11 +11,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const page = await getApiReferencePage(locale);
+  const metadata = await getApiReferenceMetadata(locale);
 
   return {
-    title: page.metadata.title,
-    description: page.metadata.description,
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

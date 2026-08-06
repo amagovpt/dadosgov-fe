@@ -1,5 +1,8 @@
 import AboutDadosGovClient from "@/components/documentation/AboutDadosGovClient";
-import { getAboutDadosGovPage } from "@/service/queries/documentation/about-dadosgov";
+import {
+  getAboutDadosGovMetadata,
+  getAboutDadosGovPage,
+} from "@/service/queries/documentation/about-dadosgov";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -8,11 +11,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const page = await getAboutDadosGovPage(locale);
+  const metadata = await getAboutDadosGovMetadata(locale);
 
   return {
-    title: page.metadata.title,
-    description: page.metadata.description,
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

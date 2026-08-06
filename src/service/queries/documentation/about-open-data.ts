@@ -1,7 +1,43 @@
-import type { AboutOpenDataPage } from "@/service/types/documentation/about-open-data";
+import type { AboutOpenDataMetadata, AboutOpenDataPage } from "@/service/types/documentation/about-open-data";
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
+
+export async function getAboutOpenDataMetadata(
+  locale: string = "pt"
+): Promise<AboutOpenDataMetadata> {
+  const query = gql(/* GraphQL */ `
+    query GetAboutOpenDataMetadata {
+      findAboutOpenDataPageSingleton {
+        data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  const { data, error } = await apolloClient.query<{
+    findAboutOpenDataPageSingleton?: { data?: AboutOpenDataPage };
+  }>({ query });
+
+  if (!data || error) {
+    console.error("Error fetching About open data metadata:", error);
+    throw new Error("Failed to fetch About open data metadata");
+  }
+
+  if (!data.findAboutOpenDataPageSingleton?.data) {
+    throw new Error("About open data metadata is missing");
+  }
+
+  return (
+    flattenData(data, locale).findAboutOpenDataPageSingleton as { metadata: AboutOpenDataMetadata }
+  ).metadata;
+}
 
 export async function getAboutOpenDataPage(locale: string = "pt"): Promise<AboutOpenDataPage> {
   const query = gql(/* GraphQL */ `
@@ -25,7 +61,7 @@ export async function getAboutOpenDataPage(locale: string = "pt"): Promise<About
   `);
 
   const { data, error } = await apolloClient.query<{
-    findAboutOpenDataPageSingleton?: { data?: Record<string, unknown> };
+    findAboutOpenDataPageSingleton?: { data?: AboutOpenDataPage };
   }>({ query });
 
   if (!data || error) {

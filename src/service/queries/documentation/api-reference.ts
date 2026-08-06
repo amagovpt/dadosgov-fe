@@ -1,7 +1,43 @@
-import type { ApiReferencePage } from "@/service/types/documentation/api-reference";
+import type { ApiReferenceMetadata, ApiReferencePage } from "@/service/types/documentation/api-reference";
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
+
+export async function getApiReferenceMetadata(
+  locale: string = "pt"
+): Promise<ApiReferenceMetadata> {
+  const query = gql(/* GraphQL */ `
+    query GetApiReferenceMetadata {
+      findApiReferencePageSingleton {
+        data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  const { data, error } = await apolloClient.query<{
+    findApiReferencePageSingleton?: { data?: ApiReferencePage };
+  }>({ query });
+
+  if (!data || error) {
+    console.error("Error fetching API reference metadata:", error);
+    throw new Error("Failed to fetch API reference metadata");
+  }
+
+  if (!data.findApiReferencePageSingleton?.data) {
+    throw new Error("API reference metadata is missing");
+  }
+
+  return (
+    flattenData(data, locale).findApiReferencePageSingleton as { metadata: ApiReferenceMetadata }
+  ).metadata;
+}
 
 export async function getApiReferencePage(locale: string = "pt"): Promise<ApiReferencePage> {
   const query = gql(/* GraphQL */ `
@@ -36,7 +72,7 @@ export async function getApiReferencePage(locale: string = "pt"): Promise<ApiRef
   `);
 
   const { data, error } = await apolloClient.query<{
-    findApiReferencePageSingleton?: { data?: Record<string, unknown> };
+    findApiReferencePageSingleton?: { data?: ApiReferencePage };
   }>({ query });
 
   if (!data || error) {

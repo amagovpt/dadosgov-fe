@@ -1,6 +1,9 @@
 import AboutOpenData from "@/components/articles/AboutOpenData";
 import { Metadata } from "next";
-import { getAboutOpenDataPage } from "@/service/queries/documentation/about-open-data";
+import {
+  getAboutOpenDataMetadata,
+  getAboutOpenDataPage,
+} from "@/service/queries/documentation/about-open-data";
 
 export async function generateMetadata({
   params,
@@ -8,11 +11,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const page = await getAboutOpenDataPage(locale);
+  const metadata = await getAboutOpenDataMetadata(locale);
 
   return {
-    title: page.metadata.title,
-    description: page.metadata.description,
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
