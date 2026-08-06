@@ -33,8 +33,6 @@ export default async function page({ params }: { params: Promise<{ locale: strin
     data?.findPageCursosSingleton?.data || {}
   ) as unknown as PageCourses;
 
-  console.log("otherCourses", otherCourses);
-
   return (
     <main className="h-full w-full">
       <HeroCourses

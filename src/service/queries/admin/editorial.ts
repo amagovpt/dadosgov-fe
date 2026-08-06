@@ -30,7 +30,9 @@ export async function getBoEditorialMetadata(locale: string = "pt"): Promise<BoE
     throw new Error("Failed to fetch bo-editorial metadata");
   }
 
-  return flattenData(data).findBoEditorialSingleton as BoEditorialMetadata;
+  const page = flattenData(data).findBoEditorialSingleton as BoEditorialMetadata;
+  if (!page) throw new Error("Bo editorial metadata is missing");
+  return page;
 }
 
 export async function getBoEditorial(locale: string = "pt"): Promise<BoEditorialPage> {
@@ -66,5 +68,7 @@ export async function getBoEditorial(locale: string = "pt"): Promise<BoEditorial
     throw new Error("Failed to fetch bo-editorial content");
   }
 
-  return flattenData(data).findBoEditorialSingleton as BoEditorialPage;
+  const page = flattenData(data).findBoEditorialSingleton as BoEditorialPage;
+  if (!page) throw new Error("Bo editorial content is missing");
+  return page;
 }

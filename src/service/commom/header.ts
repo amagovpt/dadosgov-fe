@@ -113,11 +113,9 @@ export async function getHeaderNavigation(locale: string = "pt"): Promise<Header
     throw new Error("Failed to fetch header information");
   }
 
-  const headerData = data.findHeaderNavigationSingleton?.data;
-
-  if (!headerData) {
+  if (!data.findHeaderNavigationSingleton?.data) {
     return {} as HeaderNavigationData;
   }
 
-  return flattenData(headerData) as unknown as HeaderNavigationData;
+  return flattenData(data, locale).findHeaderNavigationSingleton as HeaderNavigationData;
 }

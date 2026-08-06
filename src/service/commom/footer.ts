@@ -63,11 +63,9 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
     throw new Error("Failed to fetch footer information");
   }
 
-  const headerData = data.findFooterSingleton?.data;
-
-  if (!headerData) {
+  if (!data.findFooterSingleton?.data) {
     return {} as Footer;
   }
 
-  return flattenData(headerData) as unknown as Footer;
+  return flattenData(data, locale).findFooterSingleton as Footer;
 }

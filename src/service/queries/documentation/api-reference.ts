@@ -34,9 +34,7 @@ export async function getApiReferenceMetadata(
     throw new Error("API reference metadata is missing");
   }
 
-  return (
-    flattenData(data, locale).findApiReferencePageSingleton as { metadata: ApiReferenceMetadata }
-  ).metadata;
+  return flattenData(data, locale).findApiReferencePageSingleton as ApiReferenceMetadata;
 }
 
 export async function getApiReferencePage(locale: string = "pt"): Promise<ApiReferencePage> {

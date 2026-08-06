@@ -28,7 +28,9 @@ export async function getBoProfileMetadata(locale: string = "pt"): Promise<BoPro
     throw new Error("Failed to fetch bo-profile metadata");
   }
 
-  return flattenData(data).findBoProfileSingleton as BoProfileMetadata;
+  const page = flattenData(data).findBoProfileSingleton as BoProfileMetadata;
+  if (!page) throw new Error("Bo profile metadata is missing");
+  return page;
 }
 
 export async function getBoProfile(locale: string = "pt"): Promise<BoProfilePage> {
@@ -82,5 +84,7 @@ export async function getBoProfile(locale: string = "pt"): Promise<BoProfilePage
     throw new Error("Failed to fetch bo-profile content");
   }
 
-  return flattenData(data).findBoProfileSingleton as BoProfilePage;
+  const page = flattenData(data).findBoProfileSingleton as BoProfilePage;
+  if (!page) throw new Error("Bo profile content is missing");
+  return page;
 }

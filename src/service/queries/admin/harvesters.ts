@@ -37,7 +37,9 @@ export async function getBoHarvestersMetadata(
     throw new Error("Failed to fetch bo-harvesters metadata");
   }
 
-  return flattenData(data).findBoHarvestersSingleton as BoHarvestersMetadata;
+  const page = flattenData(data).findBoHarvestersSingleton as BoHarvestersMetadata;
+  if (!page) throw new Error("Bo harvesters metadata is missing");
+  return page;
 }
 
 export async function getBoHarvesters(
@@ -201,5 +203,7 @@ export async function getBoHarvesters(
     throw new Error("Failed to fetch bo-harvesters content");
   }
 
-  return flattenData(data).findBoHarvestersSingleton as BoHarvestersPage;
+  const page = flattenData(data).findBoHarvestersSingleton as BoHarvestersPage;
+  if (!page) throw new Error("Bo harvesters content is missing");
+  return page;
 }

@@ -34,9 +34,7 @@ export async function getAboutDadosGovMetadata(
     throw new Error("About dados.gov.pt metadata is missing");
   }
 
-  return (
-    flattenData(data, locale).findAboutDadosgovPageSingleton as { metadata: AboutDadosGovMetadata }
-  ).metadata;
+  return flattenData(data, locale).findAboutDadosgovPageSingleton as AboutDadosGovMetadata;
 }
 
 export async function getAboutDadosGovPage(locale: string = "pt"): Promise<AboutDadosGovPage> {

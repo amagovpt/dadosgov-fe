@@ -34,9 +34,7 @@ export async function getAboutOpenDataMetadata(
     throw new Error("About open data metadata is missing");
   }
 
-  return (
-    flattenData(data, locale).findAboutOpenDataPageSingleton as { metadata: AboutOpenDataMetadata }
-  ).metadata;
+  return flattenData(data, locale).findAboutOpenDataPageSingleton as AboutOpenDataMetadata;
 }
 
 export async function getAboutOpenDataPage(locale: string = "pt"): Promise<AboutOpenDataPage> {
