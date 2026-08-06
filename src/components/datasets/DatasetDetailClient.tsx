@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -41,8 +41,18 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [qualityExpanded, setQualityExpanded] = useState(false);
+  const qualityExpandedRef = useRef(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
+
+  // ADS 3.7 `CardAccordion` calls onExpanded/onCollapsed from its render body and
+  // re-fires them on every render while open. Defer the state update so we never
+  // setState during another component's render, and drop the repeat calls.
+  const syncQualityExpanded = useCallback((next: boolean) => {
+    if (qualityExpandedRef.current === next) return;
+    qualityExpandedRef.current = next;
+    queueMicrotask(() => setQualityExpanded(next));
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -51,7 +61,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
       .then((following) => { if (!cancelled) setIsFavorite(following); })
       .catch(() => { });
     return () => { cancelled = true; };
-  }, [user?.id, dataset.id]);
+  }, [user,user?.id, dataset.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -277,10 +287,12 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
                   </div>
                 </div>
               }
-              accordionHeadingTitle={qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")}
+              accordionHeadingTitle={
+                qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")
+              }
               expanded={qualityExpanded}
-              onExpanded={() => setQualityExpanded(true)}
-              onCollapsed={() => setQualityExpanded(false)}
+              onExpanded={() => syncQualityExpanded(true)}
+              onCollapsed={() => syncQualityExpanded(false)}
             >
               {qualityMissing.length > 0 && (
                 <div className="flex flex-col gap-8">
