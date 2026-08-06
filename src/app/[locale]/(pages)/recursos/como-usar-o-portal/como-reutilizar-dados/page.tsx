@@ -13,11 +13,15 @@ export async function generateMetadata(
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  const { title } = await getFaqs("como-reutilizar-dados", "pt");
-
-  return {
-    title,
-  };
+  try {
+    const { title } = await getFaqs("como-reutilizar-dados", "pt");
+    return { title };
+  } catch (error) {
+    // Fall back to the layout's default title rather than failing the whole
+    // page render when the CMS is unreachable.
+    console.error("Error fetching como-reutilizar-dados metadata:", error);
+    return {};
+  }
 }
 export default async function ReuseFaqPage() {
   const { body } = await getFaqs("como-reutilizar-dados", "pt");

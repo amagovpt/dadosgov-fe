@@ -12,12 +12,18 @@ export async function generateMetadata({ }: {
     params: Promise<{ locale: string; }>;
 }): Promise<Metadata> {
 
-    const { hero } = await getTematicAreas("pt");
-
-    return {
-        title: hero.title,
-        description: hero.description,
-    };
+    try {
+        const { hero } = await getTematicAreas("pt");
+        return {
+            title: hero.title,
+            description: hero.description,
+        };
+    } catch (error) {
+        // Fall back to the layout's default title rather than failing the
+        // whole page render when the CMS is unreachable.
+        console.error("Error fetching areas-tematicas metadata:", error);
+        return {};
+    }
 }
 
 export default async function page() {

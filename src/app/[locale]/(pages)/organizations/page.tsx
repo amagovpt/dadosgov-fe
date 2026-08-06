@@ -29,10 +29,11 @@ export async function generateMetadata({
     }
 }
 
-// The page is already dynamic (it reads searchParams); we intentionally do NOT
-// force-dynamic so the listing fetch can use the Next.js Data Cache
-// (revalidate: 60) — repeated page/query loads are served from cache and don't
-// hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
+// The page is already dynamic (it reads searchParams). The listing fetch is
+// cached for 60s per URL in the shared in-memory listing cache
+// (service/utils/listingCache.ts) — repeated page/query loads, across all
+// visitors, are served from cache and don't hit the backend rate-limit
+// (per-IP, collapsed site-wide by the F5).
 
 export default async function OrganizationsPage({
     params,
@@ -59,7 +60,7 @@ export default async function OrganizationsPage({
     }
 
     // LEDG-1836: one aggregated call replaces the prior Promise.all of 3 + N (badge) fetches.
-    // Relay the real client IP on the SSR fetch (which, on a Data Cache miss,
+    // Relay the real client IP on the SSR fetch (which, on a listing-cache miss,
     // goes direct to the backend) so the limiter keys per visitor, not the Next IP.
     const forwarded = await serverForwardedHeaders();
     const data = await fetchOrganizationsListing(page, 20, apiFilters, forwarded);

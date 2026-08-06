@@ -11,7 +11,13 @@ export async function GET(
   const targetUrl = `${getCmsBaseUrl()}/api/assets/${assetPath}${search}`;
 
   try {
-    const response = await fetch(targetUrl, { cache: "no-cache" });
+    // Deadline so a hung CMS turns into a fast 502 (caught below) instead of
+    // holding the connection open until the F5 time limit. 10s covers large
+    // assets; the signal also aborts a body stream that stalls mid-transfer.
+    const response = await fetch(targetUrl, {
+      cache: "no-cache",
+      signal: AbortSignal.timeout(10_000),
+    });
 
     if (!response.ok) {
       console.error(`[assets proxy] ${targetUrl} returned ${response.status}`);

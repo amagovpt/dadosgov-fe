@@ -6,7 +6,7 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
-- **feat(datasets): add the "Inspire" option to the listing "Tipo de dados" filter** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **feat(datasets): add the "Inspire" option to the listing "Tipo de dados" filter** [#536](https://github.com/amagovpt/dadosgov-fe/pull/536)
   - New "Inspire" option below "Conjuntos de dados de Elevado Valor", filtering
     on `?badge=inspire`. The INSPIRE badge is the curated signal: it is granted
     from the `inspire` tag, which the DCAT harvester sets when a dataset carries
@@ -20,7 +20,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     is handled separately. The group stays single-select, as the other sidebar
     toggle groups do.
 
-- **feat(documentation): link the Swagger UI and the OpenAPI JSON on the API reference page** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **feat(documentation): link the Swagger UI and the OpenAPI JSON on the API reference page** [#532](https://github.com/amagovpt/dadosgov-fe/pull/532)
   - The reference page embedded the interactive documentation but offered no way
     out of it: the old portal had a link to the Swagger and a download link for
     the spec, both of which had been lost. The "Referência" section now shows
@@ -31,7 +31,57 @@ This project has no version tags, so entries are grouped by month (newest first)
     proxy — so the `download` attribute is honoured by the browser instead of
     being ignored as a cross-origin navigation.
 
-- **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(docker): make the `.next/cache` bind mount writable by the app user** [#524](https://github.com/amagovpt/dadosgov-fe/pull/524)
+  - Docker auto-creates the `./.next/cache` bind dir as `root:root` 755, but
+    the container runs as `nextjs` (uid 10001), so every disk-cache write
+    failed with `EACCES` — constant "Failed to update prerender cache" log
+    spam and no fetch/ISR or image-optimizer caching at all in PPR. The
+    one-shot init container that already fixes `./logs` ownership on each
+    `up` (renamed `init-logs` → `init-dirs`) now chowns both bind mounts,
+    so no manual `chown` on the host is ever needed.
+
+- **fix(listings): share the SSR listing cache across visitors** [#522](https://github.com/amagovpt/dadosgov-fe/pull/522)
+  - The aggregated listing fetches (datasets / organizations / reuses) used
+    `next: { revalidate: 60 }` while relaying the visitor's `X-Forwarded-For`,
+    but the Next.js Data Cache includes request headers in its cache key — so
+    every client IP got its own ~500 KB entry, each visitor's first load
+    always hit the backend, and the on-disk fetch-cache grew with
+    IP × query combinations. The fetches now go through a shared in-memory
+    cache keyed by URL alone (`src/service/utils/listingCache.ts`, 60s TTL
+    matching the backend `@cache.cached(60)`, in-flight dedupe, LRU cap).
+    The real client IP is still relayed on the single upstream miss, so the
+    backend rate limiter keeps per-visitor attribution.
+
+- **fix(publications): cache PDF page counts instead of PDF bytes** [#522](https://github.com/amagovpt/dadosgov-fe/pull/522)
+  - The publications page counted each PDF's pages by fetching the asset with
+    `cache: "force-cache"`, but Next's Data Cache rejects entries over 2 MB —
+    so most PDFs were silently re-downloaded and re-parsed from the CMS on
+    every request (the page is `force-dynamic`), and the few under 2 MB were
+    cached forever, going stale if the asset changed under the same slug.
+    Page counts are now cached in memory (`src/lib/pdfPageCount.ts`, 1h TTL,
+    same singleton pattern as the Apollo CMS cache) and the PDF bytes are
+    fetched with `cache: "no-store"` only on a cache miss.
+
+- **fix(cms): stop a slow CMS from hanging SSR — timeout + stale-while-revalidate** [#523](https://github.com/amagovpt/dadosgov-fe/pull/523)
+  - Root cause of the intermittent multi-second loads/timeouts in PRD
+    (measured 2026-07-30: homepage 500s with 6–25s TTFB while the backend
+    answered in 60–80ms): every public SSR page depends on Squidex, the
+    Apollo cache was fully reset each TTL, and no CMS request had a deadline
+    — so an expired cache + slow CMS blocked renders until the F5 time limit.
+  - Server-side GraphQL requests now carry a per-request 5s abort signal
+    (`CMS_FETCH_TIMEOUT_MS`), and the Apollo client serves
+    stale-while-revalidate instead of resetting: past the TTL the last good
+    result is returned immediately and refreshed in the background (a failed
+    refresh keeps the stale copy). A slow CMS now degrades freshness, never
+    latency. The CMS asset proxy (`/assets/*`) also gets a 10s deadline.
+  - Hardened the uncaught CMS call sites: the 12 `generateMetadata` functions
+    that queried the CMS bare now fall back to the layout's default metadata
+    on error, and a new `[locale]/error.tsx` route boundary renders a
+    friendly retry page (header/footer intact) instead of the framework 500
+    for any remaining uncaught render error — the likely source of the
+    intermittent PRD 500s.
+
+- **feat(dataservices): restrict API creation to public-service organizations**
   - The "nova API" producer step no longer offers personal ("Eu próprio")
     publishing and lists only the user's organizations carrying the
     "Serviço público" badge. When the user belongs to no eligible
@@ -40,7 +90,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     API is always org-owned. Mirrors the backend enforcement (LEDG-2190),
     which is the source of truth (also covers direct API calls).
 
-- **fix(dataservices): show the real associated-datasets count on the API listing cards** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): show the real associated-datasets count on the API listing cards**
   - The card read `datasets.length`, but the API serializes a dataservice's
     `datasets` as a paginated subsection reference (`{ rel, href, total, type }`),
     not an array — so the count always rendered `0`. Use `datasets.total` (fixed
@@ -50,7 +100,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     partilhadas por organizações que prestam serviço público, e integre dados
     abertos, de forma automatizada, nos seus serviços e aplicações."
 
-- **feat(datasets): translate the public datasets area, mirroring the `reuses` i18n pattern** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+- **feat(datasets): translate the public datasets area, mirroring the `reuses` i18n pattern**
   - The listing and its filters already used the `datasets` namespace, but the
     whole detail page (`DatasetDetailClient`, `DatasetTabs`, `DatasetInfo`,
     `DatasetResourcesTable/*`) was hardcoded PT, so `/en/datasets/<slug>`
@@ -88,7 +138,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     `ExpandableMarkdownDescription` now use `common:readMore`/`readLess` (new),
     which also fixes organizations, dataservices and the reuse detail page.
 
-- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route**
   - New `BreadcrumbDynamic` client component + pure `buildBreadcrumbItems` helper
     derive the crumbs from `usePathname()` / `stripLocale` instead of hand-built
     arrays, translating each segment via the `common` namespace with a slug
@@ -99,7 +149,7 @@ This project has no version tags, so entries are grouped by month (newest first)
   - Migrated the datasets listing hero to derive its breadcrumb from the route
     instead of a hardcoded `[home, datasets]` array.
 
-- **refactor(i18n): make the `formatDate` date helpers locale-aware** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **refactor(i18n): make the `formatDate` date helpers locale-aware**
   - `formatDateToTimeAgo` now selects the date-fns locale from the passed
     `locale` (`pt` → `pt`, `en` → `en-GB`, previously silently `en-US`) and
     strips both the Portuguese and English fuzzy prefixes (`cerca de`,
@@ -131,7 +181,7 @@ This project has no version tags, so entries are grouped by month (newest first)
   - Pairs with the backend change that stops generating `/pages/...` links in
     mails, model `self_web_url` and SAML redirects.
 
-- **fix(harvesters): create the organization harvester detail/config page and gate editing by role** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(harvesters): create the organization harvester detail/config page and gate editing by role**
   - On the org harvesters list, clicking the name or the edit pencil navigated
     to `/admin/org/harvesters/{id}` — a route that never existed (the link was
     also missing the `{orgId}` segment) — returning a 404. Added the route
@@ -146,7 +196,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     new `canEditAdvanced` prop on `HarvesterConfigForm` and per-field `disabled`
     wiring (basic vs advanced).
 
-- **feat(dataservices): add a Swagger section to the API detail page** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **feat(dataservices): add a Swagger section to the API detail page**
   - Mirrors data.gouv.fr: when an API exposes a `machine_documentation_url`,
     the detail page now shows a "Swagger" button in the technical box and a
     "Swagger" accordion with the spec version, base URL (copy), endpoints
@@ -156,14 +206,14 @@ This project has no version tags, so entries are grouped by month (newest first)
     small OpenAPI 3.x / Swagger 2.0 reader. Non-JSON (e.g. YAML) specs are
     skipped gracefully (the section is hidden).
 
-- **fix(dataservices): revise the API form auxiliary texts on the create flow** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): revise the API form auxiliary texts on the create flow**
   - The live "nova API" page (`views/ApiRegistrationClient` → shared
     `dataserviceAuxiliaryContent` config) still showed the old pt-BR help
     texts and "O que é uma API?" intro, while the edit page already had the
     revised pt-PT copy. Updated the create-flow intro and all auxiliary items
     to the reviewed wording (LEDG-2022), matching the edit flow.
 
-- **fix(dataservices): fix the admin "Modificado em" column across all three API listings** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): fix the admin "Modificado em" column across all three API listings**
   - The column showed `NaN/NaN/NaN` and was inconsistent between the Meu
     perfil / Organização / Sistema listings, and org-owned APIs showed no
     author. Root cause: an earlier fix (LEDG-1935) edited dead root-level
@@ -178,7 +228,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     (`DataservicesClient`/`OrgDataservicesClient`/`SystemDataservicesClient`)
     that no page imported.
 
-- **fix(dataservices): stop the native "fill this field" validation on the API edit datasets tab** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): stop the native "fill this field" validation on the API edit datasets tab**
   - Editing an API → "Conjuntos de dados associados" tab: clicking Guardar
     fired the browser's "Preencha este campo" bubble on the empty (optional)
     "Link para o conjunto de dados" input, even though the save went through.
@@ -209,7 +259,7 @@ This project has no version tags, so entries are grouped by month (newest first)
   - Also fixed a wrong comment claiming chunk parts were already idempotent on
     the backend (they weren't — a retried part used to 500 with `FileExists`).
 
-- **fix(dataservices): remove the "Palavras-chave" (keywords) filter from the API listing** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(dataservices): remove the "Palavras-chave" (keywords) filter from the API listing**
   - Dataservices have no author-facing way to be tagged (the admin exposes no
     keyword input), and the filter's typeahead pulled suggestions from the
     `Tag` collection, which is populated only from datasets and reuses — never
@@ -220,7 +270,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     wiring; the remaining filters (access type, update date, organization
     type, organizations) now match the upstream set. Backend untouched.
 
-- **refactor(reuses,datasets): fetch the detail pages server-side with the visitor's session** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+- **refactor(reuses,datasets): fetch the detail pages server-side with the visitor's session**
   - The reuse and dataset detail pages fetched their entity (and, for reuses,
     each associated dataset) in a client `useEffect`, so the content was absent
     from the initial server HTML and flashed a loading state. The `[rid]` /
@@ -251,7 +301,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     Dropped the source mount and kept only `./logs:/logs` and
     `./.next/cache:/app/.next/cache`, so the image serves its own built `/app`.
 
-- **feat(analytics): add Google Analytics (GA4) tag to the shared layout** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **feat(analytics): add Google Analytics (GA4) tag to the shared layout**
   - Loads `gtag.js` for measurement ID `G-6EQQ3VB8JY` from the root
     `[locale]/layout.tsx` (common to every page) via `next/script`
     (`afterInteractive`). Both the loader and the `gtag('config', ...)` init
@@ -272,7 +322,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     types (still present on the job detail endpoint). Pairs with the udata-pt
     backend change.
 
-- **fix(resources): resolve CMS base URL from runtime env in the assets proxy** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(resources): resolve CMS base URL from runtime env in the assets proxy**
   - The `/assets/[...path]` proxy route read `NEXT_PUBLIC_API_URL`, which
     webpack inlines at `docker build` time and can't be corrected once the
     image is deployed to a VM with a different CMS URL. It now prefers the

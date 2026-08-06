@@ -21,19 +21,26 @@ export async function generateMetadata({
 }): Promise<Metadata> {
     const { slug } = await params;
 
-    const dataTopic = await getDataTopics(slug, "pt")
+    try {
+        const dataTopic = await getDataTopics(slug, "pt")
 
-    if (!dataTopic) {
+        if (!dataTopic) {
+            return {
+                title: "404 - Não foi encontrada",
+                description: "Área Temática não foi encontrada",
+            };
+        }
+
         return {
-            title: "404 - Não foi encontrada",
-            description: "Área Temática não foi encontrada",
+            title: dataTopic.title,
+            description: dataTopic.description,
         };
+    } catch (error) {
+        // Fall back to the layout's default title rather than failing the
+        // whole page render when the CMS is unreachable.
+        console.error("Error fetching area-tematica metadata:", error);
+        return {};
     }
-
-    return {
-        title: dataTopic.title,
-        description: dataTopic.description,
-    };
 }
 
 export default async function Page({
