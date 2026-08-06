@@ -22,15 +22,23 @@ import { useTranslation } from "react-i18next";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { highlightText } from "@/utils/highlightText";
 
-function formatStatNumber(value: number, locale: string): { number: string; suffix: string } {
-  const parts = new Intl.NumberFormat(locale, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).formatToParts(value);
-  return {
-    number: parts.filter((part) => part.type !== "compact").map((part) => part.value).join(""),
-    suffix: parts.filter((part) => part.type === "compact").map((part) => part.value).join(""),
-  };
+function formatStatNumber(value: number): { number: string; suffix: string } {
+  if (value >= 1_000_000) {
+    const formatted = (value / 1_000_000).toFixed(1).replace(".", ",");
+    return { number: formatted, suffix: "milhões" };
+  }
+  if (value >= 1_000) {
+    const parts: string[] = [];
+    let remaining = value;
+    while (remaining >= 1000) {
+      parts.unshift(String(remaining % 1000).padStart(3, "0"));
+      remaining = Math.floor(remaining / 1000);
+    }
+    parts.unshift(String(remaining));
+    const formatted = parts.join("\u2009");
+    return { number: formatted, suffix: "" };
+  }
+  return { number: String(value), suffix: "" };
 }
 
 interface HomeClientProps {
@@ -122,11 +130,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.reuses ?? 0, i18n.language).number}
+                        {formatStatNumber(stats?.reuses ?? 0).number}
                       </span>
-                      {formatStatNumber(stats?.reuses ?? 0, i18n.language).suffix && (
+                      {formatStatNumber(stats?.reuses ?? 0).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.reuses ?? 0, i18n.language).suffix}
+                          {formatStatNumber(stats?.reuses ?? 0).suffix}
                         </span>
 
                       )}
@@ -146,11 +154,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.users ?? 0, i18n.language).number}
+                        {formatStatNumber(stats?.users ?? 0).number}
                       </span>
-                      {formatStatNumber(stats?.users ?? 0, i18n.language).suffix && (
+                      {formatStatNumber(stats?.users ?? 0).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.users ?? 0, i18n.language).suffix}
+                          {formatStatNumber(stats?.users ?? 0).suffix}
                         </span>
                       )}
                     </div>
@@ -169,11 +177,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.datasets ?? 0, i18n.language).number}
+                        {formatStatNumber(stats?.datasets ?? 0).number}
                       </span>
-                      {formatStatNumber(stats?.datasets ?? 0, i18n.language).suffix && (
+                      {formatStatNumber(stats?.datasets ?? 0).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.datasets ?? 0, i18n.language).suffix}
+                          {formatStatNumber(stats?.datasets ?? 0).suffix}
                         </span>
                       )}
                     </div>
@@ -192,11 +200,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.organizations ?? 0, i18n.language).number}
+                        {formatStatNumber(stats?.organizations ?? 0).number}
                       </span>
-                      {formatStatNumber(stats?.organizations ?? 0, i18n.language).suffix && (
+                      {formatStatNumber(stats?.organizations ?? 0).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.organizations ?? 0, i18n.language).suffix}
+                          {formatStatNumber(stats?.organizations ?? 0).suffix}
                         </span>
                       )}
                     </div>
