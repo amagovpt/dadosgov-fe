@@ -42,7 +42,8 @@
       "label": "Data type",
       "options": {
         "all": "All",
-        "high_value": "High-Value Datasets"
+        "high_value": "High-Value Datasets",
+        "inspire": "INSPIRE"
       }
     }
   },
