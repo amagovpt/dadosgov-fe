@@ -23,12 +23,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
 
-  const { hero } = await getNewsPage(locale);
-
-  return {
-    title: `${hero.title} - dados.gov.pt`,
-    description: hero.subtitle,
-  };
+  try {
+    const { hero } = await getNewsPage(locale);
+    return {
+      title: `${hero.title} - dados.gov.pt`,
+      description: hero.subtitle,
+    };
+  } catch (error) {
+    // Fall back to the layout's default title rather than failing the whole
+    // page render when the CMS is unreachable.
+    console.error("Error fetching noticias metadata:", error);
+    return {};
+  }
 }
 
 export default async function ArticleListPage({

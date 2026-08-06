@@ -42,7 +42,8 @@
       "label": "Tipo de dados",
       "options": {
         "all": "Todos",
-        "high_value": "Conjuntos de dados de Elevado Valor"
+        "high_value": "Conjuntos de dados de Elevado Valor",
+        "inspire": "Inspire"
       }
     }
   },

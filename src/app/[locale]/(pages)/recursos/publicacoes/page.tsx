@@ -3,7 +3,7 @@ import HeroGeneral from "@/components/HeroGeneral";
 import { getPublicationsPage } from "@/service/queries/resources/publications";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
-import { getDocumentProxy } from "unpdf";
+import { fetchPdfPageCount } from "@/lib/pdfPageCount";
 import PublicationsClient from "@/components/resources/PublicationsClient";
 import {
   PUBLICATIONS_PAGE_SIZE,
@@ -39,23 +39,7 @@ export default async function PublicationsPage({
 
   const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
     if (pdfDocument === "#") return null;
-
-    const url = `${getCmsBaseUrl()}/api/assets/${pdfDocument}`;
-
-    try {
-      const res = await fetch(url, { cache: "force-cache" });
-      if (!res.ok) {
-        console.error(`[publications] page count fetch ${url} returned ${res.status}`);
-        return null;
-      }
-
-      const bytes = await res.arrayBuffer();
-      const pdf = await getDocumentProxy(new Uint8Array(bytes));
-      return pdf.numPages;
-    } catch (error) {
-      console.error(`[publications] page count fetch ${url} failed:`, error);
-      return null;
-    }
+    return fetchPdfPageCount(`${getCmsBaseUrl()}/api/assets/${pdfDocument}`);
   };
 
   const sorted = sortPublications(publications, sort);
