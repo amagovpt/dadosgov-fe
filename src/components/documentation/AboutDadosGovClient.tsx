@@ -1,15 +1,14 @@
 "use client";
 
 import { GitHubArticlePage } from "./GitHubArticlePage";
-import { useTranslation } from "react-i18next";
+import type { AboutDadosGovPage } from "@/service/types/documentation/about-dadosgov";
 
-export default function AboutDadosGovClient({ initialContent }: { initialContent?: string }) {
-  const { t } = useTranslation("documentation");
+export default function AboutDadosGovClient({ page }: { page: AboutDadosGovPage }) {
   return (
     <GitHubArticlePage
       slug="pages/faqs/about_dadosgov"
-      title={t("aboutDadosGovTitle")}
-      initialContent={initialContent}
+      title={page.metadata.title}
+      initialContent={page.content}
     />
   );
 }

@@ -44,10 +44,9 @@ export async function getApiReferencePage(locale: string = "pt"): Promise<ApiRef
     throw new Error("Failed to fetch API reference page");
   }
 
-  const page = data.findApiReferencePageSingleton?.data;
-  if (!page) {
+  if (!data.findApiReferencePageSingleton?.data) {
     throw new Error("API reference page content is missing");
   }
 
-  return flattenData(page, [locale, "pt", "en"]) as unknown as ApiReferencePage;
+  return flattenData(data, locale).findApiReferencePageSingleton as ApiReferencePage;
 }

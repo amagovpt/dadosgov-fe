@@ -1,14 +1,4 @@
 {
-  "aboutDadosGovTitle": "What is dados.gov.pt?",
-  "aboutOpenData": {
-    "metadataTitle": "About open data",
-    "metadataDescription": "Learn what open data is and why it matters."
-  },
-  "githubArticle": {
-    "certificationRequest": "Certification requests must be submitted through the [Help and Contacts](/ajuda-e-contactos) page.",
-    "arteSupport": "ARTE can also support this process, including by helping organize workshops and events that encourage these interactions. For more information, visit the [Help and Contacts](/ajuda-e-contactos) page.",
-    "certificationRequests": "For certification requests, visit the [Help and Contacts](/ajuda-e-contactos) page."
-  },
   "apiReference": {
     "openSwagger": "Open in Swagger UI",
     "downloadSpecification": "Download specification (JSON)"

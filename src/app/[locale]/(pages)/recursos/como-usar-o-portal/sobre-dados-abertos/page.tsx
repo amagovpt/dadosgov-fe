@@ -1,7 +1,6 @@
 import AboutOpenData from "@/components/articles/AboutOpenData";
-import { fetchGitHubMarkdown } from "@/service/api/github-markdown";
 import { Metadata } from "next";
-import initTranslations from "@/app/i18n";
+import { getAboutOpenDataPage } from "@/service/queries/documentation/about-open-data";
 
 export async function generateMetadata({
   params,
@@ -9,15 +8,20 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({ locale, namespaces: ["documentation"] });
+  const page = await getAboutOpenDataPage(locale);
 
   return {
-    title: `${t("aboutOpenData.metadataTitle")} - dados.gov.pt`,
-    description: t("aboutOpenData.metadataDescription"),
+    title: page.metadata.title,
+    description: page.metadata.description,
   };
 }
 
-export default async function AboutOpenDataPage() {
-  const content = await fetchGitHubMarkdown("pages/faqs/about_opendata");
-  return <AboutOpenData initialContent={content} />;
+export default async function AboutOpenDataPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const page = await getAboutOpenDataPage(locale);
+  return <AboutOpenData page={page} />;
 }

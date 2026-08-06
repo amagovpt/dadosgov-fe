@@ -7,7 +7,6 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 
 interface GitHubArticlePageProps {
   slug: string;
@@ -91,31 +90,12 @@ const markdownComponents: Components = {
   br: () => null,
 };
 
-function sanitizeMarkdown(content: string, t: TFunction): string {
-  return content
-    .replace(/<br\s*\/?>/gi, "")
-    .replace(/^\s*\n/gm, "\n")
-    .replace(/\bdados gov\b/g, "dados.gov.pt")
-    .replace(
-      /A certificação pode ser pedida através do e-mail dados@ama\.pt\./g,
-      t("documentation:githubArticle.certificationRequest")
-    )
-    .replace(
-      /A ARTE também poderá ajudar neste processo, incluindo colaborar na organização de workshops \/ eventos com vista a promover estas interações, contacte-nos em dados@ama\.pt\./g,
-      t("documentation:githubArticle.arteSupport")
-    )
-    .replace(
-      /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
-      t("documentation:githubArticle.certificationRequests")
-    );
-}
-
 export function GitHubArticlePage({
   slug,
   initialContent = "",
 }: GitHubArticlePageProps) {
   const { t } = useTranslation(["common", "documentation"]);
-  const cleanContent = sanitizeMarkdown(initialContent, t);
+  const cleanContent = initialContent;
 
   return (
     <div className="flex min-h-screen flex-col bg-white font-sans">
