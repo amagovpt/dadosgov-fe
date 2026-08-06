@@ -49,7 +49,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
     let cancelled = false;
     isFollowing("datasets", dataset.id, user.id)
       .then((following) => { if (!cancelled) setIsFavorite(following); })
-      .catch(() => {});
+      .catch(() => { });
     return () => { cancelled = true; };
   }, [user?.id, dataset.id]);
 
@@ -113,17 +113,17 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
           (user && dataset.owner?.id === user.id) ||
           (dataset.organization &&
             organizations.some((org) => org.id === dataset.organization?.id))) && (
-          <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
-            <Button
-              variant="primary"
-              hasIcon={true}
-              leadingIcon="agora-line-edit"
-              leadingIconHover="agora-solid-edit"
-            >
-              {tds("detail.edit")}
-            </Button>
-          </Link>
-        )}
+            <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
+              <Button
+                variant="primary"
+                hasIcon={true}
+                leadingIcon="agora-line-edit"
+                leadingIconHover="agora-solid-edit"
+              >
+                {tds("detail.edit")}
+              </Button>
+            </Link>
+          )}
       </div>
 
       <div className="container grid gap-32 xl:grid-cols-12">
@@ -277,10 +277,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
                   </div>
                 </div>
               }
-              accordionHeadingTitle={
-                qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")
-              }
-              accordionHeadingLevel="h4"
+              accordionHeadingTitle={qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")}
               expanded={qualityExpanded}
               onExpanded={() => setQualityExpanded(true)}
               onCollapsed={() => setQualityExpanded(false)}
