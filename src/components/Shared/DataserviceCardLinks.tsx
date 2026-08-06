@@ -13,7 +13,7 @@ interface DataserviceCardLinksProps {
 }
 
 export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const router = useRouter();
   const href = `/dataservices/${dataservice.slug}`;
 
@@ -26,7 +26,7 @@ export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps)
       trailingIcon: "",
       trailingIconHover: "",
       trailingIconActive: "",
-      children: dataservice.metrics?.views?.toLocaleString("pt-PT") || "0",
+      children: dataservice.metrics?.views?.toLocaleString(i18n.language) || "0",
       title: t("card.views"),
       onClick: (e: React.MouseEvent) => e.preventDefault(),
       className: "text-[#034AD8]",

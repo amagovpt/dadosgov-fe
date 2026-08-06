@@ -90,7 +90,7 @@ export default function UserProfileActivityTab({
                     </div>
                   </TableCell>
                   <TableCell headerLabel={t("activities.action")}>
-                    {translateActivityLabel(activity.label)}
+                    {translateActivityLabel(activity.label, t)}
                   </TableCell>
                   <TableCell headerLabel={t("activities.date")}>
                     {new Date(activity.created_at).toLocaleDateString("pt-PT", {

@@ -20,7 +20,7 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";
 import DeleteDiscussionPopup from "@/components/discussions/DeleteDiscussionPopup";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 
 interface DiscussionSectionProps {
@@ -128,7 +128,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
 };
 
 export function DiscussionSection({ entityId, entityClass }: DiscussionSectionProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const { user } = useAuth();
   const { show } = usePopupContext();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
@@ -339,7 +339,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                         {disc.user.first_name} {disc.user.last_name}
                       </span>
                       {` — ${t("discussions.postedOn")} `}
-                      {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                      {format(new Date(disc.created), "PPP", { locale: i18n.language === "en" ? enGB : pt })}
                     </p>
                   </div>
                 </div>
@@ -431,8 +431,8 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                               {msg.posted_by.first_name} {msg.posted_by.last_name}
                             </span>
                             {" — "}
-                            {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", {
-                              locale: pt,
+                            {format(new Date(msg.posted_on), "PPP", {
+                              locale: i18n.language === "en" ? enGB : pt,
                             })}
                           </p>
                         </div>

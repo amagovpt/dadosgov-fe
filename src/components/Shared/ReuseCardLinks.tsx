@@ -14,7 +14,7 @@ interface ReuseCardLinksProps {
 }
 
 export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLinksProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const router = useRouter();
 
   const links = [
@@ -26,7 +26,7 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
       trailingIcon: "",
       trailingIconHover: "",
       trailingIconActive: "",
-      children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
+      children: reuse.metrics?.views?.toLocaleString(i18n.language) || "0",
       title: t("card.views"),
       onClick: (e: React.MouseEvent) => e.preventDefault(),
       className: "text-[#034AD8]",

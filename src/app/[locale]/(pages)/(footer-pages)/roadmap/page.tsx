@@ -6,10 +6,13 @@ import { Table } from '@/components/Shared/Table';
 import { getRoadmapPage } from '@/service/queries/roadmap';
 import { parseHtmlToParagraphs } from '@/utils/htmlToParagraphs';
 import ReactMarkdown from 'react-markdown';
+import initTranslations from '@/app/i18n';
 
 export const dynamic = "force-dynamic";
 
-export default async function page() {
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
+    const { t } = await initTranslations({ locale, namespaces: ['common'] });
 
     const { hero,
         sitemap,
@@ -20,12 +23,12 @@ export default async function page() {
         followAlongAndJoinIn,
         history,
         historyOfDevelopment,
-    } = await getRoadmapPage("pt");
+    } = await getRoadmapPage(locale);
 
     const tableHeaders = [
-        "Funcionalidade",
-        "Descrição",
-        "Estado",
+        t('roadmap.functionality'),
+        t('roadmap.description'),
+        t('roadmap.status'),
     ];
 
 
@@ -78,19 +81,19 @@ export default async function page() {
                                             (<span className="flex gap-8 items-center justify-start">
                                                 <div className="w-8 h-8 bg-success-600 rounded-full" />
                                                 <div className="text-m-regular">
-                                                    Concluído
+                                                    {t('roadmap.finished')}
                                                 </div>
                                             </span>) : evolution.state === "onProgress" ?
                                                 (<span className="flex gap-8 items-center justify-start">
                                                     <div className="w-8 h-8 bg-warning-600 rounded-full" />
                                                     <div className="text-m-regular">
-                                                        Em desenvolvimento
+                                                    {t('roadmap.inProgress')}
                                                     </div>
                                                 </span>) :
                                                 (<span className="flex gap-8 items-center justify-start">
                                                     <div className="w-8 h-8 bg-neutral-600 rounded-full" />
                                                     <div className="text-m-regular">
-                                                        Em breve
+                                                    {t('roadmap.comingSoon')}
                                                     </div>
                                                 </span>)}</Table.Cell>
                                     </Table.Row>

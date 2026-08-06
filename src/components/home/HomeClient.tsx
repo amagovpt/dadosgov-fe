@@ -9,7 +9,7 @@ import { Post } from "@/service/types/posts";
 import { Reuse } from "@/service/types/reuse";
 import { SiteMetrics } from "@/service/types/shared";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
@@ -22,23 +22,15 @@ import { useTranslation } from "react-i18next";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { highlightText } from "@/utils/highlightText";
 
-function formatStatNumber(value: number): { number: string; suffix: string } {
-  if (value >= 1_000_000) {
-    const formatted = (value / 1_000_000).toFixed(1).replace(".", ",");
-    return { number: formatted, suffix: "milhões" };
-  }
-  if (value >= 1_000) {
-    const parts: string[] = [];
-    let remaining = value;
-    while (remaining >= 1000) {
-      parts.unshift(String(remaining % 1000).padStart(3, "0"));
-      remaining = Math.floor(remaining / 1000);
-    }
-    parts.unshift(String(remaining));
-    const formatted = parts.join("\u2009");
-    return { number: formatted, suffix: "" };
-  }
-  return { number: String(value), suffix: "" };
+function formatStatNumber(value: number, locale: string): { number: string; suffix: string } {
+  const parts = new Intl.NumberFormat(locale, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).formatToParts(value);
+  return {
+    number: parts.filter((part) => part.type !== "compact").map((part) => part.value).join(""),
+    suffix: parts.filter((part) => part.type === "compact").map((part) => part.value).join(""),
+  };
 }
 
 interface HomeClientProps {
@@ -62,7 +54,7 @@ export default function HomeClient({
 }: HomeClientProps) {
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation("home");
+  const { t, i18n } = useTranslation("common");
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -130,11 +122,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.reuses ?? 0).number}
+                        {formatStatNumber(stats?.reuses ?? 0, i18n.language).number}
                       </span>
-                      {formatStatNumber(stats?.reuses ?? 0).suffix && (
+                      {formatStatNumber(stats?.reuses ?? 0, i18n.language).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.reuses ?? 0).suffix}
+                          {formatStatNumber(stats?.reuses ?? 0, i18n.language).suffix}
                         </span>
 
                       )}
@@ -154,11 +146,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.users ?? 0).number}
+                        {formatStatNumber(stats?.users ?? 0, i18n.language).number}
                       </span>
-                      {formatStatNumber(stats?.users ?? 0).suffix && (
+                      {formatStatNumber(stats?.users ?? 0, i18n.language).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.users ?? 0).suffix}
+                          {formatStatNumber(stats?.users ?? 0, i18n.language).suffix}
                         </span>
                       )}
                     </div>
@@ -177,11 +169,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.datasets ?? 0).number}
+                        {formatStatNumber(stats?.datasets ?? 0, i18n.language).number}
                       </span>
-                      {formatStatNumber(stats?.datasets ?? 0).suffix && (
+                      {formatStatNumber(stats?.datasets ?? 0, i18n.language).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.datasets ?? 0).suffix}
+                          {formatStatNumber(stats?.datasets ?? 0, i18n.language).suffix}
                         </span>
                       )}
                     </div>
@@ -200,11 +192,11 @@ export default function HomeClient({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-6">
                       <span className="text-2xl-bold">
-                        {formatStatNumber(stats?.organizations ?? 0).number}
+                        {formatStatNumber(stats?.organizations ?? 0, i18n.language).number}
                       </span>
-                      {formatStatNumber(stats?.organizations ?? 0).suffix && (
+                      {formatStatNumber(stats?.organizations ?? 0, i18n.language).suffix && (
                         <span className="text-m-bold">
-                          {formatStatNumber(stats?.organizations ?? 0).suffix}
+                          {formatStatNumber(stats?.organizations ?? 0, i18n.language).suffix}
                         </span>
                       )}
                     </div>
@@ -257,7 +249,7 @@ export default function HomeClient({
         {/* Data Stories */}
         <section className="w-full flex flex-col items-center justify-center bg-primary-900 py-64">
           <div className="container flex flex-col gap-32">
-            <h2 className="text-xl-bold text-white">Data Stories</h2>
+            <h2 className="text-xl-bold text-white">{t("datastories")}</h2>
             <p className="mb-32 mt-16 max-w-3xl text-white">
               {parseHtmlToParagraphs(datastories.description)}
             </p>
@@ -277,7 +269,7 @@ export default function HomeClient({
                       }}
                       subtitle={
                         story.createdAt
-                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={story.title}
@@ -327,7 +319,7 @@ export default function HomeClient({
                       }}
                       subtitle={
                         post.created_at
-                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={post.name}

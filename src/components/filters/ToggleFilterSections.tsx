@@ -1,6 +1,7 @@
 "use client";
 
 import { Pill, Toggle } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 export interface ToggleFilterOption {
   id: string;
@@ -22,9 +23,9 @@ interface ToggleFilterSectionsProps {
   idPrefix: string;
 }
 
-function renderCountLabel(count: number | string): string {
+function renderCountLabel(count: number | string, locale: string): string {
   if (typeof count === "number") {
-    return count.toLocaleString("pt-PT");
+    return count.toLocaleString(locale);
   }
   return count;
 }
@@ -35,9 +36,10 @@ export function ToggleFilterSections({
   onChange,
   idPrefix,
 }: ToggleFilterSectionsProps) {
+  const { t, i18n } = useTranslation("common");
   return (
     <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
-      <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
+      <h2 className="font-bold text-xl text-neutral-900">{t("filters.filters")}</h2>
       {sections.map((section) => (
         <div key={section.key} className="pr-32 max-w-[592px] flex flex-col gap-8">
           <h3 className="font-bold text-base text-neutral-900 mb-8">{section.title}</h3>
@@ -77,7 +79,7 @@ export function ToggleFilterSections({
                       circular={false}
                       className="text-xs font-medium text-neutral-500 ml-16"
                     >
-                      {renderCountLabel(option.count)}
+                      {renderCountLabel(option.count, i18n.language)}
                     </Pill>
                   )}
                 </div>

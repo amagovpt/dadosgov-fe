@@ -35,7 +35,9 @@ export async function getBoNotificationsMetadata(
     throw new Error("Failed to fetch bo-notifications metadata");
   }
 
-  return flattenData(data).findBoNotificationsSingleton as BoNotificationsMetadata;
+  const page = flattenData(data).findBoNotificationsSingleton as BoNotificationsMetadata;
+  if (!page) throw new Error("Bo notifications metadata is missing");
+  return page;
 }
 
 export async function getBoNotifications(locale: string = "pt"): Promise<BoNotificationsPage> {
@@ -91,5 +93,7 @@ export async function getBoNotifications(locale: string = "pt"): Promise<BoNotif
     throw new Error("Failed to fetch bo-notifications content");
   }
 
-  return flattenData(data).findBoNotificationsSingleton as BoNotificationsPage;
+  const page = flattenData(data).findBoNotificationsSingleton as BoNotificationsPage;
+  if (!page) throw new Error("Bo notifications content is missing");
+  return page;
 }

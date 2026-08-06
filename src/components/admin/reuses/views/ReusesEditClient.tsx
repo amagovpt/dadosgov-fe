@@ -659,7 +659,7 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
               activities={activities}
               activitiesLoading={activitiesLoading}
               activitiesLoaded={activitiesLoaded}
-              translateActivityLabel={translateActivityLabel}
+              translateActivityLabel={(label) => translateActivityLabel(label, t)}
             />
           </TabBody>
         </Tab>

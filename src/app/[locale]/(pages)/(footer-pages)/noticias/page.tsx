@@ -46,7 +46,7 @@ export default async function ArticleListPage({
 }) {
   const { locale } = await params;
   const { t } = await initTranslations({ locale, namespaces: ["common"] });
-  const { hero, searchBar } = await getNewsPage("pt");
+  const { hero, searchBar } = await getNewsPage(locale);
   const { page: pageParam, sort: sortParam, q } = await searchParams;
   const currentPage = Math.max(1, Number(pageParam) || 1);
   const sort = parseArticlesSort(sortParam);

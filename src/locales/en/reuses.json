@@ -20,6 +20,12 @@
     "favorites": "Favorites",
     "datasetsCount": "{{count}} datasets"
   },
+  "noResults": {
+    "title": "Didn't find a reuse?",
+    "subtitle": "Try resetting the filters to broaden your search.",
+    "description": "Explore our complete list of open-data reuses.",
+    "reset": "Reset filters"
+  },
   "theReuses": "the reuses",
   "detail": {
     "untitled": "No title",

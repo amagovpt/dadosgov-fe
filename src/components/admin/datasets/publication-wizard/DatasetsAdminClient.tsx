@@ -187,11 +187,11 @@ export default function DatasetsAdminClient({
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (
       <DropdownOption key={freq.id} value={freq.id} selected={frequencyDefaultValue === freq.id}>
-        {getFrequencyLabel(freq.id, freq.label)}
+        {getFrequencyLabel(freq.id, freq.label, (key, options) => t(`datasets:${key}`, options))}
       </DropdownOption>
     ));
     return <DropdownSection name="frequencies">{options}</DropdownSection>;
-  }, [frequencies, frequencyDefaultValue]);
+  }, [frequencies, frequencyDefaultValue, t]);
 
   const tagOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
@@ -293,11 +293,15 @@ export default function DatasetsAdminClient({
         value={granularity.id}
         selected={spatialGranularityDefaultValue === granularity.id}
       >
-        {getGranularityLabel(granularity.id, granularity.name)}
+        {getGranularityLabel(
+          granularity.id,
+          granularity.name,
+          (key, options) => t(`datasets:${key}`, options)
+        )}
       </DropdownOption>
     ));
     return <DropdownSection name="spatial-granularity">{options}</DropdownSection>;
-  }, [granularities, spatialGranularityDefaultValue]);
+  }, [granularities, spatialGranularityDefaultValue, t]);
 
   useEffect(() => {
     if (selectedKeywordsValue) return;

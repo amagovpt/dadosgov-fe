@@ -2,6 +2,7 @@
 import { useId, useState, Children, isValidElement } from 'react';
 import { InputSelect, DropdownSection, DropdownOption, type DropdownOptionProps, type DropdownSectionProps } from '@ama-pt/agora-design-system';
 import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface MiniCoursesFiltersProps {
   onSortChange: (sortKey: string) => void;
@@ -14,6 +15,7 @@ const sortOptions = [
 ];
 
 export default function MiniCoursesFilters({ onSortChange }: MiniCoursesFiltersProps) {
+  const { t } = useTranslation('learning');
   const id = useId();
 
 
@@ -27,7 +29,7 @@ export default function MiniCoursesFilters({ onSortChange }: MiniCoursesFiltersP
     <DropdownSection key={`sort-${id}`} name="order">
       {sortOptions.map((opt, i) => (
         <DropdownOption key={`sort-${id}-${i}`} value={opt.value} selected={i === 0}>
-          {opt.label}
+          {t(`sortOptions.${opt.value}`)}
         </DropdownOption>
       ))}
     </DropdownSection>,
@@ -61,8 +63,8 @@ export default function MiniCoursesFilters({ onSortChange }: MiniCoursesFiltersP
   return (
     <div className=" flex flex-col gap-64">
       <div className="flex flex-col gap-16">
-        <h2 className="text-l-bold text-neutral-900">Ordenar</h2>
-        <InputSelect label="Ordenar" hideLabel onChange={handleSort}>
+        <h2 className="text-l-bold text-neutral-900">{t('sort')}</h2>
+        <InputSelect label={t('sort')} hideLabel onChange={handleSort}>
           {sections}
         </InputSelect>
       </div>
@@ -95,4 +97,3 @@ export default function MiniCoursesFilters({ onSortChange }: MiniCoursesFiltersP
     </div>
   );
 }
-

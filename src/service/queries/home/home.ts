@@ -41,7 +41,7 @@ export async function getHome(locale: string = "pt"): Promise<Home> {
               iv {
                 data {
                   alt {
-                    pt
+                    ${locale}
                   }
                   anchor {
                     iv {
@@ -76,11 +76,9 @@ export async function getHome(locale: string = "pt"): Promise<Home> {
     throw new Error("Failed to fetch datastory information");
   }
 
-  const homeData = data.findHomeSingleton?.data;
-
-  if (!homeData) {
+  if (!data.findHomeSingleton?.data) {
     return {} as Home;
   }
 
-  return flattenData(homeData) as Home;
+  return flattenData(data, locale).findHomeSingleton as Home;
 }

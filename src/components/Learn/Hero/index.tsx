@@ -4,6 +4,7 @@ import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import dayjs from "dayjs";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { useTranslation } from "react-i18next";
 
 export interface HeroCoursesProps {
   title: string;
@@ -22,6 +23,7 @@ export interface HeroCoursesProps {
 }
 
 export default function HeroCourses(args: HeroCoursesProps) {
+  const { t } = useTranslation("learning");
   return (
     <div className="flex w-full items-center justify-center bg-primary-100 py-64">
       <div className="container">
@@ -44,11 +46,8 @@ export default function HeroCourses(args: HeroCoursesProps) {
             </div>
 
             <div className="mt-64">
-              Atualizado em{" "}
-              {args.updatedAt ? (
-                dayjs(args.updatedAt).format("DD.MM.YYYY")
-              ) : (
-                <span className="text-m-bold">Data de atualização indisponível</span>
+              {args.updatedAt ? t("updatedAt", { date: dayjs(args.updatedAt).format("DD.MM.YYYY") }) : (
+                <span className="text-m-bold">{t("dateUnavailable")}</span>
               )}
             </div>
           </div>

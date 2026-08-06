@@ -28,7 +28,9 @@ export async function getBoLogsMetadata(locale: string = "pt"): Promise<BoLogsMe
     throw new Error("Failed to fetch bo-logs metadata");
   }
 
-  return flattenData(data).findBoLogsSingleton as BoLogsMetadata;
+  const page = flattenData(data).findBoLogsSingleton as BoLogsMetadata;
+  if (!page) throw new Error("Bo logs metadata is missing");
+  return page;
 }
 
 export async function getBoLogs(locale: string = "pt"): Promise<BoLogsPage> {
@@ -82,5 +84,7 @@ export async function getBoLogs(locale: string = "pt"): Promise<BoLogsPage> {
     throw new Error("Failed to fetch bo-logs content");
   }
 
-  return flattenData(data).findBoLogsSingleton as BoLogsPage;
+  const page = flattenData(data).findBoLogsSingleton as BoLogsPage;
+  if (!page) throw new Error("Bo logs content is missing");
+  return page;
 }

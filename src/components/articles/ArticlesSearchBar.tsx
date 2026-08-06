@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { InputSearchBar } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 interface ArticlesSearchBarProps {
   initialQuery: string;
@@ -13,6 +14,7 @@ interface ArticlesSearchBarProps {
 }
 
 export function ArticlesSearchBar({ initialQuery, label, placeholder, searchActionAltText, voiceActionAltText }: ArticlesSearchBarProps) {
+  const { t } = useTranslation("common");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -33,12 +35,12 @@ export function ArticlesSearchBar({ initialQuery, label, placeholder, searchActi
 
   return (
     <InputSearchBar
-      label={label ?? "O que procura nas novidades?"}
-      placeholder={placeholder ?? "Pesquisar artigos, notícias, webinars..."}
+      label={label ?? t("search.articlesLabel")}
+      placeholder={placeholder ?? t("search.articlesPlaceholder")}
       id="articles-search"
       hasVoiceActionButton={false}
-      voiceActionAltText={voiceActionAltText ?? "Pesquisar por voz"}
-      searchActionAltText={searchActionAltText ?? "Pesquisar"}
+      voiceActionAltText={voiceActionAltText ?? t("search.voiceAction")}
+      searchActionAltText={searchActionAltText ?? t("search.label")}
       darkMode={true}
       minLength={1}
       value={searchInput}

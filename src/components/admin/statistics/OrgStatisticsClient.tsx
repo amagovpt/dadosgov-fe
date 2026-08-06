@@ -326,7 +326,14 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                     dataservicesTotal,
                     dataservicesPage,
                     setDataservicesPage,
-                    setDataservicesPageSize
+                    setDataservicesPageSize,
+                    {
+                      itemsPerPageLabel: t("admin-common:pagination.itemsPerPage"),
+                      buttonDropdownAriaLabel: t("admin-common:pagination.selectItemsPerPage"),
+                      dropdownListAriaLabel: t("admin-common:pagination.itemsPerPageOptions"),
+                      prevButtonAriaLabel: t("admin-common:pagination.previous"),
+                      nextButtonAriaLabel: t("admin-common:pagination.next"),
+                    }
                   )}
                 >
                   <TableHeader>

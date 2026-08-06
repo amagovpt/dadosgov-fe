@@ -35,7 +35,9 @@ export async function getBoMembersMetadata(
     throw new Error("Failed to fetch bo-members metadata");
   }
 
-  return flattenData(data).findBoMembersSingleton as BoMembersMetadata;
+  const page = flattenData(data).findBoMembersSingleton as BoMembersMetadata;
+  if (!page) throw new Error("Bo members metadata is missing");
+  return page;
 }
 
 export async function getBoMembers(locale: string = "pt"): Promise<BoMembersPage> {
@@ -75,5 +77,7 @@ export async function getBoMembers(locale: string = "pt"): Promise<BoMembersPage
     throw new Error("Failed to fetch bo-members content");
   }
 
-  return flattenData(data).findBoMembersSingleton as BoMembersPage;
+  const page = flattenData(data).findBoMembersSingleton as BoMembersPage;
+  if (!page) throw new Error("Bo members content is missing");
+  return page;
 }

@@ -11,26 +11,27 @@ import dayjs from "dayjs";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
 import ButtonNavigate from "@/components/Primitives/ButtonNavigate";
+import initTranslations from "@/app/i18n";
 
-export default async function page() {
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { t } = await initTranslations({ locale, namespaces: ["learning"] });
   const { data, error } = await apolloClient.query<{
     findPageCursosSingleton: {
       data: Record<string, unknown>;
     };
   }>({
-    query: getCoursesPage("pt"),
+    query: getCoursesPage(locale),
   });
 
   if (!data && error) {
     console.error("Error fetching courses page data:", error);
-    return <div>Error loading page data</div>;
+    return <div>{t("errorLoading")}</div>;
   }
 
   const { hero, miniCourses, otherCourses } = flattenData(
     data?.findPageCursosSingleton?.data || {}
   ) as unknown as PageCourses;
-
-  console.log("otherCourses", otherCourses);
 
   return (
     <main className="h-full w-full">
@@ -39,7 +40,7 @@ export default async function page() {
           img: {
             src:
               hero.image && hero.image[0].id ? getAssets(hero.image[0].id) : "/card-full-image.png",
-            alt: hero.title ?? "Aprender",
+            alt: hero.title ?? t("learnImageAlt"),
           },
           updatedAt: hero.updatedAt,
           title: hero.title,
@@ -65,7 +66,7 @@ export default async function page() {
                       {...{
                         titleText: course.title,
                         descriptionText: "",
-                        subtitleText: `Publicado a ${dayjs(course.updatedAt).format("DD.MM.YYYY")}`,
+                        subtitleText: t("publishedAt", { date: dayjs(course.updatedAt).format("DD.MM.YYYY") }),
                         imageIndent: true,
                         className: "",
                         image: {
@@ -73,7 +74,7 @@ export default async function page() {
                             course.cover && course.cover[0]
                               ? getAssets(course.cover[0].id)
                               : "/card-full-image.png",
-                          alt: course.title ?? "Curso",
+                          alt: course.title ?? t("courseImageAlt"),
                           width: 352,
                           height: 208,
                         },

@@ -193,7 +193,7 @@ export default function DataservicesClient({
                             trailingIcon: "",
                             trailingIconHover: "",
                             trailingIconActive: "",
-                            children: ds.metrics?.views?.toLocaleString("pt-PT") || "0",
+                            children: ds.metrics?.views?.toLocaleString(i18n.language) || "0",
                             title: t("card.views"),
                             onClick: (e: MouseEvent) => e.preventDefault(),
                             className: "text-[#034AD8]",
