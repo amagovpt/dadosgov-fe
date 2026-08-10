@@ -76,6 +76,8 @@
         "Form error",
         "Search error",
         "Authentication error",
+        "Problem with an organisation or reuse",
+        "Incorrect or unavailable content",
         "Other"
       ],
       "feedback": [

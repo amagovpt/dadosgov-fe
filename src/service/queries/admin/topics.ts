@@ -28,7 +28,9 @@ export async function getBoTopicsMetadata(locale: string = "pt"): Promise<BoTopi
     throw new Error("Failed to fetch bo-topics metadata");
   }
 
-  return flattenData(data).findBoTopicsSingleton as BoTopicsMetadata;
+  const page = flattenData(data).findBoTopicsSingleton as BoTopicsMetadata;
+  if (!page) throw new Error("Bo topics metadata is missing");
+  return page;
 }
 
 export async function getBoTopics(locale: string = "pt"): Promise<BoTopicsPage> {
@@ -70,5 +72,7 @@ export async function getBoTopics(locale: string = "pt"): Promise<BoTopicsPage> 
     throw new Error("Failed to fetch bo-topics content");
   }
 
-  return flattenData(data).findBoTopicsSingleton as BoTopicsPage;
+  const page = flattenData(data).findBoTopicsSingleton as BoTopicsPage;
+  if (!page) throw new Error("Bo topics content is missing");
+  return page;
 }

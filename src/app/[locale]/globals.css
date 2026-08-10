@@ -786,8 +786,13 @@ li.section-name:empty {
   .bottom-container {
   margin-top: auto;
 }
+
 .agora-card-links .title h2 {
   text-decoration: underline;
+}
+
+.datastory-page .agora-card-links .title h2 {
+  text-decoration: none;
 }
 
 .agora-card-links-datasets .agora-card-links .card-links-container,

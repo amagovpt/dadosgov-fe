@@ -34,8 +34,10 @@ import TextLink from "@/components/Primitives/TextLink";
 import { areas, isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
 import Anchor from "./Shared/Anchor";
+import { useTranslation } from "react-i18next";
 
 export const Header = ({ data }: { data: HeaderNavigationData }) => {
+  const { t } = useTranslation("common");
   const {
     topLevelLinks = [],
     authMenuItems = [],
@@ -206,8 +208,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   }, [submenu, allSubmenus]);
 
   const currentLangLabel =
-    languages.find((l) => l.value === selectedLanguage)?.label || "Português";
-  const currentAreaLabel = areas.find((a) => a.value === selectedArea)?.label || "Portal";
+    languages.find((l) => l.value === selectedLanguage)?.label || t("header.portuguese");
+  const currentAreaLabel = areas.find((a) => a.value === selectedArea)?.label || t("header.portal");
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     // Close all menus/panels via design system API
@@ -277,7 +279,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             setSubmenu(null);
           }}
         >
-          Voltar
+          {t("header.back")}
         </Button>
       </div>
     </NavigationLink>
@@ -310,9 +312,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             </Logo>
           </Brand>
 
-          <GeneralBar aria-label="Opções navegação geral">
+          <GeneralBar aria-label={t("header.generalNavigation")}>
             <Areas
-              aria-label="Áreas do portal"
+              aria-label={t("header.portalAreas")}
               // @ts-expect-error - Prop label does exist in component logic
               label={currentAreaLabel}
               onChange={() => { }}
@@ -321,7 +323,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 const areaEl = (
                   <Area
                     value={area.value}
-                    label={area.label}
+                    label={area.value === "1" ? t("header.portal") : area.label}
                     onClick={() => router.push(area.href)}
                     active={selectedArea === area.value}
                   />
@@ -337,7 +339,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             </Areas>
 
             <Languages
-              aria-label="Selecionar idioma"
+              aria-label={t("header.selectLanguage")}
               onChange={(lang: string) => setSelectedLanguage(lang)}
             >
               {languages.map((lang) => (
@@ -351,22 +353,22 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
               ))}
             </Languages>
 
-            <Search label="Pesquisar">
+            <Search label={t("header.search")}>
               <CustomSearch>
                 <div className="max-w-xl">
                   <SearchDropdown
                     id="header-search"
                     hasVoiceActionButton={false}
-                    label="O que procura no Portal?"
-                    placeholder="Pesquisar conjunto de dados, organizações, temas..."
+                    label={t("header.searchLabel")}
+                    placeholder={t("header.searchPlaceholder")}
                   />
                 </div>
               </CustomSearch>
             </Search>
 
             <Unauthenticated
-              label={user ? `${user.first_name} ${user.last_name}` : "Autenticar"}
-              aria-label={user ? `${user.first_name} ${user.last_name}` : "Autenticar"}
+              label={user ? `${user.first_name} ${user.last_name}` : t("header.signIn")}
+              aria-label={user ? `${user.first_name} ${user.last_name}` : t("header.signIn")}
             >
               <UnauthenticatedLink
                 hasIcon
@@ -380,19 +382,19 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       : `/login${pathname && localePath !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
                   }
                 >
-                  {user ? `${user.first_name} ${user.last_name}` : "Autenticar"}
+                  {user ? `${user.first_name} ${user.last_name}` : t("header.signIn")}
                 </Link>
               </UnauthenticatedLink>
             </Unauthenticated>
           </GeneralBar>
 
           <NavigationBar
-            responsiveMenuLabel="Menu"
-            responsiveMenuAriaLabel="Abrir menu"
-            responsiveMenuBackToRootLabel="Voltar ao início"
-            modalMenuLabel="Navegação Principal"
-            modalAriaLabel="Menu de navegação"
-            modalCloseLabel="Fechar"
+            responsiveMenuLabel={t("header.menu")}
+            responsiveMenuAriaLabel={t("header.openMenu")}
+            responsiveMenuBackToRootLabel={t("header.backToHome")}
+            modalMenuLabel={t("header.mainNavigation")}
+            modalAriaLabel={t("header.navigationMenu")}
+            modalCloseLabel={t("header.close")}
           >
             {[
               ...topLevelLinks
@@ -492,7 +494,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 <div className="icon-wrapper leading flex items-center">
                   <Icon name="agora-line-dashboard" className="h-24 w-24" />
                 </div>
-                <span className="children-wrapper">Ecossistema</span>
+                <span className="children-wrapper">{t("header.ecosystem")}</span>
                 <Image
                   src="/Ecossistema/arte_black_simple.svg"
                   alt="arte.gov.pt"
@@ -518,7 +520,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       className="font-medium text-primary-900"
                       style={{ fontSize: "24px", lineHeight: "36px" }}
                     >
-                      Ecossistema
+                      {t("header.ecosystem")}
                     </p>
                     <p
                       className="font-bold text-primary-900"

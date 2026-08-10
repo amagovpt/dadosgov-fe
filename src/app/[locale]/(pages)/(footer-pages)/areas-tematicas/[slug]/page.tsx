@@ -13,47 +13,43 @@ import rehypeSanitize from 'rehype-sanitize'
 import { TopicCard } from '@/components/tematic-areas/TopicCard'
 import { getTematicAreas } from '@/service/queries/topics-areas/tematic-areas'
 import { Metadata } from 'next'
+import initTranslations from '@/app/i18n'
 
 export async function generateMetadata({
     params,
 }: {
     params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-    const { slug } = await params;
+    const { slug, locale } = await params;
 
-    try {
-        const dataTopic = await getDataTopics(slug, "pt")
+    const { t } = await initTranslations({ locale, namespaces: ['common'] });
+    const dataTopic = await getDataTopics(slug, locale)
 
-        if (!dataTopic) {
-            return {
-                title: "404 - Não foi encontrada",
-                description: "Área Temática não foi encontrada",
-            };
-        }
-
+    if (!dataTopic) {
         return {
-            title: dataTopic.title,
-            description: dataTopic.description,
+            title: `404 - ${t('thematicAreaNotFound')}`,
+            description: t('thematicAreaNotFound'),
         };
-    } catch (error) {
-        // Fall back to the layout's default title rather than failing the
-        // whole page render when the CMS is unreachable.
-        console.error("Error fetching area-tematica metadata:", error);
-        return {};
     }
+
+    return {
+        title: dataTopic.title,
+        description: dataTopic.description,
+    };
 }
 
 export default async function Page({
     params,
 }: {
-    params: Promise<{ slug: string }>
+    params: Promise<{ slug: string; locale: string }>
 }) {
     const remarkPlugins = [remarkGfm]
     const rehypePlugins = [rehypeRaw, rehypeSanitize]
-    const { slug } = await params
-    const dataTopic = await getDataTopics(slug, "pt")
+    const { slug, locale } = await params
+    const { t } = await initTranslations({ locale, namespaces: ['common'] });
+    const dataTopic = await getDataTopics(slug, locale)
     const { site_metrics } = await fetchHomepageData();
-    const { topics } = await getTematicAreas("pt");
+    const { topics } = await getTematicAreas(locale);
     const { datasets, organizations } = site_metrics
 
     const hashString = (value: string) =>
@@ -70,7 +66,7 @@ export default async function Page({
         return (
             <div className='w-full h-full py-64 flex justify-center items-center'>
                 <Typograph tag="h2" className="text-2xl-bold text-neutral-700 text-center">
-                    Não foi possivel encontrar este tema
+                    {t('thematicAreaNotFound')}
                 </Typograph>
             </div>
         )
@@ -99,15 +95,15 @@ export default async function Page({
             <div className="container w-full h-full flex flex-row gap-32 py-32">
                 <div className="flex flex-row gap-8">
                     <span className='text-m-bold'>{topics.length}</span>
-                    <span className='text-m-regular'>Áreas Temáticas</span>
+                    <span className='text-m-regular'>{t('thematicAreas')}</span>
                 </div>
                 <div className="flex flex-row gap-8">
-                    <span className='text-m-bold'>{datasets.toLocaleString("pt-PT")}</span>
-                    <span className='text-m-regular'>Conjunto de Dados</span>
+                    <span className='text-m-bold'>{datasets.toLocaleString(locale)}</span>
+                    <span className='text-m-regular'>{t('datasets')}</span>
                 </div>
                 <div className="flex flex-row gap-8">
-                    <span className='text-m-bold'>{organizations.toLocaleString("pt-PT")}</span>
-                    <span className='text-m-regular'>Organizações</span>
+                    <span className='text-m-bold'>{organizations.toLocaleString(locale)}</span>
+                    <span className='text-m-regular'>{t('organizations')}</span>
                 </div>
             </div>
             <div className="container grid grid-cols-12 gap-32 roadmap-page pb-32">
@@ -180,7 +176,7 @@ export default async function Page({
                 <div className='container w-full h-full flex flex-col gap-32'>
                     <div className='w-full flex justify-between items-center'>
                         <Typograph tag="h2" className='text-xl-bold'>
-                            Outras Áreas Temáticas
+                            {t('otherThematicAreas')}
                         </Typograph>
                         <Anchor
                             href='/areas-tematicas'
@@ -188,7 +184,7 @@ export default async function Page({
                             trailingIconActive='agora-line-arrow-right-circle'
                             trailingIconHover='agora-solid-arrow-right-circle'
                         >
-                            Ver todas as áreas temáticas
+                            {t('viewAllThematicAreas')}
                         </Anchor>
                     </div>
                     <div className='w-full h-full grid grid-cols-12 gap-32'>

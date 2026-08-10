@@ -7,21 +7,15 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string[] }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const datastorySlug = slug.join("/");
 
-  try {
-    const datastory = await getDatastoryMetadata(datastorySlug, "pt");
-    return {
-      title: datastory.title,
-      description: datastory.description,
-    };
-  } catch (error) {
-    // Fall back to the layout's default title rather than failing the whole
-    // page render when the CMS is unreachable.
-    console.error("Error fetching datastory metadata:", error);
-    return {};
-  }
+  const datastory = await getDatastoryMetadata(datastorySlug, locale);
+
+  return {
+    title: datastory.title,
+    description: datastory.description,
+  };
 }
 
 export default async function DataStoryDetailPage({
@@ -29,10 +23,10 @@ export default async function DataStoryDetailPage({
 }: {
   params: Promise<{ locale: string; slug: string[] }>;
 }) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const datastorySlug = slug.join("/");
 
-  const datastory = await getDatastory(datastorySlug, "pt");
+  const datastory = await getDatastory(datastorySlug, locale);
 
   return <DatastoryDetailsPage datastory={datastory} />;
 }

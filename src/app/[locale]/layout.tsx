@@ -32,10 +32,12 @@ const notoSansMono = Noto_Sans_Mono({
 const namespaces = [
   "common",
   "footer",
-  "home",
   "datastories",
   "datasets",
   "login",
+  "learning",
+  "documentation",
+  "profile",
   "reuses",
   "organizations",
   "dataservices",

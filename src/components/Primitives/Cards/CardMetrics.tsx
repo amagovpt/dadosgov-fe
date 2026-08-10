@@ -5,6 +5,7 @@ import Link from "next/link";
 import Icon from "../../Primitives/Icon";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 export type CardMetricsProps = {
     link: string;
@@ -58,6 +59,7 @@ export default function CardMetrics({
     hideProgressBar = false,
     titleBadges,
 }: CardMetricsProps) {
+    const { t, i18n } = useTranslation("common");
     const qualityScore = quality?.score != null ? Math.round(quality.score * 100) : 0;
     const sourceImg = organization?.logo || owner?.avatar_thumbnail || PLACEHOLDER;
     // Track only which source failed to load, so the displayed image is always
@@ -72,9 +74,15 @@ export default function CardMetrics({
 
     const formatMetric = (value: number | undefined) => {
         if (!value) return "0";
-        if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-        if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-        return String(value);
+        const isEnglish = i18n.resolvedLanguage?.startsWith("en");
+        const locale = isEnglish ? "en-US" : "pt-PT";
+        if (value >= 1_000_000) {
+            return `${(value / 1_000_000).toLocaleString(locale, { maximumFractionDigits: 1 })}${isEnglish ? "M" : " M"}`;
+        }
+        if (value >= 1_000) {
+            return `${(value / 1_000).toLocaleString(locale, { maximumFractionDigits: 0 })}${isEnglish ? "K" : " mil"}`;
+        }
+        return value.toLocaleString(locale);
     };
 
     return (
@@ -121,11 +129,11 @@ export default function CardMetrics({
                                     hidePercentageValue={true}
                                 />
                                 <span className="text-s-regular text-neutral-900 mt-4 block">
-                                    {qualityScore}% Qualidade dos metadados
+                                    {t("card.metadataQuality", { score: qualityScore })}
                                 </span>
                             </>)}
                             <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
-                                <div className="flex items-center gap-8" title="Visualizações">
+                                <div className="flex items-center gap-8" title={t("card.views")}>
                                     <Icon
                                         name="agora-solid-eye"
                                         dimensions="xs"
@@ -134,7 +142,7 @@ export default function CardMetrics({
                                     />
                                     <span>{formatMetric(metrics?.views)}</span>
                                 </div>
-                                <div className="flex items-center gap-8" title="Downloads">
+                                <div className="flex items-center gap-8" title={t("card.downloads")}>
                                     <Icon
                                         name="agora-solid-download"
                                         dimensions="xs"
@@ -143,7 +151,7 @@ export default function CardMetrics({
                                     />
                                     <span>{formatMetric(metrics?.resources_downloads)}</span>
                                 </div>
-                                <div className="flex items-center gap-8" title="Reutilizações">
+                                <div className="flex items-center gap-8" title={t("card.reuses")}>
                                     <svg
                                         width="16"
                                         height="16"
@@ -155,7 +163,7 @@ export default function CardMetrics({
                                     </svg>
                                     <span>{metrics?.reuses || 0}</span>
                                 </div>
-                                <div className="flex items-center gap-8" title="Favoritos">
+                                <div className="flex items-center gap-8" title={t("card.favorites")}>
                                     <Icon
                                         name="agora-solid-star"
                                         dimensions="xs"

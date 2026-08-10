@@ -1,0 +1,23 @@
+{
+  "errorLoading": "Não foi possível carregar os dados da página.",
+  "updatedAt": "Atualizado em {{date}}",
+  "dateUnavailable": "Data de atualização indisponível",
+  "publishedAt": "Publicado a {{date}}",
+  "learnImageAlt": "Aprender",
+  "courseImageAlt": "Curso",
+  "miniCoursesImageAlt": "Minicursos",
+  "miniCourseNotFound": "Minicurso não encontrado.",
+  "stepNotFound": "Passo não encontrado.",
+  "startCourse": "Iniciar curso",
+  "searchTitle": "Que minicurso procura?",
+  "searchLabel": "Pesquisar minicursos",
+  "searchPlaceholder": "Pesquise pelo nome da formação, área técnica ou perfil",
+  "stepImageAlt": "Imagem do passo",
+  "next": "Seguinte",
+  "seeMoreCourses": "Ver mais cursos",
+  "sort": "Ordenar",
+  "results": "{{shown}} de {{total}} resultados",
+  "sortOptions": { "asc": "Ordem alfabética A-Z", "desc": "Ordem alfabética Z-A", "newest": "Mais recentes" },
+  "previous": "Anterior",
+  "shareMiniCourse": "Partilhar este minicurso"
+}

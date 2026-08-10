@@ -37,7 +37,9 @@ export async function getBoReusesMetadata(
     throw new Error("Failed to fetch bo-reuses metadata");
   }
 
-  return flattenData(data).findBoReusesSingleton as BoReusesMetadata;
+  const page = flattenData(data).findBoReusesSingleton as BoReusesMetadata;
+  if (!page) throw new Error("Bo reuses metadata is missing");
+  return page;
 }
 
 export async function getBoReuses(locale: string = "pt"): Promise<BoReusesPage> {
@@ -236,5 +238,7 @@ export async function getBoReuses(locale: string = "pt"): Promise<BoReusesPage> 
     throw new Error("Failed to fetch bo-reuses content");
   }
 
-  return flattenData(data).findBoReusesSingleton as BoReusesPage;
+  const page = flattenData(data).findBoReusesSingleton as BoReusesPage;
+  if (!page) throw new Error("Bo reuses content is missing");
+  return page;
 }

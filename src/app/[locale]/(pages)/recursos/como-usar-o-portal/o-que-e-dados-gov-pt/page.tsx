@@ -1,7 +1,31 @@
 import AboutDadosGovClient from "@/components/documentation/AboutDadosGovClient";
-import { fetchGitHubMarkdown } from "@/service/api/github-markdown";
+import {
+  getAboutDadosGovMetadata,
+  getAboutDadosGovPage,
+} from "@/service/queries/documentation/about-dadosgov";
+import type { Metadata } from "next";
 
-export default async function AboutDadosGovPage() {
-  const content = await fetchGitHubMarkdown("pages/faqs/about_dadosgov");
-  return <AboutDadosGovClient initialContent={content} />;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getAboutDadosGovMetadata(locale);
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function AboutDadosGovPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const page = await getAboutDadosGovPage(locale);
+
+  return <AboutDadosGovClient page={page} />;
 }

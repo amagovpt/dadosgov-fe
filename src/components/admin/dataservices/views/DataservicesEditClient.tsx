@@ -40,9 +40,9 @@ import { fetchDiscussions } from "@/service/api/discussions-topics";
 import { useAuth } from "@/context/AuthContext";
 import { translateActivityLabel } from "@/utils/activityLabels";
 import {
-  AUDIENCE_CONDITIONS,
-  AUDIENCE_ROLES,
-  RESTRICTION_REASONS,
+  getAudienceConditions,
+  getAudienceRoles,
+  getRestrictionReasons,
 } from "@/utils/dataserviceLabels";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
@@ -66,6 +66,9 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
   const { user } = useAuth();
   const { show, hide } = usePopupContext();
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+  const audienceRoles = useMemo(() => getAudienceRoles(t), [t]);
+  const audienceConditions = useMemo(() => getAudienceConditions(t), [t]);
+  const restrictionReasons = useMemo(() => getRestrictionReasons(t), [t]);
   const searchParams = useSearchParams();
   const idOrSlug = searchParams.get("id") || searchParams.get("slug") || "";
 
@@ -310,7 +313,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
     try {
       const isRestricted = accessType === "restricted";
       const audiences = isRestricted
-        ? AUDIENCE_ROLES.filter((r) => accessAudiences[r.role]).map((r) => ({
+        ? audienceRoles.filter((r) => accessAudiences[r.role]).map((r) => ({
             role: r.role,
             condition: accessAudiences[r.role],
           }))
@@ -623,10 +626,10 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                         authRequestUrl={authRequestUrl}
                         businessDocUrl={businessDocUrl}
                         accessAudiences={accessAudiences}
-                        audienceRoles={AUDIENCE_ROLES}
-                        audienceConditions={AUDIENCE_CONDITIONS}
+                        audienceRoles={audienceRoles}
+                        audienceConditions={audienceConditions}
                         reasonCategory={reasonCategory}
-                        restrictionReasons={RESTRICTION_REASONS}
+                        restrictionReasons={restrictionReasons}
                         reasonText={reasonText}
                         onAccessTypeChange={setAccessType}
                         onAuthRequestUrlChange={(e) => setAuthRequestUrl(e.target.value)}
@@ -911,7 +914,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                   activities={activities}
                   activitiesLoading={activitiesLoading}
                   activitiesLoaded={activitiesLoaded}
-                  translateActivityLabel={translateActivityLabel}
+                  translateActivityLabel={(label) => translateActivityLabel(label, t)}
                 />
               </TabBody>
             </Tab>

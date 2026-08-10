@@ -30,7 +30,11 @@ export async function getSupportPageMetadata(locale: string = "pt"): Promise<Sup
     throw new Error("Failed to fetch support page metadata");
   }
 
-  return flattenData(data, [locale, "pt", "en"]).findSupportPageSingleton as SupportMetadata;
+  if (!data.findSupportPageSingleton?.data) {
+    throw new Error("Support page metadata is missing");
+  }
+
+  return flattenData(data, locale).findSupportPageSingleton as SupportMetadata;
 }
 
 export async function getSupportPage(locale: string = "pt"): Promise<SupportPageContent> {
@@ -140,5 +144,9 @@ export async function getSupportPage(locale: string = "pt"): Promise<SupportPage
     throw new Error("Failed to fetch support page content");
   }
 
-  return flattenData(data, [locale, "pt", "en"]).findSupportPageSingleton as SupportPageContent;
+  if (!data.findSupportPageSingleton?.data) {
+    throw new Error("Support page content is missing");
+  }
+
+  return flattenData(data, locale).findSupportPageSingleton as SupportPageContent;
 }

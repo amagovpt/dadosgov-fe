@@ -9,7 +9,7 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
         findFooterSingleton {
             data {
                 title {
-                    pt
+                    ${locale}
                 }
                 groups {
                     ${locale} {
@@ -23,7 +23,7 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
                     }
                 }
                 description {
-                    pt
+                    ${locale}
                 }
                 logos {
                     ${locale} {
@@ -45,7 +45,7 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
                     }
                 }
                 copyright {
-                    pt
+                    ${locale}
                 }
             }
         }
@@ -63,11 +63,9 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
     throw new Error("Failed to fetch footer information");
   }
 
-  const headerData = data.findFooterSingleton?.data;
-
-  if (!headerData) {
+  if (!data.findFooterSingleton?.data) {
     return {} as Footer;
   }
 
-  return flattenData(headerData) as unknown as Footer;
+  return flattenData(data, locale).findFooterSingleton as Footer;
 }

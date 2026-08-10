@@ -13,7 +13,7 @@ interface DataserviceCardLinksProps {
 }
 
 export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const router = useRouter();
   const href = `/dataservices/${dataservice.slug}`;
 

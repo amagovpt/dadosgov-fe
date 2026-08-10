@@ -189,7 +189,7 @@ export default function ReusesClient({
                               trailingIcon: "",
                               trailingIconHover: "",
                               trailingIconActive: "",
-                              children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
+                              children: reuse.metrics?.views?.toLocaleString(i18n.language) || "0",
                               title: tr("card.views"),
                               onClick: (e: MouseEvent) => e.preventDefault(),
                               className: "text-[#034AD8]",

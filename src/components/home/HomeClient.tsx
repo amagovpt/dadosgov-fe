@@ -9,7 +9,7 @@ import { Post } from "@/service/types/posts";
 import { Reuse } from "@/service/types/reuse";
 import { SiteMetrics } from "@/service/types/shared";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
@@ -62,7 +62,7 @@ export default function HomeClient({
 }: HomeClientProps) {
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation("home");
+  const { t, i18n } = useTranslation("common");
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -257,7 +257,7 @@ export default function HomeClient({
         {/* Data Stories */}
         <section className="w-full flex flex-col items-center justify-center bg-primary-900 py-64">
           <div className="container flex flex-col gap-32">
-            <h2 className="text-xl-bold text-white">Data Stories</h2>
+            <h2 className="text-xl-bold text-white">{t("datastories")}</h2>
             <p className="mb-32 mt-16 max-w-3xl text-white">
               {parseHtmlToParagraphs(datastories.description)}
             </p>
@@ -277,7 +277,7 @@ export default function HomeClient({
                       }}
                       subtitle={
                         story.createdAt
-                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={story.title}
@@ -327,7 +327,7 @@ export default function HomeClient({
                       }}
                       subtitle={
                         post.created_at
-                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={post.name}

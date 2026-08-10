@@ -5,7 +5,8 @@ import { Avatar, Button, InputText, InputTextArea, usePopupContext } from "@ama-
 import { Discussion } from "@/service/types/discussion";
 import { updateDiscussion, editDiscussionComment } from "@/service/api/discussions-topics";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 interface EditDiscussionPopupProps {
   discussion: Discussion;
@@ -18,6 +19,7 @@ export default function EditDiscussionPopup({
   commentIndex,
   onUpdated,
 }: EditDiscussionPopupProps) {
+  const { t, i18n } = useTranslation("common");
   const { hide } = usePopupContext();
   const msg = discussion.discussion[commentIndex];
   const isMainPost = commentIndex === 0;
@@ -70,8 +72,8 @@ export default function EditDiscussionPopup({
             {" — Publicado em "}
             {format(
               new Date(msg?.posted_on || discussion.created),
-              "d 'de' MMMM 'de' yyyy",
-              { locale: pt }
+              "PPP",
+              { locale: i18n.language === "en" ? enGB : pt }
             )}
           </p>
         </div>
@@ -80,7 +82,7 @@ export default function EditDiscussionPopup({
       {isMainPost && (
         <div>
           <InputText
-            label="Título *"
+            label={t("discussions.title")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -89,7 +91,7 @@ export default function EditDiscussionPopup({
       )}
       <div>
         <InputTextArea
-          label="Mensagem *"
+          label={t("discussions.message")}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
@@ -98,7 +100,7 @@ export default function EditDiscussionPopup({
       </div>
       <div className="flex justify-end gap-16">
         <Button variant="primary" appearance="outline" onClick={hide}>
-          Cancelar
+          {t("discussions.cancel")}
         </Button>
         <Button
           variant="primary"
@@ -106,7 +108,7 @@ export default function EditDiscussionPopup({
           onClick={handleSubmit}
           disabled={isSubmitting || !message.trim() || (isMainPost && !title.trim())}
         >
-          {isSubmitting ? "A atualizar..." : "Atualizar"}
+          {isSubmitting ? t("discussions.updating") : t("discussions.update")}
         </Button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { SearchPagination } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 interface TabPaginationProps {
   total: number;
@@ -10,6 +11,7 @@ interface TabPaginationProps {
 }
 
 export function TabPagination({ total, pageSize, currentPage, onChange }: TabPaginationProps) {
+  const { t } = useTranslation("common");
   const totalPages = Math.ceil(total / pageSize);
   if (totalPages <= 1) return null;
 
@@ -19,9 +21,9 @@ export function TabPagination({ total, pageSize, currentPage, onChange }: TabPag
         totalPages={totalPages}
         activePage={currentPage}
         onChange={onChange}
-        label="Paginação"
-        nextPageAriaLabel="Próxima página"
-        previousPageAriaLabel="Página anterior"
+        label={t("pagination.pagination")}
+        nextPageAriaLabel={t("pagination.next")}
+        previousPageAriaLabel={t("pagination.previous")}
         boundaryCount={1}
         siblingCount={1}
       />
