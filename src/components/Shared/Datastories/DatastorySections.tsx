@@ -58,7 +58,7 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
           <Iframe
             key={`section-${index}`}
             {...section}
-            className={"bg-primary-700 -mb-112"}
+            className={"bg-primary-700 -mb-104"}
           />
         );
       case "section-datastory-related-datastory":
