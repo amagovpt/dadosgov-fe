@@ -2,6 +2,7 @@
   "name": "dados.gov.pt",
   "title": "dados.gov.pt",
   "description": "Portuguese open public data portal: download, share and reuse open data from the State and local authorities",
+  "generalBarLabel": "National open data portal",
   "reuses": "Reuses",
   "users": "Users",
   "datasets": "Datasets",
@@ -45,6 +46,9 @@
   "backToArticles": "Back to articles",
   "loading": "Loading...",
   "header": {
+    "profile": "Public profile",
+    "notifications": "Notifications",
+    "logout": "Log out",
     "search": "Search",
     "searchLabel": "What are you looking for on the portal?",
     "searchPlaceholder": "Search datasets, organisations, themes...",

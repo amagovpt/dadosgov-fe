@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Header as AgoraHeader,
   Brand,
@@ -18,6 +19,12 @@ import {
   CustomSearch,
   Unauthenticated,
   UnauthenticatedLink,
+  Authenticated,
+  AuthenticatedHeader,
+  AuthenticatedBody,
+  AuthenticatedBodyLink,
+  AuthenticatedFooter,
+  AuthenticatedFooterAction,
   Icon,
   NavigationBar,
   NavigationLink,
@@ -30,14 +37,11 @@ import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
 import { stripLocale } from "@/utils/stripLocale";
-import TextLink from "@/components/Primitives/TextLink";
 import { areas, isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
 import Anchor from "./Shared/Anchor";
-import { useTranslation } from "react-i18next";
 
 export const Header = ({ data }: { data: HeaderNavigationData }) => {
-  const { t } = useTranslation("common");
   const {
     topLevelLinks = [],
     authMenuItems = [],
@@ -45,8 +49,22 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     ecosytems,
   } = data;
 
-  const ecosystemEntries = ecosytems?.ecosystemEntries ?? [];
-  const artePortals = ecosytems?.artePortals ?? [];
+  const ecosystemEntries = React.useMemo(
+    () => ecosytems?.ecosystemEntries ?? [],
+    [ecosytems?.ecosystemEntries]
+  );
+  const ecosystemColumns = React.useMemo(() => {
+    const firstColumnSize = 4;
+    const otherColumnSize = 3;
+    const columns: (typeof ecosystemEntries)[] = [];
+    let index = 0;
+    while (index < ecosystemEntries.length) {
+      const size = columns.length === 0 ? firstColumnSize : otherColumnSize;
+      columns.push(ecosystemEntries.slice(index, index + size));
+      index += size;
+    }
+    return columns;
+  }, [ecosystemEntries]);
   const allSubmenus = React.useMemo(
     () => dropdowns.flatMap((d) => d.submenus ?? []),
     [dropdowns]
@@ -59,6 +77,37 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   // comparisons while keeping the full path for the post-login `next` redirect.
   const localePath = stripLocale(pathname);
   const { user, samlLogin } = useAuth();
+  const { t } = useTranslation("common");
+  const initials = user
+    ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase()
+    : "";
+  const adminItem = authMenuItems.find((i) => i.id === "admin");
+  const logoutItem = authMenuItems.find((i) => i.id === "logout");
+
+  const [generalBarLabelPortalNode, setGeneralBarLabelPortalNode] =
+    useState<HTMLSpanElement | null>(null);
+  React.useLayoutEffect(() => {
+    const generalBar = document.querySelector("header.sticky .general-bar");
+    if (!generalBar) return;
+
+    let container = generalBar.querySelector(".general-bar-label-menu") as HTMLSpanElement | null;
+    if (!container) {
+      container = document.createElement("span");
+      container.className = "general-bar-label-menu";
+      container.style.display = "flex";
+      container.style.alignItems = "center";
+    }
+    generalBar.appendChild(container);
+
+    queueMicrotask(() => {
+      setGeneralBarLabelPortalNode(container);
+    });
+
+    return () => {
+      generalBar.querySelector(".general-bar-label-menu")?.remove();
+      setGeneralBarLabelPortalNode(null);
+    };
+  }, []);
 
   const [ecosystemOpen, setEcosystemOpen] = useState(false);
   const [ecosystemBtnPortalNode, setEcosystemBtnPortalNode] = useState<HTMLLIElement | null>(null);
@@ -74,7 +123,12 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
       li.className = "ecosystem-panel-menu";
       li.style.display = "flex";
       li.style.alignItems = "stretch";
-      panelsList.appendChild(li);
+      const authLi = panelsList.lastElementChild;
+      if (authLi) {
+        panelsList.insertBefore(li, authLi);
+      } else {
+        panelsList.appendChild(li);
+      }
     }
 
     let panelDiv = document.querySelector(".ecosystem-panel-container") as HTMLDivElement | null;
@@ -97,53 +151,19 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     };
   }, []);
 
-  // Create DOM nodes for "Administração" and "Desconectar" portals
-  const [adminPortalNode, setAdminPortalNode] = useState<HTMLLIElement | null>(null);
-  const [logoutPortalNode, setLogoutPortalNode] = useState<HTMLLIElement | null>(null);
+  // Keep the ecosystem <li> immediately before the auth slot across
+  // Authenticated <-> Unauthenticated transitions (React appends the newly
+  // mounted one at the physical end of the list, after our DOM-injected
+  // ecosystem <li>, so this just re-asserts the intended order).
   React.useLayoutEffect(() => {
     const panelsList = document.querySelector("header.sticky .panels-menu > ul");
     if (!panelsList) return;
 
-    if (user) {
-      // Administração portal
-      let adminLi = panelsList.querySelector(".admin-panel-menu") as HTMLLIElement | null;
-      if (!adminLi) {
-        adminLi = document.createElement("li");
-        adminLi.className = "admin-panel-menu";
-        panelsList.appendChild(adminLi);
-      }
-
-      // Desconectar portal
-      let logoutLi = panelsList.querySelector(".logout-panel-menu") as HTMLLIElement | null;
-      if (!logoutLi) {
-        logoutLi = document.createElement("li");
-        logoutLi.className = "logout-panel-menu";
-        panelsList.appendChild(logoutLi);
-      }
-
-      // Keep ecosystem button always rightmost
-      const ecosystemLi = panelsList.querySelector(".ecosystem-panel-menu");
-      if (ecosystemLi) panelsList.appendChild(ecosystemLi);
-
-      queueMicrotask(() => {
-        setAdminPortalNode(adminLi);
-        setLogoutPortalNode(logoutLi);
-      });
-    } else {
-      panelsList.querySelector(".admin-panel-menu")?.remove();
-      panelsList.querySelector(".logout-panel-menu")?.remove();
-      queueMicrotask(() => {
-        setAdminPortalNode(null);
-        setLogoutPortalNode(null);
-      });
+    const ecosystemLi = panelsList.querySelector(".ecosystem-panel-menu");
+    const lastChild = panelsList.lastElementChild;
+    if (ecosystemLi && lastChild && lastChild !== ecosystemLi) {
+      panelsList.insertBefore(ecosystemLi, lastChild);
     }
-
-    return () => {
-      panelsList.querySelector(".admin-panel-menu")?.remove();
-      panelsList.querySelector(".logout-panel-menu")?.remove();
-      setAdminPortalNode(null);
-      setLogoutPortalNode(null);
-    };
   }, [user]);
 
   const [selectedLanguage, setSelectedLanguage] = useState("pt");
@@ -171,6 +191,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     if (panelsMenu) {
       const rect = panelsMenu.getBoundingClientRect();
       panelDiv.style.top = `${rect.bottom}px`;
+      panelDiv.style.maxHeight = `${window.innerHeight - rect.bottom}px`;
+      panelDiv.style.overflowY = "auto";
     }
   }, [ecosystemOpen, ecosystemPanelNode]);
 
@@ -285,9 +307,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     </NavigationLink>
   );
 
-  const adminItem = authMenuItems.find((i) => i.id === "admin");
-  const logoutItem = authMenuItems.find((i) => i.id === "logout");
-
   return (
     <>
       <header
@@ -317,7 +336,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
               aria-label={t("header.portalAreas")}
               // @ts-expect-error - Prop label does exist in component logic
               label={currentAreaLabel}
-              onChange={() => { }}
+              onChange={() => {}}
             >
               {areas.map((area) => {
                 const areaEl = (
@@ -337,7 +356,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 );
               })}
             </Areas>
-
             <Languages
               aria-label={t("header.selectLanguage")}
               onChange={(lang: string) => setSelectedLanguage(lang)}
@@ -366,26 +384,91 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
               </CustomSearch>
             </Search>
 
-            <Unauthenticated
-              label={user ? `${user.first_name} ${user.last_name}` : t("header.signIn")}
-              aria-label={user ? `${user.first_name} ${user.last_name}` : t("header.signIn")}
-            >
-              <UnauthenticatedLink
-                hasIcon
-                leadingIcon="agora-line-user"
-                leadingIconHover="agora-solid-user"
+            {user ? (
+              <Authenticated
+                avatarType={user.avatar_thumbnail ? "image" : initials ? "initials" : "icon"}
+                srcPath={
+                  (user.avatar_thumbnail || initials || "agora-line-user") as unknown as undefined
+                }
+                alt={`${user.first_name} ${user.last_name}`}
+                information={`${user.first_name} ${user.last_name}`}
               >
-                <Link
-                  href={
-                    user
-                      ? `/users/${user.slug}`
-                      : `/login${pathname && localePath !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
-                  }
+                <AuthenticatedHeader>
+                  {user.first_name} {user.last_name}
+                </AuthenticatedHeader>
+                <AuthenticatedBody>
+                  {[
+                    <AuthenticatedBodyLink
+                      key="profile"
+                      hasIcon
+                      leadingIcon="agora-line-user"
+                      leadingIconHover="agora-solid-user"
+                    >
+                      <Link href={`/users/${user.slug}`}>{t("header.profile")}</Link>
+                    </AuthenticatedBodyLink>,
+                    adminItem ? (
+                      <AuthenticatedBodyLink
+                        key="admin"
+                        hasIcon
+                        leadingIcon={adminItem.icon ?? undefined}
+                      >
+                        <Link href={adminItem.href ?? "#"}>{adminItem.label}</Link>
+                      </AuthenticatedBodyLink>
+                    ) : null,
+                    <AuthenticatedBodyLink
+                      key="notifications"
+                      hasIcon
+                      leadingIcon="agora-line-mega-phone"
+                      leadingIconHover="agora-solid-mega-phone"
+                    >
+                      <Link href="/admin/notificacoes">{t("header.notifications")}</Link>
+                    </AuthenticatedBodyLink>,
+                  ].filter(
+                    (
+                      el
+                    ): el is React.ReactElement<
+                      React.ComponentProps<typeof AuthenticatedBodyLink>
+                    > => el !== null
+                  )}
+                </AuthenticatedBody>
+                <AuthenticatedFooter>
+                  <AuthenticatedFooterAction
+                    hasIcon
+                    leadingIcon="agora-line-log-out"
+                    leadingIconHover="agora-solid-log-out"
+                    appearance="link"
+                    onClick={async () => {
+                      if (samlLogin) {
+                        window.location.href = "/saml/logout";
+                        return;
+                      }
+                      try {
+                        await logout();
+                      } catch (error) {
+                        console.error("Logout error:", error);
+                      }
+                      window.location.href = "/";
+                    }}
+                  >
+                    {logoutItem?.label ?? t("header.logout")}
+                  </AuthenticatedFooterAction>
+                </AuthenticatedFooter>
+              </Authenticated>
+            ) : (
+              <Unauthenticated label={t("header.signIn")} aria-label={t("header.signIn")}>
+                <UnauthenticatedLink
+                  hasIcon
+                  leadingIcon="agora-line-user"
+                  leadingIconHover="agora-solid-user"
                 >
-                  {user ? `${user.first_name} ${user.last_name}` : t("header.signIn")}
-                </Link>
-              </UnauthenticatedLink>
-            </Unauthenticated>
+                  <Link
+                    href={`/login${pathname && localePath !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`}
+                  >
+                    {t("header.signIn")}
+                  </Link>
+                </UnauthenticatedLink>
+              </Unauthenticated>
+            )}
           </GeneralBar>
 
           <NavigationBar
@@ -432,51 +515,12 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
           </NavigationBar>
         </AgoraHeader>
       </header>
-      {adminPortalNode &&
-        adminItem &&
+      {generalBarLabelPortalNode &&
         createPortal(
-          <div className="panel-menu unauthenticated-panel-menu">
-            <span className="agora-link-wrapper agora-link-wrapper-link-neutral full-width custom-header-link-wrapper panel-menu-link-wrapper inline-flex min-h-[44px] min-w-[44px] !items-center !justify-center ">
-              <Link className="link-with-icon" href={adminItem.href ?? "#"}>
-                <div className="icon-wrapper leading">
-                  <Icon name={adminItem.icon ?? ""} dimensions="s" />
-                </div>
-                <span className="children-wrapper">{adminItem.label}</span>
-              </Link>
-            </span>
-          </div>,
-          adminPortalNode
-        )}
-      {logoutPortalNode &&
-        logoutItem &&
-        createPortal(
-          <div className="panel-menu unauthenticated-panel-menu">
-            <span className="agora-link-wrapper agora-link-wrapper-link-neutral full-width custom-header-link-wrapper panel-menu-link-wrapper inline-flex min-h-[44px] min-w-[44px] !items-center !justify-center">
-              <a
-                className="link-with-icon"
-                href="#"
-                onClick={async (e) => {
-                  e.preventDefault();
-                  if (samlLogin) {
-                    window.location.href = "/saml/logout";
-                    return;
-                  }
-                  try {
-                    await logout();
-                  } catch (error) {
-                    console.error("Logout error:", error);
-                  }
-                  window.location.href = "/";
-                }}
-              >
-                <div className="icon-wrapper leading">
-                  <Icon name={logoutItem.icon ?? ""} dimensions="s" />
-                </div>
-                <span className="children-wrapper">{logoutItem.label}</span>
-              </a>
-            </span>
-          </div>,
-          logoutPortalNode
+          <span className="hidden text-sm font-regular text-primary-900 md:inline">
+            {t("generalBarLabel")}
+          </span>,
+          generalBarLabelPortalNode
         )}
       {ecosystemBtnPortalNode &&
         createPortal(
@@ -494,13 +538,13 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 <div className="icon-wrapper leading flex items-center">
                   <Icon name="agora-line-dashboard" className="h-24 w-24" />
                 </div>
-                <span className="children-wrapper">{t("header.ecosystem")}</span>
+                <span className="children-wrapper hidden md:inline">{t("header.ecosystem")}</span>
                 <Image
                   src="/Ecossistema/arte_black_simple.svg"
                   alt="arte.gov.pt"
                   width={170}
                   height={64}
-                  className="ml-8 h-20 w-auto self-center"
+                  className="ml-8 hidden h-20 w-auto self-center md:block"
                 />
               </a>
             </span>
@@ -511,82 +555,44 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
         ecosystemOpen &&
         createPortal(
           <div className="ecosystem-custom-panel">
-            <div className="flex w-full flex-row px-[112px] py-64">
-              <div className="w-[2px] shrink-0 self-stretch bg-primary-600" />
-              <div className="flex flex-1 flex-col gap-32 pl-32">
+            <div className="flex w-full flex-col px-16 py-32 md:flex-row md:px-[112px] md:py-64">
+              <div className="flex flex-1 flex-col gap-16 pl-0 md:gap-32 md:pl-32">
                 <div className="flex flex-row items-start gap-32">
-                  <div className="w-[347px] shrink-0">
-                    <p
-                      className="font-medium text-primary-900"
-                      style={{ fontSize: "24px", lineHeight: "36px" }}
-                    >
-                      {t("header.ecosystem")}
-                    </p>
-                    <p
-                      className="font-bold text-primary-900"
-                      style={{ fontSize: "24px", lineHeight: "36px" }}
-                    >
-                      ARTE
-                    </p>
-                  </div>
-                  <p className="max-w-[488px] text-base text-primary-900">
+                  <p className="text-base font-bold text-primary-900">
                     {ecosytems?.description ?? ""}
                   </p>
                 </div>
-                <div className="flex">
-                  <ul
-                    className="grid grid-flow-col gap-x-32 gap-y-8"
-                    style={{
-                      gridTemplateRows: `repeat(${Math.max(
-                        1,
-                        Math.ceil(ecosystemEntries.length / 2)
-                      )}, minmax(0, auto))`,
-                    }}
-                  >
-                    {ecosystemEntries.map((item) => (
-                      <li key={item.href} className="max-w-256">
-                        <Anchor
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          appearance="link"
-
-                        >
-                          <div className="flex items-center gap-8 py-8">
-
-                            <div
-                              className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
-                              style={{ backgroundColor: item.bgColor ?? undefined }}
-                            >
-                              <div className="relative h-[20px] w-[20px]">
-                                <Image
-                                  src={item.logo ?? ""}
-                                  alt={item.label}
-                                  fill
-                                  className="object-contain"
-                                />
+                <div className="flex flex-col gap-8 md:flex-row md:gap-32">
+                  {ecosystemColumns.map((column, columnIdx) => (
+                    <ul key={columnIdx} className="flex flex-col gap-y-8">
+                      {column.map((item) => (
+                        <li key={item.href} className="w-full max-w-full md:max-w-256">
+                          <Anchor
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            appearance="link"
+                          >
+                            <div className="flex items-center gap-8 py-8">
+                              <div
+                                className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+                                style={{ backgroundColor: item.bgColor ?? undefined }}
+                              >
+                                <div className="relative h-[20px] w-[20px]">
+                                  <Image
+                                    src={item.logo ?? ""}
+                                    alt={item.label}
+                                    fill
+                                    className="object-contain"
+                                  />
+                                </div>
                               </div>
+                              <span className="text-base font-medium ">{item.label}</span>
                             </div>
-                            <span className="text-base font-medium ">
-                              {item.label}
-                            </span>
-                          </div>
-                        </Anchor>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="h-[1px] bg-primary-600" />
-                <div className="flex flex-row gap-32">
-                  {artePortals.map((link) => (
-                    <TextLink
-                      key={link.href}
-                      href={link.href}
-                      target="_blank"
-                      className="text-base hover:text-primary-800"
-                    >
-                      {link.label}
-                    </TextLink>
+                          </Anchor>
+                        </li>
+                      ))}
+                    </ul>
                   ))}
                 </div>
               </div>

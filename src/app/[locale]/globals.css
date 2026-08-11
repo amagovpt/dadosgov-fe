@@ -430,6 +430,13 @@ li.ecosystem-panel-menu {
   gap: 8px;
 }
 
+@media (max-width: 767px) {
+  header.sticky .panels-menu .search-panel-menu .children-wrapper,
+  header.sticky .panels-menu .unauthenticated-panel-menu .children-wrapper {
+    display: none;
+  }
+}
+
 .ecosystem-panel-container {
   position: fixed;
   left: 0;
