@@ -19,11 +19,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 import { DataserviceTabs } from "@/components/dataservices/DataserviceTabs";
 import {
-  ACCESS_TYPE_PILL_LABELS,
   ACCESS_TYPE_PILL_VARIANTS,
-  AUDIENCE_ROLE_LABELS,
-  AUDIENCE_CONDITION_LABELS,
-  RESTRICTION_REASON_LABELS,
 } from "@/utils/dataserviceLabels";
 
 interface DataserviceDetailClientProps {
@@ -129,9 +125,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
 
   const accessType = dataservice.access_type;
   const accessPillLabel = accessType
-    ? tDs(`access.pill.${accessType}`, {
-        defaultValue: ACCESS_TYPE_PILL_LABELS[accessType] ?? accessType.toUpperCase(),
-      })
+    ? tDs(`access.pill.${accessType}`, { defaultValue: accessType.toUpperCase() })
     : null;
   const accessPillVariant = accessType
     ? ACCESS_TYPE_PILL_VARIANTS[accessType] ?? "neutral"
@@ -143,9 +137,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
     accessType === "restricted"
       ? dataservice.access_type_reason_category
         ? tDs(`access.restrictionReason.${dataservice.access_type_reason_category}`, {
-            defaultValue:
-              RESTRICTION_REASON_LABELS[dataservice.access_type_reason_category] ??
-              dataservice.access_type_reason_category,
+            defaultValue: dataservice.access_type_reason_category,
           })
         : dataservice.access_type_reason ?? null
       : null;
@@ -305,11 +297,11 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                       {audiences.map((a) => (
                         <li key={a.role}>
                           {tDs(`access.audienceRole.${a.role}`, {
-                            defaultValue: AUDIENCE_ROLE_LABELS[a.role] ?? a.role,
+                            defaultValue: a.role,
                           })}
                           :{" "}
                           {tDs(`access.audienceCondition.${a.condition}`, {
-                            defaultValue: AUDIENCE_CONDITION_LABELS[a.condition] ?? a.condition,
+                            defaultValue: a.condition,
                           })}
                         </li>
                       ))}

@@ -5,7 +5,8 @@
     "titleShort": "Title",
     "status": "Status",
     "createdAt": "Created at",
-    "datasets": "Datasets"
+    "datasets": "Datasets",
+    "actions": "Actions"
   },
   "form": {
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",

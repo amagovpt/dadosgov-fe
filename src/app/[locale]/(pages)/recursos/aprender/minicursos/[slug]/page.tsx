@@ -5,19 +5,21 @@ import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
 import { getAssets } from '@/utils/getAssets';
 import dayjs from 'dayjs';
 import Image from 'next/image';
+import initTranslations from '@/app/i18n';
 
 export default async function Page({
     params,
 }: {
-    params: Promise<{ slug: string }>;
+    params: Promise<{ slug: string; locale: string }>;
 }) {
-    const { slug } = await params;
-    const { introduction, title, updatedAt } = await getMiniCourseIntroductionPage(slug);
+    const { slug, locale } = await params;
+    const { t } = await initTranslations({ locale, namespaces: ['learning'] });
+    const { introduction, title, updatedAt } = await getMiniCourseIntroductionPage(slug, locale);
 
     if (!introduction) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <p className="text-lg text-neutral-900">Minicurso não encontrado.</p>
+                <p className="text-lg text-neutral-900">{t('miniCourseNotFound')}</p>
             </div>
         );
     }
@@ -46,17 +48,17 @@ export default async function Page({
                                 href={`/recursos/aprender/minicursos/${slug}/1`}
                                 className="px-24 h-48"
                             >
-                                Iniciar Curso
+                                {t('startCourse')}
                             </ButtonNavigate>
                         </div>
                         <div className="text-primary-900">
-                            Atualizado em {dayjs(updatedAt).format('DD.MM.YYYY')}
+                            {t('updatedAt', { date: dayjs(updatedAt).format('DD.MM.YYYY') })}
                         </div>
                     </div>
                     <div className='w-full flex items-center justify-center'>
                         <Image
                             src={introduction.image && introduction.image[0] ? getAssets(introduction.image[0].id) : "/card-full-image.png"}
-                            alt="Minicursos"
+                            alt={t('miniCoursesImageAlt')}
                             width={446}
                             height={428}
                             unoptimized

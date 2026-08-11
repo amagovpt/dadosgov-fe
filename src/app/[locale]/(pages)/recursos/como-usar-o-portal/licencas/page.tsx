@@ -9,20 +9,22 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   {
-    //params,
+    params,
   }: {
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  const { title } = await getFaqs("licenses", "pt");
+  const { locale } = await params;
+  const { title } = await getFaqs("licenses", locale);
 
   return {
     title,
   };
 }
 
-export default async function page() {
-  const { title, actionTitle, body, actions } = await getFaqs("licenses", "pt");
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { title, actionTitle, body, actions } = await getFaqs("licenses", locale);
 
   return (
     <main className="flex h-full w-full flex-col items-center justify-center">

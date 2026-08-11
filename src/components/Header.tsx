@@ -37,7 +37,6 @@ import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
 import { stripLocale } from "@/utils/stripLocale";
-import TextLink from "@/components/Primitives/TextLink";
 import { areas, isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
 import Anchor from "./Shared/Anchor";
@@ -54,7 +53,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     () => ecosytems?.ecosystemEntries ?? [],
     [ecosytems?.ecosystemEntries]
   );
-  const artePortals = ecosytems?.artePortals ?? [];
   const ecosystemColumns = React.useMemo(() => {
     const firstColumnSize = 4;
     const otherColumnSize = 3;
@@ -232,8 +230,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   }, [submenu, allSubmenus]);
 
   const currentLangLabel =
-    languages.find((l) => l.value === selectedLanguage)?.label || "Português";
-  const currentAreaLabel = areas.find((a) => a.value === selectedArea)?.label || "Portal";
+    languages.find((l) => l.value === selectedLanguage)?.label || t("header.portuguese");
+  const currentAreaLabel = areas.find((a) => a.value === selectedArea)?.label || t("header.portal");
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     // Close all menus/panels via design system API
@@ -303,7 +301,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             setSubmenu(null);
           }}
         >
-          Voltar
+          {t("header.back")}
         </Button>
       </div>
     </NavigationLink>
@@ -332,24 +330,25 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
               </Link>
             </Logo>
           </Brand>
-          <GeneralBar aria-label="Opções navegação geral" >
+
+          <GeneralBar aria-label={t("header.generalNavigation")}>
             <Areas
-              aria-label="Áreas do portal"
+              aria-label={t("header.portalAreas")}
               // @ts-expect-error - Prop label does exist in component logic
               label={currentAreaLabel}
-              onChange={() => { }}
-              >
+              onChange={() => {}}
+            >
               {areas.map((area) => {
                 const areaEl = (
                   <Area
-                  value={area.value}
-                  label={area.label}
+                    value={area.value}
+                    label={area.value === "1" ? t("header.portal") : area.label}
                     onClick={() => router.push(area.href)}
                     active={selectedArea === area.value}
-                    />
-                  );
-                  return area.hidden ? (
-                    <div key={area.value} className="hidden">
+                  />
+                );
+                return area.hidden ? (
+                  <div key={area.value} className="hidden">
                     {areaEl}
                   </div>
                 ) : (
@@ -358,29 +357,28 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
               })}
             </Areas>
             <Languages
-              aria-label="Selecionar idioma"
+              aria-label={t("header.selectLanguage")}
               onChange={(lang: string) => setSelectedLanguage(lang)}
-              >
+            >
               {languages.map((lang) => (
                 <Language
-                key={lang.value}
-                value={lang.value}
-                label={lang.label}
-                abbr={lang.abbr}
-                checked={selectedLanguage === lang.value}
+                  key={lang.value}
+                  value={lang.value}
+                  label={lang.label}
+                  abbr={lang.abbr}
+                  checked={selectedLanguage === lang.value}
                 />
               ))}
             </Languages>
 
-
-            <Search label="Pesquisar">
+            <Search label={t("header.search")}>
               <CustomSearch>
                 <div className="max-w-xl">
                   <SearchDropdown
                     id="header-search"
                     hasVoiceActionButton={false}
-                    label="O que procura no Portal?"
-                    placeholder="Pesquisar conjunto de dados, organizações, temas..."
+                    label={t("header.searchLabel")}
+                    placeholder={t("header.searchPlaceholder")}
                   />
                 </div>
               </CustomSearch>
@@ -426,8 +424,11 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       <Link href="/admin/notificacoes">{t("header.notifications")}</Link>
                     </AuthenticatedBodyLink>,
                   ].filter(
-                    (el): el is React.ReactElement<React.ComponentProps<typeof AuthenticatedBodyLink>> =>
-                      el !== null
+                    (
+                      el
+                    ): el is React.ReactElement<
+                      React.ComponentProps<typeof AuthenticatedBodyLink>
+                    > => el !== null
                   )}
                 </AuthenticatedBody>
                 <AuthenticatedFooter>
@@ -454,7 +455,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 </AuthenticatedFooter>
               </Authenticated>
             ) : (
-              <Unauthenticated label="Autenticar" aria-label="Autenticar">
+              <Unauthenticated label={t("header.signIn")} aria-label={t("header.signIn")}>
                 <UnauthenticatedLink
                   hasIcon
                   leadingIcon="agora-line-user"
@@ -463,7 +464,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   <Link
                     href={`/login${pathname && localePath !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`}
                   >
-                    Autenticar
+                    {t("header.signIn")}
                   </Link>
                 </UnauthenticatedLink>
               </Unauthenticated>
@@ -471,12 +472,12 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
           </GeneralBar>
 
           <NavigationBar
-            responsiveMenuLabel="Menu"
-            responsiveMenuAriaLabel="Abrir menu"
-            responsiveMenuBackToRootLabel="Voltar ao início"
-            modalMenuLabel="Navegação Principal"
-            modalAriaLabel="Menu de navegação"
-            modalCloseLabel="Fechar"
+            responsiveMenuLabel={t("header.menu")}
+            responsiveMenuAriaLabel={t("header.openMenu")}
+            responsiveMenuBackToRootLabel={t("header.backToHome")}
+            modalMenuLabel={t("header.mainNavigation")}
+            modalAriaLabel={t("header.navigationMenu")}
+            modalCloseLabel={t("header.close")}
           >
             {[
               ...topLevelLinks
@@ -537,7 +538,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 <div className="icon-wrapper leading flex items-center">
                   <Icon name="agora-line-dashboard" className="h-24 w-24" />
                 </div>
-                <span className="children-wrapper hidden md:inline">Ecossistema</span>
+                <span className="children-wrapper hidden md:inline">{t("header.ecosystem")}</span>
                 <Image
                   src="/Ecossistema/arte_black_simple.svg"
                   alt="arte.gov.pt"
@@ -594,7 +595,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                     </ul>
                   ))}
                 </div>
-
               </div>
             </div>
           </div>,

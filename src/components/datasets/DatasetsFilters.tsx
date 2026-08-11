@@ -36,6 +36,29 @@ const FORMAT_GROUP_MAP: Record<string, string[]> = {
   documents: ["pdf", "doc", "docx", "md", "txt", "odt", "rtf"],
 };
 
+// "Tipo de dados" options, mapped to the query param each one filters on. The
+// backend computes the matching sidebar count (`rotulo_<option>`) the same way,
+// so the number shown next to an option always matches what it returns.
+//
+// Both options filter on the badge, which is the curated signal: badges are
+// granted by the backend's `update-badges` job, while the raw `hvd` / `inspire`
+// tags can be set by any harvested source. Note the HVD badge is only granted to
+// datasets of certified public-service organizations, so it covers a subset of
+// the `hvd`-tagged datasets — widening that is a policy decision on the job.
+const ROTULO_FILTER_MAP: Record<string, { param: string; value: string }> = {
+  high_value: { param: "badge", value: "hvd" },
+  inspire: { param: "badge", value: "inspire" },
+};
+
+const ROTULO_PARAMS = Array.from(
+  new Set(Object.values(ROTULO_FILTER_MAP).map((filter) => filter.param))
+);
+
+// Only the `tag` param is written comma-separated elsewhere in the app.
+function readRotuloParam(params: URLSearchParams, param: string): string[] {
+  return readQueryParamValues(params, param, { splitComma: param === "tag" });
+}
+
 const DATE_RANGE_MAP: Record<string, () => string> = {
   "30_days": () => {
     const d = new Date();
@@ -75,9 +98,10 @@ function detectFormatoFromParams(params: URLSearchParams): string {
 }
 
 function detectRotuloFromParams(params: URLSearchParams): string {
-  const tags = readQueryParamValues(params, "tag", { splitComma: true });
-  if (tags.includes("hvd")) return "high_value";
-  return "all";
+  const selected = Object.entries(ROTULO_FILTER_MAP).find(([, filter]) =>
+    readRotuloParam(params, filter.param).includes(filter.value)
+  );
+  return selected ? selected[0] : "all";
 }
 
 interface DatasetsFiltersProps {
@@ -165,6 +189,11 @@ export const DatasetsFilters = ({
             label: tds("filters.type.options.high_value"),
             description: undefined as string | undefined,
           },
+          {
+            id: "inspire",
+            label: tds("filters.type.options.inspire"),
+            description: undefined as string | undefined,
+          },
         ],
       },
     }),
@@ -248,13 +277,26 @@ export const DatasetsFilters = ({
           current.set("modified_since", DATE_RANGE_MAP[optionId]());
         }
       } else if (filterKey === "rotulo") {
-        const tags = readQueryParamValues(current, "tag", { splitComma: true }).filter(
-          (tag) => tag !== "hvd"
+        // Drop only the values this group owns, so tags/badges picked in the
+        // advanced filters survive switching option.
+        const owned = new Set(
+          Object.values(ROTULO_FILTER_MAP).map((filter) => `${filter.param}:${filter.value}`)
         );
-        if (optionId === "high_value") {
-          tags.push("hvd");
+        for (const param of ROTULO_PARAMS) {
+          const kept = readRotuloParam(current, param).filter(
+            (value) => !owned.has(`${param}:${value}`)
+          );
+          writeQueryParamValues(current, param, uniqueStrings(kept));
         }
-        writeQueryParamValues(current, "tag", uniqueStrings(tags));
+        const selected = ROTULO_FILTER_MAP[optionId];
+        if (selected) {
+          const values = readRotuloParam(current, selected.param);
+          writeQueryParamValues(
+            current,
+            selected.param,
+            uniqueStrings([...values, selected.value])
+          );
+        }
       }
 
       navigateWithParams(current);

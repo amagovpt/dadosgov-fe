@@ -15,15 +15,16 @@ const POST_REVALIDATE_SECONDS = 120;
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ rid: string }>;
+  params: Promise<{ locale: string; rid: string }>;
 }): Promise<Metadata> {
-  const { rid } = await params;
+  const { locale, rid } = await params;
+  const { t } = await initTranslations({ locale, namespaces: ["common"] });
   const post = await fetchPost(rid, { revalidate: POST_REVALIDATE_SECONDS });
 
   if (!post) {
     return {
-      title: "Artigo não encontrado - dados.gov.pt",
-      description: "O artigo que procura não existe ou foi removido.",
+      title: `${t("articleNotFound")} - dados.gov.pt`,
+      description: t("articleNotFoundDescription"),
     };
   }
 

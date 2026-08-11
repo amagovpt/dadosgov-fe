@@ -37,8 +37,10 @@ export async function getBoCommunityResourcesMetadata(
     throw new Error("Failed to fetch bo-community-resources metadata");
   }
 
-  return flattenData(data)
+  const page = flattenData(data)
     .findBoCommunityResourcesSingleton as BoCommunityResourcesMetadata;
+  if (!page) throw new Error("Bo community resources metadata is missing");
+  return page;
 }
 
 export async function getBoCommunityResources(
@@ -186,5 +188,7 @@ export async function getBoCommunityResources(
     throw new Error("Failed to fetch bo-community-resources content");
   }
 
-  return flattenData(data).findBoCommunityResourcesSingleton as BoCommunityResourcesPage;
+  const page = flattenData(data).findBoCommunityResourcesSingleton as BoCommunityResourcesPage;
+  if (!page) throw new Error("Bo community resources content is missing");
+  return page;
 }

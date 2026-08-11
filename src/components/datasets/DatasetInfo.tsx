@@ -92,12 +92,12 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
         <div className="grid grid-cols-3 gap-24 p-16">
           {dataset.page && (
             <div>
-              <p className="font-bold text-neutral-900 text-sm mb-8">links</p>
+              <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.links")}</p>
               <span className="text-neutral-900 text-sm break-all">{dataset.page}</span>
             </div>
           )}
           <div>
-            <p className="font-bold text-neutral-900 text-sm mb-8">contact</p>
+            <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.contact")}</p>
             <span className="text-neutral-900 text-sm break-all">
               {contactPoints.length > 0
                 ? contactPoints.map((cp) => cp.email || cp.name).join(", ")
@@ -263,4 +263,3 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
     </div>
   );
 };
-

@@ -8,12 +8,14 @@ import {
   Icon,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   token: string;
 }
 
 export function ResetPasswordClient({ token }: Props) {
+  const { t } = useTranslation("login");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +28,7 @@ export function ResetPasswordClient({ token }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!passwordsMatch) {
-      setError("As palavras-passe não coincidem.");
+      setError(t("resetPassword.mismatch"));
       return;
     }
 
@@ -43,10 +45,10 @@ export function ResetPasswordClient({ token }: Props) {
       if (res.ok) {
         setSuccess(true);
       } else {
-        setError(data.message || "Erro ao redefinir a palavra-passe. Tente novamente.");
+        setError(data.message || t("resetPassword.errorRequest"));
       }
     } catch {
-      setError("Erro de ligação. Tente novamente.");
+      setError(t("resetPassword.errorConnection"));
     } finally {
       setIsLoading(false);
     }
@@ -70,11 +72,10 @@ export function ResetPasswordClient({ token }: Props) {
                 </div>
                 <div>
                   <h1 className="text-2xl-bold text-brand-blue-dark mb-16">
-                    Palavra-passe redefinida
+                    {t("resetPassword.successTitle")}
                   </h1>
                   <p className="text-neutral-900">
-                    A sua palavra-passe foi alterada com sucesso. Já pode iniciar sessão com a nova
-                    palavra-passe.
+                    {t("resetPassword.successDescription")}
                   </p>
                 </div>
                 <div>
@@ -83,7 +84,7 @@ export function ResetPasswordClient({ token }: Props) {
                     className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={() => (window.location.href = "/login")}
                   >
-                    Iniciar sessão
+                    {t("resetPassword.signIn")}
                   </Button>
                 </div>
               </div>
@@ -91,10 +92,10 @@ export function ResetPasswordClient({ token }: Props) {
               <div className="flex flex-col gap-32">
                 <div>
                   <h1 className="text-2xl-bold text-brand-blue-dark mb-8">
-                    Redefinir palavra-passe
+                    {t("resetPassword.title")}
                   </h1>
                   <p className="text-neutral-900">
-                    Os campos marcados com um asterisco ( * ) são obrigatórios.
+                    {t("resetPassword.requiredFields")}
                   </p>
                 </div>
 
@@ -112,8 +113,8 @@ export function ResetPasswordClient({ token }: Props) {
                 >
                   <div className="flex flex-col gap-8">
                     <InputPassword
-                      label="Nova palavra-passe *"
-                      placeholder="Introduza a nova palavra-passe"
+                      label={t("resetPassword.newPassword")}
+                      placeholder={t("resetPassword.newPasswordPlaceholder")}
                       id="password"
                       name="password"
                       className="w-full"
@@ -121,14 +122,13 @@ export function ResetPasswordClient({ token }: Props) {
                       onChange={(e) => setPassword(e.target.value)}
                     />
                     <p className="text-sm text-neutral-600">
-                      A palavra-passe tem de ter no mínimo 13 caracteres e incluir pelo menos um
-                      símbolo (ex: !@#$%).
+                      {t("resetPassword.requirements")}
                     </p>
                   </div>
 
                   <InputPassword
-                    label="Confirmar nova palavra-passe *"
-                    placeholder="Repita a nova palavra-passe"
+                    label={t("resetPassword.confirmPassword")}
+                    placeholder={t("resetPassword.confirmPasswordPlaceholder")}
                     id="password-confirm"
                     name="password_confirm"
                     className="w-full"
@@ -137,7 +137,7 @@ export function ResetPasswordClient({ token }: Props) {
                   />
 
                   {passwordConfirm && !passwordsMatch && (
-                    <p className="text-sm text-danger-600">As palavras-passe não coincidem.</p>
+                    <p className="text-sm text-danger-600">{t("resetPassword.mismatch")}</p>
                   )}
 
                   <div className="mt-8">
@@ -147,7 +147,7 @@ export function ResetPasswordClient({ token }: Props) {
                       className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
                       disabled={!canSubmit}
                     >
-                      {isLoading ? "A guardar..." : "Redefinir palavra-passe"}
+                      {isLoading ? t("resetPassword.submitting") : t("resetPassword.submit")}
                     </Button>
                   </div>
                 </form>

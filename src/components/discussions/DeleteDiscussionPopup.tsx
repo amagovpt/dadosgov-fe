@@ -5,7 +5,8 @@ import { Avatar, Button, RadioButton, StatusCard, usePopupContext } from "@ama-p
 import { Discussion } from "@/service/types/discussion";
 import { deleteDiscussion, deleteDiscussionComment } from "@/service/api/discussions-topics";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 interface DeleteDiscussionPopupProps {
   discussion: Discussion;
@@ -18,6 +19,7 @@ export default function DeleteDiscussionPopup({
   commentIndex,
   onDeleted,
 }: DeleteDiscussionPopupProps) {
+  const { t, i18n } = useTranslation("common");
   const { hide } = usePopupContext();
   const [isDeleting, setIsDeleting] = useState(false);
   const [notificationType, setNotificationType] = useState("automatic");
@@ -68,8 +70,8 @@ export default function DeleteDiscussionPopup({
             {" — Publicado em "}
             {format(
               new Date(msg?.posted_on || discussion.created),
-              "d 'de' MMMM 'de' yyyy",
-              { locale: pt }
+              "PPP",
+              { locale: i18n.language === "en" ? enGB : pt }
             )}
           </p>
         </div>
@@ -83,25 +85,25 @@ export default function DeleteDiscussionPopup({
         showIcon
         description={
           isMainPost
-            ? "Essa ação é irreversível. Todos os comentários nesta discussão também serão apagados."
-            : "Essa ação é irreversível."
+            ? t("discussions.deleteDiscussionWarning")
+            : t("discussions.deleteWarning")
         }
       />
 
       <div>
         <p className="text-neutral-900 text-sm font-medium mb-12">
-          Notificação por e-mail
+          {t("discussions.emailNotification")}
         </p>
         <div className="flex flex-col gap-24">
           <RadioButton
-            label="Enviar um e-mail automático (opções de recurso)"
+            label={t("discussions.automaticEmail")}
             name="notification-type"
             value="automatic"
             checked={notificationType === "automatic"}
             onChange={() => setNotificationType("automatic")}
           />
           <RadioButton
-            label="Enviar um e-mail personalizado"
+            label={t("discussions.customEmail")}
             name="notification-type"
             value="custom"
             checked={notificationType === "custom"}
@@ -112,7 +114,7 @@ export default function DeleteDiscussionPopup({
 
       <div className="flex justify-end gap-16">
         <Button variant="primary" appearance="outline" onClick={hide}>
-          Cancelar
+          {t("discussions.cancel")}
         </Button>
         <Button
           variant="danger"
@@ -123,7 +125,7 @@ export default function DeleteDiscussionPopup({
           leadingIcon="agora-line-trash"
           leadingIconHover="agora-solid-trash"
         >
-          {isDeleting ? "A apagar..." : "Eliminar"}
+          {isDeleting ? t("discussions.deleting") : t("discussions.delete")}
         </Button>
       </div>
     </div>

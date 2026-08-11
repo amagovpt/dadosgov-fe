@@ -3,7 +3,7 @@ import HeroGeneral from "@/components/HeroGeneral";
 import { getPublicationsPage } from "@/service/queries/resources/publications";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
-import { getDocumentProxy } from "unpdf";
+import { fetchPdfPageCount } from "@/lib/pdfPageCount";
 import PublicationsClient from "@/components/resources/PublicationsClient";
 import {
   PUBLICATIONS_PAGE_SIZE,
@@ -13,8 +13,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { hero } = await getPublicationsPage("pt");
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const { hero } = await getPublicationsPage(locale);
 
   return {
     title: `${hero.title} - Dados Gov PT`,
@@ -24,34 +25,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PublicationsPage({
   searchParams,
+  params,
 }: {
   searchParams: Promise<{ page?: string; sort?: string }>;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const { page: pageParam, sort: sortParam } = await searchParams;
   const sort = parsePublicationsSort(sortParam);
   const currentPage = Math.max(1, Number(pageParam) || 1);
 
-  const { hero, publications } = await getPublicationsPage("pt");
+  const { hero, publications } = await getPublicationsPage(locale);
 
   const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
     if (pdfDocument === "#") return null;
-
-    const url = `${getCmsBaseUrl()}/api/assets/${pdfDocument}`;
-
-    try {
-      const res = await fetch(url, { cache: "force-cache" });
-      if (!res.ok) {
-        console.error(`[publications] page count fetch ${url} returned ${res.status}`);
-        return null;
-      }
-
-      const bytes = await res.arrayBuffer();
-      const pdf = await getDocumentProxy(new Uint8Array(bytes));
-      return pdf.numPages;
-    } catch (error) {
-      console.error(`[publications] page count fetch ${url} failed:`, error);
-      return null;
-    }
+    return fetchPdfPageCount(`${getCmsBaseUrl()}/api/assets/${pdfDocument}`);
   };
 
   const sorted = sortPublications(publications, sort);

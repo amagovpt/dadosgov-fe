@@ -3,24 +3,28 @@ import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { getFaqs } from "@/service/queries/faqs/faqs";
 import { Metadata } from "next";
 import MarkDownRender from "@/components/Shared/MarkDownRender";
+import initTranslations from "@/app/i18n";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   {
-    //params,
+    params,
   }: {
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  const { title } = await getFaqs("como-reutilizar-dados", "pt");
+  const { locale } = await params;
+  const { title } = await getFaqs("como-reutilizar-dados", locale);
 
   return {
     title,
   };
 }
-export default async function ReuseFaqPage() {
-  const { body } = await getFaqs("como-reutilizar-dados", "pt");
+export default async function ReuseFaqPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { t } = await initTranslations({ locale, namespaces: ["common"] });
+  const { body } = await getFaqs("como-reutilizar-dados", locale);
 
   return (
     <main className="flex flex-col pt-32 pb-64 bg-white gap-64 justify-center items-center w-full h-full">
@@ -37,7 +41,7 @@ export default async function ReuseFaqPage() {
               </div>
             ) : (
               <p className="text-m-regular leading-7 text-[#2b363c]">
-                Não foi possível carregar o conteúdo.
+                {t("contentLoadError")}
               </p>
             )}
           </div>
