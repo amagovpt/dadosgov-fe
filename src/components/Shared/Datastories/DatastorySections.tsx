@@ -53,6 +53,14 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
             }
           />
         );
+      case "section-datastory-bignumbers-iframe":
+        return (
+          <Iframe
+            key={`section-${index}`}
+            {...section}
+            className={"bg-primary-700 -mb-104"}
+          />
+        );
       case "section-datastory-related-datastory":
         return <RelatedDatastories key={`section-${index}`} {...section} />;
       case "section-datastory-datasets":
