@@ -1,6 +1,17 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import {
+  ComponentProps,
+  Fragment,
+  MouseEvent,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
@@ -42,33 +53,14 @@ import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header
 import Anchor from "./Shared/Anchor";
 
 export const Header = ({ data }: { data: HeaderNavigationData }) => {
-  const {
-    topLevelLinks = [],
-    authMenuItems = [],
-    dropdowns = [],
-    ecosytems,
-  } = data;
+  const { topLevelLinks = [], authMenuItems = [], dropdowns = [], ecosytems } = data;
 
-  const ecosystemEntries = React.useMemo(
+  const ecosystemEntries = useMemo(
     () => ecosytems?.ecosystemEntries ?? [],
     [ecosytems?.ecosystemEntries]
   );
-  const ecosystemColumns = React.useMemo(() => {
-    const firstColumnSize = 4;
-    const otherColumnSize = 3;
-    const columns: (typeof ecosystemEntries)[] = [];
-    let index = 0;
-    while (index < ecosystemEntries.length) {
-      const size = columns.length === 0 ? firstColumnSize : otherColumnSize;
-      columns.push(ecosystemEntries.slice(index, index + size));
-      index += size;
-    }
-    return columns;
-  }, [ecosystemEntries]);
-  const allSubmenus = React.useMemo(
-    () => dropdowns.flatMap((d) => d.submenus ?? []),
-    [dropdowns]
-  );
+
+  const allSubmenus = useMemo(() => dropdowns.flatMap((d) => d.submenus ?? []), [dropdowns]);
 
   const headerRef = useRef<HeaderElement>(null);
   const router = useRouter();
@@ -86,7 +78,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
 
   const [generalBarLabelPortalNode, setGeneralBarLabelPortalNode] =
     useState<HTMLSpanElement | null>(null);
-  React.useLayoutEffect(() => {
+
+  useLayoutEffect(() => {
     const generalBar = document.querySelector("header.sticky .general-bar");
     if (!generalBar) return;
 
@@ -113,7 +106,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const [ecosystemBtnPortalNode, setEcosystemBtnPortalNode] = useState<HTMLLIElement | null>(null);
   const [ecosystemPanelNode, setEcosystemPanelNode] = useState<HTMLDivElement | null>(null);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const panelsList = document.querySelector("header.sticky .panels-menu > ul");
     if (!panelsList) return;
 
@@ -155,7 +148,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   // Authenticated <-> Unauthenticated transitions (React appends the newly
   // mounted one at the physical end of the list, after our DOM-injected
   // ecosystem <li>, so this just re-asserts the intended order).
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const panelsList = document.querySelector("header.sticky .panels-menu > ul");
     if (!panelsList) return;
 
@@ -176,16 +169,14 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     setEcosystemOpen(false);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     headerRef.current?.closeAll?.();
   }, [pathname]);
 
   // Position ecosystem panel right below the panels-menu bar (covering the nav bar)
-  React.useEffect(() => {
+  useEffect(() => {
     if (!ecosystemOpen) return;
-    const panelDiv = document.querySelector(
-      ".ecosystem-panel-container"
-    ) as HTMLDivElement | null;
+    const panelDiv = document.querySelector(".ecosystem-panel-container") as HTMLDivElement | null;
     if (!panelDiv) return;
     const panelsMenu = document.querySelector("header.sticky .panels-menu");
     if (panelsMenu) {
@@ -200,7 +191,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const isAuthPage = localePath === "/login";
 
   // Reset submenu when clicking anywhere outside the card grid (.links)
-  const handleHeaderClickCapture = React.useCallback((e: React.MouseEvent) => {
+  const handleHeaderClickCapture = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
     if (!target.closest(".links")) {
       setSubmenu(null);
@@ -210,7 +201,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     }
   }, []);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const submenuTitles: Record<string, string> = Object.fromEntries(
       allSubmenus.map((s) => [s.id, s.label])
     );
@@ -229,11 +220,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     }
   }, [submenu, allSubmenus]);
 
-  const currentLangLabel =
-    languages.find((l) => l.value === selectedLanguage)?.label || t("header.portuguese");
   const currentAreaLabel = areas.find((a) => a.value === selectedArea)?.label || t("header.portal");
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
     // Close all menus/panels via design system API
     if (headerRef.current?.closeAll) {
       headerRef.current.closeAll();
@@ -352,7 +341,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                     {areaEl}
                   </div>
                 ) : (
-                  <React.Fragment key={area.value}>{areaEl}</React.Fragment>
+                  <Fragment key={area.value}>{areaEl}</Fragment>
                 );
               })}
             </Areas>
@@ -410,7 +399,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       <AuthenticatedBodyLink
                         key="admin"
                         hasIcon
-                        leadingIcon={adminItem.icon ?? undefined}
+                        leadingIcon="agora-line-hardware-settings"
+                        leadingIconHover="agora-solid-hardware-settings"
                       >
                         <Link href={adminItem.href ?? "#"}>{adminItem.label}</Link>
                       </AuthenticatedBodyLink>
@@ -424,11 +414,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       <Link href="/admin/notificacoes">{t("header.notifications")}</Link>
                     </AuthenticatedBodyLink>,
                   ].filter(
-                    (
-                      el
-                    ): el is React.ReactElement<
-                      React.ComponentProps<typeof AuthenticatedBodyLink>
-                    > => el !== null
+                    (el): el is ReactElement<ComponentProps<typeof AuthenticatedBodyLink>> =>
+                      el !== null
                   )}
                 </AuthenticatedBody>
                 <AuthenticatedFooter>
@@ -517,7 +504,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
       </header>
       {generalBarLabelPortalNode &&
         createPortal(
-          <span className="hidden text-sm font-regular text-primary-900 md:inline">
+          <span className="text-sm font-regular hidden text-primary-900 md:inline">
             {t("generalBarLabel")}
           </span>,
           generalBarLabelPortalNode
@@ -542,9 +529,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 <Image
                   src="/Ecossistema/arte_black_simple.svg"
                   alt="arte.gov.pt"
-                  width={170}
-                  height={64}
-                  className="ml-8 hidden h-20 w-auto self-center md:block"
+                  width={42}
+                  height={16}
+                  className="ml-8 hidden h-16 w-auto self-center md:block"
                 />
               </a>
             </span>
@@ -562,38 +549,36 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                     {ecosytems?.description ?? ""}
                   </p>
                 </div>
-                <div className="flex flex-col gap-8 md:flex-row md:gap-32">
-                  {ecosystemColumns.map((column, columnIdx) => (
-                    <ul key={columnIdx} className="flex flex-col gap-y-8">
-                      {column.map((item) => (
-                        <li key={item.href} className="w-full max-w-full md:max-w-256">
-                          <Anchor
-                            href={item.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            appearance="link"
-                          >
-                            <div className="flex items-center gap-8 py-8">
-                              <div
-                                className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
-                                style={{ backgroundColor: item.bgColor ?? undefined }}
-                              >
-                                <div className="relative h-[20px] w-[20px]">
-                                  <Image
-                                    src={item.logo ?? ""}
-                                    alt={item.label}
-                                    fill
-                                    className="object-contain"
-                                  />
-                                </div>
+                <div>
+                  <ul className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
+                    {ecosystemEntries.map((item) => (
+                      <li key={item.href} className="w-full max-w-full">
+                        <Anchor
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          appearance="link"
+                        >
+                          <div className="flex items-center gap-8 py-8">
+                            <div
+                              className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+                              style={{ backgroundColor: item.bgColor ?? undefined }}
+                            >
+                              <div className="relative h-[20px] w-[20px]">
+                                <Image
+                                  src={item.logo ?? ""}
+                                  alt={item.label}
+                                  fill
+                                  className="object-contain"
+                                />
                               </div>
-                              <span className="text-base font-medium ">{item.label}</span>
                             </div>
-                          </Anchor>
-                        </li>
-                      ))}
-                    </ul>
-                  ))}
+                            <span className="text-base font-medium">{item.label}</span>
+                          </div>
+                        </Anchor>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>
