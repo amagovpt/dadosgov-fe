@@ -2,6 +2,7 @@
   "name": "dados.gov.pt",
   "title": "dados.gov.pt",
   "description": "Portal aberto de dados públicos portugueses: descarregue, partilhe e reutilize os dados abertos do Estado e das autarquias",
+  "generalBarLabel": "Portal nacional de dados abertos",
   "reuses": "Reutilizações",
   "users": "Utilizadores",
   "datasets": "Conjuntos de dados",
@@ -45,6 +46,9 @@
   "backToArticles": "Voltar aos artigos",
   "loading": "A carregar...",
   "header": {
+    "profile": "Perfil público",
+    "notifications": "Notificações",
+    "logout": "Terminar sessão",
     "search": "Pesquisar",
     "searchLabel": "O que procura no Portal?",
     "searchPlaceholder": "Pesquisar conjunto de dados, organizações, temas...",
