@@ -3,6 +3,7 @@ export const tailwindSafelist = [
   //  - iframe with background
   "min-[320px]:!h-[45px]",
   //  - iframe size
+  "min-[320px]:!h-[168px]",
   "min-[320px]:!h-[285px]",
   "min-[320px]:!h-[315px]",
   "min-[320px]:!h-[340px]",
@@ -22,6 +23,7 @@ export const tailwindSafelist = [
   //  - iframe with background
   "min-[375px]:!h-[45px]",
   //  - iframe size
+  "min-[375px]:!h-[167px]",
   "min-[375px]:!h-[285px]",
   "min-[375px]:!h-[295px]",
   "min-[375px]:!h-[300px]",
@@ -44,6 +46,7 @@ export const tailwindSafelist = [
   //  - iframe with background
   "min-[425px]:!h-[52px]",
   //  - iframe size
+  "min-[425px]:!h-[176px]",
   "min-[425px]:!h-[310px]",
   "min-[425px]:!h-[332px]",
   "min-[425px]:!h-[340px]",
@@ -65,6 +68,7 @@ export const tailwindSafelist = [
   //  - iframe with background
   "min-[768px]:!h-[92px]",
   //  - iframe size
+  "min-[768px]:!h-[229px]",
   "min-[768px]:!h-[470px]",
   "min-[768px]:!h-[500px]",
   "min-[768px]:!h-[505px]",
@@ -87,6 +91,7 @@ export const tailwindSafelist = [
   //  - iframe with background
   "min-[1024px]:!h-[128px]",
   //  - iframe size
+  "min-[1024px]:!h-[277px]",
   "min-[1024px]:!h-[610px]",
   "min-[1024px]:!h-[660px]",
   "min-[1024px]:!h-[662px]",
@@ -110,6 +115,7 @@ export const tailwindSafelist = [
   //  - iframe with background
   "min-[1440px]:!h-[174px]",
   //  - iframe size
+  "min-[1440px]:!h-[337px]",
   "min-[1440px]:!h-[800px]",
   "min-[1440px]:!h-[860px]",
   "min-[1440px]:!h-[870px]",
