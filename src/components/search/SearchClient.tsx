@@ -9,13 +9,9 @@ import {
   Pill,
   InputSearchBar,
   CardNoResults,
-  Sidebar,
-  SidebarItem,
-  Checkbox,
-  InputSearch,
 } from "@ama-pt/agora-design-system";
 
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import { Pagination } from "@/components/Pagination";
 import { searchDataservices } from "@/service/api/dataservices";
 import { fetchLicenses, fetchGranularities, suggestFormats } from "@/service/api/datasets";
@@ -418,26 +414,29 @@ export default function SearchClient() {
   return (
     <div className="filters flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
-        <HeroGeneral
-          title={titleMap[activeTab]}
-          backgroundImageUrl="/Banner/hero-bg.png"
-        >
-          <InputSearchBar
-            label={t("search.advancedTitle")}
-            placeholder={t("search.advancedPlaceholder")}
-            id="search-page-input"
-            hasVoiceActionButton={false}
-            voiceActionAltText={t("search.voiceAction")}
-            searchActionAltText={t("search.label")}
-            darkMode={true}
-            value={searchInput}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
-            onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === "Enter") handleSearch();
-            }}
-            onSearchActivate={() => handleSearch()}
-          />
-        </HeroGeneral>
+        <Hero.Root backgroundImageUrl="/Banner/hero-bg.png">
+          <Hero.Breadcrumb />
+          <Hero.Content>
+            <Hero.Title>{titleMap[activeTab]}</Hero.Title>
+          </Hero.Content>
+          <Hero.Actions>
+            <InputSearchBar
+              label={t("search.advancedTitle")}
+              placeholder={t("search.advancedPlaceholder")}
+              id="search-page-input"
+              hasVoiceActionButton={false}
+              voiceActionAltText={t("search.voiceAction")}
+              searchActionAltText={t("search.label")}
+              darkMode={true}
+              value={searchInput}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter") handleSearch();
+              }}
+              onSearchActivate={() => handleSearch()}
+            />
+          </Hero.Actions>
+        </Hero.Root>
 
         <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
           <div className="grid-filters grid md:grid-cols-3 xl:grid-cols-12">

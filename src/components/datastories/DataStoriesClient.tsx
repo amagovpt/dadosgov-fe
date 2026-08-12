@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CardLinks, Button } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { Datastories, DataStoriesPage } from "@/service/types/datastories/datastories";
 import { DataStoriesFilterState } from "@/service/types/datastories/filters";
@@ -59,10 +59,13 @@ export default function DataStoriesClient({
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
-      <HeroGeneral
-        title={pageContent.hero.title}
-        subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
-      />
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{pageContent.hero.title}</Hero.Title>
+          <Hero.Description description={formatHtmlParagraphs(pageContent.hero.description)} />
+        </Hero.Content>
+      </Hero.Root>
 
       {/* Search Filter */}
       <SearchFilter

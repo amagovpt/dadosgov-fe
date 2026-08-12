@@ -1,6 +1,6 @@
 import Anchor from '@/components/Shared/Anchor'
 import { Typograph } from '@/components/Shared/Generics/Typograph'
-import Hero from '@/components/Shared/Hero'
+import { Hero } from '@/components/Shared/Hero'
 import SimpleSiteMap from '@/components/Shared/SiteMap/SimpleSiteMap'
 import { fetchHomepageData } from '@/service/api/system'
 import { getDataTopics } from '@/service/queries/topics-areas/topic'
@@ -87,11 +87,13 @@ export default async function Page({
 
     return (
         <div className='w-full h-full flex flex-col items-center justify-center gap-32'>
-            <Hero
-                breadcrumbCurrentLabel={title}
-                title={title}
-                description={parseHtmlToParagraphs(description)}
-            />
+            <Hero.Root backgroundImageUrl={null}>
+                <Hero.Breadcrumb currentLabel={title} />
+                <Hero.Content>
+                    <Hero.Title>{title}</Hero.Title>
+                    <Hero.Description description={parseHtmlToParagraphs(description)} />
+                </Hero.Content>
+            </Hero.Root>
             <div className="container w-full h-full flex flex-row gap-32 py-32">
                 <div className="flex flex-row gap-8">
                     <span className='text-m-bold'>{topics.length}</span>

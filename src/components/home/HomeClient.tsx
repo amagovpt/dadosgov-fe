@@ -13,7 +13,7 @@ import { enGB, pt } from "date-fns/locale";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
-import HeroGeneral from "../HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import PublishDropdown from "../admin/PublishDropdown";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import Image from "next/image";
@@ -85,26 +85,21 @@ export default function HomeClient({
     <main className="w-full h-full">
       <div className="w-full ">
         <div className="w-full">
-          <HeroGeneral
-            hasBreadcrumb={false}
-            title={
-              <span className="text-white flex flex-col items-start leading-tight">
+          {/* The homepage is the root — no breadcrumb slot. */}
+          <Hero.Root>
+            <Hero.Content>
+              <Hero.Title>
                 {highlightText(HomeHero.title, HomeHero.highlight, {
                   highlightClassName: "text-2xl-bold",
                   textClassName: "text-2xl-regular",
                 })}
-              </span>
-            }
-            subtitle={
-              <span className="text-white text-m-regular">
-                {parseHtmlToParagraphs(HomeHero.description).map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </span>
-            }
-          >
-            <PublishDropdown darkMode={true} outline={false} />
-          </HeroGeneral>
+              </Hero.Title>
+              <Hero.Description description={parseHtmlToParagraphs(HomeHero.description)} />
+            </Hero.Content>
+            <Hero.Actions>
+              <PublishDropdown darkMode={true} outline={false} />
+            </Hero.Actions>
+          </Hero.Root>
 
           {/* Stats Section */}
           <div className="py-64 bg-primary-900 text-white flex flex-col items-center justify-center">

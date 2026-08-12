@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import { getPublicationsPage } from "@/service/queries/resources/publications";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
@@ -57,12 +57,13 @@ export default async function PublicationsPage({
 
   return (
     <main className="flex w-full flex-col items-center justify-center bg-primary-50">
-      <HeroGeneral
-        title={hero.title}
-        backgroundImageUrl="/Banner/hero-bg.png"
-      >
-        <div className="text-white">{parseHtmlToParagraphs(hero.description)}</div>
-      </HeroGeneral>
+      <Hero.Root backgroundImageUrl="/Banner/hero-bg.png">
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{hero.title}</Hero.Title>
+          <Hero.Description description={parseHtmlToParagraphs(hero.description)} />
+        </Hero.Content>
+      </Hero.Root>
       <PublicationsClient
         publications={pagedWithCounts}
         total={total}

@@ -1,4 +1,4 @@
-import HeroGeneral from '@/components/HeroGeneral'
+import { Hero } from '@/components/Shared/Hero'
 import { TopicCard } from '@/components/tematic-areas/TopicCard';
 import { fetchHomepageData } from '@/service/api/system';
 import { getTematicAreas } from '@/service/queries/topics-areas/tematic-areas';
@@ -35,11 +35,13 @@ export default async function page({ params }: { params: Promise<{ locale: strin
 
     return (
         <div className="w-full h-full flex flex-col items-center justify-center">
-            <HeroGeneral title={hero.title}>
-                <div className="text-white">
-                    {parseHtmlToParagraphs(hero.description)}
-                </div>
-            </HeroGeneral>
+            <Hero.Root>
+                <Hero.Breadcrumb />
+                <Hero.Content>
+                    <Hero.Title>{hero.title}</Hero.Title>
+                    <Hero.Description description={parseHtmlToParagraphs(hero.description)} />
+                </Hero.Content>
+            </Hero.Root>
             <main className="w-full h-full flex flex-col items-center justify-center py-64 gap-32">
                 <div className="container w-full h-full flex flex-row gap-32">
                     <div className="flex flex-row gap-8">
