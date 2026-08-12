@@ -542,8 +542,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
         ecosystemOpen &&
         createPortal(
           <div className="ecosystem-custom-panel">
-            <div className="flex w-full flex-col px-16 py-32 md:flex-row md:px-[112px] md:py-64">
-              <div className="flex flex-1 flex-col gap-16 pl-0 md:gap-32 md:pl-32">
+            <div className="container mx-auto flex w-full flex-col py-16 md:flex-row md:py-32">
+              <div className="flex flex-1 flex-col gap-16 pl-0 md:gap-32">
                 <div className="flex flex-row items-start gap-32">
                   <p className="text-base font-bold text-primary-900">
                     {ecosytems?.description ?? ""}
