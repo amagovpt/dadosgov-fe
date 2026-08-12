@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Accordion,
@@ -35,12 +35,18 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const visibleRows = useMemo(() => {
     if (!tabularData) return [];
     const start = (page - 1) * DEFAULT_PAGE_SIZE;
     return tabularData.rows.slice(start, start + DEFAULT_PAGE_SIZE);
   }, [tabularData, page]);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+    tableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const format = resource.format?.toLowerCase() || "";
   const isTabular = TABULAR_FORMATS.includes(format);
@@ -127,7 +133,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                         {tds("resources.preview.exploreCta")}
                       </Button>
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto" ref={tableRef}>
                       <Table desktopLayout="table">
                         <TableHeader>
                           <TableRow>
@@ -158,7 +164,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                       currentPage={page}
                       totalItems={tabularData.rows.length}
                       pageSize={DEFAULT_PAGE_SIZE}
-                      onPageChange={setPage}
+                      onPageChange={handlePageChange}
                     />
                     <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
                       {tds("resources.preview.footer", {
