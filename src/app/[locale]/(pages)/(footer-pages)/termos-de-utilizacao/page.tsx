@@ -1,4 +1,4 @@
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { getFaqs } from "@/service/queries/faqs/faqs";
 
 import { Metadata } from "next";
@@ -9,38 +9,28 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   {
-    //params,
+    params,
   }: {
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  try {
-    const { title } = await getFaqs("termos-de-utilizacao", "pt");
-    return { title };
-  } catch (error) {
-    // Fall back to the layout's default title rather than failing the whole
-    // page render when the CMS is unreachable.
-    console.error("Error fetching termos-de-utilizacao metadata:", error);
-    return {};
-  }
+  const { locale } = await params;
+  const { title } = await getFaqs("termos-de-utilizacao", locale);
+
+  return {
+    title,
+  };
 }
 
-export default async function TermsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const { title, body } = await getFaqs("termos-de-utilizacao", "pt");
-  const { t } = await initTranslations({ locale, namespaces: ["common"], });
+  const { t } = await initTranslations({ locale, namespaces: ["common"] });
+  const { title, body } = await getFaqs("termos-de-utilizacao", locale);
 
   return (
     <main className="flex flex-col pt-32 pb-64 bg-white gap-64 justify-center items-center w-full h-full">
       <div className="container ">
-        <Breadcrumb items={[
-          { label: t("home"), url: "/" },
-          { label: title, url: "/termos-de-utilizacao" },
-        ]} />
+        <BreadcrumbDynamic darkMode={false} currentLabel={title} />
       </div>
 
       <div className="bg-neutral-100 flex flex-col items-center justify-center py-64 w-full h-full">
@@ -52,7 +42,7 @@ export default async function TermsPage({
               </div>
             ) : (
               <p className="text-m-regular leading-7 text-[#2b363c]">
-                Não foi possível carregar o conteúdo.
+                {t("contentLoadError")}
               </p>
             )}
           </div>

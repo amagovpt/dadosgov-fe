@@ -30,6 +30,7 @@ export async function generateMetadata({
 
 
 export default async function ReusesPage({
+    params,
     searchParams,
 }: {
     params: Promise<{ locale: string }>;
@@ -43,6 +44,7 @@ export default async function ReusesPage({
         modified_since?: string;
     }>;
 }) {
+    const { locale } = await params;
     const resolvedSearchParams = await searchParams;
     const page = Number(resolvedSearchParams?.page) || 1;
     const filters: ReuseFilters = {
@@ -65,7 +67,7 @@ export default async function ReusesPage({
     const forwarded = await serverForwardedHeaders();
     const data = await fetchReusesListing(page, 12, apiFilters, forwarded);
 
-    const dataCms = await getFrontOfficePage("reuses","pt");
+    const pageContent = await getFrontOfficePage("reuses", locale);
 
     return (
         <ReusesClient
@@ -73,7 +75,7 @@ export default async function ReusesPage({
             currentPage={page}
             filterCounts={data.filter_counts}
             allOrganizations={data.organizations}
-            dataCms={dataCms}
+            pageContent={pageContent}
         />
     );
 }

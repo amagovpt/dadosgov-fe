@@ -101,11 +101,9 @@ export async function getRoadmapPage(locale: string = "pt"): Promise<RoadmapPage
     throw new Error("Failed to fetch roadmap page information");
   }
 
-  const roadmapPage = data.findRoadmapPageSingleton?.data;
-
-  if (!roadmapPage) {
+  if (!data.findRoadmapPageSingleton?.data) {
     return {} as RoadmapPageData;
   }
 
-  return flattenData(roadmapPage) as unknown as RoadmapPageData;
+  return flattenData(data, locale).findRoadmapPageSingleton as RoadmapPageData;
 }

@@ -1,0 +1,36 @@
+{
+  "title": "Discussions",
+  "popup": {
+    "title": "Discussion"
+  },
+  "columns": {
+    "title": "Title",
+    "author": "Author",
+    "status": "Status",
+    "date": "Date",
+    "messages": "Messages",
+    "createdAt": "Created at",
+    "closedAt": "Closed at"
+  },
+  "status": {
+    "open": "OPEN",
+    "closed": "CLOSED"
+  },
+  "empty": {
+    "descriptionOrganization": "There are no discussions about this organization yet."
+  },
+  "organizationFallback": "Organization",
+  "withoutOrganization": "No organization",
+  "metrics": {
+    "views": "Views",
+    "downloads": "Downloads",
+    "reuses": "Reuses",
+    "favorites": "Favorites"
+  },
+  "commentLabel": "Write your comment",
+  "actions": {
+    "delete": "Delete",
+    "addComment": "Add comment",
+    "commentAndClose": "Comment and close"
+  }
+}

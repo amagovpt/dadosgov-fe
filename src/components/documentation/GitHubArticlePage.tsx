@@ -5,16 +5,12 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
-interface BreadcrumbItem {
-  label: string;
-  url: string;
-}
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { useTranslation } from "react-i18next";
 
 interface GitHubArticlePageProps {
   slug: string;
   title?: string;
-  breadcrumbItems: BreadcrumbItem[];
   initialContent?: string;
 }
 
@@ -94,31 +90,12 @@ const markdownComponents: Components = {
   br: () => null,
 };
 
-function sanitizeMarkdown(content: string): string {
-  return content
-    .replace(/<br\s*\/?>/gi, "")
-    .replace(/^\s*\n/gm, "\n")
-    .replace(/\bdados gov\b/g, "dados.gov.pt")
-    .replace(
-      /A certificação pode ser pedida através do e-mail dados@ama\.pt\./g,
-      "O pedido de certificação deve ser realizado através da página [Ajuda e Contactos](/ajuda-e-contactos)."
-    )
-    .replace(
-      /A ARTE também poderá ajudar neste processo, incluindo colaborar na organização de workshops \/ eventos com vista a promover estas interações, contacte-nos em dados@ama\.pt\./g,
-      "A ARTE também poderá apoiar este processo, nomeadamente através da colaboração na organização de workshops e eventos que promovam estas interações. Para mais informações, consulte a página [Ajuda e Contactos](/ajuda-e-contactos)."
-    )
-    .replace(
-      /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
-      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/ajuda-e-contactos)."
-    );
-}
-
 export function GitHubArticlePage({
   slug,
-  breadcrumbItems,
   initialContent = "",
 }: GitHubArticlePageProps) {
-  const cleanContent = sanitizeMarkdown(initialContent);
+  const { t } = useTranslation(["common", "documentation"]);
+  const cleanContent = initialContent;
 
   return (
     <div className="flex min-h-screen flex-col bg-white font-sans">
@@ -126,7 +103,7 @@ export function GitHubArticlePage({
         <div className="container mx-auto px-4">
           {/* Breadcrumbs */}
           <div className="mb-[64px] pt-[32px]">
-            <Breadcrumb items={breadcrumbItems} />
+            <BreadcrumbDynamic darkMode={false} />
           </div>
         </div>
 
@@ -147,7 +124,7 @@ export function GitHubArticlePage({
                   </div>
                 ) : (
                   <p className="text-m-regular leading-7 text-[#2b363c]">
-                    Não foi possível carregar o conteúdo.
+                    {t("contentLoadError")}
                   </p>
                 )}
               </div>

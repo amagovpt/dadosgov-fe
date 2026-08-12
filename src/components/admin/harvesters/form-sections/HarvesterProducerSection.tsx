@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   DropdownOption,
   type DropdownSectionProps,
@@ -21,6 +22,7 @@ export default function HarvesterProducerSection({
   hasProducerError,
   onProducerChange,
 }: HarvesterProducerSectionProps) {
+  const { t } = useTranslation("admin-harvesters");
   const producerOptions: React.ReactElement<DropdownSectionProps> = (
     <DropdownSection name="identity">
       {organizations.map((organization) => (
@@ -33,17 +35,17 @@ export default function HarvesterProducerSection({
 
   return (
     <>
-      <h2 className="admin-page__section-title">Produtor</h2>
+      <h2 className="admin-page__section-title">{t("fields.producer")}</h2>
 
       <div className="admin-page__fields-group">
         <AdminSelectAdapter
-          label="Confirme a identidade que pretende utilizar na publicação. *"
-          placeholder="Selecione o produtor..."
+          label={t("fields.producerLabel")}
+          placeholder={t("fields.producerPlaceholder")}
           id="harvester-producer"
           valueRef={selectedProducerRef}
           onValueChange={onProducerChange}
           hasError={hasProducerError}
-          errorMessage="Selecione uma organização"
+          errorMessage={t("fields.producerError")}
           required
         >
           {producerOptions}

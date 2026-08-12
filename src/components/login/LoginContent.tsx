@@ -4,12 +4,12 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
-  Breadcrumb,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { login } from "@/service/api/auth";
 import { buildSamlEndpoint, sanitizeNextUrl, submitSamlForm } from "./loginUtils";
 import { SupportStatusCard } from "./LoginShared";
@@ -25,11 +25,6 @@ export function LoginContent() {
   const searchParams = useSearchParams();
   const nextUrl = sanitizeNextUrl(searchParams.get("next"));
   const prefilledEmail = searchParams.get("email") || "";
-
-  const breadcrumbItems = [
-    { label: t("home"), url: "/" },
-    { label: t("auth"), url: "#" },
-  ];
 
   const [cmdModalOpen, setCmdModalOpen] = useState(false);
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
@@ -100,7 +95,7 @@ export function LoginContent() {
       <div className="login-page container mx-auto max-w-7xl px-16 pb-64 pt-32">
         {showMainView && (
           <div>
-            <Breadcrumb items={breadcrumbItems} />
+            <BreadcrumbDynamic darkMode={false} />
           </div>
         )}
 

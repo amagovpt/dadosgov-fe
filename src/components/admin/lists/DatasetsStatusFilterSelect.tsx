@@ -1,5 +1,8 @@
+"use client";
+
 import { InputSelect } from "@ama-pt/agora-design-system";
 import { Dropdown } from "@/components/Primitives/Dropdown";
+import { useTranslation } from "react-i18next";
 
 interface DatasetsStatusFilterSelectProps {
   statusFilter: string;
@@ -13,14 +16,17 @@ export default function DatasetsStatusFilterSelect({
   statusFilter,
   onChange,
   id = "filter-status",
-  placeholder = "Filtrar por estado",
+  placeholder,
   defaultValue,
 }: DatasetsStatusFilterSelectProps) {
+  const { t } = useTranslation("admin-common");
+  const resolvedPlaceholder = placeholder ?? t("filters.statusPlaceholder");
+
   return (
     <InputSelect
       label=""
       hideLabel
-      placeholder={placeholder}
+      placeholder={resolvedPlaceholder}
       id={id}
       defaultValue={defaultValue}
       onChange={(options) => {
@@ -29,19 +35,19 @@ export default function DatasetsStatusFilterSelect({
     >
       <Dropdown.Section name="status">
         <Dropdown.Option value="" selected={statusFilter === ""}>
-          Todos
+          {t("filters.all")}
         </Dropdown.Option>
         <Dropdown.Option value="public" selected={statusFilter === "public"}>
-          Público
+          {t("status.public")}
         </Dropdown.Option>
         <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
-          Arquivado
+          {t("status.archived")}
         </Dropdown.Option>
         <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
-          Rascunho
+          {t("status.draft")}
         </Dropdown.Option>
         <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
-          Excluído
+          {t("status.deleted")}
         </Dropdown.Option>
       </Dropdown.Section>
     </InputSelect>

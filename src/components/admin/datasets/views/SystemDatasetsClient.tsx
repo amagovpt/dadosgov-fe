@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -10,13 +11,20 @@ import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
   createDatasetColumns,
   DatasetSortField,
+  sortDatasets,
   systemDatasetSortFieldMap,
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
-export default function SystemDatasetsClient() {
+interface SystemDatasetsClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,10 +34,11 @@ export default function SystemDatasetsClient() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const usesLocalSort = sortField === "status" || sortField === "quality" || sortField === "resources";
 
   const sortParam = useMemo(
-    () => buildApiSortParam(sortField, sortOrder, systemDatasetSortFieldMap),
-    [sortField, sortOrder]
+    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, systemDatasetSortFieldMap)),
+    [sortField, sortOrder, usesLocalSort],
   );
   const columns = useMemo(
     () =>
@@ -37,8 +46,18 @@ export default function SystemDatasetsClient() {
         editHref: (dataset) => `/admin/datasets/${dataset.id}`,
         showResourceCount: true,
         showQualityScore: true,
+        labels: {
+          title: t("admin-datasets:list.columns.title"),
+          titleShort: t("admin-datasets:list.columns.titleShort"),
+          status: t("admin-datasets:list.columns.status"),
+          createdAt: t("admin-datasets:list.columns.createdAt"),
+          lastModified: t("admin-datasets:list.columns.lastModified"),
+          resources: t("admin-datasets:list.columns.resources"),
+          quality: t("admin-datasets:list.columns.quality"),
+          actions: t("admin-datasets:list.columns.actions"),
+        },
       }),
-    []
+    [t],
   );
 
   const loadDatasets = useCallback(async () => {
@@ -107,27 +126,32 @@ export default function SystemDatasetsClient() {
     sortOrder,
     setSortField,
     setSortOrder,
-    setCurrentPage
+    setCurrentPage,
+  );
+  const visibleDatasets = useMemo(
+    () => (usesLocalSort ? sortDatasets(datasets, sortField, sortOrder) : datasets),
+    [datasets, sortField, sortOrder, usesLocalSort],
   );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Conjuntos de dados", url: "/admin/system/datasets" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-datasets:list.title"), url: "/admin/system/datasets" },
       ]}
-      title="Conjuntos de dados"
+      title={t("admin-datasets:list.title")}
       isLoading={isLoading}
       count={totalItems}
-      hasItems={datasets.length > 0}
+      hasItems={visibleDatasets.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome, código ou sigla da entidade",
-        ariaLabel: "Pesquisar conjuntos de dados",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -139,16 +163,10 @@ export default function SystemDatasetsClient() {
           }}
         />
       }
-      emptyState={
-        <AdminEmptyState
-          icon="agora-line-edit"
-          title="Sem publicações"
-          description="Nenhum conjunto de dados encontrado."
-        />
-      }
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
-        items={datasets}
+        items={visibleDatasets}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}
@@ -157,4 +175,3 @@ export default function SystemDatasetsClient() {
     </AdminListPage>
   );
 }
-

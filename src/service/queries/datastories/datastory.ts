@@ -100,6 +100,15 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     title
                   }
                 }
+                ... on SectionDatastoryBignumbersIframeComponent {
+                  id
+                  schemaName
+                  iframe {
+                    source
+                    classNames
+                    classNameIframeBackground
+                  }
+                }
                 ... on SectionDatastoryIframeComponent {
                   schemaName
                   id

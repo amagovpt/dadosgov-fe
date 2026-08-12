@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchPost } from "@/service/api/posts";
 import { formatPostDate } from "@/utils/articlesListing";
 import initTranslations from "@/app/i18n";
@@ -15,15 +15,16 @@ const POST_REVALIDATE_SECONDS = 120;
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ rid: string }>;
+  params: Promise<{ locale: string; rid: string }>;
 }): Promise<Metadata> {
-  const { rid } = await params;
+  const { locale, rid } = await params;
+  const { t } = await initTranslations({ locale, namespaces: ["common"] });
   const post = await fetchPost(rid, { revalidate: POST_REVALIDATE_SECONDS });
 
   if (!post) {
     return {
-      title: "Artigo não encontrado - dados.gov.pt",
-      description: "O artigo que procura não existe ou foi removido.",
+      title: `${t("articleNotFound")} - dados.gov.pt`,
+      description: t("articleNotFoundDescription"),
     };
   }
 
@@ -53,13 +54,7 @@ export default async function ArticleDetailPage({
       <div className="container mx-auto pt-32">
         {/* Breadcrumb */}
         <div>
-          <Breadcrumb
-            items={[
-              { label: t("home"), url: "/" },
-              { label: t("news"), url: "/noticias" },
-              { label: post.name, url: "#" },
-            ]}
-          />
+          <BreadcrumbDynamic darkMode={false} currentLabel={post.name} />
         </div>
 
         {/* Title Section */}

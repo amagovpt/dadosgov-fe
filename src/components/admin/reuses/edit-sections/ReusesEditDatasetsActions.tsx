@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 
 type ReusesEditDatasetsActionsProps = {
@@ -12,6 +13,8 @@ export default function ReusesEditDatasetsActions({
   canSave,
   onAddDatasetLink,
 }: ReusesEditDatasetsActionsProps) {
+  const { t } = useTranslation("admin-reuses");
+
   return (
     <>
       <div className="flex justify-end">
@@ -24,7 +27,7 @@ export default function ReusesEditDatasetsActions({
           leadingIconHover="agora-solid-plus-circle"
           onClick={onAddDatasetLink}
         >
-          Adicionar
+          {t("form.addDatasetLink")}
         </Button>
       </div>
 
@@ -37,7 +40,7 @@ export default function ReusesEditDatasetsActions({
           trailingIconHover="agora-solid-check-circle"
           disabled={!canSave || isSubmitting}
         >
-          {isSubmitting ? "A guardar..." : "Guardar"}
+          {isSubmitting ? t("edit.saving") : t("edit.save")}
         </Button>
       </div>
     </>

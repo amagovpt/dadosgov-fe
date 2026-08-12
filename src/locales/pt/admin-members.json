@@ -1,0 +1,65 @@
+{
+  "title": "Membros",
+  "breadcrumbs": {
+    "members": "Membros"
+  },
+  "organizationFallback": "Organização",
+  "requestError": "Ocorreu um erro ao aceitar o pedido. Tente novamente.",
+  "count_one": "{{count}} membro",
+  "count_other": "{{count}} membros",
+  "addMember": "Adicionar um membro",
+  "columns": {
+    "member": "Membros",
+    "role": "Estatuto",
+    "since": "Membro desde",
+    "actions": "Ações",
+    "editRole": "Editar papel",
+    "removeMember": "Remover membro"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "editor": "Editor"
+  },
+  "pendingRequests": {
+    "title": "Pedidos de adesão pendentes ({{count}})",
+    "user": "Utilizador",
+    "comment": "Comentário",
+    "requestDate": "Data do pedido",
+    "actions": "Ações",
+    "accepting": "A aceitar...",
+    "accept": "Aceitar",
+    "refuse": "Recusar"
+  },
+  "popups": {
+    "refuseTitle": "Recusar pedido de adesão",
+    "removeTitle": "Eliminar membro",
+    "editRoleTitle": "Editar papel do membro",
+    "addTitle": "Adicionar um membro à organização"
+  },
+  "addPopup": {
+    "pendingInvite": "Este utilizador já foi convidado para esta organização. O convite encontra-se pendente de aceitação.",
+    "userLabel": "Utilizador",
+    "searchPlaceholder": "Pesquisar um utilizador",
+    "searchInputPlaceholder": "Escreva pelo menos 2 caracteres...",
+    "searching": "A pesquisar...",
+    "noResults": "Nenhum utilizador encontrado",
+    "alreadyMember": "Utilizador já está associado a esta organização",
+    "roleLabel": "Papel do membro",
+    "addError": "Ocorreu um erro ao adicionar o membro. Tente novamente.",
+    "add": "Adicionar"
+  },
+  "editRolePopup": {
+    "description": "Alterar o papel de {{name}}",
+    "roleLabel": "Papel do membro"
+  },
+  "removePopup": {
+    "description": "Tem a certeza que deseja eliminar este membro?",
+    "deleting": "A eliminar..."
+  },
+  "refusePopup": {
+    "description": "Recusar o pedido de adesão de {{name}}?",
+    "reasonLabel": "Motivo da recusa",
+    "reasonPlaceholder": "Indique o motivo da recusa (opcional)",
+    "refusing": "A recusar..."
+  }
+}

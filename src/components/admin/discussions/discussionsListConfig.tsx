@@ -5,23 +5,39 @@ import type { Discussion } from "@/service/types/discussion";
 import { formatDateToDMY } from "@/utils/formatDate";
 
 export type DiscussionSortField = "created" | "closed";
+export type DiscussionListSortField = "status";
 
 interface OrgDiscussionColumnsOptions {
   onOpenDiscussion: (discussion: Discussion) => void;
   formatDate: (date: string) => string;
+  labels: DiscussionColumnLabels;
 }
 
-export function createDiscussionColumns(): AdminListColumn<Discussion>[] {
+export interface DiscussionColumnLabels {
+  title: string;
+  author: string;
+  status: string;
+  date: string;
+  messages: string;
+  createdAt: string;
+  closedAt: string;
+  open: string;
+  closed: string;
+}
+
+export function createDiscussionColumns(
+  labels: DiscussionColumnLabels,
+): AdminListColumn<Discussion, DiscussionListSortField>[] {
   return [
     {
       id: "title",
-      header: "Título",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.title,
       renderCell: (discussion) => <span className="font-medium">{discussion.title}</span>,
     },
     {
       id: "author",
-      header: "Autor",
+      header: labels.author,
       renderCell: (discussion) => (
         <div className="flex items-center gap-8">
           {discussion.user?.avatar_thumbnail ? (
@@ -41,22 +57,24 @@ export function createDiscussionColumns(): AdminListColumn<Discussion>[] {
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (discussion) =>
         discussion.closed ? (
-          <StatusDot variant="success">FECHADA</StatusDot>
+          <StatusDot variant="success">{labels.closed}</StatusDot>
         ) : (
-          <StatusDot variant="informative">ABERTA</StatusDot>
+          <StatusDot variant="informative">{labels.open}</StatusDot>
         ),
     },
     {
       id: "date",
-      header: "Data",
+      header: labels.date,
       renderCell: (discussion) => formatDateToDMY(discussion.created),
     },
     {
       id: "messages",
-      header: "Mensagens",
+      header: labels.messages,
       renderCell: (discussion) => discussion.discussion?.length || 0,
     },
   ];
@@ -65,12 +83,13 @@ export function createDiscussionColumns(): AdminListColumn<Discussion>[] {
 export function createOrgDiscussionColumns({
   onOpenDiscussion,
   formatDate,
+  labels,
 }: OrgDiscussionColumnsOptions): AdminListColumn<Discussion, DiscussionSortField>[] {
   return [
     {
       id: "title",
-      header: "Título",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.title,
       renderCell: (discussion) => (
         <button
           className="text-left text-primary-600 underline"
@@ -85,14 +104,14 @@ export function createOrgDiscussionColumns({
     },
     {
       id: "created",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created",
       sortType: "date",
       renderCell: (discussion) => formatDate(discussion.created),
     },
     {
       id: "closed",
-      header: "Fechado em",
+      header: labels.closedAt,
       sortField: "closed",
       sortType: "date",
       renderCell: (discussion) => (discussion.closed ? formatDate(discussion.closed) : "-"),

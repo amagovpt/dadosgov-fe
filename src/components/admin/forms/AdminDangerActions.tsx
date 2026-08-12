@@ -1,18 +1,20 @@
+"use client";
+
 import React from "react";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 
 type ActionCardVariant = "warning" | "informative" | "danger";
 
+export type AdminDangerAction = {
+  variant: ActionCardVariant;
+  heading?: React.ReactNode;
+  description?: React.ReactNode;
+  actionLabel?: React.ReactNode;
+  onAction?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
+};
+
 type AdminDangerActionsProps = {
-  primaryVariant?: ActionCardVariant;
-  primaryHeading?: React.ReactNode;
-  primaryDescription?: React.ReactNode;
-  primaryActionLabel?: React.ReactNode;
-  onPrimaryAction?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
-  dangerHeading?: React.ReactNode;
-  dangerDescription?: React.ReactNode;
-  dangerActionLabel?: React.ReactNode;
-  onDangerAction?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
+  actions: AdminDangerAction[];
   disabled?: boolean;
 };
 
@@ -25,26 +27,27 @@ function ActionCard({
   disabled = false,
 }: {
   variant: ActionCardVariant;
-  heading: React.ReactNode;
+  heading?: React.ReactNode;
   description?: React.ReactNode;
   actionLabel: React.ReactNode;
   onAction: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   disabled?: boolean;
 }) {
+  const hasDescription = React.Children.count(description) > 0;
+
   return (
     <StatusCard
       variant={variant}
       showIcon
       description={
         <>
-          <strong>{heading}</strong>
-          {description ? (
+          {heading ? <strong>{heading}</strong> : null}
+          {hasDescription ? (
             <>
-              <br />
               {description}
             </>
           ) : null}
-          <br />
+
           <Button
             type="button"
             appearance="link"
@@ -64,50 +67,31 @@ function ActionCard({
 }
 
 export default function AdminDangerActions({
-  primaryVariant = "warning",
-  primaryHeading,
-  primaryDescription,
-  primaryActionLabel,
-  onPrimaryAction,
-  dangerHeading = "Atenção esta ação é irreversível.",
-  dangerDescription,
-  dangerActionLabel,
-  onDangerAction,
+  actions,
   disabled = false,
 }: AdminDangerActionsProps) {
-  const showPrimary = Boolean(primaryHeading && primaryActionLabel && onPrimaryAction);
-  const showDanger = Boolean(dangerActionLabel && onDangerAction);
+  const visibleActions = actions.filter((action) => Boolean(action.actionLabel && action.onAction));
 
   // Each card is gated by the backend permission upstream (the caller only
   // passes the action when allowed). When the user can do neither, render
   // nothing instead of an empty danger zone.
-  if (!showPrimary && !showDanger) {
+  if (visibleActions.length === 0) {
     return null;
   }
 
   return (
     <div className="dataset-edit-danger-actions">
-      {showPrimary ? (
+      {visibleActions.map((action, index) => (
         <ActionCard
-          variant={primaryVariant}
-          heading={primaryHeading}
-          description={primaryDescription}
-          actionLabel={primaryActionLabel}
-          onAction={onPrimaryAction!}
+          key={index}
+          variant={action.variant}
+          heading={action.heading}
+          description={action.description}
+          actionLabel={action.actionLabel}
+          onAction={action.onAction!}
           disabled={disabled}
         />
-      ) : null}
-
-      {showDanger ? (
-        <ActionCard
-          variant="danger"
-          heading={dangerHeading}
-          description={dangerDescription}
-          actionLabel={dangerActionLabel}
-          onAction={onDangerAction!}
-          disabled={disabled}
-        />
-      ) : null}
+      ))}
     </div>
   );
 }

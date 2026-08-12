@@ -28,6 +28,8 @@
   },
   "theReuses": "as reutilizações",
   "detail": {
+    "untitled": "Sem título",
+    "noDescription": "Sem descrição",
     "addFavorite": "Adicionar aos favoritos",
     "removeFavorite": "Remover dos favoritos",
     "viewReuse": "Veja reutilização",

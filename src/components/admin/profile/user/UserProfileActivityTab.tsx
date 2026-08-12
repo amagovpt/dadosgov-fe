@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   Avatar,
   CardNoResults,
@@ -34,24 +35,28 @@ export default function UserProfileActivityTab({
   onPageChange,
   onPageSizeChange,
 }: UserProfileActivityTabProps) {
+  const { t } = useTranslation("admin-profile");
+
   return (
     <div className="mt-24">
-      {isLoading && <p className="text-sm text-neutral-700">A carregar...</p>}
+      {isLoading && <p className="text-sm text-neutral-700">{t("activities.loading")}</p>}
 
       {!isLoading && activities.length === 0 && (
         <CardNoResults
           className="admin-page__empty"
           position="center"
           icon={<Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem atividades"
-          description="Nenhuma atividade registada."
+          title={t("activities.emptyTitle")}
+          description={t("activities.emptyDescription")}
           hasAnchor={false}
         />
       )}
 
       {!isLoading && activities.length > 0 && (
         <>
-          <h2 className="mb-16 text-base font-medium text-neutral-900">{activityTotal} ATIVIDADES</h2>
+          <h2 className="mb-16 text-base font-medium text-neutral-900">
+            {t("activities.count", { count: activityTotal })}
+          </h2>
           <AdminPaginatedTable
             pageSize={activityPageSize}
             totalItems={activityTotal}
@@ -61,15 +66,15 @@ export default function UserProfileActivityTab({
           >
             <TableHeader>
               <TableRow>
-                <TableHeaderCell>Utilizador</TableHeaderCell>
-                <TableHeaderCell>Ação</TableHeaderCell>
-                <TableHeaderCell>Data</TableHeaderCell>
+                <TableHeaderCell>{t("activities.user")}</TableHeaderCell>
+                <TableHeaderCell>{t("activities.action")}</TableHeaderCell>
+                <TableHeaderCell>{t("activities.date")}</TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>
               {activities.map((activity, index) => (
                 <TableRow key={index}>
-                  <TableCell headerLabel="Utilizador">
+                  <TableCell headerLabel={t("activities.user")}>
                     <div className="flex items-center gap-8">
                       <Avatar
                         avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
@@ -84,8 +89,10 @@ export default function UserProfileActivityTab({
                       </TextLink>
                     </div>
                   </TableCell>
-                  <TableCell headerLabel="Ação">{translateActivityLabel(activity.label)}</TableCell>
-                  <TableCell headerLabel="Data">
+                  <TableCell headerLabel={t("activities.action")}>
+                    {translateActivityLabel(activity.label, t)}
+                  </TableCell>
+                  <TableCell headerLabel={t("activities.date")}>
                     {new Date(activity.created_at).toLocaleDateString("pt-PT", {
                       day: "2-digit",
                       month: "2-digit",

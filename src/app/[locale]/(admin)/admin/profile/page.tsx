@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
 import ProfileClient from "@/components/admin/profile/user/ProfileClient";
+import { getBoProfile, getBoProfileMetadata } from "@/service/queries/admin/profile";
 
-export const metadata: Metadata = {
-  title: "Perfil - Admin - dados.gov.pt",
-  description: "Perfil do utilizador no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoProfileMetadata(locale);
 
-export default function ProfilePage() {
-  return <ProfileClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoProfile(locale);
+
+  return <ProfileClient pageContent={pageContent} />;
 }

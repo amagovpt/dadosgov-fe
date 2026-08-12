@@ -1,0 +1,13 @@
+{
+  "title": "Notificações",
+  "read": "lida",
+  "markAsRead": "Marcar como lida",
+  "harvesterValidation": {
+    "title": "Validação de harvester — {{status}}",
+    "sourceUnavailable": "Fonte indisponível (poderá ter sido eliminada).",
+    "viewHarvester": "Ver harvester"
+  },
+  "generic": {
+    "title": "Nova notificação"
+  }
+}

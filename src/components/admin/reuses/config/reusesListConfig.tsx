@@ -4,14 +4,16 @@ import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
 import type { Reuse } from "@/service/types/reuse";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
-export type ReuseSortField = "title" | "created_at" | "datasets";
-export type SystemReuseSortField = "title" | "created_at";
+export type ReuseSortField = "title" | "status" | "created_at" | "datasets";
+export type SystemReuseSortField = "title" | "status" | "created_at";
 
-export const systemReuseSortFieldMap: Record<SystemReuseSortField, string> = {
+export const systemReuseSortFieldMap: Record<SystemReuseSortField, string | null> = {
   title: "title",
+  status: null,
   created_at: "created",
 };
 
@@ -27,6 +29,9 @@ export function sortReuses(
   return [...items].sort((a, b) => {
     if (sortField === "title") {
       return collator.compare(a.title ?? "", b.title ?? "") * direction;
+    }
+    if (sortField === "status") {
+      return (getResourceStatusSortValue(a) - getResourceStatusSortValue(b)) * direction;
     }
     if (sortField === "created_at") {
       const aTime = a.created_at ? Date.parse(a.created_at) : 0;
@@ -48,6 +53,16 @@ interface ReuseColumnsOptions<TSortableDatasets extends boolean = true> {
   linkStyle?: "textLink" | "anchor";
   editHref: (reuse: Reuse) => string;
   sortableDatasets?: TSortableDatasets;
+  labels: ReuseColumnLabels;
+}
+
+interface ReuseColumnLabels {
+  title: string;
+  titleShort: string;
+  status: string;
+  createdAt: string;
+  datasets: string;
+  actions: string;
 }
 
 export function createReuseColumns<TSortableDatasets extends boolean = true>({
@@ -55,6 +70,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
   linkStyle = "textLink",
   editHref,
   sortableDatasets = true as TSortableDatasets,
+  labels,
 }: ReuseColumnsOptions<TSortableDatasets>): AdminListColumn<
   Reuse,
   ReuseSortFieldByDatasets<TSortableDatasets>
@@ -62,8 +78,8 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
   return [
     {
       id: "title",
-      header: "Título da reutilização",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.titleShort,
       sortField: "title" as ReuseSortFieldByDatasets<TSortableDatasets>,
       sortType: "numeric",
       renderCell: (reuse) =>
@@ -77,12 +93,14 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
+      sortField: "status" as ReuseSortFieldByDatasets<TSortableDatasets>,
+      sortType: "string",
       renderCell: (reuse) => <ResourceStatusBadge item={reuse} />,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at" as ReuseSortFieldByDatasets<TSortableDatasets>,
       sortType: "date",
       renderCell: (reuse) => (
@@ -107,8 +125,8 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     },
     {
       id: "datasets",
-      header: "Conjuntos de dados",
-      headerLabel: "Conjuntos de dados",
+      header: labels.datasets,
+      headerLabel: labels.datasets,
       sortField: sortableDatasets
         ? ("datasets" as ReuseSortFieldByDatasets<TSortableDatasets>)
         : undefined,
@@ -116,6 +134,8 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
       renderCell: (reuse) => reuse.datasets?.length ?? 0,
     },
     createTableActionsColumn<Reuse>({
+      header: labels.actions,
+      headerLabel: labels.actions,
       viewAction: (reuse) => ({
         href: `/reuses/${reuse.slug}`,
       }),

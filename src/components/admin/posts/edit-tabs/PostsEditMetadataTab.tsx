@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import type { Post } from "@/service/types/posts";
 import PostsEditDangerZone from "@/components/admin/posts/edit-sections/PostsEditDangerZone";
 import PostMetadataSection from "@/components/admin/posts/form-sections/PostMetadataSection";
+import type { AdminCard } from "@/service/types/admin/common";
 
 interface PostsEditMetadataTabProps {
   post: Post;
@@ -19,6 +21,9 @@ interface PostsEditMetadataTabProps {
   hasTitleError?: boolean;
   hasHeaderError?: boolean;
   isSaving: boolean;
+  unpublishCard?: AdminCard;
+  republishCard?: AdminCard;
+  deleteCard?: AdminCard;
   onTitleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onHeaderChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onArticleTypeChange: (value: string) => void;
@@ -47,6 +52,9 @@ export default function PostsEditMetadataTab({
   hasTitleError = false,
   hasHeaderError = false,
   isSaving,
+  unpublishCard,
+  republishCard,
+  deleteCard,
   onTitleChange,
   onHeaderChange,
   onArticleTypeChange,
@@ -61,6 +69,8 @@ export default function PostsEditMetadataTab({
   onRepublish,
   onOpenDeletePopup,
 }: PostsEditMetadataTabProps) {
+  const { t } = useTranslation(["admin-common", "admin-posts"]);
+
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
@@ -73,7 +83,7 @@ export default function PostsEditMetadataTab({
           }}
         >
           <p className="text-neutral-900 text-base leading-7">
-            Campos precedidos por uma estrela (*) são obrigatórios.
+            {t("admin-posts:metadataForm.requiredInfoAlt")}
           </p>
 
           <PostMetadataSection
@@ -89,11 +99,11 @@ export default function PostsEditMetadataTab({
             hasTitleError={hasTitleError}
             hasHeaderError={hasHeaderError}
             contentTypeOptions={["html", "markdown", "blocks"]}
-            sectionTitle="DESCRIÇÃO"
+            sectionTitle={t("admin-posts:metadataForm.sectionTitleUpper")}
             sectionTitleClassName="admin-page__section-title mt-8"
-            headerPlaceholder="Insira aqui"
-            articleTypeLabel="Tipo de Item"
-            pageLabel="Page"
+            headerPlaceholder={t("admin-posts:metadataForm.headerPlaceholderShort")}
+            articleTypeLabel={t("admin-posts:metadataForm.itemType")}
+            pageLabel={t("admin-posts:list.page")}
             onTitleChange={onTitleChange}
             onHeaderChange={onHeaderChange}
             onArticleTypeChange={onArticleTypeChange}
@@ -114,7 +124,7 @@ export default function PostsEditMetadataTab({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSaving}
             >
-              {isSaving ? "A guardar..." : "Guardar"}
+              {isSaving ? t("admin-common:actions.saving") : t("admin-common:actions.save")}
             </Button>
           </div>
         </form>
@@ -122,6 +132,9 @@ export default function PostsEditMetadataTab({
         <PostsEditDangerZone
           isPublished={!!post.published}
           isSaving={isSaving}
+          unpublishCard={unpublishCard}
+          republishCard={republishCard}
+          deleteCard={deleteCard}
           onUnpublish={onUnpublish}
           onRepublish={onRepublish}
           onOpenDeletePopup={onOpenDeletePopup}

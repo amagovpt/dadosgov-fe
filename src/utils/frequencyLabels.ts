@@ -1,3 +1,11 @@
+/**
+ * PT-PT fallback labels for update frequencies.
+ *
+ * The public dataset page resolves these through the `datasets` i18n namespace
+ * (`frequency.<id>`) by passing `t`; this map stays as the fallback for the
+ * call sites that have no translator yet (backoffice), where the backend label
+ * would otherwise come back in English.
+ */
 export const frequencyLabelsMap: Record<string, string> = {
   // Sub-daily
   continuous: "Contínua",
@@ -46,6 +54,15 @@ export const frequencyLabelsMap: Record<string, string> = {
   unknown: "Desconhecida",
 };
 
-export function getFrequencyLabel(id: string, fallbackLabel: string): string {
-  return frequencyLabelsMap[id] || fallbackLabel;
+/**
+ * Resolves a frequency label. Pass `t` (from the `datasets` namespace) to get
+ * the label in the active locale; without it the PT map is used.
+ */
+export function getFrequencyLabel(
+  id: string,
+  fallbackLabel: string,
+  t?: (key: string, options?: { defaultValue?: string }) => string
+): string {
+  const fallback = frequencyLabelsMap[id] || fallbackLabel;
+  return t ? t(`frequency.${id}`, { defaultValue: fallback }) : fallback;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { twMerge } from "tailwind-merge";
 import AppIcon, { AppIconI } from "../Primitives/AppIcon";
 
@@ -30,6 +31,8 @@ export default function TableActionsCell({
   editAction,
   deleteAction,
 }: TableActionsCellI) {
+  const { t } = useTranslation("admin-common");
+
   return (
     <div className={twMerge("flex gap-8", className)}>
       {viewAction && (
@@ -50,7 +53,7 @@ export default function TableActionsCell({
       )}
       {deleteAction && (
         <button
-          aria-label={deleteAction?.ariaLabel ?? "Eliminar"}
+          aria-label={deleteAction?.ariaLabel ?? t("actions.delete")}
           disabled={deleteAction?.disabled}
           onClick={() => deleteAction.handler()}
           className={"text-danger-600 disabled:opacity-50"}

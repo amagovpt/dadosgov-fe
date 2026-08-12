@@ -1,0 +1,43 @@
+{
+  "title": "Statistics",
+  "breadcrumbs": {
+    "user": "Statistics",
+    "organization": "Statistics"
+  },
+  "tabs": {
+    "user": "User",
+    "organization": "Organization",
+    "datasets": "Datasets",
+    "dataservices": "API",
+    "reuses": "Reuses"
+  },
+  "actions": {
+    "publishOnPortal": "Publish on the portal",
+    "report": "Report",
+    "catalog": "Catalog",
+    "aggregatedStatistics": "Aggregated statistics"
+  },
+  "states": {
+    "loading": "Loading...",
+    "results_zero": "{{count}} results",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results"
+  },
+  "table": {
+    "datasetTitle": "DATASET TITLE",
+    "dataserviceTitle": "API TITLE",
+    "reuseTitle": "REUSE TITLE",
+    "title": "Title",
+    "discussions": "Discussions",
+    "views": "Views",
+    "downloads": "Downloads",
+    "reuses": "Reuses",
+    "favorites": "Favorites",
+    "status": "Status"
+  },
+  "status": {
+    "private": "Private",
+    "archived": "Archived",
+    "public": "Public"
+  }
+}

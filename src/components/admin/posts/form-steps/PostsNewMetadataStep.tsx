@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { JSX } from "react";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import PostMetadataSection from "@/components/admin/posts/form-sections/PostMetadataSection";
@@ -52,6 +53,8 @@ export default function PostsNewMetadataStep({
   onImageSecurityError,
   onNext,
 }: PostsNewMetadataStepProps) {
+  const { t } = useTranslation("admin-posts");
+
   return (
     <form
       className="admin-page__form"
@@ -62,7 +65,7 @@ export default function PostsNewMetadataStep({
       }}
     >
       <p className="pt-32 text-base leading-7 text-neutral-900">
-        Os campos marcados com um asterisco ( * ) são obrigatórios.
+        {t("metadataForm.requiredInfo")}
       </p>
 
       <PostMetadataSection
@@ -90,7 +93,7 @@ export default function PostsNewMetadataStep({
 
       <AdminStepActions
         primaryAction={{
-          label: "Seguinte",
+          label: t("steps.next"),
           type: "submit",
           hasIcon: true,
           trailingIcon: "agora-line-arrow-right-circle",

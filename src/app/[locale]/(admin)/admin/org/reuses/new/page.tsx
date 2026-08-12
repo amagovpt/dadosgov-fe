@@ -1,25 +1,22 @@
-"use client";
+import type { Metadata } from "next";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
+import { getBoReusesMetadata } from "@/service/queries/admin/reuses";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoReusesMetadata(locale);
+
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
 
 export default function OrgReusesNewRedirect() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { activeOrg, isLoading } = useActiveOrganization();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (activeOrg) {
-      const params = searchParams.toString();
-      router.replace(
-        `/admin/org/${activeOrg.id}/reuses/new${params ? `?${params}` : ""}`,
-      );
-    } else {
-      router.replace("/admin");
-    }
-  }, [activeOrg, isLoading, router, searchParams]);
-
-  return null;
+  return <AdminOrgRedirect targetPath="/admin/org/{orgId}/reuses/new" preserveSearchParams />;
 }

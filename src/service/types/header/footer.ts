@@ -1,7 +1,15 @@
+import { Image } from "@/service/types/shared";
+
 export type FooterCard = {
   title: string;
   href: string;
   enabled: boolean;
+};
+
+export type FooterBrand = {
+  alt: string;
+  anchor: { children: string; href: string } | null;
+  logo: Image[];
 };
 
 export type FooterGroup = {
@@ -28,6 +36,7 @@ export type FooterRelatedLink = {
 
 export type Footer = {
   title: string;
+  brands: FooterBrand[];
   description: string;
   groups: FooterGroup[];
   logos: FooterLogo[];

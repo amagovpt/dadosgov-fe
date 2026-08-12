@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ChangeEvent, MutableRefObject, ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   type DropdownSectionProps,
@@ -13,8 +14,11 @@ import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AppIcon from "@/components/Primitives/AppIcon";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ReusesFormDetailsStepProps {
+  introduction?: AdminHelpBlock;
   apiError: string | null;
   hasOrganization: boolean;
   selectedProducerRef: MutableRefObject<string>;
@@ -60,6 +64,7 @@ interface ReusesFormDetailsStepProps {
 }
 
 export default function ReusesFormDetailsStep({
+  introduction,
   apiError,
   hasOrganization,
   selectedProducerRef,
@@ -95,21 +100,29 @@ export default function ReusesFormDetailsStep({
   onNextStep,
   isSubmitting,
 }: ReusesFormDetailsStepProps) {
+  const { t } = useTranslation("admin-reuses");
+
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>O que é reutilização?</strong>
-            <br />
-            Uma reutilização mostra de que forma os dados públicos podem ser utilizados. Ao
-            publicar a sua reutilização, aumenta a visibilidade do seu trabalho e pode
-            estabelecer contacto direto com a entidade que produz o conjunto de dados.
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            <>
+              {introduction.title ? (
+                <>
+                  <strong>{introduction.title}</strong>
+                  <br />
+                  {formatHtmlParagraphs(introduction.description)}
+                </>
+              ) : (
+                formatHtmlParagraphs(introduction.description)
+              )}
+            </>
+          }
+        />
+      ) : null}
 
       {apiError && (
         <div className="mt-32 mb-16">
@@ -126,13 +139,13 @@ export default function ReusesFormDetailsStep({
         }}
       >
         <p className="pt-32 text-base leading-7 text-neutral-900">
-          Os campos marcados com um asterisco ( * ) são obrigatórios.
+          {t("form.requiredFields")}
         </p>
-        <h2 className="admin-page__section-title">Produtor</h2>
+        <h2 className="admin-page__section-title">{t("form.producerSectionTitle")}</h2>
 
         <IsolatedSelect
-          label="Confirme a identidade que pretende utilizar na publicação."
-          placeholder="Selecione o produtor..."
+          label={t("form.producerLabel")}
+          placeholder={t("form.producerPlaceholder")}
           id="producer-identity"
           onChangeRef={selectedProducerRef}
           defaultValue={selectedProducerValue}
@@ -143,85 +156,84 @@ export default function ReusesFormDetailsStep({
 
         {!hasOrganization && (
           <div className="admin-page__org-card">
-            <p className="admin-page__org-card-title">Não pertence a uma organização.</p>
+            <p className="admin-page__org-card-title">{t("form.noOrganizationTitle")}</p>
             <p className="admin-page__org-card-description">
-              Quando a reutilização for produzida no contexto de atividade profissional, é
-              recomendável que seja publicada em nome da organização responsável.
+              {t("form.noOrganizationDescription")}
             </p>
             <Link href="/admin/organizations/new" className="admin-page__org-card-link">
-              Crie ou integre uma organização em dados.gov.pt
+              {t("form.organizationLink")}
               <AppIcon name="agora-line-arrow-right-circle" className="h-24 w-24" />
             </Link>
           </div>
         )}
 
-        <h2 className="admin-page__section-title">Descrição</h2>
+        <h2 className="admin-page__section-title">{t("form.descriptionSectionTitle")}</h2>
 
         <div className="admin-page__fields-group">
           <InputText
-            label="Nome da reutilização *"
-            placeholder="Insira o nome aqui"
+            label={t("form.nameField")}
+            placeholder={t("form.namePlaceholder")}
             id="reuse-title"
             value={reuseName}
             onChange={onReuseNameChange}
             hasError={!!formErrors.reuseName}
             hasFeedback={!!formErrors.reuseName}
             feedbackState="danger"
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={t("form.fieldRequired")}
           />
           <InputText
-            label="Reutilização *"
-            placeholder="Insira o URL aqui (ex: https://...)"
+            label={t("form.linkField")}
+            placeholder={t("form.linkPlaceholder")}
             id="reuse-link"
             value={reuseLink}
             onChange={onReuseLinkChange}
             hasError={!!formErrors.reuseLink || reuseLinkInvalid}
             hasFeedback={!!formErrors.reuseLink || reuseLinkInvalid}
             feedbackState="danger"
-            errorFeedbackText={reuseLinkInvalid ? "URL inválido" : "Campo obrigatório"}
+            errorFeedbackText={reuseLinkInvalid ? t("form.linkInvalid") : t("form.fieldRequired")}
           />
           {reuseLinkInvalid && (
             <div className="mt-8">
               <StatusCard
                 variant="danger"
                 showIcon
-                description="O URL inserido é inválido. Por favor, insira um endereço válido (ex: https://exemplo.pt)."
+                description={t("form.linkInvalidDescription")}
               />
             </div>
           )}
           <IsolatedSelect
-            label="Tipo *"
-            placeholder="Selecione um tipo..."
+            label={t("form.typeField")}
+            placeholder={t("form.typePlaceholder")}
             id="reuse-type"
             searchable
-            searchInputPlaceholder="Escreva para pesquisar..."
-            searchNoResultsText="Nenhum resultado encontrado"
+            searchInputPlaceholder={t("form.noResults")}
+            searchNoResultsText={t("form.noResults")}
             onChangeRef={selectedReuseTypeRef}
             defaultValue={selectedReuseTypeValue}
             onChangeCallback={onReuseTypeChange}
             hasError={!!formErrors.reuseType}
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={t("form.fieldRequired")}
           >
             {typeOptions}
           </IsolatedSelect>
           <IsolatedSelect
-            label="Tema *"
-            placeholder="Selecione um tema..."
+            label={t("form.topicField")}
+            placeholder={t("form.topicPlaceholder")}
             id="reuse-theme"
             searchable
-            searchInputPlaceholder="Escreva para pesquisar..."
-            searchNoResultsText="Nenhum resultado encontrado"
+            searchInputPlaceholder={t("form.noResults")}
+            searchNoResultsText={t("form.noResults")}
             onChangeRef={selectedReuseTopicRef}
             defaultValue={selectedReuseTopicValue}
             onChangeCallback={onReuseTopicChange}
             hasError={!!formErrors.reuseTopic}
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={t("form.fieldRequired")}
           >
             {topicOptions}
           </IsolatedSelect>
           <InputTextArea
-            label="Descrição *"
-            placeholder="Insira a descrição aqui"
+            label={t("form.descriptionField")}
+            placeholder={t("form.descriptionPlaceholder")}
             id="reuse-description"
             rows={4}
             maxLength={3000}
@@ -231,7 +243,7 @@ export default function ReusesFormDetailsStep({
             hasError={!!formErrors.reuseDescription}
             hasFeedback={!!formErrors.reuseDescription}
             feedbackState="danger"
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={t("form.fieldRequired")}
           />
           <KeywordSelectField
             id="reuse-keywords"
@@ -249,12 +261,12 @@ export default function ReusesFormDetailsStep({
           />
 
           <ImageUploadField
-            label="Imagem de capa"
+            label={t("form.coverImageField")}
             files={reuseCoverImageFile ? [reuseCoverImageFile] : undefined}
             onChange={onReuseCoverImageChange}
             onSecurityError={onReuseCoverImageSecurityError}
-            dragAndDropLabel="Arraste e largue a imagem aqui"
-            inputLabel="Selecionar ficheiro"
+            dragAndDropLabel={t("form.coverDropLabel")}
+            inputLabel={t("form.coverInputLabel")}
           />
         </div>
 
@@ -268,7 +280,7 @@ export default function ReusesFormDetailsStep({
             leadingIconHover="agora-solid-arrow-left-circle"
             onClick={onPreviousStep}
           >
-            Anterior
+            {t("form.previous")}
           </Button>
           <Button
             type="submit"
@@ -278,7 +290,7 @@ export default function ReusesFormDetailsStep({
             trailingIconHover="agora-solid-arrow-right-circle"
             disabled={isSubmitting || reuseLinkInvalid}
           >
-            {isSubmitting ? "A criar..." : "Seguinte"}
+            {isSubmitting ? t("form.creating") : t("form.next")}
           </Button>
         </div>
       </form>

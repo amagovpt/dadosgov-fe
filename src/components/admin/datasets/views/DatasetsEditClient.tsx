@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Button,
@@ -15,19 +16,26 @@ import {
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { Dropdown } from "@/components/Primitives/Dropdown";
-
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { fetchActivity } from "@/service/api/activity";
-import { fetchDataset, fetchLicenses, fetchFrequencies, fetchResourceTypes, fetchGranularities, fetchSpatialZonesByIds } from "@/service/api/datasets";
+import {
+  fetchDataset,
+  fetchLicenses,
+  fetchFrequencies,
+  fetchResourceTypes,
+  fetchGranularities,
+  fetchSpatialZonesByIds,
+} from "@/service/api/datasets";
 import { fetchDiscussions } from "@/service/api/discussions-topics";
 import { suggestSpatialZones } from "@/service/api/search";
 import { requestTransfer } from "@/service/api/transfers";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
-import { License, Frequency, Granularity, SpatialZone, Activity, ResourceType } from "@/service/types/catalog";
-import { Dataset } from "@/service/types/dataset";
-import { Discussion } from "@/service/types/discussion";
+import type { License, Frequency, Granularity, SpatialZone, Activity, ResourceType } from "@/service/types/catalog";
+import type { Dataset } from "@/service/types/dataset";
+import type { Discussion } from "@/service/types/discussion";
 import DatasetsEditDeletePopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditDeletePopup";
+import DatasetsEditTransferPopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditTransferPopup";
 import DatasetsEditMetadataTab from "@/components/admin/datasets/edit-tabs/DatasetsEditMetadataTab";
 import DatasetsEditResourcesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditResourcesTab";
 import DatasetsEditDiscussionsTab from "@/components/admin/datasets/edit-tabs/DatasetsEditDiscussionsTab";
@@ -36,7 +44,6 @@ import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import TextLink from "@/components/Primitives/TextLink";
-
 import { translateActivityLabel } from "@/utils/activityLabels";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
@@ -44,11 +51,15 @@ import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { useDatasetLifecycleActions } from "@/components/admin/datasets/hooks/useDatasetLifecycleActions";
 import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/useDatasetMetadataActions";
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
-import {
-  type DatasetEditField,
-} from "@/components/admin/datasets/form-state/datasetEditFormModel";
+import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
-export default function DatasetsEditClient() {
+interface DatasetsEditClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function DatasetsEditClient({ pageContent }: DatasetsEditClientProps) {
+  const { t } = useTranslation("admin-datasets");
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
@@ -58,8 +69,6 @@ export default function DatasetsEditClient() {
 
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Form state
   const [title, setTitle] = useState("");
   const [acronym, setAcronym] = useState("");
   const [description, setDescription] = useState("");
@@ -69,13 +78,9 @@ export default function DatasetsEditClient() {
   const [temporalStart, setTemporalStart] = useState("");
   const [temporalEnd, setTemporalEnd] = useState("");
   const [featured, setFeatured] = useState(false);
-
-  // Refs for IsolatedSelect (avoid setState during render cycle)
   const keywordsRef = useRef("");
   const spatialCoverageRef = useRef("");
   const spatialGranularityRef = useRef("");
-
-  // API state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isUploadingRef = useRef(false);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -89,8 +94,6 @@ export default function DatasetsEditClient() {
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors<DatasetEditField>();
-
-  // Dropdown data
   const [licenses, setLicenses] = useState<License[]>([]);
   const [frequencies, setFrequencies] = useState<Frequency[]>([]);
   const [granularities, setGranularities] = useState<Granularity[]>([]);
@@ -98,8 +101,6 @@ export default function DatasetsEditClient() {
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
   const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
   const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
-
-  // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
   const [loadedTitle, setLoadedTitle] = useState("");
   const [loadedAcronym, setLoadedAcronym] = useState("");
   const [loadedLicense, setLoadedLicense] = useState("");
@@ -108,13 +109,10 @@ export default function DatasetsEditClient() {
   const [loadedSpatialGranularity, setLoadedSpatialGranularity] = useState("");
   const [loadedSpatialZones, setLoadedSpatialZones] = useState<string[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
-
-  // Activity data
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(false);
   const [discussionsLoaded, setDiscussionsLoaded] = useState(false);
   const [discussionsTotal, setDiscussionsTotal] = useState<number | null>(null);
-
   const [activities, setActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
   const [activitiesLoaded, setActivitiesLoaded] = useState(false);
@@ -157,7 +155,6 @@ export default function DatasetsEditClient() {
         if (ds.temporal_coverage) {
           const toDateOnly = (iso: string) => {
             if (!iso) return "";
-            // Keep PT-formatted values as-is (avoid JS mm/dd parsing ambiguity).
             if (/^\d{2}\/\d{2}\/\d{4}$/.test(iso)) return iso;
             const d = new Date(iso);
             if (isNaN(d.getTime())) return iso;
@@ -197,13 +194,13 @@ export default function DatasetsEditClient() {
           .catch(() => {});
       } catch (error) {
         console.error("Error loading dataset:", error);
-        setApiError("Erro ao carregar o conjunto de dados.");
+        setApiError(t("edit.loadError"));
       } finally {
         setIsLoading(false);
       }
     }
-    if (slug) loadData();
-  }, [slug]);
+    if (slug) void loadData();
+  }, [slug, t]);
 
   const loadDiscussions = () => {
     if (discussionsLoaded || !dataset) return;
@@ -230,7 +227,6 @@ export default function DatasetsEditClient() {
       .finally(() => setActivitiesLoading(false));
   };
 
-  // Memoized children for IsolatedSelect to prevent re-render cascades
   const licenseOptions = useMemo(() => {
     const options = licenses.map((license) => (
       <Dropdown.Option key={license.id} value={license.id} selected={license.id === loadedLicense}>
@@ -245,15 +241,15 @@ export default function DatasetsEditClient() {
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (
       <Dropdown.Option key={freq.id} value={freq.id} selected={freq.id === frequencyDefaultValue}>
-        {getFrequencyLabel(freq.id, freq.label)}
+        {getFrequencyLabel(freq.id, freq.label, (key, options) => t(`datasets:${key}`, options))}
       </Dropdown.Option>
     ));
     return <Dropdown.Section name="frequencies">{options}</Dropdown.Section>;
-  }, [frequencies, frequencyDefaultValue]);
+  }, [frequencies, frequencyDefaultValue, t]);
 
   const selectedKeywords = useMemo(
     () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
-    [loadedKeywords]
+    [loadedKeywords],
   );
   const { keywordOptions, setKeywordSearch, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords,
@@ -284,11 +280,8 @@ export default function DatasetsEditClient() {
     spatialCoverageRef.current = normalized;
     const ids = new Set(normalized.split(",").filter(Boolean));
     setSpatialZones((prev) => {
-      // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
-      const additions = spatialZoneSearchRef.current.filter(
-        (z) => ids.has(z.id) && !seen.has(z.id)
-      );
+      const additions = spatialZoneSearchRef.current.filter((z) => ids.has(z.id) && !seen.has(z.id));
       const kept = prev.filter((z) => ids.has(z.id));
       if (additions.length === 0 && kept.length === prev.length) return prev;
       return [...kept, ...additions];
@@ -315,7 +308,7 @@ export default function DatasetsEditClient() {
       options.push(
         <Dropdown.Option key="empty" value="">
           —
-        </Dropdown.Option>
+        </Dropdown.Option>,
       );
     }
     return <Dropdown.Section name="spatial-coverage">{options}</Dropdown.Section>;
@@ -328,19 +321,19 @@ export default function DatasetsEditClient() {
       </Dropdown.Option>,
       ...granularities.map((g) => (
         <Dropdown.Option key={g.id} value={g.id} selected={g.id === loadedSpatialGranularity}>
-          {getGranularityLabel(g.id, g.name)}
+          {getGranularityLabel(g.id, g.name, (key, options) => t(`datasets:${key}`, options))}
         </Dropdown.Option>
       )),
     ];
     return <Dropdown.Section name="spatial-granularity">{options}</Dropdown.Section>;
-  }, [granularities, loadedSpatialGranularity]);
+  }, [granularities, loadedSpatialGranularity, t]);
 
   const handleTitleChange = useCallback(
     (value: string) => {
       setTitle(value);
       if (value.trim()) clearError("title");
     },
-    [clearError]
+    [clearError],
   );
 
   const { handleSaveMetadata } = useDatasetMetadataActions({
@@ -387,7 +380,7 @@ export default function DatasetsEditClient() {
     });
 
   const handleTransferDataset = async (recipient: RecipientSelection, comment: string) => {
-    if (!dataset) throw new Error("Conjunto de dados não carregado.");
+    if (!dataset) throw new Error(t("edit.notFound"));
     setApiError(null);
     setApiSuccess(null);
     await requestTransfer({
@@ -396,12 +389,10 @@ export default function DatasetsEditClient() {
       comment: comment || undefined,
     });
     hide();
-    showApiSuccess(
-      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
-      15000,
-    );
+    showApiSuccess(t("edit.transferRequested", { recipient: recipient.label }), 15000);
   };
 
+  void handleTransferDataset;
 
   const { handleDeleteResource, handleFileUpload, handleResourceClick, handleResourceEdit } =
     useDatasetResourceActions({
@@ -422,7 +413,7 @@ export default function DatasetsEditClient() {
   if (isLoading) {
     return (
       <div className="admin-page">
-        <p className="text-neutral-600">A carregar...</p>
+        <p className="text-neutral-600">{t("edit.loading")}</p>
       </div>
     );
   }
@@ -430,9 +421,9 @@ export default function DatasetsEditClient() {
   if (!dataset) {
     return (
       <div className="admin-page">
-        <StatusCard variant="danger" showIcon description="Conjunto de dados não encontrado." />
+        <StatusCard variant="danger" showIcon description={t("edit.notFound")} />
         <Button variant="primary" onClick={() => router.push("/admin/me/datasets")}>
-          Voltar
+          {t("edit.back")}
         </Button>
       </div>
     );
@@ -464,27 +455,17 @@ export default function DatasetsEditClient() {
     return qualityCriteria.filter((key) => q[key] === true).length;
   })();
 
-  const formatDate = (dateStr: string) => {
-    try {
-      const d = new Date(dateStr);
-      return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "-";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
+  const statsCount =
+    (dataset.metrics?.views ?? 0) +
+    (dataset.metrics?.resources_downloads ?? 0) +
+    (dataset.metrics?.reuses ?? 0) +
+    (dataset.metrics?.followers ?? 0);
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Conjuntos de dados", url: "/admin/me/datasets" },
+        { label: t("edit.breadcrumbAdmin"), url: "/admin" },
+        { label: t("title"), url: "/admin/me/datasets" },
         { label: dataset.title },
       ]}
       title={dataset.title}
@@ -496,7 +477,7 @@ export default function DatasetsEditClient() {
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="h-16 w-16" />
-            Ver página pública
+            {t("edit.viewPublicPage")}
           </span>
         </Button>
       }
@@ -515,9 +496,9 @@ export default function DatasetsEditClient() {
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
           <Pill variant={dataset.private ? "warning" : "success"}>
-            {dataset.private ? "RASCUNHO" : "PÚBLICO"}
+            {dataset.private ? t("edit.statusDraft") : t("edit.statusPublic")}
           </Pill>
-          {dataset.featured && <Pill variant="informative">DESTAQUE</Pill>}
+          {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
           <span className="admin-edit-info__stat">
             <svg
               width="14"
@@ -532,11 +513,11 @@ export default function DatasetsEditClient() {
                 fill="#64718B"
               />
             </svg>
-            {`${(dataset.metrics?.views ?? 0) + (dataset.metrics?.resources_downloads ?? 0) + (dataset.metrics?.reuses ?? 0) + (dataset.metrics?.followers ?? 0)} estatísticas`}
+            {t("edit.statisticsCount", { count: statsCount })}
           </span>
           <span className="admin-edit-info__stat">
             <Icon name="agora-line-document" className="admin-edit-info__stat-icon" />
-            {`${metadataCount} metadados`}
+            {t("edit.metadataCount", { count: metadataCount })}
           </span>
           <span className="admin-edit-info__stat">
             <Icon name="agora-line-star" className="admin-edit-info__stat-icon" />
@@ -548,12 +529,12 @@ export default function DatasetsEditClient() {
           <Icon name="agora-line-clock" className="admin-edit-info__clock-icon" />
           {latestActivity ? (
             <>
-              {" Atividade mais recente: "}
+              {` ${t("edit.latestActivityPrefix")} `}
               <TextLink href={`/users/${latestActivity.actor.slug}`}>
                 {latestActivity.actor.first_name} {latestActivity.actor.last_name}
               </TextLink>
               {" — "}
-              {translateActivityLabel(latestActivity.label)}
+              {translateActivityLabel(latestActivity.label, t)}
               {" — "}
               <span>
                 {format(new Date(latestActivity.created_at), "d 'de' MMMM 'de' yyyy", {
@@ -563,15 +544,13 @@ export default function DatasetsEditClient() {
             </>
           ) : (
             <>
-              {" Atividade mais recente: "}
+              {` ${t("edit.latestActivityPrefix")} `}
               {dataset.owner && (
-                <>
-                  <TextLink href={`/users/${dataset.owner.slug}`}>
-                    {dataset.owner.first_name} {dataset.owner.last_name}
-                  </TextLink>
-                </>
+                <TextLink href={`/users/${dataset.owner.slug}`}>
+                  {dataset.owner.first_name} {dataset.owner.last_name}
+                </TextLink>
               )}
-              {" — editou o conjunto de dados — "}
+              {` — ${t("edit.latestActivityFallback")} — `}
               <span>
                 {format(new Date(dataset.last_modified), "d 'de' MMMM 'de' yyyy", {
                   locale: pt,
@@ -591,11 +570,16 @@ export default function DatasetsEditClient() {
             if (index === 3) loadActivities();
           }}
         >
-          {/* Metadata Tab */}
           <Tab>
-            <TabHeader>Metadados</TabHeader>
+            <TabHeader>{t("edit.tabs.metadata")}</TabHeader>
             <TabBody>
               <DatasetsEditMetadataTab
+                auxiliaryItems={pageContent.editAuxiliaryItems}
+                visibilityCard={pageContent.visibilityCard}
+                transferCard={pageContent.transferCard}
+                archiveCard={pageContent.archiveCard}
+                unarchiveCard={pageContent.unarchiveCard}
+                deleteCard={pageContent.deleteCard}
                 dataset={dataset}
                 featured={featured}
                 isSubmitting={isSubmitting}
@@ -608,7 +592,7 @@ export default function DatasetsEditClient() {
                 keywordOptions={keywordOptions}
                 loadedLicense={loadedLicense}
                 licenseOptions={licenseOptions}
-                loadedFrequency={frequencyDefaultValue}
+                loadedFrequency={loadedFrequency}
                 frequencyOptions={frequencyOptions}
                 temporalStart={temporalStart}
                 temporalEnd={temporalEnd}
@@ -672,6 +656,21 @@ export default function DatasetsEditClient() {
                   setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
                 }}
                 onSaveMetadata={handleSaveMetadata}
+                onOpenTransferPopup={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  show(
+                    <DatasetsEditTransferPopup
+                      datasetTitle={dataset.title}
+                      onConfirm={handleTransferDataset}
+                    />,
+                    {
+                      title: t("edit.transferTitle"),
+                      closeAriaLabel: t("edit.closeAriaLabel"),
+                      dimensions: "m",
+                    },
+                  );
+                }}
                 onToggleArchive={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -681,8 +680,8 @@ export default function DatasetsEditClient() {
                   e.preventDefault();
                   e.stopPropagation();
                   show(<DatasetsEditDeletePopup onClose={hide} onConfirm={handleDeleteDataset} />, {
-                    title: "Elimine o conjunto de dados",
-                    closeAriaLabel: "Fechar",
+                    title: t("edit.deleteModalTitle"),
+                    closeAriaLabel: t("edit.closeAriaLabel"),
                     dimensions: "m",
                   });
                 }}
@@ -690,9 +689,8 @@ export default function DatasetsEditClient() {
             </TabBody>
           </Tab>
 
-          {/* Resources Tab */}
           <Tab>
-            <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
+            <TabHeader>{`${t("edit.tabs.resources")} (${dataset.resources.length})`}</TabHeader>
             <TabBody>
               <DatasetsEditResourcesTab
                 dataset={dataset}
@@ -711,9 +709,8 @@ export default function DatasetsEditClient() {
             </TabBody>
           </Tab>
 
-          {/* Discussions Tab */}
           <Tab>
-            <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
+            <TabHeader>{`${t("edit.tabs.discussions")} (${discussionsTotal ?? 0})`}</TabHeader>
             <TabBody>
               <DatasetsEditDiscussionsTab
                 discussionsLoading={discussionsLoading}
@@ -723,15 +720,14 @@ export default function DatasetsEditClient() {
             </TabBody>
           </Tab>
 
-          {/* Activities Tab */}
           <Tab>
-            <TabHeader>Atividades</TabHeader>
+            <TabHeader>{t("edit.tabs.activities")}</TabHeader>
             <TabBody>
               <DatasetsEditActivitiesTab
                 activitiesLoading={activitiesLoading}
                 activitiesLoaded={activitiesLoaded}
                 activities={activities}
-                translateActivityLabel={translateActivityLabel}
+                translateActivityLabel={(label) => translateActivityLabel(label, t)}
               />
             </TabBody>
           </Tab>

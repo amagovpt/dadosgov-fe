@@ -1,53 +1,61 @@
 "use client";
 
-import { FAQ_DATA } from "../constants";
-import { slugify } from "../utils";
+import type { FaqCategory } from "@/service/types/support";
 
 interface SupportSidebarProps {
   activeItem: string;
-  onItemClick: (item: string) => void;
+  categories: FaqCategory[];
+  currentAnchorId: string;
+  currentLabel: string;
+  helpAnchorId: string;
+  helpLabel: string;
 }
 
-export function SupportSidebar({ activeItem, onItemClick }: SupportSidebarProps) {
+export function SupportSidebar({
+  activeItem,
+  categories,
+  currentAnchorId,
+  currentLabel,
+  helpAnchorId,
+  helpLabel,
+}: SupportSidebarProps) {
+  const enabledCategories = categories.filter((category) => category.enabled !== false);
+
   return (
     <div className="sidebar-index border-l border-neutral-700 pr-64">
       <ul>
-        <li className="mb-16 cursor-pointer" onClick={() => onItemClick("Nesta página")}>
+        <li className="mb-16 cursor-pointer">
           <a
-            href="#nesta-pagina"
-            className={`text-neutral-900 ${activeItem === "Nesta página" ? "text-m-bold font-bold" : "text-m-regular"}`}
-            style={activeItem === "Nesta página" ? { fontWeight: 700 } : {}}
+            href={`#${currentAnchorId}`}
+            className={`text-neutral-900 inline-block w-full ${activeItem === currentAnchorId ? "text-m-bold font-bold" : "text-m-regular"}`}
+            style={activeItem === currentAnchorId ? { fontWeight: 700 } : {}}
           >
-            Nesta página
+            {currentLabel}
           </a>
         </li>
 
-        {FAQ_DATA.map((category) => {
-          const slug = slugify(category.category);
+        {enabledCategories.map((category) => {
+          const slug = category.id;
           return (
-            <li
-              key={slug}
-              className="mb-8 cursor-pointer"
-              onClick={() => onItemClick(category.category)}
-            >
+            <li key={slug} className="mb-8 cursor-pointer">
               <a
                 href={`#${slug}`}
-                className={`text-neutral-900 ${activeItem === category.category ? "text-m-bold font-bold" : "text-m-regular"}`}
-                style={activeItem === category.category ? { fontWeight: 700 } : {}}
+                className={`text-neutral-900 inline-block w-full ${activeItem === slug ? "text-m-bold font-bold" : "text-m-regular"}`}
+                style={activeItem === slug ? { fontWeight: 700 } : {}}
               >
-                {category.category}
+                {category.title}
               </a>
             </li>
           );
         })}
 
-        <li className="cursor-pointer" onClick={() => onItemClick("Ajuda")}>
+        <li className="cursor-pointer">
           <a
-            href="#ajuda"
-            className={`text-neutral-900 ${activeItem === "Ajuda" ? "text-m-bold font-bold" : "text-m-regular"}`}
-            style={activeItem === "Ajuda" ? { fontWeight: 700 } : {}}
+            href={`#${helpAnchorId}`}
+            className={`text-neutral-900 inline-block w-full ${activeItem === helpAnchorId ? "text-m-bold font-bold" : "text-m-regular"}`}
+            style={activeItem === helpAnchorId ? { fontWeight: 700 } : {}}
           >
-            Ajuda
+            {helpLabel}
           </a>
         </li>
       </ul>

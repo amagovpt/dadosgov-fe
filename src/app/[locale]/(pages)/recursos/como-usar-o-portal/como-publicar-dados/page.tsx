@@ -1,49 +1,34 @@
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { getFaqs } from "@/service/queries/faqs/faqs";
 import { Metadata } from "next";
-import initTranslations from "@/app/i18n";
 import MarkDownRender from "@/components/Shared/MarkDownRender";
+import initTranslations from "@/app/i18n";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   {
-    //params,
+    params,
   }: {
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  try {
-    const { title } = await getFaqs("como-publicar-dados", "pt");
-    return { title };
-  } catch (error) {
-    // Fall back to the layout's default title rather than failing the whole
-    // page render when the CMS is unreachable.
-    console.error("Error fetching como-publicar-dados metadata:", error);
-    return {};
-  }
-}
-export default async function PublishFaqPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
   const { locale } = await params;
-  const { body } = await getFaqs("como-publicar-dados", "pt");
-  const { t } = await initTranslations({ locale, namespaces: ["common"], });
+  const { title } = await getFaqs("como-publicar-dados", locale);
 
-
+  return {
+    title,
+  };
+}
+export default async function PublishFaqPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { t } = await initTranslations({ locale, namespaces: ["common"] });
+  const { body } = await getFaqs("como-publicar-dados", locale);
 
   return (
     <main className="flex flex-col pt-32 pb-64 bg-white gap-64 justify-center items-center w-full h-full">
       <div className="container ">
-        <Breadcrumb items={[
-          { label: t("home"), url: "/" },
-          { label: t("recursos"), url: "/recursos" },
-          { label: t("como-usar-o-portal"), url: "/recursos/como-usar-o-portal" },
-          { label: "Como publicar dados", url: "/recursos/como-usar-o-portal/como-publicar-dados" },
-
-        ]} />
+        <BreadcrumbDynamic darkMode={false} />
       </div>
 
       <div className="bg-neutral-100 flex flex-col items-center justify-center py-64 w-full h-full">
@@ -55,7 +40,7 @@ export default async function PublishFaqPage({
               </div>
             ) : (
               <p className="text-m-regular leading-7 text-[#2b363c]">
-                Não foi possível carregar o conteúdo.
+                {t("contentLoadError")}
               </p>
             )}
           </div>
@@ -64,4 +49,3 @@ export default async function PublishFaqPage({
     </main>
   );
 }
-

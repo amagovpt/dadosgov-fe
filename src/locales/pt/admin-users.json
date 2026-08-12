@@ -1,0 +1,71 @@
+{
+  "title": "Utilizadores",
+  "breadcrumbs": {
+    "users": "Utilizadores"
+  },
+  "tabs": {
+    "profile": "Perfil",
+    "activities": "Atividades",
+    "subscriptions": "Subscrições",
+    "followings": "Acompanhamentos"
+  },
+  "deletePopup": {
+    "title": "Tem a certeza que quer eliminar este utilizador?",
+    "description": "Esta ação é irreversível."
+  },
+  "messages": {
+    "loading": "A carregar...",
+    "saveError": "Erro ao guardar o perfil. Tente novamente."
+  },
+  "profileTab": {
+    "sectionTitle": "EDITAR PERFIL",
+    "saveSuccess": "Perfil guardado com sucesso.",
+    "firstNameLabel": "Nome *",
+    "firstNamePlaceholder": "Insira o nome aqui",
+    "lastNameLabel": "Último nome *",
+    "lastNamePlaceholder": "Insira o último nome aqui",
+    "biographyLabel": "Biografia",
+    "biographyPlaceholder": "Insira a descrição aqui",
+    "roleLabel": "Perfil",
+    "roleAdmin": "Administrador",
+    "roleEditor": "Editor",
+    "websiteLabel": "Site da Internet",
+    "websitePlaceholder": "Insira o URL aqui",
+    "avatarLabel": "Foto de perfil",
+    "avatarUploaderLabel": "Ficheiros",
+    "avatarInputLabel": "Selecione ou arraste o ficheiro",
+    "avatarRemoveFileButtonLabel": "Remover ficheiro",
+    "avatarReplaceFileButtonLabel": "Substituir ficheiro",
+    "avatarExtensionsInstructions": "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
+    "emailLabel": "Endereço de e-mail",
+    "emailPlaceholder": "Insira o endereço de e-mail aqui",
+    "saveLoading": "A guardar..."
+  },
+  "headerCard": {
+    "memberSince": "Membro desde:",
+    "viewPublicProfile": "Ver perfil público"
+  },
+  "activities": {
+    "loading": "A carregar atividades...",
+    "previous": "Anterior",
+    "page": "Página {{page}} de {{total}}",
+    "next": "Seguinte"
+  },
+  "subscriptions": {
+    "loading": "A carregar subscrições..."
+  },
+  "list": {
+    "filterPlaceholder": "Filtrar por perfil",
+    "filterAll": "Todos",
+    "filterAdmin": "Admin",
+    "filterEditor": "Editor"
+  },
+  "columns": {
+    "name": "Nome",
+    "createdAt": "Criado em",
+    "datasets": "Conjuntos de dados",
+    "reuses": "Reutilizações",
+    "followers": "Seguidores",
+    "profile": "Perfis"
+  }
+}

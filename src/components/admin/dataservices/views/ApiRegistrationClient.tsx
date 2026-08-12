@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import { createDataservice, updateDataservice } from "@/service/api/dataservices";
 import { fetchDataset, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { searchDatasets } from "@/service/api/search";
-import { AUDIENCE_ROLES } from "@/utils/dataserviceLabels";
+import {
+  getAudienceConditions,
+  getAudienceRoles,
+  getRestrictionReasons,
+} from "@/utils/dataserviceLabels";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
@@ -19,20 +24,28 @@ import ApiRegistrationPublishStep from "@/components/admin/dataservices/registra
 import DataserviceProducerSection from "@/components/admin/dataservices/form-sections/DataserviceProducerSection";
 import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
 import DataserviceAccessSection from "@/components/admin/dataservices/form-sections/DataserviceAccessSection";
-import { getDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
-import DataserviceTermsSection from "../form-sections/DataserviceTermsSection";
+import DataserviceTermsSection from "@/components/admin/dataservices/form-sections/DataserviceTermsSection";
+import { getCreateDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
   onNextStep: () => void;
   onPreviousStep: () => void;
+  pageContent: BoDataservicesPage;
 }
 
 export default function ApiRegistrationClient({
   currentStep,
   onNextStep,
   onPreviousStep,
+  pageContent,
 }: ApiRegistrationClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+  const audienceRoles = useMemo(() => getAudienceRoles(t), [t]);
+  const audienceConditions = useMemo(() => getAudienceConditions(t), [t]);
+  const restrictionReasons = useMemo(() => getRestrictionReasons(t), [t]);
   const { user } = useAuth();
   const [accessType, setAccessType] = useState("open");
   const [producer, setProducer] = useState("");
@@ -54,8 +67,6 @@ export default function ApiRegistrationClient({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdDataservice, setCreatedDataservice] = useState<Dataservice | null>(null);
 
-  // Dataset linking (step 2) — mirrors the edit flow: preload the user's own +
-  // their orgs' datasets, search the whole portal, and allow adding by URL.
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
   const [dropdownDatasets, setDropdownDatasets] = useState<Dataset[]>([]);
   const [linkDatasets, setLinkDatasets] = useState<Dataset[]>([]);
@@ -70,8 +81,6 @@ export default function ApiRegistrationClient({
     "apiName" | "apiDescription"
   >();
 
-  // An API can only be published in the name of an organization carrying the
-  // "public-service" badge (LEDG-2190) — personal publishing is not offered.
   const eligibleOrgs = useMemo(
     () =>
       (user?.organizations || []).filter((org) =>
@@ -79,13 +88,59 @@ export default function ApiRegistrationClient({
       ),
     [user?.organizations],
   );
-  // Default to the first eligible organization when the user hasn't picked one.
   const effectiveProducer = producer || eligibleOrgs[0]?.id || "";
+
+  useEffect(() => {
+    const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const personal = fetchMyDatasets(1, 100);
+    const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
+
+    Promise.all([personal, ...orgs])
+      .then((results) => setMyDatasets(dedupe(results.flatMap((result) => result.data || []))))
+      .catch(() => {});
+  }, [user?.organizations]);
+
+  useEffect(() => {
+    const q = datasetSearch.trim();
+    if (q.length < 2) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const result = await searchDatasets(q, 1, 20);
+        setDatasetSearchResults(result.data || []);
+      } catch {
+        setDatasetSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [datasetSearch]);
+
+  const selectedDatasets = useMemo(() => {
+    const seen = new Set<string>();
+    return [...dropdownDatasets, ...linkDatasets].filter((dataset) => {
+      if (seen.has(dataset.id)) return false;
+      seen.add(dataset.id);
+      return true;
+    });
+  }, [dropdownDatasets, linkDatasets]);
+
+  const availableDatasets = useMemo(() => {
+    const combined: Dataset[] = [...dropdownDatasets, ...datasetSearchResults, ...myDatasets];
+    const seen = new Set<string>();
+    return combined.filter((dataset) => {
+      if (seen.has(dataset.id) || dataset.archived || dataset.deleted) return false;
+      seen.add(dataset.id);
+      return true;
+    });
+  }, [dropdownDatasets, datasetSearchResults, myDatasets]);
 
   async function handleStep1Next() {
     const errors: Partial<Record<"apiName" | "apiDescription", string>> = {};
-    if (!apiName.trim()) errors.apiName = "Indique o nome da API.";
-    if (!apiDescription.trim()) errors.apiDescription = "Descreva a API.";
+    if (!apiName.trim()) errors.apiName = t("admin-dataservices:form.validationErrors.name");
+    if (!apiDescription.trim()) {
+      errors.apiDescription = t("admin-dataservices:form.validationErrors.description");
+    }
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -94,10 +149,7 @@ export default function ApiRegistrationClient({
     }
 
     if (!effectiveProducer) {
-      setApiError(
-        "Só é possível publicar uma API em nome de uma organização com o emblema " +
-          "'Serviço público'.",
-      );
+      setApiError(t("admin-dataservices:form.publicServiceRequiredError"));
       return;
     }
 
@@ -107,9 +159,9 @@ export default function ApiRegistrationClient({
 
     const isRestricted = accessType === "restricted";
     const audiences = isRestricted
-      ? AUDIENCE_ROLES.filter((r) => accessAudiences[r.role]).map((r) => ({
-          role: r.role,
-          condition: accessAudiences[r.role],
+      ? audienceRoles.filter((role) => accessAudiences[role.role]).map((role) => ({
+          role: role.role,
+          condition: accessAudiences[role.role],
         }))
       : undefined;
     const usesOtherReason = reasonCategory === "other";
@@ -140,68 +192,21 @@ export default function ApiRegistrationClient({
       setCreatedDataservice(dataservice);
       onNextStep();
     } catch (error: unknown) {
-      setApiError(normalizeApiError(error, "Erro ao criar a API. Tente novamente.").message);
+      setApiError(normalizeApiError(error, t("admin-dataservices:form.createError")).message);
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  // Preload the dataset pool (user's own + their organizations' datasets).
-  useEffect(() => {
-    const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
-    const personal = fetchMyDatasets(1, 100);
-    const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
-    Promise.all([personal, ...orgs])
-      .then((results) => setMyDatasets(dedupe(results.flatMap((r) => r.data || []))))
-      .catch(() => {});
-  }, [user?.organizations]);
-
-  // Search datasets across the whole portal when the user types (debounced).
-  useEffect(() => {
-    const q = datasetSearch.trim();
-    if (q.length < 2) return;
-    const timer = setTimeout(async () => {
-      try {
-        const res = await searchDatasets(q, 1, 20);
-        setDatasetSearchResults(res.data || []);
-      } catch {
-        setDatasetSearchResults([]);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [datasetSearch]);
-
-  // Deduped union of both buckets — the persisted/displayed selection.
-  const selectedDatasets = useMemo(() => {
-    const seen = new Set<string>();
-    return [...dropdownDatasets, ...linkDatasets].filter((d) => {
-      if (seen.has(d.id)) return false;
-      seen.add(d.id);
-      return true;
-    });
-  }, [dropdownDatasets, linkDatasets]);
-
-  // Options offered by the search multi-select (excludes archived/deleted).
-  const availableDatasets = (() => {
-    const combined: Dataset[] = [...dropdownDatasets, ...datasetSearchResults, ...myDatasets];
-    const seen = new Set<string>();
-    return combined.filter((d) => {
-      if (seen.has(d.id) || d.archived || d.deleted) return false;
-      seen.add(d.id);
-      return true;
-    });
-  })();
-
   function handleDropdownChange(ids: string[]) {
-    setDropdownDatasets(availableDatasets.filter((d) => ids.includes(d.id)));
+    setDropdownDatasets(availableDatasets.filter((dataset) => ids.includes(dataset.id)));
   }
 
   function removeDataset(id: string) {
-    setDropdownDatasets((prev) => prev.filter((d) => d.id !== id));
-    setLinkDatasets((prev) => prev.filter((d) => d.id !== id));
+    setDropdownDatasets((previous) => previous.filter((dataset) => dataset.id !== id));
+    setLinkDatasets((previous) => previous.filter((dataset) => dataset.id !== id));
   }
 
-  // Resolve a pasted dados.gov.pt dataset URL to a portal dataset and add it.
   async function handleAddDatasetLink() {
     const raw = datasetLinkUrl.trim();
     if (!raw) return;
@@ -214,34 +219,34 @@ export default function ApiRegistrationClient({
     } catch {
       slug = raw.split("/").filter(Boolean).pop() || "";
     }
+
     if (!slug) {
-      setDatasetLinkError("URL inválido. Cole o link de um conjunto de dados deste portal.");
+      setDatasetLinkError(t("admin-dataservices:edit.invalidDatasetUrl"));
       return;
     }
 
     setIsResolvingLink(true);
     try {
       const dataset = await fetchDataset(slug);
-      if (selectedDatasets.some((d) => d.id === dataset.id)) {
-        setDatasetLinkError("Este conjunto de dados já foi adicionado.");
+      if (selectedDatasets.some((selectedDataset) => selectedDataset.id === dataset.id)) {
+        setDatasetLinkError(t("admin-dataservices:edit.datasetAlreadyAdded"));
         return;
       }
-      setLinkDatasets((prev) => [...prev, dataset]);
+      setLinkDatasets((previous) => [...previous, dataset]);
       setDatasetLinkUrl("");
     } catch {
-      setDatasetLinkError("Conjunto de dados não encontrado neste portal.");
+      setDatasetLinkError(t("admin-dataservices:edit.datasetNotFound"));
     } finally {
       setIsResolvingLink(false);
     }
   }
 
-  // Attach the selected datasets to the created dataservice before advancing.
   async function handleStep2Next() {
     if (createdDataservice && selectedDatasets.length > 0) {
       setIsLinkingDatasets(true);
       try {
         await updateDataservice(createdDataservice.id, {
-          datasets: selectedDatasets.map((d) => d.id),
+          datasets: selectedDatasets.map((dataset) => dataset.id),
         });
       } catch (error) {
         console.error("Error linking datasets to dataservice:", error);
@@ -252,9 +257,6 @@ export default function ApiRegistrationClient({
     onNextStep();
   }
 
-  // Step 3: the API was created as a draft (private: true) in step 1. Publishing
-  // flips it public and redirects to the API's public page; saving keeps it as a
-  // draft and returns to the list.
   async function handlePublish() {
     if (!createdDataservice) return;
     setIsPublishing(true);
@@ -263,20 +265,19 @@ export default function ApiRegistrationClient({
       await updateDataservice(createdDataservice.id, { private: false });
       window.location.href = createdDataservice.slug
         ? `/dataservices/${createdDataservice.slug}`
-        : "/admin/me/dataservices";
+        : "/admin/dataservices";
     } catch {
-      setApiError("Erro ao publicar a API. Tente novamente.");
+      setApiError(t("admin-dataservices:edit.publishError"));
       setIsPublishing(false);
     }
   }
 
   function handleSaveDraft() {
-    window.location.href = "/admin/me/dataservices";
+    window.location.href = "/admin/dataservices";
   }
 
-  const auxiliaryItems = getDataserviceAuxiliaryItems({
-    hasApiNameError: hasError("apiName"),
-    hasApiDescriptionError: hasError("apiDescription"),
+  const auxiliaryItems = getCreateDataserviceAuxiliaryItems({
+    items: pageContent.createAuxiliaryItems,
   });
 
   return (
@@ -284,20 +285,19 @@ export default function ApiRegistrationClient({
       <div className="admin-page__form-area">
         {currentStep === 1 && (
           <>
-            <StatusCard
-              variant="informative"
-              showIcon
-              description={
-                <>
-                  <strong>O que é uma API?</strong>
-                  <br />
-                  Uma API (Application Programming Interface) é uma ferramenta/solução informática
-                  que permite o acesso automático e estruturado entre sistemas, ou seja, funciona
-                  como uma ponte ou um tradutor que permite que dois aplicativos diferentes
-                  comuniquem entre si.
-                </>
-              }
-            />
+            {pageContent.introduction ? (
+              <StatusCard
+                variant="informative"
+                showIcon
+                description={
+                  <>
+                    <strong>{pageContent.introduction.title}</strong>
+                    <br />
+                    {formatHtmlParagraphs(pageContent.introduction.description)}
+                  </>
+                }
+              />
+            ) : null}
 
             {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
@@ -310,7 +310,7 @@ export default function ApiRegistrationClient({
               }}
             >
               <p className="pt-32 text-base leading-7 text-neutral-900">
-                Os campos marcados com um asterisco ( * ) são obrigatórios.
+                {t("admin-dataservices:form.requiredFields")}
               </p>
 
               <DataserviceProducerSection
@@ -318,6 +318,7 @@ export default function ApiRegistrationClient({
                   id: organization.id,
                   name: organization.name,
                 }))}
+                helper={pageContent.producerHelper}
                 initialValue={effectiveProducer}
                 onValueChange={setProducer}
               />
@@ -332,18 +333,15 @@ export default function ApiRegistrationClient({
                 availability={availability}
                 hasApiNameError={hasError("apiName")}
                 hasApiDescriptionError={hasError("apiDescription")}
+                showRateLimiting={false}
                 onApiNameChange={(event) => {
                   setApiName(event.target.value);
-                  if (event.target.value.trim()) {
-                    clearError("apiName");
-                  }
+                  if (event.target.value.trim()) clearError("apiName");
                 }}
                 onApiAcronymChange={(event) => setApiAcronym(event.target.value)}
                 onApiDescriptionChange={(event) => {
                   setApiDescription(event.target.value);
-                  if (event.target.value.trim()) {
-                    clearError("apiDescription");
-                  }
+                  if (event.target.value.trim()) clearError("apiDescription");
                 }}
                 onBaseApiUrlChange={(event) => setBaseApiUrl(event.target.value)}
                 onMachineDocUrlChange={(event) => setMachineDocUrl(event.target.value)}
@@ -355,12 +353,16 @@ export default function ApiRegistrationClient({
                 accessType={accessType}
                 authRequestUrl={authRequestUrl}
                 businessDocUrl={businessDocUrl}
+                accountAccessValue="open_with_account"
                 accessAudiences={accessAudiences}
+                audienceRoles={audienceRoles}
+                audienceConditions={audienceConditions}
                 reasonCategory={reasonCategory}
+                restrictionReasons={restrictionReasons}
                 reasonText={reasonText}
                 onAccessTypeChange={setAccessType}
                 onAudienceChange={(role, value) =>
-                  setAccessAudiences((prev) => ({ ...prev, [role]: value }))
+                  setAccessAudiences((previous) => ({ ...previous, [role]: value }))
                 }
                 onReasonCategoryChange={setReasonCategory}
                 onReasonTextChange={(event) => setReasonText(event.target.value)}
@@ -377,7 +379,9 @@ export default function ApiRegistrationClient({
 
               <AdminStepActions
                 primaryAction={{
-                  label: isSubmitting ? "A criar..." : "Seguinte",
+                  label: isSubmitting
+                    ? t("admin-dataservices:form.creating")
+                    : t("admin-dataservices:form.next"),
                   type: "submit",
                   hasIcon: true,
                   trailingIcon: "agora-line-arrow-right-circle",
@@ -408,6 +412,7 @@ export default function ApiRegistrationClient({
             onAddDatasetLink={handleAddDatasetLink}
             onPreviousStep={onPreviousStep}
             onNextStep={handleStep2Next}
+            datasetLinksInfo={pageContent.datasetLinksInfo}
           />
         )}
 
@@ -416,6 +421,7 @@ export default function ApiRegistrationClient({
             createdDataservice={createdDataservice}
             apiName={apiName}
             apiDescription={apiDescription}
+            createdCard={pageContent.createdCard}
             apiError={apiError}
             isPublishing={isPublishing}
             onPublish={handlePublish}
@@ -424,7 +430,9 @@ export default function ApiRegistrationClient({
         )}
       </div>
 
-      {currentStep === 1 && <AdminAuxiliarySidebar items={auxiliaryItems} />}
+      {currentStep === 1 && auxiliaryItems.length > 0 ? (
+        <AdminAuxiliarySidebar items={auxiliaryItems} />
+      ) : null}
     </div>
   );
 }

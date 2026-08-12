@@ -1,0 +1,143 @@
+{
+  "title": "Perfil",
+  "breadcrumbs": {
+    "profile": "Perfil"
+  },
+  "tabs": {
+    "profile": "Perfil",
+    "subscriptions": "Subscrições",
+    "followings": "Acompanhamentos",
+    "activities": "Atividades"
+  },
+  "messages": {
+    "saveError": "Erro ao guardar o perfil. Tente novamente.",
+    "generateApiKeyError": "Erro ao gerar a chave da API. Tente novamente.",
+    "revokeApiKeyError": "Erro ao revogar a chave da API. Tente novamente.",
+    "deleteAvatarError": "Erro ao eliminar a foto de perfil. Tente novamente.",
+    "uploadAvatarError": "Erro ao carregar a foto de perfil. Tente novamente.",
+    "emailChangeError": "Erro ao solicitar a alteração de e-mail. Verifique o endereço e tente novamente.",
+    "avatarMaxSize": "O ficheiro excede o tamanho máximo de 4 MB."
+  },
+  "header": {
+    "memberSince": "Membro desde:",
+    "viewPublicProfile": "Ver perfil público"
+  },
+  "form": {
+    "sectionTitle": "EDITAR PERFIL",
+    "saveSuccess": "Perfil guardado com sucesso.",
+    "firstNameLabel": "Nome *",
+    "firstNamePlaceholder": "Insira o nome aqui",
+    "lastNameLabel": "Último nome *",
+    "lastNamePlaceholder": "Insira o apelido aqui",
+    "biographyLabel": "Biografia",
+    "biographyPlaceholder": "Insira a descrição aqui",
+    "websiteLabel": "Site da Internet",
+    "websitePlaceholder": "Insira o URL aqui",
+    "passwordLabel": "Senha",
+    "changePasswordButton": "Alterar senha",
+    "changePasswordTitle": "Altere a sua senha",
+    "deleteAvatarTitle": "Eliminar foto de perfil",
+    "deleteAvatarLoading": "A eliminar..."
+  },
+  "avatar": {
+    "label": "Foto de perfil",
+    "filesLabel": "Ficheiros",
+    "dragAndDropLabel": "Arraste e largue o ficheiro aqui",
+    "inputLabel": "Selecione ou arraste o ficheiro",
+    "selectedFilesLabel": "ficheiro selecionado",
+    "removeFileButtonLabel": "Remover ficheiro",
+    "replaceFileButtonLabel": "Substituir ficheiro",
+    "extensionsInstructions": "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
+    "maxSizeExceededErrorLabel": "O ficheiro excede o tamanho máximo de 4 MB.",
+    "forbiddenExtensionErrorLabel": "Formato de ficheiro não permitido."
+  },
+  "apiKeys": {
+    "title": "Chaves da API",
+    "description": "Gere uma chave para autenticar pedidos à API. Por motivos de segurança, a chave completa só é apresentada uma vez no momento da criação — guarde-a num local seguro.",
+    "newKeyNameLabel": "Nome da nova chave (opcional)",
+    "newKeyNamePlaceholder": "Ex.: Script backup, Integração X...",
+    "generate": "Gerar nova chave",
+    "generating": "A gerar...",
+    "copyNowTitle": "Copie esta chave agora.",
+    "copyNowDescription": "Não voltará a ser apresentada.",
+    "copied": "Copiado",
+    "copy": "Copiar",
+    "activeKeys": "Chaves ativas ({{count}})",
+    "createdAt": "Criada em {{date}}",
+    "lastUsed": "último uso {{value}}",
+    "neverUsed": "nunca utilizada",
+    "revoke": "Revogar",
+    "revoking": "A revogar...",
+    "empty": "Ainda não tem chaves de API geradas."
+  },
+  "email": {
+    "success": "E-mail de confirmação enviado para {{email}}. Verifique a sua caixa de entrada e clique no link para concluir.",
+    "newEmailLabel": "Novo endereço de e-mail",
+    "newEmailPlaceholder": "Insira o novo e-mail aqui",
+    "emailLabel": "Endereço de e-mail",
+    "emailPlaceholder": "Insira o e-mail aqui",
+    "changeButton": "Alterar e-mail",
+    "pendingConfirmation": "Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é {{email}}.",
+    "confirm": "Confirmar",
+    "sending": "A enviar..."
+  },
+  "changePassword": {
+    "requiredField": "Campo obrigatório",
+    "passwordMismatch": "As senhas não coincidem",
+    "error": "Erro ao alterar a senha. Verifique os dados e tente novamente.",
+    "success": "Senha alterada com sucesso.",
+    "currentPasswordLabel": "Senha atual *",
+    "newPasswordLabel": "Nova senha *",
+    "confirmPasswordLabel": "Confirme a nova senha *",
+    "submitting": "A alterar...",
+    "submit": "Altere a sua senha"
+  },
+  "deleteAvatarPopup": {
+    "description": "Tem a certeza que deseja eliminar a foto de perfil?"
+  },
+  "subscriptions": {
+    "loading": "A carregar subscrições...",
+    "emptyTitle": "Sem subscrições",
+    "emptyDescription": "Não segue conteúdos"
+  },
+  "activities": {
+    "loading": "A carregar...",
+    "emptyTitle": "Sem atividades",
+    "emptyDescription": "Nenhuma atividade registada.",
+    "count": "{{count}} ATIVIDADES",
+    "user": "Utilizador",
+    "action": "Ação",
+    "date": "Data"
+  },
+  "organization": {
+    "organizationFallback": "Organização",
+    "deletePopupTitle": "Tem a certeza que quer eliminar esta organização?",
+    "deleteError": "Ocorreu um erro ao eliminar a organização. Por favor, tente novamente.",
+    "logoMaxSize": "O ficheiro excede o tamanho máximo de 500 KB.",
+    "logoUploadError": "Erro ao carregar o logotipo. Por favor, tente novamente.",
+    "deletePopupDescription": "Esta ação é irreversível.",
+    "header": {
+      "members": "{{count}} membros",
+      "datasets": "{{count}} conjuntos de dados",
+      "reuses": "{{count}} reutilizações"
+    },
+    "form": {
+      "sectionTitle": "EDITAR ORGANIZAÇÃO",
+      "saveSuccess": "Perfil da organização atualizado com sucesso.",
+      "saveError": "Ocorreu um erro ao guardar. Por favor, tente novamente.",
+      "nameLabel": "Nome *",
+      "namePlaceholder": "Insira o nome aqui",
+      "acronymLabel": "Sigla",
+      "acronymPlaceholder": "Insira a sigla aqui",
+      "descriptionLabel": "Descrição *",
+      "descriptionPlaceholder": "Insira a descrição aqui",
+      "websiteLabel": "Website",
+      "websitePlaceholder": "Insira o URL aqui",
+      "badges": "Emblemas",
+      "logoLabel": "Logotipo",
+      "logoUploaderLabel": "Ficheiro",
+      "logoExtensions": "Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG.",
+      "logoMaxSizeExceeded": "O ficheiro excede o tamanho máximo de 500 KB."
+    }
+  }
+}

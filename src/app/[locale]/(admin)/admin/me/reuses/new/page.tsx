@@ -1,12 +1,29 @@
 import type { Metadata } from "next";
 import ReusesNewClient from "@/components/admin/reuses/views/ReusesNewClient";
+import { getBoReuses, getBoReusesMetadata } from "@/service/queries/admin/reuses";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-export const metadata: Metadata = {
-  title: "Descreva a sua reutilização - Admin - dados.gov.pt",
-  description:
-    "Formulário de inscrição para novas reutilizações no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoReusesMetadata(locale);
 
-export default function ReusesNewPage() {
-  return <ReusesNewClient />;
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
+
+export default async function ReusesNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoReuses(locale);
+
+  return <ReusesNewClient pageContent={pageContent} />;
 }

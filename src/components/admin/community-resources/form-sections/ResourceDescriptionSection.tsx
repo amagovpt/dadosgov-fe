@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import ResourceDescriptionFields from "@/components/admin/community-resources/form-sections/ResourceDescriptionFields";
 
 interface ResourceDescriptionSectionProps {
@@ -29,9 +30,13 @@ export default function ResourceDescriptionSection({
   onDescriptionChange,
   onTypeChange,
 }: ResourceDescriptionSectionProps) {
+  const { t } = useTranslation("admin-community-resources");
+
   return (
     <>
-      <h2 className="admin-page__section-title">Descrição</h2>
+      <h2 className="admin-page__section-title">
+        {t("form.descriptionSectionTitle")}
+      </h2>
 
       <div className="admin-page__fields-group">
         <ResourceDescriptionFields

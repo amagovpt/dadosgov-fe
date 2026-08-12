@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
 import SystemTopicsClient from "@/components/admin/topics/SystemTopicsClient";
+import { getBoTopics, getBoTopicsMetadata } from "@/service/queries/admin/topics";
 
-export const metadata: Metadata = {
-  title: "Temas - Sistema - Admin - dados.gov.pt",
-  description: "Gestão de temas do sistema no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoTopicsMetadata(locale);
 
-export default function SystemTopicsPage() {
-  return <SystemTopicsClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function SystemTopicsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoTopics(locale);
+
+  return <SystemTopicsClient pageContent={pageContent} />;
 }

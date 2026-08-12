@@ -4,12 +4,18 @@ import TextLink from "@/components/Primitives/TextLink";
 import TableActionsCell from "@/components/admin/TableActionsCell";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
 import type { CommunityResource } from "@/service/types/community-resource";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 
-export type CommunityResourceSortField = "title" | "format" | "created_at" | "last_modified";
-export type OrgCommunityResourceSortField = "title" | "created_at" | "last_modified";
+export type CommunityResourceSortField =
+  | "title"
+  | "status"
+  | "format"
+  | "created_at"
+  | "last_modified";
+export type OrgCommunityResourceSortField = "title" | "status" | "created_at" | "last_modified";
 
 export function sortCommunityResources<T extends CommunityResource>(
   items: T[],
@@ -23,6 +29,9 @@ export function sortCommunityResources<T extends CommunityResource>(
     switch (sortField) {
       case "title":
         comparison = (a.title || "").localeCompare(b.title || "");
+        break;
+      case "status":
+        comparison = getResourceStatusSortValue(a) - getResourceStatusSortValue(b);
         break;
       case "format":
         comparison = (a.format || "").localeCompare(b.format || "");
@@ -47,7 +56,22 @@ interface CommunityResourceColumnsOptions {
   showDatasetLink?: boolean;
   useSystemStatusDot?: boolean;
   showOwnerOnLastModified?: boolean;
+  labels: CommunityResourceColumnLabels;
   editHref: (resource: CommunityResource) => string;
+}
+
+interface CommunityResourceColumnLabels {
+  title: string;
+  status: string;
+  format: string;
+  createdAt: string;
+  modifiedAt: string;
+  lastModified: string;
+  action: string;
+  actions: string;
+  deleted: string;
+  archived: string;
+  published: string;
 }
 
 type CommunityResourceColumnField<TIncludeFormat extends boolean> = TIncludeFormat extends true
@@ -61,11 +85,12 @@ type CommunityResourceColumnsOptionsByFormat<TIncludeFormat extends boolean> =
 
 export function createCommunityResourceColumns<TIncludeFormat extends boolean = false>({
   includeFormat = false as TIncludeFormat,
-  titleHeader = "Título",
+  titleHeader,
   titleCellStyle = "neutral",
   showDatasetLink = false,
   useSystemStatusDot = false,
   showOwnerOnLastModified = false,
+  labels,
   editHref,
 }: CommunityResourceColumnsOptionsByFormat<TIncludeFormat>): AdminListColumn<
   CommunityResource,
@@ -77,8 +102,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
   >[] = [
     {
       id: "title",
-      header: titleHeader,
-      headerLabel: "Título",
+      header: titleHeader ?? labels.title,
+      headerLabel: labels.title,
       sortField: "title" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) => (
@@ -100,13 +125,19 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
+      sortField: "status" as CommunityResourceColumnField<TIncludeFormat>,
+      sortType: "string",
       renderCell: (resource) =>
         useSystemStatusDot ? (
           <StatusDot
             variant={resource.deleted ? "danger" : resource.archived ? "warning" : "success"}
           >
-            {resource.deleted ? "Eliminado" : resource.archived ? "Arquivado" : "Publicado"}
+            {resource.deleted
+              ? labels.deleted
+              : resource.archived
+                ? labels.archived
+                : labels.published}
           </StatusDot>
         ) : (
           <ResourceStatusBadge item={resource} />
@@ -117,8 +148,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
   if (includeFormat) {
     columns.push({
       id: "format",
-      header: "Formato",
-      headerLabel: "Formato",
+      header: labels.format,
+      headerLabel: labels.format,
       sortField: "format" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) =>
@@ -129,16 +160,16 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
   columns.push(
     {
       id: "created_at",
-      header: "Criado em",
-      headerLabel: "Criado em",
+      header: labels.createdAt,
+      headerLabel: labels.createdAt,
       sortField: "created_at" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) => formatDateToDMY(resource.created_at),
     },
     {
       id: "last_modified",
-      header: useSystemStatusDot ? "Modificado em" : "Última modificação",
-      headerLabel: useSystemStatusDot ? "Modificado em" : "Última modificação",
+      header: useSystemStatusDot ? labels.modifiedAt : labels.lastModified,
+      headerLabel: useSystemStatusDot ? labels.modifiedAt : labels.lastModified,
       sortField: "last_modified" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) =>
@@ -160,8 +191,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
     },
     {
       id: "actions",
-      header: useSystemStatusDot ? "Ação" : "Ações",
-      headerLabel: useSystemStatusDot ? "Ação" : "Ações",
+      header: useSystemStatusDot ? labels.action : labels.actions,
+      headerLabel: useSystemStatusDot ? labels.action : labels.actions,
       renderCell: (resource) => (
         <TableActionsCell
           editAction={can(resource, "edit") ? { href: editHref(resource) } : undefined}

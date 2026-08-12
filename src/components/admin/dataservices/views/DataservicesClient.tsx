@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -8,12 +9,23 @@ import { fetchMyDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
-import { createDataserviceColumns, DataserviceSortField, sortDataservices } from "../config/dataservicesListConfig";
+import {
+  createDataserviceColumns,
+  DataserviceSortField,
+  sortDataservices,
+} from "../config/dataservicesListConfig";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
-export default function DataservicesClient() {
+interface DataservicesClientProps {
+  pageContent: BoDataservicesPage;
+}
+
+export default function DataservicesClient({ pageContent }: DataservicesClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const { displayName } = useCurrentUser();
 
   const [apis, setApis] = useState<Dataservice[]>([]);
@@ -42,8 +54,20 @@ export default function DataservicesClient() {
     [sortedApis, currentPage, pageSize]
   );
   const columns = useMemo(
-    () => createDataserviceColumns(),
-    []
+    () =>
+      createDataserviceColumns({
+        ownerMetaStyle: "dot",
+        labels: {
+          title: t("admin-dataservices:columns.title"),
+          titleShort: t("admin-dataservices:columns.titleShort"),
+          status: t("admin-dataservices:columns.status"),
+          createdAt: t("admin-dataservices:columns.createdAt"),
+          modifiedAt: t("admin-dataservices:columns.modifiedAt"),
+          by: t("admin-dataservices:columns.by"),
+          about: t("admin-dataservices:columns.about"),
+        },
+      }),
+    [t]
   );
 
   useEffect(() => {
@@ -63,12 +87,12 @@ export default function DataservicesClient() {
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: "API", url: "/admin/dataservices" },
-      ]}
-      title="API"
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-dataservices:title"),
+      })}
+      title={t("admin-dataservices:title")}
       isLoading={isLoading}
       count={filteredApis.length}
       currentPage={currentPage}
@@ -76,8 +100,9 @@ export default function DataservicesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome da API",
-        ariaLabel: "Pesquisar APIs",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -88,7 +113,12 @@ export default function DataservicesClient() {
           }}
         />
       }
-      emptyState={<AdminEmptyState icon="agora-line-edit" createUrl="/admin/dataservices/new" />}
+      emptyState={
+        <AdminEmptyState
+          noResults={pageContent.myNoResults}
+          createUrl="/admin/dataservices/new"
+        />
+      }
     >
       <AdminListTable
         items={paginatedApis}

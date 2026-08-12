@@ -1,16 +1,19 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
-  StatusCard,
-  InputSelect,
-  DropdownSection,
-  DropdownOption,
-  Tag,
-  InputText,
   Button,
+  DropdownOption,
+  DropdownSection,
+  InputSelect,
+  InputText,
+  StatusCard,
+  Tag,
 } from "@ama-pt/agora-design-system";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { Dataset } from "@/service/types/dataset";
 
 interface ApiRegistrationDatasetsStepProps {
@@ -28,6 +31,7 @@ interface ApiRegistrationDatasetsStepProps {
   onAddDatasetLink: () => void;
   onPreviousStep: () => void;
   onNextStep: () => void;
+  datasetLinksInfo?: AdminHelpBlock;
 }
 
 export default function ApiRegistrationDatasetsStep({
@@ -45,14 +49,29 @@ export default function ApiRegistrationDatasetsStep({
   onAddDatasetLink,
   onPreviousStep,
   onNextStep,
+  datasetLinksInfo,
 }: ApiRegistrationDatasetsStepProps) {
+  const { t } = useTranslation("admin-dataservices");
+
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
-      />
+      {datasetLinksInfo ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            datasetLinksInfo.title ? (
+              <>
+                <strong>{datasetLinksInfo.title}</strong>
+                <br />
+                {formatHtmlParagraphs(datasetLinksInfo.description)}
+              </>
+            ) : (
+              formatHtmlParagraphs(datasetLinksInfo.description)
+            )
+          }
+        />
+      ) : null}
 
       <form
         className="admin-page__form"
@@ -63,13 +82,13 @@ export default function ApiRegistrationDatasetsStep({
         }}
       >
         <InputSelect
-          label="Pesquisar um conjunto de dados"
-          placeholder="Selecione conjuntos de dados..."
+          label={t("datasetLinks.searchLabel")}
+          placeholder={t("edit.datasetSelectPlaceholder")}
           id="api-registration-datasets"
           type="checkbox"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("edit.datasetSearchPlaceholder")}
+          searchNoResultsText={t("edit.noDatasetResults")}
           onSearchInputChange={onSearchInputChange}
           onChange={(options) => onDropdownChange(options.map((o) => String(o.value)))}
         >
@@ -91,7 +110,7 @@ export default function ApiRegistrationDatasetsStep({
             {selectedDatasets.map((dataset) => (
               <Tag
                 key={dataset.id}
-                aria-label={`Remover ${dataset.title}`}
+                aria-label={t("edit.removeDataset", { title: dataset.title })}
                 onClick={() => onRemoveDataset(dataset.id)}
               >
                 {dataset.title}
@@ -101,12 +120,12 @@ export default function ApiRegistrationDatasetsStep({
         )}
 
         <div className="admin-page__divider-or">
-          <span className="admin-page__divider-or-text">ou</span>
+          <span className="admin-page__divider-or-text">{t("edit.or")}</span>
         </div>
 
         <div className="flex flex-col gap-8">
           <InputText
-            label="Link para o conjunto de dados"
+            label={t("datasetLinks.linkLabel")}
             placeholder="https://..."
             id="api-registration-dataset-link-url"
             required={false}
@@ -136,20 +155,20 @@ export default function ApiRegistrationDatasetsStep({
               onClick={onAddDatasetLink}
               disabled={isResolvingLink || !datasetLinkUrl.trim()}
             >
-              Adicionar
+              {t("datasetLinks.add")}
             </Button>
           </div>
         </div>
 
         <AdminStepActions
           previousAction={{
-            label: "Anterior",
+            label: t("form.previous"),
             appearance: "outline",
             variant: "neutral",
             onClick: onPreviousStep,
           }}
           primaryAction={{
-            label: isLinking ? "A vincular..." : "Seguinte",
+            label: isLinking ? t("form.linking") : t("form.next"),
             type: "submit",
             hasIcon: true,
             trailingIcon: "agora-line-arrow-right-circle",

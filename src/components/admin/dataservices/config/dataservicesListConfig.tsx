@@ -4,13 +4,15 @@ import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
-export type DataserviceSortField = "title" | "created_at" | "last_modified";
+export type DataserviceSortField = "title" | "status" | "created_at" | "last_modified";
 
-export const dataserviceSortFieldMap: Record<DataserviceSortField, string> = {
+export const dataserviceSortFieldMap: Record<DataserviceSortField, string | null> = {
   title: "title",
+  status: null,
   created_at: "created",
   last_modified: "last_modified",
 };
@@ -31,6 +33,9 @@ export function sortDataservices(
     if (sortField === "title") {
       return collator.compare(a.title ?? "", b.title ?? "") * dir;
     }
+    if (sortField === "status") {
+      return (getResourceStatusSortValue(a) - getResourceStatusSortValue(b)) * dir;
+    }
     const aValue = sortField === "created_at" ? a.created_at : getDataserviceModifiedAt(a);
     const bValue = sortField === "created_at" ? b.created_at : getDataserviceModifiedAt(b);
     const aTime = aValue ? Date.parse(aValue) : 0;
@@ -39,49 +44,72 @@ export function sortDataservices(
   });
 }
 
-export function createDataserviceColumns(): AdminListColumn<Dataservice, DataserviceSortField>[] {
+interface DataserviceColumnsOptions {
+  ownerMetaStyle?: "dot" | "by";
+  labels: DataserviceColumnLabels;
+}
+
+interface DataserviceColumnLabels {
+  title: string;
+  titleShort: string;
+  status: string;
+  createdAt: string;
+  modifiedAt: string;
+  by: string;
+  about: string;
+}
+
+export function createDataserviceColumns({
+  ownerMetaStyle = "dot",
+  labels,
+}: DataserviceColumnsOptions): AdminListColumn<Dataservice, DataserviceSortField>[] {
   return [
     {
       id: "title",
-      header: "Título da API",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.titleShort,
       sortField: "title",
       sortType: "numeric",
       renderCell: (api) => <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>,
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (api) => <ResourceStatusBadge item={api} />,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at",
       sortType: "date",
       renderCell: (api) => formatDateToDMY(api.created_at),
     },
     {
       id: "last_modified",
-      header: "Modificado em",
+      header: labels.modifiedAt,
       sortField: "last_modified",
       sortType: "date",
-      renderCell: (api) => {
-        const author = api.owner
-          ? `${api.owner.first_name} ${api.owner.last_name}`
-          : api.organization?.name;
-        return (
-          <>
-            {formatDateToDMY(getDataserviceModifiedAt(api))}
-            {author && (
-              <>
-                <br />
-                <span className="text-sm text-neutral-500">por {author}</span>
-              </>
-            )}
-          </>
-        );
-      },
+      renderCell: (api) => (
+        <>
+          {formatDateToDMY(getDataserviceModifiedAt(api))}
+          {(api.owner || api.organization) && (
+            <>
+              <br />
+              <span className="text-sm text-neutral-500">
+                {ownerMetaStyle === "by" ? labels.by : labels.about}{" "}
+                {ownerMetaStyle === "dot" ? (
+                  <span className="text-success-600">{"\u25cf"}</span>
+                ) : null}{" "}
+                {api.owner
+                  ? `${api.owner.first_name} ${api.owner.last_name}`
+                  : api.organization?.name}
+              </span>
+            </>
+          )}
+        </>
+      ),
     },
     createTableActionsColumn<Dataservice>({
       viewAction: (api) => ({

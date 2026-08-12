@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/service/types/dataset";
-import { frequencyLabelsMap } from "@/utils/frequencyLabels";
+import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { formatDateLong } from "@/utils/formatDate";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
@@ -12,18 +12,6 @@ import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 interface DatasetInfoProps {
   dataset: Dataset;
 }
-
-
-const licenseMap: Record<string, string> = {
-  "cc-by": "Creative Commons Attribution",
-  "cc-by-sa": "Creative Commons Attribution Share-Alike",
-  "cc-zero": "Creative Commons Zero",
-  "fr-lo": "Licence Ouverte / Open Licence",
-  "odc-by": "Open Data Commons Attribution",
-  "odc-odbl": "Open Data Commons Open Database License",
-  "odc-pddl": "Open Data Commons Public Domain Dedication and License",
-  notspecified: "Não especificada",
-};
 
 const formatZone = (zone: string): string => {
   const parts = zone.split(":");
@@ -34,6 +22,7 @@ const formatZone = (zone: string): string => {
 };
 
 const CopyButton = ({ text }: { text: string }) => {
+  const { t: tds } = useTranslation("datasets");
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -46,7 +35,7 @@ const CopyButton = ({ text }: { text: string }) => {
     <button
       onClick={handleCopy}
       className="inline-flex items-center ml-8 text-primary-600 hover:text-primary-800"
-      title={copied ? "Copiado!" : "Copiar"}
+      title={copied ? tds("info.copied") : tds("info.copy")}
     >
       {copied ? (
         <svg
@@ -76,6 +65,7 @@ const CopyButton = ({ text }: { text: string }) => {
 
 export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
   const { i18n } = useTranslation("common");
+  const { t: tds } = useTranslation("datasets");
   if (!dataset) return null;
   const tags = dataset.tags ?? [];
   const contactPoints = dataset.contact_points ?? [];
@@ -98,20 +88,20 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
 
   if (hasExtras) {
     accordionItems.push(
-      <Accordion key="extras" headingTitle="Extras" headingLevel="h3">
+      <Accordion key="extras" headingTitle={tds("info.extras")} headingLevel="h3">
         <div className="grid grid-cols-3 gap-24 p-16">
           {dataset.page && (
             <div>
-              <p className="font-bold text-neutral-900 text-sm mb-8">links</p>
+              <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.links")}</p>
               <span className="text-neutral-900 text-sm break-all">{dataset.page}</span>
             </div>
           )}
           <div>
-            <p className="font-bold text-neutral-900 text-sm mb-8">contact</p>
+            <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.contact")}</p>
             <span className="text-neutral-900 text-sm break-all">
               {contactPoints.length > 0
                 ? contactPoints.map((cp) => cp.email || cp.name).join(", ")
-                : "Não disponível"}
+                : tds("info.unavailable")}
             </span>
           </div>
         </div>
@@ -121,7 +111,7 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
 
   if (hasHarvest) {
     accordionItems.push(
-      <Accordion key="harvest" headingTitle="Harvest" headingLevel="h3">
+      <Accordion key="harvest" headingTitle={tds("info.harvest")} headingLevel="h3">
         <div className="grid grid-cols-3 gap-x-24 gap-y-24 p-16">
           {[
             "backend",
@@ -158,21 +148,23 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
       {hasInfo && (
         <div>
           <h3 className="font-medium text-base text-neutral-900 uppercase mb-16">
-            Informação
+            {tds("info.title")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-24">
             {tags.length > 0 && (
               <div className="min-w-0">
                 <TagsCollapse
                   tags={tags}
-                  title="Palavras-chave"
+                  title={tds("info.keywords")}
                   titleClassName="font-bold text-neutral-900 text-sm mb-8"
                 />
               </div>
             )}
             {dataset.id && (
               <div>
-                <p className="font-bold text-neutral-900 text-sm mb-8">Identificador</p>
+                <p className="font-bold text-neutral-900 text-sm mb-8">
+                  {tds("info.identifier")}
+                </p>
                 <div className="flex items-center">
                   <span className="text-neutral-900 text-sm">{dataset.id}</span>
                   <CopyButton text={dataset.id} />
@@ -181,9 +173,9 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
             )}
             {dataset.license && (
               <div>
-                <p className="font-bold text-neutral-900 text-sm mb-8">Licença</p>
+                <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.license")}</p>
                 <span className="text-neutral-900 text-sm">
-                  {licenseMap[dataset.license] || dataset.license}
+                  {tds(`licenses.${dataset.license}`, { defaultValue: dataset.license })}
                 </span>
               </div>
             )}
@@ -195,12 +187,12 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
       {hasTemporal && (
         <div className="mt-32">
           <h3 className="font-medium text-base text-neutral-900 uppercase mb-16">
-            Temporalidade
+            {tds("info.temporal")}
           </h3>
           <div className="grid grid-cols-3 gap-24">
             {dataset.created_at && (
               <div>
-                <p className="font-bold text-neutral-900 text-sm mb-8">Criação</p>
+                <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.created")}</p>
                 <span className="text-neutral-900 text-sm">
                   {formatDateLong(dataset.created_at, i18n.language as "pt" | "en")}
                 </span>
@@ -208,15 +200,17 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
             )}
             {dataset.frequency && (
               <div>
-                <p className="font-bold text-neutral-900 text-sm mb-8">Frequência</p>
+                <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.frequency")}</p>
                 <span className="text-neutral-900 text-sm">
-                  {frequencyLabelsMap[dataset.frequency] || dataset.frequency}
+                  {getFrequencyLabel(dataset.frequency, dataset.frequency, tds)}
                 </span>
               </div>
             )}
             {dataset.last_modified && (
               <div>
-                <p className="font-bold text-neutral-900 text-sm mb-8">Última atualização</p>
+                <p className="font-bold text-neutral-900 text-sm mb-8">
+                  {tds("info.lastUpdate")}
+                </p>
                 <span className="text-neutral-900 text-sm">
                   {formatDateLong(dataset.last_modified, i18n.language as "pt" | "en")}
                 </span>
@@ -230,12 +224,12 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
       {hasSpatial && (
         <div className="mt-32">
           <h3 className="font-medium text-base text-neutral-900 uppercase mb-16">
-            Cobertura espacial
+            {tds("info.spatial")}
           </h3>
           <div className="grid grid-cols-3 gap-24">
             {dataset.spatial?.zones && dataset.spatial.zones.length > 0 && (
               <div>
-                <p className="font-bold text-neutral-900 text-sm mb-8">Zonas</p>
+                <p className="font-bold text-neutral-900 text-sm mb-8">{tds("info.zones")}</p>
                 <span className="text-neutral-900 text-sm">
                   {dataset.spatial.zones.map(formatZone).join(", ")}
                 </span>
@@ -244,10 +238,14 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
             {dataset.spatial?.granularity && (
               <div>
                 <p className="font-bold text-neutral-900 text-sm mb-8">
-                  Granularidade da cobertura territorial
+                  {tds("info.granularity")}
                 </p>
                 <span className="text-neutral-900 text-sm">
-                  {getGranularityLabel(dataset.spatial.granularity, dataset.spatial.granularity)}
+                  {getGranularityLabel(
+                    dataset.spatial.granularity,
+                    dataset.spatial.granularity,
+                    tds
+                  )}
                 </span>
               </div>
             )}
@@ -265,4 +263,3 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
     </div>
   );
 };
-

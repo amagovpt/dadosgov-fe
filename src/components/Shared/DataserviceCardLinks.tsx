@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { CardLinks } from "@ama-pt/agora-design-system";
 import { Dataservice } from "@/service/types/dataservice";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { formatDateToDMY } from "@/utils/formatDate";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 
 interface DataserviceCardLinksProps {
@@ -13,6 +13,7 @@ interface DataserviceCardLinksProps {
 }
 
 export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps) {
+  const { t, i18n } = useTranslation("common");
   const router = useRouter();
   const href = `/dataservices/${dataservice.slug}`;
 
@@ -26,7 +27,7 @@ export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps)
       trailingIconHover: "",
       trailingIconActive: "",
       children: dataservice.metrics?.views?.toLocaleString("pt-PT") || "0",
-      title: "Visualizações",
+      title: t("card.views"),
       onClick: (e: React.MouseEvent) => e.preventDefault(),
       className: "text-[#034AD8]",
     },
@@ -39,7 +40,7 @@ export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps)
       trailingIconHover: "",
       trailingIconActive: "",
       children: dataservice.metrics?.followers || 0,
-      title: "Favoritos",
+      title: t("card.favorites"),
       onClick: (e: React.MouseEvent) => e.preventDefault(),
       className: "text-[#034AD8]",
     },
@@ -53,13 +54,13 @@ export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps)
         variant="transparent"
         image={{
           src: dataservice.organization?.logo || "/images/placeholders/organization.png",
-          alt: dataservice.organization?.name || "Organização",
+          alt: dataservice.organization?.name || t("card.organization"),
         }}
         category={
           dataservice.organization?.name ||
           (dataservice.owner
             ? `${dataservice.owner.first_name} ${dataservice.owner.last_name}`.trim()
-            : "API")
+            : t("card.api"))
         }
         title={
           <div className="text-xl-bold underline">{sanitizeUserMarkdown(dataservice.title)}</div>
@@ -73,11 +74,9 @@ export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps)
         }
         date={
           <span className="font-[300]">
-            {`Atualizado ${format(
-              new Date(dataservice.last_modified || dataservice.created_at),
-              "dd MM yyyy",
-              { locale: pt }
-            )}`}
+            {t("card.updated", {
+              date: formatDateToDMY(dataservice.last_modified || dataservice.created_at),
+            })}
           </span>
         }
         links={links}

@@ -18,19 +18,29 @@ import SearchFilter from "@/components/Shared/SearchFilter";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dataservice } from "@/service/types/dataservice";
 import { APIResponse } from "@/service/types/shared";
-import HeroGeneral from "@/components/HeroGeneral";
+import { FrontOfficePage } from "@/service/types/shared/common";
+import { Hero } from "@/components/Shared/Hero";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useDataservicesListing } from "@/hooks/useDataservicesListing";
-import { DATASERVICE_SORT_LABELS } from "@/utils/dataservicesListingQuery";
 import { useTranslation } from "react-i18next";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 interface DataservicesClientProps {
   initialData: APIResponse<Dataservice>;
   currentPage: number;
+  /** Optional: the CMS is the source of truth, the `dataservices` namespace is the fallback. */
+  pageContent?: FrontOfficePage;
 }
 
-export default function DataservicesClient({ initialData, currentPage }: DataservicesClientProps) {
+export default function DataservicesClient({
+  initialData,
+  currentPage,
+  pageContent,
+}: DataservicesClientProps) {
   const router = useRouter();
+  const { t, i18n } = useTranslation("common");
+  const { t: tDs } = useTranslation("dataservices");
+  const { language } = i18n;
   const [filtersOpen, setFiltersOpen] = useState(false);
   const {
     activePage,
@@ -42,43 +52,48 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
     setSearchQuery,
     sortDefault,
   } = useDataservicesListing({ initialData, currentPage });
-  const { t } = useTranslation("common");
 
   const { data: dataservices, total, page_size } = listData;
 
+  const DATASERVICE_SORT_LABELS: Record<string, string> = {
+    relevancia: tDs("sort.relevancia"),
+    recentes: tDs("sort.recentes"),
+  };
+
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
-      <HeroGeneral
-        title="APIs"
-        breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: "APIs", url: "/dataservices" },
-        ]}
-        subtitle={
-          <div className="max-w-[592px] text-primary-100">
-            <p>
-              {total === 0
-                ? "Não existem resultados disponíveis para a sua pesquisa"
-                : `Pesquise através de ${total.toLocaleString("pt-PT")} APIs em dados.gov.pt`}
-            </p>
-            <p className="mt-8">
-              Explore as APIs partilhadas por organizações que prestam serviço público, e integre
-              dados abertos, de forma automatizada, nos seus serviços e aplicações.
-            </p>
-          </div>
-        }
-      >
-        <PublishDropdown darkMode={true} outline={false} />
-      </HeroGeneral>
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{pageContent?.hero?.title ?? tDs("hero.title")}</Hero.Title>
+          <Hero.Description
+            description={
+              <div className="max-w-[592px] text-primary-100">
+                <p>
+                  {total === 0
+                    ? tDs("hero.subtitleEmpty")
+                    : tDs("hero.subtitleCount", { count: total })}
+                </p>
+                <div className="mt-8">
+                  {stripHtmlTags(pageContent?.hero?.description ?? tDs("hero.subtitleText"))}
+                </div>
+              </div>
+            }
+          />
+        </Hero.Content>
+        <Hero.Actions>
+          <PublishDropdown darkMode={true} outline={false} />
+        </Hero.Actions>
+      </Hero.Root>
 
       {/* Search Filter */}
       <SearchFilter
         id="dataservices-search"
-        placeholder="Pesquisar APIs..."
+        placeholder={pageContent?.search?.placeholder ?? tDs("search.placeholder")}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
-        examplesText='Exemplos: "geolocalização", "transportes", "saúde"'
+        examplesText={tDs("search.examples")}
       />
 
       {/* Main Content */}
@@ -101,7 +116,7 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                   })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
               {t("results", { count: total })}
@@ -119,7 +134,7 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
               }}
             >
               {Object.entries(DATASERVICE_SORT_LABELS).map(([key, label]) => (
-                <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
+                <Toggle key={key} value={key} aria-label={tDs("sort.ariaLabel", { label })}>
                   {label}
                 </Toggle>
               ))}
@@ -145,7 +160,10 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
             >
               {dataservices.length > 0 ? (
                 dataservices.map((ds) => {
-                  const timeAgo = formatDateToTimeAgo(ds.last_modified || ds.created_at);
+                  const timeAgo = formatDateToTimeAgo(
+                    ds.last_modified || ds.created_at,
+                    language as "pt" | "en"
+                  );
                   const dsUrl = `/dataservices/${ds.slug}`;
 
                   return (
@@ -158,7 +176,7 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                           src: ds.organization?.logo || "/images/placeholders/organization.png",
                           alt: ds.title,
                         }}
-                        category={ds.organization?.name || "API"}
+                        category={ds.organization?.name || t("card.api")}
                         title={<div className="text-xl-bold underline">{ds.title}</div>}
                         description={
                           ds.description ? (
@@ -167,7 +185,11 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                             </p>
                           ) : undefined
                         }
-                        date={<span className="font-[300]">Atualizado há {timeAgo}</span>}
+                        date={
+                          <span className="font-[300]">
+                            {t("card.updatedAgo", { date: timeAgo })}
+                          </span>
+                        }
                         links={[
                           {
                             href: "#",
@@ -178,7 +200,7 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                             trailingIconHover: "",
                             trailingIconActive: "",
                             children: ds.metrics?.views?.toLocaleString("pt-PT") || "0",
-                            title: "Visualizações",
+                            title: t("card.views"),
                             onClick: (e: MouseEvent) => e.preventDefault(),
                             className: "text-[#034AD8]",
                           },
@@ -190,8 +212,8 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                             trailingIcon: "",
                             trailingIconHover: "",
                             trailingIconActive: "",
-                            children: `${ds.datasets?.total ?? 0} datasets`,
-                            title: "Datasets",
+                            children: t("card.datasetsCount", { count: ds.datasets?.total ?? 0 }),
+                            title: t("card.datasets"),
                             onClick: (e: MouseEvent) => e.preventDefault(),
                             className: "text-[#034AD8]",
                           },
@@ -204,7 +226,7 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                             trailingIconHover: "",
                             trailingIconActive: "",
                             children: ds.metrics?.followers || 0,
-                            title: "Favoritos",
+                            title: t("card.favorites"),
                             onClick: (e: MouseEvent) => e.preventDefault(),
                             className: "text-[#034AD8]",
                           },
@@ -228,15 +250,15 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                         className="icon-xl h-12 w-12 text-primary-500"
                       />
                     }
-                    title="Não encontrou o que procurava?"
+                    title={pageContent?.noResults?.title ?? tDs("noResults.title")}
                     subtitle={
                       <span className="font-bold">
-                        Tente redefinir os filtros para ampliar a sua pesquisa.
+                        {pageContent?.noResults?.subtitle ?? tDs("noResults.subtitle")}
                       </span>
                     }
                     description={
                       <div className="mx-auto max-w-[592px]">
-                        Explore a nossa lista completa de APIs de dados abertos.
+                        {pageContent?.noResults?.description ?? tDs("noResults.description")}
                       </div>
                     }
                     position="center"

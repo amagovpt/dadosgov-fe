@@ -1,95 +1,120 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
+  DropdownOption,
+  DropdownSection,
+  InputSelect,
   InputText,
   RadioButton,
-  InputSelect,
-  DropdownSection,
-  DropdownOption,
 } from "@ama-pt/agora-design-system";
-import {
-  AUDIENCE_ROLES,
-  AUDIENCE_CONDITIONS,
-  RESTRICTION_REASONS,
-} from "@/utils/dataserviceLabels";
+
+type Option = {
+  value: string;
+  label: string;
+};
+
+type AudienceRole = {
+  role: string;
+  label: string;
+};
 
 interface DataserviceAccessSectionProps {
   accessType: string;
   authRequestUrl: string;
   businessDocUrl: string;
-  accessAudiences: Record<string, string>;
-  reasonCategory: string;
-  reasonText: string;
+  idPrefix?: string;
+  accountAccessValue?: string;
+  accessAudiences?: Record<string, string>;
+  audienceRoles?: AudienceRole[];
+  audienceConditions?: Option[];
+  reasonCategory?: string;
+  restrictionReasons?: Option[];
+  reasonText?: string;
   onAccessTypeChange: (value: string) => void;
-  onAudienceChange: (role: string, value: string) => void;
-  onReasonCategoryChange: (value: string) => void;
-  onReasonTextChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAuthRequestUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onBusinessDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onAudienceChange?: (role: string, condition: string) => void;
+  onReasonCategoryChange?: (value: string) => void;
+  onReasonTextChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function DataserviceAccessSection({
   accessType,
   authRequestUrl,
   businessDocUrl,
-  accessAudiences,
-  reasonCategory,
-  reasonText,
+  idPrefix = "api",
+  accountAccessValue = "account",
+  accessAudiences = {},
+  audienceRoles = [],
+  audienceConditions = [],
+  reasonCategory = "",
+  restrictionReasons = [],
+  reasonText = "",
   onAccessTypeChange,
+  onAuthRequestUrlChange,
+  onBusinessDocUrlChange,
   onAudienceChange,
   onReasonCategoryChange,
   onReasonTextChange,
-  onAuthRequestUrlChange,
-  onBusinessDocUrlChange,
 }: DataserviceAccessSectionProps) {
+  const { t } = useTranslation("admin-dataservices");
+  const showRestrictedFields =
+    accessType === "restricted" &&
+    audienceRoles.length > 0 &&
+    audienceConditions.length > 0 &&
+    onAudienceChange;
+
   return (
     <>
-      <h2 className="admin-page__section-title">Acesso</h2>
+      <h2 className="admin-page__section-title">{t("fields.access")}</h2>
 
       <div className="admin-page__fields-group">
         <div className="flex flex-col gap-8">
-          <span className="text-base font-medium leading-7 text-primary-900">Tipo de acesso</span>
+          <span className="text-base font-medium leading-7 text-primary-900">
+            {t("fields.accessType")}
+          </span>
           <div className="flex flex-row gap-4">
             <RadioButton
-              label="Aberto"
-              id="access-open"
-              name="access-type"
+              label={t("fields.accessOpen")}
+              id={`${idPrefix}-access-open`}
+              name={`${idPrefix}-access-type`}
               checked={accessType === "open"}
               onChange={() => onAccessTypeChange("open")}
             />
             <RadioButton
-              label="Aberto com conta"
-              id="access-account"
-              name="access-type"
-              checked={accessType === "open_with_account"}
-              onChange={() => onAccessTypeChange("open_with_account")}
+              label={t("fields.accessAccount")}
+              id={`${idPrefix}-access-account`}
+              name={`${idPrefix}-access-type`}
+              checked={accessType === accountAccessValue}
+              onChange={() => onAccessTypeChange(accountAccessValue)}
             />
             <RadioButton
-              label="Restrito"
-              id="access-restricted"
-              name="access-type"
+              label={t("fields.accessRestricted")}
+              id={`${idPrefix}-access-restricted`}
+              name={`${idPrefix}-access-type`}
               checked={accessType === "restricted"}
               onChange={() => onAccessTypeChange("restricted")}
             />
           </div>
         </div>
 
-        {accessType === "restricted" && (
+        {showRestrictedFields && (
           <>
-            <div className="grid grid-cols-1 items-end gap-8 md:grid-cols-3">
-              {AUDIENCE_ROLES.map((role) => (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              {audienceRoles.map((role) => (
                 <InputSelect
                   key={role.role}
                   label={role.label}
-                  placeholder="Selecione uma opção"
-                  id={`access-audience-${role.role}`}
+                  placeholder={t("fields.selectOption")}
+                  id={`${idPrefix}-access-audience-${role.role}`}
                   onChange={(options) =>
                     onAudienceChange(role.role, (options[0]?.value as string) || "")
                   }
                 >
                   <DropdownSection name={`audience-${role.role}`}>
-                    {AUDIENCE_CONDITIONS.map((condition) => (
+                    {audienceConditions.map((condition) => (
                       <DropdownOption
                         key={condition.value}
                         value={condition.value}
@@ -103,30 +128,34 @@ export default function DataserviceAccessSection({
               ))}
             </div>
 
-            <InputSelect
-              label="Motivo da restrição"
-              placeholder="Selecione uma opção"
-              id="access-reason-category"
-              onChange={(options) => onReasonCategoryChange((options[0]?.value as string) || "")}
-            >
-              <DropdownSection name="reason-category">
-                {RESTRICTION_REASONS.map((reason) => (
-                  <DropdownOption
-                    key={reason.value}
-                    value={reason.value}
-                    selected={reasonCategory === reason.value}
-                  >
-                    {reason.label}
-                  </DropdownOption>
-                ))}
-              </DropdownSection>
-            </InputSelect>
+            {restrictionReasons.length > 0 && onReasonCategoryChange && (
+              <InputSelect
+                label={t("fields.restrictionReason")}
+                placeholder={t("fields.selectOption")}
+                id={`${idPrefix}-access-reason-category`}
+                onChange={(options) =>
+                  onReasonCategoryChange((options[0]?.value as string) || "")
+                }
+              >
+                <DropdownSection name="reason-category">
+                  {restrictionReasons.map((reason) => (
+                    <DropdownOption
+                      key={reason.value}
+                      value={reason.value}
+                      selected={reasonCategory === reason.value}
+                    >
+                      {reason.label}
+                    </DropdownOption>
+                  ))}
+                </DropdownSection>
+              </InputSelect>
+            )}
 
-            {reasonCategory === "other" && (
+            {reasonCategory === "other" && onReasonTextChange && (
               <InputText
-                label="Especifique o motivo da restrição"
-                placeholder="Descreva o motivo"
-                id="access-reason-text"
+                label={t("fields.restrictionReasonText")}
+                placeholder={t("fields.restrictionReasonTextPlaceholder")}
+                id={`${idPrefix}-access-reason-text`}
                 value={reasonText}
                 onChange={onReasonTextChange}
               />
@@ -135,16 +164,16 @@ export default function DataserviceAccessSection({
         )}
 
         <InputText
-          label="Link para a ferramenta de autorização de acesso"
-          placeholder="Insira o URL aqui"
-          id="api-auth-tool"
+          label={t("fields.authRequestUrl")}
+          placeholder={t("fields.urlPlaceholder")}
+          id={`${idPrefix}-auth-tool`}
           value={authRequestUrl}
           onChange={onAuthRequestUrlChange}
         />
         <InputText
-          label="Link para a documentação funcional"
-          placeholder="Insira o URL aqui"
-          id="api-doc-commercial"
+          label={t("fields.businessDocUrl")}
+          placeholder={t("fields.urlPlaceholder")}
+          id={`${idPrefix}-doc-commercial`}
           value={businessDocUrl}
           onChange={onBusinessDocUrlChange}
         />

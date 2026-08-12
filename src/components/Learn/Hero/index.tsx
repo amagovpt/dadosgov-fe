@@ -1,9 +1,10 @@
 "use client";
 import Image from "next/image";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import dayjs from "dayjs";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { useTranslation } from "react-i18next";
 
 export interface HeroCoursesProps {
   title: string;
@@ -13,17 +14,27 @@ export interface HeroCoursesProps {
     src: string;
     alt?: string;
   };
-  breadcrumbItems: {
-    label: string;
-    url: string;
-  }[];
+  /** Render the route-derived breadcrumb. Default `true`. */
+  hasBreadcrumb?: boolean;
+  /** Label overrides for intermediate dynamic segments, keyed by raw segment. */
+  breadcrumbOverrides?: Record<string, React.ReactNode>;
+  /** Label for the last crumb (a CMS/API title). */
+  breadcrumbCurrentLabel?: React.ReactNode;
 }
 
 export default function HeroCourses(args: HeroCoursesProps) {
+  const { t } = useTranslation("learning");
   return (
     <div className="flex w-full items-center justify-center bg-primary-100 py-64">
       <div className="container">
-        <Breadcrumb items={args.breadcrumbItems} className="mb-64" />
+        {(args.hasBreadcrumb ?? true) && (
+          <BreadcrumbDynamic
+            darkMode={false}
+            overrides={args.breadcrumbOverrides}
+            currentLabel={args.breadcrumbCurrentLabel}
+            className="mb-64"
+          />
+        )}
         <div className="flex flex-col items-center gap-64 lg:flex-row">
           <div className="w-full">
             <h1 className="mb-32 text-3xl-bold text-primary-600">
@@ -35,11 +46,8 @@ export default function HeroCourses(args: HeroCoursesProps) {
             </div>
 
             <div className="mt-64">
-              Atualizado em{" "}
-              {args.updatedAt ? (
-                dayjs(args.updatedAt).format("DD.MM.YYYY")
-              ) : (
-                <span className="text-m-bold">Data de atualização indisponível</span>
+              {args.updatedAt ? t("updatedAt", { date: dayjs(args.updatedAt).format("DD.MM.YYYY") }) : (
+                <span className="text-m-bold">{t("dateUnavailable")}</span>
               )}
             </div>
           </div>

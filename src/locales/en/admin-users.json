@@ -1,0 +1,71 @@
+{
+  "title": "Users",
+  "breadcrumbs": {
+    "users": "Users"
+  },
+  "tabs": {
+    "profile": "Profile",
+    "activities": "Activities",
+    "subscriptions": "Subscriptions",
+    "followings": "Followers"
+  },
+  "deletePopup": {
+    "title": "Are you sure you want to delete this user?",
+    "description": "This action is irreversible."
+  },
+  "messages": {
+    "loading": "Loading...",
+    "saveError": "Error saving the profile. Please try again."
+  },
+  "profileTab": {
+    "sectionTitle": "EDIT PROFILE",
+    "saveSuccess": "Profile saved successfully.",
+    "firstNameLabel": "First name *",
+    "firstNamePlaceholder": "Enter the first name here",
+    "lastNameLabel": "Last name *",
+    "lastNamePlaceholder": "Enter the last name here",
+    "biographyLabel": "Biography",
+    "biographyPlaceholder": "Enter the description here",
+    "roleLabel": "Profile",
+    "roleAdmin": "Administrator",
+    "roleEditor": "Editor",
+    "websiteLabel": "Website",
+    "websitePlaceholder": "Enter the URL here",
+    "avatarLabel": "Profile picture",
+    "avatarUploaderLabel": "Files",
+    "avatarInputLabel": "Select or drag the file",
+    "avatarRemoveFileButtonLabel": "Remove file",
+    "avatarReplaceFileButtonLabel": "Replace file",
+    "avatarExtensionsInstructions": "Maximum size: 4 MB. Accepted formats: JPG, JPEG, PNG.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Enter the email address here",
+    "saveLoading": "Saving..."
+  },
+  "headerCard": {
+    "memberSince": "Member since:",
+    "viewPublicProfile": "View public profile"
+  },
+  "activities": {
+    "loading": "Loading activities...",
+    "previous": "Previous",
+    "page": "Page {{page}} of {{total}}",
+    "next": "Next"
+  },
+  "subscriptions": {
+    "loading": "Loading subscriptions..."
+  },
+  "list": {
+    "filterPlaceholder": "Filter by profile",
+    "filterAll": "All",
+    "filterAdmin": "Admin",
+    "filterEditor": "Editor"
+  },
+  "columns": {
+    "name": "Name",
+    "createdAt": "Created on",
+    "datasets": "Datasets",
+    "reuses": "Reuses",
+    "followers": "Followers",
+    "profile": "Profiles"
+  }
+}

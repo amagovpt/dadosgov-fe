@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import { fetchOrganizations } from "@/service/api/organizations";
 import { Organization } from "@/service/types/identity";
@@ -20,38 +21,15 @@ import {
   writeQueryParamValues,
 } from "@/utils/filterUtils";
 
-const DATASERVICE_TOGGLE_FILTERS = {
-  atualizacao: {
-    title: "Data da atualização",
-    param: "modified_since",
-    options: [
-      { id: "all", label: "Todos" },
-      { id: "30_days", label: "Os últimos 30 dias" },
-      { id: "12_months", label: "Os últimos 12 meses" },
-      { id: "3_years", label: "Os últimos 3 anos" },
-    ],
-  },
-  organizacao: {
-    title: "Tipo de organização",
-    param: "organization_badge",
-    options: [
-      { id: "all", label: "Todos" },
-      { id: "public-service", label: "Serviço público" },
-    ],
-  },
-  acesso: {
-    title: "Tipo de acesso",
-    param: "access_type",
-    options: [
-      { id: "all", label: "Todos" },
-      { id: "open", label: "Aberto" },
-      { id: "open_with_account", label: "Aberto com conta" },
-      { id: "restricted", label: "Restrito" },
-    ],
-  },
-};
+type ToggleFilterKey = "atualizacao" | "organizacao" | "acesso";
 
-type ToggleFilterKey = keyof typeof DATASERVICE_TOGGLE_FILTERS;
+// The query-string param each toggle filter drives (kept out of the translated
+// label build so the filter logic stays language-independent).
+const TOGGLE_FILTER_PARAMS: Record<ToggleFilterKey, string> = {
+  atualizacao: "modified_since",
+  organizacao: "organization_badge",
+  acesso: "access_type",
+};
 
 const DATE_RANGE_MAP: Record<string, () => string> = {
   "30_days": () => {
@@ -86,6 +64,8 @@ export const DataservicesFilters = () => {
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
   const paramsRef = useRef(queryString);
+  const { t } = useTranslation("common");
+  const { t: tDs } = useTranslation("dataservices");
 
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
@@ -132,7 +112,6 @@ export const DataservicesFilters = () => {
   const handleToggleFilterChange = useCallback(
     (filterKey: ToggleFilterKey, optionId: string) => {
       const current = getWorkingParams();
-      const section = DATASERVICE_TOGGLE_FILTERS[filterKey];
 
       if (filterKey === "atualizacao") {
         current.delete("modified_since");
@@ -140,9 +119,9 @@ export const DataservicesFilters = () => {
           current.set("modified_since", DATE_RANGE_MAP[optionId]());
         }
       } else {
-        current.delete(section.param);
+        current.delete(TOGGLE_FILTER_PARAMS[filterKey]);
         if (optionId !== "all") {
-          current.set(section.param, optionId);
+          current.set(TOGGLE_FILTER_PARAMS[filterKey], optionId);
         }
       }
 
@@ -175,22 +154,43 @@ export const DataservicesFilters = () => {
   );
 
   const toggleSections = useMemo<ToggleFilterSection[]>(
-    () =>
-      (Object.keys(DATASERVICE_TOGGLE_FILTERS) as ToggleFilterKey[]).map((filterKey) => ({
-        key: filterKey,
-        title: DATASERVICE_TOGGLE_FILTERS[filterKey].title,
-        options: DATASERVICE_TOGGLE_FILTERS[filterKey].options.map((option) => ({
-          id: option.id,
-          label: option.label,
-        })),
-      })),
-    []
+    () => [
+      {
+        key: "atualizacao",
+        title: t("filters.update.label"),
+        options: [
+          { id: "all", label: t("filters.all") },
+          { id: "30_days", label: t("filters.update.options.30_days") },
+          { id: "12_months", label: t("filters.update.options.12_months") },
+          { id: "3_years", label: t("filters.update.options.3_years") },
+        ],
+      },
+      {
+        key: "organizacao",
+        title: tDs("filters.orgType.title"),
+        options: [
+          { id: "all", label: t("filters.all") },
+          { id: "public-service", label: tDs("filters.orgType.publicService") },
+        ],
+      },
+      {
+        key: "acesso",
+        title: tDs("filters.accessType.title"),
+        options: [
+          { id: "all", label: t("filters.all") },
+          { id: "open", label: tDs("filters.accessType.open") },
+          { id: "open_with_account", label: tDs("filters.accessType.openWithAccount") },
+          { id: "restricted", label: tDs("filters.accessType.restricted") },
+        ],
+      },
+    ],
+    [t, tDs]
   );
 
   const advancedFilterGroups = useMemo<AdvancedFilterGroup[]>(
     () => [
       {
-        name: "Organizações",
+        name: t("filters.advanced.organization"),
         param: "organization",
         data: allOrganizations.map((organization) => ({
           id: organization.id,
@@ -199,7 +199,7 @@ export const DataservicesFilters = () => {
         searchable: true,
       },
     ],
-    [allOrganizations]
+    [allOrganizations, t]
   );
 
   return (
@@ -213,7 +213,9 @@ export const DataservicesFilters = () => {
         idPrefix="dsvc-filter"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">Filtros avançados</h2>
+      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">
+        {t("filters.advanced.label")}
+      </h2>
 
       <AdvancedFiltersSidebar
         groups={advancedFilterGroups}
@@ -233,7 +235,7 @@ export const DataservicesFilters = () => {
             router.replace("/dataservices", { scroll: false });
           }}
         >
-          Limpar filtros
+          {t("filters.clear")}
         </Button>
       </div>
     </div>

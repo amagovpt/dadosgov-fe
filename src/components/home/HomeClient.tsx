@@ -9,11 +9,11 @@ import { Post } from "@/service/types/posts";
 import { Reuse } from "@/service/types/reuse";
 import { SiteMetrics } from "@/service/types/shared";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
-import HeroGeneral from "../HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import PublishDropdown from "../admin/PublishDropdown";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import Image from "next/image";
@@ -62,7 +62,7 @@ export default function HomeClient({
 }: HomeClientProps) {
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation("home");
+  const { t, i18n } = useTranslation("common");
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -85,25 +85,21 @@ export default function HomeClient({
     <main className="w-full h-full">
       <div className="w-full ">
         <div className="w-full">
-          <HeroGeneral
-            title={
-              <h1 className="text-white flex flex-col items-start leading-tight">
+          {/* The homepage is the root — no breadcrumb slot. */}
+          <Hero.Root>
+            <Hero.Content>
+              <Hero.Title>
                 {highlightText(HomeHero.title, HomeHero.highlight, {
                   highlightClassName: "text-2xl-bold",
                   textClassName: "text-2xl-regular",
                 })}
-              </h1>
-            }
-            subtitle={
-              <span className="text-white text-m-regular">
-                {parseHtmlToParagraphs(HomeHero.description).map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </span>
-            }
-          >
-            <PublishDropdown darkMode={true} outline={false} />
-          </HeroGeneral>
+              </Hero.Title>
+              <Hero.Description description={parseHtmlToParagraphs(HomeHero.description)} />
+            </Hero.Content>
+            <Hero.Actions>
+              <PublishDropdown darkMode={true} outline={false} />
+            </Hero.Actions>
+          </Hero.Root>
 
           {/* Stats Section */}
           <div className="py-64 bg-primary-900 text-white flex flex-col items-center justify-center">
@@ -256,7 +252,7 @@ export default function HomeClient({
         {/* Data Stories */}
         <section className="w-full flex flex-col items-center justify-center bg-primary-900 py-64">
           <div className="container flex flex-col gap-32">
-            <h2 className="text-xl-bold text-white">Data Stories</h2>
+            <h2 className="text-xl-bold text-white">{t("datastories")}</h2>
             <p className="mb-32 mt-16 max-w-3xl text-white">
               {parseHtmlToParagraphs(datastories.description)}
             </p>
@@ -276,7 +272,7 @@ export default function HomeClient({
                       }}
                       subtitle={
                         story.createdAt
-                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={story.title}
@@ -326,7 +322,7 @@ export default function HomeClient({
                       }}
                       subtitle={
                         post.created_at
-                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={post.name}

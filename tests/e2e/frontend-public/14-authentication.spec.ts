@@ -1,5 +1,5 @@
 import { test, expect, type Locator, type Page } from "playwright/test";
-import { ADMIN_CREDS } from "../../helpers/auth";
+import { ADMIN_CREDS, loginAsAdmin } from "../../helpers/auth";
 
 const LOGIN_URL = "/login";
 
@@ -135,8 +135,31 @@ test.describe("Authentication Page", () => {
     expect(page.url()).toContain("/login");
   });
 
-  test.skip("AU-12: Logout (needs auth)", async () => {
-    // Skipped: requires authenticated session
+  test("AU-12: Logout via the header avatar drawer clears the session", async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    const header = page.locator("header").first();
+    const avatarTrigger = header.locator(".agora-avatar-container").first();
+    await expect(avatarTrigger).toBeVisible({ timeout: 10000 });
+    await avatarTrigger.click();
+
+    const drawer = page.locator(".agora-drawer").first();
+    await expect(drawer).toBeVisible({ timeout: 10000 });
+
+    const logoutButton = drawer.getByText("Terminar sessão").first();
+    await logoutButton.click();
+
+    await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/pt", {
+      timeout: 15000,
+    });
+    await page.waitForLoadState("networkidle");
+
+    const authLink = page.locator('header a[href="/login"]').first();
+    await expect(authLink).toBeVisible({ timeout: 10000 });
   });
 
   test("AU-13: /loginregister redirects to /login", async ({

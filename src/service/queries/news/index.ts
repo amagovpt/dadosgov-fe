@@ -39,11 +39,9 @@ export async function getNewsPage(locale: string = "pt"): Promise<NewsPage> {
     throw new Error("Failed to fetch News information");
   }
 
-  const newsData = data.findNewsSingleton?.data;
-
-  if (!newsData) {
+  if (!data.findNewsSingleton?.data) {
     return {} as NewsPage;
   }
 
-  return flattenData(newsData) as unknown as NewsPage;
+  return flattenData(data, locale).findNewsSingleton as NewsPage;
 }

@@ -1,27 +1,21 @@
 import ReactMarkdown from "react-markdown";
 import { getFaqs } from "@/service/queries/faqs/faqs";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import Anchor from "@/components/Shared/Anchor";
 
 export const dynamic = "force-dynamic";
 
-export default async function page() {
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const { title, actionTitle, body, actions } = await getFaqs(
     "acesso-ao-catalogo-via-sparql",
-    "pt"
+    locale
   );
 
   return (
     <main className="flex h-full w-full flex-col items-center justify-center">
       <div className="container flex flex-col py-32">
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: "Recursos", url: "/recursos" },
-            { label: "Desenvolvimento", url: "/recursos/desenvolvimento" },
-            { label: "Acesso via SPARQL", url: "/recursos/desenvolvimento/acesso-via-sparql" },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} />
       </div>
       <div className="container flex flex-col gap-16 py-32 font-sans leading-3 text-primary-900">
         <ReactMarkdown

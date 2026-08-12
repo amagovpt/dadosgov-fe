@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   Icon,
   Pill,
@@ -14,6 +13,7 @@ import {
   CardArticle,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
@@ -42,7 +42,7 @@ export default function ReuseDetailClient({
   initialDatasets,
   initialIsFavorite,
 }: ReuseDetailClientProps) {
-  const { t, i18n } = useTranslation("common");
+  const { i18n } = useTranslation("common");
   const { t: tr } = useTranslation("reuses");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -106,17 +106,7 @@ export default function ReuseDetailClient({
           {/* Breadcrumbs & Actions */}
           <div className="mb-24">
             <div className="mb-24">
-              <Breadcrumb
-                darkMode={false}
-                items={[
-                  { label: t("home"), url: "/" },
-                  { label: t("reuses"), url: "/reuses" },
-                  {
-                    label: reuse.title,
-                    url: `/reuses/${reuse.slug || reuse.id}`,
-                  },
-                ]}
-              />
+              <BreadcrumbDynamic darkMode={false} currentLabel={reuse.title} />
             </div>
             <div className="flex justify-end">
               <div className="flex flex-wrap items-center gap-16">

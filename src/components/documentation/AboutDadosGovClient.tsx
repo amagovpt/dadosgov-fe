@@ -1,19 +1,14 @@
 "use client";
 
 import { GitHubArticlePage } from "./GitHubArticlePage";
+import type { AboutDadosGovPage } from "@/service/types/documentation/about-dadosgov";
 
-export default function AboutDadosGovClient({ initialContent }: { initialContent?: string }) {
+export default function AboutDadosGovClient({ page }: { page: AboutDadosGovPage }) {
   return (
     <GitHubArticlePage
       slug="pages/faqs/about_dadosgov"
-      title="O que é dados.gov.pt"
-      initialContent={initialContent}
-      breadcrumbItems={[
-        { label: "Início", url: "/" },
-        { label: "Recursos", url: "/recursos" },
-        { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
-        { label: "O que é dados.gov.pt", url: "/recursos/como-usar-o-portal/o-que-e-dados-gov-pt" },
-      ]}
+      title={page.metadata.title}
+      initialContent={page.content}
     />
   );
 }

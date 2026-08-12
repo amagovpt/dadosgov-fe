@@ -2,27 +2,29 @@
 
 import React from 'react';
 import { Icon, Accordion, AccordionGroup } from '@ama-pt/agora-design-system';
-import HeroGeneral from '@/components/HeroGeneral';
+import { Hero } from '@/components/Shared/Hero';
 
 export default function ThemesPage() {
   return (
     <main className="flex-grow bg-white">
-      <HeroGeneral
-        title="Dados relacionados à cultura"
-        breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: 'Dados relacionados à cultura', url: '#' }
-        ]}
-      >
-        <div className="subtitle">
-          <p className="text-primary-100 mb-8 max-w-4xl text-lg leading-relaxed">
-            Esta página tem como objetivo listar os principais conjuntos de dados relacionados à cultura disponíveis em dados.gov.pt. Ela não é exaustiva e <a href="#" className="underline hover:text-primary-200 transition-colors">está aberta a contribuições</a>.
-          </p>
-          <p className="text-primary-100 max-w-4xl text-lg leading-relaxed">
-            Pode descobrir todos os dados relacionados com a cultura em <a href="#" className="underline hover:text-primary-200 transition-colors">culture.data.gouv.fr</a>, a plataforma dedicada a referenciar, promover e divulgar dados culturais públicos.
-          </p>
-        </div>
-      </HeroGeneral>
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>Dados relacionados à cultura</Hero.Title>
+          <Hero.Description
+            description={
+              <div className="subtitle">
+                <p className="text-primary-100 mb-8 max-w-4xl text-lg leading-relaxed">
+                  Esta página tem como objetivo listar os principais conjuntos de dados relacionados à cultura disponíveis em dados.gov.pt. Ela não é exaustiva e <a href="#" className="underline hover:text-primary-200 transition-colors">está aberta a contribuições</a>.
+                </p>
+                <p className="text-primary-100 max-w-4xl text-lg leading-relaxed">
+                  Pode descobrir todos os dados relacionados com a cultura em <a href="#" className="underline hover:text-primary-200 transition-colors">culture.data.gouv.fr</a>, a plataforma dedicada a referenciar, promover e divulgar dados culturais públicos.
+                </p>
+              </div>
+            }
+          />
+        </Hero.Content>
+      </Hero.Root>
 
       <div className="container mx-auto px-4 py-64">
         <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32">

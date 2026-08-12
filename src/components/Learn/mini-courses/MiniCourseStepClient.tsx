@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { Button } from '@ama-pt/agora-design-system';
-import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
+import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
@@ -9,6 +9,7 @@ import { BodyCourse } from '@/service/types/courses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
 import Link from 'next/link';
 import { getAssets } from '@/utils/getAssets';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   title: string;
@@ -26,6 +27,7 @@ const socialLinks = [
 ];
 
 export default function CourseStepClient({ title, slug, stepCourse, step }: Props) {
+  const { t } = useTranslation('learning');
 
 
   const router = useRouter();
@@ -58,7 +60,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
   if (!course) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-neutral-600">Minicurso não encontrado.</p>
+        <p className="text-lg text-neutral-600">{t('miniCourseNotFound')}</p>
       </div>
     );
   }
@@ -67,7 +69,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
   if (!currentStep) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-neutral-600">Passo não encontrado.</p>
+        <p className="text-lg text-neutral-600">{t('stepNotFound')}</p>
       </div>
     );
   }
@@ -94,14 +96,11 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
   return (
     <main className="w-full flex flex-col justify-center items-center bg-primary-100 gap-64 py-64">
       <div className='container '>
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: "Recursos", url: "/recursos/" },
-            { label: 'Aprender', url: '/recursos/aprender/' },
-            { label: 'Minicursos', url: '/recursos/aprender/minicursos/' },
-            { label: title, url: '#' },
-          ]}
+        {/* The step number is not part of the trail: the course is the deepest crumb. */}
+        <BreadcrumbDynamic
+          darkMode={false}
+          path={`/recursos/aprender/minicursos/${slug}`}
+          currentLabel={title}
         />
       </div>
       {/* Dark blue background area */}
@@ -147,7 +146,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
                           {currentStep.image && (
                             <Image
                               src={getAssets(currentStep.image[0]?.id) ?? "/card-full-image.png"}
-                              alt={currentStep.title ?? "Imagem do passo"}
+                              alt={currentStep.title ?? t('stepImageAlt')}
                               width={["top", "bottom"].includes(currentStep.imagePosition ?? "") ? 796 : 350}
                               height={281}
                               className="max-w-full max-h-full object-contain bg-primary-100"
@@ -169,7 +168,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
                             leadingIconHover="agora-solid-arrow-left-circle"
                             onClick={handlePrevious}
                           >
-                            Anterior
+                            {t('previous')}
                           </Button>
                         )}
                         <Button
@@ -180,7 +179,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
                           trailingIconHover="agora-solid-arrow-right-circle"
                           onClick={handleNext}
                         >
-                          {isLastStep ? "Ver mais cursos" : "Seguinte"}
+                          {isLastStep ? t('seeMoreCourses') : t('next')}
                         </Button>
                       </div>
                     </div>
@@ -196,7 +195,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
       {/* Share section */}
       <div className={twMerge("container flex flex-col gap-16", isLastStep ? "block" : "hidden")}>
         <p className="text-m-regular text-primary-800 ">
-          Partilhar este minicurso
+          {t('shareMiniCourse')}
         </p>
         <div className="flex flex-row gap-16">
           {socialLinks.map((link) => (
