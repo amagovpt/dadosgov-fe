@@ -35,7 +35,9 @@ export async function getBoUsersMetadata(
     throw new Error("Failed to fetch bo-users metadata");
   }
 
-  return flattenData(data).findBoUsersSingleton as BoUsersMetadata;
+  const page = flattenData(data).findBoUsersSingleton as BoUsersMetadata;
+  if (!page) throw new Error("Bo users metadata is missing");
+  return page;
 }
 
 export async function getBoUsers(locale: string = "pt"): Promise<BoUsersPage> {
@@ -156,5 +158,7 @@ export async function getBoUsers(locale: string = "pt"): Promise<BoUsersPage> {
     throw new Error("Failed to fetch bo-users content");
   }
 
-  return flattenData(data).findBoUsersSingleton as BoUsersPage;
+  const page = flattenData(data).findBoUsersSingleton as BoUsersPage;
+  if (!page) throw new Error("Bo users content is missing");
+  return page;
 }

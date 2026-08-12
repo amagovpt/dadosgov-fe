@@ -37,7 +37,9 @@ export async function getBoDataservicesMetadata(
     throw new Error("Failed to fetch bo-dataservices metadata");
   }
 
-  return flattenData(data).findBoDataservicesSingleton as BoDataservicesMetadata;
+  const page = flattenData(data).findBoDataservicesSingleton as BoDataservicesMetadata;
+  if (!page) throw new Error("Bo dataservices metadata is missing");
+  return page;
 }
 
 export async function getBoDataservices(
@@ -221,5 +223,7 @@ export async function getBoDataservices(
     throw new Error("Failed to fetch bo-dataservices content");
   }
 
-  return flattenData(data).findBoDataservicesSingleton as BoDataservicesPage;
+  const page = flattenData(data).findBoDataservicesSingleton as BoDataservicesPage;
+  if (!page) throw new Error("Bo dataservices content is missing");
+  return page;
 }

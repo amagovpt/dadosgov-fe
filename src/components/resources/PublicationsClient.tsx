@@ -10,13 +10,13 @@ import { Pagination } from "@/components/Pagination";
 import { Publication } from "@/service/types/resources/publications";
 import {
   PUBLICATIONS_PAGE_SIZE,
-  PUBLICATIONS_SORT_LABELS,
   PublicationsSort,
 } from "@/utils/publicationsListing";
 import { formatDateLong } from "@/utils/formatDate";
 import { getAssets } from "@/utils/getAssets";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { Toggle, ToggleGroup } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 type PublicationWithPageCount = Publication & { pageCount: number | null };
 
@@ -33,6 +33,7 @@ export default function PublicationsClient({
   currentPage,
   currentSort,
 }: PublicationsClientProps) {
+  const { t, i18n } = useTranslation("common");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -62,7 +63,7 @@ export default function PublicationsClient({
     <div className="container flex flex-col items-center justify-center gap-32 py-32">
       <div className="w-full flex justify-between items-end border-b-2 border-neutral-200 mb-24 pb-12 pt-32">
         <span className="text-neutral-900 text-m-regular">
-          {publications.length} Resultados
+          {t("publications.results", { count: total })}
         </span>
         <ToggleGroup
           multiple={false}
@@ -74,9 +75,13 @@ export default function PublicationsClient({
             }
           }}
         >
-          {Object.entries(PUBLICATIONS_SORT_LABELS).map(([key, label]) => (
-            <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
-              {label}
+          {(["recente", "antigo"] as PublicationsSort[]).map((key) => (
+            <Toggle
+              key={key}
+              value={key}
+              aria-label={t("publications.sortBy", { label: t(`publications.sort.${key}`) })}
+            >
+              {t(`publications.sort.${key}`)}
             </Toggle>
           ))}
         </ToggleGroup>
@@ -113,7 +118,7 @@ export default function PublicationsClient({
                           leadingIconActive="agora-line-download"
                           leadingIconHover="agora-solid-download"
                         >
-                          Descarregar ficheiro
+                          {t("publications.downloadFile")}
                         </Anchor>
                         <div className="text-neutral-900 text-m-light flex gap-4">
                           <span className="text-neutral-900 text-m-light uppercase">
@@ -127,7 +132,7 @@ export default function PublicationsClient({
                             <>
                               ·
                               <span className="text-neutral-900 text-m-light">
-                                {pubs.pageCount} páginas
+                                {t("publications.pages", { count: pubs.pageCount })}
                               </span>
                             </>
                           )}
@@ -138,7 +143,9 @@ export default function PublicationsClient({
                 }
                 date={
                   <span className="font-[300]">
-                    Actualizado {formatDateLong(pubs.metaDetails.updatedAt)}
+                    {t("publications.updated", {
+                      date: formatDateLong(pubs.metaDetails.updatedAt, i18n.language as "pt" | "en"),
+                    })}
                   </span>
                 }
               />
@@ -149,7 +156,7 @@ export default function PublicationsClient({
         <div className="col-span-full">
           <CardNoResults
             icon={<Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />}
-            title="Não existem publicações"
+            title={t("publications.empty")}
             position="center"
             hasAnchor={true}
           />

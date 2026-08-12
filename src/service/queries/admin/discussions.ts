@@ -37,7 +37,9 @@ export async function getBoDiscussionsMetadata(
     throw new Error("Failed to fetch bo-discussions metadata");
   }
 
-  return flattenData(data).findBoDiscussionsSingleton as BoDiscussionsMetadata;
+  const page = flattenData(data).findBoDiscussionsSingleton as BoDiscussionsMetadata;
+  if (!page) throw new Error("Bo discussions metadata is missing");
+  return page;
 }
 
 export async function getBoDiscussions(locale: string = "pt"): Promise<BoDiscussionsPage> {
@@ -87,5 +89,7 @@ export async function getBoDiscussions(locale: string = "pt"): Promise<BoDiscuss
     throw new Error("Failed to fetch bo-discussions content");
   }
 
-  return flattenData(data).findBoDiscussionsSingleton as BoDiscussionsPage;
+  const page = flattenData(data).findBoDiscussionsSingleton as BoDiscussionsPage;
+  if (!page) throw new Error("Bo discussions content is missing");
+  return page;
 }

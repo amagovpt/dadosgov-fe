@@ -14,7 +14,7 @@ interface ReuseCardLinksProps {
 }
 
 export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLinksProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const router = useRouter();
 
   const links = [

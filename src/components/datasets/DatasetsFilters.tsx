@@ -40,13 +40,13 @@ const FORMAT_GROUP_MAP: Record<string, string[]> = {
 // backend computes the matching sidebar count (`rotulo_<option>`) the same way,
 // so the number shown next to an option always matches what it returns.
 //
-// INSPIRE uses the badge: it is the curated signal, granted from the `inspire`
-// tag the DCAT harvester sets for GEMET INSPIRE themes. HVD stays on the raw
-// tag for now — its badge is only granted to datasets of certified
-// public-service organizations, so it would cover a subset of the tagged ones.
-// Moving it to `badge=hvd` is tracked in LEDG-2240.
+// Both options filter on the badge, which is the curated signal: badges are
+// granted by the backend's `update-badges` job, while the raw `hvd` / `inspire`
+// tags can be set by any harvested source. Note the HVD badge is only granted to
+// datasets of certified public-service organizations, so it covers a subset of
+// the `hvd`-tagged datasets — widening that is a policy decision on the job.
 const ROTULO_FILTER_MAP: Record<string, { param: string; value: string }> = {
-  high_value: { param: "tag", value: "hvd" },
+  high_value: { param: "badge", value: "hvd" },
   inspire: { param: "badge", value: "inspire" },
 };
 

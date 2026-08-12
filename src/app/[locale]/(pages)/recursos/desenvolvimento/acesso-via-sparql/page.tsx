@@ -5,10 +5,11 @@ import Anchor from "@/components/Shared/Anchor";
 
 export const dynamic = "force-dynamic";
 
-export default async function page() {
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const { title, actionTitle, body, actions } = await getFaqs(
     "acesso-ao-catalogo-via-sparql",
-    "pt"
+    locale
   );
 
   return (

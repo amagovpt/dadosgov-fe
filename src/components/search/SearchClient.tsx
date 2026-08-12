@@ -9,13 +9,9 @@ import {
   Pill,
   InputSearchBar,
   CardNoResults,
-  Sidebar,
-  SidebarItem,
-  Checkbox,
-  InputSearch,
 } from "@ama-pt/agora-design-system";
 
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import { Pagination } from "@/components/Pagination";
 import { searchDataservices } from "@/service/api/dataservices";
 import { fetchLicenses, fetchGranularities, suggestFormats } from "@/service/api/datasets";
@@ -27,18 +23,19 @@ import { Dataset } from "@/service/types/dataset";
 import { Organization } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
 import AppIcon from "../Primitives/AppIcon";
+import { useTranslation } from "react-i18next";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
 
 const TYPES: {
   type: SearchType;
-  label: string;
+  labelKey: string;
   icon: string | ((active: boolean) => string);
   iconHover: string;
 }[] = [
   {
     type: "datasets",
-    label: "Conjunto de dados",
+    labelKey: "datasets",
     icon: "agora-line-layers-menu",
     iconHover: "agora-solid-layers-menu",
   },
@@ -51,13 +48,13 @@ const TYPES: {
   // },
   {
     type: "reuses",
-    label: "Reutilizações",
+    labelKey: "reuses",
     icon: (active: boolean) => (active ? "/Icons/bar_char_white.svg" : "/Icons/bar_chart.svg"),
     iconHover: "/Icons/bar_char_white.svg",
   },
   {
     type: "organizations",
-    label: "Organizações",
+    labelKey: "organizations",
     icon: "agora-line-buildings",
     iconHover: "agora-solid-buildings",
   },
@@ -65,73 +62,73 @@ const TYPES: {
 
 const DATASET_FILTERS = {
   formato: {
-    title: "Formato dos dados",
+    title: "format",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
+      { id: "all", label: "all", count: "45 mil" },
       {
         id: "tabular",
-        label: "Tabular",
+        label: "tabular",
         description: "csv, xls, xlsx, ods, parquet...",
         count: "14 mil",
       },
       {
         id: "structured",
-        label: "Estruturado",
+        label: "structured",
         description: "JSON, RDF, XML, SQL...",
         count: "9,3 mil",
       },
       {
         id: "geographic",
-        label: "Geográfico",
+        label: "geographic",
         description: "geojson, shp, kml...",
         count: "4,6 mil",
       },
       {
         id: "documents",
-        label: "Documentos",
+        label: "documents",
         description: "pdf, doc, docx, md, txt, ...",
         count: "2,8 mil",
       },
-      { id: "other", label: "Outro", count: "29 mil" },
+      { id: "other", label: "other", count: "29 mil" },
     ],
   },
   metodo: {
-    title: "Métodos de acesso",
+    title: "access",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "free_download", label: "Download gratuito", count: "42 mil" },
-      { id: "open_conditions", label: "Aberto sob certas condições", count: "0" },
-      { id: "auth_access", label: "Acesso mediante autorização", count: "11" },
+      { id: "all", label: "all", count: "45 mil" },
+      { id: "free_download", label: "freeDownload", count: "42 mil" },
+      { id: "open_conditions", label: "openConditions", count: "0" },
+      { id: "auth_access", label: "authAccess", count: "11" },
     ],
   },
   atualizacao: {
-    title: "Data da atualização",
+    title: "updated",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "30_days", label: "Os últimos 30 dias", count: "6 mil" },
-      { id: "12_months", label: "Os últimos 12 meses", count: "15 mil" },
-      { id: "3_years", label: "Os últimos 3 anos", count: "26 mil" },
+      { id: "all", label: "all", count: "45 mil" },
+      { id: "30_days", label: "last30Days", count: "6 mil" },
+      { id: "12_months", label: "last12Months", count: "15 mil" },
+      { id: "3_years", label: "last3Years", count: "26 mil" },
     ],
   },
   organizacao: {
-    title: "Tipo de organização",
+    title: "organization",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "public_service", label: "Serviço público", count: "27 mil" },
-      { id: "local_authority", label: "Autoridade local", count: "11 mil" },
-      { id: "business", label: "Negócios", count: "1,6 mil" },
-      { id: "association", label: "Associação", count: "434" },
-      { id: "user", label: "Utilizador", count: "737" },
+      { id: "all", label: "all", count: "45 mil" },
+      { id: "public_service", label: "publicService", count: "27 mil" },
+      { id: "local_authority", label: "localAuthority", count: "11 mil" },
+      { id: "business", label: "business", count: "1,6 mil" },
+      { id: "association", label: "association", count: "434" },
+      { id: "user", label: "user", count: "737" },
     ],
   },
   rotulo: {
-    title: "Rótulo de dados",
+    title: "dataLabel",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "high_value", label: "Conjuntos de dados de alto valor", count: "591" },
-      { id: "inspire", label: "Inspirar", count: "16 mil" },
-      { id: "public_reference", label: "Serviço público de dados de referência", count: "9" },
-      { id: "statistics", label: "Séries estatísticas de interesse geral", count: "11" },
+      { id: "all", label: "all", count: "45 mil" },
+      { id: "high_value", label: "highValue", count: "591" },
+      { id: "inspire", label: "inspire", count: "16 mil" },
+      { id: "public_reference", label: "publicReference", count: "9" },
+      { id: "statistics", label: "statistics", count: "11" },
     ],
   },
 };
@@ -141,6 +138,7 @@ type FilterKey = keyof typeof DATASET_FILTERS;
 const PAGE_SIZE = 10;
 
 export default function SearchClient() {
+  const { t, i18n } = useTranslation("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
@@ -320,14 +318,15 @@ export default function SearchClient() {
     router.push(`/pesquisa?${current.toString()}`);
   };
 
-  const handleFilterSearchChange = (groupName: string, value: string) => {
-    setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-    if (groupName === "Palavras-chave") handleTagSearch(value);
-    if (groupName === "Formatos") handleFormatSearch(value);
-    if (groupName === "Cobertura espacial") handleZoneSearch(value);
+  const handleFilterSearchChange = (groupId: string, value: string) => {
+    setFilterSearchQueries((prev) => ({ ...prev, [groupId]: value }));
+    if (groupId === "keywords") handleTagSearch(value);
+    if (groupId === "formats") handleFormatSearch(value);
+    if (groupId === "spatialCoverage") handleZoneSearch(value);
   };
 
   const advancedFilterGroups: {
+    id: string;
     name: string;
     param: string;
     data: { id: string; name: string }[];
@@ -335,40 +334,46 @@ export default function SearchClient() {
     suggest?: boolean;
   }[] = [
     {
-      name: "Organizações",
+      id: "organizations",
+      name: t("search.advancedFilters.organizations"),
       param: "organization",
       data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
       searchable: true,
     },
     {
-      name: "Palavras-chave",
+      id: "keywords",
+      name: t("search.advancedFilters.keywords"),
       param: "tag",
       data: filterTagOptions,
       searchable: true,
       suggest: true,
     },
     {
-      name: "Formatos",
+      id: "formats",
+      name: t("search.advancedFilters.formats"),
       param: "format",
       data: filterFormatOptions,
       searchable: true,
       suggest: true,
     },
     {
-      name: "Licenças",
+      id: "licenses",
+      name: t("search.advancedFilters.licenses"),
       param: "license",
       data: filterLicenses.map((l) => ({ id: l.id, name: l.title })),
       searchable: true,
     },
     {
-      name: "Cobertura espacial",
+      id: "spatialCoverage",
+      name: t("search.advancedFilters.spatialCoverage"),
       param: "geozone",
       data: filterZoneOptions,
       searchable: true,
       suggest: true,
     },
     {
-      name: "Granularidade espacial",
+      id: "spatialGranularity",
+      name: t("search.advancedFilters.spatialGranularity"),
       param: "granularity",
       data: filterGranularities.map((g) => ({ id: g.id, name: g.name })),
       searchable: true,
@@ -400,42 +405,45 @@ export default function SearchClient() {
   const totalForActiveTab = totals[activeTab];
 
   const titleMap: Record<SearchType, string> = {
-    datasets: "Conjuntos de dados",
-    dataservices: "APIs",
-    reuses: "Reutilizações",
-    organizations: "Organizações",
+    datasets: t("datasets"),
+    dataservices: t("card.api"),
+    reuses: t("reuses"),
+    organizations: t("organizations"),
   };
 
   return (
     <div className="filters flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
-        <HeroGeneral
-          title={titleMap[activeTab]}
-          backgroundImageUrl="/Banner/hero-bg.png"
-        >
-          <InputSearchBar
-            label="Pesquisa avançada"
-            placeholder="Pesquisar conjunto de dados, organizações, reutilizações..."
-            id="search-page-input"
-            hasVoiceActionButton={false}
-            voiceActionAltText="Pesquisar por voz"
-            searchActionAltText="Pesquisar"
-            darkMode={true}
-            value={searchInput}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
-            onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === "Enter") handleSearch();
-            }}
-            onSearchActivate={() => handleSearch()}
-          />
-        </HeroGeneral>
+        <Hero.Root backgroundImageUrl="/Banner/hero-bg.png">
+          <Hero.Breadcrumb />
+          <Hero.Content>
+            <Hero.Title>{titleMap[activeTab]}</Hero.Title>
+          </Hero.Content>
+          <Hero.Actions>
+            <InputSearchBar
+              label={t("search.advancedTitle")}
+              placeholder={t("search.advancedPlaceholder")}
+              id="search-page-input"
+              hasVoiceActionButton={false}
+              voiceActionAltText={t("search.voiceAction")}
+              searchActionAltText={t("search.label")}
+              darkMode={true}
+              value={searchInput}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter") handleSearch();
+              }}
+              onSearchActivate={() => handleSearch()}
+            />
+          </Hero.Actions>
+        </Hero.Root>
 
         <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
           <div className="grid-filters grid md:grid-cols-3 xl:grid-cols-12">
             {/* Sidebar */}
             <div className="p-32 pl-0 xl:col-span-4 xl:block">
               <div className="mb-64 mt-32 flex max-w-[592px] flex-col gap-16 pr-32">
-                <h2 className="text-xl mb-16 font-bold text-neutral-900">Tipo</h2>
+                <h2 className="text-xl mb-16 font-bold text-neutral-900">{t("search.type")}</h2>
                 {TYPES.map((item) => {
                   const isActive = item.type === activeTab;
                   const icon = typeof item.icon === "function" ? item.icon(isActive) : item.icon;
@@ -466,7 +474,7 @@ export default function SearchClient() {
                             isActive ? "font-bold text-primary-600" : "font-bold text-neutral-900"
                           }
                         >
-                          {item.label}
+                          {t(`search.types.${item.labelKey}`)}
                         </span>
                         <Pill
                           variant="neutral"
@@ -474,7 +482,7 @@ export default function SearchClient() {
                           circular={false}
                           className="text-xs ml-16 font-medium text-neutral-500"
                         >
-                          {totals[item.type].toLocaleString("pt-PT")}
+                          {totals[item.type].toLocaleString(i18n.language)}
                         </Pill>
                       </div>
                     </Toggle>
@@ -484,13 +492,13 @@ export default function SearchClient() {
 
               {activeTab === "datasets" && (
                 <div className="mb-32 flex flex-col gap-32">
-                  <h2 className="text-xl font-bold text-neutral-900">Filtros</h2>
+                  <h2 className="text-xl font-bold text-neutral-900">{t("filters.filters")}</h2>
                   {(Object.keys(DATASET_FILTERS) as FilterKey[]).map((filterKey) => {
                     const section = DATASET_FILTERS[filterKey];
                     return (
                       <div key={filterKey} className="flex max-w-[592px] flex-col gap-8 pr-32">
                         <h3 className="mb-8 text-base font-bold text-neutral-900">
-                          {section.title}
+                          {t(`filters.${section.title}.${section.title}`)}
                         </h3>
                         {section.options.map((option) => {
                           const isSelected = selectedFilters[filterKey] === option.id;
@@ -516,7 +524,7 @@ export default function SearchClient() {
                                       : "font-bold text-neutral-900"
                                   }
                                 >
-                                  {option.label}
+                                  {t(`filters.${section.title}.${option.label}`)}
                                 </span>
                                 {"description" in option && option.description && (
                                   <span className="text-xs ml-8 font-normal text-neutral-900">
@@ -568,8 +576,7 @@ export default function SearchClient() {
                                 {dataset.organization.name}
                                 {dataset.last_modified && (
                                   <span className="ml-8">
-                                    — Atualizado a{" "}
-                                    {new Date(dataset.last_modified).toLocaleDateString("pt-PT")}
+                                    — {t("search.updatedOn", { date: new Date(dataset.last_modified).toLocaleDateString(i18n.language) })}
                                   </span>
                                 )}
                               </p>
@@ -597,8 +604,8 @@ export default function SearchClient() {
                           icon={
                             <Icon name="agora-line-search" className="h-48 w-48 text-neutral-400" />
                           }
-                          title={`Nenhum resultado encontrado para "${query}"`}
-                          description="Tente pesquisar com termos diferentes."
+                          title={t("search.noResultsFor", { query })}
+                          description={t("search.tryDifferentTerms")}
                         />
                       )}
                     </div>
@@ -630,8 +637,8 @@ export default function SearchClient() {
                           icon={
                             <Icon name="agora-line-search" className="h-48 w-48 text-neutral-400" />
                           }
-                          title={`Nenhum resultado encontrado para "${query}"`}
-                          description="Tente pesquisar com termos diferentes."
+                          title={t("search.noResultsFor", { query })}
+                          description={t("search.tryDifferentTerms")}
                         />
                       )}
                     </div>
@@ -676,8 +683,8 @@ export default function SearchClient() {
                               className="h-48 w-48 text-neutral-400"
                             />
                           }
-                          title={`Nenhum resultado encontrado para "${query}"`}
-                          description="Tente pesquisar com termos diferentes."
+                          title={t("search.noResultsFor", { query })}
+                          description={t("search.tryDifferentTerms")}
                         />
                       )}
                     </div>
@@ -726,8 +733,8 @@ export default function SearchClient() {
                           icon={
                             <Icon name="agora-line-search" className="h-48 w-48 text-neutral-400" />
                           }
-                          title={`Nenhum resultado encontrado para "${query}"`}
-                          description="Tente pesquisar com termos diferentes."
+                          title={t("search.noResultsFor", { query })}
+                          description={t("search.tryDifferentTerms")}
                         />
                       )}
                     </div>
@@ -752,7 +759,7 @@ export default function SearchClient() {
 
       {!query && (
         <div className="container mx-auto py-48 text-center text-neutral-500">
-          <p className="text-m-regular">Introduza um termo para pesquisar no portal.</p>
+          <p className="text-m-regular">{t("search.enterTerm")}</p>
         </div>
       )}
     </div>

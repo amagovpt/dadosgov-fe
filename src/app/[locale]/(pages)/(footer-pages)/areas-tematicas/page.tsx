@@ -1,4 +1,4 @@
-import HeroGeneral from '@/components/HeroGeneral'
+import { Hero } from '@/components/Shared/Hero'
 import { TopicCard } from '@/components/tematic-areas/TopicCard';
 import { fetchHomepageData } from '@/service/api/system';
 import { getTematicAreas } from '@/service/queries/topics-areas/tematic-areas';
@@ -6,55 +6,55 @@ import { getAssets } from '@/utils/getAssets';
 import { parseHtmlToParagraphs } from '@/utils/htmlToParagraphs';
 import { Metadata } from 'next';
 import Image from 'next/image';
+import initTranslations from '@/app/i18n';
 
 
-export async function generateMetadata({ }: {
+export async function generateMetadata({ params }: {
     params: Promise<{ locale: string; }>;
 }): Promise<Metadata> {
 
-    try {
-        const { hero } = await getTematicAreas("pt");
-        return {
-            title: hero.title,
-            description: hero.description,
-        };
-    } catch (error) {
-        // Fall back to the layout's default title rather than failing the
-        // whole page render when the CMS is unreachable.
-        console.error("Error fetching areas-tematicas metadata:", error);
-        return {};
-    }
+    const { locale } = await params;
+    const { hero } = await getTematicAreas(locale);
+
+    return {
+        title: hero.title,
+        description: hero.description,
+    };
 }
 
-export default async function page() {
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
+    const { t } = await initTranslations({ locale, namespaces: ['common'] });
 
     const { site_metrics } = await fetchHomepageData();
     const { datasets, organizations } = site_metrics
-    const { hero, topics } = await getTematicAreas("pt");
+    const { hero, topics } = await getTematicAreas(locale);
     const FEATURED_SLUG = "governo-administracao-publica"
     const featuredTopic = topics.find((topic) => topic.slug === FEATURED_SLUG)
     const otherTopics = topics.filter((topic) => topic.slug !== FEATURED_SLUG).toReversed()
 
     return (
         <div className="w-full h-full flex flex-col items-center justify-center">
-            <HeroGeneral title={hero.title}>
-                <div className="text-white">
-                    {parseHtmlToParagraphs(hero.description)}
-                </div>
-            </HeroGeneral>
+            <Hero.Root>
+                <Hero.Breadcrumb />
+                <Hero.Content>
+                    <Hero.Title>{hero.title}</Hero.Title>
+                    <Hero.Description description={parseHtmlToParagraphs(hero.description)} />
+                </Hero.Content>
+            </Hero.Root>
             <main className="w-full h-full flex flex-col items-center justify-center py-64 gap-32">
                 <div className="container w-full h-full flex flex-row gap-32">
                     <div className="flex flex-row gap-8">
                         <span className='text-m-bold'>{topics.length}</span>
-                        <span className='text-m-regular'>Áreas Temáticas</span>
+                        <span className='text-m-regular'>{t('thematicAreas')}</span>
                     </div>
                     <div className="flex flex-row gap-8">
-                        <span className='text-m-bold'>{datasets.toLocaleString("pt-PT")}</span>
-                        <span className='text-m-regular'>Conjunto de Dados</span>
+                        <span className='text-m-bold'>{datasets.toLocaleString(locale)}</span>
+                        <span className='text-m-regular'>{t('datasets')}</span>
                     </div>
                     <div className="flex flex-row gap-8">
-                        <span className='text-m-bold'>{organizations.toLocaleString("pt-PT")}</span>
-                        <span className='text-m-regular'>Organizações</span>
+                        <span className='text-m-bold'>{organizations.toLocaleString(locale)}</span>
+                        <span className='text-m-regular'>{t('organizations')}</span>
                     </div>
                 </div>
                 <div className="container w-full h-full flex flex-row ">

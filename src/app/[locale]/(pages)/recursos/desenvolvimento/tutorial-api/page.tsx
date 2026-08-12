@@ -5,8 +5,9 @@ import Anchor from "@/components/Shared/Anchor";
 
 export const dynamic = "force-dynamic";
 
-export default async function page() {
-  const { title, actionTitle, body, actions } = await getFaqs("api-tutorial", "pt");
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { title, actionTitle, body, actions } = await getFaqs("api-tutorial", locale);
 
   return (
     <main className="flex h-full w-full flex-col items-center justify-center">

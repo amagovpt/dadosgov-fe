@@ -2,28 +2,28 @@ import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { getFaqs } from "@/service/queries/faqs/faqs";
 import { Metadata } from "next";
 import MarkDownRender from "@/components/Shared/MarkDownRender";
+import initTranslations from "@/app/i18n";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   {
-    //params,
+    params,
   }: {
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  try {
-    const { title } = await getFaqs("como-publicar-dados", "pt");
-    return { title };
-  } catch (error) {
-    // Fall back to the layout's default title rather than failing the whole
-    // page render when the CMS is unreachable.
-    console.error("Error fetching como-publicar-dados metadata:", error);
-    return {};
-  }
+  const { locale } = await params;
+  const { title } = await getFaqs("como-publicar-dados", locale);
+
+  return {
+    title,
+  };
 }
-export default async function PublishFaqPage() {
-  const { body } = await getFaqs("como-publicar-dados", "pt");
+export default async function PublishFaqPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { t } = await initTranslations({ locale, namespaces: ["common"] });
+  const { body } = await getFaqs("como-publicar-dados", locale);
 
   return (
     <main className="flex flex-col pt-32 pb-64 bg-white gap-64 justify-center items-center w-full h-full">
@@ -40,7 +40,7 @@ export default async function PublishFaqPage() {
               </div>
             ) : (
               <p className="text-m-regular leading-7 text-[#2b363c]">
-                Não foi possível carregar o conteúdo.
+                {t("contentLoadError")}
               </p>
             )}
           </div>

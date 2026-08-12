@@ -6,6 +6,19 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(datasets)!: filter "Elevado Valor" on the HVD badge instead of the raw tag**
+  - The option moved from `?tag=hvd` to `?badge=hvd`, so both options in "Tipo de
+    dados" now rest on the badge — the curated signal, granted by the backend's
+    `update-badges` job — instead of a free-form tag any harvested source can set.
+    The sidebar count moved with it, so the number next to the option is the
+    number of results it returns.
+  - **Expect fewer results than before** (measured in dev: 251 tagged → 144
+    badged). The badge job only grants HVD to datasets owned by certified
+    public-service organizations, so 107 tagged datasets fall outside it;
+    widening that is a policy decision on the badge job, tracked separately.
+  - In an environment where `update-badges` has never run, the option shows 0
+    and returns 0 — coherent, but empty until the job runs.
+
 - **feat(datasets): add the "Inspire" option to the listing "Tipo de dados" filter** [#536](https://github.com/amagovpt/dadosgov-fe/pull/536)
   - New "Inspire" option below "Conjuntos de dados de Elevado Valor", filtering
     on `?badge=inspire`. The INSPIRE badge is the curated signal: it is granted

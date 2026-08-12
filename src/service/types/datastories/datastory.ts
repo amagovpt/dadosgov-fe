@@ -54,6 +54,14 @@ export type BigNumbersSection = {
 
 // ----------------------------------------------------------------------------------------------
 
+export type BigNumbersIframeSection = {
+  schemaName: "section-datastory-bignumbers-iframe";
+  id: string;
+  iframe: Iframe[];
+};
+
+// ----------------------------------------------------------------------------------------------
+
 type TimelineEvent = {
   label: string;
   icon: string;
@@ -106,8 +114,8 @@ type Iframe = {
 export type IframeSection = {
   schemaName: "section-datastory-iframe";
   id: string;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   iframe: Iframe[];
 };
 
@@ -178,6 +186,7 @@ export type SummarySection = {
 
 export type DatastorySection =
   | BigNumbersSection
+  | BigNumbersIframeSection
   | TimelineSection
   | PublicAdminStructureSection
   | IframeSection

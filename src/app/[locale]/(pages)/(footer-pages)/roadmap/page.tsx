@@ -1,15 +1,18 @@
 import { Accordion } from '@/components/Shared/Accordion';
 import { Typograph } from '@/components/Shared/Generics/Typograph';
-import Hero from '@/components/Shared/Hero';
+import { Hero } from '@/components/Shared/Hero';
 import SimpleSiteMap from '@/components/Shared/SiteMap/SimpleSiteMap'
 import { Table } from '@/components/Shared/Table';
 import { getRoadmapPage } from '@/service/queries/roadmap';
 import { parseHtmlToParagraphs } from '@/utils/htmlToParagraphs';
 import ReactMarkdown from 'react-markdown';
+import initTranslations from '@/app/i18n';
 
 export const dynamic = "force-dynamic";
 
-export default async function page() {
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
+    const { t } = await initTranslations({ locale, namespaces: ['common'] });
 
     const { hero,
         sitemap,
@@ -20,21 +23,24 @@ export default async function page() {
         followAlongAndJoinIn,
         history,
         historyOfDevelopment,
-    } = await getRoadmapPage("pt");
+    } = await getRoadmapPage(locale);
 
     const tableHeaders = [
-        "Funcionalidade",
-        "Descrição",
-        "Estado",
+        t('roadmap.functionality'),
+        t('roadmap.description'),
+        t('roadmap.status'),
     ];
 
 
     return (
         <main className="w-full h-full flex flex-col items-center justify-center ">
-            <Hero
-                title={hero.title}
-                description={parseHtmlToParagraphs(hero.description)}
-            />
+            <Hero.Root backgroundImageUrl={null}>
+                <Hero.Breadcrumb />
+                <Hero.Content>
+                    <Hero.Title>{hero.title}</Hero.Title>
+                    <Hero.Description description={parseHtmlToParagraphs(hero.description)} />
+                </Hero.Content>
+            </Hero.Root>
             <div className="container grid grid-cols-12 gap-32 py-64 roadmap-page">
                 <div className="md:col-span-3 hidden md:block">
                     <SimpleSiteMap
@@ -78,19 +84,19 @@ export default async function page() {
                                             (<span className="flex gap-8 items-center justify-start">
                                                 <div className="w-8 h-8 bg-success-600 rounded-full" />
                                                 <div className="text-m-regular">
-                                                    Concluído
+                                                    {t('roadmap.finished')}
                                                 </div>
                                             </span>) : evolution.state === "onProgress" ?
                                                 (<span className="flex gap-8 items-center justify-start">
                                                     <div className="w-8 h-8 bg-warning-600 rounded-full" />
                                                     <div className="text-m-regular">
-                                                        Em desenvolvimento
+                                                    {t('roadmap.inProgress')}
                                                     </div>
                                                 </span>) :
                                                 (<span className="flex gap-8 items-center justify-start">
                                                     <div className="w-8 h-8 bg-neutral-600 rounded-full" />
                                                     <div className="text-m-regular">
-                                                        Em breve
+                                                    {t('roadmap.comingSoon')}
                                                     </div>
                                                 </span>)}</Table.Cell>
                                     </Table.Row>

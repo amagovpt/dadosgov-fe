@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import { getPublicationsPage } from "@/service/queries/resources/publications";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
@@ -13,31 +13,29 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const { hero } = await getPublicationsPage("pt");
-    return {
-      title: `${hero.title} - Dados Gov PT`,
-      description: hero.description,
-    };
-  } catch (error) {
-    // Fall back to the layout's default title rather than failing the whole
-    // page render when the CMS is unreachable.
-    console.error("Error fetching publicacoes metadata:", error);
-    return {};
-  }
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const { hero } = await getPublicationsPage(locale);
+
+  return {
+    title: `${hero.title} - Dados Gov PT`,
+    description: hero.description,
+  };
 }
 
 export default async function PublicationsPage({
   searchParams,
+  params,
 }: {
   searchParams: Promise<{ page?: string; sort?: string }>;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const { page: pageParam, sort: sortParam } = await searchParams;
   const sort = parsePublicationsSort(sortParam);
   const currentPage = Math.max(1, Number(pageParam) || 1);
 
-  const { hero, publications } = await getPublicationsPage("pt");
+  const { hero, publications } = await getPublicationsPage(locale);
 
   const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
     if (pdfDocument === "#") return null;
@@ -59,12 +57,13 @@ export default async function PublicationsPage({
 
   return (
     <main className="flex w-full flex-col items-center justify-center bg-primary-50">
-      <HeroGeneral
-        title={hero.title}
-        backgroundImageUrl="/Banner/hero-bg.png"
-      >
-        <div className="text-white">{parseHtmlToParagraphs(hero.description)}</div>
-      </HeroGeneral>
+      <Hero.Root backgroundImageUrl="/Banner/hero-bg.png">
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{hero.title}</Hero.Title>
+          <Hero.Description description={parseHtmlToParagraphs(hero.description)} />
+        </Hero.Content>
+      </Hero.Root>
       <PublicationsClient
         publications={pagedWithCounts}
         total={total}

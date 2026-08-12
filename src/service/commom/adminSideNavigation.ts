@@ -61,11 +61,9 @@ export async function getAdminSideNavigation(
     throw new Error("Failed to fetch admin side navigation");
   }
 
-  const navData = data.findAdminSideNavigationSingleton?.data;
-
-  if (!navData) {
+  if (!data.findAdminSideNavigationSingleton?.data) {
     return {} as AdminSideNavigationData;
   }
 
-  return flattenData(navData) as unknown as AdminSideNavigationData;
+  return flattenData(data, locale).findAdminSideNavigationSingleton as AdminSideNavigationData;
 }

@@ -3,14 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { InputSearchBar } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
+import { twJoin, twMerge } from "tailwind-merge";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
 
-const SEARCH_OPTIONS: { type: SearchType; label: string; path: string }[] = [
-  { type: "datasets", label: "conjuntos de dados", path: "/datasets" },
-  { type: "dataservices", label: "APIs", path: "/dataservices" },
-  { type: "reuses", label: "reutilizações", path: "/reuses" },
-  { type: "organizations", label: "organizações", path: "/organizations" },
+const SEARCH_OPTIONS: { type: SearchType; labelKey: string; path: string }[] = [
+  { type: "datasets", labelKey: "datasets", path: "/datasets" },
+  { type: "dataservices", labelKey: "apis", path: "/dataservices" },
+  { type: "reuses", labelKey: "reuses", path: "/reuses" },
+  { type: "organizations", labelKey: "organizations", path: "/organizations" },
 ];
 
 interface SearchDropdownProps {
@@ -20,16 +22,21 @@ interface SearchDropdownProps {
   label?: string;
   hasVoiceActionButton?: boolean;
   excludeTypes?: SearchType[];
+  classname?: string;
 }
 
 export default function SearchDropdown({
   id,
   darkMode = false,
-  placeholder = "Pesquisar conjunto de dados, organizações, reutilizações...",
-  label = "Pesquisar",
+  placeholder,
+  label,
   hasVoiceActionButton = false,
   excludeTypes = [],
+  classname,
 }: SearchDropdownProps) {
+  const { t } = useTranslation("common");
+  const resolvedPlaceholder = placeholder ?? t("search.advancedPlaceholder");
+  const resolvedLabel = label ?? t("search.label");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -150,17 +157,17 @@ export default function SearchDropdown({
   };
 
   return (
-    <div ref={wrapperRef} className="relative w-full py-64">
+    <div ref={wrapperRef} className={twMerge("relative w-full py-64", classname)}>
       <InputSearchBar
-        label={label}
-        placeholder={placeholder}
+        label={resolvedLabel}
+        placeholder={resolvedPlaceholder}
         id={id}
         onKeyDown={handleKeyDown}
         onSearchActivate={handleSearchActivate}
         darkMode={darkMode}
         hasVoiceActionButton={hasVoiceActionButton}
-        voiceActionAltText="Pesquisar por voz"
-        searchActionAltText="Pesquisar"
+        voiceActionAltText={t("search.voiceAction")}
+        searchActionAltText={t("header.search")}
         autoComplete="off"
       />
 
@@ -194,9 +201,10 @@ export default function SearchDropdown({
                 onMouseLeave={() => setActiveIndex(-1)}
                 onClick={() => navigateToSearch(option.type)}
               >
-                Pesquisar{" "}
-                <strong>&laquo;{query.trim()}&raquo;</strong>{" "}
-                nos/nas <strong>{option.label}</strong>
+                {t("search.dropdown.searchIn", {
+                  query: query.trim(),
+                  type: t(`search.dropdown.${option.labelKey}`),
+                })}
               </li>
             ))}
           </ul>

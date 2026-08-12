@@ -4,7 +4,7 @@ import Section from "../../Section";
 import { IframeSection } from "@/service/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export type IframeI = IframeSection & { className?: string };
+export type IframeI = Omit<IframeSection, "schemaName"> & { className?: string };
 
 export default function Iframe({ id, title, description, iframe, className }: IframeI) {
   return (
@@ -15,19 +15,21 @@ export default function Iframe({ id, title, description, iframe, className }: If
         className
       )}
     >
-      <InfoBlock.Root className={"gap-64 pt-64"}>
-        <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
-          <InfoBlock.Title
-            titleLevel="h2"
-            title={title}
-            className="text-2xl font-bold text-primary-900"
-          />
-          <InfoBlock.Description
-            className="whitespace-pre-wrap text-m-light text-black"
-            description={formatHtmlParagraphs(description) as string[]}
-          />
-        </InfoBlock.Header>
-      </InfoBlock.Root>
+      {(title || description) && (
+        <InfoBlock.Root className={"gap-64 pt-64"}>
+          <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
+            <InfoBlock.Title
+              titleLevel="h2"
+              title={title}
+              className="text-2xl font-bold text-primary-900"
+            />
+            <InfoBlock.Description
+              className="whitespace-pre-wrap text-m-light text-black"
+              description={formatHtmlParagraphs(description) as string[]}
+            />
+          </InfoBlock.Header>
+        </InfoBlock.Root>
+      )}
       {iframe.map((iframe, index) => {
         return (
           <div

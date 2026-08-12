@@ -1,13 +1,30 @@
 import AboutOpenData from "@/components/articles/AboutOpenData";
-import { fetchGitHubMarkdown } from "@/service/api/github-markdown";
 import { Metadata } from "next";
+import {
+  getAboutOpenDataMetadata,
+  getAboutOpenDataPage,
+} from "@/service/queries/documentation/about-open-data";
 
-export const metadata: Metadata = {
-  title: "Sobre dados abertos - dados.gov.pt",
-  description: "Saiba o que são dados abertos e qual a sua importância.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getAboutOpenDataMetadata(locale);
 
-export default async function AboutOpenDataPage() {
-  const content = await fetchGitHubMarkdown("pages/faqs/about_opendata");
-  return <AboutOpenData initialContent={content} />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function AboutOpenDataPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const page = await getAboutOpenDataPage(locale);
+  return <AboutOpenData page={page} />;
 }
