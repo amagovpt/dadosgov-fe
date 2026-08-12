@@ -202,8 +202,10 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-24">
                     {tabularData.columns.map((col, i) => (
-                      <div key={i}>
-                        <p className="text-sm font-bold text-neutral-900 mb-4">{col.name}</p>
+                      <div key={i} className="min-w-0">
+                        <p className="text-sm font-bold text-neutral-900 mb-4 break-words">
+                          {col.name}
+                        </p>
                         <span className="inline-block bg-neutral-100 text-neutral-900 text-xs px-8 py-4 rounded">
                           {col.type}
                         </span>
