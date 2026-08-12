@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { InputSearchBar } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
+import { twJoin, twMerge } from "tailwind-merge";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
 
@@ -21,6 +22,7 @@ interface SearchDropdownProps {
   label?: string;
   hasVoiceActionButton?: boolean;
   excludeTypes?: SearchType[];
+  classname?: string;
 }
 
 export default function SearchDropdown({
@@ -30,6 +32,7 @@ export default function SearchDropdown({
   label,
   hasVoiceActionButton = false,
   excludeTypes = [],
+  classname,
 }: SearchDropdownProps) {
   const { t } = useTranslation("common");
   const resolvedPlaceholder = placeholder ?? t("search.advancedPlaceholder");
@@ -154,7 +157,7 @@ export default function SearchDropdown({
   };
 
   return (
-    <div ref={wrapperRef} className="relative w-full py-64">
+    <div ref={wrapperRef} className={twMerge("relative w-full py-64", classname)}>
       <InputSearchBar
         label={resolvedLabel}
         placeholder={resolvedPlaceholder}

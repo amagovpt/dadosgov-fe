@@ -11,7 +11,7 @@ import { Dataset } from "@/service/types/dataset";
 import { Organization } from "@/service/types/identity";
 import { APIResponse } from "@/service/types/shared";
 
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Button from "../Primitives/Button";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
@@ -110,16 +110,20 @@ export default function DatasetsClient({
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
-      <HeroGeneral
-        title={pageContent?.hero?.title ?? tds("hero.title")}
-        subtitle={
-          formatHtmlParagraphs(
-            pageContent?.hero?.description ?? tds("hero.subtitle")
-          ) as string[]
-        }
-      >
-        <PublishDropdown darkMode={true} outline={false} />
-      </HeroGeneral>
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{pageContent?.hero?.title ?? tds("hero.title")}</Hero.Title>
+          <Hero.Description
+            description={formatHtmlParagraphs(
+              pageContent?.hero?.description ?? tds("hero.subtitle")
+            )}
+          />
+        </Hero.Content>
+        <Hero.Actions>
+          <PublishDropdown darkMode={true} outline={false} />
+        </Hero.Actions>
+      </Hero.Root>
 
       {/* Search Filter */}
       <SearchFilter
