@@ -1,5 +1,5 @@
 import initTranslations from "@/app/i18n";
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import SiteMapTree from "@/components/Shared/SiteMap/SiteMapTree";
 import { getHeaderNavigation } from "@/service/commom/header";
 import { getFrontOfficeMetadata, getFrontOfficePage } from "@/service/queries/common";
@@ -62,25 +62,21 @@ export default async function Sitemap({
 
     return (
         <main className="flex flex-col">
-            <HeroGeneral
-                title={
-                    <span className="text-white flex flex-col items-start leading-tight">
-                        {pageContent?.hero.title}
-                    </span>
-                }
-                subtitle={
-                    <div className="flex flex-col gap-32">
-                        <span className="text-white text-m-regular">
-                            {stripHtmlTags(pageContent?.hero.description)}
-                        </span>
-                        <span className="text-white text-m-regular">
-                            {t("updatedAt", {
+            <Hero.Root>
+                <Hero.Breadcrumb />
+                <Hero.Content>
+                    <Hero.Title className="!text-m-regular text-white">{pageContent?.hero.title}</Hero.Title>
+                    <Hero.Description
+                        className="gap-32"
+                        description={[
+                            stripHtmlTags(pageContent?.hero.description),
+                            t("updatedAt", {
                                 date: dayjs(pageContent?.metadata.createdAt).format("DD.MM.YYYY"),
-                            })}
-                        </span>
-                    </div>
-                }
-            />
+                            }),
+                        ]}
+                    />
+                </Hero.Content>
+            </Hero.Root>
             <div className="flex flex-col justify-center items-center py-64 ">
                 <div className="container flex flex-row gap-32">
                     <div className="w-full">

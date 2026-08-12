@@ -1,6 +1,6 @@
 import { Accordion } from '@/components/Shared/Accordion';
 import { Typograph } from '@/components/Shared/Generics/Typograph';
-import Hero from '@/components/Shared/Hero';
+import { Hero } from '@/components/Shared/Hero';
 import SimpleSiteMap from '@/components/Shared/SiteMap/SimpleSiteMap'
 import { Table } from '@/components/Shared/Table';
 import { getRoadmapPage } from '@/service/queries/roadmap';
@@ -34,10 +34,13 @@ export default async function page({ params }: { params: Promise<{ locale: strin
 
     return (
         <main className="w-full h-full flex flex-col items-center justify-center ">
-            <Hero
-                title={hero.title}
-                description={parseHtmlToParagraphs(hero.description)}
-            />
+            <Hero.Root backgroundImageUrl={null}>
+                <Hero.Breadcrumb />
+                <Hero.Content>
+                    <Hero.Title>{hero.title}</Hero.Title>
+                    <Hero.Description description={parseHtmlToParagraphs(hero.description)} />
+                </Hero.Content>
+            </Hero.Root>
             <div className="container grid grid-cols-12 gap-32 py-64 roadmap-page">
                 <div className="md:col-span-3 hidden md:block">
                     <SimpleSiteMap

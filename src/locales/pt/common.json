@@ -44,6 +44,15 @@
   "articleNotFoundDescription": "O artigo que procura não existe ou foi removido.",
   "backToArticles": "Voltar aos artigos",
   "loading": "A carregar...",
+  "notFound": {
+    "error": "Erro 404",
+    "title": "Página não encontrada",
+    "subtitle": "Não conseguimos encontrar o recurso que procura.",
+    "description": "O conteúdo pode ter sido removido, alterado ou o endereço introduzido poderá não estar correto. Explore os conjuntos de dados disponíveis ou volte à página inicial para continuar a sua pesquisa.",
+    "suggestion": "Pesquisar conjunto de dados, organizações, temas...",
+    "whatAreYouLookingFor": "O que procura no portal?",
+    "backToHome": "Voltar à página inicial"
+  },
   "header": {
     "search": "Pesquisar",
     "searchLabel": "O que procura no Portal?",
@@ -257,6 +266,19 @@
   "listingError": {
     "title": "Não foi possível carregar",
     "subtitle": "Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos."
+  },
+  "apiError": {
+    "serverErrorTitle": "Serviço indisponível",
+    "serverErrorDescription": "Ocorreu um erro no servidor. Tente novamente dentro de momentos.",
+    "networkErrorTitle": "Sem ligação",
+    "networkErrorDescription": "Não foi possível contactar o servidor. Verifique a sua ligação à Internet.",
+    "sessionExpiredTitle": "Sessão expirada",
+    "sessionExpiredDescription": "Inicie sessão novamente para continuar.",
+    "pageErrorTitle": "Não foi possível carregar esta página",
+    "pageErrorSubtitle": "O serviço pode estar temporariamente indisponível.",
+    "pageErrorDescription": "Tente novamente dentro de instantes. Se o problema persistir, contacte o suporte.",
+    "pageErrorReference": "Referência: {{digest}}",
+    "backToHome": "Voltar à página inicial"
   },
   "retry": "Tentar novamente",
   "discussions": {

@@ -19,7 +19,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dataservice } from "@/service/types/dataservice";
 import { APIResponse } from "@/service/types/shared";
 import { FrontOfficePage } from "@/service/types/shared/common";
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useDataservicesListing } from "@/hooks/useDataservicesListing";
 import { useTranslation } from "react-i18next";
@@ -62,23 +62,29 @@ export default function DataservicesClient({
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
-      <HeroGeneral
-        title={pageContent?.hero?.title ?? tDs("hero.title")}
-        subtitle={
-          <div className="max-w-[592px] text-primary-100">
-            <p>
-              {total === 0
-                ? tDs("hero.subtitleEmpty")
-                : tDs("hero.subtitleCount", { count: total })}
-            </p>
-            <div className="mt-8">
-              {stripHtmlTags(pageContent?.hero?.description  ?? tDs("hero.subtitleText"))}
-            </div>
-          </div>
-        }
-      >
-        <PublishDropdown darkMode={true} outline={false} />
-      </HeroGeneral>
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{pageContent?.hero?.title ?? tDs("hero.title")}</Hero.Title>
+          <Hero.Description
+            description={
+              <div className="max-w-[592px] text-primary-100">
+                <p>
+                  {total === 0
+                    ? tDs("hero.subtitleEmpty")
+                    : tDs("hero.subtitleCount", { count: total })}
+                </p>
+                <div className="mt-8">
+                  {stripHtmlTags(pageContent?.hero?.description ?? tDs("hero.subtitleText"))}
+                </div>
+              </div>
+            }
+          />
+        </Hero.Content>
+        <Hero.Actions>
+          <PublishDropdown darkMode={true} outline={false} />
+        </Hero.Actions>
+      </Hero.Root>
 
       {/* Search Filter */}
       <SearchFilter

@@ -44,6 +44,15 @@
   "articleNotFoundDescription": "The article you are looking for does not exist or has been removed.",
   "backToArticles": "Back to articles",
   "loading": "Loading...",
+  "notFound": {
+    "error": "Erro 404",
+    "title": "Page not found",
+    "subtitle": "We could not find the resource you are looking for.",
+    "description": "The content may have been removed, changed, or the address you entered may not be correct. Explore the available datasets or return to the home page to continue your search.",
+    "suggestion": "Search datasets, organisations, themes...",
+    "whatAreYouLookingFor": "What are you looking for on the portal?",
+    "backToHome": "Back to home"
+  },
   "header": {
     "search": "Search",
     "searchLabel": "What are you looking for on the portal?",
@@ -257,6 +266,19 @@
   "listingError": {
     "title": "Unable to load",
     "subtitle": "An error occurred while contacting the server. Please try again in a few moments."
+  },
+  "apiError": {
+    "serverErrorTitle": "Service unavailable",
+    "serverErrorDescription": "A server error occurred. Please try again in a few moments.",
+    "networkErrorTitle": "No connection",
+    "networkErrorDescription": "Could not reach the server. Please check your internet connection.",
+    "sessionExpiredTitle": "Session expired",
+    "sessionExpiredDescription": "Please sign in again to continue.",
+    "pageErrorTitle": "This page could not be loaded",
+    "pageErrorSubtitle": "The service may be temporarily unavailable.",
+    "pageErrorDescription": "Please try again shortly. If the problem persists, contact support.",
+    "pageErrorReference": "Reference: {{digest}}",
+    "backToHome": "Back to homepage"
   },
   "retry": "Try again",
   "discussions": {

@@ -16,7 +16,7 @@ import SearchFilter from "@/components/Shared/SearchFilter";
 import { Organization } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
 import { APIResponse } from "@/service/types/shared";
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
 import { useReusesListing } from "@/hooks/useReusesListing";
@@ -72,12 +72,22 @@ export default function ReusesClient({
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
-      <HeroGeneral
-        title={pageContent?.hero.title ?? t("reuses")}
-        subtitle={<p className="max-w-[592px] text-primary-100">{pageContent?.hero.subtitle ?? tr("hero.subtitle")}</p>}
-      >
-        <PublishDropdown darkMode={true} outline={false} />
-      </HeroGeneral>
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{pageContent?.hero.title ?? t("reuses")}</Hero.Title>
+          <Hero.Description
+            description={
+              <p className="max-w-[592px] text-primary-100">
+                {pageContent?.hero.subtitle ?? tr("hero.subtitle")}
+              </p>
+            }
+          />
+        </Hero.Content>
+        <Hero.Actions>
+          <PublishDropdown darkMode={true} outline={false} />
+        </Hero.Actions>
+      </Hero.Root>
 
       {/* Search Filter */}
       <SearchFilter

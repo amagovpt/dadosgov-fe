@@ -9,7 +9,7 @@ import { OrgBadges, Organization } from "@/service/types/identity";
 import { APIResponse } from "@/service/types/shared";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
@@ -65,16 +65,22 @@ export default function OrganizationsClient({
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
-      <HeroGeneral
-        title={pageContent?.hero?.title ?? tOrg("hero.title")}
-        subtitle={
-          <p className="max-w-[592px] text-primary-100">
-            {pageContent?.hero?.subtitle ?? tOrg("hero.subtitle")}
-          </p>
-        }
-      >
-        <PublishDropdown darkMode={true} outline={false} />
-      </HeroGeneral>
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{pageContent?.hero?.title ?? tOrg("hero.title")}</Hero.Title>
+          <Hero.Description
+            description={
+              <p className="max-w-[592px] text-primary-100">
+                {pageContent?.hero?.subtitle ?? tOrg("hero.subtitle")}
+              </p>
+            }
+          />
+        </Hero.Content>
+        <Hero.Actions>
+          <PublishDropdown darkMode={true} outline={false} />
+        </Hero.Actions>
+      </Hero.Root>
 
       {/* Search Filter */}
       <SearchFilter
