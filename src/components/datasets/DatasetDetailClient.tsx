@@ -17,6 +17,7 @@ import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followe
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import {
   QUALITY_CRITERIA,
@@ -141,6 +142,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
         <div className="xl:col-span-6 xl:block">
           <div className="flex flex-col gap-4" ref={titleRef}>
             <h1 className="mb-24 text-xl-bold leading-tight text-primary-900">{dataset.title}</h1>
+            <DatasetBadges badges={dataset.badges} className="mb-24" />
           </div>
 
           {/* Description */}

@@ -5,6 +5,7 @@ import { ToggleGroup, Toggle, usePopupContext } from "@ama-pt/agora-design-syste
 import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { Frequency, Granularity, License } from "@/service/types/catalog";
 import { Dataset } from "@/service/types/dataset";
@@ -219,6 +220,7 @@ export default function DatasetsClient({
                       ...dataset,
                       last_modified: timeAgo,
                       link: `/datasets/${dataset.slug}`,
+                      titleBadges: <DatasetBadges badges={dataset.badges} />,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />;
                   })
