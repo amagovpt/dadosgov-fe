@@ -13,7 +13,6 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -48,6 +47,8 @@ import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
 import { stripLocale } from "@/utils/stripLocale";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
+import { LocalizedLink } from "./Shared/LocalizedLink";
 import { areas, isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
 import Anchor from "./Shared/Anchor";
@@ -68,6 +69,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   // usePathname() is locale-prefixed (`/pt/login`); normalize for route
   // comparisons while keeping the full path for the post-login `next` redirect.
   const localePath = stripLocale(pathname);
+  // Nav hrefs from the CMS/config carry no locale prefix; localize them before
+  // navigating so the i18n proxy never has to 307 (prefetch-loop fix).
+  const localizeHref = useLocalizedHref();
   const { user, samlLogin } = useAuth();
   const { t } = useTranslation("common");
   const initials = user
@@ -230,7 +234,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     setSubmenu(null);
 
     if (href !== "#") {
-      router.push(href);
+      router.push(localizeHref(href));
     }
   };
 
@@ -308,7 +312,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
         <AgoraHeader ref={headerRef} maxNavigationItems={7}>
           <Brand>
             <Logo>
-              <Link href="/" className="flex items-center">
+              <LocalizedLink href="/" className="flex items-center">
                 <Image
                   src="/Logos/Dados.gov_logocores.png"
                   alt="dados.gov.pt"
@@ -316,7 +320,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   width={251}
                   priority
                 />
-              </Link>
+              </LocalizedLink>
             </Logo>
           </Brand>
 
@@ -332,7 +336,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   <Area
                     value={area.value}
                     label={area.value === "1" ? t("header.portal") : area.label}
-                    onClick={() => router.push(area.href)}
+                    onClick={() => router.push(localizeHref(area.href))}
                     active={selectedArea === area.value}
                   />
                 );
@@ -393,7 +397,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       leadingIcon="agora-line-user"
                       leadingIconHover="agora-solid-user"
                     >
-                      <Link href={`/users/${user.slug}`}>{t("header.profile")}</Link>
+                      <LocalizedLink href={`/users/${user.slug}`}>
+                        {t("header.profile")}
+                      </LocalizedLink>
                     </AuthenticatedBodyLink>,
                     adminItem ? (
                       <AuthenticatedBodyLink
@@ -402,7 +408,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                         leadingIcon="agora-line-hardware-settings"
                         leadingIconHover="agora-solid-hardware-settings"
                       >
-                        <Link href={adminItem.href ?? "#"}>{adminItem.label}</Link>
+                        <LocalizedLink href={adminItem.href ?? "#"}>{adminItem.label}</LocalizedLink>
                       </AuthenticatedBodyLink>
                     ) : null,
                     <AuthenticatedBodyLink
@@ -411,7 +417,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       leadingIcon="agora-line-mega-phone"
                       leadingIconHover="agora-solid-mega-phone"
                     >
-                      <Link href="/admin/notificacoes">{t("header.notifications")}</Link>
+                      <LocalizedLink href="/admin/notificacoes">
+                        {t("header.notifications")}
+                      </LocalizedLink>
                     </AuthenticatedBodyLink>,
                   ].filter(
                     (el): el is ReactElement<ComponentProps<typeof AuthenticatedBodyLink>> =>
@@ -448,11 +456,11 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   leadingIcon="agora-line-user"
                   leadingIconHover="agora-solid-user"
                 >
-                  <Link
+                  <LocalizedLink
                     href={`/login${pathname && localePath !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`}
                   >
                     {t("header.signIn")}
-                  </Link>
+                  </LocalizedLink>
                 </UnauthenticatedLink>
               </Unauthenticated>
             )}
@@ -471,9 +479,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 .filter((link) => isEnabled(link, !!user))
                 .map((link) => (
                   <NavigationLink key={link.id ?? link.href} appearance="link">
-                    <Link href={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
+                    <LocalizedLink href={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
                       {link.label}
-                    </Link>
+                    </LocalizedLink>
                   </NavigationLink>
                 )),
               ...dropdowns

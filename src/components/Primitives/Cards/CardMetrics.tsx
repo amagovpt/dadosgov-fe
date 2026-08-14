@@ -6,6 +6,7 @@ import Icon from "../../Primitives/Icon";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 
 export type CardMetricsProps = {
     link: string;
@@ -60,6 +61,11 @@ export default function CardMetrics({
     titleBadges,
 }: CardMetricsProps) {
     const { t, i18n } = useTranslation("common");
+    // Callers pass unprefixed links (`/datasets/<slug>`); localize here so every
+    // card list avoids the i18n proxy 307 on prefetch (idempotent when a caller
+    // already passes a locale-prefixed link).
+    const localizeHref = useLocalizedHref();
+    const localizedLink = localizeHref(link);
     const qualityScore = quality?.score != null ? Math.round(quality.score * 100) : 0;
     const sourceImg = organization?.logo || owner?.avatar_thumbnail || PLACEHOLDER;
     // Track only which source failed to load, so the displayed image is always
@@ -87,7 +93,7 @@ export default function CardMetrics({
 
     return (
         <Link
-            href={link}
+            href={localizedLink}
             className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
         >
             <CardGeneral
@@ -185,7 +191,7 @@ export default function CardMetrics({
                 }
                 isBlockedLink={true}
                 anchor={{
-                    href: link,
+                    href: localizedLink,
                 }}
             />
         </Link>
