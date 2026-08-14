@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Button, CardArticle } from "@ama-pt/agora-design-system";
-import Link from "next/link";
 import { Dataset } from "@/service/types/dataset";
 import { Post } from "@/service/types/posts";
 import { Reuse } from "@/service/types/reuse";
@@ -21,6 +20,8 @@ import AppIcon from "../Primitives/AppIcon";
 import { useTranslation } from "react-i18next";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { highlightText } from "@/utils/highlightText";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -63,6 +64,9 @@ export default function HomeClient({
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
   const { t, i18n } = useTranslation("common");
+  // Design-system `mainAnchor` hrefs bypass <LocalizedLink>; localize them
+  // explicitly so the i18n proxy never has to 307 (prefetch-loop fix).
+  const localizeHref = useLocalizedHref();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -234,7 +238,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/datasets">
+              <LocalizedLink href="/datasets">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -245,7 +249,7 @@ export default function HomeClient({
                 >
                   <span>{t("seeAllDatasets")}</span>
                 </Button>
-              </Link>
+              </LocalizedLink>
             </div>
           </div>
         </section>
@@ -278,14 +282,14 @@ export default function HomeClient({
                       }
                       title={story.title}
                       mainAnchor={{
-                        href: `/datastories/${story.slug}`,
+                        href: localizeHref(`/datastories/${story.slug}`),
                       }}
                       blockedLink={true}
                     />
                   ))}
                 </div>
                 <div className="mt-32">
-                  <Link href="/datastories">
+                  <LocalizedLink href="/datastories">
                     <Button
                       variant="primary"
                       appearance="link"
@@ -297,7 +301,7 @@ export default function HomeClient({
                     >
                       <span className="text-white">{t("seeAllDataStories")}</span>
                     </Button>
-                  </Link>
+                  </LocalizedLink>
                 </div>
               </>
             ) : (
@@ -330,7 +334,7 @@ export default function HomeClient({
                       blockedLink={false}
                     >
                       <div className="mt-auto pt-16">
-                        <Link href={`/noticias/${post.slug}`}>
+                        <LocalizedLink href={`/noticias/${post.slug}`}>
                           <Button
                             variant="primary"
                             appearance="link"
@@ -341,7 +345,7 @@ export default function HomeClient({
                           >
                             <span>{t("readMore")}</span>
                           </Button>
-                        </Link>
+                        </LocalizedLink>
                       </div>
                     </CardArticle>
                   </div>
@@ -353,7 +357,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/noticias">
+              <LocalizedLink href="/noticias">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -364,7 +368,7 @@ export default function HomeClient({
                 >
                   <span>{t("seeAllNews")}</span>
                 </Button>
-              </Link>
+              </LocalizedLink>
             </div>
           </div>
         </section>
@@ -387,7 +391,7 @@ export default function HomeClient({
                 )}
               </div>
             </div>
-            <Link href="/organizations">
+            <LocalizedLink href="/organizations">
               <Button
                 variant="primary"
                 appearance="link"
@@ -398,7 +402,7 @@ export default function HomeClient({
               >
                 <span>{t("seeAllOrganizations")}</span>
               </Button>
-            </Link>
+            </LocalizedLink>
           </div>
         </section>
       </div>

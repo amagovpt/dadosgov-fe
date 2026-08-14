@@ -14,7 +14,7 @@ import {
   LinksSectionSocialLinksLabel,
 } from "@ama-pt/agora-design-system";
 import Image from "next/image";
-import Link from "next/link";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -54,7 +54,7 @@ const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
                   ?.filter((l) => l.enabled === true)
                   ?.map((link, linkIdx) => (
                     <li key={linkIdx}>
-                      <Link
+                      <LocalizedLink
                         href={link.href}
                         className="text-sm text-white transition-colors hover:underline"
                         {...(link.href.startsWith("http")
@@ -62,7 +62,7 @@ const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
                           : {})}
                       >
                         {link.title}
-                      </Link>
+                      </LocalizedLink>
                     </li>
                   ))}
               </ul>
