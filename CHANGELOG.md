@@ -6,6 +6,23 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(upload): raise the resource upload guard to 1 GiB**
+  - `MAX_UPLOAD_SIZE` goes from 800 MB to 1 GiB, mirroring the backend's new
+    `RESOURCES_FILE_MAX_SIZE`. The guard exists to spare the user a doomed
+    upload — a file above it is refused before the first part leaves the
+    browser — so keeping it below the backend ceiling would hide capacity the
+    platform now offers, and keeping it above would trade an instant error for a
+    long upload that fails at the combine step.
+  - Chunking is unchanged: parts stay at 1 MB (`uiConfig.resourceFileUploadChunk`)
+    because the perimeter WAF is what dictates that size, so a 1 GiB file is now
+    ~1074 sequential part requests plus the combine. Nothing in the Next.js proxy
+    or `client_max_body_size` needs to move — each request is still ~1 MB.
+  - XML and SVG keep their own tighter caps (100 MB / 5 MB): they are read fully
+    into memory to be sanitized, so they cannot follow the binary ceiling. A
+    1 GiB XML is still refused client-side, by design.
+  - Community resources keep their own 420 MB form limit; only the dataset
+    resource path moves.
+
 - **feat(datasets)!: filter "Elevado Valor" on the HVD badge instead of the raw tag**
   - The option moved from `?tag=hvd` to `?badge=hvd`, so both options in "Tipo de
     dados" now rest on the badge — the curated signal, granted by the backend's
