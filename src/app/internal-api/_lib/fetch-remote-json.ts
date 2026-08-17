@@ -1,6 +1,10 @@
 import dns from "node:dns/promises";
 import net from "node:net";
 
+import {
+  SKIP_GLOBAL_ERROR_HANDLING,
+  type FetchInitWithPolicy,
+} from "@/service/utils/apiErrorPolicy";
 import { logProxyEvent } from "./fetch-resource-bytes";
 
 /**
@@ -80,11 +84,17 @@ export async function fetchRemoteJson(
   try {
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
       const url = await assertSafeUrl(current);
-      res = await fetch(url, {
+      // A publisher-set URL normally points somewhere the policy does not
+      // watch, but nothing stops it naming the backend's own origin. This
+      // handler forwards the upstream status to the client either way, so keep
+      // the policy out of a proxy hop it cannot answer for.
+      const init: FetchInitWithPolicy = {
         headers: { "User-Agent": USER_AGENT, Accept: "application/json, */*" },
         redirect: "manual",
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      });
+        [SKIP_GLOBAL_ERROR_HANDLING]: true,
+      };
+      res = await fetch(url, init);
       if (res.status >= 300 && res.status < 400) {
         const location = res.headers.get("location");
         if (!location) break;

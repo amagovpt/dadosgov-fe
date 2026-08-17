@@ -30,7 +30,7 @@ describe("cachedListingFetch", () => {
     const first = await cachedListingFetch<{ total: number }>("/api/1/site/datasets-listing/");
     const second = await cachedListingFetch<{ total: number }>("/api/1/site/datasets-listing/");
 
-    expect(first).toEqual({ ok: true, data: { total: 42 } });
+    expect(first).toEqual({ total: 42 });
     expect(second).toEqual(first);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -44,7 +44,8 @@ describe("cachedListingFetch", () => {
     await cachedListingFetch("/listing", { "X-Forwarded-For": "2.2.2.2" });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    // The miss relayed the first visitor's headers upstream.
+    // The miss relayed the first visitor's headers upstream. Nothing opts out of
+    // the global error policy: a listing failure belongs to the error boundary.
     expect(fetchMock).toHaveBeenCalledWith("/listing", {
       cache: "no-store",
       headers: { "X-Forwarded-For": "1.1.1.1" },
@@ -73,7 +74,7 @@ describe("cachedListingFetch", () => {
       cachedListingFetch("/listing"),
     ]);
 
-    expect(a).toEqual({ ok: true, data: { total: 7 } });
+    expect(a).toEqual({ total: 7 });
     expect(b).toEqual(a);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -90,9 +91,22 @@ describe("cachedListingFetch", () => {
     vi.advanceTimersByTime(61_000);
     const stale = await cachedListingFetch<{ total: number }>("/listing");
 
-    expect(fresh).toEqual({ ok: true, data: { total: 1 } });
-    expect(stale).toEqual({ ok: true, data: { total: 2 } });
+    expect(fresh).toEqual({ total: 1 });
+    expect(stale).toEqual({ total: 2 });
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("throws on a non-2xx the policy ignores, instead of parsing the body as JSON", async () => {
+    // A 429 from the public search limiter: `resolveApiErrorAction` returns
+    // "ignore" for it, so the interceptor lets it through and this is what
+    // turns it into a failure the error boundary can take.
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response("rate limited", { status: 429, statusText: "Too Many" }));
+    vi.stubGlobal("fetch", fetchMock);
+    const cachedListingFetch = await loadCachedListingFetch();
+
+    await expect(cachedListingFetch("/listing")).rejects.toThrow(/429 Too Many/);
   });
 
   it("does not cache HTTP errors: the next request retries upstream", async () => {
@@ -103,11 +117,10 @@ describe("cachedListingFetch", () => {
     vi.stubGlobal("fetch", fetchMock);
     const cachedListingFetch = await loadCachedListingFetch();
 
-    const failed = await cachedListingFetch("/listing");
+    await expect(cachedListingFetch("/listing")).rejects.toThrow();
     const recovered = await cachedListingFetch<{ total: number }>("/listing");
 
-    expect(failed).toEqual({ ok: false, status: 429, statusText: "Too Many" });
-    expect(recovered).toEqual({ ok: true, data: { total: 3 } });
+    expect(recovered).toEqual({ total: 3 });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
@@ -122,7 +135,7 @@ describe("cachedListingFetch", () => {
     await expect(cachedListingFetch("/listing")).rejects.toThrow("fetch failed");
     const recovered = await cachedListingFetch<{ total: number }>("/listing");
 
-    expect(recovered).toEqual({ ok: true, data: { total: 4 } });
+    expect(recovered).toEqual({ total: 4 });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 

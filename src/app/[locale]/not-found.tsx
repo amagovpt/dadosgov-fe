@@ -1,13 +1,13 @@
 "use client";
 import ButtonNavigate from "@/components/Primitives/ButtonNavigate";
-import InputSearchBar from "@/components/Primitives/InputSearchBar";
+import Icon from "@/components/Primitives/Icon";
 import Pill from "@/components/Primitives/Pill";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { Hero } from "@/components/Shared/Hero";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
-import Image from "next/image";
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
 
@@ -19,7 +19,14 @@ export default function NotFound() {
       <Hero.Root backgroundImageUrl={null}>
         <div className="w-full flex md:flex-row flex-col justify-center md:justify-stretch  gap-32">
           <Hero.Content>
-            <Image src={"/Icons/question-mark.svg"} alt="404" width={300} height={300} />
+            <Suspense fallback={null}>
+              <Icon
+                name="agora-line-hardware-settings"
+                aria-hidden
+                focusable={false}
+                className="!h-[280px] !min-h-[280px] !w-[280px] !min-w-[280px] shrink-0 !fill-white"
+              />
+            </Suspense>
           </Hero.Content>
           <Hero.Content>
             <div className="flex flex-col gap-16 h-full justify-center">

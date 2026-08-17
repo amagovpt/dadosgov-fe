@@ -6,6 +6,7 @@ import type {
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL, authFetch } from "@/service/utils/API";
 import { parseOpenApi, type ParsedSwagger } from "@/utils/parseOpenApi";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 /**
  * Fetch and parse a dataservice's OpenAPI/Swagger spec through the SSRF-guarded
@@ -22,6 +23,7 @@ export async function fetchSwaggerSpec(
     if (!res.ok) return null;
     return parseOpenApi(await res.json());
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching Swagger spec:", error);
     return null;
   }
@@ -60,6 +62,7 @@ export async function fetchMyDataservices(
       previous_page: page > 1 ? String(page - 1) : null,
     };
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching my dataservices:", error);
     return {
       data: [],
@@ -120,6 +123,7 @@ export async function fetchDataservices(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching dataservices:", error);
     return {
       data: [],
@@ -150,6 +154,7 @@ export async function fetchOrgDataservices(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching organization dataservices:", error);
     return {
       data: [],
@@ -178,6 +183,7 @@ export async function fetchDataservice(id: string): Promise<Dataservice> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching dataservice:", error);
     throw error;
   }
@@ -252,6 +258,7 @@ export async function searchDataservices(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error searching dataservices:", error);
     return {
       data: [],

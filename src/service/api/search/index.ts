@@ -5,6 +5,7 @@ import type { Reuse } from "@/service/types/reuse";
 import type { GlobalSearchSuggestion } from "@/service/types/search";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 export async function searchDatasets(
@@ -22,6 +23,7 @@ export async function searchDatasets(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error searching datasets:", error);
     return {
       data: [],
@@ -50,6 +52,7 @@ export async function searchOrganizations(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error searching organizations:", error);
     return {
       data: [],
@@ -78,6 +81,7 @@ export async function searchReuses(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error searching reuses:", error);
     return {
       data: [],
@@ -100,6 +104,7 @@ export async function suggestTags(query: string, size: number = 10): Promise<Tag
     if (!res.ok) throw new Error(`Failed to suggest tags: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting tags:", error);
     return [];
   }
@@ -122,6 +127,7 @@ export async function suggestGlobalSearch(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching search suggestions:", error);
     return [];
   }
@@ -142,6 +148,7 @@ export async function suggestSpatialZones(
     if (!res.ok) throw new Error(`Failed to suggest spatial zones: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting spatial zones:", error);
     return [];
   }
@@ -164,6 +171,7 @@ export async function getSpatialZones(
       })
     );
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching spatial zones:", error);
     return [];
   }
@@ -183,6 +191,7 @@ export async function suggestUsers(query: string, size: number = 20): Promise<Us
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting users:", error);
     return [];
   }

@@ -1,4 +1,8 @@
 import { NextRequest } from "next/server";
+import {
+  SKIP_GLOBAL_ERROR_HANDLING,
+  type FetchInitWithPolicy,
+} from "@/service/utils/apiErrorPolicy";
 
 /**
  * Catalogue-scoped resource fetch for the tabular-preview proxy routes.
@@ -61,22 +65,31 @@ export async function fetchResourceBytes(
 
   const target = `${BACKEND_URL}/api/1/datasets/r/${rid}/`;
 
+  // `target` is a watched URL, so without the opt-out the server-side API error
+  // policy would throw `ApiPageError` from inside `fetch` for a refusal or a
+  // 5xx. The `catch` below cannot tell that from a transport failure and would
+  // answer 502, discarding the status the `!res.ok` branch exists to forward.
+  // This route proxies the backend: its job is to relay the real status, not to
+  // raise a page error for a preview panel.
+  const init: FetchInitWithPolicy = {
+    headers: {
+      "User-Agent": USER_AGENT,
+      // Forward the original client IP so the backend's user_or_ip rate
+      // limiter keys on the real visitor instead of collapsing every
+      // preview to this server's egress IP.
+      ...(requesterIp !== "?" ? { "X-Forwarded-For": requesterIp } : {}),
+    },
+    // The resolver streams the body directly (HTTP 200, no redirect). Fail
+    // closed if it ever redirects, rather than following into an unvetted
+    // location.
+    redirect: "error",
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    [SKIP_GLOBAL_ERROR_HANDLING]: true,
+  };
+
   let res: Response;
   try {
-    res = await fetch(target, {
-      headers: {
-        "User-Agent": USER_AGENT,
-        // Forward the original client IP so the backend's user_or_ip rate
-        // limiter keys on the real visitor instead of collapsing every
-        // preview to this server's egress IP.
-        ...(requesterIp !== "?" ? { "X-Forwarded-For": requesterIp } : {}),
-      },
-      // The resolver streams the body directly (HTTP 200, no redirect). Fail
-      // closed if it ever redirects, rather than following into an unvetted
-      // location.
-      redirect: "error",
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    });
+    res = await fetch(target, init);
   } catch (err) {
     logProxyEvent(logLabel, {
       level: "warn",

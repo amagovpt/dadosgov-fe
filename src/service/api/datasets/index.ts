@@ -27,6 +27,7 @@ import {
   translateUploadErrorPayload,
 } from "@/service/utils/API";
 import { cachedListingFetch } from "@/service/utils/listingCache";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 /**
@@ -60,6 +61,7 @@ export async function fetchMyDatasets(
       previous_page: page > 1 ? String(page - 1) : null,
     };
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching my datasets:", error);
     return {
       data: [],
@@ -105,6 +107,7 @@ export async function fetchMyOrgDatasets(
       previous_page: page > 1 ? String(page - 1) : null,
     };
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching my org datasets:", error);
     return {
       data: [],
@@ -168,6 +171,7 @@ export async function fetchDatasets(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching datasets:", error);
     return {
       data: [],
@@ -235,6 +239,7 @@ export async function fetchAdminDatasets(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching datasets:", error);
     return {
       data: [],
@@ -269,6 +274,7 @@ export async function fetchDataset(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching dataset:", error);
     throw error;
   }
@@ -281,6 +287,7 @@ export async function fetchLicenses(): Promise<License[]> {
     if (!res.ok) throw new Error(`Failed to fetch licenses: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching licenses:", error);
     return [];
   }
@@ -293,6 +300,7 @@ export async function fetchFrequencies(): Promise<Frequency[]> {
     if (!res.ok) throw new Error(`Failed to fetch frequencies: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching frequencies:", error);
     return [];
   }
@@ -305,6 +313,7 @@ export async function fetchSchemas(): Promise<string[]> {
     if (!res.ok) throw new Error(`Failed to fetch schemas: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching schemas:", error);
     return [];
   }
@@ -317,6 +326,7 @@ export async function fetchDatasetBadges(): Promise<DatasetBadges> {
     if (!res.ok) throw new Error(`Failed to fetch dataset badges: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching dataset badges:", error);
     return {};
   }
@@ -329,6 +339,7 @@ export async function fetchResourceTypes(): Promise<ResourceType[]> {
     if (!res.ok) throw new Error(`Failed to fetch resource types: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching resource types:", error);
     return [];
   }
@@ -508,6 +519,7 @@ export async function fetchAllowedExtensions(): Promise<string[]> {
     if (!res.ok) throw new Error(`Failed to fetch allowed extensions: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching allowed extensions:", error);
     return [];
   }
@@ -523,6 +535,7 @@ export async function suggestFormats(query: string): Promise<FormatSuggestion[]>
     if (!res.ok) throw new Error(`Failed to suggest formats: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting formats:", error);
     return [];
   }
@@ -545,6 +558,7 @@ export async function suggestDatasets(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching dataset suggestions:", error);
     return [];
   }
@@ -574,6 +588,7 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
       level: f.properties.level ?? "",
     })) as SpatialZone[];
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching spatial zones by ids:", error);
     return [];
   }
@@ -586,6 +601,7 @@ export async function fetchGranularities(): Promise<Granularity[]> {
     if (!res.ok) throw new Error(`Failed to fetch granularities: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching granularities:", error);
     return [];
   }
@@ -603,8 +619,6 @@ export interface DatasetsListingResponse {
   licenses: License[];
   frequencies: Frequency[];
   granularities: Granularity[];
-  error?: boolean;
-  errorStatus?: number | "network";
 }
 
 
@@ -619,77 +633,51 @@ export async function fetchDatasetsListing(
   filters?: DatasetFilters,
   forwarded?: Record<string, string>,
 ): Promise<DatasetsListingResponse> {
-  const emptyShape: DatasetsListingResponse = {
-    listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
-    filter_counts: {},
-    organizations: [],
-    licenses: [],
-    frequencies: [],
-    granularities: [],
-  };
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("page_size", String(pageSize));
 
-  try {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("page_size", String(pageSize));
+  if (filters) {
+    if (filters.q) params.set("q", filters.q);
+    if (filters.schema) params.set("schema", filters.schema);
+    if (filters.geozone) params.set("geozone", filters.geozone);
+    if (filters.granularity) params.set("granularity", filters.granularity);
+    if (filters.sort) params.set("sort", filters.sort);
+    if (filters.featured !== undefined) params.set("featured", String(filters.featured));
+    if (filters.owner) params.set("owner", filters.owner);
+    if (filters.modified_since) params.set("modified_since", filters.modified_since);
+    if (filters.dataservice) params.set("dataservice", filters.dataservice);
 
-    if (filters) {
-      if (filters.q) params.set("q", filters.q);
-      if (filters.schema) params.set("schema", filters.schema);
-      if (filters.geozone) params.set("geozone", filters.geozone);
-      if (filters.granularity) params.set("granularity", filters.granularity);
-      if (filters.sort) params.set("sort", filters.sort);
-      if (filters.featured !== undefined) params.set("featured", String(filters.featured));
-      if (filters.owner) params.set("owner", filters.owner);
-      if (filters.modified_since) params.set("modified_since", filters.modified_since);
-      if (filters.dataservice) params.set("dataservice", filters.dataservice);
-
-      const arrayParams: [string, string | string[] | undefined][] = [
-        ["tag", filters.tag],
-        ["license", filters.license],
-        ["format", filters.format],
-        ["frequency", filters.frequency],
-        ["badge", filters.badge],
-        ["organization", filters.organization],
-      ];
-      for (const [key, value] of arrayParams) {
-        if (!value) continue;
-        if (Array.isArray(value)) {
-          value.forEach((v) => params.append(key, v));
-        } else {
-          params.set(key, value);
-        }
+    const arrayParams: [string, string | string[] | undefined][] = [
+      ["tag", filters.tag],
+      ["license", filters.license],
+      ["format", filters.format],
+      ["frequency", filters.frequency],
+      ["badge", filters.badge],
+      ["organization", filters.organization],
+    ];
+    for (const [key, value] of arrayParams) {
+      if (!value) continue;
+      if (Array.isArray(value)) {
+        value.forEach((v) => params.append(key, v));
+      } else {
+        params.set(key, value);
       }
     }
-
-    const url = `${API_BASE_URL}/site/datasets-listing/?${params.toString()}`;
-    // SSR listing: cached per-URL for 60s in `listingCache` (matches the
-    // backend @cache.cached(60)), shared across visitors — the Next.js Data
-    // Cache keys on headers, so it would fragment per client IP. Repeated
-    // page/query loads never reach the backend and don't consume the per-IP
-    // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
-    // On a cache-miss, `forwarded` relays the real client IP so the backend
-    // keys the limiter per visitor instead of the Next.js server IP.
-    const result = await cachedListingFetch<DatasetsListingResponse>(url, forwarded);
-
-    if (!result.ok) {
-      console.error(`Error fetching datasets listing: ${result.status} ${result.statusText}`);
-      return {
-        ...emptyShape,
-        listing: { ...emptyShape.listing, error: true, errorStatus: result.status },
-        error: true,
-        errorStatus: result.status,
-      };
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error("Error fetching datasets listing:", error);
-    return {
-      ...emptyShape,
-      listing: { ...emptyShape.listing, error: true, errorStatus: "network" },
-      error: true,
-      errorStatus: "network",
-    };
   }
+
+  const url = `${API_BASE_URL}/site/datasets-listing/?${params.toString()}`;
+  // SSR listing: cached per-URL for 60s in `listingCache` (matches the
+  // backend @cache.cached(60)), shared across visitors — the Next.js Data
+  // Cache keys on headers, so it would fragment per client IP. Repeated
+  // page/query loads never reach the backend and don't consume the per-IP
+  // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
+  // On a cache-miss, `forwarded` relays the real client IP so the backend
+  // keys the limiter per visitor instead of the Next.js server IP.
+  //
+  // No fallback here on purpose: a listing that cannot be fetched has no page
+  // to render, so the failure propagates out of the Server Component and
+  // `[locale]/error.tsx` decides what the visitor gets — the previous page back
+  // with a toast, or the error page on a cold load.
+  return cachedListingFetch<DatasetsListingResponse>(url, forwarded);
 }

@@ -114,10 +114,8 @@ export default function CommunityResourceEditClient({
         error,
         t("admin-community-resources:form.updateError")
       );
-      if (normalized.status === 401) {
-        setApiError(t("admin-community-resources:form.sessionExpired"));
-        return;
-      }
+      // See CommunityResourceFormClient: 401 and 5xx are reported globally.
+      if (normalized.status === 401 || (normalized.status ?? 0) >= 500) return;
       setApiError(normalized.message || t("admin-community-resources:form.updateError"));
     },
     scrollToTopOnStart: true,

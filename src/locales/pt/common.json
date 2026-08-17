@@ -267,10 +267,6 @@
     "harvester": "Um harvester",
     "organization": "Uma organização"
   },
-  "listingError": {
-    "title": "Não foi possível carregar",
-    "subtitle": "Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos."
-  },
   "apiError": {
     "serverErrorTitle": "Serviço indisponível",
     "serverErrorDescription": "Ocorreu um erro no servidor. Tente novamente dentro de momentos.",
@@ -278,11 +274,39 @@
     "networkErrorDescription": "Não foi possível contactar o servidor. Verifique a sua ligação à Internet.",
     "sessionExpiredTitle": "Sessão expirada",
     "sessionExpiredDescription": "Inicie sessão novamente para continuar.",
-    "pageErrorTitle": "Não foi possível carregar esta página",
-    "pageErrorSubtitle": "O serviço pode estar temporariamente indisponível.",
-    "pageErrorDescription": "Tente novamente dentro de instantes. Se o problema persistir, contacte o suporte.",
-    "pageErrorReference": "Referência: {{digest}}",
+    "navigationErrorTitle": "Não foi possível processar o pedido",
+    "navigationErrorDescription": "Pedimos desculpa, ocorreu algo de inesperado."
+  },
+  "errorCode": "Erro {{status}}",
+  "error500": {
+    "error": "Erro 500",
+    "title": "Algo não correu como esperado",
+    "subtitle": "Não foi possível concluir o seu pedido neste momento.",
+    "description": "Ocorreu um problema ao processar a informação solicitada. Tente novamente dentro de alguns instantes ou regresse à página inicial para continuar a navegar no portal.",
+    "refresh": "Recarregar página"
+  },
+  "errorAccess": {
+    "error": "Erro 401/403",
+    "title": "Acesso restrito",
+    "subtitle": "Não tem autorização para aceder a este conteúdo.",
+    "description": "Este recurso requer autenticação ou permissões específicas. Se acredita que deveria ter acesso, verifique as suas credenciais ou contacte o responsável pela gestão da plataforma.",
     "backToHome": "Voltar à página inicial"
+  },
+  "errorNetwork": {
+    "error": "Sem ligação",
+    "title": "Não foi possível contactar o servidor",
+    "subtitle": "O portal não conseguiu chegar aos nossos serviços.",
+    "description": "Verifique a sua ligação à Internet e tente novamente. Se a ligação estiver operacional, o serviço poderá estar temporariamente indisponível.",
+    "refresh": "Recarregar página"
+  },
+  "errorMaintenance": {
+    "title": "Portal temporariamente indisponível",
+    "subtitle": "Estamos a realizar melhorias na plataforma.",
+    "description": "Para assegurar a qualidade, segurança e disponibilidade dos serviços, o Dados.gov.pt encontra-se temporariamente em manutenção. Agradecemos a sua compreensão e esperamos voltar a recebê-lo em breve."
+  },
+  "errorHelp": {
+    "title": "Precisa de ajuda?",
+    "email": "arte@arte.gov.pt"
   },
   "retry": "Tentar novamente",
   "discussions": {
