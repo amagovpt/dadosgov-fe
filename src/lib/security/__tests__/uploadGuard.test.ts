@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MAX_UPLOAD_SIZE } from "../constants";
 import { guardFile, guardFiles } from "../uploadGuard";
 
 function makeFile(content: string, name: string, type: string): File {
@@ -13,6 +14,15 @@ async function readFile(file: File): Promise<string> {
     reader.readAsText(file);
   });
 }
+
+describe("MAX_UPLOAD_SIZE", () => {
+  it("mirrors the backend RESOURCES_FILE_MAX_SIZE of 1 GiB", () => {
+    // A guard looser than the backend lets the user spend a long chunked upload
+    // on a file that is rejected at the end; a tighter one hides capacity the
+    // platform advertises. Both sides move together or not at all.
+    expect(MAX_UPLOAD_SIZE).toBe(1024 * 1024 * 1024);
+  });
+});
 
 describe("guardFile", () => {
   it("sanitizes a malicious SVG and replaces the file", async () => {
@@ -68,19 +78,37 @@ describe("guardFile", () => {
 
   it("accepts a large binary file below the global upload cap", async () => {
     const file = makeFile("a,b,c\n1,2,3\n", "big.csv", "text/csv");
-    // 60MB — above the old 50MB XML cap but well below the 800MB upload cap.
+    // 60MB — above the old 50MB XML cap but well below the 1GB upload cap.
     Object.defineProperty(file, "size", { value: 60 * 1024 * 1024 });
+    const result = await guardFile(file);
+    expect(result.ok).toBe(true);
+  });
+
+  it("accepts a file at exactly the global upload cap", async () => {
+    const file = makeFile("a,b,c\n1,2,3\n", "exact.csv", "text/csv");
+    // The boundary belongs to the publisher: the backend rejects only what is
+    // strictly larger than RESOURCES_FILE_MAX_SIZE, so the guard must match.
+    Object.defineProperty(file, "size", { value: MAX_UPLOAD_SIZE });
     const result = await guardFile(file);
     expect(result.ok).toBe(true);
   });
 
   it("rejects a file above the global upload cap", async () => {
     const file = makeFile("a,b,c\n1,2,3\n", "huge.csv", "text/csv");
-    // 801MB — above the 800MB upload cap.
-    Object.defineProperty(file, "size", { value: 801 * 1024 * 1024 });
+    // 1GB + 1MB — above the 1GB upload cap.
+    Object.defineProperty(file, "size", { value: MAX_UPLOAD_SIZE + 1024 * 1024 });
     const result = await guardFile(file);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.reason).toMatch(/demasiado grande/i);
+  });
+
+  it("states the cap in the rejection message", async () => {
+    const file = makeFile("a,b,c\n1,2,3\n", "huge.csv", "text/csv");
+    Object.defineProperty(file, "size", { value: MAX_UPLOAD_SIZE + 1 });
+    const result = await guardFile(file);
+    expect(result.ok).toBe(false);
+    // The number the user reads must follow the constant, not a stale literal.
+    if (!result.ok) expect(result.reason).toContain("1024MB");
   });
 
   it("processes multiple files in guardFiles", async () => {
