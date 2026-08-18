@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Avatar,
   Button,
@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 interface DiscussionSectionProps {
   entityId: string;
   entityClass: "Reuse" | "Dataset" | "Organization" | "Dataservice";
+  onCountChange?: (count: number) => void;
 }
 
 interface ReplyFormProps {
@@ -127,7 +128,11 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
   );
 };
 
-export function DiscussionSection({ entityId, entityClass }: DiscussionSectionProps) {
+export function DiscussionSection({
+  entityId,
+  entityClass,
+  onCountChange,
+}: DiscussionSectionProps) {
   const { t, i18n } = useTranslation("common");
   const { user } = useAuth();
   const { show } = usePopupContext();
@@ -141,6 +146,14 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [discussionSearch, setDiscussionSearch] = useState("");
 
+  const updateDiscussionCount = useCallback(
+    (count: number) => {
+      setDiscussionCount(count);
+      onCountChange?.(count);
+    },
+    [onCountChange],
+  );
+
   useEffect(() => {
     async function load() {
       try {
@@ -149,13 +162,13 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
             ? await fetchOrgDiscussions(entityId)
             : await fetchDiscussions(entityId);
         setDiscussions(response.data ?? []);
-        setDiscussionCount(response.total ?? 0);
+        updateDiscussionCount(response.total ?? 0);
       } catch (error) {
         console.error("Error loading discussions:", error);
       }
     }
     load();
-  }, [entityId, entityClass]);
+  }, [entityId, entityClass, updateDiscussionCount]);
 
   const handleCreateDiscussion = async () => {
     if (!newDiscTitle.trim() || !newDiscMessage.trim()) return;
@@ -172,7 +185,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
       const created = await createDiscussion(payload);
       if (created) {
         setDiscussions((prev) => [created, ...prev]);
-        setDiscussionCount((prev) => prev + 1);
+        updateDiscussionCount(discussionCount + 1);
         setNewDiscTitle("");
         setNewDiscMessage("");
         setShowNewDiscussion(false);
@@ -391,7 +404,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                             commentIndex={0}
                             onDeleted={() => {
                               setDiscussions((prev) => prev.filter((d) => d.id !== disc.id));
-                              setDiscussionCount((prev) => prev - 1);
+                              updateDiscussionCount(Math.max(0, discussionCount - 1));
                             }}
                           />,
                           {

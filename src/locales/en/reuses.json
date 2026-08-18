@@ -39,7 +39,7 @@
     "noOrganization": "No organisation",
     "defaultType": "Application",
     "description": "Description",
-    "discussions": "Discussions",
+    "discussions": "Discussions ({{count}})",
     "tags": "Tags",
     "lastUpdate": "Last update",
     "creationDate": "Creation date",

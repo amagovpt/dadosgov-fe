@@ -33,6 +33,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     const [dataserviceCount, setDataserviceCount] = useState(0);
     const [communityResources, setCommunityResources] = useState<CommunityResource[]>([]);
     const [communityCount, setCommunityCount] = useState(0);
+    const [discussionCount, setDiscussionCount] = useState(dataset.metrics.discussions || 0);
 
     useEffect(() => {
         async function loadTabData() {
@@ -121,10 +122,14 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                 </Tab>
                 <Tab active={tabParam === 'discussions' || undefined}>
                     <TabHeader>
-                        {tds('tabs.discussions', { count: dataset.metrics.discussions || 0 })}
+                        {tds('tabs.discussions', { count: discussionCount })}
                     </TabHeader>
                     <TabBodyWrapper>
-                        <DiscussionSection entityId={dataset.id} entityClass="Dataset" />
+                        <DiscussionSection
+                            entityId={dataset.id}
+                            entityClass="Dataset"
+                            onCountChange={setDiscussionCount}
+                        />
                     </TabBodyWrapper>
                 </Tab>
                 <Tab>
