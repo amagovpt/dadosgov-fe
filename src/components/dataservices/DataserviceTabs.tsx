@@ -21,6 +21,9 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
   const language = i18n.language as "pt" | "en";
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [datasetCount, setDatasetCount] = useState(0);
+  const [discussionCount, setDiscussionCount] = useState(
+    dataservice.metrics?.discussions || 0,
+  );
 
   const formatLongDate = (value?: string | null) => {
     if (!value) return null;
@@ -121,10 +124,14 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
         </Tab>
         <Tab>
           <TabHeader>
-            {tDs("tabs.discussions", { count: dataservice.metrics?.discussions || 0 })}
+            {tDs("tabs.discussions", { count: discussionCount })}
           </TabHeader>
           <TabBodyWrapper>
-            <DiscussionSection entityId={dataservice.id} entityClass="Dataservice" />
+            <DiscussionSection
+              entityId={dataservice.id}
+              entityClass="Dataservice"
+              onCountChange={setDiscussionCount}
+            />
           </TabBodyWrapper>
         </Tab>
       </Tabs>
