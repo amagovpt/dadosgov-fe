@@ -14,6 +14,7 @@ import {
   useModalContext,
 } from "@ama-pt/agora-design-system";
 import { Typograph } from "../../Generics/Typograph";
+import { useTranslation } from "react-i18next";
 
 // ----------------------------------------------------------------------------------------------------------------
 
@@ -98,11 +99,12 @@ export default function Timeline({
   timeline,
 }: CardsStepsI) {
   const { show } = useModalContext();
+  const { t } = useTranslation("common");
 
   const handleOpenModal = () => {
     show(<TimelineModal {...timeline} />, {
       title: timeline.title,
-      closeButtonLabel: "Fechar",
+      closeButtonLabel: t("header.close"),
       darkMode: true,
     } as ModalConfiguration);
   };

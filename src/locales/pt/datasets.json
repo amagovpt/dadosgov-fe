@@ -42,7 +42,8 @@
       "label": "Tipo de dados",
       "options": {
         "all": "Todos",
-        "high_value": "Conjuntos de dados de Elevado Valor"
+        "high_value": "Conjuntos de dados de Elevado Valor",
+        "inspire": "Inspire"
       }
     }
   },
@@ -115,6 +116,8 @@
     "communityDisclaimer": "Estes recursos são publicados pela comunidade e não são da responsabilidade do produtor dos dados."
   },
   "info": {
+    "links": "Ligações",
+    "contact": "Contacto",
     "title": "Informação",
     "keywords": "Palavras-chave",
     "identifier": "Identificador",

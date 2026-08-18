@@ -40,6 +40,7 @@ import DatasetsEditMetadataTab from "@/components/admin/datasets/edit-tabs/Datas
 import DatasetsEditResourcesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditResourcesTab";
 import DatasetsEditDiscussionsTab from "@/components/admin/datasets/edit-tabs/DatasetsEditDiscussionsTab";
 import DatasetsEditActivitiesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditActivitiesTab";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -241,11 +242,11 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (
       <Dropdown.Option key={freq.id} value={freq.id} selected={freq.id === frequencyDefaultValue}>
-        {getFrequencyLabel(freq.id, freq.label)}
+        {getFrequencyLabel(freq.id, freq.label, (key, options) => t(`datasets:${key}`, options))}
       </Dropdown.Option>
     ));
     return <Dropdown.Section name="frequencies">{options}</Dropdown.Section>;
-  }, [frequencies, frequencyDefaultValue]);
+  }, [frequencies, frequencyDefaultValue, t]);
 
   const selectedKeywords = useMemo(
     () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
@@ -321,12 +322,12 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       </Dropdown.Option>,
       ...granularities.map((g) => (
         <Dropdown.Option key={g.id} value={g.id} selected={g.id === loadedSpatialGranularity}>
-          {getGranularityLabel(g.id, g.name)}
+          {getGranularityLabel(g.id, g.name, (key, options) => t(`datasets:${key}`, options))}
         </Dropdown.Option>
       )),
     ];
     return <Dropdown.Section name="spatial-granularity">{options}</Dropdown.Section>;
-  }, [granularities, loadedSpatialGranularity]);
+  }, [granularities, loadedSpatialGranularity, t]);
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -499,6 +500,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             {dataset.private ? t("edit.statusDraft") : t("edit.statusPublic")}
           </Pill>
           {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
+          <DatasetBadges badges={dataset.badges} />
           <span className="admin-edit-info__stat">
             <svg
               width="14"
@@ -534,7 +536,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                 {latestActivity.actor.first_name} {latestActivity.actor.last_name}
               </TextLink>
               {" — "}
-              {translateActivityLabel(latestActivity.label)}
+              {translateActivityLabel(latestActivity.label, t)}
               {" — "}
               <span>
                 {format(new Date(latestActivity.created_at), "d 'de' MMMM 'de' yyyy", {
@@ -727,7 +729,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                 activitiesLoading={activitiesLoading}
                 activitiesLoaded={activitiesLoaded}
                 activities={activities}
-                translateActivityLabel={translateActivityLabel}
+                translateActivityLabel={(label) => translateActivityLabel(label, t)}
               />
             </TabBody>
           </Tab>

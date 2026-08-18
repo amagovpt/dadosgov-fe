@@ -6,6 +6,7 @@ import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-sys
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
+import { useTranslation } from "react-i18next";
 
 type Step =
   | "loading"
@@ -17,6 +18,7 @@ type Step =
   | "success";
 
 export default function MigrateAccountClient() {
+  const { t } = useTranslation("login");
   const router = useRouter();
   const searchParams = useSearchParams();
   const noEmail = searchParams.get("no_email") === "true";
@@ -89,10 +91,10 @@ export default function MigrateAccountClient() {
         if (pending.last_name) setLegacyLastName(pending.last_name);
         setStep("confirm-account");
       } else {
-        setError("Nenhuma conta encontrada com esses dados.");
+        setError(t("migration.errorNotFound"));
       }
     } catch {
-      setError("Erro ao procurar conta.");
+      setError(t("migration.errorSearch"));
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +108,7 @@ export default function MigrateAccountClient() {
       setResendCountdown(60);
       setStep("verify-code");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro ao enviar o codigo.");
+      setError(err instanceof Error ? err.message : t("migration.errorSendCode"));
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +122,7 @@ export default function MigrateAccountClient() {
       setResendCountdown(60);
       setCode("");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro ao reenviar o codigo.");
+      setError(err instanceof Error ? err.message : t("migration.errorResendCode"));
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +135,7 @@ export default function MigrateAccountClient() {
       await confirmMigration({ method: "code", code });
       setStep("success");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Codigo invalido.");
+      setError(err instanceof Error ? err.message : t("migration.errorInvalidCode"));
     } finally {
       setIsLoading(false);
     }
@@ -146,11 +148,11 @@ export default function MigrateAccountClient() {
       await confirmMigration({ method: "password", password });
       setStep("success");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Palavra-passe incorreta.");
+      setError(err instanceof Error ? err.message : t("migration.errorInvalidPassword"));
     } finally {
       setIsLoading(false);
     }
-  }, [password]);
+  }, [password, t]);
 
   const handleSkip = useCallback(async () => {
     setIsLoading(true);
@@ -159,7 +161,7 @@ export default function MigrateAccountClient() {
       await skipMigration();
       window.location.href = "/";
     } catch {
-      setError("Erro ao criar conta.");
+      setError(t("migration.errorCreateAccount"));
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +180,7 @@ export default function MigrateAccountClient() {
     return (
       <main className="min-h-screen flex-grow bg-white">
         <div className="container mx-auto max-w-7xl px-16 pb-64 pt-32">
-          <p className="text-lg text-neutral-700">A carregar...</p>
+          <p className="text-lg text-neutral-700">{t("migration.loading")}</p>
         </div>
       </main>
     );
@@ -193,13 +195,12 @@ export default function MigrateAccountClient() {
 
         <div className="mt-64 max-w-[560px]">
           <h1 className="mb-16 text-2xl-medium text-brand-blue-dark">
-            Migrar conta para Chave Movel Digital
+            {t("migration.migrateTitle")}
           </h1>
 
           {step !== "success" && (
             <p className="text-lg mb-32 text-neutral-700">
-              Detetamos que ja possui uma conta no portal. Para continuar a utilizar os seus dados,
-              precisa de verificar a propriedade da conta.
+              {t("migration.migrateDescription")}
             </p>
           )}
 
@@ -215,9 +216,9 @@ export default function MigrateAccountClient() {
               <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
                 <Icon name="agora-line-search" className="h-24 w-24 text-brand-blue-primary" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">Encontre a sua conta</h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.searchTitle")}</h2>
               <p className="text-neutral-900">
-                Introduza o email ou o nome associado a sua conta anterior.
+                {t("migration.searchDescription")}
               </p>
 
               <div className="mb-8 flex gap-16">
@@ -226,21 +227,21 @@ export default function MigrateAccountClient() {
                   onClick={() => setSearchByName(false)}
                   className="text-sm"
                 >
-                  Por email
+                  {t("migration.byEmail")}
                 </Button>
                 <Button
                   variant={searchByName ? "primary" : "neutral"}
                   onClick={() => setSearchByName(true)}
                   className="text-sm"
                 >
-                  Por nome
+                  {t("migration.byName")}
                 </Button>
               </div>
 
               {!searchByName ? (
                 <InputText
-                  label="Email da conta anterior"
-                  placeholder="exemplo@email.com"
+                  label={t("migration.previousAccountEmail")}
+                  placeholder={t("migration.emailExample")}
                   id="search-email"
                   name="search-email"
                   type="email"
@@ -254,8 +255,8 @@ export default function MigrateAccountClient() {
               ) : (
                 <>
                   <InputText
-                    label="Nome"
-                    placeholder="Introduza o nome"
+                    label={t("migration.firstName")}
+                    placeholder={t("migration.firstNamePlaceholder")}
                     id="search-first-name"
                     name="search-first-name"
                     className="w-full"
@@ -266,8 +267,8 @@ export default function MigrateAccountClient() {
                     disabled={isLoading}
                   />
                   <InputText
-                    label="Apelido"
-                    placeholder="Introduza o apelido"
+                    label={t("migration.lastName")}
+                    placeholder={t("migration.lastNamePlaceholder")}
                     id="search-last-name"
                     name="search-last-name"
                     className="w-full"
@@ -291,10 +292,10 @@ export default function MigrateAccountClient() {
                   }
                   className="px-48"
                 >
-                  {isLoading ? "A procurar..." : "Procurar conta"}
+                  {isLoading ? t("migration.searching") : t("migration.searchAccount")}
                 </Button>
                 <Button variant="neutral" onClick={handleSkip} disabled={isLoading}>
-                  Criar conta nova
+                  {t("migration.createNewAccount")}
                 </Button>
               </div>
             </div>
@@ -306,10 +307,9 @@ export default function MigrateAccountClient() {
               <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
                 <Icon name="agora-line-user" className="h-24 w-24 text-brand-blue-primary" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">Esta conta é sua?</h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.confirmTitle")}</h2>
               <p className="text-neutral-900">
-                Encontramos uma conta existente no portal com os seguintes dados. Confirme se esta
-                conta lhe pertence.
+                {t("migration.confirmDescription")}
               </p>
 
               <div className="flex flex-col gap-16 rounded-8 border border-neutral-300 bg-neutral-50 p-24">
@@ -317,7 +317,7 @@ export default function MigrateAccountClient() {
                   <div className="flex items-center gap-12">
                     <AppIcon name="agora-line-user" className="shrink-0 text-neutral-600" />
                     <div>
-                      <p className="text-xs text-neutral-600">Nome</p>
+                      <p className="text-xs text-neutral-600">{t("migration.firstName")}</p>
                       <p className="text-base-bold text-neutral-900">
                         {legacyFirstName} {legacyLastName}
                       </p>
@@ -328,7 +328,7 @@ export default function MigrateAccountClient() {
                   <div className="flex items-center gap-12">
                     <AppIcon name="agora-line-mail" className="shrink-0 text-neutral-600" />
                     <div>
-                      <p className="text-xs text-neutral-600">Email</p>
+                      <p className="text-xs text-neutral-600">{t("migration.email")}</p>
                       <p className="text-base-bold text-neutral-900">{maskedEmail}</p>
                     </div>
                   </div>
@@ -344,10 +344,10 @@ export default function MigrateAccountClient() {
                   }}
                   className="px-48"
                 >
-                  Sim, esta conta e minha
+                  {t("migration.confirmYes")}
                 </Button>
                 <Button variant="neutral" onClick={handleSkip} disabled={isLoading}>
-                  Nao, criar conta nova
+                  {t("migration.confirmNo")}
                 </Button>
               </div>
             </div>
@@ -359,9 +359,9 @@ export default function MigrateAccountClient() {
               <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
                 <Icon name="agora-line-shield" className="h-24 w-24 text-brand-blue-primary" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">Verifique a sua identidade</h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.verifyTitle")}</h2>
               <p className="text-neutral-900">
-                Para confirmar que esta conta lhe pertence, escolha um dos metodos abaixo.
+                {t("migration.verifyDescription")}
               </p>
 
               <div className="flex flex-col gap-16">
@@ -375,10 +375,10 @@ export default function MigrateAccountClient() {
                   </div>
                   <div>
                     <p className="text-lg-bold text-brand-blue-dark">
-                      Enviar codigo para o meu email
+                      {t("migration.sendCode")}
                     </p>
                     <p className="text-sm text-neutral-700">
-                      Enviaremos um código de 6 dígitos para {maskedEmail || "o seu email"}
+                      {t("migration.codeDescription", { email: maskedEmail || t("migration.email") })}
                     </p>
                   </div>
                 </button>
@@ -393,10 +393,10 @@ export default function MigrateAccountClient() {
                   </div>
                   <div>
                     <p className="text-lg-bold text-brand-blue-dark">
-                      Sei a minha palavra-passe antiga
+                      {t("migration.knowOldPassword")}
                     </p>
                     <p className="text-sm text-neutral-700">
-                      Introduza a palavra-passe da sua conta anterior
+                      {t("migration.oldPasswordMethodDescription")}
                     </p>
                   </div>
                 </button>
@@ -411,7 +411,7 @@ export default function MigrateAccountClient() {
                 }}
                 className="text-sm h-auto p-0"
               >
-                Voltar
+                {t("migration.back")}
               </Button>
             </div>
           )}
@@ -422,14 +422,13 @@ export default function MigrateAccountClient() {
               <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
                 <Icon name="agora-line-mail" className="h-24 w-24 text-brand-blue-primary" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">Introduza o codigo</h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.verifyCodeTitle")}</h2>
               <p className="text-neutral-900">
-                Enviamos um codigo de 6 digitos para <strong>{maskedEmail}</strong>. Verifique a sua
-                caixa de entrada.
+                {t("migration.codeDescription", { email: maskedEmail })}
               </p>
 
               <InputText
-                label="Codigo de verificacao"
+                label={t("migration.verificationCode")}
                 placeholder="000000"
                 id="migration-code"
                 name="migration-code"
@@ -446,14 +445,14 @@ export default function MigrateAccountClient() {
                   disabled={isLoading || code.length !== 6}
                   className="px-48"
                 >
-                  {isLoading ? "A verificar..." : "Verificar"}
+                  {isLoading ? t("migration.checking") : t("migration.verify")}
                 </Button>
                 <Button
                   variant="neutral"
                   onClick={handleResendCode}
                   disabled={isLoading || resendCountdown > 0}
                 >
-                  {resendCountdown > 0 ? `Reenviar (${resendCountdown}s)` : "Reenviar codigo"}
+                  {resendCountdown > 0 ? `${t("migration.resendCode")} (${resendCountdown}s)` : t("migration.resendCode")}
                 </Button>
               </div>
 
@@ -466,7 +465,7 @@ export default function MigrateAccountClient() {
                 }}
                 className="text-sm h-auto p-0"
               >
-                Voltar
+                {t("migration.back")}
               </Button>
             </div>
           )}
@@ -478,15 +477,15 @@ export default function MigrateAccountClient() {
                 <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
               </div>
               <h2 className="text-xl-bold text-brand-blue-dark">
-                Introduza a sua palavra-passe antiga
+                {t("migration.verifyPasswordTitle")}
               </h2>
               <p className="text-neutral-900">
-                Introduza a palavra-passe que usava para entrar na sua conta anterior.
+                {t("migration.verifyPasswordDescription")}
               </p>
 
               <InputPassword
-                label="Palavra-passe"
-                placeholder="Introduza a palavra-passe"
+                label={t("migration.password")}
+                placeholder={t("migration.passwordPlaceholder")}
                 id="migration-password"
                 name="migration-password"
                 className="w-full"
@@ -502,7 +501,7 @@ export default function MigrateAccountClient() {
                   disabled={isLoading || !password}
                   className="px-48"
                 >
-                  {isLoading ? "A verificar..." : "Verificar"}
+                  {isLoading ? t("migration.checking") : t("migration.verify")}
                 </Button>
               </div>
 
@@ -515,7 +514,7 @@ export default function MigrateAccountClient() {
                 }}
                 className="text-sm h-auto p-0"
               >
-                Voltar
+                {t("migration.back")}
               </Button>
             </div>
           )}
@@ -526,10 +525,9 @@ export default function MigrateAccountClient() {
               <div className="bg-green-100 w-fit rounded-full p-24">
                 <Icon name="agora-line-check-circle" className="text-green-600 h-48 w-48" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">Conta migrada com sucesso!</h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.migrateSuccessTitle")}</h2>
               <p className="text-neutral-900">
-                A sua conta foi migrada para a Chave Movel Digital com sucesso. Sera redirecionado
-                em breve...
+                {t("migration.migrateSuccessDescription")}
               </p>
             </div>
           )}

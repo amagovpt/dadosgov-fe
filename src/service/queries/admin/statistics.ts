@@ -37,7 +37,9 @@ export async function getBoStatisticsMetadata(
     throw new Error("Failed to fetch bo-statistics metadata");
   }
 
-  return flattenData(data).findBoStatisticsSingleton as BoStatisticsMetadata;
+  const page = flattenData(data).findBoStatisticsSingleton as BoStatisticsMetadata;
+  if (!page) throw new Error("Bo statistics metadata is missing");
+  return page;
 }
 
 export async function getBoStatistics(locale: string = "pt"): Promise<BoStatisticsPage> {
@@ -168,5 +170,7 @@ export async function getBoStatistics(locale: string = "pt"): Promise<BoStatisti
     throw new Error("Failed to fetch bo-statistics content");
   }
 
-  return flattenData(data).findBoStatisticsSingleton as BoStatisticsPage;
+  const page = flattenData(data).findBoStatisticsSingleton as BoStatisticsPage;
+  if (!page) throw new Error("Bo statistics content is missing");
+  return page;
 }

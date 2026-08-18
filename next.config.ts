@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
   // Prevent Next.js from stripping trailing slashes on proxied routes,
   // which causes redirect loops with Flask (Flask adds trailing slash,
   // Next.js removes it → 308 loop).
+  trailingSlash: true,
   skipTrailingSlashRedirect: true,
   compress: true,
   productionBrowserSourceMaps: false,

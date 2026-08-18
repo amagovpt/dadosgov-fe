@@ -8,9 +8,9 @@ import { fetchDataset, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { searchDatasets } from "@/service/api/search";
 import {
-  AUDIENCE_CONDITIONS,
-  AUDIENCE_ROLES,
-  RESTRICTION_REASONS,
+  getAudienceConditions,
+  getAudienceRoles,
+  getRestrictionReasons,
 } from "@/utils/dataserviceLabels";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
@@ -43,6 +43,9 @@ export default function ApiRegistrationClient({
   pageContent,
 }: ApiRegistrationClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+  const audienceRoles = useMemo(() => getAudienceRoles(t), [t]);
+  const audienceConditions = useMemo(() => getAudienceConditions(t), [t]);
+  const restrictionReasons = useMemo(() => getRestrictionReasons(t), [t]);
   const { user } = useAuth();
   const [accessType, setAccessType] = useState("open");
   const [producer, setProducer] = useState("");
@@ -156,7 +159,7 @@ export default function ApiRegistrationClient({
 
     const isRestricted = accessType === "restricted";
     const audiences = isRestricted
-      ? AUDIENCE_ROLES.filter((role) => accessAudiences[role.role]).map((role) => ({
+      ? audienceRoles.filter((role) => accessAudiences[role.role]).map((role) => ({
           role: role.role,
           condition: accessAudiences[role.role],
         }))
@@ -352,10 +355,10 @@ export default function ApiRegistrationClient({
                 businessDocUrl={businessDocUrl}
                 accountAccessValue="open_with_account"
                 accessAudiences={accessAudiences}
-                audienceRoles={AUDIENCE_ROLES}
-                audienceConditions={AUDIENCE_CONDITIONS}
+                audienceRoles={audienceRoles}
+                audienceConditions={audienceConditions}
                 reasonCategory={reasonCategory}
-                restrictionReasons={RESTRICTION_REASONS}
+                restrictionReasons={restrictionReasons}
                 reasonText={reasonText}
                 onAccessTypeChange={setAccessType}
                 onAudienceChange={(role, value) =>

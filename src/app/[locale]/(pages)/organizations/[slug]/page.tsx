@@ -4,8 +4,6 @@ import OrganizationDetailClient from '@/components/organizations/OrganizationDet
 import { sanitizeUserMarkdown } from '@/utils/sanitizeUserMarkdown';
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 
-export const dynamic = 'force-dynamic';
-
 export default async function Page({
     params,
 }: {

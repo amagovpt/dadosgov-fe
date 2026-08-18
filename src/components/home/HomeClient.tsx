@@ -1,19 +1,18 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Button, CardArticle } from "@ama-pt/agora-design-system";
-import Link from "next/link";
 import { Dataset } from "@/service/types/dataset";
 import { Post } from "@/service/types/posts";
 import { Reuse } from "@/service/types/reuse";
 import { SiteMetrics } from "@/service/types/shared";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
-import HeroGeneral from "../HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import PublishDropdown from "../admin/PublishDropdown";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import Image from "next/image";
@@ -21,6 +20,8 @@ import AppIcon from "../Primitives/AppIcon";
 import { useTranslation } from "react-i18next";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { highlightText } from "@/utils/highlightText";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -62,7 +63,10 @@ export default function HomeClient({
 }: HomeClientProps) {
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation("home");
+  const { t, i18n } = useTranslation("common");
+  // Design-system `mainAnchor` hrefs bypass <LocalizedLink>; localize them
+  // explicitly so the i18n proxy never has to 307 (prefetch-loop fix).
+  const localizeHref = useLocalizedHref();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -85,26 +89,21 @@ export default function HomeClient({
     <main className="w-full h-full">
       <div className="w-full ">
         <div className="w-full">
-          <HeroGeneral
-            hasBreadcrumb={false}
-            title={
-              <h1 className="text-white flex flex-col items-start leading-tight">
+          {/* The homepage is the root — no breadcrumb slot. */}
+          <Hero.Root>
+            <Hero.Content>
+              <Hero.Title>
                 {highlightText(HomeHero.title, HomeHero.highlight, {
                   highlightClassName: "text-2xl-bold",
                   textClassName: "text-2xl-regular",
                 })}
-              </h1>
-            }
-            subtitle={
-              <span className="text-white text-m-regular">
-                {parseHtmlToParagraphs(HomeHero.description).map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </span>
-            }
-          >
-            <PublishDropdown darkMode={true} outline={false} />
-          </HeroGeneral>
+              </Hero.Title>
+              <Hero.Description description={parseHtmlToParagraphs(HomeHero.description)} />
+            </Hero.Content>
+            <Hero.Actions>
+              <PublishDropdown darkMode={true} outline={false} />
+            </Hero.Actions>
+          </Hero.Root>
 
           {/* Stats Section */}
           <div className="py-64 bg-primary-900 text-white flex flex-col items-center justify-center">
@@ -228,6 +227,7 @@ export default function HomeClient({
                     ...dataset,
                     last_modified: timeAgo,
                     link: `/datasets/${dataset.slug}`,
+                    titleBadges: <DatasetBadges badges={dataset.badges} />,
                   } as CardMetricsProps;
                   return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />;
                 })
@@ -238,7 +238,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/datasets">
+              <LocalizedLink href="/datasets">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -249,7 +249,7 @@ export default function HomeClient({
                 >
                   <span>{t("seeAllDatasets")}</span>
                 </Button>
-              </Link>
+              </LocalizedLink>
             </div>
           </div>
         </section>
@@ -257,7 +257,7 @@ export default function HomeClient({
         {/* Data Stories */}
         <section className="w-full flex flex-col items-center justify-center bg-primary-900 py-64">
           <div className="container flex flex-col gap-32">
-            <h2 className="text-xl-bold text-white">Data Stories</h2>
+            <h2 className="text-xl-bold text-white">{t("datastories")}</h2>
             <p className="mb-32 mt-16 max-w-3xl text-white">
               {parseHtmlToParagraphs(datastories.description)}
             </p>
@@ -277,19 +277,19 @@ export default function HomeClient({
                       }}
                       subtitle={
                         story.createdAt
-                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={story.title}
                       mainAnchor={{
-                        href: `/datastories/${story.slug}`,
+                        href: localizeHref(`/datastories/${story.slug}`),
                       }}
                       blockedLink={true}
                     />
                   ))}
                 </div>
                 <div className="mt-32">
-                  <Link href="/datastories">
+                  <LocalizedLink href="/datastories">
                     <Button
                       variant="primary"
                       appearance="link"
@@ -301,7 +301,7 @@ export default function HomeClient({
                     >
                       <span className="text-white">{t("seeAllDataStories")}</span>
                     </Button>
-                  </Link>
+                  </LocalizedLink>
                 </div>
               </>
             ) : (
@@ -327,14 +327,14 @@ export default function HomeClient({
                       }}
                       subtitle={
                         post.created_at
-                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: pt }) })
+                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
                           : ""
                       }
                       title={post.name}
                       blockedLink={false}
                     >
                       <div className="mt-auto pt-16">
-                        <Link href={`/noticias/${post.slug}`}>
+                        <LocalizedLink href={`/noticias/${post.slug}`}>
                           <Button
                             variant="primary"
                             appearance="link"
@@ -345,7 +345,7 @@ export default function HomeClient({
                           >
                             <span>{t("readMore")}</span>
                           </Button>
-                        </Link>
+                        </LocalizedLink>
                       </div>
                     </CardArticle>
                   </div>
@@ -357,7 +357,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/noticias">
+              <LocalizedLink href="/noticias">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -368,7 +368,7 @@ export default function HomeClient({
                 >
                   <span>{t("seeAllNews")}</span>
                 </Button>
-              </Link>
+              </LocalizedLink>
             </div>
           </div>
         </section>
@@ -391,7 +391,7 @@ export default function HomeClient({
                 )}
               </div>
             </div>
-            <Link href="/organizations">
+            <LocalizedLink href="/organizations">
               <Button
                 variant="primary"
                 appearance="link"
@@ -402,7 +402,7 @@ export default function HomeClient({
               >
                 <span>{t("seeAllOrganizations")}</span>
               </Button>
-            </Link>
+            </LocalizedLink>
           </div>
         </section>
       </div>

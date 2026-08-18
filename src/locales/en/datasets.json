@@ -42,7 +42,8 @@
       "label": "Data type",
       "options": {
         "all": "All",
-        "high_value": "High-Value Datasets"
+        "high_value": "High-Value Datasets",
+        "inspire": "INSPIRE"
       }
     }
   },
@@ -115,6 +116,8 @@
     "communityDisclaimer": "These resources are published by the community and are not the responsibility of the data producer."
   },
   "info": {
+    "links": "Links",
+    "contact": "Contact",
     "title": "Information",
     "keywords": "Keywords",
     "identifier": "Identifier",

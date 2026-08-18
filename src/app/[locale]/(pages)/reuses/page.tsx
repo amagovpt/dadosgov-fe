@@ -14,16 +14,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
 
-  const metadata = await getFrontOfficeMetadata("reuses",locale);
-
-  return {
-    title: metadata.title,
-    description: stripHtmlTags(metadata.description),
-  };
+  try {
+    const metadata = await getFrontOfficeMetadata("reuses",locale);
+    return {
+      title: metadata.title,
+      description: stripHtmlTags(metadata.description),
+    };
+  } catch (error) {
+    // Fall back to the layout's default title/description rather than failing
+    // the whole page render when the CMS is unreachable.
+    console.error("Error fetching reuses metadata:", error);
+    return {};
+  }
 }
 
 
 export default async function ReusesPage({
+    params,
     searchParams,
 }: {
     params: Promise<{ locale: string }>;
@@ -37,6 +44,7 @@ export default async function ReusesPage({
         modified_since?: string;
     }>;
 }) {
+    const { locale } = await params;
     const resolvedSearchParams = await searchParams;
     const page = Number(resolvedSearchParams?.page) || 1;
     const filters: ReuseFilters = {
@@ -54,12 +62,12 @@ export default async function ReusesPage({
     }
 
     // LEDG-1836: one aggregated call replaces the prior Promise.all of 6 fetches.
-    // Relay the real client IP on the SSR fetch (which, on a Data Cache miss,
+    // Relay the real client IP on the SSR fetch (which, on a listing-cache miss,
     // goes direct to the backend) so the limiter keys per visitor, not the Next IP.
     const forwarded = await serverForwardedHeaders();
     const data = await fetchReusesListing(page, 12, apiFilters, forwarded);
 
-    const pageContent = await getFrontOfficePage("reuses","pt");
+    const pageContent = await getFrontOfficePage("reuses", locale);
 
     return (
         <ReusesClient

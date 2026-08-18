@@ -7,6 +7,7 @@ import AppIcon from '@/components/Primitives/AppIcon';
 import CardIllustrative from '@/components/Primitives/Cards/CardIllustrative';
 import { Pagination } from '@/components/Pagination';
 import { PageMiniCourses } from '@/service/types/courses';
+import { useTranslation } from 'react-i18next';
 
 
 export interface MiniCoursesResultProps {
@@ -17,13 +18,14 @@ export interface MiniCoursesResultProps {
 
 export default function MiniCoursesResult({ filteredCourses, currentPage, PAGE_SIZE }: MiniCoursesResultProps) {
     const [sortKey, setSortKey] = useState('asc');
+    const { t, i18n } = useTranslation('learning');
 
     const paginatedCourses = useMemo(() => {
         const start = (currentPage - 1) * PAGE_SIZE;
         return [...filteredCourses]
             .sort((a, b) => {
-                if (sortKey === 'asc') return a.title.localeCompare(b.title, 'pt');
-                if (sortKey === 'desc') return b.title.localeCompare(a.title, 'pt');
+                if (sortKey === 'asc') return a.title.localeCompare(b.title, i18n.language);
+                if (sortKey === 'desc') return b.title.localeCompare(a.title, i18n.language);
                 if (sortKey === 'newest') return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
                 return 0;
             })
@@ -38,7 +40,7 @@ export default function MiniCoursesResult({ filteredCourses, currentPage, PAGE_S
             <div className="col-span-9 ">
                 <div className="flex justify-end mb-16">
                     <span className="text-s-regular text-neutral-500 font-medium tracking-tight">
-                        {paginatedCourses.length} de {filteredCourses.length} resultados
+                        {t('results', { shown: paginatedCourses.length, total: filteredCourses.length })}
                     </span>
                 </div>
                 {paginatedCourses.length > 0 && (

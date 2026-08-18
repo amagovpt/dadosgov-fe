@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import HeroGeneral from "@/components/HeroGeneral";
+import { Hero } from "@/components/Shared/Hero";
 import { Pagination } from "@/components/Pagination";
 import ResultsCount from "@/components/admin/ResultsCount";
 import { ArticleCard } from "@/components/articles/ArticleCard";
@@ -23,12 +23,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
 
-  const { hero } = await getNewsPage(locale);
-
-  return {
-    title: `${hero.title} - dados.gov.pt`,
-    description: hero.subtitle,
-  };
+  try {
+    const { hero } = await getNewsPage(locale);
+    return {
+      title: `${hero.title} - dados.gov.pt`,
+      description: hero.subtitle,
+    };
+  } catch (error) {
+    // Fall back to the layout's default title rather than failing the whole
+    // page render when the CMS is unreachable.
+    console.error("Error fetching noticias metadata:", error);
+    return {};
+  }
 }
 
 export default async function ArticleListPage({
@@ -40,7 +46,7 @@ export default async function ArticleListPage({
 }) {
   const { locale } = await params;
   const { t } = await initTranslations({ locale, namespaces: ["common"] });
-  const { hero, searchBar } = await getNewsPage("pt");
+  const { hero, searchBar } = await getNewsPage(locale);
   const { page: pageParam, sort: sortParam, q } = await searchParams;
   const currentPage = Math.max(1, Number(pageParam) || 1);
   const sort = parseArticlesSort(sortParam);
@@ -55,21 +61,24 @@ export default async function ArticleListPage({
 
   return (
     <main className="flex w-full flex-col items-center justify-center bg-primary-50">
-      <HeroGeneral
-        title={hero.title}
-        backgroundImageUrl="/Banner/hero-bg.png"
-      >
-        <ArticlesSearchBar
-          initialQuery={query ?? ""}
-          label={searchBar.label}
-          placeholder={searchBar.placeholder}
-          searchActionAltText={searchBar.searchActionAltText}
-          voiceActionAltText={searchBar.voiceActionAltText}
-        />
-        <div className="mt-8 text-s-regular text-neutral-200">
-          {parseHtmlToParagraphs(hero.description)}
-        </div>
-      </HeroGeneral>
+      <Hero.Root backgroundImageUrl="/Banner/hero-bg.png">
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{hero.title}</Hero.Title>
+        </Hero.Content>
+        <Hero.Actions>
+          <ArticlesSearchBar
+            initialQuery={query ?? ""}
+            label={searchBar.label}
+            placeholder={searchBar.placeholder}
+            searchActionAltText={searchBar.searchActionAltText}
+            voiceActionAltText={searchBar.voiceActionAltText}
+          />
+          <div className="mt-8 text-s-regular text-neutral-200">
+            {parseHtmlToParagraphs(hero.description)}
+          </div>
+        </Hero.Actions>
+      </Hero.Root>
       <div className="container flex flex-col items-center justify-center gap-32 py-32">
         <div className="flex w-full flex-col items-center justify-end">
           <div className="flex w-full items-end gap-16">

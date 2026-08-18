@@ -1,41 +1,23 @@
 "use client";
 
-import type { ComponentType } from "react";
-import type { RichAnswerKey } from "../../types";
-import { DadosEspecificosAnswer } from "./DadosEspecificosAnswer";
-import { PublicarAnswer } from "./PublicarAnswer";
-import { UsarDadosAnswer } from "./UsarDadosAnswer";
-import { ApisAnswer } from "./ApisAnswer";
-import { LegaisAnswer } from "./LegaisAnswer";
-import { ProblemasTecnicosAnswer } from "./ProblemasTecnicosAnswer";
-import { PedidosDadosAnswer } from "./PedidosDadosAnswer";
-import { OutrosAnswer } from "./OutrosAnswer";
-import { Emblemas } from "./Emblemas";
-
-const FAQ_ANSWERS: Partial<Record<string, ComponentType>> = {
-  true: DadosEspecificosAnswer,
-  publicar: PublicarAnswer,
-  "usar-dados": UsarDadosAnswer,
-  apis: ApisAnswer,
-  legais: LegaisAnswer,
-  "problemas-tecnicos": ProblemasTecnicosAnswer,
-  "pedidos-dados": PedidosDadosAnswer,
-  outros: OutrosAnswer,
-  emblema: Emblemas,
-};
+import React from "react";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface FaqAnswerProps {
-  richAnswer: RichAnswerKey | undefined;
   plainAnswer: string;
 }
 
-export function FaqAnswer({ richAnswer, plainAnswer }: FaqAnswerProps) {
-  if (!richAnswer) return <>{plainAnswer}</>;
+export function FaqAnswer({ plainAnswer }: FaqAnswerProps) {
+  const answerSegments = plainAnswer.split(/<p>\s*<\/p>/g);
 
-  const key = String(richAnswer);
-  const AnswerComponent = FAQ_ANSWERS[key];
-
-  if (!AnswerComponent) return <>{plainAnswer}</>;
-
-  return <AnswerComponent />;
+  return (
+    <div className="[&_a]:inline-block [&_a]:p-[2px] [&_a]:text-m-regular [&_a]:text-neutral-900 [&_a]:underline [&_a]:[text-decoration-color:var(--color-neutral-900)] [&_a]:[text-decoration-thickness:.094rem] [&_a]:[text-underline-offset:.388rem]">
+      {answerSegments.map((segment, index) => (
+        <React.Fragment key={index}>
+          {index > 0 ? <div className="h-16" /> : null}
+          {formatHtmlParagraphs(segment)}
+        </React.Fragment>
+      ))}
+    </div>
+  );
 }

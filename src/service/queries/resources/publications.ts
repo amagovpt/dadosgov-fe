@@ -63,11 +63,9 @@ export async function getPublicationsPage(locale: string = "pt"): Promise<Public
     throw new Error("Failed to fetch datastory information");
   }
 
-  const publicationPage = data.findPublicationsPageSingleton?.data;
-
-  if (!publicationPage) {
+  if (!data.findPublicationsPageSingleton?.data) {
     return {} as PublicationPage;
   }
 
-  return flattenData(publicationPage) as unknown as PublicationPage;
+  return flattenData(data, locale).findPublicationsPageSingleton as PublicationPage;
 }

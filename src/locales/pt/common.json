@@ -2,11 +2,25 @@
   "name": "dados.gov.pt",
   "title": "dados.gov.pt",
   "description": "Portal aberto de dados públicos portugueses: descarregue, partilhe e reutilize os dados abertos do Estado e das autarquias",
+  "generalBarLabel": "Portal nacional de dados abertos",
   "reuses": "Reutilizações",
   "users": "Utilizadores",
   "datasets": "Conjuntos de dados",
   "organizations": "Organizações",
+  "thematicAreas": "Áreas Temáticas",
+  "thematicAreaNotFound": "Não foi possível encontrar este tema",
+  "otherThematicAreas": "Outras Áreas Temáticas",
+  "viewAllThematicAreas": "Ver todas as áreas temáticas",
+  "roadmap": {
+    "functionality": "Funcionalidade",
+    "description": "Descrição",
+    "status": "Estado",
+    "finished": "Concluído",
+    "inProgress": "Em desenvolvimento",
+    "comingSoon": "Em breve"
+  },
   "publishedAt": "Publicado a {{date}}",
+  "updatedAt": "Atualizado a {{date}}",
   "readMore": "Ler mais",
   "readLess": "Ler menos",
   "seeAllDatasets": "Ver todos os conjuntos de dados",
@@ -31,6 +45,37 @@
   "articleNotFoundDescription": "O artigo que procura não existe ou foi removido.",
   "backToArticles": "Voltar aos artigos",
   "loading": "A carregar...",
+  "notFound": {
+    "error": "Erro 404",
+    "title": "Página não encontrada",
+    "subtitle": "Não conseguimos encontrar o recurso que procura.",
+    "description": "O conteúdo pode ter sido removido, alterado ou o endereço introduzido poderá não estar correto. Explore os conjuntos de dados disponíveis ou volte à página inicial para continuar a sua pesquisa.",
+    "suggestion": "Pesquisar conjunto de dados, organizações, temas...",
+    "whatAreYouLookingFor": "O que procura no portal?",
+    "backToHome": "Voltar à página inicial"
+  },
+  "header": {
+    "profile": "Perfil público",
+    "notifications": "Notificações",
+    "logout": "Terminar sessão",
+    "search": "Pesquisar",
+    "searchLabel": "O que procura no Portal?",
+    "searchPlaceholder": "Pesquisar conjunto de dados, organizações, temas...",
+    "ecosystem": "Ecossistema",
+    "generalNavigation": "Opções de navegação geral",
+    "portalAreas": "Áreas do portal",
+    "selectLanguage": "Selecionar idioma",
+    "signIn": "Autenticar",
+    "menu": "Menu",
+    "openMenu": "Abrir menu",
+    "backToHome": "Voltar ao início",
+    "mainNavigation": "Navegação principal",
+    "navigationMenu": "Menu de navegação",
+    "close": "Fechar",
+    "back": "Voltar",
+    "portal": "Portal",
+    "portuguese": "Português"
+  },
   "results_one": "{{count, number}} resultado",
   "results_other": "{{count, number}} resultados",
   "card": {
@@ -45,7 +90,8 @@
     "dateUnavailable": "Data indisponível",
     "reuse": "Reutilização",
     "api": "API",
-    "organization": "Organização"
+    "organization": "Organização",
+    "metadataQuality": "{{score}}% Qualidade dos metadados"
   },
   "datastories": "Data Stories",
   "pagination": {
@@ -53,13 +99,99 @@
     "previous": "Página anterior",
     "next": "Página seguinte"
   },
+  "loader": "A carregar...",
+  "contentLoadError": "Não foi possível carregar o conteúdo.",
+  "publications": {
+    "updated": "Atualizado {{date}}",
+    "empty": "Não existem publicações",
+    "results_one": "{{count}} resultado",
+    "results_other": "{{count}} resultados",
+    "sortBy": "Ordenar por {{label}}",
+    "sort": {
+      "recente": "Mais recente",
+      "antigo": "Mais antigo"
+    },
+    "downloadFile": "Descarregar ficheiro",
+    "pages_one": "{{count}} página",
+    "pages_other": "{{count}} páginas"
+  },
   "search": {
     "label": "Pesquisar",
     "placeholder": "Pesquisar...",
     "noResults": "Nenhum resultado encontrado.",
-    "minCharsMessage": "Escreva pelo menos 2 caracteres..."
+    "minCharsMessage": "Escreva pelo menos 2 caracteres...",
+    "type": "Tipo",
+    "enterTerm": "Introduza um termo para pesquisar no portal.",
+    "articlesLabel": "O que procura nas novidades?",
+    "articlesPlaceholder": "Pesquisar artigos, notícias, webinars...",
+    "voiceAction": "Pesquisar por voz",
+    "types": {
+      "datasets": "Conjunto de dados",
+      "reuses": "Reutilizações",
+      "organizations": "Organizações"
+    },
+    "advancedTitle": "Pesquisa avançada",
+    "advancedPlaceholder": "Pesquisar conjunto de dados, organizações, reutilizações...",
+    "updatedOn": "Atualizado a {{date}}",
+    "advancedFilters": {
+      "organizations": "Organizações",
+      "keywords": "Palavras-chave",
+      "formats": "Formatos",
+      "licenses": "Licenças",
+      "spatialCoverage": "Cobertura espacial",
+      "spatialGranularity": "Granularidade espacial"
+    },
+    "dropdown": {
+      "datasets": "conjuntos de dados",
+      "apis": "APIs",
+      "reuses": "reutilizações",
+      "organizations": "organizações",
+      "searchIn": "Pesquisar “{{query}}” em {{type}}"
+    },
+    "noResultsFor": "Nenhum resultado encontrado para \"{{query}}\"",
+    "tryDifferentTerms": "Tente pesquisar com termos diferentes."
   },
   "filters": {
+    "format": {
+      "format": "Formato dos dados",
+      "all": "Todos",
+      "tabular": "Tabular",
+      "structured": "Estruturado",
+      "geographic": "Geográfico",
+      "documents": "Documentos",
+      "other": "Outro"
+    },
+    "access": {
+      "access": "Métodos de acesso",
+      "all": "Todos",
+      "freeDownload": "Download gratuito",
+      "openConditions": "Aberto sob certas condições",
+      "authAccess": "Acesso mediante autorização"
+    },
+    "updated": {
+      "updated": "Data da atualização",
+      "all": "Todos",
+      "last30Days": "Os últimos 30 dias",
+      "last12Months": "Os últimos 12 meses",
+      "last3Years": "Os últimos 3 anos"
+    },
+    "organization": {
+      "organization": "Tipo de organização",
+      "all": "Todos",
+      "publicService": "Serviço público",
+      "localAuthority": "Autoridade local",
+      "business": "Negócios",
+      "association": "Associação",
+      "user": "Utilizador"
+    },
+    "dataLabel": {
+      "dataLabel": "Rótulo de dados",
+      "all": "Todos",
+      "highValue": "Conjuntos de dados de alto valor",
+      "inspire": "Inspirar",
+      "publicReference": "Serviço público de dados de referência",
+      "statistics": "Séries estatísticas de interesse geral"
+    },
     "filters": "Filtros",
     "hideFilters": "Ocultar filtros",
     "openFilters": "Abrir filtros",
@@ -106,6 +238,7 @@
     "roadmap": "Roteiro para dados.gov.pt",
     "termos-de-utilizacao": "Termos de utilização",
     "ajuda-e-contactos": "Ajuda e contactos",
+    "sitemap": "Mapa do Site",
     "recursos": "Recursos",
     "publicacoes": "Publicações",
     "como-usar-o-portal": "Como usar o portal",
@@ -138,8 +271,33 @@
     "title": "Não foi possível carregar",
     "subtitle": "Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos."
   },
+  "apiError": {
+    "serverErrorTitle": "Serviço indisponível",
+    "serverErrorDescription": "Ocorreu um erro no servidor. Tente novamente dentro de momentos.",
+    "networkErrorTitle": "Sem ligação",
+    "networkErrorDescription": "Não foi possível contactar o servidor. Verifique a sua ligação à Internet.",
+    "sessionExpiredTitle": "Sessão expirada",
+    "sessionExpiredDescription": "Inicie sessão novamente para continuar.",
+    "pageErrorTitle": "Não foi possível carregar esta página",
+    "pageErrorSubtitle": "O serviço pode estar temporariamente indisponível.",
+    "pageErrorDescription": "Tente novamente dentro de instantes. Se o problema persistir, contacte o suporte.",
+    "pageErrorReference": "Referência: {{digest}}",
+    "backToHome": "Voltar à página inicial"
+  },
   "retry": "Tentar novamente",
   "discussions": {
+    "title": "Título *",
+    "message": "Mensagem *",
+    "cancel": "Cancelar",
+    "update": "Atualizar",
+    "updating": "A atualizar...",
+    "deleteWarning": "Essa ação é irreversível.",
+    "deleteDiscussionWarning": "Essa ação é irreversível. Todos os comentários nesta discussão também serão apagados.",
+    "emailNotification": "Notificação por e-mail",
+    "automaticEmail": "Enviar um e-mail automático (opções de recurso)",
+    "customEmail": "Enviar um e-mail personalizado",
+    "deleting": "A apagar...",
+    "delete": "Eliminar",
     "count_one": "{{count}} DISCUSSÃO",
     "count_other": "{{count}} DISCUSSÕES",
     "searchAria": "Pesquisar discussões",

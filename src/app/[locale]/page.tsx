@@ -3,16 +3,15 @@ import HomeClient from "@/components/home/HomeClient";
 import { getHome } from "@/service/queries/home/home";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 
-export const dynamic = 'force-dynamic';
-
-export default async function Home() {
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const data = await fetchHomepageData();
 
   let hero: HomeHero;
   let datastories: HomeDatastories;
   let usedDailyBy: UsedDailyBy[] = [];
   try {
-    const result = await getHome("pt");
+    const result = await getHome(locale);
     hero = result.hero;
     datastories = result.datastories;
     usedDailyBy = result.usedDailyBy ?? [];

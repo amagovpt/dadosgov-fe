@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,7 @@ import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followe
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import {
   QUALITY_CRITERIA,
@@ -41,17 +42,27 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [qualityExpanded, setQualityExpanded] = useState(false);
+  const qualityExpandedRef = useRef(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
+
+  // ADS 3.7 `CardAccordion` calls onExpanded/onCollapsed from its render body and
+  // re-fires them on every render while open. Defer the state update so we never
+  // setState during another component's render, and drop the repeat calls.
+  const syncQualityExpanded = useCallback((next: boolean) => {
+    if (qualityExpandedRef.current === next) return;
+    qualityExpandedRef.current = next;
+    queueMicrotask(() => setQualityExpanded(next));
+  }, []);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     isFollowing("datasets", dataset.id, user.id)
       .then((following) => { if (!cancelled) setIsFavorite(following); })
-      .catch(() => {});
+      .catch(() => { });
     return () => { cancelled = true; };
-  }, [user?.id, dataset.id]);
+  }, [user,user?.id, dataset.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -113,17 +124,17 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
           (user && dataset.owner?.id === user.id) ||
           (dataset.organization &&
             organizations.some((org) => org.id === dataset.organization?.id))) && (
-          <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
-            <Button
-              variant="primary"
-              hasIcon={true}
-              leadingIcon="agora-line-edit"
-              leadingIconHover="agora-solid-edit"
-            >
-              {tds("detail.edit")}
-            </Button>
-          </Link>
-        )}
+            <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
+              <Button
+                variant="primary"
+                hasIcon={true}
+                leadingIcon="agora-line-edit"
+                leadingIconHover="agora-solid-edit"
+              >
+                {tds("detail.edit")}
+              </Button>
+            </Link>
+          )}
       </div>
 
       <div className="container grid gap-32 xl:grid-cols-12">
@@ -131,6 +142,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
         <div className="xl:col-span-6 xl:block">
           <div className="flex flex-col gap-4" ref={titleRef}>
             <h1 className="mb-24 text-xl-bold leading-tight text-primary-900">{dataset.title}</h1>
+            <DatasetBadges badges={dataset.badges} className="mb-24" />
           </div>
 
           {/* Description */}
@@ -280,10 +292,9 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
               accordionHeadingTitle={
                 qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")
               }
-              accordionHeadingLevel="h4"
               expanded={qualityExpanded}
-              onExpanded={() => setQualityExpanded(true)}
-              onCollapsed={() => setQualityExpanded(false)}
+              onExpanded={() => syncQualityExpanded(true)}
+              onCollapsed={() => syncQualityExpanded(false)}
             >
               {qualityMissing.length > 0 && (
                 <div className="flex flex-col gap-8">

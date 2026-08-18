@@ -61,11 +61,9 @@ export async function getTematicAreas(locale: string = "pt"): Promise<TematicAre
     throw new Error("Failed to fetch datastory information");
   }
 
-  const tematicAreas = data.findTematicPageSingleton?.data;
-
-  if (!tematicAreas) {
+  if (!data.findTematicPageSingleton?.data) {
     return {} as TematicAreaPage;
   }
 
-  return flattenData(tematicAreas) as unknown as TematicAreaPage;
+  return flattenData(data, locale).findTematicPageSingleton as TematicAreaPage;
 }

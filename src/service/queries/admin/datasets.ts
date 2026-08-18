@@ -37,7 +37,9 @@ export async function getBoDatasetsMetadata(
     throw new Error("Failed to fetch bo-datasets metadata");
   }
 
-  return flattenData(data).findBoDatasetsSingleton as BoDatasetsMetadata;
+  const page = flattenData(data).findBoDatasetsSingleton as BoDatasetsMetadata;
+  if (!page) throw new Error("Bo datasets metadata is missing");
+  return page;
 }
 
 export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPage> {
@@ -256,5 +258,7 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
     throw new Error("Failed to fetch bo-datasets content");
   }
 
-  return flattenData(data).findBoDatasetsSingleton as BoDatasetsPage;
+  const page = flattenData(data).findBoDatasetsSingleton as BoDatasetsPage;
+  if (!page) throw new Error("Bo datasets content is missing");
+  return page;
 }

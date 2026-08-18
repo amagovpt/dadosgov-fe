@@ -2,15 +2,18 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button, Pill } from "@ama-pt/agora-design-system";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 
 function DataservicePreviewContent() {
+  const { t } = useTranslation("common");
+  const { t: tDs } = useTranslation("dataservices");
   const searchParams = useSearchParams();
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const title = searchParams.get("title") || "Sem título";
-  const description = searchParams.get("description") || "Sem descrição";
+  const title = searchParams.get("title") || tDs("detail.untitled");
+  const description = searchParams.get("description") || tDs("detail.noDescription");
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -23,15 +26,15 @@ function DataservicePreviewContent() {
           */}
           <Breadcrumb
             items={[
-              { label: "Início", url: "/" },
-              { label: "API", url: "/admin/dataservices" },
+              { label: t("breadcrumbs.home"), url: "/" },
+              { label: t("breadcrumbs.dataservices"), url: "/admin/dataservices" },
               { label: title, url: "#" },
             ]}
           />
         </div>
 
         <div className="flex justify-end items-center gap-16">
-          <Pill variant="warning">Rascunho</Pill>
+          <Pill variant="warning">{tDs("detail.draft")}</Pill>
           <Button
             variant="primary"
             appearance={isFavorite ? "solid" : "outline"}
@@ -41,7 +44,7 @@ function DataservicePreviewContent() {
             className="flex-shrink-0"
             onClick={() => setIsFavorite(!isFavorite)}
           >
-            {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            {isFavorite ? tDs("detail.removeFavorite") : tDs("detail.addFavorite")}
           </Button>
         </div>
 

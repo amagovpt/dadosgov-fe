@@ -31,13 +31,16 @@ const notoSansMono = Noto_Sans_Mono({
 const namespaces = [
   "common",
   "footer",
-  "home",
   "datastories",
   "datasets",
   "login",
+  "learning",
+  "documentation",
+  "profile",
   "reuses",
   "organizations",
   "dataservices",
+  "support",
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",
@@ -104,14 +107,14 @@ export default async function RootLayout({
 }) {
   const { locale: rawLocale } = await params;
   const locale = i18nConfig.locales.includes(rawLocale) ? rawLocale : i18nConfig.defaultLocale;
-  const { resources, t } = await initTranslations({
+  const { resources } = await initTranslations({
     locale,
     namespaces,
   });
 
   let headerNavigation: HeaderNavigationData;
   try {
-    headerNavigation = await getHeaderNavigation("pt");
+    headerNavigation = await getHeaderNavigation(locale);
   } catch (error) {
     console.error("Error fetching header navigation:", error);
     headerNavigation = {} as HeaderNavigationData;

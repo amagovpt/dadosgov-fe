@@ -1,4 +1,5 @@
 import { test, expect } from "playwright/test";
+import { loginAsAdmin } from "../../helpers/auth";
 
 test.describe("Header and Footer", () => {
   test.beforeEach(async ({ page }) => {
@@ -86,8 +87,51 @@ test.describe("Header and Footer", () => {
     expect(page.url()).toContain("/login");
   });
 
-  test.skip("NV-07: User menu with session (needs auth)", async () => {
-    // Skipped: requires authenticated session
+  test("NV-19: Ecosystem button appears to the left of the auth control", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+    const ecosystemButton = header.getByText("Ecossistema", { exact: false }).first();
+    const authControl = header.locator('a[href="/login"]').first();
+
+    await expect(ecosystemButton).toBeVisible({ timeout: 10000 });
+    await expect(authControl).toBeVisible({ timeout: 10000 });
+
+    const ecosystemBox = await ecosystemButton.boundingBox();
+    const authBox = await authControl.boundingBox();
+    expect(ecosystemBox).not.toBeNull();
+    expect(authBox).not.toBeNull();
+    expect(ecosystemBox!.x).toBeLessThan(authBox!.x);
+  });
+
+  test("NV-07: Authenticated user menu shows an avatar and opens a drawer with profile/notifications/logout", async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    const header = page.locator("header").first();
+    const avatarTrigger = header.locator(".agora-avatar-container").first();
+    await expect(avatarTrigger).toBeVisible({ timeout: 10000 });
+
+    // Ecosystem stays to the left of the auth control in the logged-in state too.
+    const ecosystemButton = header.getByText("Ecossistema", { exact: false }).first();
+    const ecosystemBox = await ecosystemButton.boundingBox();
+    const avatarBox = await avatarTrigger.boundingBox();
+    expect(ecosystemBox).not.toBeNull();
+    expect(avatarBox).not.toBeNull();
+    expect(ecosystemBox!.x).toBeLessThan(avatarBox!.x);
+
+    await avatarTrigger.click();
+
+    const drawer = page.locator(".agora-drawer").first();
+    await expect(drawer).toBeVisible({ timeout: 10000 });
+    await expect(drawer.getByText("Perfil público")).toBeVisible({ timeout: 10000 });
+    await expect(drawer.getByText("Notificações")).toBeVisible({ timeout: 10000 });
+    await expect(drawer.getByText("Terminar sessão")).toBeVisible({ timeout: 10000 });
+    // "Administração" is CMS-driven content — not asserted here to avoid
+    // coupling this test to live Squidex data.
   });
 
   test("NV-13: Recursos dropdown opens and shows all main menu items", async ({

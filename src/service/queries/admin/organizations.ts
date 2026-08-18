@@ -37,7 +37,9 @@ export async function getBoOrganizationsMetadata(
     throw new Error("Failed to fetch bo-organizations metadata");
   }
 
-  return flattenData(data).findBoOrganizationsSingleton as BoOrganizationsMetadata;
+  const page = flattenData(data).findBoOrganizationsSingleton as BoOrganizationsMetadata;
+  if (!page) throw new Error("Bo organizations metadata is missing");
+  return page;
 }
 
 export async function getBoOrganizations(
@@ -170,5 +172,7 @@ export async function getBoOrganizations(
     throw new Error("Failed to fetch bo-organizations content");
   }
 
-  return flattenData(data).findBoOrganizationsSingleton as BoOrganizationsPage;
+  const page = flattenData(data).findBoOrganizationsSingleton as BoOrganizationsPage;
+  if (!page) throw new Error("Bo organizations content is missing");
+  return page;
 }

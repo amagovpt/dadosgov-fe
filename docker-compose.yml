@@ -1,17 +1,22 @@
 services:
-  # One-shot init: ensures ./logs (auto-created by Docker as root) is writable
-  # by the app user before the app starts. Runs on every `up`, then exits.
-  init-logs:
-    container_name: udata-frontend-init-logs
+  # One-shot init: ensures the bind-mounted host dirs (auto-created by Docker
+  # as root when missing) are writable by the app user before the app starts.
+  # ./logs collects the app log; ./.next/cache holds the Next.js fetch/ISR and
+  # image-optimizer caches — left root-owned it produces constant
+  # "Failed to update prerender cache ... EACCES" log spam and no disk caching
+  # at all. Runs on every `up`, then exits.
+  init-dirs:
+    container_name: udata-frontend-init-dirs
     image: busybox:stable
-    command: sh -c "chown -R ${NEXTJS_UID:-10001}:${NEXTJS_GID:-10001} /logs && chmod 2775 /logs"
+    command: sh -c "chown -R ${NEXTJS_UID:-10001}:${NEXTJS_GID:-10001} /logs /cache && chmod 2775 /logs /cache"
     volumes:
       - ./logs:/logs
+      - ./.next/cache:/cache
 
   app:
     container_name: udata-frontend-app
     depends_on:
-      init-logs:
+      init-dirs:
         condition: service_completed_successfully
     build:
       context: .

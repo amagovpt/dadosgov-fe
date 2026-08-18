@@ -2,7 +2,7 @@
 
 import { Accordion } from "@ama-pt/agora-design-system";
 import { FaqAnswer } from "./answers";
-import type { FaqItem } from "../types";
+import type { FaqItem } from "@/service/types/support";
 
 interface FaqAccordionItemProps {
   item: FaqItem;
@@ -23,7 +23,7 @@ export function FaqAccordionItem({
     <Accordion
       key={`${currentId}-${expandedId === currentId}`}
       headingTitle={
-        <span className="mr-16 font-bold text-[#2B363C]">{item.question}</span>
+        <span className="mr-16 font-bold text-[#2B363C]">{item.title}</span>
       }
       headingLevel="h4"
       defaultExpanded={expandedId === currentId}
@@ -31,7 +31,7 @@ export function FaqAccordionItem({
       onCollapsed={() => onCollapsed(currentId)}
     >
       <div className="mr-16 py-16 leading-relaxed text-neutral-900">
-        <FaqAnswer richAnswer={item.richAnswer} plainAnswer={item.answer} />
+        <FaqAnswer plainAnswer={item.description ?? ""} />
       </div>
     </Accordion>
   );

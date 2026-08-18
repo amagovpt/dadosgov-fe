@@ -1,22 +1,29 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { FaqLink } from "../FaqLink";
 
 export function LegaisAnswer() {
+  const { t } = useTranslation("support");
+
   return (
     <div className="space-y-16">
       <div>
-        <p className="font-bold">Proteção de Dados Pessoais / RGPD</p>
+        <p className="font-bold">{t("legalAnswers.personalDataTitle")}</p>
         <p>
-          Contactar a{" "}
-          <FaqLink href="https://www.cnpd.pt">Comissão Nacional de Proteção de Dados</FaqLink>
+          {t("legalAnswers.contactPrefix")}{" "}
+          <FaqLink href="https://www.cnpd.pt">
+            {t("legalAnswers.cnpdLink")}
+          </FaqLink>
         </p>
       </div>
       <div>
-        <p className="font-bold">Pedido de remoção de dados pessoais</p>
+        <p className="font-bold">{t("legalAnswers.removalRequestTitle")}</p>
         <p>
-          Contactar a equipa do dados.gov.pt na página de{" "}
-          <FaqLink href="/ajuda-e-contactos#ajuda">Suporte</FaqLink>
+          {t("legalAnswers.supportPrefix")}{" "}
+          <FaqLink href="/ajuda-e-contactos#help">
+            {t("legalAnswers.supportLink")}
+          </FaqLink>
         </p>
       </div>
     </div>
