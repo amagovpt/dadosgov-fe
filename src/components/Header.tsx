@@ -47,7 +47,7 @@ import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
 import { stripLocale } from "@/utils/stripLocale";
-import { useLocalizedHref } from "@/hooks/useLocalizedHref";
+import { useCurrentLocale, useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { LocalizedLink } from "./Shared/LocalizedLink";
 import { areas, isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
@@ -72,6 +72,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   // Nav hrefs from the CMS/config carry no locale prefix; localize them before
   // navigating so the i18n proxy never has to 307 (prefetch-loop fix).
   const localizeHref = useLocalizedHref();
+  const currentLocale = useCurrentLocale();
   const { user, samlLogin } = useAuth();
   const { t } = useTranslation("common");
   const initials = user
@@ -163,7 +164,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     }
   }, [user]);
 
-  const [selectedLanguage, setSelectedLanguage] = useState("pt");
   const [submenu, setSubmenu] = useState<string | null>(null);
   const selectedArea = localePath === "/login" ? "2" : "1";
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -176,6 +176,20 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   useEffect(() => {
     headerRef.current?.closeAll?.();
   }, [pathname]);
+
+  const handleLanguageChange = (newLocale: string) => {
+    if (!languages.some((language) => language.value === newLocale)) return;
+
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 30);
+    document.cookie = `NEXT_LOCALE=${newLocale}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+
+    const localizedPath = `/${newLocale}${localePath === "/" ? "" : localePath}`;
+    const search = window.location.search;
+    const hash = window.location.hash;
+    router.push(`${localizedPath}${search}${hash}`);
+    router.refresh();
+  };
 
   // Position ecosystem panel right below the panels-menu bar (covering the nav bar)
   useEffect(() => {
@@ -351,7 +365,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             </Areas>
             <Languages
               aria-label={t("header.selectLanguage")}
-              onChange={(lang: string) => setSelectedLanguage(lang)}
+              onChange={handleLanguageChange}
             >
               {languages.map((lang) => (
                 <Language
@@ -359,7 +373,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   value={lang.value}
                   label={lang.label}
                   abbr={lang.abbr}
-                  checked={selectedLanguage === lang.value}
+                  icon={lang.icon}
+                  checked={currentLocale === lang.value}
                 />
               ))}
             </Languages>
