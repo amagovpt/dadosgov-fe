@@ -25,15 +25,24 @@ import { TabularPage, TabularProfile, TabularSortDir } from "@/service/types/tab
 import { formatDateLong } from "@/utils/formatDate";
 import { CopyField } from "./CopyField";
 import { PREVIEW_PAGE_SIZE, SPREADSHEET_FORMATS, TABULAR_FORMATS } from "./constants";
-import { buildTabularData, downloadUrl, formatBytes, parseCsv, translateExtrasKey, translateExtrasValue } from "./utils";
+import { buildTabularData, downloadUrl, formatBytes, parseCsv, sortRowsByColumn, translateExtrasKey, translateExtrasValue } from "./utils";
 import { SpreadsheetPreview, TabularData } from "./types";
 
 type SortOrder = "none" | "ascending" | "descending";
 
+type AgoraSortType = "string" | "numeric" | "date";
+
 /** Map a csv-detective python_type to the Agora table sort affordance. */
-const agoraSortType = (pythonType?: string): "string" | "numeric" | "date" => {
+const agoraSortType = (pythonType?: string): AgoraSortType => {
   if (pythonType === "int" || pythonType === "float") return "numeric";
   if (pythonType === "date" || pythonType === "datetime") return "date";
+  return "string";
+};
+
+/** Same mapping for the in-app heuristics used by the byte-proxy preview. */
+const heuristicSortType = (type?: string): AgoraSortType => {
+  if (type === "integer" || type === "float") return "numeric";
+  if (type === "date") return "date";
   return "string";
 };
 
@@ -188,16 +197,39 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
     return tabularData?.headers ?? [];
   }, [source, tabularPage, profile, tabularData]);
 
+  /**
+   * Sort affordance of a column: the csv-detective type on the api-tabular
+   * path, the in-app heuristic on the fallback one, so both previews expose
+   * the same sortable headers.
+   */
+  const sortTypeFor = useCallback(
+    (header: string): AgoraSortType => {
+      if (source === "tabular") {
+        return agoraSortType(profile?.columns?.[header]?.python_type);
+      }
+      return heuristicSortType(tabularData?.columns.find((col) => col.name === header)?.type);
+    },
+    [source, profile, tabularData]
+  );
+
   const rows = useMemo(() => {
     if (source === "tabular") {
+      // Already ordered and paginated by api-tabular.
       return (tabularPage?.records ?? []).map((record) =>
         headers.map((header) => formatCell(record[header]))
       );
     }
     if (!tabularData) return [];
+    // The whole file is in memory here, so sorting happens over every row
+    // before paginating — not just over the page on screen.
+    const sortIndex = sortBy ? headers.indexOf(sortBy) : -1;
+    const ordered =
+      sortBy && sortIndex >= 0
+        ? sortRowsByColumn(tabularData.rows, sortIndex, sortTypeFor(sortBy), sortDir, locale)
+        : tabularData.rows;
     const start = (page - 1) * PREVIEW_PAGE_SIZE;
-    return tabularData.rows.slice(start, start + PREVIEW_PAGE_SIZE);
-  }, [source, tabularPage, headers, tabularData, page]);
+    return ordered.slice(start, start + PREVIEW_PAGE_SIZE);
+  }, [source, tabularPage, headers, tabularData, page, sortBy, sortDir, sortTypeFor, locale]);
 
   const hasData = source === "tabular" ? tabularPage !== null : tabularData !== null;
   const totalRows = source === "tabular" ? (tabularPage?.meta.total ?? 0) : (tabularData?.totalRows ?? 0);
@@ -238,26 +270,22 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
                       <Table desktopLayout="table">
                         <TableHeader>
                           <TableRow>
-                            {headers.map((header, i) =>
-                              source === "tabular" ? (
-                                <TableHeaderCell
-                                  key={i}
-                                  sortType={agoraSortType(profile?.columns?.[header]?.python_type)}
-                                  sortOrder={
-                                    sortBy === header
-                                      ? sortDir === "asc"
-                                        ? "ascending"
-                                        : "descending"
-                                      : "none"
-                                  }
-                                  onSortChange={(order) => handleSortChange(header, order)}
-                                >
-                                  {header}
-                                </TableHeaderCell>
-                              ) : (
-                                <TableHeaderCell key={i}>{header}</TableHeaderCell>
-                              )
-                            )}
+                            {headers.map((header, i) => (
+                              <TableHeaderCell
+                                key={i}
+                                sortType={sortTypeFor(header)}
+                                sortOrder={
+                                  sortBy === header
+                                    ? sortDir === "asc"
+                                      ? "ascending"
+                                      : "descending"
+                                    : "none"
+                                }
+                                onSortChange={(order) => handleSortChange(header, order)}
+                              >
+                                {header}
+                              </TableHeaderCell>
+                            ))}
                           </TableRow>
                         </TableHeader>
                         <TableBody>
