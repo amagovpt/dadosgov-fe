@@ -172,7 +172,6 @@ All contributors must follow these conventions. References:
 [Conventional Branch](https://conventionalbranch.org/) and [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
 
 - **Never add `Co-Authored-By`** or any AI attribution to commit messages. Commits must appear as made solely by the developer working on the branch.
-- **Never create commits.** Claude must NEVER run `git commit` (or `git push`). Only make changes in the working tree and leave the developer to review and commit **manually**. This applies even when changes look complete — committing is always the developer's action.
 - **Protected branches — never commit or work directly on them.** Do not commit, push, or make changes directly on `main`, `develop`, `tst`, or `ppr` (environment branches: production, integration, test, pre-production). Always work on a dedicated `feature/` / `bugfix/` / `chore/` / `hotfix/` branch created from the appropriate base branch. If the current branch is one of these protected branches, stop and ask the developer to switch to (or create) a working branch before proceeding.
 
 ### Branches — Conventional Branch
@@ -232,3 +231,13 @@ fix(auth): mint CSRF server-side on authenticated POSTs (fix #42)
 chore: bump @ama-pt/agora-design-system to 3.6.1
 refactor(home): pass aggregated data as props to HomeClient
 ```
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
