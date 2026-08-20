@@ -183,7 +183,7 @@
     },
     "loading": "A carregar...",
     "title": "Concluir registo",
-    "description": "A sua Chave Móvel Digital não disponibilizou um endereço de e-mail utilizável, pelo que a sua conta foi criada com um endereço temporário. Para concluir o registo, indique um endereço de e-mail válido — vamos enviar-lhe um link de confirmação.",
+    "description": "A sua autenticação (Chave Móvel Digital ou eIDAS) não disponibilizou um endereço de e-mail utilizável, pelo que a sua conta foi criada com um endereço temporário. Para concluir o registo, indique um endereço de e-mail válido — vamos enviar-lhe um link de confirmação.",
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
     "emailLabel": "Endereço de e-mail *",
     "emailConfirmLabel": "Confirmar endereço de e-mail *",

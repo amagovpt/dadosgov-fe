@@ -183,7 +183,7 @@
     },
     "loading": "Loading...",
     "title": "Complete registration",
-    "description": "Your Chave Móvel Digital did not provide a usable email address, so your account was created with a temporary one. To complete your registration, provide a valid email address — we will send you a confirmation link.",
+    "description": "Your authentication (Chave Móvel Digital or eIDAS) did not provide a usable email address, so your account was created with a temporary one. To complete your registration, provide a valid email address — we will send you a confirmation link.",
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",
     "emailLabel": "Email address *",
     "emailConfirmLabel": "Confirm email address *",
