@@ -16,6 +16,9 @@ interface AuthContextProps {
   user: UserRef | null;
   isLoading: boolean;
   samlLogin: boolean;
+  // True while the account still has a saml-* placeholder email: the user
+  // must provide a real email on /complete-registration before browsing.
+  pendingRegistration: boolean;
   isAdmin: boolean;
   hasOrganization: boolean;
   refresh: () => Promise<void>;
@@ -25,6 +28,7 @@ const AuthContext = createContext<AuthContextProps>({
   user: null,
   isLoading: true,
   samlLogin: false,
+  pendingRegistration: false,
   isAdmin: false,
   hasOrganization: false,
   refresh: async () => {},
@@ -64,9 +68,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
+  const pendingRegistration = user?.pending_registration ?? false;
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, samlLogin, isAdmin, hasOrganization, refresh }}
+      value={{
+        user,
+        isLoading,
+        samlLogin,
+        pendingRegistration,
+        isAdmin,
+        hasOrganization,
+        refresh,
+      }}
     >
       {children}
     </AuthContext.Provider>
