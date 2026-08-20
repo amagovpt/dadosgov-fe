@@ -176,6 +176,34 @@
     "errorRequest": "Error resetting password. Please try again.",
     "errorConnection": "Connection error. Please try again."
   },
+  "completeRegistration": {
+    "metadata": {
+      "title": "Complete registration - dados.gov.pt",
+      "description": "Provide a valid email address to complete your account registration on the dados.gov.pt portal."
+    },
+    "loading": "Loading...",
+    "title": "Complete registration",
+    "description": "Your authentication (Chave Móvel Digital or eIDAS) did not provide a usable email address, so your account was created with a temporary one. To complete your registration, provide a valid email address — we will send you a confirmation link.",
+    "requiredFields": "Fields marked with an asterisk ( * ) are required.",
+    "emailLabel": "Email address *",
+    "emailConfirmLabel": "Confirm email address *",
+    "emailPlaceholder": "example@email.com",
+    "invalidEmail": "Enter a valid email address.",
+    "mismatch": "The email addresses do not match.",
+    "submit": "Send confirmation link",
+    "submitting": "Sending...",
+    "errorRequest": "Error registering the email address. Check the address and try again.",
+    "errorRateLimited": "Too many attempts. Please wait a moment and try again.",
+    "sentTitle": "Check your inbox",
+    "sentDescription": "We sent a confirmation link to {{email}}. Open the email and click the link to complete your registration. If you cannot find it, check your spam folder.",
+    "resend": "Resend email",
+    "changeAddress": "Use a different address",
+    "flash": {
+      "alreadyTaken": "That email address is already associated with another account. Please provide a different one.",
+      "invalid": "The confirmation link is invalid. Please request a new one.",
+      "expired": "The confirmation link has expired. We sent a new link to the address you provided."
+    }
+  },
   "errors": {
     "requiredFields": "Please fill in all required fields.",
     "loginFailed": "An error occurred while trying to sign in.",
