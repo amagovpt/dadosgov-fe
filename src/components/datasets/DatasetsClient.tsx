@@ -19,7 +19,6 @@ import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 import { twJoin } from "tailwind-merge";
-import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
 import FoNoResults from "../common/FoNoResults";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -205,12 +204,7 @@ export default function DatasetsClient({
                     : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
                 )}
               >
-                {listData.error ? (
-                  <ListingErrorBanner
-                    entity={tds("theDatasets")}
-                    errorStatus={listData.errorStatus}
-                  />
-                ) : datasets.length > 0 ? (
+                {datasets.length > 0 ? (
                   datasets.map((dataset) => {
                     const timeAgo = formatDateToTimeAgo(
                       dataset.last_modified || dataset.created_at,

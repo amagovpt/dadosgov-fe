@@ -8,6 +8,7 @@ import type {
   TopicUpdatePayload,
 } from "@/service/types/topic";
 import { API_AUTH_URL, API_BASE_URL, API_V2_BASE_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 export async function fetchOrgDiscussions(
@@ -31,6 +32,7 @@ export async function fetchOrgDiscussions(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching org discussions:", error);
     return {
       data: [],
@@ -65,6 +67,7 @@ export async function fetchDiscussions(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching discussions:", error);
     return {
       data: [],
@@ -96,6 +99,7 @@ export async function fetchTopics(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching topics:", error);
     return {
       data: [],
@@ -130,6 +134,7 @@ export async function createDiscussion(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error creating discussion:", error);
     return null;
   }
@@ -152,6 +157,7 @@ export async function fetchTopic(slugOrId: string): Promise<Topic | null> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching topic:", error);
     return null;
   }
@@ -184,6 +190,7 @@ export async function replyToDiscussion(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error replying to discussion:", error);
     return null;
   }
@@ -207,6 +214,7 @@ export async function fetchTopicElements(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching topic elements:", error);
     return {
       data: [],
@@ -241,6 +249,7 @@ export async function createTopic(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error creating topic:", error);
     return null;
   }
@@ -269,6 +278,7 @@ export async function updateTopic(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error updating topic:", error);
     return null;
   }
@@ -292,6 +302,7 @@ export async function deleteTopic(id: string): Promise<boolean> {
 
     return true;
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error deleting topic:", error);
     return false;
   }
@@ -320,6 +331,7 @@ export async function addTopicElement(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error adding topic element:", error);
     return null;
   }
@@ -349,6 +361,7 @@ export async function removeTopicElement(
 
     return true;
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error removing topic element:", error);
     return false;
   }
@@ -377,6 +390,7 @@ export async function updateTopicElements(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error updating topic elements:", error);
     return null;
   }
@@ -411,6 +425,7 @@ export async function closeDiscussion(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error closing discussion:", error);
     return null;
   }
@@ -439,6 +454,7 @@ export async function deleteDiscussion(
 
     return true;
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error deleting discussion:", error);
     return false;
   }
@@ -466,6 +482,7 @@ export async function updateDiscussion(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error updating discussion:", error);
     return null;
   }
@@ -494,6 +511,7 @@ export async function editDiscussionComment(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error editing comment:", error);
     return null;
   }
@@ -519,6 +537,7 @@ export async function deleteDiscussionComment(
 
     return true;
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error deleting comment:", error);
     return false;
   }

@@ -22,7 +22,6 @@ import { ReusesFilters } from "@/components/reuses/ReusesFilters";
 import { useReusesListing } from "@/hooks/useReusesListing";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { twJoin } from "tailwind-merge";
-import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
 import { FrontOfficePage } from "@/service/types/shared/common";
 
@@ -160,12 +159,7 @@ export default function ReusesClient({
                   filtersOpen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
                 )}
               >
-                {listData.error ? (
-                  <ListingErrorBanner
-                    entity={tr("theReuses")}
-                    errorStatus={listData.errorStatus}
-                  />
-                ) : reuses.length > 0 ? (
+                {reuses.length > 0 ? (
                   reuses.map((reuse) => {
                     const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at, language as "pt" | "en");
                     return (

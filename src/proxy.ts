@@ -17,8 +17,6 @@ import { isPathRestricted } from "./utils/matchRestrictedPath";
  *   3) Inject `X-Forwarded-Host` on backend-proxied routes so Flask
  *      (ProxyFix, SERVER_NAME) sees the expected host when the frontend
  *      runs in Docker.
- *   4) Expose the request pathname as `x-pathname` so Server Components (which
- *      have no `usePathname()`) can build locale-aware redirect targets.
  *
  * The CSP is intentionally built here (not in `next.config.ts`) because
  * the nonce must be regenerated per request — static headers in
@@ -82,11 +80,6 @@ export async function proxy(request: NextRequest) {
   const skipCsp = NO_CSP_PATHS.some((p) => pathname.startsWith(p));
 
   const requestHeaders = new Headers(request.headers);
-
-  // Server Components have no `usePathname()`. The server-side API error
-  // interceptor needs the current path to build `/login?next=…` when a session
-  // has expired mid-render.
-  requestHeaders.set("x-pathname", pathname);
 
   if (isBackendProxy && BACKEND_HOST) {
     requestHeaders.set("X-Forwarded-Host", BACKEND_HOST);
