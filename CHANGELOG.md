@@ -6,6 +6,23 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(auth): complete-registration page for CMD accounts without a usable email**
+  - CMD/SAML accounts created without a usable email carry a minted
+    `saml-*@autenticacao.gov.pt` placeholder. The backend now redirects such
+    logins to the new `/complete-registration` page (Ágora `InputText`,
+    `Button`, `StatusCard`), where the user provides a valid email and
+    confirms it through the emailed link (existing `/auth/change-email`
+    proxy with server-side CSRF minting) to conclude registration.
+  - A global `CompleteRegistrationGate` (mounted next to `NewAccountNotice`)
+    reads the new `pending_registration` flag from `/me` and keeps
+    placeholder accounts on the page while browsing; confirmation-link
+    failures (`?flash=change_email_*` on the homepage redirect) are
+    forwarded and rendered as translated errors. Old backends without the
+    flag simply disable the gate.
+  - The migration wizard's "create new account" step now reads
+    `pending_registration` from `/saml/migration/skip` and lands on
+    `/complete-registration` instead of the homepage when the new account
+    got a placeholder email.
 - **feat(datasets): serve the resource preview from the self-hosted api-tabular service**
   - The dataset-detail preview now queries the hydra/api-tabular pipeline
     through new server-side proxies (`/internal-api/proxy-tabular-data` and
