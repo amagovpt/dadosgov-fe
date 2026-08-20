@@ -11,6 +11,7 @@ import type {
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL, translateUploadErrorPayload } from "@/service/utils/API";
 import { cachedListingFetch } from "@/service/utils/listingCache";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 /**
@@ -45,6 +46,7 @@ export async function fetchMyReuses(
       previous_page: page > 1 ? String(page - 1) : null,
     };
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching my reuses:", error);
     return {
       data: [],
@@ -110,6 +112,7 @@ export async function fetchReuses(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching reuses:", error);
     return empty;
   }
@@ -132,6 +135,7 @@ export async function fetchReuse(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching reuse:", error);
     throw error;
   }
@@ -144,6 +148,7 @@ export async function fetchReuseTypes(): Promise<ReuseType[]> {
     if (!res.ok) throw new Error(`Failed to fetch reuse types: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching reuse types:", error);
     return [];
   }
@@ -156,6 +161,7 @@ export async function fetchReuseTopics(): Promise<ReuseTopic[]> {
     if (!res.ok) throw new Error(`Failed to fetch reuse topics: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching reuse topics:", error);
     return [];
   }
@@ -283,6 +289,7 @@ export async function suggestReuses(
     if (!res.ok) throw new Error(`Failed to suggest reuses: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting reuses:", error);
     return [];
   }
@@ -311,8 +318,6 @@ export interface ReusesListingResponse {
   listing: APIResponse<Reuse>;
   filter_counts: Record<string, number>;
   organizations: Organization[];
-  error?: boolean;
-  errorStatus?: number | "network";
 }
 
 
@@ -326,67 +331,42 @@ export async function fetchReusesListing(
   filters?: ReuseFilters,
   forwarded?: Record<string, string>,
 ): Promise<ReusesListingResponse> {
-  const emptyShape: ReusesListingResponse = {
-    listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
-    filter_counts: {},
-    organizations: [],
-  };
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("page_size", String(pageSize));
 
-  try {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("page_size", String(pageSize));
+  if (filters) {
+    if (filters.q) params.set("q", filters.q);
+    if (filters.type) params.set("type", filters.type);
+    if (filters.owner) params.set("owner", filters.owner);
+    if (filters.dataset) params.set("dataset", filters.dataset);
+    if (filters.sort) params.set("sort", filters.sort);
+    if (filters.modified_since) params.set("modified_since", filters.modified_since);
 
-    if (filters) {
-      if (filters.q) params.set("q", filters.q);
-      if (filters.type) params.set("type", filters.type);
-      if (filters.owner) params.set("owner", filters.owner);
-      if (filters.dataset) params.set("dataset", filters.dataset);
-      if (filters.sort) params.set("sort", filters.sort);
-      if (filters.modified_since) params.set("modified_since", filters.modified_since);
-
-      const arrayParams: [string, string | string[] | undefined][] = [
-        ["tag", filters.tag],
-        ["organization", filters.organization],
-      ];
-      for (const [key, value] of arrayParams) {
-        if (!value) continue;
-        if (Array.isArray(value)) {
-          value.forEach((v) => params.append(key, v));
-        } else {
-          params.set(key, value);
-        }
+    const arrayParams: [string, string | string[] | undefined][] = [
+      ["tag", filters.tag],
+      ["organization", filters.organization],
+    ];
+    for (const [key, value] of arrayParams) {
+      if (!value) continue;
+      if (Array.isArray(value)) {
+        value.forEach((v) => params.append(key, v));
+      } else {
+        params.set(key, value);
       }
     }
-
-    const url = `${API_BASE_URL}/site/reuses-listing/?${params.toString()}`;
-    // SSR listing: cached per-URL for 60s in `listingCache` (matches the
-    // backend @cache.cached(60)), shared across visitors — the Next.js Data
-    // Cache keys on headers, so it would fragment per client IP. Repeated
-    // page/query loads don't hit the backend PUBLIC_SEARCH_LIMIT bucket that
-    // the F5 IP-collapse turns site-wide. On a cache-miss, `forwarded` relays
-    // the real client IP so the backend keys the limiter per visitor instead
-    // of the Next.js server IP.
-    const result = await cachedListingFetch<ReusesListingResponse>(url, forwarded);
-
-    if (!result.ok) {
-      console.error(`Error fetching reuses listing: ${result.status} ${result.statusText}`);
-      return {
-        ...emptyShape,
-        listing: { ...emptyShape.listing, error: true, errorStatus: result.status },
-        error: true,
-        errorStatus: result.status,
-      };
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error("Error fetching reuses listing:", error);
-    return {
-      ...emptyShape,
-      listing: { ...emptyShape.listing, error: true, errorStatus: "network" },
-      error: true,
-      errorStatus: "network",
-    };
   }
+
+  const url = `${API_BASE_URL}/site/reuses-listing/?${params.toString()}`;
+  // SSR listing: cached per-URL for 60s in `listingCache` (matches the
+  // backend @cache.cached(60)), shared across visitors — the Next.js Data
+  // Cache keys on headers, so it would fragment per client IP. Repeated
+  // page/query loads don't hit the backend PUBLIC_SEARCH_LIMIT bucket that
+  // the F5 IP-collapse turns site-wide. On a cache-miss, `forwarded` relays
+  // the real client IP so the backend keys the limiter per visitor instead
+  // of the Next.js server IP.
+  //
+  // See fetchDatasetsListing: a failure propagates to `[locale]/error.tsx`
+  // rather than degrading into an empty listing.
+  return cachedListingFetch<ReusesListingResponse>(url, forwarded);
 }

@@ -13,6 +13,7 @@ import {
   isHarvesterValidation,
 } from "@/components/admin/notifications/notification-helpers";
 import AppIcon from "@/components/Primitives/AppIcon";
+import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { BoNotificationsPage } from "@/service/types/admin/notifications";
 
@@ -28,6 +29,7 @@ interface NotificationsClientProps {
 
 export default function NotificationsClient({ pageContent }: NotificationsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-notifications"]);
+  const { notifyApiError } = useApiErrorHandler();
   const [items, setItems] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -60,14 +62,20 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
     };
   }, []);
 
-  const handleMarkRead = useCallback(async (id: string) => {
-    try {
-      const updated = await markNotificationRead(id);
-      setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  }, []);
+  const handleMarkRead = useCallback(
+    async (id: string) => {
+      try {
+        const updated = await markNotificationRead(id);
+        setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
+      } catch (error) {
+        // The button used to do nothing at all on failure — the notification
+        // simply stayed unread with no explanation.
+        console.error("Error marking notification as read:", error);
+        notifyApiError(error);
+      }
+    },
+    [notifyApiError]
+  );
 
   return (
     <AdminLayout

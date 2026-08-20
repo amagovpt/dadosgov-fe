@@ -5,6 +5,7 @@ import type { APIResponse } from "@/service/types/shared";
 import type { SiteConfigUpdatePayload, SiteInfo } from "@/service/types/shared";
 import type { SystemLogContent, SystemLogFile } from "@/service/types/transfer-system";
 import { API_AUTH_URL, API_BASE_URL, authFetch } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 export async function fetchSiteInfo(): Promise<SiteInfo> {
@@ -19,6 +20,7 @@ export async function fetchSiteInfo(): Promise<SiteInfo> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching site info:", error);
     return {
       id: "",
@@ -58,6 +60,7 @@ export async function fetchFeaturedDatasets(pageSize: number = 3): Promise<APIRe
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching featured datasets:", error);
     return {
       data: [],
@@ -83,6 +86,7 @@ export async function fetchFeaturedReuses(pageSize: number = 3): Promise<APIResp
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching featured reuses:", error);
     return {
       data: [],
@@ -108,6 +112,7 @@ export async function fetchLatestDatasets(pageSize: number = 3): Promise<APIResp
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching latest datasets:", error);
     return {
       data: [],
@@ -136,6 +141,7 @@ export async function fetchLatestReuses(pageSize: number = 3): Promise<APIRespon
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching latest reuses:", error);
     return {
       data: [],
@@ -166,6 +172,7 @@ export async function fetchHomepageData(): Promise<HomepageData> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching homepage data:", error);
     return {
       site_metrics: { datasets: 0, organizations: 0, reuses: 0, users: 0 },
@@ -203,6 +210,7 @@ export async function fetchHomeFeaturedDatasets(): Promise<Dataset[]> {
       throw new Error(`Failed to fetch home featured datasets: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching home featured datasets:", error);
     return [];
   }
@@ -234,6 +242,7 @@ export async function fetchHomeFeaturedReuses(): Promise<Reuse[]> {
       throw new Error(`Failed to fetch home featured reuses: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching home featured reuses:", error);
     return [];
   }
@@ -295,6 +304,7 @@ export async function fetchSystemLogs(): Promise<SystemLogFile[]> {
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching system logs:", error);
     return [];
   }
@@ -316,6 +326,7 @@ export async function fetchSystemLogContent(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching system log content:", error);
     return null;
   }
@@ -336,7 +347,8 @@ export async function checkUrlReachable(url: string): Promise<boolean> {
     if (!res.ok) return true;
     const data = await res.json();
     return data.reachable !== false;
-  } catch {
+  } catch (error) {
+    rethrowControlFlow(error);
     return true;
   }
 }
