@@ -235,11 +235,9 @@
       "loadError": "Could not load the data for preview.",
       "unavailable": "Preview not available for this resource.",
       "structureUnavailable": "Data structure not available for this resource.",
-      "exploreTitle": "Explore the data in detail.",
-      "exploreDescription": "Use this tool to get an overview of the data, learn more about the different columns or apply filters and sorting.",
-      "exploreCta": "Explore the data",
       "footer": "Preview last updated: {{date}} — {{cols}} columns — {{rows}} rows",
-      "limited": " (preview limited to {{count}} rows)"
+      "limited": " (preview limited to {{count}} rows)",
+      "pageLoadError": "Could not load this page of data."
     },
     "metadata": {
       "url": "URL",

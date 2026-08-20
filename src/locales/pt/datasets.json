@@ -1,7 +1,7 @@
 {
   "notFound": "Conjunto de dados não encontrado.",
   "hero": {
-    "title":"Conjuntos de dados",
+    "title": "Conjuntos de dados",
     "subtitle": "Explore conjuntos de dados abertos de diversas origens, temas e em diferentes formatos, e utilize-os como base para novos estudos e insights."
   },
   "search": {
@@ -235,11 +235,9 @@
       "loadError": "Não foi possível carregar os dados para pré-visualização.",
       "unavailable": "Pré-visualização não disponível para este recurso.",
       "structureUnavailable": "Estrutura de dados não disponível para este recurso.",
-      "exploreTitle": "Explore os dados em detalhes.",
-      "exploreDescription": "Utilize esta ferramenta para obter uma visão geral dos dados, aprender mais sobre as diferentes colunas ou realizar filtros e classificações.",
-      "exploreCta": "Explore os dados",
       "footer": "Última atualização da pré-visualização: {{date}} — {{cols}} colunas — {{rows}} linhas",
-      "limited": " (pré-visualização limitada a {{count}} linhas)"
+      "limited": " (pré-visualização limitada a {{count}} linhas)",
+      "pageLoadError": "Não foi possível carregar esta página de dados."
     },
     "metadata": {
       "url": "URL",

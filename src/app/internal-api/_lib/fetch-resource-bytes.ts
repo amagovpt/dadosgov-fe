@@ -28,7 +28,7 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:7000";
 const FETCH_TIMEOUT_MS = 20_000;
 const USER_AGENT = "dadosgov-preview-proxy/1.0 (+https://dados.gov.pt)";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function logProxyEvent(label: string, event: Record<string, unknown>) {
   console.log(JSON.stringify({ event: label, ...event }));

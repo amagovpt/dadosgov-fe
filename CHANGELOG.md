@@ -6,6 +6,27 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(datasets): serve the resource preview from the self-hosted api-tabular service**
+  - The dataset-detail preview now queries the hydra/api-tabular pipeline
+    through new server-side proxies (`/internal-api/proxy-tabular-data` and
+    `/internal-api/proxy-tabular-profile`, reading `TABULAR_API_URL`), so the
+    table is paginated server-side (5 rows per page over the whole file),
+    headers sort ascending/descending on the server, and the "Estrutura de
+    dados" tab shows the real csv-detective column types instead of
+    client-side heuristics — replicating data.gouv.fr's preview behaviour.
+  - Resources not yet ingested (no successful `analysis:parsing` extras, or a
+    404 from api-tabular) and ods files keep the previous byte-proxy preview
+    (`proxy-csv`/`proxy-spreadsheet`), so nothing loses the preview it has
+    today; both paths now show 5 rows per page.
+  - Both paths also offer the same sortable headers, so the preview behaves
+    the same whichever serves it. api-tabular sorts on the server; the byte
+    proxy sorts the rows it already holds in memory, over the whole file
+    rather than the page on screen, typed by the same heuristics that fill
+    the "Estrutura de dados" tab (numbers as numbers, dates as dates).
+  - The proxies live under `/internal-api/` because every `/api/*` path is
+    shadowed by the rewrite to the Flask backend, and the CSP blocks the
+    browser from reaching the internal api-tabular host directly.
+
 - **feat(upload): raise the resource upload guard to 1 GiB**
   - `MAX_UPLOAD_SIZE` goes from 800 MB to 1 GiB, mirroring the backend's new
     `RESOURCES_FILE_MAX_SIZE`. The guard exists to spare the user a doomed
