@@ -6,6 +6,23 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(harvesters): scope the producer select to what the user may harvest for**
+  - The "Produtor" field of the harvester wizard was fed only by the
+    memberships in `/api/1/me/`, which have nothing to do with the global
+    admin role. A portal admin with no memberships therefore saw an empty
+    required select and could not pass step 1, even though the backend lets
+    them create a source for any organization (every udata `Permission`
+    carries `RoleNeed("admin")`). Admins now get a server-side organization
+    typeahead over `/organizations/suggest/` — debounced, seeded with a
+    non-empty list, and keeping the chosen organization pinned so a later
+    search does not clear the selection.
+  - For everyone else the list is filtered by the backend-computed
+    `permissions.harvest` flag, the same check `POST /harvest/sources/`
+    performs. Organization editors no longer see organizations whose
+    submission would fail with a 403; when nothing is eligible an explicit
+    warning with a link to create an organization replaces the silently
+    empty select.
+
 - **feat(auth): complete-registration page for CMD accounts without a usable email**
   - CMD/SAML accounts created without a usable email carry a minted
     `saml-*@autenticacao.gov.pt` placeholder. The backend now redirects such
