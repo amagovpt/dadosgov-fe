@@ -80,7 +80,7 @@
     "reusesNoun_other": "REUSES",
     "noReusesTitle": "No reuses",
     "noReusesDesc": "No reuse associated with this organization.",
-    "discussions": "Discussions",
+    "discussions": "Discussions ({{count}})",
     "info": "Information",
     "statistics": "Statistics",
     "reuses": "Reuses",
