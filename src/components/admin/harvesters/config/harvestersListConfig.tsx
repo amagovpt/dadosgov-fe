@@ -15,6 +15,13 @@ import { getHarvesterStatus, type HarvesterStatusLabels } from "@/utils/harveste
 
 export type HarvesterSortField = "name" | "status" | "created_at" | "last_job";
 
+/**
+ * The harvest sources endpoint paginates but cannot search, filter by status or sort, so
+ * both views load the whole (small) catalogue once and do that work client-side. Keep this
+ * in sync with the API page_size ceiling if the catalogue ever outgrows a single request.
+ */
+export const HARVESTERS_FETCH_PAGE_SIZE = 9999;
+
 export function getLastJobTimestamp(harvester: HarvestSource): number {
   const job = harvester.last_job;
   if (!job) return 0;
@@ -26,6 +33,13 @@ function getHarvesterStatusSortValue(harvester: HarvestSource): string {
   const validationState = harvester.validation?.state ?? "pending";
   const lastJobStatus = harvester.last_job?.status ?? "no_job";
   return `${validationState}:${lastJobStatus}`;
+}
+
+export function filterHarvestersBySearch(harvesters: HarvestSource[], searchQuery: string) {
+  const query = searchQuery.trim().toLowerCase();
+  if (!query) return harvesters;
+
+  return harvesters.filter((harvester) => harvester.name.toLowerCase().includes(query));
 }
 
 export function filterHarvestersByStatus(harvesters: HarvestSource[], statusFilter: string) {
