@@ -28,6 +28,13 @@ function getHarvesterStatusSortValue(harvester: HarvestSource): string {
   return `${validationState}:${lastJobStatus}`;
 }
 
+export function filterHarvestersBySearch(harvesters: HarvestSource[], searchQuery: string) {
+  const query = searchQuery.trim().toLowerCase();
+  if (!query) return harvesters;
+
+  return harvesters.filter((harvester) => harvester.name.toLowerCase().includes(query));
+}
+
 export function filterHarvestersByStatus(harvesters: HarvestSource[], statusFilter: string) {
   if (!statusFilter) return harvesters;
 
