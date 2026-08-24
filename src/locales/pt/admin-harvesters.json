@@ -128,8 +128,6 @@
     "autoArchive": "Arquivamento automático",
     "autoArchiveShort": "Arquivo automático",
     "advancedTitle": "Avançado",
-    "configureRemoteUrlPrefix": "Configurar prefixo de URL remoto",
-    "remoteUrlPrefix": "Prefixo de URL remoto",
     "schedulePlaceholder": "Máscara: * * * * * (exemplo: 0 12 * * *)",
     "scheduleError": "O planeamento tem de ter exatamente 5 campos separados por espaços, cada campo sendo um número ou * (minuto hora dia-do-mês mês dia-da-semana).",
     "saveSuccess": "Guardado com sucesso.",
@@ -149,7 +147,15 @@
       "organization": "Organização",
       "tags": "Marcação",
       "publisher": "Publicador"
-    }
+    },
+    "featureLabels": {
+      "geodcatap": "GeoDCAT-AP",
+      "inspire": "Importar conjuntos de dados Inspire"
+    },
+    "extraConfigLabels": {
+      "remote_url_prefix": "Prefixo de URL remoto"
+    },
+    "configure": "Configurar"
   },
   "fields": {
     "producer": "Produtor",

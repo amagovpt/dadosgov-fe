@@ -17,7 +17,11 @@ import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sect
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
-import { localizeFilterLabel as localizeBackendFilterLabel } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
+import {
+  localizeExtraConfigLabel as localizeBackendExtraConfigLabel,
+  localizeFeatureLabel as localizeBackendFeatureLabel,
+  localizeFilterLabel as localizeBackendFilterLabel,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import type { HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
 import { getEditHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
@@ -57,6 +61,17 @@ interface HarvesterConfigFormProps {
   setSelectedBackend: (v: string) => void;
   backends: HarvestBackend[];
   activeBackendFilters: { key: string; label: string }[];
+  /**
+   * The features and extra configs the selected backend declares, and the
+   * values held for them. This screen had no controls for either, so a
+   * harvester created with them could be read and changed only through the API.
+   */
+  activeBackendFeatures: HarvestBackend["features"];
+  activeBackendExtraConfigs: HarvestBackend["extra_configs"];
+  featureValues: Record<string, boolean>;
+  extraConfigValues: Record<string, string>;
+  onToggleFeature: (key: string) => void;
+  onExtraConfigChange: (key: string, value: string) => void;
   formErrors: Partial<Record<string, boolean | string>>;
   clearError: (field: HarvesterFormField) => void;
   addFilter: () => void;
@@ -104,6 +119,12 @@ export function HarvesterConfigForm({
   setSelectedBackend,
   backends,
   activeBackendFilters,
+  activeBackendFeatures,
+  activeBackendExtraConfigs,
+  featureValues,
+  extraConfigValues,
+  onToggleFeature,
+  onExtraConfigChange,
   formErrors,
   clearError,
   addFilter,
@@ -390,6 +411,36 @@ export function HarvesterConfigForm({
                 )}
               </div>
             )}
+
+            {activeBackendFeatures.length > 0 && (
+              <div className="flex flex-col gap-16">
+                {activeBackendFeatures.map((feature) => (
+                  <Switch
+                    key={feature.key}
+                    label={localizeBackendFeatureLabel(feature, (subkey) =>
+                      t(`admin-harvesters:form.featureLabels.${subkey}`),
+                    )}
+                    checked={featureValues[feature.key] ?? feature.default ?? false}
+                    onChange={() => onToggleFeature(feature.key)}
+                    disabled={advancedDisabled}
+                  />
+                ))}
+              </div>
+            )}
+
+            {activeBackendExtraConfigs.map((extraConfig) => (
+              <IsolatedInput
+                key={extraConfig.key}
+                label={localizeBackendExtraConfigLabel(extraConfig, (subkey) =>
+                  t(`admin-harvesters:form.extraConfigLabels.${subkey}`),
+                )}
+                placeholder=""
+                id={`extra-config-${extraConfig.key}`}
+                defaultValue={extraConfigValues[extraConfig.key] ?? ""}
+                disabled={advancedDisabled}
+                onChange={(value) => onExtraConfigChange(extraConfig.key, value)}
+              />
+            ))}
 
             <div className="flex gap-48">
               <Switch

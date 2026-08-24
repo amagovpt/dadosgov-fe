@@ -6,6 +6,34 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(admin-harvesters): keep the GeoDCAT-AP and remote URL prefix settings**
+  - The creation wizard collected the GeoDCAT-AP switch and the "Remote URL
+    prefix" field and submitted neither. Both are real harvest config, read when
+    the harvester runs, so whoever configured them saw them accepted in the form
+    and lost without a word — the same silent drop the harvester filters had.
+  - Both are now sent inside the single `config` object the API reads. The three
+    parts of that object — filters, features and extra configs — are composed in
+    one place, because building it once per part would leave only the last and
+    drop the others.
+  - Which fields appear, and the keys they submit, now come from the backend
+    metadata instead of a hand-written list of implementation types. That gives a
+    UI to the "Inspire" option of the OpenDataSoft PT backend, which has been
+    declared all along and was reachable from no screen.
+  - The edit screen gained controls for both, seeded from what is stored. It had
+    none at all, so a harvester created with these settings could be seen only
+    through the API and changed only through it.
+  - Clearing the last setting a harvester has now works. A save that carried no
+    configuration at all used to leave the stored one untouched, so blanking the
+    remote URL prefix — or removing the last filter — reported success and
+    changed nothing.
+  - A save keeps the configuration keys no screen shows, instead of replacing the
+    whole configuration with what the form knows about.
+  - Values are always gated by what the selected implementation declares, on both
+    screens, so changing the type no longer leaves the previous type's settings
+    behind to be refused by the API.
+  - No stored harvester is affected: these settings were never written by the
+    interface, and a harvester that has none behaves exactly as before — the
+    harvest falls back to each option's declared default.
 - **fix(admin-harvesters): keep the filters set when a harvester is created**
   - A "Marcação" filter added in the creation wizard never reached the
     harvester. The select emitted the key `tag` while every backend that
