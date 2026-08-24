@@ -58,6 +58,31 @@ interface UseHarvesterDetailActionsParams {
   push: (href: string) => void;
 }
 
+/**
+ * The features and extra configs already stored on the source, in the shape the
+ * payload builders take.
+ *
+ * The API replaces the whole `config` on update, so a save that omits them
+ * erases them. Until the edit screen renders its own controls for these, it has
+ * to send back what it read — otherwise saving a harvester created with, say,
+ * GeoDCAT-AP on would silently turn it off.
+ */
+function readStoredConfig(source: HarvestSource | null) {
+  const config = (source?.config ?? {}) as {
+    features?: Record<string, boolean>;
+    extra_configs?: { key?: string; value?: string }[];
+  };
+
+  return {
+    features: config.features ?? {},
+    extraConfigs: Object.fromEntries(
+      (config.extra_configs ?? [])
+        .filter((entry) => entry.key)
+        .map((entry) => [entry.key as string, entry.value ?? ""]),
+    ),
+  };
+}
+
 export function useHarvesterDetailActions({
   source,
   backends,
@@ -151,6 +176,7 @@ export function useHarvesterDetailActions({
             autoarchive: isAutoArchive,
             filters,
             activeFilterKeys: [...validKeys],
+            ...readStoredConfig(source),
           }),
         ),
         newSchedule && newSchedule !== oldSchedule
@@ -194,6 +220,7 @@ export function useHarvesterDetailActions({
           active: isEnabled,
           autoarchive: isAutoArchive,
           filters,
+          ...readStoredConfig(source),
         }),
       );
       setPreviewJob(job);

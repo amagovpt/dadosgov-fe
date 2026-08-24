@@ -107,6 +107,11 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
       active: isEnabled,
       autoarchive: isAutoArchive,
       filters,
+      // The GeoDCAT-AP switch and the remote-URL-prefix field were collected
+      // and never submitted. Keyed on what the backend declares, so a value
+      // left over from another type cannot reach the API.
+      features: isGeoDcat && selectedType === "csw-dcat" ? { geodcatap: true } : {},
+      extraConfigs: showRemoteUrlPrefix ? { remote_url_prefix: remoteUrlPrefix } : {},
     });
   }
 

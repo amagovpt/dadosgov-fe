@@ -32,7 +32,18 @@ interface HarvesterDetailsValues {
   messages?: Partial<Record<HarvesterFormField, string>>;
 }
 
-interface HarvesterCreateValues extends HarvesterDetailsValues {
+/**
+ * The harvest config the form collects beyond the filters: the features the
+ * selected backend declares (`HarvestFeature`, a flag per key) and its extra
+ * configs (`HarvestExtraConfig`, a value per key). Both are keyed on what the
+ * backend declares, so an entry for a key it does not declare cannot occur.
+ */
+export interface HarvesterConfigValues {
+  features: Record<string, boolean>;
+  extraConfigs: Record<string, string>;
+}
+
+interface HarvesterCreateValues extends HarvesterDetailsValues, HarvesterConfigValues {
   description: string;
   backend: string;
   active: boolean;
@@ -40,7 +51,7 @@ interface HarvesterCreateValues extends HarvesterDetailsValues {
   filters: HarvesterFilterValue[];
 }
 
-interface HarvesterUpdateValues {
+interface HarvesterUpdateValues extends HarvesterConfigValues {
   name: string;
   description: string;
   url: string;
@@ -104,6 +115,41 @@ function mapFilters(filters: HarvesterFilterValue[], validKeys?: Set<string>) {
     }));
 }
 
+/**
+ * Composes the single `config` object the API accepts, from every part of it the
+ * form collects.
+ *
+ * One function on purpose: `filters`, `features` and `extra_configs` all live
+ * inside the same `config`, so spreading `{ config: … }` once per part would
+ * leave only the last one and silently drop the others.
+ *
+ * Each part is omitted when empty, and `config` itself is omitted when nothing
+ * is left — an empty `config` would be sent for a backend that declares no
+ * configurable anything.
+ */
+function buildConfig(
+  filters: ReturnType<typeof mapFilters>,
+  { features, extraConfigs }: HarvesterConfigValues,
+) {
+  // `has_feature` falls back to the feature's declared default, so sending the
+  // flags as collected — including the false ones — is what makes turning a
+  // default-on feature off actually stick.
+  const featureKeys = Object.keys(features);
+  const extra_configs = Object.entries(extraConfigs)
+    // An empty value means "not set": sending it would store an empty string
+    // where the backend expects the config to be absent.
+    .filter(([, value]) => value.trim())
+    .map(([key, value]) => ({ key, value: value.trim() }));
+
+  const config = {
+    ...(filters.length > 0 ? { filters } : {}),
+    ...(featureKeys.length > 0 ? { features } : {}),
+    ...(extra_configs.length > 0 ? { extra_configs } : {}),
+  };
+
+  return Object.keys(config).length > 0 ? { config } : {};
+}
+
 export function buildHarvesterCreatePayload(
   values: HarvesterCreateValues,
 ): HarvestSourceCreatePayload {
@@ -118,12 +164,10 @@ export function buildHarvesterCreatePayload(
     autoarchive: values.autoarchive,
     ...(values.description.trim() ? { description: values.description } : {}),
     ...(producer && producer !== "user" ? { organization: producer } : {}),
-    // Nested under `config`, like the update and preview payloads: the API's
-    // `HarvestSourceForm` has no top-level `filters` field, so WTForms dropped
-    // it in silence and every harvester created here was created unfiltered.
-    // Keyed off the mapped list, not `values.filters`, so a filter with no
-    // value does not send an empty `config`.
-    ...(filters.length > 0 ? { config: { filters } } : {}),
+    // Everything the API reads lives under `config`: its `HarvestSourceForm`
+    // has no top-level `filters` or `features` field, so WTForms dropped them
+    // in silence and every harvester created here was created without them.
+    ...buildConfig(filters, values),
   };
 }
 
@@ -139,7 +183,7 @@ export function buildHarvesterUpdatePayload(
     backend: values.backend || values.fallbackBackend,
     active: values.active,
     autoarchive: values.autoarchive,
-    ...(filters.length > 0 ? { config: { filters } } : {}),
+    ...buildConfig(filters, values),
   };
 }
 
@@ -155,6 +199,6 @@ export function buildHarvesterPreviewPayload(
     schedule: values.schedule.trim() || undefined,
     active: values.active,
     autoarchive: values.autoarchive,
-    ...(filters.length > 0 ? { config: { filters } } : {}),
+    ...buildConfig(filters, values),
   };
 }

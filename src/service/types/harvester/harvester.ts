@@ -110,7 +110,6 @@ export interface HarvestSourceCreatePayload {
   organization?: string;
   schedule?: string;
   config?: Record<string, unknown>;
-  features?: Record<string, boolean>;
   active?: boolean;
   autoarchive?: boolean;
 }
@@ -123,7 +122,6 @@ export interface HarvestSourceUpdatePayload {
   organization?: string;
   schedule?: string;
   config?: Record<string, unknown>;
-  features?: Record<string, boolean>;
   active?: boolean;
   autoarchive?: boolean;
 }

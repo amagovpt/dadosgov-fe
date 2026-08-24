@@ -14,6 +14,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildHarvesterCreatePayload,
+  buildHarvesterPreviewPayload,
+  buildHarvesterUpdatePayload,
   validateHarvesterDetails,
 } from "../harvesterFormModel";
 
@@ -78,6 +80,8 @@ describe("buildHarvesterCreatePayload", () => {
       active: true,
       autoarchive: true,
       filters: [],
+      features: {},
+      extraConfigs: {},
     });
 
     expect(payload.backend).toBe("dcat");
@@ -93,6 +97,8 @@ describe("buildHarvesterCreatePayload", () => {
       active: true,
       autoarchive: true,
       filters: [],
+      features: {},
+      extraConfigs: {},
     });
 
     expect(payload.backend).toBe("apambiente");
@@ -115,6 +121,8 @@ describe("buildHarvesterCreatePayload — filters", () => {
     backend: "ckan",
     active: true,
     autoarchive: true,
+    features: {},
+    extraConfigs: {},
   };
 
   it("nests the filters under config, where the API reads them", () => {
@@ -197,5 +205,146 @@ describe("buildHarvesterCreatePayload — filters", () => {
     const payload = buildHarvesterCreatePayload({ ...base, filters: [] });
 
     expect(payload).not.toHaveProperty("config");
+  });
+});
+
+/**
+ * LEDG-2316: the GeoDCAT-AP switch and the "Remote URL prefix" field were
+ * collected by the wizard and submitted by nothing. Both are real backend
+ * config — `HarvestFeature("geodcatap", …)` and
+ * `HarvestExtraConfig(…, "remote_url_prefix", …)` — read at harvest time from
+ * `config.features[key]` and `config.extra_configs`.
+ */
+describe("buildHarvesterCreatePayload — features and extra configs", () => {
+  const base = {
+    name: "Catálogo",
+    description: "",
+    url: "https://exemplo.pt/catalogo",
+    producer: "org-dgt",
+    backend: "csw-dcat",
+    active: true,
+    autoarchive: true,
+    filters: [],
+    features: {},
+    extraConfigs: {},
+  };
+
+  it("sends the features as a flag per key, where has_feature reads them", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      features: { geodcatap: true },
+    });
+
+    expect(payload.config).toEqual({ features: { geodcatap: true } });
+    // The shape the API has no field for, and dropped in silence.
+    expect(payload).not.toHaveProperty("features");
+  });
+
+  it("sends a feature switched off, so turning a default-on feature off sticks", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      features: { geodcatap: false },
+    });
+
+    // `has_feature` falls back to the declared default when the key is absent,
+    // so omitting `false` would leave a default-on feature on.
+    expect(payload.config).toEqual({ features: { geodcatap: false } });
+  });
+
+  it("sends the extra configs as the {key, value} list the API expects", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      extraConfigs: { remote_url_prefix: "https://exemplo.pt/dados/" },
+    });
+
+    expect(payload.config).toEqual({
+      extra_configs: [{ key: "remote_url_prefix", value: "https://exemplo.pt/dados/" }],
+    });
+  });
+
+  it("drops an extra config left empty, and trims the one that is set", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      extraConfigs: { remote_url_prefix: "   " },
+    });
+    expect(payload).not.toHaveProperty("config");
+
+    const trimmed = buildHarvesterCreatePayload({
+      ...base,
+      extraConfigs: { remote_url_prefix: "  https://exemplo.pt/  " },
+    });
+    expect(trimmed.config).toEqual({
+      extra_configs: [{ key: "remote_url_prefix", value: "https://exemplo.pt/" }],
+    });
+  });
+
+  /**
+   * The regression this ticket is most exposed to: `filters`, `features` and
+   * `extra_configs` share one `config` object. Spreading `{ config: … }` once
+   * per part would leave only the last, silently dropping the others — and the
+   * filters are what LEDG-2311 had just fixed.
+   */
+  it("composes one config carrying filters, features and extra configs together", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+      features: { geodcatap: true },
+      extraConfigs: { remote_url_prefix: "https://exemplo.pt/dados/" },
+    });
+
+    expect(payload.config).toEqual({
+      filters: [{ key: "tags", value: "ambiente", type: "include" }],
+      features: { geodcatap: true },
+      extra_configs: [{ key: "remote_url_prefix", value: "https://exemplo.pt/dados/" }],
+    });
+  });
+
+  it("sends no config at all when nothing was configured", () => {
+    expect(buildHarvesterCreatePayload(base)).not.toHaveProperty("config");
+  });
+});
+
+describe("buildHarvesterUpdatePayload and buildHarvesterPreviewPayload — config", () => {
+  const base = {
+    name: "Catálogo",
+    description: "Uma descrição",
+    url: "https://exemplo.pt/catalogo",
+    backend: "csw-dcat",
+    fallbackBackend: "csw-dcat",
+    active: true,
+    autoarchive: true,
+    filters: [],
+    activeFilterKeys: ["tags"],
+    features: {},
+    extraConfigs: {},
+  };
+
+  it("carries features and extra configs through the update payload", () => {
+    const payload = buildHarvesterUpdatePayload({
+      ...base,
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+      features: { geodcatap: true },
+      extraConfigs: { remote_url_prefix: "https://exemplo.pt/dados/" },
+    });
+
+    // The API replaces the whole `config` on update, so anything missing here
+    // is erased from the harvester.
+    expect(payload.config).toEqual({
+      filters: [{ key: "tags", value: "ambiente", type: "include" }],
+      features: { geodcatap: true },
+      extra_configs: [{ key: "remote_url_prefix", value: "https://exemplo.pt/dados/" }],
+    });
+  });
+
+  it("carries them through the preview payload, so the preview tests them", () => {
+    const payload = buildHarvesterPreviewPayload({
+      ...base,
+      fallbackName: "Catálogo",
+      fallbackUrl: "https://exemplo.pt/catalogo",
+      schedule: "",
+      features: { geodcatap: true },
+    });
+
+    expect(payload.config).toEqual({ features: { geodcatap: true } });
   });
 });
