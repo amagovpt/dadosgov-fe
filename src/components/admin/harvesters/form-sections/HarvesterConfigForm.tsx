@@ -70,8 +70,6 @@ interface HarvesterConfigFormProps {
   updateFilter: (index: number, field: string, value: string) => void;
   setHarvesterSchedule: (v: string) => void;
   isSaving: boolean;
-  saveSuccess: boolean;
-  saveError: string | null;
   onSave: () => void;
   isPreviewing: boolean;
   previewJob: HarvestPreviewJob | null;
@@ -117,8 +115,6 @@ export function HarvesterConfigForm({
   updateFilter,
   setHarvesterSchedule,
   isSaving,
-  saveSuccess,
-  saveError,
   onSave,
   isPreviewing,
   previewJob,
@@ -432,13 +428,6 @@ export function HarvesterConfigForm({
               errorFeedbackText={scheduleError ?? undefined}
             />
           </div>
-
-          {saveSuccess && (
-            <p className="text-sm text-green-600 text-right">
-              {t("admin-harvesters:form.saveSuccess")}
-            </p>
-          )}
-          {saveError && <p className="text-sm text-red-600 text-right">{saveError}</p>}
 
           <div className="admin-page__actions flex justify-end gap-16">
             <Button
