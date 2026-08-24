@@ -140,7 +140,8 @@
     "validationErrors": {
       "producer": "Selecione uma organização produtora.",
       "name": "Indique o nome do harvester.",
-      "url": "Indique o URL do harvester."
+      "url": "Indique o URL do harvester.",
+      "type": "Selecione um tipo de harvester."
     },
     "saveErrorRetry": "Tente novamente.",
     "saveError": "Erro ao guardar ({{status}}) — {{message}}",

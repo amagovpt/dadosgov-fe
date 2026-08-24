@@ -124,11 +124,14 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
       producer: selectedProducerRef.current,
       name: harvesterName,
       url: harvesterUrl,
+      backend: selectedTypeRef.current,
       requireOrganizationProducer: true,
+      requireBackend: true,
       messages: {
         harvesterProducer: t("admin-harvesters:form.validationErrors.producer"),
         harvesterName: t("admin-harvesters:form.validationErrors.name"),
         harvesterUrl: t("admin-harvesters:form.validationErrors.url"),
+        harvesterType: t("admin-harvesters:form.validationErrors.type"),
       },
     });
 
@@ -247,6 +250,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                   backends={backendOptions.backends}
                   typeNoResultsText={backendOptions.noResultsText}
                   hasNoBackend={backendOptions.hasNoBackend}
+                  hasTypeError={hasError("harvesterType")}
                   selectedTypeRef={selectedTypeRef}
                   selectedType={selectedType}
                   filters={filters}
@@ -257,6 +261,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                   isAutoArchive={isAutoArchive}
                   onTypeChange={(value) => {
                     setSelectedType(value);
+                    if (value) clearError("harvesterType");
                     setShowRemoteUrlPrefix(false);
                     setRemoteUrlPrefix("");
                     setIsGeoDcat(false);

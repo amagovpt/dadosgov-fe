@@ -19,7 +19,13 @@ This project has no version tags, so entries are grouped by month (newest first)
     the enabled backends. Both screens now read the same endpoint, so a backend
     registered in udata shows up in the wizard without a frontend change.
   - When the endpoint answers with nothing to offer, an explicit warning
-    replaces the select instead of leaving a blank required field.
+    replaces the select instead of leaving a blank required field. Step 1 now
+    validates the type as well: an empty one used to pass validation and reach
+    the API as `backend: "dcat"`, so a failed catalogue request could silently
+    create a DCAT source against a CKAN URL.
+  - The select is seeded from the type already chosen, so stepping back from
+    the preview no longer shows the placeholder over a type the wizard would
+    still submit.
 - **fix(harvesters): scope the producer select to what the user may harvest for**
   - The "Produtor" field of the harvester wizard was fed only by the
     memberships in `/api/1/me/`, which have nothing to do with the global

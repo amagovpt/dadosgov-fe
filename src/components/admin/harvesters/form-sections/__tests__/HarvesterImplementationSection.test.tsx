@@ -55,6 +55,7 @@ async function renderSection(props: Partial<React.ComponentProps<typeof Harveste
         backends={CATALOGUE}
         typeNoResultsText={ptHarvesters.form.noResults}
         hasNoBackend={false}
+        hasTypeError={false}
         selectedTypeRef={{ current: "" }}
         selectedType=""
         filters={[]}
@@ -124,12 +125,30 @@ describe("HarvesterImplementationSection — campo Tipo", () => {
     expect(container.querySelector("#harvester-type")).toBeNull();
   });
 
-  it("keeps the type-specific controls keyed on the selected backend", async () => {
+  it("marks the current type as selected so a step back does not blank the control", async () => {
+    await renderSection({ selectedType: "dgt" });
+
+    // The wizard remounts this subtree when the user returns from the preview
+    // step: without `selected`, IsolatedSelect reseeds to "" and the field
+    // shows the placeholder while selectedTypeRef still submits "dgt".
+    const selected = container.querySelector('[aria-selected="true"], [data-selected="true"]');
+    expect(selected?.textContent).toContain("Harvester DGT");
+  });
+
+  it("flags the field when the wizard rejects a submission with no type", async () => {
+    await renderSection({ hasTypeError: true });
+
+    expect(container.textContent).toContain(ptHarvesters.form.validationErrors.type);
+    expect(container.querySelector('[aria-invalid="true"]')).not.toBeNull();
+  });
+
+  it("keeps the CKAN-only filter controls keyed on the selected backend id", async () => {
     await renderSection({ selectedType: "ckan" });
     expect(container.textContent).toContain(ptHarvesters.form.addFilter);
 
-    await renderSection({ selectedType: "ine" });
-    // The five backends restored to the list declare no filters of their own.
+    // dgt is one of the five types this change restored; it declares no
+    // filters of its own, so the CKAN block must stay hidden for it.
+    await renderSection({ selectedType: "dgt" });
     expect(container.textContent).not.toContain(ptHarvesters.form.addFilter);
   });
 });

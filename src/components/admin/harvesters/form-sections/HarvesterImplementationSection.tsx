@@ -26,6 +26,7 @@ interface HarvesterImplementationSectionProps {
   typeNoResultsText: string;
   /** The backends endpoint answered with nothing to offer. */
   hasNoBackend: boolean;
+  hasTypeError: boolean;
   selectedTypeRef: React.RefObject<string>;
   selectedType: string;
   filters: HarvesterFilter[];
@@ -50,6 +51,7 @@ export default function HarvesterImplementationSection({
   backends,
   typeNoResultsText,
   hasNoBackend,
+  hasTypeError,
   selectedTypeRef,
   selectedType,
   filters,
@@ -89,6 +91,13 @@ export default function HarvesterImplementationSection({
             searchable
             searchInputPlaceholder={t("form.searchInputPlaceholder")}
             searchNoResultsText={typeNoResultsText}
+            // The wizard remounts this subtree when the user steps back from
+            // the preview, and IsolatedSelect only seeds its internal value
+            // from defaultValue. Without it the control falls back to the
+            // placeholder while selectedTypeRef still submits the chosen type.
+            defaultValue={selectedType}
+            hasError={hasTypeError}
+            errorFeedbackText={t("form.validationErrors.type")}
             onChangeRef={selectedTypeRef}
             onChangeCallback={onTypeChange}
           >

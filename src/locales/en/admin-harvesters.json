@@ -140,7 +140,8 @@
     "validationErrors": {
       "producer": "Select a producer organization.",
       "name": "Enter the harvester name.",
-      "url": "Enter the harvester URL."
+      "url": "Enter the harvester URL.",
+      "type": "Select a harvester type."
     },
     "saveErrorRetry": "Try again.",
     "saveError": "Error saving ({{status}}) — {{message}}",
