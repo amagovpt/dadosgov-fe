@@ -1,4 +1,4 @@
-import type { HarvestBackend } from "@/service/types/harvester";
+import type { HarvestBackend, HarvestSource } from "@/service/types/harvester";
 
 /**
  * The harvest filter keys we carry a translation for, under
@@ -98,4 +98,44 @@ export function selectBackendExtraConfigs(
  */
 export function seedFeatureValues(features: HarvestBackend["features"]): Record<string, boolean> {
   return Object.fromEntries(features.map((feature) => [feature.key, feature.default ?? false]));
+}
+
+/**
+ * The features and extra configs already stored on a source, in the shape the
+ * payload builders and the form controls take.
+ *
+ * The API replaces the whole `config` on update, so a save that omits them
+ * erases them: the edit screen seeds its controls from this, and what it sends
+ * back is what the user sees.
+ */
+export function readStoredConfig(source: HarvestSource | null) {
+  const config = (source?.config ?? {}) as {
+    features?: Record<string, boolean>;
+    extra_configs?: { key?: string; value?: string }[];
+  };
+
+  return {
+    features: config.features ?? {},
+    extraConfigs: Object.fromEntries(
+      (config.extra_configs ?? [])
+        .filter((entry) => entry.key)
+        .map((entry) => [entry.key as string, entry.value ?? ""]),
+    ),
+  };
+}
+
+/**
+ * Keeps only the entries whose key the selected backend declares, the same way
+ * the filters are gated by their valid keys.
+ *
+ * Switching the implementation type leaves the previous type's values in the
+ * form state, and `HarvestConfigField` rejects any key the new backend does not
+ * declare — so an untouched leftover would turn a save into a 400.
+ */
+export function keepDeclaredKeys<T>(
+  values: Record<string, T>,
+  declared: { key: string }[],
+): Record<string, T> {
+  const keys = new Set(declared.map((entry) => entry.key));
+  return Object.fromEntries(Object.entries(values).filter(([key]) => keys.has(key)));
 }

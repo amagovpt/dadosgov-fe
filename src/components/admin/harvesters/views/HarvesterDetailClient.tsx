@@ -29,6 +29,7 @@ import { can } from "@/utils/permissions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { type HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
+import { readStoredConfig } from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import HarvestersAcceptedStatusInfoCard from "@/components/admin/harvesters/form-ui/HarvestersAcceptedStatusInfoCard";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -144,6 +145,8 @@ export default function HarvesterDetailClient({
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const [selectedBackend, setSelectedBackend] = useState("");
+  const [featureValues, setFeatureValues] = useState<Record<string, boolean>>({});
+  const [extraConfigValues, setExtraConfigValues] = useState<Record<string, string>>({});
   const { errors: formErrors, setErrors, clearError, focusFirstError } =
     useFormErrors<HarvesterFormField>();
 
@@ -151,6 +154,7 @@ export default function HarvesterDetailClient({
     if (!source) return;
     const existingFilters =
       (source.config?.filters as { key?: string; value?: string; type?: string }[] | undefined) || [];
+    const storedConfig = readStoredConfig(source);
 
     const frameId = requestAnimationFrame(() => {
       setHarvesterName(source.name);
@@ -168,6 +172,8 @@ export default function HarvesterDetailClient({
           mode: filter.type || "include",
         })),
       );
+      setFeatureValues(storedConfig.features);
+      setExtraConfigValues(storedConfig.extraConfigs);
     });
 
     return () => cancelAnimationFrame(frameId);
@@ -175,6 +181,8 @@ export default function HarvesterDetailClient({
 
   const {
     activeBackendFilters,
+    activeBackendFeatures,
+    activeBackendExtraConfigs,
     addFilter,
     handleApproveSource,
     handleDeleteHarvester,
@@ -193,6 +201,8 @@ export default function HarvesterDetailClient({
     isEnabled,
     isAutoArchive,
     filters,
+    featureValues,
+    extraConfigValues,
     harvesterSchedule,
     setSource,
     setFilters,
@@ -432,6 +442,16 @@ export default function HarvesterDetailClient({
               setSelectedBackend={setSelectedBackend}
               backends={backends}
               activeBackendFilters={activeBackendFilters}
+              activeBackendFeatures={activeBackendFeatures}
+              activeBackendExtraConfigs={activeBackendExtraConfigs}
+              featureValues={featureValues}
+              extraConfigValues={extraConfigValues}
+              onToggleFeature={(key) =>
+                setFeatureValues((previous) => ({ ...previous, [key]: !previous[key] }))
+              }
+              onExtraConfigChange={(key, value) =>
+                setExtraConfigValues((previous) => ({ ...previous, [key]: value }))
+              }
               formErrors={formErrors}
               clearError={clearError}
               addFilter={addFilter}

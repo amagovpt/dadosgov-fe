@@ -10,9 +10,11 @@ import { describe, expect, it } from "vitest";
 
 import type { HarvestBackend } from "@/service/types/harvester";
 import {
+  keepDeclaredKeys,
   localizeExtraConfigLabel,
   localizeFeatureLabel,
   localizeFilterLabel,
+  readStoredConfig,
   seedFeatureValues,
   selectBackendExtraConfigs,
   selectBackendFeatures,
@@ -156,5 +158,56 @@ describe("localizeFeatureLabel / localizeExtraConfigLabel", () => {
     expect(localizeExtraConfigLabel(extraConfig("brandNew", "Algo Novo"), translate)).toBe(
       "Algo Novo",
     );
+  });
+});
+
+describe("keepDeclaredKeys", () => {
+  it("drops the values of a backend that is no longer selected", () => {
+    // Switching csw-dcat → odspt on the edit screen leaves `geodcatap` in
+    // state; sending it would answer 400 `Unknown feature "geodcatap"`.
+    expect(
+      keepDeclaredKeys({ geodcatap: true, inspire: false }, [feature("inspire", "Inspire")]),
+    ).toEqual({ inspire: false });
+  });
+
+  it("keeps everything the backend does declare, false values included", () => {
+    expect(
+      keepDeclaredKeys({ inspire: false }, [feature("inspire", "Inspire")]),
+    ).toEqual({ inspire: false });
+  });
+
+  it("keeps nothing for a backend that declares nothing", () => {
+    expect(keepDeclaredKeys({ geodcatap: true }, [])).toEqual({});
+  });
+});
+
+describe("readStoredConfig", () => {
+  it("reads the stored features and extra configs into the form shape", () => {
+    const source = {
+      config: {
+        features: { geodcatap: true },
+        extra_configs: [{ key: "remote_url_prefix", value: "https://exemplo.pt/" }],
+      },
+    } as unknown as Parameters<typeof readStoredConfig>[0];
+
+    expect(readStoredConfig(source)).toEqual({
+      features: { geodcatap: true },
+      extraConfigs: { remote_url_prefix: "https://exemplo.pt/" },
+    });
+  });
+
+  it("reads an absent config as nothing configured", () => {
+    expect(readStoredConfig(null)).toEqual({ features: {}, extraConfigs: {} });
+    expect(
+      readStoredConfig({ config: {} } as unknown as Parameters<typeof readStoredConfig>[0]),
+    ).toEqual({ features: {}, extraConfigs: {} });
+  });
+
+  it("skips a stored extra config with no key", () => {
+    const source = {
+      config: { extra_configs: [{ value: "orfão" }, { key: "remote_url_prefix", value: "x" }] },
+    } as unknown as Parameters<typeof readStoredConfig>[0];
+
+    expect(readStoredConfig(source).extraConfigs).toEqual({ remote_url_prefix: "x" });
   });
 });
