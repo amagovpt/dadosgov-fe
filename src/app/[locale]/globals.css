@@ -1453,6 +1453,26 @@ body:has(.admin-wrapper) > div > header.sticky {
   color: var(--color-white);
 }
 
+/* Ágora's own built-in mobile menu button (shown below the "xl" breakpoint,
+   see the toggle's own hide rule) — center it in the rail and recolor its
+   icon white, matching our toggle icon above it. Its grid is meant for a
+   full page-width layout (columns sized off the whole viewport, per
+   xs/md/xl breakpoint), so inside our 112px rail its content ends up wider
+   than the rail itself and overflows both sides symmetrically — replacing
+   it with a plain flex row (one child either way) sidesteps that grid
+   entirely instead of fighting its column math. */
+.admin-side-nav .agora-sidebar-navigation-mobile {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+}
+
+.admin-side-nav .agora-sidebar-navigation-mobile .agora-snm-menu svg,
+.admin-side-nav .agora-sidebar-navigation-mobile .agora-snm-menu svg path {
+  fill: var(--color-white);
+  color: var(--color-white);
+}
+
 .admin-side-nav--collapsed .admin-sidebar-nav__group-label {
   flex-direction: column;
   gap: 4px;
@@ -2270,6 +2290,18 @@ body:has(.admin-wrapper) > div > header.sticky {
 }
 
 /* 7.8 Responsive */
+/* Below the "xl" breakpoint (1280px), Ágora's Sidebar swaps in its own
+   built-in mobile navigation (the layered-icon menu button rendered inside
+   `.admin-side-nav__panel`, unconditionally, regardless of viewport — it's
+   only ever visually redundant below this width). Our custom expand/collapse
+   toggle is a desktop-rail concept; hide it so only the native mobile
+   control remains. */
+@media (max-width: 1279px) {
+  .admin-side-nav__toggle {
+    display: none;
+  }
+}
+
 @media (max-width: 1024px) {
   .admin-new-page__cards {
     flex-direction: column;
