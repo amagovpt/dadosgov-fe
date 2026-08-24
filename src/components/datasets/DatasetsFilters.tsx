@@ -109,7 +109,9 @@ function detectAtualizacaoFromParams(params: URLSearchParams): string {
 
 function detectFormatoFromParams(params: URLSearchParams): string {
   const selected = params.getAll("format_family");
-  // The group is single-select, so the first value in the URL is the selection.
+  // The group is single-select, so it only ever writes one value. A URL carrying
+  // several (hand-edited, or a link from elsewhere) resolves to the first option
+  // in display order, which is the one the group will show as active.
   return FORMAT_FAMILIES.find((family) => selected.includes(family)) ?? "all";
 }
 
