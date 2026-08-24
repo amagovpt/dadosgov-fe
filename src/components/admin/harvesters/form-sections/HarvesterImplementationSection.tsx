@@ -7,9 +7,11 @@ import {
   DropdownOption,
   DropdownSection,
   InputText,
+  StatusCard,
   Switch,
 } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import type { HarvestBackend } from "@/service/types/harvester";
 
 interface HarvesterFilter {
   mode: string;
@@ -18,6 +20,12 @@ interface HarvesterFilter {
 }
 
 interface HarvesterImplementationSectionProps {
+  /** The enabled harvest backends, as returned by the API. */
+  backends: HarvestBackend[];
+  /** Distinguishes "still loading" from "nothing matches the search". */
+  typeNoResultsText: string;
+  /** The backends endpoint answered with nothing to offer. */
+  hasNoBackend: boolean;
   selectedTypeRef: React.RefObject<string>;
   selectedType: string;
   filters: HarvesterFilter[];
@@ -39,6 +47,9 @@ interface HarvesterImplementationSectionProps {
 }
 
 export default function HarvesterImplementationSection({
+  backends,
+  typeNoResultsText,
+  hasNoBackend,
   selectedTypeRef,
   selectedType,
   filters,
@@ -68,29 +79,28 @@ export default function HarvesterImplementationSection({
       <h2 className="admin-page__section-title">{t("detail.fields.implementation")}</h2>
 
       <div className="admin-page__fields-group">
-        <IsolatedSelect
-          label={t("form.typeFieldPlain")}
-          placeholder={t("form.typePlaceholder")}
-          id="harvester-type"
-          searchable
-          searchInputPlaceholder={t("form.searchInputPlaceholder")}
-          searchNoResultsText={t("form.noResults")}
-          onChangeRef={selectedTypeRef}
-          onChangeCallback={onTypeChange}
-        >
-          <DropdownSection name="types">
-            <DropdownOption value="dcat">DCAT</DropdownOption>
-            <DropdownOption value="csw-dcat">CSW-DCAT</DropdownOption>
-            <DropdownOption value="csw-iso-19139">CSW-ISO-19139</DropdownOption>
-            <DropdownOption value="ckan">CKAN</DropdownOption>
-            <DropdownOption value="ckanpt">CKAN PT</DropdownOption>
-            <DropdownOption value="dkan">DKAN</DropdownOption>
-            <DropdownOption value="cswudata">CSW</DropdownOption>
-            <DropdownOption value="odspt">OpenDataSoft PT</DropdownOption>
-            <DropdownOption value="maaf">MAAF</DropdownOption>
-            <DropdownOption value="ogc">OGC</DropdownOption>
-          </DropdownSection>
-        </IsolatedSelect>
+        {hasNoBackend ? (
+          <StatusCard variant="warning" showIcon description={t("form.typesUnavailable")} />
+        ) : (
+          <IsolatedSelect
+            label={t("form.typeFieldPlain")}
+            placeholder={t("form.typePlaceholder")}
+            id="harvester-type"
+            searchable
+            searchInputPlaceholder={t("form.searchInputPlaceholder")}
+            searchNoResultsText={typeNoResultsText}
+            onChangeRef={selectedTypeRef}
+            onChangeCallback={onTypeChange}
+          >
+            <DropdownSection name="types">
+              {backends.map((backend) => (
+                <DropdownOption key={backend.id} value={backend.id}>
+                  {backend.label}
+                </DropdownOption>
+              ))}
+            </DropdownSection>
+          </IsolatedSelect>
+        )}
 
         {supportsCkanFilters && (
           <div>

@@ -14,6 +14,7 @@ import HarvesterProducerSection from "@/components/admin/harvesters/form-section
 import { useHarvesterProducerOptions } from "@/components/admin/harvesters/hooks/useHarvesterProducerOptions";
 import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sections/HarvesterDescriptionSection";
 import HarvesterImplementationSection from "@/components/admin/harvesters/form-sections/HarvesterImplementationSection";
+import { useHarvesterBackendOptions } from "@/components/admin/harvesters/hooks/useHarvesterBackendOptions";
 import HarvesterPreviewSection from "@/components/admin/harvesters/form-sections/HarvesterPreviewSection";
 import HarvesterPublishStep from "@/components/admin/harvesters/form-steps/HarvesterPublishStep";
 import { getCreateHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
@@ -35,6 +36,7 @@ interface HarvestersNewClientProps {
 export default function HarvestersNewClient({ pageContent }: HarvestersNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const producer = useHarvesterProducerOptions();
+  const backendOptions = useHarvesterBackendOptions();
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 3;
@@ -242,6 +244,9 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                 />
 
                 <HarvesterImplementationSection
+                  backends={backendOptions.backends}
+                  typeNoResultsText={backendOptions.noResultsText}
+                  hasNoBackend={backendOptions.hasNoBackend}
                   selectedTypeRef={selectedTypeRef}
                   selectedType={selectedType}
                   filters={filters}
