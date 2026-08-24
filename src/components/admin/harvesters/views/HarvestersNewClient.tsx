@@ -14,6 +14,7 @@ import HarvesterProducerSection from "@/components/admin/harvesters/form-section
 import { useHarvesterProducerOptions } from "@/components/admin/harvesters/hooks/useHarvesterProducerOptions";
 import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sections/HarvesterDescriptionSection";
 import HarvesterImplementationSection from "@/components/admin/harvesters/form-sections/HarvesterImplementationSection";
+import { useHarvesterBackendOptions } from "@/components/admin/harvesters/hooks/useHarvesterBackendOptions";
 import HarvesterPreviewSection from "@/components/admin/harvesters/form-sections/HarvesterPreviewSection";
 import HarvesterPublishStep from "@/components/admin/harvesters/form-steps/HarvesterPublishStep";
 import { getCreateHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
@@ -35,6 +36,7 @@ interface HarvestersNewClientProps {
 export default function HarvestersNewClient({ pageContent }: HarvestersNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const producer = useHarvesterProducerOptions();
+  const backendOptions = useHarvesterBackendOptions();
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 3;
@@ -122,11 +124,14 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
       producer: selectedProducerRef.current,
       name: harvesterName,
       url: harvesterUrl,
+      backend: selectedTypeRef.current,
       requireOrganizationProducer: true,
+      requireBackend: true,
       messages: {
         harvesterProducer: t("admin-harvesters:form.validationErrors.producer"),
         harvesterName: t("admin-harvesters:form.validationErrors.name"),
         harvesterUrl: t("admin-harvesters:form.validationErrors.url"),
+        harvesterType: t("admin-harvesters:form.validationErrors.type"),
       },
     });
 
@@ -242,6 +247,10 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                 />
 
                 <HarvesterImplementationSection
+                  backends={backendOptions.backends}
+                  typeNoResultsText={backendOptions.noResultsText}
+                  hasNoBackend={backendOptions.hasNoBackend}
+                  hasTypeError={hasError("harvesterType")}
                   selectedTypeRef={selectedTypeRef}
                   selectedType={selectedType}
                   filters={filters}
@@ -252,6 +261,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                   isAutoArchive={isAutoArchive}
                   onTypeChange={(value) => {
                     setSelectedType(value);
+                    if (value) clearError("harvesterType");
                     setShowRemoteUrlPrefix(false);
                     setRemoteUrlPrefix("");
                     setIsGeoDcat(false);
