@@ -8,6 +8,7 @@ import {
   Icon,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 
 export function ResetPasswordClient({ token }: Props) {
   const { t } = useTranslation("login");
+  const localizeHref = useLocalizedHref();
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -82,7 +84,7 @@ export function ResetPasswordClient({ token }: Props) {
                   <Button
                     variant="primary"
                     className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                    onClick={() => (window.location.href = "/login")}
+                    onClick={() => (window.location.href = localizeHref("/login"))}
                   >
                     {t("resetPassword.signIn")}
                   </Button>
