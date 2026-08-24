@@ -21,6 +21,14 @@ This project has no version tags, so entries are grouped by month (newest first)
     created through the wizard was created unfiltered whatever key was used.
     They are now nested under `config`, like the update and preview payloads
     always were.
+  - A row whose key was deselected — clicking the already-selected option clears
+    the selection — is dropped instead of submitted. Now that the field reaches
+    the API, an empty key would answer 400 and block the wizard on the step it
+    was previously passing by discarding the filters.
+  - The filter labels are translated by key rather than by the label the API
+    sends: those labels are marshalled in the deployment's default language, so
+    matching on the English ones never worked and the edit screen showed the
+    API's own wording instead of the portal's.
   - No stored harvester is affected: the API only ever accepted filter keys the
     backend declares, so the wrong key could not be persisted — on creation it
     was discarded with the rest of the field, and on edit it was filtered out
