@@ -6,6 +6,37 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(datasets): stop collapsing multi-value listing filters into one value**
+  - Selecting a second option in "Cobertura espacial" or "Granularidade
+    espacial" emptied the listing. The datasets page read those two params with
+    `String(...)`, so two selected values arrived as the array stringified to
+    `"a,b"` — one value matching no zone and no granularity. The backend had
+    accepted repeats all along: `?granularity=country` returns 212 datasets,
+    `?granularity=other` 1052, and picking both returned 0 instead of the union.
+  - The page had grown its own copy of the query parsing next to
+    `parseDatasetsFilters`, and only the copy in the page was wrong. It now uses
+    the shared helper, which gained a variant for the `Record<string, string |
+    string[]>` shape a Server Component receives, and lists every repeatable
+    param in one place — so a filter can no longer be multi-value in the URL and
+    single-value on the way to the API. Covered by unit tests on the parser.
+- **fix(datasets): make the "Outros" format option filter instead of clearing**
+  - The "Formato" sidebar group carried its own copy of the backend's format
+    lists and expanded a selection into `?format=csv&format=xls&…`. "Outros"
+    cannot be written that way — it is the complement of the other groups — so
+    the option deleted the param and wrote nothing, behaving exactly like
+    "Todos", with no count next to it either.
+  - The group now sends `?format_family=` and its options are the backend's
+    format families, so the extension lists live in one place instead of two
+    copies that a comment asked readers to keep in sync, and each option's count
+    comes from the same query the filter applies. Two option ids are renamed to
+    their family (`structured` → `machine_readable`, `geographic` →
+    `geographical`); the visible labels are unchanged in both locales.
+    Selecting a group no longer wipes individual formats chosen in the advanced
+    filters — the group owns `format_family`, the advanced filter owns `format`,
+    and the backend combines them as an AND.
+  - Needs the backend that serves `?format_family=` deployed first: the API
+    ignores unknown params, so a frontend arriving alone would leave the group
+    returning every dataset.
 - **fix(admin-harvesters): search the whole harvester catalogue, not the visible page**
   - The backoffice harvester lists paginated on the server but searched and
     filtered in memory, so both only ever saw the current page: matches on
