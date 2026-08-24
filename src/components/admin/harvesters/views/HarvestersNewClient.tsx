@@ -4,7 +4,6 @@ import React, { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
-import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
@@ -12,6 +11,7 @@ import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import { createHarvester, previewHarvestSource } from "@/service/api/harvesters";
 import type { HarvestPreviewJob } from "@/service/types/harvester";
 import HarvesterProducerSection from "@/components/admin/harvesters/form-sections/HarvesterProducerSection";
+import { useHarvesterProducerOptions } from "@/components/admin/harvesters/hooks/useHarvesterProducerOptions";
 import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sections/HarvesterDescriptionSection";
 import HarvesterImplementationSection from "@/components/admin/harvesters/form-sections/HarvesterImplementationSection";
 import HarvesterPreviewSection from "@/components/admin/harvesters/form-sections/HarvesterPreviewSection";
@@ -34,7 +34,7 @@ interface HarvestersNewClientProps {
 
 export default function HarvestersNewClient({ pageContent }: HarvestersNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
-  const { user } = useAuth();
+  const producer = useHarvesterProducerOptions();
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 3;
@@ -209,13 +209,17 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                 </p>
 
                 <HarvesterProducerSection
-                  organizations={(user?.organizations || []).map((organization) => ({
-                    id: organization.id,
-                    name: organization.name,
-                  }))}
+                  organizations={producer.organizations}
                   selectedProducerRef={selectedProducerRef}
                   hasProducerError={hasError("harvesterProducer")}
-                  onProducerChange={() => clearError("harvesterProducer")}
+                  onProducerChange={(value) => {
+                    producer.rememberSelection(value);
+                    clearError("harvesterProducer");
+                  }}
+                  searchable={producer.isSearchable}
+                  onSearch={producer.onSearch}
+                  searchNoResultsText={producer.noResultsText}
+                  hasNoEligibleOrganization={producer.hasNoEligibleOrganization}
                 />
 
                 <HarvesterDescriptionSection

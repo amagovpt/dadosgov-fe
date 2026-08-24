@@ -106,6 +106,7 @@ export interface Badge {
 export interface OrganizationMetrics {
   datasets: number;
   dataservices: number;
+  discussions?: number;
   followers: number;
   members: number;
   reuses: number;
@@ -234,4 +235,3 @@ export interface UserSuggestion {
   avatar_thumbnail: string | null;
   score: number;
 }
-

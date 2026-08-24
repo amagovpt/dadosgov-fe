@@ -6,6 +6,39 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(harvesters): scope the producer select to what the user may harvest for**
+  - The "Produtor" field of the harvester wizard was fed only by the
+    memberships in `/api/1/me/`, which have nothing to do with the global
+    admin role. A portal admin with no memberships therefore saw an empty
+    required select and could not pass step 1, even though the backend lets
+    them create a source for any organization (every udata `Permission`
+    carries `RoleNeed("admin")`). Admins now get a server-side organization
+    typeahead over `/organizations/suggest/` — debounced, seeded with a
+    non-empty list, and keeping the chosen organization pinned so a later
+    search does not clear the selection.
+  - For everyone else the list is filtered by the backend-computed
+    `permissions.harvest` flag, the same check `POST /harvest/sources/`
+    performs. Organization editors no longer see organizations whose
+    submission would fail with a 403; when nothing is eligible an explicit
+    warning with a link to create an organization replaces the silently
+    empty select.
+- **fix(admin-harvesters): search the whole harvester catalogue, not the visible page**
+  - The backoffice harvester lists paginated on the server but searched and
+    filtered in memory, so both only ever saw the current page: matches on
+    later pages stayed invisible unless the page size was raised, and the
+    results counter and paginator kept reporting the unfiltered total, which
+    announced pages that rendered empty.
+  - The sources endpoint cannot search, filter by validation state or sort, and
+    the catalogue is small, so the system view now loads it once and does all
+    three client-side — the shape the organization view already used. The
+    counter and paginator describe the filtered set, so a search with no
+    matches shows the empty state instead of an empty table with live
+    pagination, and column sorting covers the whole set rather than one page.
+  - The organization view's search input had no change handler and the
+    controller's query was never read, leaving a field that looked functional
+    and did nothing; it now runs the same filter, combined with the status
+    filter.
+
 - **feat(auth): complete-registration page for CMD accounts without a usable email**
   - CMD/SAML accounts created without a usable email carry a minted
     `saml-*@autenticacao.gov.pt` placeholder. The backend now redirects such
