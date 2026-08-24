@@ -110,6 +110,8 @@
     "typePlaceholder": "Select a type...",
     "searchInputPlaceholder": "Type to search...",
     "noResults": "No results found",
+    "typesLoading": "Loading types...",
+    "typesUnavailable": "The harvester types could not be loaded. Reload the page and try again.",
     "filtersTitle": "Filters",
     "filterModeField": "Mode",
     "filterModeInclude": "Include",
