@@ -317,6 +317,7 @@ describe("buildHarvesterUpdatePayload and buildHarvesterPreviewPayload — confi
     activeFilterKeys: ["tags"],
     features: {},
     extraConfigs: {},
+    storedConfig: {},
   };
 
   it("carries features and extra configs through the update payload", () => {
@@ -327,12 +328,47 @@ describe("buildHarvesterUpdatePayload and buildHarvesterPreviewPayload — confi
       extraConfigs: { remote_url_prefix: "https://exemplo.pt/dados/" },
     });
 
-    // The API replaces the whole `config` on update, so anything missing here
-    // is erased from the harvester.
     expect(payload.config).toEqual({
       filters: [{ key: "tags", value: "ambiente", type: "include" }],
       features: { geodcatap: true },
       extra_configs: [{ key: "remote_url_prefix", value: "https://exemplo.pt/dados/" }],
+    });
+  });
+
+  /**
+   * Omitting `config` is not an erasure: `wtforms_json` leaves a field that the
+   * request does not carry alone, so `form.data["config"]` comes back as the
+   * stored dict and `update_source` writes it unchanged. Clearing the last
+   * filter or extra config therefore has to be said explicitly.
+   */
+  it("says the cleared config out loud instead of omitting it", () => {
+    const payload = buildHarvesterUpdatePayload({
+      ...base,
+      storedConfig: {
+        extra_configs: [{ key: "remote_url_prefix", value: "https://antigo.pt/" }],
+      },
+      // The admin blanked the only field the source had set.
+      extraConfigs: { remote_url_prefix: "" },
+    });
+
+    expect(payload.config).toEqual({ filters: [], features: {}, extra_configs: [] });
+  });
+
+  it("keeps the stored config keys no screen models", () => {
+    const payload = buildHarvesterUpdatePayload({
+      ...base,
+      // `config` is a free-form dict server-side: the CKAN backends read
+      // `apikey` from it and CSW reads `default_tag`, and no screen shows
+      // either — rebuilding the object from the form would drop them.
+      storedConfig: { apikey: "segredo", filters: [{ key: "tags", value: "velho" }] },
+      filters: [{ mode: "include", type: "tags", value: "novo" }],
+    });
+
+    expect(payload.config).toEqual({
+      apikey: "segredo",
+      filters: [{ key: "tags", value: "novo", type: "include" }],
+      features: {},
+      extra_configs: [],
     });
   });
 
@@ -345,6 +381,10 @@ describe("buildHarvesterUpdatePayload and buildHarvesterPreviewPayload — confi
       features: { geodcatap: true },
     });
 
-    expect(payload.config).toEqual({ features: { geodcatap: true } });
+    expect(payload.config).toEqual({
+      filters: [],
+      features: { geodcatap: true },
+      extra_configs: [],
+    });
   });
 });

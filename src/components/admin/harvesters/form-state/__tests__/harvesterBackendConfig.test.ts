@@ -19,6 +19,7 @@ import {
   selectBackendExtraConfigs,
   selectBackendFeatures,
   selectBackendFilters,
+  toggleFeatureValue,
 } from "../harvesterBackendConfig";
 
 function backend(
@@ -209,5 +210,26 @@ describe("readStoredConfig", () => {
     } as unknown as Parameters<typeof readStoredConfig>[0];
 
     expect(readStoredConfig(source).extraConfigs).toEqual({ remote_url_prefix: "x" });
+  });
+});
+
+describe("toggleFeatureValue", () => {
+  const declared = [feature("geodcatap", "GeoDCAT-AP"), feature("onByDefault", "On", true)];
+
+  it("switches off a default-on feature the source never stored", () => {
+    // `!values[key]` would read `!undefined === true` and leave the switch on,
+    // while the switch itself renders the declared default.
+    expect(toggleFeatureValue({}, "onByDefault", declared)).toEqual({ onByDefault: false });
+  });
+
+  it("switches on a default-off feature the source never stored", () => {
+    expect(toggleFeatureValue({}, "geodcatap", declared)).toEqual({ geodcatap: true });
+  });
+
+  it("flips a stored value and leaves the others alone", () => {
+    expect(toggleFeatureValue({ geodcatap: true, inspire: false }, "geodcatap", declared)).toEqual({
+      geodcatap: false,
+      inspire: false,
+    });
   });
 });

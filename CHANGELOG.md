@@ -20,8 +20,14 @@ This project has no version tags, so entries are grouped by month (newest first)
     UI to the "Inspire" option of the OpenDataSoft PT backend, which has been
     declared all along and was reachable from no screen.
   - The edit screen gained controls for both, seeded from what is stored. It had
-    none, and the API replaces the whole configuration on save, so a harvester
-    created with GeoDCAT-AP on would lose it the first time anyone saved it.
+    none at all, so a harvester created with these settings could be seen only
+    through the API and changed only through it.
+  - Clearing the last setting a harvester has now works. A save that carried no
+    configuration at all used to leave the stored one untouched, so blanking the
+    remote URL prefix — or removing the last filter — reported success and
+    changed nothing.
+  - A save keeps the configuration keys no screen shows, instead of replacing the
+    whole configuration with what the form knows about.
   - Values are always gated by what the selected implementation declares, on both
     screens, so changing the type no longer leaves the previous type's settings
     behind to be refused by the API.

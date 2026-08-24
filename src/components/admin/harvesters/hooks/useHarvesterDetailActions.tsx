@@ -169,10 +169,11 @@ export function useHarvesterDetailActions({
             autoarchive: isAutoArchive,
             filters,
             activeFilterKeys: [...validKeys],
-            // What the form holds, seeded from the stored config: the API
-            // replaces the whole `config`, so anything omitted is erased.
+            // What the form holds, seeded from the stored config and pruned to
+            // the keys this backend declares.
             features: keepDeclaredKeys(featureValues, activeBackendFeatures),
             extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
+            storedConfig: source.config ?? {},
           }),
         ),
         newSchedule && newSchedule !== oldSchedule
@@ -218,6 +219,7 @@ export function useHarvesterDetailActions({
           filters,
           features: keepDeclaredKeys(featureValues, activeBackendFeatures),
           extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
+          storedConfig: source.config ?? {},
         }),
       );
       setPreviewJob(job);

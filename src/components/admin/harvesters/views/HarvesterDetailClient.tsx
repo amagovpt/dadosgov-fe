@@ -29,7 +29,10 @@ import { can } from "@/utils/permissions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { type HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
-import { readStoredConfig } from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
+import {
+  readStoredConfig,
+  toggleFeatureValue,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import HarvestersAcceptedStatusInfoCard from "@/components/admin/harvesters/form-ui/HarvestersAcceptedStatusInfoCard";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -447,7 +450,7 @@ export default function HarvesterDetailClient({
               featureValues={featureValues}
               extraConfigValues={extraConfigValues}
               onToggleFeature={(key) =>
-                setFeatureValues((previous) => ({ ...previous, [key]: !previous[key] }))
+                setFeatureValues((previous) => toggleFeatureValue(previous, key, activeBackendFeatures))
               }
               onExtraConfigChange={(key, value) =>
                 setExtraConfigValues((previous) => ({ ...previous, [key]: value }))

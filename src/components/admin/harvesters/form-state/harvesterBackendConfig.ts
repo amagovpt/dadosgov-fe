@@ -104,9 +104,10 @@ export function seedFeatureValues(features: HarvestBackend["features"]): Record<
  * The features and extra configs already stored on a source, in the shape the
  * payload builders and the form controls take.
  *
- * The API replaces the whole `config` on update, so a save that omits them
- * erases them: the edit screen seeds its controls from this, and what it sends
- * back is what the user sees.
+ * The edit screen seeds its controls from this, so what it sends back is what
+ * the user sees. It has to send them: the update payload replaces the keys it
+ * carries, so a save that left them out would keep whatever was stored no
+ * matter what the form showed.
  */
 export function readStoredConfig(source: HarvestSource | null) {
   const config = (source?.config ?? {}) as {
@@ -138,4 +139,22 @@ export function keepDeclaredKeys<T>(
 ): Record<string, T> {
   const keys = new Set(declared.map((entry) => entry.key));
   return Object.fromEntries(Object.entries(values).filter(([key]) => keys.has(key)));
+}
+
+/**
+ * Flips one feature flag, reading the current state the same way the switch
+ * renders it.
+ *
+ * `!values[key]` is not enough: a feature the source has never stored is absent
+ * from the values while the switch shows the declared default, so for a
+ * `default: true` feature the first click would compute `!undefined === true`
+ * and leave it on.
+ */
+export function toggleFeatureValue(
+  values: Record<string, boolean>,
+  key: string,
+  declared: { key: string; default?: boolean }[],
+): Record<string, boolean> {
+  const declaredDefault = declared.find((feature) => feature.key === key)?.default ?? false;
+  return { ...values, [key]: !(values[key] ?? declaredDefault) };
 }

@@ -52,6 +52,8 @@ interface HarvesterCreateValues extends HarvesterDetailsValues, HarvesterConfigV
 }
 
 interface HarvesterUpdateValues extends HarvesterConfigValues {
+  /** The source's stored `config`, so keys no screen models are not dropped. */
+  storedConfig: Record<string, unknown>;
   name: string;
   description: string;
   url: string;
@@ -116,38 +118,68 @@ function mapFilters(filters: HarvesterFilterValue[], validKeys?: Set<string>) {
 }
 
 /**
- * Composes the single `config` object the API accepts, from every part of it the
- * form collects.
+ * The parts of `config` this form models, in the shape the API stores them.
  *
  * One function on purpose: `filters`, `features` and `extra_configs` all live
  * inside the same `config`, so spreading `{ config: … }` once per part would
  * leave only the last one and silently drop the others.
- *
- * Each part is omitted when empty, and `config` itself is omitted when nothing
- * is left — an empty `config` would be sent for a backend that declares no
- * configurable anything.
  */
-function buildConfig(
+function buildManagedConfig(
   filters: ReturnType<typeof mapFilters>,
   { features, extraConfigs }: HarvesterConfigValues,
 ) {
-  // `has_feature` falls back to the feature's declared default, so sending the
-  // flags as collected — including the false ones — is what makes turning a
-  // default-on feature off actually stick.
-  const featureKeys = Object.keys(features);
-  const extra_configs = Object.entries(extraConfigs)
-    // An empty value means "not set": sending it would store an empty string
-    // where the backend expects the config to be absent.
-    .filter(([, value]) => value.trim())
-    .map(([key, value]) => ({ key, value: value.trim() }));
+  return {
+    filters,
+    // `has_feature` falls back to the feature's declared default, so sending
+    // the flags as collected — including the false ones — is what makes turning
+    // a default-on feature off actually stick.
+    features,
+    extra_configs: Object.entries(extraConfigs)
+      // An empty value means "not set": sending it would store an empty string
+      // where the backend expects the config to be absent.
+      .filter(([, value]) => value.trim())
+      .map(([key, value]) => ({ key, value: value.trim() })),
+  };
+}
+
+/**
+ * `config` for a source being created: each part omitted when empty, and no
+ * `config` at all when nothing was configured.
+ */
+function buildCreateConfig(
+  filters: ReturnType<typeof mapFilters>,
+  values: HarvesterConfigValues,
+) {
+  const { features, extra_configs } = buildManagedConfig(filters, values);
 
   const config = {
     ...(filters.length > 0 ? { filters } : {}),
-    ...(featureKeys.length > 0 ? { features } : {}),
+    ...(Object.keys(features).length > 0 ? { features } : {}),
     ...(extra_configs.length > 0 ? { extra_configs } : {}),
   };
 
   return Object.keys(config).length > 0 ? { config } : {};
+}
+
+/**
+ * `config` for a source being updated or previewed from the edit screen: the
+ * three parts this form owns, over whatever else the stored config holds.
+ *
+ * Always sent, and always with all three keys, because omitting `config` is not
+ * an erasure — `wtforms_json` leaves a missing field alone, so the stored value
+ * survives and clearing the last filter or extra config would report success
+ * and change nothing.
+ *
+ * Merged onto the stored config rather than rebuilt from scratch: `config` is a
+ * free-form dict server-side and holds keys no screen models (`apikey` for the
+ * CKAN backends, `default_tag` for CSW), which a rebuilt object would drop.
+ */
+function buildStoredConfig(
+  filters: ReturnType<typeof mapFilters>,
+  values: HarvesterConfigValues,
+  storedConfig: Record<string, unknown>,
+) {
+  return { config: { ...storedConfig, ...buildManagedConfig(filters, values) } };
 }
 
 export function buildHarvesterCreatePayload(
@@ -167,7 +199,7 @@ export function buildHarvesterCreatePayload(
     // Everything the API reads lives under `config`: its `HarvestSourceForm`
     // has no top-level `filters` or `features` field, so WTForms dropped them
     // in silence and every harvester created here was created without them.
-    ...buildConfig(filters, values),
+    ...buildCreateConfig(filters, values),
   };
 }
 
@@ -183,7 +215,7 @@ export function buildHarvesterUpdatePayload(
     backend: values.backend || values.fallbackBackend,
     active: values.active,
     autoarchive: values.autoarchive,
-    ...buildConfig(filters, values),
+    ...buildStoredConfig(filters, values, values.storedConfig),
   };
 }
 
@@ -199,6 +231,6 @@ export function buildHarvesterPreviewPayload(
     schedule: values.schedule.trim() || undefined,
     active: values.active,
     autoarchive: values.autoarchive,
-    ...buildConfig(filters, values),
+    ...buildStoredConfig(filters, values, values.storedConfig),
   };
 }

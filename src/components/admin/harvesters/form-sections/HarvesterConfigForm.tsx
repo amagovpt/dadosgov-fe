@@ -63,9 +63,8 @@ interface HarvesterConfigFormProps {
   activeBackendFilters: { key: string; label: string }[];
   /**
    * The features and extra configs the selected backend declares, and the
-   * values held for them. Without these controls the screen saved a `config`
-   * without them, and the API replaces the whole `config` — so a harvester
-   * created with GeoDCAT-AP on lost it on the first save from here.
+   * values held for them. This screen had no controls for either, so a
+   * harvester created with them could be read and changed only through the API.
    */
   activeBackendFeatures: HarvestBackend["features"];
   activeBackendExtraConfigs: HarvestBackend["extra_configs"];
@@ -430,29 +429,17 @@ export function HarvesterConfigForm({
             )}
 
             {activeBackendExtraConfigs.map((extraConfig) => (
-              <div key={extraConfig.key}>
-                <p className="text-base font-medium leading-7 text-primary-900">
-                  {localizeBackendExtraConfigLabel(extraConfig, (subkey) =>
-                    t(`admin-harvesters:form.extraConfigLabels.${subkey}`),
-                  )}
-                </p>
-                <div className="mt-8 flex items-center gap-8">
-                  <div className="flex-1">
-                    <InputText
-                      key={`extra-config-${extraConfig.key}-${selectedBackend}`}
-                      label=""
-                      hideLabel
-                      placeholder=""
-                      id={`extra-config-${extraConfig.key}`}
-                      defaultValue={extraConfigValues[extraConfig.key] ?? ""}
-                      disabled={advancedDisabled}
-                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                        onExtraConfigChange(extraConfig.key, event.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
+              <IsolatedInput
+                key={extraConfig.key}
+                label={localizeBackendExtraConfigLabel(extraConfig, (subkey) =>
+                  t(`admin-harvesters:form.extraConfigLabels.${subkey}`),
+                )}
+                placeholder=""
+                id={`extra-config-${extraConfig.key}`}
+                defaultValue={extraConfigValues[extraConfig.key] ?? ""}
+                disabled={advancedDisabled}
+                onChange={(value) => onExtraConfigChange(extraConfig.key, value)}
+              />
             ))}
 
             <div className="flex gap-48">

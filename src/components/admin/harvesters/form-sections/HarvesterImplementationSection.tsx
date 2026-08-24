@@ -96,7 +96,7 @@ export default function HarvesterImplementationSection({
   onToggleEnabled,
   onToggleAutoArchive,
 }: HarvesterImplementationSectionProps) {
-  const { t } = useTranslation("admin-harvesters");
+  const { t } = useTranslation(["admin-harvesters", "admin-common"]);
 
   return (
     <>
@@ -270,7 +270,7 @@ export default function HarvesterImplementationSection({
                   leadingIconHover="agora-solid-trash"
                   onClick={() => onClearExtraConfig(extraConfig.key)}
                 >
-                  {t("actions.delete")}
+                  {t("admin-common:actions.delete")}
                 </Button>
               </div>
             </div>

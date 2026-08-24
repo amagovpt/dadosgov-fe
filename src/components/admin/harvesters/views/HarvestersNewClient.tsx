@@ -25,6 +25,7 @@ import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import {
   seedFeatureValues,
+  toggleFeatureValue,
   selectBackendExtraConfigs,
   selectBackendFeatures,
   selectBackendFilters,
@@ -307,7 +308,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                   onRemoveFilter={removeFilter}
                   onUpdateFilter={updateFilter}
                   onToggleFeature={(key) =>
-                    setFeatureValues((previous) => ({ ...previous, [key]: !previous[key] }))
+                    setFeatureValues((previous) => toggleFeatureValue(previous, key, activeBackendFeatures))
                   }
                   onShowExtraConfig={(key) =>
                     setVisibleExtraConfigKeys((previous) =>
