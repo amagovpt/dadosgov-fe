@@ -5,14 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sidebar, SidebarItem, Icon } from "@ama-pt/agora-design-system";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { fetchOrganization } from "@/service/api/organizations";
 import { Organization } from "@/service/types/identity";
-import type {
-  AdminNavLink,
-  AdminSideNavigationData,
-} from "@/service/types/admin-side-navigation";
+import type { AdminNavLink, AdminSideNavigationData } from "@/service/types/admin-side-navigation";
 import { stripLocale } from "@/utils/stripLocale";
 
 interface NavChild {
@@ -44,6 +42,8 @@ function toNavChild(link: AdminNavLink, href: string): NavChild {
 }
 
 export function AdminSideNavigation({ data }: { data: AdminSideNavigationData }) {
+  const { t } = useTranslation("admin-common");
+  const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
   // usePathname() is locale-prefixed (`/pt/admin/...`) because prefixDefault is
   // true; normalize before matching so `/admin`-anchored logic keeps working.
@@ -145,100 +145,123 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
   const showHomeLink = Boolean(homeLink?.label) && homeLink?.enabled !== false;
 
   return (
-    <nav className="admin-side-nav">
-      <Sidebar variant="navigation" darkMode className="admin-sidebar-nav">
-        {[
-          ...(showHomeLink
-            ? [
+    <nav
+      className={`admin-side-nav ${isExpanded ? "admin-side-nav--expanded" : "admin-side-nav--collapsed"}`}
+    >
+      <div className="admin-side-nav__panel">
+        <button
+          type="button"
+          className="admin-side-nav__toggle"
+          aria-expanded={isExpanded}
+          onClick={() => setIsExpanded((expanded) => !expanded)}
+        >
+          <span className="admin-side-nav__toggle-content">
+            <span className="admin-side-nav__toggle-icon">
+              <Icon name="agora-line-panel-left" className="admin-side-nav__toggle-icon-glyph" />
+            </span>
+            <span className="admin-sidebar-nav__group-label-text text-base font-medium">
+              {isExpanded ? t("sidebar.close") : t("sidebar.expand")}
+            </span>
+          </span>
+        </button>
+        <Sidebar variant="navigation" darkMode className="admin-sidebar-nav">
+          {[
+            ...visibleGroups.map((group) => {
+              const hasActiveChild = group.children.some((child) =>
+                localePath.startsWith(child.href)
+              );
+
+              return (
                 <SidebarItem
-                  key="home"
+                  key={group.label}
                   variant="navigation"
                   darkMode
-                  className="admin-sidebar-nav__home-item"
+                  open={hasActiveChild}
                   item={{
                     children: (
-                      <Link href={homeLink.href || "/"} className="admin-sidebar-nav__group-label">
-                        {homeLink.icon && (
-                          <Icon
-                            name={homeLink.icon}
-                            className="admin-sidebar-nav__group-icon"
-                          />
-                        )}
-                        {homeLink.label}
-                      </Link>
-                    ),
-                  }}
-                />,
-              ]
-            : []),
-          ...visibleGroups.map((group) => {
-          const hasActiveChild = group.children.some(
-            (child) => localePath.startsWith(child.href),
-          );
-
-          return (
-            <SidebarItem
-              key={group.label}
-              variant="navigation"
-              darkMode
-              open={hasActiveChild}
-              item={{
-                children: (
-                  <span className={`admin-sidebar-nav__group-label ${hasActiveChild ? "admin-sidebar-nav__group-label--active" : ""}`}>
-                    {group.icon && (
-                      <Icon
-                        name={group.icon}
-                        className="admin-sidebar-nav__group-icon"
-                      />
-                    )}
-                    <span className="admin-sidebar-nav__group-label-text">{toSentenceCase(group.label)}</span>
-                  </span>
-                ),
-                hasIcon: true,
-                collapsedIconTrailing: "agora-line-chevron-up",
-                collapsedIconHoverTrailing: "agora-solid-chevron-up",
-                expandedIconTrailing: "agora-line-chevron-down",
-                expandedIconHoverTrailing: "agora-solid-chevron-down",
-              }}
-            >
-              <ul className="admin-sidebar-nav__children">
-                {group.children.map((child) => {
-                  const isActive = localePath.startsWith(child.href);
-                  return (
-                    <li key={child.href}>
-                      <Link
-                        href={child.href}
-                        className={`admin-sidebar-nav__child-item ${
-                          isActive
-                            ? "admin-sidebar-nav__child-item--active"
-                            : ""
-                        }`}
+                      <span
+                        className={`admin-sidebar-nav__group-label ${hasActiveChild ? "admin-sidebar-nav__group-label--active" : ""}`}
                       >
-                        {child.customIcon ? (
-                          <Image
-                            src={child.customIcon}
-                            alt={child.label}
-                            width={20}
-                            height={20}
-                            className="admin-sidebar-nav__child-icon"
-                          />
-                        ) : child.icon ? (
-                          <Icon
-                            name={child.icon}
-                            className="admin-sidebar-nav__child-icon"
-                          />
-                        ) : null}
-                        <span>{child.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </SidebarItem>
-          );
-        }),
-        ]}
-      </Sidebar>
+                        {group.icon && (
+                          <Icon name={group.icon} className="admin-sidebar-nav__group-icon" />
+                        )}
+                        <span className="admin-sidebar-nav__group-label-text text-base font-medium">
+                          {toSentenceCase(group.label)}
+                        </span>
+                      </span>
+                    ),
+                    ...(isExpanded
+                      ? {
+                          hasIcon: true,
+                          collapsedIconTrailing: "agora-line-chevron-up",
+                          collapsedIconHoverTrailing: "agora-solid-chevron-up",
+                          expandedIconTrailing: "agora-line-chevron-down",
+                          expandedIconHoverTrailing: "agora-solid-chevron-down",
+                        }
+                      : {}),
+                  }}
+                >
+                  <ul className="admin-sidebar-nav__children">
+                    {group.children.map((child) => {
+                      const isActive = localePath.startsWith(child.href);
+                      return (
+                        <li key={child.href}>
+                          <Link
+                            href={child.href}
+                            className={`admin-sidebar-nav__child-item ${
+                              isActive ? "admin-sidebar-nav__child-item--active" : ""
+                            }`}
+                          >
+                            {child.customIcon ? (
+                              <Image
+                                src={child.customIcon}
+                                alt={child.label}
+                                width={20}
+                                height={20}
+                                className="admin-sidebar-nav__child-icon"
+                              />
+                            ) : child.icon ? (
+                              <Icon name={child.icon} className="admin-sidebar-nav__child-icon" />
+                            ) : null}
+                            <span className="admin-sidebar-nav__child-item-text">{child.label}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </SidebarItem>
+              );
+            }),
+            ...(showHomeLink
+              ? [
+                  <SidebarItem
+                    key="home"
+                    variant="navigation"
+                    darkMode
+                    item={{
+                      children: (
+                        <Link href={homeLink.href || "/"}>
+                          <span className="admin-sidebar-nav__home-badge">
+                            <Image
+                              src="/favicon.png"
+                              alt=""
+                              width={24}
+                              height={24}
+                              className="admin-sidebar-nav__home-badge-icon"
+                            />
+                          </span>
+                          <span className="admin-sidebar-nav__group-label-text text-base font-bold">
+                            {t("header.portalTitle")}
+                          </span>
+                        </Link>
+                      ),
+                    }}
+                  />,
+                ]
+              : []),
+          ]}
+        </Sidebar>
+      </div>
     </nav>
   );
 }
