@@ -128,8 +128,8 @@ export function HarvesterConfigForm({
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
   const scheduleErrorMessage = t("admin-harvesters:form.scheduleError");
-  const localizeFilterLabel = (label: string) =>
-    localizeBackendFilterLabel(label, (subkey) =>
+  const localizeFilterLabel = (filter: { key: string; label: string }) =>
+    localizeBackendFilterLabel(filter, (subkey) =>
       t(`admin-harvesters:form.filterLabels.${subkey}`),
     );
 
@@ -298,7 +298,7 @@ export function HarvesterConfigForm({
                                   value={f.key}
                                   selected={filter.type === f.key}
                                 >
-                                  {localizeFilterLabel(f.label)}
+                                  {localizeFilterLabel(f)}
                                 </DropdownOption>
                               ))}
                             </DropdownSection>

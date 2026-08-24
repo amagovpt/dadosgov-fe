@@ -147,7 +147,7 @@
     "saveError": "Error saving ({{status}}) — {{message}}",
     "filterLabels": {
       "organization": "Organization",
-      "tag": "Tag",
+      "tags": "Tag",
       "publisher": "Publisher"
     }
   },

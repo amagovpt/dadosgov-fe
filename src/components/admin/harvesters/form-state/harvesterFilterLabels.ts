@@ -1,33 +1,44 @@
-/**
- * The backend declares each harvest filter with an English label
- * (`HarvestFilter(_("Tag"), "tags", …)`), translated server-side only when the
- * request carries a locale the API knows. Both harvester screens read the same
- * `GET /api/1/harvest/backends/` payload, so the mapping from that label to our
- * own i18n keys lives here instead of being duplicated per screen.
- *
- * Keyed on the label rather than on the filter key because the key is what goes
- * on the wire to the backend (and into the CKAN Solr query), so it must stay
- * exactly as declared.
- */
-const FILTER_KEY_LABELS: Record<string, string> = {
-  Organization: "organization",
-  Tag: "tag",
-  Publisher: "publisher",
-  "Remote ID": "remoteId",
-};
+import type { HarvestBackend } from "@/service/types/harvester";
 
 /**
- * Localizes a backend filter label, falling back to the label as received when
- * we have no translation for it — a new backend filter shows up in English
- * rather than as a raw i18n key.
+ * The harvest filter keys we carry a translation for, under
+ * `admin-harvesters:form.filterLabels`.
  *
- * `translate` takes the subkey under `admin-harvesters:form.filterLabels` so
- * each caller keeps its own namespace prefix.
+ * Keyed on the filter key and not on the label the API sends: that label is a
+ * `lazy_gettext` string marshalled through `get_locale()`, and `/api/1` sets
+ * `g.lang_code` to the deployment's `DEFAULT_LANGUAGE` (`pt`) when the request
+ * carries no `lang`, so the endpoint answers "Etiqueta" and "Editor" rather
+ * than "Tag" and "Publisher". A map keyed on the English labels never matched.
+ * The key is the same value the backend validates and puts in the CKAN Solr
+ * query, so it does not move with the caller's locale.
+ */
+const TRANSLATED_FILTER_KEYS = new Set(["organization", "tags", "publisher"]);
+
+/**
+ * Localizes a backend filter, falling back to the label the API sent when we
+ * carry no translation for the key — a filter a backend adds later shows up
+ * under the API's own wording instead of as a raw i18n key.
+ *
+ * `translate` takes the key as the subkey under
+ * `admin-harvesters:form.filterLabels`, so each caller keeps its own namespace
+ * prefix.
  */
 export function localizeFilterLabel(
-  label: string,
+  filter: { key: string; label: string },
   translate: (subkey: string) => string,
 ): string {
-  const subkey = FILTER_KEY_LABELS[label];
-  return subkey ? translate(subkey) : label;
+  return TRANSLATED_FILTER_KEYS.has(filter.key) ? translate(filter.key) : filter.label;
+}
+
+/**
+ * The filters the given backend declares. Both harvester screens derive the
+ * filter key options and the visibility of their filters block from this: a
+ * hardcoded list drifts from what the API accepts, and `HarvestConfigField`
+ * rejects any key the selected backend does not declare.
+ */
+export function selectBackendFilters(
+  backends: HarvestBackend[],
+  backendId: string,
+): HarvestBackend["filters"] {
+  return backends.find((backend) => backend.id === backendId)?.filters ?? [];
 }

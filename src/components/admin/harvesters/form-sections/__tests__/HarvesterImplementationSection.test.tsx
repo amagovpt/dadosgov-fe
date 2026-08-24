@@ -205,20 +205,41 @@ describe("HarvesterImplementationSection — chaves de filtro", () => {
     });
 
     const text = container.querySelector("#filter-type-0")?.textContent ?? "";
-    expect(text).toContain(ptHarvesters.form.filterLabels.tag);
+    expect(text).toContain(ptHarvesters.form.filterLabels.tags);
     expect(text).toContain(ptHarvesters.form.filterLabels.organization);
   });
 
-  it("falls back to the backend label for a filter we have no translation for", async () => {
+  it("falls back to the backend label for a key we have no translation for", async () => {
     await renderSection({
       selectedType: "odspt",
-      activeBackendFilters: [filter("Something New", "somethingNew")],
+      activeBackendFilters: [filter("Algo Novo", "somethingNew")],
       filters: [{ mode: "include", type: "somethingNew", value: "x" }],
     });
 
     const text = container.querySelector("#filter-type-0")?.textContent ?? "";
-    expect(text).toContain("Something New");
+    expect(text).toContain("Algo Novo");
     expect(text).not.toContain("form.filterLabels");
+  });
+
+  /**
+   * `/api/1` marshals the filter labels through `get_locale()`, which falls back
+   * to the deployment's `DEFAULT_LANGUAGE`, so the endpoint answers "Etiqueta"
+   * and "Editor" — not "Tag" and "Publisher". Looking the translation up by
+   * label therefore never matched; it is looked up by key.
+   */
+  it("translates by key, so the label the API sends does not decide it", async () => {
+    await renderSection({
+      selectedType: "ckan",
+      activeBackendFilters: [
+        { label: "Etiqueta", key: "tags", type: "string", description: "" },
+        { label: "Organização", key: "organization", type: "string", description: "" },
+      ],
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+    });
+
+    const text = container.querySelector("#filter-type-0")?.textContent ?? "";
+    expect(text).toContain(ptHarvesters.form.filterLabels.tags);
+    expect(text).not.toContain("Etiqueta");
   });
 
   it("marks the saved key as selected so a step back does not blank the control", async () => {
@@ -232,7 +253,7 @@ describe("HarvesterImplementationSection — chaves de filtro", () => {
       '#filter-type-0 [aria-selected="true"], #filter-type-0 [data-selected="true"]',
     );
     expect([...selected].map((node) => node.textContent).join(" ")).toContain(
-      ptHarvesters.form.filterLabels.tag,
+      ptHarvesters.form.filterLabels.tags,
     );
   });
 });

@@ -29,7 +29,7 @@ interface HarvesterImplementationSectionProps {
    * list drifts from what the backend accepts, and `HarvestConfigField`
    * rejects any key the backend does not declare.
    */
-  activeBackendFilters: { key: string; label: string }[];
+  activeBackendFilters: HarvestBackend["filters"];
   /** Distinguishes "still loading" from "nothing matches the search". */
   typeNoResultsText: string;
   /** The backends endpoint answered with nothing to offer. */
@@ -162,7 +162,7 @@ export default function HarvesterImplementationSection({
                     <DropdownSection name={`filter-type-${index}`}>
                       {activeBackendFilters.map((backendFilter) => (
                         <DropdownOption key={backendFilter.key} value={backendFilter.key}>
-                          {localizeFilterLabel(backendFilter.label, (subkey) =>
+                          {localizeFilterLabel(backendFilter, (subkey) =>
                             t(`form.filterLabels.${subkey}`),
                           )}
                         </DropdownOption>

@@ -147,7 +147,7 @@
     "saveError": "Erro ao guardar ({{status}}) — {{message}}",
     "filterLabels": {
       "organization": "Organização",
-      "tag": "Marcação",
+      "tags": "Marcação",
       "publisher": "Publicador"
     }
   },

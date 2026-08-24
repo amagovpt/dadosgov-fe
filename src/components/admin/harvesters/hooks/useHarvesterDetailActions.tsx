@@ -24,6 +24,7 @@ import {
   validateHarvesterDetails,
 } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
+import { selectBackendFilters } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
 
 interface UseHarvesterDetailActionsParams {
   source: HarvestSource | null;
@@ -84,7 +85,7 @@ export function useHarvesterDetailActions({
 }: UseHarvesterDetailActionsParams) {
   const { t } = useTranslation("admin-harvesters");
   const activeBackendFilters = useMemo(
-    () => backends.find((backend) => backend.id === selectedBackend)?.filters ?? [],
+    () => selectBackendFilters(backends, selectedBackend),
     [backends, selectedBackend],
   );
 

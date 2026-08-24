@@ -23,6 +23,7 @@ import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { selectBackendFilters } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
 import {
   buildHarvesterCreatePayload,
   type HarvesterFormField,
@@ -71,9 +72,9 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   // The keys the selected backend declares. `HarvestConfigField` rejects any
   // other key, so seeding a filter with a literal (it used to be "organization")
   // only works by accident and breaks as soon as a backend declares something
-  // else. The edit screen derives it the same way.
+  // else. The edit screen derives it through the same selector.
   const activeBackendFilters = useMemo(
-    () => backendOptions.backends.find((backend) => backend.id === selectedType)?.filters ?? [],
+    () => selectBackendFilters(backendOptions.backends, selectedType),
     [backendOptions.backends, selectedType],
   );
 
