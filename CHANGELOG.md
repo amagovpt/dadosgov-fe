@@ -6,6 +6,20 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(admin-harvesters): list every enabled harvest backend in the creation "Tipo" field**
+  - The creation wizard decided the "Tipo" options locally, with ten
+    `DropdownOption` literals, while the edit screen listed whatever
+    `GET /api/1/harvest/backends/` returned. Five enabled backends
+    (`apambiente`, `ine`, `inehvd`, `dgt`, `dgtIne`) were therefore impossible
+    to pick when creating a harvester, and the labels of the ones that were
+    listed did not match the `display_name` each backend declares.
+  - The literal also ignored the deployment's `HARVESTER_BACKENDS`, so it could
+    offer a type disabled in that environment whose submission
+    `POST /harvest/sources/` then rejects — the `backend` field is an enum over
+    the enabled backends. Both screens now read the same endpoint, so a backend
+    registered in udata shows up in the wizard without a frontend change.
+  - When the endpoint answers with nothing to offer, an explicit warning
+    replaces the select instead of leaving a blank required field.
 - **fix(harvesters): scope the producer select to what the user may harvest for**
   - The "Produtor" field of the harvester wizard was fed only by the
     memberships in `/api/1/me/`, which have nothing to do with the global
