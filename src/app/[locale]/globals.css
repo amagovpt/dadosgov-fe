@@ -1473,6 +1473,8 @@ body:has(.admin-wrapper) > div > header.sticky {
   overflow: visible;
   text-overflow: initial;
   white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .admin-side-nav--collapsed .admin-sidebar-nav__children {

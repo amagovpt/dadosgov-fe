@@ -157,7 +157,10 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
         >
           <span className="admin-side-nav__toggle-content">
             <span className="admin-side-nav__toggle-icon">
-              <Icon name="agora-line-panel-left" className="admin-side-nav__toggle-icon-glyph" />
+              <Icon
+                name={isExpanded ? "agora-line-panel-left" : "agora-line-panel-right"}
+                className="admin-side-nav__toggle-icon-glyph"
+              />
             </span>
             <span className="admin-sidebar-nav__group-label-text text-base font-medium">
               {isExpanded ? t("sidebar.close") : t("sidebar.expand")}
