@@ -110,6 +110,8 @@
     "typePlaceholder": "Selecione um tipo...",
     "searchInputPlaceholder": "Escreva para pesquisar...",
     "noResults": "Nenhum resultado encontrado",
+    "typesLoading": "A carregar os tipos...",
+    "typesUnavailable": "Não foi possível carregar os tipos de harvester. Recarregue a página e tente novamente.",
     "filtersTitle": "Filtros",
     "filterModeField": "Modo",
     "filterModeInclude": "Incluir",
@@ -138,7 +140,8 @@
     "validationErrors": {
       "producer": "Selecione uma organização produtora.",
       "name": "Indique o nome do harvester.",
-      "url": "Indique o URL do harvester."
+      "url": "Indique o URL do harvester.",
+      "type": "Selecione um tipo de harvester."
     },
     "saveErrorRetry": "Tente novamente.",
     "saveError": "Erro ao guardar ({{status}}) — {{message}}",

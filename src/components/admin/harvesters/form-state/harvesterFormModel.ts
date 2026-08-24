@@ -7,7 +7,8 @@ import type {
 export type HarvesterFormField =
   | "harvesterProducer"
   | "harvesterName"
-  | "harvesterUrl";
+  | "harvesterUrl"
+  | "harvesterType";
 
 export interface HarvesterFilterValue {
   mode: string;
@@ -20,6 +21,14 @@ interface HarvesterDetailsValues {
   url: string;
   producer?: string;
   requireOrganizationProducer?: boolean;
+  backend?: string;
+  /**
+   * The creation wizard must not submit without a type: an empty `backend`
+   * falls back to "dcat" in `buildHarvesterCreatePayload`, which would silently
+   * create a DCAT source against, say, a CKAN URL. The edit screen always has
+   * the saved backend to fall back to, so it leaves this off.
+   */
+  requireBackend?: boolean;
   messages?: Partial<Record<HarvesterFormField, string>>;
 }
 
@@ -66,6 +75,9 @@ export function validateHarvesterDetails(
   }
   if (!values.url.trim()) {
     errors.harvesterUrl = values.messages?.harvesterUrl ?? "";
+  }
+  if (values.requireBackend && !values.backend?.trim()) {
+    errors.harvesterType = values.messages?.harvesterType ?? "";
   }
 
   return errors;
