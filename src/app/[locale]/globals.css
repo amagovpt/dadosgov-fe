@@ -1538,14 +1538,22 @@ body:has(.admin-wrapper) > div > header.sticky {
 }
 
 .admin-sidebar-nav .agora-link-wrapper {
-  padding: 64px 0 12px !important;
+  padding: 0 !important;
   min-height: auto !important;
   min-width: auto !important;
   width: 100%;
+border-left: none !important;
+}
+
+.admin-sidebar-nav .agora-link-wrapper:has(.admin-sidebar-nav__home-badge) {
+  padding: 64px 0 12px !important;
 }
 
 .admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item {
   border-left: 3px solid transparent;
+  border-radius: 0 !important;
+  height: 100%;
+  width: 100%;
 }
 
 .admin-sidebar-nav.agora-sidebar
@@ -1571,16 +1579,21 @@ body:has(.admin-wrapper) > div > header.sticky {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding: 16px;
+}
+
+.admin-side-nav__toggle .admin-sidebar-nav__group-label-text {
+  padding: 16px 0;
+}
+
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-btn-link-neutral.agora-sidebar-button-item:has(.admin-sidebar-nav__group-label--active),
+.admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item:has(.admin-sidebar-nav__group-label--active) {
+  background-color: #0338a2 !important;
+  border-left: 3px solid var(--color-white) !important;
 }
 
 .admin-sidebar-nav__group-label--active {
   font-weight: 700;
-}
-
-.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-btn-link-neutral.agora-sidebar-button-item[aria-expanded="true"],
-.admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item[aria-expanded="true"] {
-  background-color: #0338a2 !important;
-  border-left: 3px solid var(--color-white) !important;
 }
 
 .admin-sidebar-nav .agora-sidebar-item > .agora-sidebar-button-item:hover,
