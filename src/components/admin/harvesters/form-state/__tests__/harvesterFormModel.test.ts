@@ -98,3 +98,104 @@ describe("buildHarvesterCreatePayload", () => {
     expect(payload.backend).toBe("apambiente");
   });
 });
+
+/**
+ * LEDG-2311: the creation payload used to put the filters at the top level of
+ * the POST body. `HarvestSourceForm` declares no top-level `filters` field, so
+ * WTForms discarded them without a word and every harvester created through the
+ * wizard was created unfiltered — the update and preview payloads had it right
+ * all along.
+ */
+describe("buildHarvesterCreatePayload — filters", () => {
+  const base = {
+    name: "Catálogo",
+    description: "",
+    url: "https://exemplo.pt/catalogo",
+    producer: "org-dgt",
+    backend: "ckan",
+    active: true,
+    autoarchive: true,
+  };
+
+  it("nests the filters under config, where the API reads them", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+    });
+
+    expect(payload.config).toEqual({
+      filters: [{ key: "tags", value: "ambiente", type: "include" }],
+    });
+    // The shape the backend silently ignored.
+    expect(payload).not.toHaveProperty("filters");
+  });
+
+  it("carries the exclude mode through as the filter type", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      filters: [{ mode: "exclude", type: "organization", value: "dgt" }],
+    });
+
+    expect(payload.config).toEqual({
+      filters: [{ key: "organization", value: "dgt", type: "exclude" }],
+    });
+  });
+
+  it("sends no config when the only filter has no value", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      // A filter row the user added and left empty: `mapFilters` drops it, so
+      // keying the payload off the raw list would post an empty `config`.
+      filters: [{ mode: "include", type: "tags", value: "  " }],
+    });
+
+    expect(payload).not.toHaveProperty("config");
+  });
+
+  it("drops a row whose key was deselected instead of posting an empty key", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      // Clicking the already-selected option in the key select deselects it:
+      // the design system reports an empty selection and the row keeps only its
+      // value. Posting that gives `Unknown filter key ""` — a 400 on the step
+      // 1 → 2 preview and on creation, where the old top-level `filters` shape
+      // was silently discarded instead.
+      filters: [{ mode: "include", type: "", value: "ambiente" }],
+    });
+
+    expect(payload).not.toHaveProperty("config");
+  });
+
+  it("keeps the filters whose key survived alongside a deselected one", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      filters: [
+        { mode: "include", type: "", value: "ambiente" },
+        { mode: "include", type: "organization", value: "dgt" },
+      ],
+    });
+
+    expect(payload.config).toEqual({
+      filters: [{ key: "organization", value: "dgt", type: "include" }],
+    });
+  });
+
+  it("names the include mode when the mode select was deselected too", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      filters: [{ mode: "", type: "tags", value: "ambiente" }],
+    });
+
+    // The backends read anything but "exclude" as an include, so this was never
+    // wrong on the wire — it just left the intent implicit.
+    expect(payload.config).toEqual({
+      filters: [{ key: "tags", value: "ambiente", type: "include" }],
+    });
+  });
+
+  it("sends no config when there are no filters at all", () => {
+    const payload = buildHarvesterCreatePayload({ ...base, filters: [] });
+
+    expect(payload).not.toHaveProperty("config");
+  });
+});

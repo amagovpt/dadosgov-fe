@@ -32,13 +32,26 @@ vi.mock("react-i18next", () => ({
 
 import HarvesterImplementationSection from "../HarvesterImplementationSection";
 
-function backend(id: string, label: string): HarvestBackend {
-  return { id, label, filters: [], features: [], extra_configs: [] };
+type BackendFilter = HarvestBackend["filters"][number];
+
+function filter(label: string, key: string): BackendFilter {
+  return { label, key, type: "string", description: `A ${label.toLowerCase()} name` };
 }
+
+function backend(id: string, label: string, filters: BackendFilter[] = []): HarvestBackend {
+  return { id, label, filters, features: [], extra_configs: [] };
+}
+
+/**
+ * What the CKAN backends declare — note the key is `tags`, not `tag`
+ * (`HarvestFilter(_("Tag"), "tags", …)`). The wizard used to emit `tag`, which
+ * `HarvestConfigField` rejects, so the filter never reached the harvester.
+ */
+const CKAN_FILTERS = [filter("Organization", "organization"), filter("Tag", "tags")];
 
 /** What GET /api/1/harvest/backends/ answers on this deployment. */
 const CATALOGUE: HarvestBackend[] = [
-  backend("ckan", "CKAN"),
+  backend("ckan", "CKAN", CKAN_FILTERS),
   backend("dcat", "DCAT"),
   backend("dgt", "Harvester DGT"),
   backend("apambiente", "Harvester Portal do Ambiente"),
@@ -53,6 +66,7 @@ async function renderSection(props: Partial<React.ComponentProps<typeof Harveste
     root.render(
       <HarvesterImplementationSection
         backends={CATALOGUE}
+        activeBackendFilters={[]}
         typeNoResultsText={ptHarvesters.form.noResults}
         hasNoBackend={false}
         hasTypeError={false}
@@ -142,13 +156,104 @@ describe("HarvesterImplementationSection — campo Tipo", () => {
     expect(container.querySelector('[aria-invalid="true"]')).not.toBeNull();
   });
 
-  it("keeps the CKAN-only filter controls keyed on the selected backend id", async () => {
-    await renderSection({ selectedType: "ckan" });
+  it("shows the filters block for a backend that declares filters, and only then", async () => {
+    await renderSection({ selectedType: "ckan", activeBackendFilters: CKAN_FILTERS });
     expect(container.textContent).toContain(ptHarvesters.form.addFilter);
 
-    // dgt is one of the five types this change restored; it declares no
-    // filters of its own, so the CKAN block must stay hidden for it.
-    await renderSection({ selectedType: "dgt" });
+    // dgt declares no filters of its own, so the block must stay hidden. This
+    // used to be keyed on a hardcoded `selectedType === "ckan" || "ckanpt"`,
+    // which also hid the block for odspt and ogc — both of which do declare
+    // filters the backend accepts.
+    await renderSection({ selectedType: "dgt", activeBackendFilters: [] });
     expect(container.textContent).not.toContain(ptHarvesters.form.addFilter);
+  });
+});
+
+describe("HarvesterImplementationSection — chaves de filtro", () => {
+  /**
+   * LEDG-2311: the filter type select carried two literals, `organization` and
+   * `tag`. The backends declare `tags`, and `HarvestConfigField.pre_validate`
+   * raises `Unknown filter key "tag" for "ckan" backend`, so a "Marcação"
+   * filter created in the wizard could never reach the harvester. The options
+   * now come from the same metadata the edit screen reads.
+   */
+  it("offers the keys the backend declares, so `tags` and never `tag`", async () => {
+    await renderSection({
+      selectedType: "ckan",
+      activeBackendFilters: CKAN_FILTERS,
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+    });
+
+    // The design system does not put the option value in an attribute of its
+    // own; it encodes it in `data-section-option-id` as `<id>-text-<value>`,
+    // which is the only place the key — the part the backend validates — is
+    // observable in the DOM. Asserting on the label instead would pass with the
+    // wrong key, since "Marcação" is what both `tag` and `tags` are labelled.
+    const keys = [...container.querySelectorAll("#filter-type-0 [data-section-option-id]")].map(
+      (node) => node.getAttribute("data-section-option-id")?.replace("filter-type-0-text-", ""),
+    );
+    expect(keys).toContain("tags");
+    expect(keys).not.toContain("tag");
+    expect(keys).toContain("organization");
+  });
+
+  it("labels each key from the metadata label, translated when we know it", async () => {
+    await renderSection({
+      selectedType: "ckan",
+      activeBackendFilters: CKAN_FILTERS,
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+    });
+
+    const text = container.querySelector("#filter-type-0")?.textContent ?? "";
+    expect(text).toContain(ptHarvesters.form.filterLabels.tags);
+    expect(text).toContain(ptHarvesters.form.filterLabels.organization);
+  });
+
+  it("falls back to the backend label for a key we have no translation for", async () => {
+    await renderSection({
+      selectedType: "odspt",
+      activeBackendFilters: [filter("Algo Novo", "somethingNew")],
+      filters: [{ mode: "include", type: "somethingNew", value: "x" }],
+    });
+
+    const text = container.querySelector("#filter-type-0")?.textContent ?? "";
+    expect(text).toContain("Algo Novo");
+    expect(text).not.toContain("form.filterLabels");
+  });
+
+  /**
+   * `/api/1` marshals the filter labels through `get_locale()`, which falls back
+   * to the deployment's `DEFAULT_LANGUAGE`, so the endpoint answers "Etiqueta"
+   * and "Editor" — not "Tag" and "Publisher". Looking the translation up by
+   * label therefore never matched; it is looked up by key.
+   */
+  it("translates by key, so the label the API sends does not decide it", async () => {
+    await renderSection({
+      selectedType: "ckan",
+      activeBackendFilters: [
+        { label: "Etiqueta", key: "tags", type: "string", description: "" },
+        { label: "Organização", key: "organization", type: "string", description: "" },
+      ],
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+    });
+
+    const text = container.querySelector("#filter-type-0")?.textContent ?? "";
+    expect(text).toContain(ptHarvesters.form.filterLabels.tags);
+    expect(text).not.toContain("Etiqueta");
+  });
+
+  it("marks the saved key as selected so a step back does not blank the control", async () => {
+    await renderSection({
+      selectedType: "ckan",
+      activeBackendFilters: CKAN_FILTERS,
+      filters: [{ mode: "exclude", type: "tags", value: "ambiente" }],
+    });
+
+    const selected = container.querySelectorAll(
+      '#filter-type-0 [aria-selected="true"], #filter-type-0 [data-selected="true"]',
+    );
+    expect([...selected].map((node) => node.textContent).join(" ")).toContain(
+      ptHarvesters.form.filterLabels.tags,
+    );
   });
 });

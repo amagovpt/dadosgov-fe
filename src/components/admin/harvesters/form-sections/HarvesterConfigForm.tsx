@@ -17,17 +17,11 @@ import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sect
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
+import { localizeFilterLabel as localizeBackendFilterLabel } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
 import type { HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
 import { getEditHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
-
-const FILTER_KEY_LABELS: Record<string, string> = {
-  Organization: "organization",
-  Tag: "tag",
-  Publisher: "publisher",
-  "Remote ID": "remoteId",
-};
 
 // Schedule ("Planeamento") is a cron expression with exactly 5 fields
 // (minuto hora dia mês dia-da-semana), each field being a number or "*".
@@ -134,10 +128,10 @@ export function HarvesterConfigForm({
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
   const scheduleErrorMessage = t("admin-harvesters:form.scheduleError");
-  const localizeFilterLabel = (label: string) => {
-    const key = FILTER_KEY_LABELS[label];
-    return key ? t(`admin-harvesters:form.filterLabels.${key}`) : label;
-  };
+  const localizeFilterLabel = (filter: { key: string; label: string }) =>
+    localizeBackendFilterLabel(filter, (subkey) =>
+      t(`admin-harvesters:form.filterLabels.${subkey}`),
+    );
 
   // Basic fields (name, description, filters) follow `canEdit`; advanced fields
   // (URL, implementation type, schedule, toggles) follow `canEditAdvanced`,
@@ -304,7 +298,7 @@ export function HarvesterConfigForm({
                                   value={f.key}
                                   selected={filter.type === f.key}
                                 >
-                                  {localizeFilterLabel(f.label)}
+                                  {localizeFilterLabel(f)}
                                 </DropdownOption>
                               ))}
                             </DropdownSection>
