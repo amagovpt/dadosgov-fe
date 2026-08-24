@@ -17,7 +17,7 @@ import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sect
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
-import { localizeFilterLabel as localizeBackendFilterLabel } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
+import { localizeFilterLabel as localizeBackendFilterLabel } from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import type { HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
 import { getEditHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";

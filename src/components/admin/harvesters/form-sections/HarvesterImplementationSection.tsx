@@ -11,7 +11,11 @@ import {
   Switch,
 } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import { localizeFilterLabel } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
+import {
+  localizeExtraConfigLabel,
+  localizeFeatureLabel,
+  localizeFilterLabel,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import type { HarvestBackend } from "@/service/types/harvester";
 
 interface HarvesterFilter {
@@ -30,6 +34,19 @@ interface HarvesterImplementationSectionProps {
    * rejects any key the backend does not declare.
    */
   activeBackendFilters: HarvestBackend["filters"];
+  /**
+   * The features and extra configs the selected backend declares. Like the
+   * filters, both the fields shown and the keys they submit come from here: the
+   * GeoDCAT-AP switch used to be gated on `selectedType === "csw-dcat"`, which
+   * is why the `inspire` feature of the OpenDataSoft PT backend could not be
+   * set through the UI at all.
+   */
+  activeBackendFeatures: HarvestBackend["features"];
+  activeBackendExtraConfigs: HarvestBackend["extra_configs"];
+  featureValues: Record<string, boolean>;
+  extraConfigValues: Record<string, string>;
+  /** The extra configs whose input is revealed, by key. */
+  visibleExtraConfigKeys: string[];
   /** Distinguishes "still loading" from "nothing matches the search". */
   typeNoResultsText: string;
   /** The backends endpoint answered with nothing to offer. */
@@ -38,19 +55,16 @@ interface HarvesterImplementationSectionProps {
   selectedTypeRef: React.RefObject<string>;
   selectedType: string;
   filters: HarvesterFilter[];
-  isGeoDcat: boolean;
-  showRemoteUrlPrefix: boolean;
-  remoteUrlPrefix: string;
   isEnabled: boolean;
   isAutoArchive: boolean;
   onTypeChange: (value: string) => void;
   onAddFilter: () => void;
   onRemoveFilter: (index: number) => void;
   onUpdateFilter: (index: number, field: string, value: string) => void;
-  onToggleGeoDcat: () => void;
-  onShowRemoteUrlPrefix: () => void;
-  onRemoteUrlPrefixChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onClearRemoteUrlPrefix: () => void;
+  onToggleFeature: (key: string) => void;
+  onShowExtraConfig: (key: string) => void;
+  onExtraConfigChange: (key: string, value: string) => void;
+  onClearExtraConfig: (key: string) => void;
   onToggleEnabled: () => void;
   onToggleAutoArchive: () => void;
 }
@@ -58,31 +72,31 @@ interface HarvesterImplementationSectionProps {
 export default function HarvesterImplementationSection({
   backends,
   activeBackendFilters,
+  activeBackendFeatures,
+  activeBackendExtraConfigs,
+  featureValues,
+  extraConfigValues,
+  visibleExtraConfigKeys,
   typeNoResultsText,
   hasNoBackend,
   hasTypeError,
   selectedTypeRef,
   selectedType,
   filters,
-  isGeoDcat,
-  showRemoteUrlPrefix,
-  remoteUrlPrefix,
   isEnabled,
   isAutoArchive,
   onTypeChange,
   onAddFilter,
   onRemoveFilter,
   onUpdateFilter,
-  onToggleGeoDcat,
-  onShowRemoteUrlPrefix,
-  onRemoteUrlPrefixChange,
-  onClearRemoteUrlPrefix,
+  onToggleFeature,
+  onShowExtraConfig,
+  onExtraConfigChange,
+  onClearExtraConfig,
   onToggleEnabled,
   onToggleAutoArchive,
 }: HarvesterImplementationSectionProps) {
   const { t } = useTranslation("admin-harvesters");
-  const supportsRemoteUrlPrefix =
-    selectedType === "csw-dcat" || selectedType === "csw-iso-19139";
 
   return (
     <>
@@ -213,58 +227,69 @@ export default function HarvesterImplementationSection({
           </div>
         )}
 
-        {selectedType === "csw-dcat" && (
-          <Switch label="GeoDCAT-AP" checked={isGeoDcat} onChange={onToggleGeoDcat} />
+        {activeBackendFeatures.length > 0 && (
+          <div className="flex flex-col gap-16">
+            {activeBackendFeatures.map((feature) => (
+              <Switch
+                key={feature.key}
+                label={localizeFeatureLabel(feature, (subkey) => t(`form.featureLabels.${subkey}`))}
+                checked={featureValues[feature.key] ?? feature.default ?? false}
+                onChange={() => onToggleFeature(feature.key)}
+              />
+            ))}
+          </div>
         )}
 
-        {supportsRemoteUrlPrefix && (
-          <>
-            {!showRemoteUrlPrefix ? (
-              <div className="flex justify-start">
+        {activeBackendExtraConfigs.map((extraConfig) => {
+          const label = localizeExtraConfigLabel(extraConfig, (subkey) =>
+            t(`form.extraConfigLabels.${subkey}`),
+          );
+
+          return visibleExtraConfigKeys.includes(extraConfig.key) ? (
+            <div key={extraConfig.key}>
+              <p className="text-base font-medium leading-7 text-primary-900">{label}</p>
+              <div className="mt-8 flex items-center gap-8">
+                <div className="flex-1">
+                  <InputText
+                    label=""
+                    hideLabel
+                    placeholder=""
+                    id={`extra-config-${extraConfig.key}`}
+                    value={extraConfigValues[extraConfig.key] ?? ""}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      onExtraConfigChange(extraConfig.key, event.target.value)
+                    }
+                  />
+                </div>
                 <Button
                   type="button"
-                  appearance="link"
-                  variant="primary"
+                  appearance="outline"
+                  variant="neutral"
                   hasIcon
-                  leadingIcon="agora-line-plus-circle"
-                  leadingIconHover="agora-solid-plus-circle"
-                  onClick={onShowRemoteUrlPrefix}
+                  leadingIcon="agora-line-trash"
+                  leadingIconHover="agora-solid-trash"
+                  onClick={() => onClearExtraConfig(extraConfig.key)}
                 >
-                  {t("form.configureRemoteUrlPrefix")}
+                  {t("actions.delete")}
                 </Button>
               </div>
-            ) : (
-              <div>
-                <p className="text-base font-medium leading-7 text-primary-900">
-                  {t("form.remoteUrlPrefix")}
-                </p>
-                <div className="mt-8 flex items-center gap-8">
-                  <div className="flex-1">
-                    <InputText
-                      label=""
-                      hideLabel
-                      placeholder=""
-                      id="remote-url-prefix"
-                      value={remoteUrlPrefix}
-                      onChange={onRemoteUrlPrefixChange}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    appearance="outline"
-                    variant="neutral"
-                    hasIcon
-                    leadingIcon="agora-line-trash"
-                    leadingIconHover="agora-solid-trash"
-                    onClick={onClearRemoteUrlPrefix}
-                  >
-                    {t("actions.delete")}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
+            </div>
+          ) : (
+            <div key={extraConfig.key} className="flex justify-start">
+              <Button
+                type="button"
+                appearance="link"
+                variant="primary"
+                hasIcon
+                leadingIcon="agora-line-plus-circle"
+                leadingIconHover="agora-solid-plus-circle"
+                onClick={() => onShowExtraConfig(extraConfig.key)}
+              >
+                {`${t("form.configure")} ${label}`}
+              </Button>
+            </div>
+          );
+        })}
 
         {selectedType && (
           <div className="flex gap-48">

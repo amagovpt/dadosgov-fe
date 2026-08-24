@@ -24,7 +24,7 @@ import {
   validateHarvesterDetails,
 } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
-import { selectBackendFilters } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
+import { selectBackendFilters } from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 
 interface UseHarvesterDetailActionsParams {
   source: HarvestSource | null;

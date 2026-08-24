@@ -73,19 +73,21 @@ async function renderSection(props: Partial<React.ComponentProps<typeof Harveste
         selectedTypeRef={{ current: "" }}
         selectedType=""
         filters={[]}
-        isGeoDcat={false}
-        showRemoteUrlPrefix={false}
-        remoteUrlPrefix=""
+        activeBackendFeatures={[]}
+        activeBackendExtraConfigs={[]}
+        featureValues={{}}
+        extraConfigValues={{}}
+        visibleExtraConfigKeys={[]}
         isEnabled
         isAutoArchive
         onTypeChange={() => {}}
         onAddFilter={() => {}}
         onRemoveFilter={() => {}}
         onUpdateFilter={() => {}}
-        onToggleGeoDcat={() => {}}
-        onShowRemoteUrlPrefix={() => {}}
-        onRemoteUrlPrefixChange={() => {}}
-        onClearRemoteUrlPrefix={() => {}}
+        onToggleFeature={() => {}}
+        onShowExtraConfig={() => {}}
+        onExtraConfigChange={() => {}}
+        onClearExtraConfig={() => {}}
         onToggleEnabled={() => {}}
         onToggleAutoArchive={() => {}}
         {...props}
@@ -255,5 +257,88 @@ describe("HarvesterImplementationSection — chaves de filtro", () => {
     expect([...selected].map((node) => node.textContent).join(" ")).toContain(
       ptHarvesters.form.filterLabels.tags,
     );
+  });
+});
+
+/**
+ * LEDG-2316: the GeoDCAT-AP switch was gated on `selectedType === "csw-dcat"`
+ * and the remote-URL-prefix block on a two-id list, so the `inspire` feature of
+ * the OpenDataSoft PT backend had no UI at all. Both now come from the same
+ * metadata the filters do.
+ */
+describe("HarvesterImplementationSection — features e extra configs", () => {
+  const GEODCATAP = { key: "geodcatap", label: "GeoDCAT-AP", description: "", default: false };
+  const INSPIRE = {
+    key: "inspire",
+    label: "Harvest Inspire datasets",
+    description: "",
+    default: false,
+  };
+  const REMOTE_PREFIX = {
+    key: "remote_url_prefix",
+    label: "Prefixo de URL remoto",
+    description: "",
+    default: "",
+  };
+
+  it("renders a switch per declared feature, labelled from our own i18n", async () => {
+    await renderSection({
+      selectedType: "csw-dcat",
+      activeBackendFeatures: [GEODCATAP],
+      featureValues: { geodcatap: false },
+    });
+
+    expect(container.textContent).toContain(ptHarvesters.form.featureLabels.geodcatap);
+  });
+
+  it("renders the feature no backend id ever showed", async () => {
+    await renderSection({
+      selectedType: "odspt",
+      activeBackendFeatures: [INSPIRE],
+      featureValues: { inspire: false },
+    });
+
+    // The pt label is ours: upstream leaves this msgid untranslated, so the API
+    // answers it in English.
+    expect(container.textContent).toContain(ptHarvesters.form.featureLabels.inspire);
+  });
+
+  it("shows nothing when the backend declares no features or extra configs", async () => {
+    await renderSection({ selectedType: "dcat" });
+
+    expect(container.textContent).not.toContain(ptHarvesters.form.featureLabels.geodcatap);
+    expect(container.textContent).not.toContain(ptHarvesters.form.extraConfigLabels.remote_url_prefix);
+  });
+
+  it("offers the extra config behind a reveal link, then its input", async () => {
+    await renderSection({
+      selectedType: "csw-dcat",
+      activeBackendExtraConfigs: [REMOTE_PREFIX],
+      visibleExtraConfigKeys: [],
+    });
+    expect(container.textContent).toContain(ptHarvesters.form.configure);
+    expect(container.querySelector("#extra-config-remote_url_prefix")).toBeNull();
+
+    await renderSection({
+      selectedType: "csw-dcat",
+      activeBackendExtraConfigs: [REMOTE_PREFIX],
+      visibleExtraConfigKeys: ["remote_url_prefix"],
+      extraConfigValues: { remote_url_prefix: "https://exemplo.pt/dados/" },
+    });
+    const input = container.querySelector<HTMLInputElement>("#extra-config-remote_url_prefix");
+    expect(input?.value).toBe("https://exemplo.pt/dados/");
+  });
+
+  it("keys the extra config input on the declared key, not on a fixed id", async () => {
+    // The old markup hardcoded `id="remote-url-prefix"`; a second extra config
+    // would have collided with it.
+    await renderSection({
+      selectedType: "odspt",
+      activeBackendExtraConfigs: [{ key: "other_thing", label: "Outra Coisa", description: "", default: "" }],
+      visibleExtraConfigKeys: ["other_thing"],
+    });
+
+    expect(container.querySelector("#extra-config-other_thing")).not.toBeNull();
+    expect(container.textContent).toContain("Outra Coisa");
   });
 });
