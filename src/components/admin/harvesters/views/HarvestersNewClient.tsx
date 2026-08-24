@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
@@ -23,6 +23,7 @@ import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { selectBackendFilters } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
 import {
   buildHarvesterCreatePayload,
   type HarvesterFormField,
@@ -68,10 +69,19 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors<HarvesterFormField>();
 
+  // The keys the selected backend declares. `HarvestConfigField` rejects any
+  // other key, so seeding a filter with a literal (it used to be "organization")
+  // only works by accident and breaks as soon as a backend declares something
+  // else. The edit screen derives it through the same selector.
+  const activeBackendFilters = useMemo(
+    () => selectBackendFilters(backendOptions.backends, selectedType),
+    [backendOptions.backends, selectedType],
+  );
+
   function addFilter() {
     setFilters((previousFilters) => [
       ...previousFilters,
-      { mode: "include", type: "organization", value: "" },
+      { mode: "include", type: activeBackendFilters[0]?.key ?? "", value: "" },
     ]);
   }
 
@@ -248,6 +258,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
 
                 <HarvesterImplementationSection
                   backends={backendOptions.backends}
+                  activeBackendFilters={activeBackendFilters}
                   typeNoResultsText={backendOptions.noResultsText}
                   hasNoBackend={backendOptions.hasNoBackend}
                   hasTypeError={hasError("harvesterType")}

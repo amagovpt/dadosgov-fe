@@ -87,13 +87,20 @@ function mapFilters(filters: HarvesterFilterValue[], validKeys?: Set<string>) {
   return filters
     .filter(
       (filter) =>
+        // A row with no key is dropped rather than sent: clicking the selected
+        // option in the key select deselects it, leaving `type: ""`, and
+        // `HarvestConfigField` answers 400 `Unknown filter key ""` — which
+        // would block the wizard on the very step this fix is about.
+        filter.type &&
         filter.value.trim() &&
-        (!validKeys || (filter.type && validKeys.has(filter.type))),
+        (!validKeys || validKeys.has(filter.type)),
     )
     .map((filter) => ({
       key: filter.type,
       value: filter.value,
-      type: filter.mode,
+      // The mode select deselects the same way. The backends read anything
+      // other than "exclude" as an include, but say it rather than lean on that.
+      type: filter.mode || "include",
     }));
 }
 
@@ -111,7 +118,12 @@ export function buildHarvesterCreatePayload(
     autoarchive: values.autoarchive,
     ...(values.description.trim() ? { description: values.description } : {}),
     ...(producer && producer !== "user" ? { organization: producer } : {}),
-    ...(values.filters.length > 0 ? { filters } : {}),
+    // Nested under `config`, like the update and preview payloads: the API's
+    // `HarvestSourceForm` has no top-level `filters` field, so WTForms dropped
+    // it in silence and every harvester created here was created unfiltered.
+    // Keyed off the mapped list, not `values.filters`, so a filter with no
+    // value does not send an empty `config`.
+    ...(filters.length > 0 ? { config: { filters } } : {}),
   };
 }
 
@@ -134,7 +146,7 @@ export function buildHarvesterUpdatePayload(
 export function buildHarvesterPreviewPayload(
   values: HarvesterPreviewValues,
 ): HarvestSourceCreatePayload {
-  const filters = mapFilters(values.filters).filter((filter) => filter.key);
+  const filters = mapFilters(values.filters);
 
   return {
     name: values.name.trim() || values.fallbackName,
