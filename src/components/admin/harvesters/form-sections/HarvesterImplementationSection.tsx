@@ -11,6 +11,7 @@ import {
   Switch,
 } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import { localizeFilterLabel } from "@/components/admin/harvesters/form-state/harvesterFilterLabels";
 import type { HarvestBackend } from "@/service/types/harvester";
 
 interface HarvesterFilter {
@@ -22,6 +23,13 @@ interface HarvesterFilter {
 interface HarvesterImplementationSectionProps {
   /** The enabled harvest backends, as returned by the API. */
   backends: HarvestBackend[];
+  /**
+   * The filters the selected backend declares. Both the visibility of the
+   * filters block and the keys its select offers come from here: a hardcoded
+   * list drifts from what the backend accepts, and `HarvestConfigField`
+   * rejects any key the backend does not declare.
+   */
+  activeBackendFilters: { key: string; label: string }[];
   /** Distinguishes "still loading" from "nothing matches the search". */
   typeNoResultsText: string;
   /** The backends endpoint answered with nothing to offer. */
@@ -49,6 +57,7 @@ interface HarvesterImplementationSectionProps {
 
 export default function HarvesterImplementationSection({
   backends,
+  activeBackendFilters,
   typeNoResultsText,
   hasNoBackend,
   hasTypeError,
@@ -72,7 +81,6 @@ export default function HarvesterImplementationSection({
   onToggleAutoArchive,
 }: HarvesterImplementationSectionProps) {
   const { t } = useTranslation("admin-harvesters");
-  const supportsCkanFilters = selectedType === "ckan" || selectedType === "ckanpt";
   const supportsRemoteUrlPrefix =
     selectedType === "csw-dcat" || selectedType === "csw-iso-19139";
 
@@ -111,7 +119,7 @@ export default function HarvesterImplementationSection({
           </IsolatedSelect>
         )}
 
-        {supportsCkanFilters && (
+        {activeBackendFilters.length > 0 && (
           <div>
             <p className="text-base font-medium leading-7 text-primary-900">
               {t("form.filtersTitle")}
@@ -128,6 +136,10 @@ export default function HarvesterImplementationSection({
                     hideLabel
                     placeholder={t("form.filterModeInclude")}
                     id={`filter-mode-${index}`}
+                    // Without it the control falls back to the placeholder when
+                    // the wizard remounts this subtree on a step back, while the
+                    // filter it submits still carries the value held in state.
+                    defaultValue={filter.mode}
                     onChangeCallback={(value) => onUpdateFilter(index, "mode", value)}
                   >
                     <DropdownSection name={`filter-mode-${index}`}>
@@ -142,15 +154,19 @@ export default function HarvesterImplementationSection({
                   <IsolatedSelect
                     label=""
                     hideLabel
-                    placeholder={t("form.filterLabels.organization")}
+                    placeholder={t("form.filterKeyPlaceholder")}
                     id={`filter-type-${index}`}
+                    defaultValue={filter.type}
                     onChangeCallback={(value) => onUpdateFilter(index, "type", value)}
                   >
                     <DropdownSection name={`filter-type-${index}`}>
-                      <DropdownOption value="organization">
-                        {t("form.filterLabels.organization")}
-                      </DropdownOption>
-                      <DropdownOption value="tag">{t("form.filterLabels.tag")}</DropdownOption>
+                      {activeBackendFilters.map((backendFilter) => (
+                        <DropdownOption key={backendFilter.key} value={backendFilter.key}>
+                          {localizeFilterLabel(backendFilter.label, (subkey) =>
+                            t(`form.filterLabels.${subkey}`),
+                          )}
+                        </DropdownOption>
+                      ))}
                     </DropdownSection>
                   </IsolatedSelect>
                 </div>
