@@ -98,3 +98,63 @@ describe("buildHarvesterCreatePayload", () => {
     expect(payload.backend).toBe("apambiente");
   });
 });
+
+/**
+ * LEDG-2311: the creation payload used to put the filters at the top level of
+ * the POST body. `HarvestSourceForm` declares no top-level `filters` field, so
+ * WTForms discarded them without a word and every harvester created through the
+ * wizard was created unfiltered — the update and preview payloads had it right
+ * all along.
+ */
+describe("buildHarvesterCreatePayload — filters", () => {
+  const base = {
+    name: "Catálogo",
+    description: "",
+    url: "https://exemplo.pt/catalogo",
+    producer: "org-dgt",
+    backend: "ckan",
+    active: true,
+    autoarchive: true,
+  };
+
+  it("nests the filters under config, where the API reads them", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      filters: [{ mode: "include", type: "tags", value: "ambiente" }],
+    });
+
+    expect(payload.config).toEqual({
+      filters: [{ key: "tags", value: "ambiente", type: "include" }],
+    });
+    // The shape the backend silently ignored.
+    expect(payload).not.toHaveProperty("filters");
+  });
+
+  it("carries the exclude mode through as the filter type", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      filters: [{ mode: "exclude", type: "organization", value: "dgt" }],
+    });
+
+    expect(payload.config).toEqual({
+      filters: [{ key: "organization", value: "dgt", type: "exclude" }],
+    });
+  });
+
+  it("sends no config when the only filter has no value", () => {
+    const payload = buildHarvesterCreatePayload({
+      ...base,
+      // A filter row the user added and left empty: `mapFilters` drops it, so
+      // keying the payload off the raw list would post an empty `config`.
+      filters: [{ mode: "include", type: "tags", value: "  " }],
+    });
+
+    expect(payload).not.toHaveProperty("config");
+  });
+
+  it("sends no config when there are no filters at all", () => {
+    const payload = buildHarvesterCreatePayload({ ...base, filters: [] });
+
+    expect(payload).not.toHaveProperty("config");
+  });
+});

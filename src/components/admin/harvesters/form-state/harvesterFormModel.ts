@@ -111,7 +111,12 @@ export function buildHarvesterCreatePayload(
     autoarchive: values.autoarchive,
     ...(values.description.trim() ? { description: values.description } : {}),
     ...(producer && producer !== "user" ? { organization: producer } : {}),
-    ...(values.filters.length > 0 ? { filters } : {}),
+    // Nested under `config`, like the update and preview payloads: the API's
+    // `HarvestSourceForm` has no top-level `filters` field, so WTForms dropped
+    // it in silence and every harvester created here was created unfiltered.
+    // Keyed off the mapped list, not `values.filters`, so a filter with no
+    // value does not send an empty `config`.
+    ...(filters.length > 0 ? { config: { filters } } : {}),
   };
 }
 
