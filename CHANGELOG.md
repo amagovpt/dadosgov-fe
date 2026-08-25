@@ -19,6 +19,21 @@ This project has no version tags, so entries are grouped by month (newest first)
     string[]>` shape a Server Component receives, and lists every repeatable
     param in one place — so a filter can no longer be multi-value in the URL and
     single-value on the way to the API. Covered by unit tests on the parser.
+- **fix(datasets): drop `format_family` values the API would reject**
+  - The API declares `format_family` with a closed set of choices and answers 400
+    on anything else, and the listing fetch deliberately has no fallback, so
+    forwarding an unknown value took the whole `/datasets` page to the error
+    boundary — an HTTP 500 from `?format_family=garbage`, from a comma-joined
+    `tabular,documents`, or from the pre-rename `structured`. Any mangled or
+    hand-edited link could trigger it, while every other listing filter degrades
+    to an empty result instead.
+  - Values outside the known families are dropped in the parser, so such URLs
+    render the unfiltered listing. Only params the API constrains with `choices=`
+    are filtered this way: the others accept anything and must stay forwarded,
+    since dropping an unknown value there would silently widen the listing
+    instead of narrowing it. The family list is now shared between the parser and
+    the sidebar, so validation happens against the very list the UI renders.
+
 - **fix(datasets): make the "Outros" format option filter instead of clearing**
   - The "Formato" sidebar group carried its own copy of the backend's format
     lists and expanded a selection into `?format=csv&format=xls&…`. "Outros"
