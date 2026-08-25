@@ -19,6 +19,14 @@ export interface AdvancedFilterGroup {
   minCharsMessage?: string;
   emptyMessage?: string;
   /**
+   * True when the last suggestion request for this group failed. Kept separate
+   * from an empty `data`, because "the search could not run" and "the search
+   * found nothing" must not read the same to the user (LEDG-2326).
+   */
+  hasError?: boolean;
+  /** Overrides the default error message, in the shape of `emptyMessage`. */
+  errorMessage?: string;
+  /**
    * Display labels for selected ids (`suggest` groups only). Lets a selected
    * item keep its human-readable name once it drops out of the live
    * suggestions list (e.g. after clearing the search input).
@@ -137,6 +145,19 @@ export function AdvancedFiltersSidebar({
                       {group.minCharsMessage || t("search.minCharsMessage")}
                     </p>
                   )
+                ) : group.hasError ? (
+                  <div className="flex flex-col items-start gap-2">
+                    <p className="text-sm text-danger-700" role="status">
+                      {group.errorMessage || t("search.error")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => onSearchChange(group.name, searchQuery)}
+                      className="text-xs cursor-pointer text-primary-500 underline hover:text-primary-700"
+                    >
+                      {t("search.retry")}
+                    </button>
+                  </div>
                 ) : (
                   <p className="text-sm text-neutral-500">
                     {group.emptyMessage || t("search.noResults")}

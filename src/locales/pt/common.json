@@ -149,7 +149,9 @@
       "searchIn": "Pesquisar “{{query}}” em {{type}}"
     },
     "noResultsFor": "Nenhum resultado encontrado para \"{{query}}\"",
-    "tryDifferentTerms": "Tente pesquisar com termos diferentes."
+    "tryDifferentTerms": "Tente pesquisar com termos diferentes.",
+    "error": "Não foi possível concluir a pesquisa.",
+    "retry": "Tentar novamente"
   },
   "filters": {
     "format": {
