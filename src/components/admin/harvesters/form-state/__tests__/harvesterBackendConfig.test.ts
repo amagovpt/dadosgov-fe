@@ -152,6 +152,13 @@ describe("localizeFeatureLabel / localizeExtraConfigLabel", () => {
     expect(
       localizeExtraConfigLabel(extraConfig("remote_url_prefix", "Prefixo"), translate),
     ).toBe("traduzido:remote_url_prefix");
+    // LEDG-2319: the ckanpt config the source description used to carry.
+    expect(localizeExtraConfigLabel(extraConfig("geozones", "Geozones"), translate)).toBe(
+      "traduzido:geozones",
+    );
+    expect(localizeExtraConfigLabel(extraConfig("license", "License"), translate)).toBe(
+      "traduzido:license",
+    );
   });
 
   it("falls back to the API label for a key we carry no translation for", () => {

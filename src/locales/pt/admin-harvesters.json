@@ -153,7 +153,9 @@
       "inspire": "Importar conjuntos de dados Inspire"
     },
     "extraConfigLabels": {
-      "remote_url_prefix": "Prefixo de URL remoto"
+      "remote_url_prefix": "Prefixo de URL remoto",
+      "geozones": "Zonas geográficas",
+      "license": "Licença por omissão"
     },
     "configure": "Configurar"
   },

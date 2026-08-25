@@ -153,7 +153,9 @@
       "inspire": "Harvest Inspire datasets"
     },
     "extraConfigLabels": {
-      "remote_url_prefix": "Remote URL prefix"
+      "remote_url_prefix": "Remote URL prefix",
+      "geozones": "Geozones",
+      "license": "Default license"
     },
     "configure": "Configure"
   },

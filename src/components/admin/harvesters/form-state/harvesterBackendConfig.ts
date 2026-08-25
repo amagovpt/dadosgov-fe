@@ -34,7 +34,7 @@ export function localizeFilterLabel(
 const TRANSLATED_FEATURE_KEYS = new Set(["geodcatap", "inspire"]);
 
 /** The extra configs we carry a translation for, under `form.extraConfigLabels`. */
-const TRANSLATED_EXTRA_CONFIG_KEYS = new Set(["remote_url_prefix"]);
+const TRANSLATED_EXTRA_CONFIG_KEYS = new Set(["remote_url_prefix", "geozones", "license"]);
 
 /** Same key-not-label lookup as `localizeFilterLabel`, for a backend feature. */
 export function localizeFeatureLabel(
