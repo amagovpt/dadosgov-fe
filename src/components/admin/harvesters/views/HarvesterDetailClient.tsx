@@ -300,6 +300,21 @@ export default function HarvesterDetailClient({
     <AdminLayout breadcrumbItems={breadcrumbItems}
       title={source.name}
     >
+      {saveError && (
+        <div className="mb-16">
+          <StatusCard variant="danger" showIcon description={saveError} />
+        </div>
+      )}
+      {saveSuccess && (
+        <div className="mb-16">
+          <StatusCard
+            variant="success"
+            showIcon
+            description={t("admin-harvesters:form.saveSuccess")}
+          />
+        </div>
+      )}
+
       {/* Metadata info */}
       <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-24">
         <div className="flex items-center gap-8">
@@ -462,8 +477,6 @@ export default function HarvesterDetailClient({
               updateFilter={updateFilter}
               setHarvesterSchedule={setHarvesterSchedule}
               isSaving={isSaving}
-              saveSuccess={saveSuccess}
-              saveError={saveError}
               onSave={handleSaveHarvester}
               isPreviewing={isPreviewing}
               previewJob={previewJob}
