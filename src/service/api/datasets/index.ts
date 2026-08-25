@@ -134,8 +134,6 @@ export async function fetchDatasets(
     if (filters) {
       if (filters.q) params.set("q", filters.q);
       if (filters.schema) params.set("schema", filters.schema);
-      if (filters.geozone) params.set("geozone", filters.geozone);
-      if (filters.granularity) params.set("granularity", filters.granularity);
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.owner) params.set("owner", filters.owner);
@@ -144,6 +142,9 @@ export async function fetchDatasets(
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
+        ["geozone", filters.geozone],
+        ["granularity", filters.granularity],
+        ["format_family", filters.format_family],
         ["license", filters.license],
         ["format", filters.format],
         ["frequency", filters.frequency],
@@ -203,8 +204,6 @@ export async function fetchAdminDatasets(
     if (filters) {
       if (filters.q) params.set("q", filters.q);
       if (filters.schema) params.set("schema", filters.schema);
-      if (filters.geozone) params.set("geozone", filters.geozone);
-      if (filters.granularity) params.set("granularity", filters.granularity);
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.private !== undefined) params.set("private", String(filters.private));
@@ -213,6 +212,9 @@ export async function fetchAdminDatasets(
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
+        ["geozone", filters.geozone],
+        ["granularity", filters.granularity],
+        ["format_family", filters.format_family],
         ["license", filters.license],
         ["format", filters.format],
         ["frequency", filters.frequency],
@@ -640,8 +642,6 @@ export async function fetchDatasetsListing(
   if (filters) {
     if (filters.q) params.set("q", filters.q);
     if (filters.schema) params.set("schema", filters.schema);
-    if (filters.geozone) params.set("geozone", filters.geozone);
-    if (filters.granularity) params.set("granularity", filters.granularity);
     if (filters.sort) params.set("sort", filters.sort);
     if (filters.featured !== undefined) params.set("featured", String(filters.featured));
     if (filters.owner) params.set("owner", filters.owner);
@@ -650,6 +650,9 @@ export async function fetchDatasetsListing(
 
     const arrayParams: [string, string | string[] | undefined][] = [
       ["tag", filters.tag],
+      ["geozone", filters.geozone],
+      ["granularity", filters.granularity],
+      ["format_family", filters.format_family],
       ["license", filters.license],
       ["format", filters.format],
       ["frequency", filters.frequency],

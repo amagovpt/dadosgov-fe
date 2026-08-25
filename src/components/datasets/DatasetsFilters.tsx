@@ -22,6 +22,7 @@ import {
   uniqueStrings,
   writeQueryParamValues,
 } from "@/utils/filterUtils";
+import { DATASET_FORMAT_FAMILIES } from "@/utils/datasetsListingQuery";
 import { useTranslation } from "react-i18next";
 
 interface FilterOption {
@@ -29,11 +30,23 @@ interface FilterOption {
   name: string;
 }
 
-const FORMAT_GROUP_MAP: Record<string, string[]> = {
-  tabular: ["csv", "xls", "xlsx", "ods", "parquet", "tsv"],
-  structured: ["json", "rdf", "xml", "sql", "ndjson", "jsonl"],
-  geographic: ["geojson", "shp", "kml", "kmz", "gpx", "wfs", "wms"],
-  documents: ["pdf", "doc", "docx", "md", "txt", "odt", "rtf"],
+// The "Formato" group filters on the backend's format families
+// (`?format_family=`) rather than on lists of extensions. It used to hold a local
+// copy of those lists and expand a selection into `?format=csv&format=xls&...`,
+// which "Outros" cannot be written as — it is the complement of the other
+// families — so that option wrote no filter and behaved exactly like "Todos".
+// The family names now come from DATASET_FORMAT_FAMILIES, shared with the query
+// parser, and the sidebar count (`formato_<family>`) is computed from the very
+// same query the filter applies.
+//
+// Example extensions per option, purely illustrative: the backend decides what
+// actually belongs to a family.
+const FORMAT_FAMILY_EXAMPLES: Record<string, string | undefined> = {
+  tabular: "csv, xls, xlsx, ods, parquet...",
+  machine_readable: "JSON, RDF, XML, SQL...",
+  geographical: "geojson, shp, kml...",
+  documents: "pdf, doc, docx, md, txt, ...",
+  other: undefined,
 };
 
 // "Tipo de dados" options, mapped to the query param each one filters on. The
@@ -87,14 +100,11 @@ function detectAtualizacaoFromParams(params: URLSearchParams): string {
 }
 
 function detectFormatoFromParams(params: URLSearchParams): string {
-  const formats = params.getAll("format");
-  if (formats.length === 0) return "all";
-  for (const [groupId, groupFormats] of Object.entries(FORMAT_GROUP_MAP)) {
-    if (formats.length > 0 && formats.every((f) => groupFormats.includes(f.toLowerCase()))) {
-      return groupId;
-    }
-  }
-  return "other";
+  const selected = params.getAll("format_family");
+  // The group is single-select, so it only ever writes one value. A URL carrying
+  // several (hand-edited, or a link from elsewhere) resolves to the first option
+  // in display order, which is the one the group will show as active.
+  return DATASET_FORMAT_FAMILIES.find((family) => selected.includes(family)) ?? "all";
 }
 
 function detectRotuloFromParams(params: URLSearchParams): string {
@@ -132,31 +142,11 @@ export const DatasetsFilters = ({
         title: tds("filters.format.label"),
         options: [
           { id: "all", label: t("filters.all"), description: undefined as string | undefined },
-          {
-            id: "tabular",
-            label: tds("filters.format.options.tabular"),
-            description: "csv, xls, xlsx, ods, parquet...",
-          },
-          {
-            id: "structured",
-            label: tds("filters.format.options.structured"),
-            description: "JSON, RDF, XML, SQL...",
-          },
-          {
-            id: "geographic",
-            label: tds("filters.format.options.geographic"),
-            description: "geojson, shp, kml...",
-          },
-          {
-            id: "documents",
-            label: tds("filters.format.options.documents"),
-            description: "pdf, doc, docx, md, txt, ...",
-          },
-          {
-            id: "other",
-            label: tds("filters.format.options.other"),
-            description: undefined as string | undefined,
-          },
+          ...DATASET_FORMAT_FAMILIES.map((family) => ({
+            id: family as string,
+            label: tds(`filters.format.options.${family}`),
+            description: FORMAT_FAMILY_EXAMPLES[family],
+          })),
         ],
       },
       atualizacao: {
@@ -266,10 +256,12 @@ export const DatasetsFilters = ({
       const current = getWorkingParams();
 
       if (filterKey === "formato") {
-        current.delete("format");
-        if (optionId !== "all" && optionId !== "other") {
-          const formats = FORMAT_GROUP_MAP[optionId];
-          if (formats) formats.forEach((format) => current.append("format", format));
+        // Owns `format_family` only. Individual formats picked in the advanced
+        // filters live in `format` and survive switching option — the two compose
+        // as an AND on the backend.
+        current.delete("format_family");
+        if (optionId !== "all") {
+          current.set("format_family", optionId);
         }
       } else if (filterKey === "atualizacao") {
         current.delete("modified_since");

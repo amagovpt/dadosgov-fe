@@ -31,8 +31,8 @@
       "options": {
         "all": "All",
         "tabular": "Tabular",
-        "structured": "Structured",
-        "geographic": "Geographic",
+        "machine_readable": "Structured",
+        "geographical": "Geographic",
         "documents": "Documents",
         "other": "Other"
       }
