@@ -220,7 +220,6 @@ export function HarvesterConfigForm({
             hasHarvesterNameError={!!formErrors.harvesterName}
             hasHarvesterUrlError={!!formErrors.harvesterUrl}
             namePlaceholder=""
-            descriptionLabel={t("admin-harvesters:fields.descriptionRequired")}
             descriptionPlaceholder=""
             urlPlaceholder=""
             nameDisabled={basicDisabled}

@@ -169,7 +169,6 @@
     "producerNoEligibleOrg": "Um harvester só pode ser criado em nome de uma organização de que seja administrador. A sua conta não administra nenhuma organização.",
     "producerCreateOrganization": "Criar uma organização",
     "description": "Descrição",
-    "descriptionRequired": "Descrição *",
     "name": "Nome *",
     "namePlaceholder": "Insira o nome aqui",
     "descriptionPlaceholder": "Insira a descrição aqui",
