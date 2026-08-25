@@ -19,6 +19,11 @@ This project has no version tags, so entries are grouped by month (newest first)
     inherit the bug. The three fields that really are mandatory - a dataset's
     title, a reuse's name and its URL, all `required` in the API - now say so
     explicitly; a dataset's acronym and the harvester schedule stop claiming it.
+  - The harvester edit screen is the one admin form without `noValidate`, which
+    is why it was the only place the default actually blocked a submit instead of
+    just drawing a marker. Every control on that form now states whether it is
+    required, so the filter value - which is not an `IsolatedInput` and could
+    block the same way once a filter was added - stops relying on the default too.
   - This is the cause behind the hand-written asterisk removed from the
     harvester description: that label was compensating for the same default.
 

@@ -248,6 +248,7 @@ export function HarvesterConfigForm({
               placeholder=""
               id="harvester-type"
               defaultValue={selectedBackend}
+              required
               disabled={advancedDisabled}
               searchable
               searchInputPlaceholder={t("admin-harvesters:form.searchInputPlaceholder")}
@@ -280,6 +281,7 @@ export function HarvesterConfigForm({
                             label={t("admin-harvesters:form.filterModeField")}
                             placeholder=""
                             id={`filter-mode-${index}`}
+                            required={false}
                             defaultValue={filter.mode}
                             disabled={basicDisabled}
                             onChange={(opts) => {
@@ -301,6 +303,7 @@ export function HarvesterConfigForm({
                             label={t("admin-harvesters:form.filterKeyField")}
                             placeholder={t("admin-harvesters:form.filterKeyPlaceholder")}
                             id={`filter-type-${index}`}
+                            required={false}
                             defaultValue={filter.type}
                             disabled={basicDisabled}
                             onChange={(opts) => {
@@ -321,6 +324,12 @@ export function HarvesterConfigForm({
                             </DropdownSection>
                           </InputSelect>
                         </div>
+                        {/*
+                          Every control here says whether it is required rather
+                          than inheriting Agora's default of `true`. This is the
+                          one admin form without `noValidate`, so a filter added
+                          and left empty blocked saving the whole harvester.
+                        */}
                         <div className="mt-8 flex items-center gap-8">
                           <div className="flex-1">
                             <InputText
@@ -330,6 +339,7 @@ export function HarvesterConfigForm({
                               placeholder=""
                               id={`filter-value-${index}`}
                               defaultValue={filter.value}
+                              required={false}
                               disabled={basicDisabled}
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 updateFilter(index, "value", e.target.value)
