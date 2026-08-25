@@ -170,8 +170,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         setResourceTypes(resTypes);
 
         suggestSpatialZones("", 20).then((results) => {
-          spatialZoneSearchRef.current = results;
-          setSpatialZoneSearch(results);
+          spatialZoneSearchRef.current = results ?? [];
+          setSpatialZoneSearch(results ?? []);
         });
 
         if (ds.spatial?.zones?.length) {
@@ -643,8 +643,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                   }
                   suggestSpatialZones(q, 50)
                     .then((results) => {
-                      spatialZoneSearchRef.current = results;
-                      setSpatialZoneSearch(results);
+                      spatialZoneSearchRef.current = results ?? [];
+                      setSpatialZoneSearch(results ?? []);
                     })
                     .catch(() => {
                       spatialZoneSearchRef.current = [];

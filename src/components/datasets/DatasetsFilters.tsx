@@ -302,7 +302,7 @@ export const DatasetsFilters = ({
       return;
     }
     try {
-      const results = await suggestTags(query);
+      const results = (await suggestTags(query)) ?? [];
       setTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
     } catch {
       setTagOptions([]);
@@ -315,7 +315,7 @@ export const DatasetsFilters = ({
       return;
     }
     try {
-      const results = await suggestFormats(query);
+      const results = (await suggestFormats(query)) ?? [];
       setFormatOptions(results.map((format) => ({ id: format.text, name: format.text })));
     } catch {
       setFormatOptions([]);
@@ -328,7 +328,7 @@ export const DatasetsFilters = ({
       return;
     }
     try {
-      const results = await suggestSpatialZones(query);
+      const results = (await suggestSpatialZones(query)) ?? [];
       setZoneOptions(results.map((zone) => ({ id: zone.id, name: zone.name })));
       setZoneLabels((prev) => {
         const next = { ...prev };
