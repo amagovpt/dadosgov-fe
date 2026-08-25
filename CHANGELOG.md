@@ -16,6 +16,9 @@ This project has no version tags, so entries are grouped by month (newest first)
     harvester's default license and geographic zones are ordinary harvest
     settings now, so the generic settings section renders them like any other and
     they get Portuguese labels instead of the English ones the API sends.
+  - Those settings also show the explanation the API sends with them, which no
+    harvester screen rendered before. It matters here because the geographic zones
+    are typed as one comma-separated value, and nothing in the form said so.
 
 - **fix(admin-harvesters): keep the GeoDCAT-AP and remote URL prefix settings**
   - The creation wizard collected the GeoDCAT-AP switch and the "Remote URL
