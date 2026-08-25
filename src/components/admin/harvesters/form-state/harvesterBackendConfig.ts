@@ -34,7 +34,7 @@ export function localizeFilterLabel(
 const TRANSLATED_FEATURE_KEYS = new Set(["geodcatap", "inspire"]);
 
 /** The extra configs we carry a translation for, under `form.extraConfigLabels`. */
-const TRANSLATED_EXTRA_CONFIG_KEYS = new Set(["remote_url_prefix"]);
+const TRANSLATED_EXTRA_CONFIG_KEYS = new Set(["remote_url_prefix", "geozones", "license"]);
 
 /** Same key-not-label lookup as `localizeFilterLabel`, for a backend feature. */
 export function localizeFeatureLabel(
@@ -52,6 +52,23 @@ export function localizeExtraConfigLabel(
   return TRANSLATED_EXTRA_CONFIG_KEYS.has(extraConfig.key)
     ? translate(extraConfig.key)
     : extraConfig.label;
+}
+
+/**
+ * The help text for an extra config, translated by key where we carry one.
+ *
+ * The API sends a description explaining the expected format - for `geozones`,
+ * that the identifiers are comma-separated - and neither harvester screen used to
+ * render it, so the format was only discoverable by reading the backend. Falls
+ * back to the API text for a key we carry no translation for.
+ */
+export function localizeExtraConfigHelp(
+  extraConfig: { key: string; description?: string | null },
+  translate: (subkey: string) => string,
+): string {
+  return TRANSLATED_EXTRA_CONFIG_KEYS.has(extraConfig.key)
+    ? translate(extraConfig.key)
+    : (extraConfig.description ?? "");
 }
 
 /**
