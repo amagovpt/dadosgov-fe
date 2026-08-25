@@ -1573,6 +1573,7 @@ border-left: none !important;
   overflow: hidden;
   flex: 1;
   justify-content: flex-start;
+  padding-top: 16px;
 }
 
 .admin-sidebar-nav__group-label-text {
