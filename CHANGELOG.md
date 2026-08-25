@@ -6,6 +6,20 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(admin-harvesters): the harvester description is no longer marked as required**
+  - The edit screen labelled it "Descrição *" while the creation screen labelled
+    it "Descrição", nothing in either screen validated it, and the backend calls
+    it optional details about the harvester. The asterisk and the translation key
+    that carried it are gone, along with the label override prop that existed
+    only for them, so both screens agree with each other and with the API.
+  - The backend stopped reading that field as a configuration blob: the CKAN PT
+    harvester's default license and geographic zones are ordinary harvest
+    settings now, so the generic settings section renders them like any other and
+    they get Portuguese labels instead of the English ones the API sends.
+  - Those settings also show the explanation the API sends with them, which no
+    harvester screen rendered before. It matters here because the geographic zones
+    are typed as one comma-separated value, and nothing in the form said so.
+
 - **fix(admin-harvesters): keep the GeoDCAT-AP and remote URL prefix settings**
   - The creation wizard collected the GeoDCAT-AP switch and the "Remote URL
     prefix" field and submitted neither. Both are real harvest config, read when

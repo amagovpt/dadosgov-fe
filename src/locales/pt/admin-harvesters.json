@@ -153,9 +153,16 @@
       "inspire": "Importar conjuntos de dados Inspire"
     },
     "extraConfigLabels": {
-      "remote_url_prefix": "Prefixo de URL remoto"
+      "remote_url_prefix": "Prefixo de URL remoto",
+      "geozones": "Zonas geográficas",
+      "license": "Licença por omissão"
     },
-    "configure": "Configurar"
+    "configure": "Configurar",
+    "extraConfigHelp": {
+      "remote_url_prefix": "Prefixo usado para construir o URL remoto dos itens colhidos.",
+      "geozones": "Identificadores de GeoZone separados por vírgula, por exemplo pt:concelho:1106",
+      "license": "Identificador da licença a usar quando a licença remota não é reconhecida, por exemplo cc-by"
+    }
   },
   "fields": {
     "producer": "Produtor",
@@ -169,7 +176,6 @@
     "producerNoEligibleOrg": "Um harvester só pode ser criado em nome de uma organização de que seja administrador. A sua conta não administra nenhuma organização.",
     "producerCreateOrganization": "Criar uma organização",
     "description": "Descrição",
-    "descriptionRequired": "Descrição *",
     "name": "Nome *",
     "namePlaceholder": "Insira o nome aqui",
     "descriptionPlaceholder": "Insira a descrição aqui",

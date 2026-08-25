@@ -18,6 +18,7 @@ import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
 import {
+  localizeExtraConfigHelp as localizeBackendExtraConfigHelp,
   localizeExtraConfigLabel as localizeBackendExtraConfigLabel,
   localizeFeatureLabel as localizeBackendFeatureLabel,
   localizeFilterLabel as localizeBackendFilterLabel,
@@ -220,7 +221,6 @@ export function HarvesterConfigForm({
             hasHarvesterNameError={!!formErrors.harvesterName}
             hasHarvesterUrlError={!!formErrors.harvesterUrl}
             namePlaceholder=""
-            descriptionLabel={t("admin-harvesters:fields.descriptionRequired")}
             descriptionPlaceholder=""
             urlPlaceholder=""
             nameDisabled={basicDisabled}
@@ -430,7 +430,9 @@ export function HarvesterConfigForm({
                 label={localizeBackendExtraConfigLabel(extraConfig, (subkey) =>
                   t(`admin-harvesters:form.extraConfigLabels.${subkey}`),
                 )}
-                placeholder=""
+                placeholder={localizeBackendExtraConfigHelp(extraConfig, (subkey) =>
+                  t(`admin-harvesters:form.extraConfigHelp.${subkey}`),
+                )}
                 id={`extra-config-${extraConfig.key}`}
                 defaultValue={extraConfigValues[extraConfig.key] ?? ""}
                 disabled={advancedDisabled}
