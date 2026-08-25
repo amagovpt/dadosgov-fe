@@ -157,7 +157,12 @@
       "geozones": "Geozones",
       "license": "Default license"
     },
-    "configure": "Configure"
+    "configure": "Configure",
+    "extraConfigHelp": {
+      "remote_url_prefix": "A prefix used to build the remote URL of the harvested items.",
+      "geozones": "Comma-separated GeoZone identifiers, e.g. pt:concelho:1106",
+      "license": "Identifier of the license to fall back on, e.g. cc-by"
+    }
   },
   "fields": {
     "producer": "Producer",

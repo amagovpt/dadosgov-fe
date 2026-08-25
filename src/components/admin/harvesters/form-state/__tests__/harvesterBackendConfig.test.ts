@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import type { HarvestBackend } from "@/service/types/harvester";
 import {
   keepDeclaredKeys,
+  localizeExtraConfigHelp,
   localizeExtraConfigLabel,
   localizeFeatureLabel,
   localizeFilterLabel,
@@ -166,6 +167,21 @@ describe("localizeFeatureLabel / localizeExtraConfigLabel", () => {
     expect(localizeExtraConfigLabel(extraConfig("brandNew", "Algo Novo"), translate)).toBe(
       "Algo Novo",
     );
+  });
+
+  /**
+   * LEDG-2319: the API sends a description saying `geozones` is comma-separated,
+   * and neither screen rendered it, so the format was only discoverable by reading
+   * the backend.
+   */
+  it("localizes the help text by key, and falls back to the API description", () => {
+    expect(localizeExtraConfigHelp({ key: "geozones", description: "csv" }, translate)).toBe(
+      "traduzido:geozones",
+    );
+    expect(
+      localizeExtraConfigHelp({ key: "brandNew", description: "Explicação da API" }, translate),
+    ).toBe("Explicação da API");
+    expect(localizeExtraConfigHelp({ key: "brandNew" }, translate)).toBe("");
   });
 });
 

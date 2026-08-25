@@ -12,6 +12,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import {
+  localizeExtraConfigHelp,
   localizeExtraConfigLabel,
   localizeFeatureLabel,
   localizeFilterLabel,
@@ -253,7 +254,9 @@ export default function HarvesterImplementationSection({
                   <InputText
                     label=""
                     hideLabel
-                    placeholder=""
+                    placeholder={localizeExtraConfigHelp(extraConfig, (subkey) =>
+                      t(`form.extraConfigHelp.${subkey}`),
+                    )}
                     id={`extra-config-${extraConfig.key}`}
                     value={extraConfigValues[extraConfig.key] ?? ""}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>

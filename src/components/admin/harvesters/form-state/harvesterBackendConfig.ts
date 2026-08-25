@@ -55,6 +55,23 @@ export function localizeExtraConfigLabel(
 }
 
 /**
+ * The help text for an extra config, translated by key where we carry one.
+ *
+ * The API sends a description explaining the expected format - for `geozones`,
+ * that the identifiers are comma-separated - and neither harvester screen used to
+ * render it, so the format was only discoverable by reading the backend. Falls
+ * back to the API text for a key we carry no translation for.
+ */
+export function localizeExtraConfigHelp(
+  extraConfig: { key: string; description?: string | null },
+  translate: (subkey: string) => string,
+): string {
+  return TRANSLATED_EXTRA_CONFIG_KEYS.has(extraConfig.key)
+    ? translate(extraConfig.key)
+    : (extraConfig.description ?? "");
+}
+
+/**
  * The filters the given backend declares. Both harvester screens derive the
  * filter key options and the visibility of their filters block from this: a
  * hardcoded list drifts from what the API accepts, and `HarvestConfigField`

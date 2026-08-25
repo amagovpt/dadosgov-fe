@@ -157,7 +157,12 @@
       "geozones": "Zonas geográficas",
       "license": "Licença por omissão"
     },
-    "configure": "Configurar"
+    "configure": "Configurar",
+    "extraConfigHelp": {
+      "remote_url_prefix": "Prefixo usado para construir o URL remoto dos itens colhidos.",
+      "geozones": "Identificadores de GeoZone separados por vírgula, por exemplo pt:concelho:1106",
+      "license": "Identificador da licença a usar quando a licença remota não é reconhecida, por exemplo cc-by"
+    }
   },
   "fields": {
     "producer": "Produtor",
