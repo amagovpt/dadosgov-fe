@@ -128,8 +128,6 @@
     "autoArchive": "Automatic archiving",
     "autoArchiveShort": "Automatic archive",
     "advancedTitle": "Advanced",
-    "configureRemoteUrlPrefix": "Configure remote URL prefix",
-    "remoteUrlPrefix": "Remote URL prefix",
     "schedulePlaceholder": "Mask: * * * * * (example: 0 12 * * *)",
     "scheduleError": "The schedule must have exactly 5 space-separated fields, each field being a number or * (minute hour day-of-month month day-of-week).",
     "saveSuccess": "Saved successfully.",
@@ -147,8 +145,17 @@
     "saveError": "Error saving ({{status}}) — {{message}}",
     "filterLabels": {
       "organization": "Organization",
-      "tag": "Tag"
-    }
+      "tags": "Tag",
+      "publisher": "Publisher"
+    },
+    "featureLabels": {
+      "geodcatap": "GeoDCAT-AP",
+      "inspire": "Harvest Inspire datasets"
+    },
+    "extraConfigLabels": {
+      "remote_url_prefix": "Remote URL prefix"
+    },
+    "configure": "Configure"
   },
   "fields": {
     "producer": "Producer",

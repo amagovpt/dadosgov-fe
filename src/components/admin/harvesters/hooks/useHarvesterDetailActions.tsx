@@ -24,6 +24,12 @@ import {
   validateHarvesterDetails,
 } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
+import {
+  keepDeclaredKeys,
+  selectBackendExtraConfigs,
+  selectBackendFeatures,
+  selectBackendFilters,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 
 interface UseHarvesterDetailActionsParams {
   source: HarvestSource | null;
@@ -35,6 +41,9 @@ interface UseHarvesterDetailActionsParams {
   isEnabled: boolean;
   isAutoArchive: boolean;
   filters: { type: string; value: string; mode: string }[];
+  /** The flags and values of the features/extra configs the backend declares. */
+  featureValues: Record<string, boolean>;
+  extraConfigValues: Record<string, string>;
   harvesterSchedule: string;
   setSource: React.Dispatch<React.SetStateAction<HarvestSource | null>>;
   setFilters: React.Dispatch<
@@ -67,6 +76,8 @@ export function useHarvesterDetailActions({
   isEnabled,
   isAutoArchive,
   filters,
+  featureValues,
+  extraConfigValues,
   harvesterSchedule,
   setSource,
   setFilters,
@@ -84,7 +95,15 @@ export function useHarvesterDetailActions({
 }: UseHarvesterDetailActionsParams) {
   const { t } = useTranslation("admin-harvesters");
   const activeBackendFilters = useMemo(
-    () => backends.find((backend) => backend.id === selectedBackend)?.filters ?? [],
+    () => selectBackendFilters(backends, selectedBackend),
+    [backends, selectedBackend],
+  );
+  const activeBackendFeatures = useMemo(
+    () => selectBackendFeatures(backends, selectedBackend),
+    [backends, selectedBackend],
+  );
+  const activeBackendExtraConfigs = useMemo(
+    () => selectBackendExtraConfigs(backends, selectedBackend),
     [backends, selectedBackend],
   );
 
@@ -150,6 +169,11 @@ export function useHarvesterDetailActions({
             autoarchive: isAutoArchive,
             filters,
             activeFilterKeys: [...validKeys],
+            // What the form holds, seeded from the stored config and pruned to
+            // the keys this backend declares.
+            features: keepDeclaredKeys(featureValues, activeBackendFeatures),
+            extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
+            storedConfig: source.config ?? {},
           }),
         ),
         newSchedule && newSchedule !== oldSchedule
@@ -193,6 +217,9 @@ export function useHarvesterDetailActions({
           active: isEnabled,
           autoarchive: isAutoArchive,
           filters,
+          features: keepDeclaredKeys(featureValues, activeBackendFeatures),
+          extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
+          storedConfig: source.config ?? {},
         }),
       );
       setPreviewJob(job);
@@ -245,6 +272,8 @@ export function useHarvesterDetailActions({
 
   return {
     activeBackendFilters,
+    activeBackendFeatures,
+    activeBackendExtraConfigs,
     addFilter,
     handleApproveSource,
     handleDeleteHarvester,

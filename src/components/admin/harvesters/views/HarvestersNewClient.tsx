@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
@@ -23,6 +23,13 @@ import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import {
+  seedFeatureValues,
+  toggleFeatureValue,
+  selectBackendExtraConfigs,
+  selectBackendFeatures,
+  selectBackendFilters,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import {
   buildHarvesterCreatePayload,
   type HarvesterFormField,
@@ -50,9 +57,9 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ mode: string; type: string; value: string }[]>([]);
   const [selectedType, setSelectedType] = useState("");
-  const [isGeoDcat, setIsGeoDcat] = useState(false);
-  const [showRemoteUrlPrefix, setShowRemoteUrlPrefix] = useState(false);
-  const [remoteUrlPrefix, setRemoteUrlPrefix] = useState("");
+  const [featureValues, setFeatureValues] = useState<Record<string, boolean>>({});
+  const [extraConfigValues, setExtraConfigValues] = useState<Record<string, string>>({});
+  const [visibleExtraConfigKeys, setVisibleExtraConfigKeys] = useState<string[]>([]);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewJob, setPreviewJob] = useState<HarvestPreviewJob | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -68,10 +75,27 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors<HarvesterFormField>();
 
+  // The keys the selected backend declares. `HarvestConfigField` rejects any
+  // other key, so seeding a filter with a literal (it used to be "organization")
+  // only works by accident and breaks as soon as a backend declares something
+  // else. The edit screen derives it through the same selector.
+  const activeBackendFilters = useMemo(
+    () => selectBackendFilters(backendOptions.backends, selectedType),
+    [backendOptions.backends, selectedType],
+  );
+  const activeBackendFeatures = useMemo(
+    () => selectBackendFeatures(backendOptions.backends, selectedType),
+    [backendOptions.backends, selectedType],
+  );
+  const activeBackendExtraConfigs = useMemo(
+    () => selectBackendExtraConfigs(backendOptions.backends, selectedType),
+    [backendOptions.backends, selectedType],
+  );
+
   function addFilter() {
     setFilters((previousFilters) => [
       ...previousFilters,
-      { mode: "include", type: "organization", value: "" },
+      { mode: "include", type: activeBackendFilters[0]?.key ?? "", value: "" },
     ]);
   }
 
@@ -97,6 +121,11 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
       active: isEnabled,
       autoarchive: isAutoArchive,
       filters,
+      // Keyed on what the selected backend declares, and re-seeded when the
+      // type changes, so a value left over from another type cannot reach the
+      // API — `HarvestConfigField` rejects any key the backend does not declare.
+      features: featureValues,
+      extraConfigs: extraConfigValues,
     });
   }
 
@@ -248,34 +277,54 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
 
                 <HarvesterImplementationSection
                   backends={backendOptions.backends}
+                  activeBackendFilters={activeBackendFilters}
                   typeNoResultsText={backendOptions.noResultsText}
                   hasNoBackend={backendOptions.hasNoBackend}
                   hasTypeError={hasError("harvesterType")}
                   selectedTypeRef={selectedTypeRef}
                   selectedType={selectedType}
                   filters={filters}
-                  isGeoDcat={isGeoDcat}
-                  showRemoteUrlPrefix={showRemoteUrlPrefix}
-                  remoteUrlPrefix={remoteUrlPrefix}
+                  activeBackendFeatures={activeBackendFeatures}
+                  activeBackendExtraConfigs={activeBackendExtraConfigs}
+                  featureValues={featureValues}
+                  extraConfigValues={extraConfigValues}
+                  visibleExtraConfigKeys={visibleExtraConfigKeys}
                   isEnabled={isEnabled}
                   isAutoArchive={isAutoArchive}
                   onTypeChange={(value) => {
                     setSelectedType(value);
                     if (value) clearError("harvesterType");
-                    setShowRemoteUrlPrefix(false);
-                    setRemoteUrlPrefix("");
-                    setIsGeoDcat(false);
+                    // Re-seed from the new backend's own metadata: a feature or
+                    // extra config the previous type declared is not a key this
+                    // one accepts, and `HarvestConfigField` would reject it.
+                    setFeatureValues(
+                      seedFeatureValues(selectBackendFeatures(backendOptions.backends, value)),
+                    );
+                    setExtraConfigValues({});
+                    setVisibleExtraConfigKeys([]);
                     setFilters([]);
                   }}
                   onAddFilter={addFilter}
                   onRemoveFilter={removeFilter}
                   onUpdateFilter={updateFilter}
-                  onToggleGeoDcat={() => setIsGeoDcat((value) => !value)}
-                  onShowRemoteUrlPrefix={() => setShowRemoteUrlPrefix(true)}
-                  onRemoteUrlPrefixChange={(event) => setRemoteUrlPrefix(event.target.value)}
-                  onClearRemoteUrlPrefix={() => {
-                    setShowRemoteUrlPrefix(false);
-                    setRemoteUrlPrefix("");
+                  onToggleFeature={(key) =>
+                    setFeatureValues((previous) => toggleFeatureValue(previous, key, activeBackendFeatures))
+                  }
+                  onShowExtraConfig={(key) =>
+                    setVisibleExtraConfigKeys((previous) =>
+                      previous.includes(key) ? previous : [...previous, key],
+                    )
+                  }
+                  onExtraConfigChange={(key, value) =>
+                    setExtraConfigValues((previous) => ({ ...previous, [key]: value }))
+                  }
+                  onClearExtraConfig={(key) => {
+                    setVisibleExtraConfigKeys((previous) => previous.filter((item) => item !== key));
+                    setExtraConfigValues((previous) => {
+                      const next = { ...previous };
+                      delete next[key];
+                      return next;
+                    });
                   }}
                   onToggleEnabled={() => setIsEnabled((value) => !value)}
                   onToggleAutoArchive={() => setIsAutoArchive((value) => !value)}
