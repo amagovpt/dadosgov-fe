@@ -39,6 +39,39 @@ describe("parseDatasetsFilters", () => {
     expect(filters.format_family).toEqual(["tabular", "documents"]);
   });
 
+  // The API declares format_family with a closed set of choices and answers 400
+  // on anything else. The listing fetch has no fallback, so forwarding an unknown
+  // value took the whole page to the error boundary (HTTP 500) instead of simply
+  // returning nothing, which any hand-edited or mangled link could trigger.
+  it("drops format_family values the API would reject", () => {
+    expect(parseDatasetsFilters(new URLSearchParams("format_family=garbage"))).toEqual({
+      sort: "-created",
+    });
+    // Never comma-split, so the joined form is not a valid family either.
+    expect(
+      parseDatasetsFilters(new URLSearchParams("format_family=tabular,documents"))
+    ).toEqual({ sort: "-created" });
+    // The pre-rename ids are gone and must not reach the API.
+    expect(parseDatasetsFilters(new URLSearchParams("format_family=structured"))).toEqual({
+      sort: "-created",
+    });
+  });
+
+  it("keeps the valid format families when mixed with rejected ones", () => {
+    const filters = parseDatasetsFilters(
+      new URLSearchParams("format_family=garbage&format_family=other")
+    );
+    expect(filters.format_family).toBe("other");
+  });
+
+  it("does not restrict params the API accepts freely", () => {
+    // granularity has no choices list: an unknown value returns nothing, so it
+    // must be forwarded rather than dropped (dropping it would silently widen
+    // the listing to everything).
+    const filters = parseDatasetsFilters(new URLSearchParams("granularity=garbage"));
+    expect(filters.granularity).toBe("garbage");
+  });
+
   it("defaults to newest-first when there is neither a sort nor a query", () => {
     expect(parseDatasetsFilters(new URLSearchParams()).sort).toBe("-created");
     expect(parseDatasetsFilters(new URLSearchParams("q=saude")).sort).toBeUndefined();

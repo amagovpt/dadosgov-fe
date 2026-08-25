@@ -25,6 +25,26 @@ const MULTI_VALUE_PARAMS = [
 // Only `tag` is ever written comma-separated elsewhere in the app.
 const COMMA_SEPARATED_PARAMS = new Set(["tag"]);
 
+// The resource format families the backend recognises, in the order the sidebar
+// shows them. The backend owns which extensions belong to a family; these are
+// just the family names, which the UI has to know anyway to label its options.
+export const DATASET_FORMAT_FAMILIES = [
+  "tabular",
+  "machine_readable",
+  "geographical",
+  "documents",
+  "other",
+] as const;
+
+// Params the API declares with a closed set of choices: it answers 400 on
+// anything else, and the listing fetch has no fallback, so an unknown value
+// would take the whole page to the error boundary instead of simply returning
+// nothing. Values outside the set are dropped here so a hand-edited or mangled
+// link degrades like every other filter.
+const ALLOWED_VALUES: Record<string, ReadonlySet<string>> = {
+  format_family: new Set(DATASET_FORMAT_FAMILIES),
+};
+
 function readValues(params: URLSearchParams, name: string): string[] {
   const values = params.getAll(name);
   if (!COMMA_SEPARATED_PARAMS.has(name)) return values;
@@ -54,7 +74,8 @@ export function parseDatasetsFilters(params: URLSearchParams): DatasetFilters {
   };
 
   for (const name of MULTI_VALUE_PARAMS) {
-    const values = readValues(params, name);
+    const allowed = ALLOWED_VALUES[name];
+    const values = readValues(params, name).filter((value) => !allowed || allowed.has(value));
     if (values.length === 0) continue;
     // A single value stays a plain string so the URL keeps its usual shape.
     filters[name] = values.length === 1 ? values[0] : values;

@@ -22,6 +22,7 @@ import {
   uniqueStrings,
   writeQueryParamValues,
 } from "@/utils/filterUtils";
+import { DATASET_FORMAT_FAMILIES } from "@/utils/datasetsListingQuery";
 import { useTranslation } from "react-i18next";
 
 interface FilterOption {
@@ -29,26 +30,17 @@ interface FilterOption {
   name: string;
 }
 
-// "Formato" options, in the order they are shown. These are the backend's format
-// families (`?format_family=`), not lists of extensions: the format lists live in
-// the backend settings only, and the sidebar count (`formato_<family>`) is
-// computed from the very same query the filter applies, so a number can no longer
-// disagree with the listing it opens.
+// The "Formato" group filters on the backend's format families
+// (`?format_family=`) rather than on lists of extensions. It used to hold a local
+// copy of those lists and expand a selection into `?format=csv&format=xls&...`,
+// which "Outros" cannot be written as — it is the complement of the other
+// families — so that option wrote no filter and behaved exactly like "Todos".
+// The family names now come from DATASET_FORMAT_FAMILIES, shared with the query
+// parser, and the sidebar count (`formato_<family>`) is computed from the very
+// same query the filter applies.
 //
-// This used to be a local copy of the extension lists that the group expanded
-// into `?format=csv&format=xls&...`. "Outros" cannot be written that way — it is
-// the complement of the other families — so the option wrote no filter at all and
-// behaved exactly like "Todos".
-const FORMAT_FAMILIES = [
-  "tabular",
-  "machine_readable",
-  "geographical",
-  "documents",
-  "other",
-] as const;
-
-// Example extensions shown under each option. Purely illustrative: the backend
-// decides what actually belongs to a family.
+// Example extensions per option, purely illustrative: the backend decides what
+// actually belongs to a family.
 const FORMAT_FAMILY_EXAMPLES: Record<string, string | undefined> = {
   tabular: "csv, xls, xlsx, ods, parquet...",
   machine_readable: "JSON, RDF, XML, SQL...",
@@ -112,7 +104,7 @@ function detectFormatoFromParams(params: URLSearchParams): string {
   // The group is single-select, so it only ever writes one value. A URL carrying
   // several (hand-edited, or a link from elsewhere) resolves to the first option
   // in display order, which is the one the group will show as active.
-  return FORMAT_FAMILIES.find((family) => selected.includes(family)) ?? "all";
+  return DATASET_FORMAT_FAMILIES.find((family) => selected.includes(family)) ?? "all";
 }
 
 function detectRotuloFromParams(params: URLSearchParams): string {
@@ -150,7 +142,7 @@ export const DatasetsFilters = ({
         title: tds("filters.format.label"),
         options: [
           { id: "all", label: t("filters.all"), description: undefined as string | undefined },
-          ...FORMAT_FAMILIES.map((family) => ({
+          ...DATASET_FORMAT_FAMILIES.map((family) => ({
             id: family as string,
             label: tds(`filters.format.options.${family}`),
             description: FORMAT_FAMILY_EXAMPLES[family],
