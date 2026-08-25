@@ -52,6 +52,111 @@ This project has no version tags, so entries are grouped by month (newest first)
   - Needs the backend that serves `?format_family=` deployed first: the API
     ignores unknown params, so a frontend arriving alone would leave the group
     returning every dataset.
+- **fix(admin-harvesters): the harvester description is no longer marked as required**
+  - The edit screen labelled it "Descrição *" while the creation screen labelled
+    it "Descrição", nothing in either screen validated it, and the backend calls
+    it optional details about the harvester. The asterisk and the translation key
+    that carried it are gone, along with the label override prop that existed
+    only for them, so both screens agree with each other and with the API.
+  - The backend stopped reading that field as a configuration blob: the CKAN PT
+    harvester's default license and geographic zones are ordinary harvest
+    settings now, so the generic settings section renders them like any other and
+    they get Portuguese labels instead of the English ones the API sends.
+  - Those settings also show the explanation the API sends with them, which no
+    harvester screen rendered before. It matters here because the geographic zones
+    are typed as one comma-separated value, and nothing in the form said so.
+
+- **fix(admin-harvesters): keep the GeoDCAT-AP and remote URL prefix settings**
+  - The creation wizard collected the GeoDCAT-AP switch and the "Remote URL
+    prefix" field and submitted neither. Both are real harvest config, read when
+    the harvester runs, so whoever configured them saw them accepted in the form
+    and lost without a word — the same silent drop the harvester filters had.
+  - Both are now sent inside the single `config` object the API reads. The three
+    parts of that object — filters, features and extra configs — are composed in
+    one place, because building it once per part would leave only the last and
+    drop the others.
+  - Which fields appear, and the keys they submit, now come from the backend
+    metadata instead of a hand-written list of implementation types. That gives a
+    UI to the "Inspire" option of the OpenDataSoft PT backend, which has been
+    declared all along and was reachable from no screen.
+  - The edit screen gained controls for both, seeded from what is stored. It had
+    none at all, so a harvester created with these settings could be seen only
+    through the API and changed only through it.
+  - Clearing the last setting a harvester has now works. A save that carried no
+    configuration at all used to leave the stored one untouched, so blanking the
+    remote URL prefix — or removing the last filter — reported success and
+    changed nothing.
+  - A save keeps the configuration keys no screen shows, instead of replacing the
+    whole configuration with what the form knows about.
+  - Values are always gated by what the selected implementation declares, on both
+    screens, so changing the type no longer leaves the previous type's settings
+    behind to be refused by the API.
+  - No stored harvester is affected: these settings were never written by the
+    interface, and a harvester that has none behaves exactly as before — the
+    harvest falls back to each option's declared default.
+- **fix(admin-harvesters): keep the filters set when a harvester is created**
+  - A "Marcação" filter added in the creation wizard never reached the
+    harvester. The select emitted the key `tag` while every backend that
+    supports the filter declares `tags`, and the harvest config validation
+    rejects any key the selected backend does not declare — the key goes
+    straight into the CKAN Solr query, where `tags` is the indexed field.
+  - The filter keys and the visibility of the whole filters block now come from
+    the same backend metadata the edit screen reads, instead of from literals in
+    the wizard. That also stops hiding the block for the OpenDataSoft PT and OGC
+    backends, both of which declare filters the API accepts.
+  - The creation payload sent the filters at the top level of the request, where
+    the API has no such field and dropped them without an error, so a harvester
+    created through the wizard was created unfiltered whatever key was used.
+    They are now nested under `config`, like the update and preview payloads
+    always were.
+  - A row whose key was deselected — clicking the already-selected option clears
+    the selection — is dropped instead of submitted. Now that the field reaches
+    the API, an empty key would answer 400 and block the wizard on the step it
+    was previously passing by discarding the filters.
+  - The filter labels are translated by key rather than by the label the API
+    sends: those labels are marshalled in the deployment's default language, so
+    matching on the English ones never worked and the edit screen showed the
+    API's own wording instead of the portal's.
+  - No stored harvester is affected: the API only ever accepted filter keys the
+    backend declares, so the wrong key could not be persisted — on creation it
+    was discarded with the rest of the field, and on edit it was filtered out
+    before the request and would have been refused anyway.
+- **fix(admin-harvesters): list every enabled harvest backend in the creation "Tipo" field**
+  - The creation wizard decided the "Tipo" options locally, with ten
+    `DropdownOption` literals, while the edit screen listed whatever
+    `GET /api/1/harvest/backends/` returned. Five enabled backends
+    (`apambiente`, `ine`, `inehvd`, `dgt`, `dgtIne`) were therefore impossible
+    to pick when creating a harvester, and the labels of the ones that were
+    listed did not match the `display_name` each backend declares.
+  - The literal also ignored the deployment's `HARVESTER_BACKENDS`, so it could
+    offer a type disabled in that environment whose submission
+    `POST /harvest/sources/` then rejects — the `backend` field is an enum over
+    the enabled backends. Both screens now read the same endpoint, so a backend
+    registered in udata shows up in the wizard without a frontend change.
+  - When the endpoint answers with nothing to offer, an explicit warning
+    replaces the select instead of leaving a blank required field. Step 1 now
+    validates the type as well: an empty one used to pass validation and reach
+    the API as `backend: "dcat"`, so a failed catalogue request could silently
+    create a DCAT source against a CKAN URL.
+  - The select is seeded from the type already chosen, so stepping back from
+    the preview no longer shows the placeholder over a type the wizard would
+    still submit.
+- **fix(harvesters): scope the producer select to what the user may harvest for**
+  - The "Produtor" field of the harvester wizard was fed only by the
+    memberships in `/api/1/me/`, which have nothing to do with the global
+    admin role. A portal admin with no memberships therefore saw an empty
+    required select and could not pass step 1, even though the backend lets
+    them create a source for any organization (every udata `Permission`
+    carries `RoleNeed("admin")`). Admins now get a server-side organization
+    typeahead over `/organizations/suggest/` — debounced, seeded with a
+    non-empty list, and keeping the chosen organization pinned so a later
+    search does not clear the selection.
+  - For everyone else the list is filtered by the backend-computed
+    `permissions.harvest` flag, the same check `POST /harvest/sources/`
+    performs. Organization editors no longer see organizations whose
+    submission would fail with a 403; when nothing is eligible an explicit
+    warning with a link to create an organization replaces the silently
+    empty select.
 - **fix(admin-harvesters): search the whole harvester catalogue, not the visible page**
   - The backoffice harvester lists paginated on the server but searched and
     filtered in memory, so both only ever saw the current page: matches on

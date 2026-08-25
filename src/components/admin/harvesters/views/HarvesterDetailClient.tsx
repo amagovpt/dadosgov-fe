@@ -29,6 +29,10 @@ import { can } from "@/utils/permissions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { type HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
+import {
+  readStoredConfig,
+  toggleFeatureValue,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import HarvestersAcceptedStatusInfoCard from "@/components/admin/harvesters/form-ui/HarvestersAcceptedStatusInfoCard";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -144,6 +148,8 @@ export default function HarvesterDetailClient({
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const [selectedBackend, setSelectedBackend] = useState("");
+  const [featureValues, setFeatureValues] = useState<Record<string, boolean>>({});
+  const [extraConfigValues, setExtraConfigValues] = useState<Record<string, string>>({});
   const { errors: formErrors, setErrors, clearError, focusFirstError } =
     useFormErrors<HarvesterFormField>();
 
@@ -151,6 +157,7 @@ export default function HarvesterDetailClient({
     if (!source) return;
     const existingFilters =
       (source.config?.filters as { key?: string; value?: string; type?: string }[] | undefined) || [];
+    const storedConfig = readStoredConfig(source);
 
     const frameId = requestAnimationFrame(() => {
       setHarvesterName(source.name);
@@ -168,6 +175,8 @@ export default function HarvesterDetailClient({
           mode: filter.type || "include",
         })),
       );
+      setFeatureValues(storedConfig.features);
+      setExtraConfigValues(storedConfig.extraConfigs);
     });
 
     return () => cancelAnimationFrame(frameId);
@@ -175,6 +184,8 @@ export default function HarvesterDetailClient({
 
   const {
     activeBackendFilters,
+    activeBackendFeatures,
+    activeBackendExtraConfigs,
     addFilter,
     handleApproveSource,
     handleDeleteHarvester,
@@ -193,6 +204,8 @@ export default function HarvesterDetailClient({
     isEnabled,
     isAutoArchive,
     filters,
+    featureValues,
+    extraConfigValues,
     harvesterSchedule,
     setSource,
     setFilters,
@@ -287,6 +300,21 @@ export default function HarvesterDetailClient({
     <AdminLayout breadcrumbItems={breadcrumbItems}
       title={source.name}
     >
+      {saveError && (
+        <div className="mb-16">
+          <StatusCard variant="danger" showIcon description={saveError} />
+        </div>
+      )}
+      {saveSuccess && (
+        <div className="mb-16">
+          <StatusCard
+            variant="success"
+            showIcon
+            description={t("admin-harvesters:form.saveSuccess")}
+          />
+        </div>
+      )}
+
       {/* Metadata info */}
       <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-24">
         <div className="flex items-center gap-8">
@@ -432,6 +460,16 @@ export default function HarvesterDetailClient({
               setSelectedBackend={setSelectedBackend}
               backends={backends}
               activeBackendFilters={activeBackendFilters}
+              activeBackendFeatures={activeBackendFeatures}
+              activeBackendExtraConfigs={activeBackendExtraConfigs}
+              featureValues={featureValues}
+              extraConfigValues={extraConfigValues}
+              onToggleFeature={(key) =>
+                setFeatureValues((previous) => toggleFeatureValue(previous, key, activeBackendFeatures))
+              }
+              onExtraConfigChange={(key, value) =>
+                setExtraConfigValues((previous) => ({ ...previous, [key]: value }))
+              }
               formErrors={formErrors}
               clearError={clearError}
               addFilter={addFilter}
@@ -439,8 +477,6 @@ export default function HarvesterDetailClient({
               updateFilter={updateFilter}
               setHarvesterSchedule={setHarvesterSchedule}
               isSaving={isSaving}
-              saveSuccess={saveSuccess}
-              saveError={saveError}
               onSave={handleSaveHarvester}
               isPreviewing={isPreviewing}
               previewJob={previewJob}

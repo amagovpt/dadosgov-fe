@@ -21,6 +21,8 @@ const NON_LOCALIZED_PREFIXES = [
   "/_next",
 ];
 
+const STATIC_FILE = /\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?|ttf|otf|eot|css|js|mjs|map)$/i;
+
 /**
  * Prefixes an internal href with the active locale (`/datasets` → `/pt/datasets`).
  *
@@ -45,9 +47,7 @@ export function localizeHref(href: string, locale: string): string {
   if (NON_LOCALIZED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return href;
   }
-  // Static files (`/favicon.png`, `/Logos/x.svg`) are excluded from the i18n
-  // proxy matcher and must keep their real path.
-  if (/\.[^/]+$/.test(pathname)) return href;
+  if (STATIC_FILE.test(pathname)) return href;
 
   const resolvedLocale = locales.includes(locale) ? locale : i18nConfig.defaultLocale;
   const suffix = href.slice(pathname.length);
