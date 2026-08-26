@@ -81,9 +81,9 @@ export function DataStoriesFilters({
   }, []);
 
   const handleFilterSearchChange = useCallback(
-    (groupName: string, value: string) => {
-      setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-      if (groupName === "Palavras-chave") {
+    (paramName: string, value: string) => {
+      setFilterSearchQueries((prev) => ({ ...prev, [paramName]: value }));
+      if (paramName === "tag") {
         handleTagSearch(value);
       }
     },

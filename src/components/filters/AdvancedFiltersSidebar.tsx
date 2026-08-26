@@ -39,7 +39,12 @@ interface AdvancedFiltersSidebarProps {
   searchQueries: Record<string, string>;
   getActiveValues: (paramName: string) => string[];
   onToggleValue: (paramName: string, value: string) => void;
-  onSearchChange: (groupName: string, value: string) => void;
+  /**
+   * Called with the group's `param` — its query-string name — not its display
+   * label. Callers route on it to know which suggestion to fetch; a translated
+   * label could never be compared safely (LEDG-2326).
+   */
+  onSearchChange: (paramName: string, value: string) => void;
   onClearGroup?: (paramName: string) => void;
   showClearActions?: boolean;
   checkboxIdPrefix: string;
@@ -62,7 +67,7 @@ export function AdvancedFiltersSidebar({
   return (
     <Sidebar variant="filter" className="font-bold">
       {groups.map((group) => {
-        const searchQuery = searchQueries[group.name] || "";
+        const searchQuery = searchQueries[group.param] || "";
         const activeValues = getActiveValues(group.param);
         const activeCount = activeValues.length;
 
@@ -114,7 +119,7 @@ export function AdvancedFiltersSidebar({
                     hideLabel
                     placeholder={group.searchPlaceholder || t("search.placeholder")}
                     value={searchQuery}
-                    onChange={(event) => onSearchChange(group.name, event.target.value)}
+                    onChange={(event) => onSearchChange(group.param, event.target.value)}
                   />
                   <Icon
                     name="agora-solid-search"
@@ -152,7 +157,7 @@ export function AdvancedFiltersSidebar({
                     </p>
                     <button
                       type="button"
-                      onClick={() => onSearchChange(group.name, searchQuery)}
+                      onClick={() => onSearchChange(group.param, searchQuery)}
                       className="text-xs cursor-pointer text-primary-500 underline hover:text-primary-700"
                     >
                       {t("search.retry")}

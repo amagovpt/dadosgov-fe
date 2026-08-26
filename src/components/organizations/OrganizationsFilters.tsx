@@ -219,9 +219,9 @@ export const OrganizationsFilters = ({
   );
 
   const handleGroupSearch = useCallback(
-    (groupName: string, value: string) => {
-      if (groupName === orgGroupName) setOrgSearch(value);
-      if (groupName === badgeGroupName) setBadgeSearch(value);
+    (paramName: string, value: string) => {
+      if (paramName === "organization") setOrgSearch(value);
+      if (paramName === "badge") setBadgeSearch(value);
     },
     [orgGroupName, badgeGroupName]
   );
@@ -242,8 +242,8 @@ export const OrganizationsFilters = ({
       <AdvancedFiltersSidebar
         groups={advancedGroups}
         searchQueries={{
-          [orgGroupName]: orgSearch,
-          [badgeGroupName]: badgeSearch,
+          organization: orgSearch,
+          badge: badgeSearch,
         }}
         getActiveValues={getActiveValues}
         onToggleValue={handleAdvancedToggle}

@@ -318,11 +318,11 @@ export default function SearchClient() {
     router.push(`/pesquisa?${current.toString()}`);
   };
 
-  const handleFilterSearchChange = (groupId: string, value: string) => {
-    setFilterSearchQueries((prev) => ({ ...prev, [groupId]: value }));
-    if (groupId === "keywords") handleTagSearch(value);
-    if (groupId === "formats") handleFormatSearch(value);
-    if (groupId === "spatialCoverage") handleZoneSearch(value);
+  const handleFilterSearchChange = (paramName: string, value: string) => {
+    setFilterSearchQueries((prev) => ({ ...prev, [paramName]: value }));
+    if (paramName === "tag") handleTagSearch(value);
+    if (paramName === "format") handleFormatSearch(value);
+    if (paramName === "geozone") handleZoneSearch(value);
   };
 
   const advancedFilterGroups: {

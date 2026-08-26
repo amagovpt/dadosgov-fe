@@ -141,8 +141,8 @@ export const DataservicesFilters = () => {
     [getWorkingParams, navigateWithParams]
   );
 
-  const handleSearchChange = useCallback((groupName: string, value: string) => {
-    setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
+  const handleSearchChange = useCallback((paramName: string, value: string) => {
+    setSearchQueries((prev) => ({ ...prev, [paramName]: value }));
   }, []);
 
   const getActiveValues = useCallback(

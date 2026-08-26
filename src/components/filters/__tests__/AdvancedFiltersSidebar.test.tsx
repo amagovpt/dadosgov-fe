@@ -53,7 +53,7 @@ function render(group: AdvancedFilterGroup, searchQuery: string, onSearchChange 
     root.render(
       <AdvancedFiltersSidebar
         groups={[group]}
-        searchQueries={{ [group.name]: searchQuery }}
+        searchQueries={{ [group.param]: searchQuery }}
         getActiveValues={() => []}
         onToggleValue={vi.fn()}
         onSearchChange={onSearchChange}
@@ -94,7 +94,7 @@ describe("AdvancedFiltersSidebar suggest states", () => {
     act(() => {
       retry?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(onSearchChange).toHaveBeenCalledWith("Palavras-chave", "pdf");
+    expect(onSearchChange).toHaveBeenCalledWith("tag", "pdf");
   });
 
   it("still says no results when the search ran and matched nothing", () => {

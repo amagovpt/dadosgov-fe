@@ -157,9 +157,9 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
   );
 
   const handleFilterSearchChange = useCallback(
-    (groupName: string, value: string) => {
-      setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-      if (groupName === t("filters.advanced.tag")) handleTagSearch(value);
+    (paramName: string, value: string) => {
+      setFilterSearchQueries((prev) => ({ ...prev, [paramName]: value }));
+      if (paramName === "tag") handleTagSearch(value);
     },
     [handleTagSearch, t]
   );
