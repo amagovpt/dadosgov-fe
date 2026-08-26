@@ -6,6 +6,32 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(harvesters): authorize the harvester preview instead of relying on it not being checked**
+  - The edit screen previewed through `POST /harvest/source/preview/` without ever
+    naming an organization. That endpoint only tests
+    `organization.permissions["harvest"]` when the payload names one, so this was
+    the one path in the backoffice reaching a branch with no authorization test at
+    all — and it worked *because* nothing checked it. It also made the preview
+    lie: the harvest backends attribute previewed datasets to the source's
+    organization when there is one and fall back to the owner otherwise, with the
+    owner filled in from the session, so the preview showed the datasets belonging
+    to whoever clicked it rather than to the producer.
+  - The payload now names the source's organization, and the screen picks the
+    route that can actually authorize the person asking. Previewing an unsaved
+    config only makes sense with edit rights, and without them every field in the
+    configuration tab is disabled — so the config is the stored one, and
+    `GET /harvest/source/<id>/preview/` returns the same preview while authorizing
+    per source through `source.permissions["preview"]`. The route is chosen on
+    edit rights *and* the source having an organization, because those are the two
+    things the config route needs to authorize anyone: an organization's editors
+    have neither, and the owner of an owner-only source has edit rights but no
+    organization to be authorized against, so both go through the per-source
+    route that admits them.
+  - The preview button now follows `canPreview`, from the same backend-computed
+    `source.permissions` the save and delete buttons already use. It was the only
+    action on the form rendered unconditionally, and the harvester detail routes
+    sit under no route guard, so any authenticated account saw it.
+
 - **fix(filters): the advanced-filter search boxes now query the API, and a failure says so**
   - Typing in **Palavras-chave**, **Formatos** or **Cobertura Espacial** returned
     "Nenhum resultado encontrado" for every term, because the request was never
