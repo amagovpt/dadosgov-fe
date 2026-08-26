@@ -203,6 +203,10 @@ export const DatasetsFilters = ({
   // search input) or after a page reload with a `geozone` already in the URL.
   const [zoneLabels, setZoneLabels] = useState<Record<string, string>>({});
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
+  // Which suggest groups failed their last request, keyed by the group names
+  // `handleSearchChange` routes on. Kept apart from the option lists so a
+  // failure is not painted as "no results" (LEDG-2326).
+  const [suggestErrors, setSuggestErrors] = useState<Record<string, boolean>>({});
   const selectedToggleFilters = useMemo<Record<ToggleFilterKey, string>>(
     () => ({
       formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
@@ -299,44 +303,68 @@ export const DatasetsFilters = ({
   const handleTagSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setTagOptions([]);
+      setSuggestErrors((prev) => ({ ...prev, tag: false }));
       return;
     }
     try {
-      const results = (await suggestTags(query)) ?? [];
+      const results = await suggestTags(query);
+      if (results === null) {
+        setTagOptions([]);
+        setSuggestErrors((prev) => ({ ...prev, tag: true }));
+        return;
+      }
       setTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
+      setSuggestErrors((prev) => ({ ...prev, tag: false }));
     } catch {
       setTagOptions([]);
+      setSuggestErrors((prev) => ({ ...prev, tag: true }));
     }
   }, []);
 
   const handleFormatSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setFormatOptions([]);
+      setSuggestErrors((prev) => ({ ...prev, format: false }));
       return;
     }
     try {
-      const results = (await suggestFormats(query)) ?? [];
+      const results = await suggestFormats(query);
+      if (results === null) {
+        setFormatOptions([]);
+        setSuggestErrors((prev) => ({ ...prev, format: true }));
+        return;
+      }
       setFormatOptions(results.map((format) => ({ id: format.text, name: format.text })));
+      setSuggestErrors((prev) => ({ ...prev, format: false }));
     } catch {
       setFormatOptions([]);
+      setSuggestErrors((prev) => ({ ...prev, format: true }));
     }
   }, []);
 
   const handleZoneSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setZoneOptions([]);
+      setSuggestErrors((prev) => ({ ...prev, geozone: false }));
       return;
     }
     try {
-      const results = (await suggestSpatialZones(query)) ?? [];
+      const results = await suggestSpatialZones(query);
+      if (results === null) {
+        setZoneOptions([]);
+        setSuggestErrors((prev) => ({ ...prev, geozone: true }));
+        return;
+      }
       setZoneOptions(results.map((zone) => ({ id: zone.id, name: zone.name })));
       setZoneLabels((prev) => {
         const next = { ...prev };
         for (const zone of results) next[zone.id] = zone.name;
         return next;
       });
+      setSuggestErrors((prev) => ({ ...prev, geozone: false }));
     } catch {
       setZoneOptions([]);
+      setSuggestErrors((prev) => ({ ...prev, geozone: true }));
     }
   }, []);
 
@@ -354,11 +382,11 @@ export const DatasetsFilters = ({
   );
 
   const handleSearchChange = useCallback(
-    (groupName: string, value: string) => {
-      setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-      if (groupName === "tags") handleTagSearch(value);
-      if (groupName === "format") handleFormatSearch(value);
-      if (groupName === "geozone") handleZoneSearch(value);
+    (paramName: string, value: string) => {
+      setSearchQueries((prev) => ({ ...prev, [paramName]: value }));
+      if (paramName === "tag") handleTagSearch(value);
+      if (paramName === "format") handleFormatSearch(value);
+      if (paramName === "geozone") handleZoneSearch(value);
     },
     [handleFormatSearch, handleTagSearch, handleZoneSearch]
   );
@@ -403,6 +431,7 @@ export const DatasetsFilters = ({
       {
         name: t("filters.advanced.tag"),
         param: "tag",
+        hasError: suggestErrors["tag"],
         data: tagOptions,
         searchable: true,
         suggest: true,
@@ -413,6 +442,7 @@ export const DatasetsFilters = ({
       {
         name: t("filters.advanced.format"),
         param: "format",
+        hasError: suggestErrors["format"],
         data: formatOptions,
         searchable: true,
         suggest: true,
@@ -435,6 +465,7 @@ export const DatasetsFilters = ({
       {
         name: t("filters.advanced.geozone"),
         param: "geozone",
+        hasError: suggestErrors["geozone"],
         data: zoneOptions,
         searchable: true,
         suggest: true,
@@ -462,6 +493,7 @@ export const DatasetsFilters = ({
       zoneOptions,
       zoneLabels,
       allGranularities,
+      suggestErrors,
       t,
     ]
   );
