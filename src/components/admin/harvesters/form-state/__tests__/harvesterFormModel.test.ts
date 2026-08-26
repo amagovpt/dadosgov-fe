@@ -387,4 +387,41 @@ describe("buildHarvesterUpdatePayload and buildHarvesterPreviewPayload — confi
       extra_configs: [],
     });
   });
+
+  /**
+   * The preview payload used to carry no organization at all, which had two
+   * consequences: `POST /harvest/source/preview/` skipped its permission test
+   * entirely (it only runs `organization.permissions["harvest"]` when the
+   * payload names one), and the previewed datasets came back attributed to
+   * whoever clicked preview, because the backends fall back to `source.owner`
+   * and the API fills `owner` in from the session.
+   */
+  it("names the producer organization, so the preview is authorized against it", () => {
+    const payload = buildHarvesterPreviewPayload({
+      ...base,
+      fallbackName: "Catálogo",
+      fallbackUrl: "https://exemplo.pt/catalogo",
+      schedule: "",
+      organization: "org-dgt",
+    });
+
+    expect(payload.organization).toBe("org-dgt");
+  });
+
+  /**
+   * An owner-only source has no organization to name. The key must be absent
+   * rather than empty: `HarvestSourceForm.organization` resolves a reference,
+   * and the branch that authorizes against an organization must not be entered
+   * with a falsy one.
+   */
+  it("omits the organization for an owner-only source", () => {
+    const payload = buildHarvesterPreviewPayload({
+      ...base,
+      fallbackName: "Catálogo",
+      fallbackUrl: "https://exemplo.pt/catalogo",
+      schedule: "",
+    });
+
+    expect(payload).not.toHaveProperty("organization");
+  });
 });

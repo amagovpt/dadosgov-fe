@@ -214,6 +214,7 @@ export function useHarvesterDetailActions({
           backend: selectedBackend,
           fallbackBackend: source.backend,
           schedule: harvesterSchedule,
+          organization: source.organization?.id,
           active: isEnabled,
           autoarchive: isAutoArchive,
           filters,
