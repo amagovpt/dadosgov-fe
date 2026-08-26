@@ -39,7 +39,7 @@ export function useKeywordSelect({
     suggestTags("", initialFetchLimit)
       .then((results) => {
         if (!cancelled) {
-          setTagSuggestions(results);
+          setTagSuggestions(results ?? []);
         }
       })
       .catch(() => {
@@ -65,7 +65,7 @@ export function useKeywordSelect({
       if (cancelled) return;
 
       try {
-        const results = await suggestTags(query, searchFetchLimit);
+        const results = (await suggestTags(query, searchFetchLimit)) ?? [];
         if (!cancelled) {
           setTagSearch(results);
         }
