@@ -81,6 +81,8 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
 
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
+  // Which suggest groups failed their last request (LEDG-2326).
+  const [filterSuggestErrors, setFilterSuggestErrors] = useState<Record<string, boolean>>({});
   const selectedToggleFilters = useMemo<Record<ReuseFilterKey, string>>(
     () => ({
       atualizacao: detectAtualizacaoFromParams(
@@ -110,13 +112,21 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
   const handleTagSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setFilterTagOptions([]);
+      setFilterSuggestErrors((prev) => ({ ...prev, tag: false }));
       return;
     }
     try {
-      const results = (await suggestTags(query)) ?? [];
+      const results = await suggestTags(query);
+      if (results === null) {
+        setFilterTagOptions([]);
+        setFilterSuggestErrors((prev) => ({ ...prev, tag: true }));
+        return;
+      }
       setFilterTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
+      setFilterSuggestErrors((prev) => ({ ...prev, tag: false }));
     } catch {
       setFilterTagOptions([]);
+      setFilterSuggestErrors((prev) => ({ ...prev, tag: true }));
     }
   }, []);
 
@@ -203,6 +213,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
       {
         name: t("filters.advanced.tag"),
         param: "tag",
+      hasError: filterSuggestErrors["tag"],
         data: filterTagOptions,
         searchable: true,
         suggest: true,
@@ -211,7 +222,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
         emptyMessage: t("filters.advanced.search.noResults"),
       },
     ],
-    [allOrganizations, filterTagOptions, t]
+    [allOrganizations, filterTagOptions, filterSuggestErrors, t]
   );
 
   return (
