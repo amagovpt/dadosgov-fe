@@ -21,9 +21,12 @@ This project has no version tags, so entries are grouped by month (newest first)
     config only makes sense with edit rights, and without them every field in the
     configuration tab is disabled — so the config is the stored one, and
     `GET /harvest/source/<id>/preview/` returns the same preview while authorizing
-    per source through `source.permissions["preview"]`. That covers an
-    organization's editors and the owner of an owner-only source, who may preview
-    and may not edit, and whom the config route would answer 403.
+    per source through `source.permissions["preview"]`. The route is chosen on
+    edit rights *and* the source having an organization, because those are the two
+    things the config route needs to authorize anyone: an organization's editors
+    have neither, and the owner of an owner-only source has edit rights but no
+    organization to be authorized against, so both go through the per-source
+    route that admits them.
   - The preview button now follows `canPreview`, from the same backend-computed
     `source.permissions` the save and delete buttons already use. It was the only
     action on the form rendered unconditionally, and the harvester detail routes

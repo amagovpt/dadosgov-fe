@@ -93,8 +93,10 @@ interface HarvesterConfigFormProps {
   canDelete?: boolean;
   // Whether this user may preview at all — `source.permissions["preview"]`
   // (HarvestSourcePermission: owner, org-admin, org-editor). Kept separate from
-  // `canEdit` because an editor may preview without editing; the detail screen
-  // reads which of the two preview routes that implies. Nothing on the create
+  // `canEdit` because the two rights genuinely differ, in both directions: an
+  // org editor may preview without editing, and the owner of an owner-only
+  // source may edit without the config-preview route being able to authorize
+  // them. The detail screen reads both to pick the route. Nothing on the create
   // flow has a source yet, hence the default.
   canPreview?: boolean;
   deleteCard?: AdminCard;

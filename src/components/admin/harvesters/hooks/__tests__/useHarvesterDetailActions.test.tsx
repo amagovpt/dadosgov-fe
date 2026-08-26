@@ -47,8 +47,14 @@ type HookParams = Parameters<typeof useHarvesterDetailActions>[0];
 const PREVIEW_JOB = { id: "job-1", status: "done", items: [] };
 
 /**
- * A source with the given `permissions` flags. `edit` is the one under test:
- * it is what tells the screen whether the form can diverge from the store.
+ * A source with the given `permissions` flags.
+ *
+ * The flags must be a combination the backend actually serializes, which is the
+ * whole reason this file exists in its current shape. `HarvestSourceAdminPermission`
+ * resolves `edit` from `OrganizationAdminNeed(source.organization)` when there is
+ * an organization and from `UserNeed(source.owner)` otherwise — so `edit: false`
+ * on an owner-only source is unreachable, and a test that asserts on it proves
+ * nothing about the owner it claims to cover.
  */
 function harvestSource(permissions: Record<string, boolean>, organizationId?: string) {
   return {
@@ -174,9 +180,15 @@ describe("useHarvesterDetailActions — which preview route", () => {
     expect(previewHarvestSourceByIdMock).toHaveBeenCalledWith("src-1");
   });
 
-  /** Same for the owner of an owner-only source: no organization to authorize against. */
+  /**
+   * The owner of an owner-only source, which is the case that makes the second
+   * half of the condition load-bearing: the backend grants them `edit: true`
+   * (UserNeed on the owner), so testing edit rights alone routes them to the
+   * config endpoint — where a payload naming no organization requires a
+   * sysadmin, and they get a 403 for a preview they are entitled to.
+   */
   it("previews an owner-only source through its own source route", async () => {
-    await render(params(harvestSource({ edit: false, preview: true })));
+    await render(params(harvestSource({ edit: true, preview: true })));
 
     await act(async () => {
       await latest().handlePreviewHarvester();

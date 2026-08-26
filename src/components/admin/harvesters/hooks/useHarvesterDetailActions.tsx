@@ -207,16 +207,22 @@ export function useHarvesterDetailActions({
     setPreviewJob(null);
     setPreviewError(null);
     try {
-      // Two preview routes, and which one is right follows from whether the
-      // form can differ from what is stored. Without edit rights every field in
-      // the configuration tab is disabled (`basicDisabled`/`advancedDisabled` in
-      // HarvesterConfigForm), so the config here IS the stored config and the
-      // per-source route serves it — and that route authorizes through
-      // `source.permissions["preview"]`, which covers the owner and an
-      // organization's editors. The config-payload route can only authorize
-      // against an organization (org-admin), so sending them there would answer
-      // 403 for a preview they are entitled to.
-      const job = can(source, "edit")
+      // Two preview routes, and this condition has to mirror what the
+      // config-payload route can actually authorize: harvest permission on the
+      // organization the payload names. So both halves are needed — edit rights,
+      // because without them every field in the configuration tab is disabled
+      // (`basicDisabled`/`advancedDisabled` in HarvesterConfigForm) and the
+      // config here IS the stored config; and an organization to authorize
+      // against, because with none the route requires a sysadmin.
+      //
+      // The second half is not redundant: `HarvestSourceAdminPermission` grants
+      // `edit` to the owner of a source that has no organization, so testing
+      // edit alone sent them to a route that answers 403 for a preview they are
+      // entitled to. The per-source route serves everyone else, authorizing
+      // through `source.permissions["preview"]` — owner and org editors
+      // included — and returns the same preview, since the config is the stored
+      // one in every case that lands here.
+      const job = can(source, "edit") && source.organization
         ? await previewHarvestSource(
             buildHarvesterPreviewPayload({
               name: harvesterName,
