@@ -6,6 +6,29 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(filters): the advanced-filter search boxes now query the API, and a failure says so**
+  - Typing in **Palavras-chave**, **Formatos** or **Cobertura Espacial** returned
+    "Nenhum resultado encontrado" for every term, because the request was never
+    made. The sidebar handed `onSearchChange` the group's *translated label*
+    while the components compared it against internal identifiers — `"tags"`,
+    `"format"`, `"geozone"` in the datasets filters, a hardcoded
+    `"Palavras-chave"` in the data stories. Nothing matched, so no suggestion was
+    ever fetched. Confirmed in a browser: with the three suggest endpoints
+    intercepted, no request was ever observed.
+  - Routing now goes by the group's `param` — the query-string name, stable
+    across locales and label changes — and every caller of the shared sidebar
+    compares params, including the reuses filters, which happened to work by
+    comparing the translated label. Two contracts in one shared component is
+    what produced the bug.
+  - A failure is also no longer painted as "no results". The suggest helpers
+    return `null` on failure instead of the `[]` they returned for both cases,
+    the sidebar gained an opt-in error state with a retry action, and the
+    datasets, reuses and data-stories filters pass it. The console logging that
+    the failures already had is untouched. This is the confusion
+    `rethrowControlFlow` describes in its own docstring: "the backend being down
+    … renders as an empty result set, indistinguishable from a search that found
+    nothing".
+
 - **fix(datasets): stop collapsing multi-value listing filters into one value**
   - Selecting a second option in "Cobertura espacial" or "Granularidade
     espacial" emptied the listing. The datasets page read those two params with
