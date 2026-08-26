@@ -40,8 +40,6 @@ export function DataStoriesFilters({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
-  // Which suggest groups failed their last request (LEDG-2326).
-  const [filterSuggestErrors, setFilterSuggestErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     onFiltersChange({
@@ -53,21 +51,13 @@ export function DataStoriesFilters({
   const handleTagSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setFilterTagOptions([]);
-      setFilterSuggestErrors((prev) => ({ ...prev, tag: false }));
       return;
     }
     try {
-      const results = await suggestTags(query);
-      if (results === null) {
-        setFilterTagOptions([]);
-        setFilterSuggestErrors((prev) => ({ ...prev, tag: true }));
-        return;
-      }
+      const results = (await suggestTags(query)) ?? [];
       setFilterTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
-      setFilterSuggestErrors((prev) => ({ ...prev, tag: false }));
     } catch {
       setFilterTagOptions([]);
-      setFilterSuggestErrors((prev) => ({ ...prev, tag: true }));
     }
   }, []);
 
@@ -91,9 +81,9 @@ export function DataStoriesFilters({
   }, []);
 
   const handleFilterSearchChange = useCallback(
-    (paramName: string, value: string) => {
-      setFilterSearchQueries((prev) => ({ ...prev, [paramName]: value }));
-      if (paramName === "tag") {
+    (groupName: string, value: string) => {
+      setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
+      if (groupName === "Palavras-chave") {
         handleTagSearch(value);
       }
     },
@@ -175,7 +165,6 @@ export function DataStoriesFilters({
       {
         name: t("filters.tags.tags"),
         param: "tag",
-      hasError: filterSuggestErrors["tag"],
         data: filterTagOptions,
         searchable: true,
         suggest: true,
@@ -184,7 +173,7 @@ export function DataStoriesFilters({
         emptyMessage: t("filters.tags.emptyMessage"),
       },
     ],
-    [filterTagOptions, filterSuggestErrors, t]
+    [filterTagOptions, t]
   );
 
   return (

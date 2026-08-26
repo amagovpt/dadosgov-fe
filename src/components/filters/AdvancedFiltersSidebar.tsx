@@ -150,25 +150,26 @@ export function AdvancedFiltersSidebar({
                       {group.minCharsMessage || t("search.minCharsMessage")}
                     </p>
                   )
-                ) : group.hasError ? (
-                  <div className="flex flex-col items-start gap-2">
-                    <p className="text-sm text-danger-700" role="status">
-                      {group.errorMessage || t("search.error")}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => onSearchChange(group.param, searchQuery)}
-                      className="text-xs cursor-pointer text-primary-500 underline hover:text-primary-700"
-                    >
-                      {t("search.retry")}
-                    </button>
-                  </div>
-                ) : (
+                ) : group.hasError ? null : (
                   <p className="text-sm text-neutral-500">
                     {group.emptyMessage || t("search.noResults")}
                   </p>
                 )}
               </div>
+              {group.hasError && (
+                <div className="mt-2 flex flex-col items-start gap-2">
+                  <p className="text-sm text-danger-700" role="status">
+                    {group.errorMessage || t("search.error")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onSearchChange(group.param, searchQuery)}
+                    className="text-xs cursor-pointer text-primary-500 underline hover:text-primary-700"
+                  >
+                    {t("search.retry")}
+                  </button>
+                </div>
+              )}
             </div>
           </SidebarItem>
         );

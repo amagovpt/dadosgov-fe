@@ -48,13 +48,18 @@ function makeGroup(overrides: Partial<AdvancedFilterGroup> = {}): AdvancedFilter
 let container: HTMLDivElement;
 let root: Root;
 
-function render(group: AdvancedFilterGroup, searchQuery: string, onSearchChange = vi.fn()) {
+function render(
+  group: AdvancedFilterGroup,
+  searchQuery: string,
+  onSearchChange = vi.fn(),
+  activeValues: string[] = []
+) {
   act(() => {
     root.render(
       <AdvancedFiltersSidebar
         groups={[group]}
         searchQueries={{ [group.param]: searchQuery }}
-        getActiveValues={() => []}
+        getActiveValues={() => activeValues}
         onToggleValue={vi.fn()}
         onSearchChange={onSearchChange}
         checkboxIdPrefix="test"
@@ -114,5 +119,18 @@ describe("AdvancedFiltersSidebar suggest states", () => {
     const text = container.textContent ?? "";
     expect(text).toContain("Falhou a pesquisa de formatos");
     expect(text).not.toContain(ERROR_TEXT);
+  });
+
+  // A suggest group folds its selected values into the rendered list, so the
+  // error used to be unreachable the moment anything was ticked — the exact
+  // situation a user filtering by one keyword and searching for a second is in.
+  it("still reports the error when the group already has a selection", () => {
+    render(makeGroup({ hasError: true, selectedLabels: { saude: "saude" } }), "pdf", vi.fn(), [
+      "saude",
+    ]);
+    const text = container.textContent ?? "";
+    expect(text).toContain("saude");
+    expect(text).toContain(ERROR_TEXT);
+    expect(text).toContain(RETRY_TEXT);
   });
 });

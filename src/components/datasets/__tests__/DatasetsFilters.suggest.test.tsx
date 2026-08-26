@@ -21,16 +21,18 @@ import ptDatasets from "@/locales/pt/datasets.json";
 
 const bundles: Record<string, unknown> = { common: ptCommon, datasets: ptDatasets };
 
-const translate = (namespace: string) => (key: string): string => {
-  const raw = key
-    .split(".")
-    .reduce<unknown>(
-      (node, part) =>
-        node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined,
-      bundles[namespace]
-    );
-  return typeof raw === "string" ? raw : key;
-};
+const translate =
+  (namespace: string) =>
+  (key: string): string => {
+    const raw = key
+      .split(".")
+      .reduce<unknown>(
+        (node, part) =>
+          node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined,
+        bundles[namespace]
+      );
+    return typeof raw === "string" ? raw : key;
+  };
 
 vi.mock("react-i18next", () => ({
   useTranslation: (namespace: string) => ({
@@ -73,6 +75,7 @@ let container: HTMLDivElement;
 let root: Root;
 
 beforeEach(() => {
+  vi.useFakeTimers();
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
@@ -82,6 +85,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  vi.useRealTimers();
 });
 
 function mount() {
@@ -95,7 +99,15 @@ async function typeInto(label: string, value: string) {
   const inputs = Array.from(container.querySelectorAll<HTMLInputElement>("input"));
   // Each searchable group renders one search box, in declaration order:
   // organization, tag, format, license, frequency, geozone, granularity.
-  const order = ["Organizações", "Palavras-chave", "Formatos", "Licenças", "Frequência", "Cobertura Espacial", "Granularidade Espacial"];
+  const order = [
+    "Organizações",
+    "Palavras-chave",
+    "Formatos",
+    "Licenças",
+    "Frequência",
+    "Cobertura Espacial",
+    "Granularidade Espacial",
+  ];
   const boxes = inputs.filter((i) => i.type !== "checkbox");
   const box = boxes[order.indexOf(label)];
   expect(box, `search box for ${label}`).toBeDefined();
@@ -106,8 +118,13 @@ async function typeInto(label: string, value: string) {
     setValue?.call(box, value);
     box.dispatchEvent(new Event("input", { bubbles: true }));
   });
-  // Let the suggest promise settle and its state update flush.
+  // The request is debounced by 300 ms; run the timer, then let the promise and
+  // its state update flush.
   await act(async () => {
+    vi.advanceTimersByTime(300);
+  });
+  await act(async () => {
+    await Promise.resolve();
     await Promise.resolve();
   });
 }
@@ -147,5 +164,55 @@ describe("DatasetsFilters advanced search routing", () => {
     const text = container.textContent ?? "";
     expect(text).toContain(NO_RESULTS_TEXT);
     expect(text).not.toContain(ERROR_TEXT);
+  });
+
+  // The failure mode an independent review pointed at: a slow failure landing
+  // after a newer success would wipe the good options and show an error over a
+  // query that was answered fine.
+  it("ignores a stale failure that lands after a newer successful search", async () => {
+    suggestFormats.mockResolvedValue([]);
+    suggestSpatialZones.mockResolvedValue([]);
+    let releaseFirst: (v: unknown) => void = () => {};
+    suggestTags
+      .mockImplementationOnce(() => new Promise((r) => (releaseFirst = r)))
+      .mockResolvedValueOnce([{ text: "saude" }]);
+    mount();
+
+    await typeInto("Palavras-chave", "sau");
+    await typeInto("Palavras-chave", "saude");
+
+    // Only now does the first request fail, after the second already answered.
+    await act(async () => {
+      releaseFirst(null);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const text = container.textContent ?? "";
+    expect(text).toContain("saude");
+    expect(text).not.toContain(ERROR_TEXT);
+  });
+
+  it("debounces so a burst of keystrokes issues one request", async () => {
+    for (const g of GROUPS) g.helper().mockResolvedValue([]);
+    mount();
+    const box = Array.from(container.querySelectorAll<HTMLInputElement>("input")).filter(
+      (i) => i.type !== "checkbox"
+    )[1];
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    for (const v of ["sa", "sau", "saud", "saude"]) {
+      await act(async () => {
+        setValue?.call(box, v);
+        box.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(suggestTags).toHaveBeenCalledTimes(1);
+    expect(suggestTags).toHaveBeenCalledWith("saude");
   });
 });

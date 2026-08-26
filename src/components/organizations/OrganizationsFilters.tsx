@@ -12,11 +12,7 @@ import {
   ToggleFilterSection,
   ToggleFilterSections,
 } from "@/components/filters/ToggleFilterSections";
-import {
-  readQueryParamValues,
-  toggleSelection,
-  writeQueryParamValues,
-} from "@/utils/filterUtils";
+import { readQueryParamValues, toggleSelection, writeQueryParamValues } from "@/utils/filterUtils";
 import { useTranslation } from "react-i18next";
 
 const ORG_TYPE_OPTIONS = [
@@ -57,9 +53,9 @@ export const OrganizationsFilters = ({
   const [badgeSearch, setBadgeSearch] = useState("");
   const [orgSearch, setOrgSearch] = useState("");
 
-  // Advanced-filter group names double as their identity keys in
-  // `AdvancedFiltersSidebar` (searchQueries / onSearchChange), so compute them
-  // once and reuse the same translated value everywhere below.
+  // Display labels only. The sidebar identifies a group by its `param`, never by
+  // its name — routing on the translated label is what broke the suggest
+  // searches (LEDG-2326).
   const orgGroupName = t("filters.advanced.organization");
   const badgeGroupName = tOrg("filters.advanced.orgTypeGroup");
 
@@ -138,7 +134,8 @@ export const OrganizationsFilters = ({
   );
 
   const orgItems = useMemo(
-    () => allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
+    () =>
+      allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
     [allOrganizations]
   );
 
@@ -166,10 +163,8 @@ export const OrganizationsFilters = ({
         options: ORG_TYPE_OPTIONS.map((option) => ({
           id: option.id,
           label:
-            option.id === "all"
-              ? t("filters.all")
-              : tOrg(ORG_TYPE_OPTION_LABEL_KEYS[option.id]),
-          count: option.id === "all" ? totalOrgs : orgBadgeCounts[option.badge] ?? 0,
+            option.id === "all" ? t("filters.all") : tOrg(ORG_TYPE_OPTION_LABEL_KEYS[option.id]),
+          count: option.id === "all" ? totalOrgs : (orgBadgeCounts[option.badge] ?? 0),
         })),
       },
     ],
@@ -218,16 +213,13 @@ export const OrganizationsFilters = ({
     [toggleBadge, toggleOrg]
   );
 
-  const handleGroupSearch = useCallback(
-    (paramName: string, value: string) => {
-      if (paramName === "organization") setOrgSearch(value);
-      if (paramName === "badge") setBadgeSearch(value);
-    },
-    [orgGroupName, badgeGroupName]
-  );
+  const handleGroupSearch = useCallback((paramName: string, value: string) => {
+    if (paramName === "organization") setOrgSearch(value);
+    if (paramName === "badge") setBadgeSearch(value);
+  }, []);
 
   return (
-    <div className="h-full organizations-filters">
+    <div className="organizations-filters h-full">
       <ToggleFilterSections
         sections={toggleSections}
         selectedValues={{ orgType: selectedOrgType }}
@@ -235,7 +227,7 @@ export const OrganizationsFilters = ({
         idPrefix="org-filter-type"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-64 mb-32">
+      <h2 className="text-xl mb-32 mt-64 font-bold text-neutral-900">
         {t("filters.advanced.label")}
       </h2>
 

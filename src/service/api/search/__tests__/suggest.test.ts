@@ -42,10 +42,7 @@ describe("suggest helpers distinguish failure from no matches", () => {
     });
 
     it(`${name} returns null on a non-ok response`, async () => {
-      vi.stubGlobal(
-        "fetch",
-        vi.fn().mockResolvedValue({ ok: false, statusText: "Bad Gateway" })
-      );
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, statusText: "Bad Gateway" }));
       await expect(call()).resolves.toBeNull();
     });
 

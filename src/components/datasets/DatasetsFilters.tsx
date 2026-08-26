@@ -203,6 +203,15 @@ export const DatasetsFilters = ({
   // search input) or after a page reload with a `geozone` already in the URL.
   const [zoneLabels, setZoneLabels] = useState<Record<string, string>>({});
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
+  // Debounce timer and last-requested query per suggest param. Before LEDG-2326
+  // these requests never fired, so neither guard existed; now that they do, a
+  // word typed at speed would issue one request per keystroke against an
+  // IP-limited endpoint, and a slow failure landing after a newer success would
+  // wipe the good options and show an error over an answered query. Same shape
+  // as `useKeywordSelect`: a 300 ms timer plus a staleness check.
+  const suggestTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const latestQueryRef = useRef<Record<string, string>>({});
+
   // Which suggest groups failed their last request, keyed by the group names
   // `handleSearchChange` routes on. Kept apart from the option lists so a
   // failure is not painted as "no results" (LEDG-2326).
@@ -300,72 +309,93 @@ export const DatasetsFilters = ({
     [getWorkingParams, navigateWithParams]
   );
 
-  const handleTagSearch = useCallback(async (query: string) => {
+  const handleTagSearch = useCallback((query: string) => {
+    latestQueryRef.current["tag"] = query;
+    clearTimeout(suggestTimersRef.current["tag"]);
     if (query.length < 2) {
       setTagOptions([]);
       setSuggestErrors((prev) => ({ ...prev, tag: false }));
       return;
     }
-    try {
-      const results = await suggestTags(query);
-      if (results === null) {
+    suggestTimersRef.current["tag"] = setTimeout(async () => {
+      try {
+        const results = await suggestTags(query);
+        // A newer keystroke has already been requested: this answer is stale.
+        if (latestQueryRef.current["tag"] !== query) return;
+        if (results === null) {
+          setTagOptions([]);
+          setSuggestErrors((prev) => ({ ...prev, tag: true }));
+          return;
+        }
+        setTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
+        setSuggestErrors((prev) => ({ ...prev, tag: false }));
+      } catch {
+        if (latestQueryRef.current["tag"] !== query) return;
         setTagOptions([]);
         setSuggestErrors((prev) => ({ ...prev, tag: true }));
-        return;
       }
-      setTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
-      setSuggestErrors((prev) => ({ ...prev, tag: false }));
-    } catch {
-      setTagOptions([]);
-      setSuggestErrors((prev) => ({ ...prev, tag: true }));
-    }
+    }, 300);
   }, []);
 
-  const handleFormatSearch = useCallback(async (query: string) => {
+  const handleFormatSearch = useCallback((query: string) => {
+    latestQueryRef.current["format"] = query;
+    clearTimeout(suggestTimersRef.current["format"]);
     if (query.length < 2) {
       setFormatOptions([]);
       setSuggestErrors((prev) => ({ ...prev, format: false }));
       return;
     }
-    try {
-      const results = await suggestFormats(query);
-      if (results === null) {
+    suggestTimersRef.current["format"] = setTimeout(async () => {
+      try {
+        const results = await suggestFormats(query);
+        // A newer keystroke has already been requested: this answer is stale.
+        if (latestQueryRef.current["format"] !== query) return;
+        if (results === null) {
+          setFormatOptions([]);
+          setSuggestErrors((prev) => ({ ...prev, format: true }));
+          return;
+        }
+        setFormatOptions(results.map((format) => ({ id: format.text, name: format.text })));
+        setSuggestErrors((prev) => ({ ...prev, format: false }));
+      } catch {
+        if (latestQueryRef.current["format"] !== query) return;
         setFormatOptions([]);
         setSuggestErrors((prev) => ({ ...prev, format: true }));
-        return;
       }
-      setFormatOptions(results.map((format) => ({ id: format.text, name: format.text })));
-      setSuggestErrors((prev) => ({ ...prev, format: false }));
-    } catch {
-      setFormatOptions([]);
-      setSuggestErrors((prev) => ({ ...prev, format: true }));
-    }
+    }, 300);
   }, []);
 
-  const handleZoneSearch = useCallback(async (query: string) => {
+  const handleZoneSearch = useCallback((query: string) => {
+    latestQueryRef.current["geozone"] = query;
+    clearTimeout(suggestTimersRef.current["geozone"]);
     if (query.length < 2) {
       setZoneOptions([]);
       setSuggestErrors((prev) => ({ ...prev, geozone: false }));
       return;
     }
-    try {
-      const results = await suggestSpatialZones(query);
-      if (results === null) {
+    suggestTimersRef.current["geozone"] = setTimeout(async () => {
+      try {
+        const results = await suggestSpatialZones(query);
+        // A newer keystroke has already been requested: this answer is stale.
+        if (latestQueryRef.current["geozone"] !== query) return;
+        if (results === null) {
+          setZoneOptions([]);
+          setSuggestErrors((prev) => ({ ...prev, geozone: true }));
+          return;
+        }
+        setZoneOptions(results.map((zone) => ({ id: zone.id, name: zone.name })));
+        setZoneLabels((prev) => {
+          const next = { ...prev };
+          for (const zone of results) next[zone.id] = zone.name;
+          return next;
+        });
+        setSuggestErrors((prev) => ({ ...prev, geozone: false }));
+      } catch {
+        if (latestQueryRef.current["geozone"] !== query) return;
         setZoneOptions([]);
         setSuggestErrors((prev) => ({ ...prev, geozone: true }));
-        return;
       }
-      setZoneOptions(results.map((zone) => ({ id: zone.id, name: zone.name })));
-      setZoneLabels((prev) => {
-        const next = { ...prev };
-        for (const zone of results) next[zone.id] = zone.name;
-        return next;
-      });
-      setSuggestErrors((prev) => ({ ...prev, geozone: false }));
-    } catch {
-      setZoneOptions([]);
-      setSuggestErrors((prev) => ({ ...prev, geozone: true }));
-    }
+    }, 300);
   }, []);
 
   const handleFilterChange = useCallback(

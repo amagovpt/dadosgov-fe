@@ -171,7 +171,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
       setFilterSearchQueries((prev) => ({ ...prev, [paramName]: value }));
       if (paramName === "tag") handleTagSearch(value);
     },
-    [handleTagSearch, t]
+    [handleTagSearch]
   );
 
   const getActiveValues = useCallback(
@@ -205,7 +205,10 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
       {
         name: t("filters.advanced.organization"),
         param: "organization",
-        data: allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
+        data: allOrganizations.map((organization) => ({
+          id: organization.id,
+          name: organization.name,
+        })),
         searchable: true,
         searchPlaceholder: t("search.label"),
         emptyMessage: t("filters.advanced.search.noResults"),
@@ -213,7 +216,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
       {
         name: t("filters.advanced.tag"),
         param: "tag",
-      hasError: filterSuggestErrors["tag"],
+        hasError: filterSuggestErrors["tag"],
         data: filterTagOptions,
         searchable: true,
         suggest: true,
@@ -234,7 +237,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
         idPrefix="reuse-filter"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">
+      <h2 className="text-xl mb-32 mt-[36px] font-bold text-neutral-900">
         {t("filters.advanced.label")}
       </h2>
 
