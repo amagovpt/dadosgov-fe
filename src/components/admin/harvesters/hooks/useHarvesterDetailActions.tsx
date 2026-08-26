@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   deleteHarvester,
   previewHarvestSource,
+  previewHarvestSourceById,
   rejectHarvestSource,
   scheduleHarvester,
   unscheduleHarvester,
@@ -24,6 +25,7 @@ import {
   validateHarvesterDetails,
 } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
+import { can } from "@/utils/permissions";
 import {
   keepDeclaredKeys,
   selectBackendExtraConfigs,
@@ -205,24 +207,35 @@ export function useHarvesterDetailActions({
     setPreviewJob(null);
     setPreviewError(null);
     try {
-      const job = await previewHarvestSource(
-        buildHarvesterPreviewPayload({
-          name: harvesterName,
-          fallbackName: source.name,
-          url: harvesterUrl,
-          fallbackUrl: source.url,
-          backend: selectedBackend,
-          fallbackBackend: source.backend,
-          schedule: harvesterSchedule,
-          organization: source.organization?.id,
-          active: isEnabled,
-          autoarchive: isAutoArchive,
-          filters,
-          features: keepDeclaredKeys(featureValues, activeBackendFeatures),
-          extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
-          storedConfig: source.config ?? {},
-        }),
-      );
+      // Two preview routes, and which one is right follows from whether the
+      // form can differ from what is stored. Without edit rights every field in
+      // the configuration tab is disabled (`basicDisabled`/`advancedDisabled` in
+      // HarvesterConfigForm), so the config here IS the stored config and the
+      // per-source route serves it — and that route authorizes through
+      // `source.permissions["preview"]`, which covers the owner and an
+      // organization's editors. The config-payload route can only authorize
+      // against an organization (org-admin), so sending them there would answer
+      // 403 for a preview they are entitled to.
+      const job = can(source, "edit")
+        ? await previewHarvestSource(
+            buildHarvesterPreviewPayload({
+              name: harvesterName,
+              fallbackName: source.name,
+              url: harvesterUrl,
+              fallbackUrl: source.url,
+              backend: selectedBackend,
+              fallbackBackend: source.backend,
+              schedule: harvesterSchedule,
+              organization: source.organization?.id,
+              active: isEnabled,
+              autoarchive: isAutoArchive,
+              filters,
+              features: keepDeclaredKeys(featureValues, activeBackendFeatures),
+              extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
+              storedConfig: source.config ?? {},
+            }),
+          )
+        : await previewHarvestSourceById(source.id);
       setPreviewJob(job);
     } catch (error: unknown) {
       const err = error as { data?: { message?: string }; message?: string };
