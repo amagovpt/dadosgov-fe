@@ -91,6 +91,12 @@ interface HarvesterConfigFormProps {
   // only preview. Default true for the create flow (no source yet).
   canEdit?: boolean;
   canDelete?: boolean;
+  // Whether this user may preview at all — `source.permissions["preview"]`
+  // (HarvestSourcePermission: owner, org-admin, org-editor). Kept separate from
+  // `canEdit` because an editor may preview without editing; the detail screen
+  // reads which of the two preview routes that implies. Nothing on the create
+  // flow has a source yet, hence the default.
+  canPreview?: boolean;
   deleteCard?: AdminCard;
   auxiliaryItems?: AdminAuxiliaryItem[];
   // Whether the "advanced" fields (URL, implementation type, schedule, toggles)
@@ -139,6 +145,7 @@ export function HarvesterConfigForm({
   onDelete,
   canEdit = true,
   canDelete = true,
+  canPreview = true,
   deleteCard,
   auxiliaryItems,
   canEditAdvanced,
@@ -487,17 +494,19 @@ export function HarvesterConfigForm({
           </div>
 
           <div className="admin-page__actions flex justify-end gap-16">
-            <Button
-              appearance="outline"
-              variant="primary"
-              type="button"
-              disabled={isPreviewing || !!scheduleError}
-              onClick={onPreview}
-            >
-              {isPreviewing
-                ? t("admin-harvesters:actions.previewing")
-                : t("admin-harvesters:actions.preview")}
-            </Button>
+            {canPreview && (
+              <Button
+                appearance="outline"
+                variant="primary"
+                type="button"
+                disabled={isPreviewing || !!scheduleError}
+                onClick={onPreview}
+              >
+                {isPreviewing
+                  ? t("admin-harvesters:actions.previewing")
+                  : t("admin-harvesters:actions.preview")}
+              </Button>
+            )}
             {canEdit && (
               <Button
                 variant="primary"
