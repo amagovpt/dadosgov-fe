@@ -40,10 +40,11 @@ vi.mock("next/navigation", () => ({
 
 const fetchMigrationPendingMock = vi.fn();
 const skipMigrationMock = vi.fn();
+const sendMigrationLinkMock = vi.fn();
 vi.mock("@/service/api/migration", () => ({
   fetchMigrationPending: () => fetchMigrationPendingMock(),
   searchMigrationAccount: vi.fn(),
-  sendMigrationCode: vi.fn(),
+  sendMigrationLink: () => sendMigrationLinkMock(),
   confirmMigration: vi.fn(),
   skipMigration: (email: string) => skipMigrationMock(email),
   resendMigrationConfirmation: vi.fn(),
@@ -150,6 +151,7 @@ beforeEach(() => {
   pushMock.mockClear();
   fetchMigrationPendingMock.mockReset();
   skipMigrationMock.mockReset();
+  sendMigrationLinkMock.mockReset();
 });
 
 afterEach(() => {
@@ -327,6 +329,94 @@ describe("MigrateAccountClient account creation step", () => {
       expect(message).toBeTruthy();
       expect(message.toLowerCase()).not.toContain("volte atrás");
       expect(message.toLowerCase()).not.toContain("go back");
+    }
+  });
+});
+
+/**
+ * LEDG-2357: the linking branch proves ownership of the legacy account with a
+ * validation link instead of a 6-digit code. The waiting screen it lands on is
+ * the same shape as the account-creation one, and nothing on it is
+ * authenticated until the link in the mail is followed.
+ */
+describe("MigrateAccountClient validation-link step", () => {
+  /** The method buttons wrap a title and a description, so their textContent
+   *  is never just the label clickButton matches on. */
+  async function clickCard(label: string) {
+    const button = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes(label)
+    );
+    if (!button) throw new Error(`card not found: ${label}`);
+    await act(async () => {
+      button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  }
+
+  async function reachChooseMethod() {
+    await render({ pending: true, candidate: true, email: "j***@example.pt" });
+    await clickButton(translate("migration.confirmYes"));
+  }
+
+  it("shows the validation-link screen with the ticket's copy after sending", async () => {
+    sendMigrationLinkMock.mockResolvedValue({ sent: true });
+    await reachChooseMethod();
+
+    await clickCard(translate("migration.sendLink"));
+
+    expect(sendMigrationLinkMock).toHaveBeenCalledTimes(1);
+    const text = container.textContent ?? "";
+    expect(text).toContain(translate("migration.linkSentTitle"));
+    expect(text).toContain(translate("migration.linkSentDescription"));
+  });
+
+  it("holds the resend behind a visible cooldown", async () => {
+    sendMigrationLinkMock.mockResolvedValue({ sent: true });
+    await reachChooseMethod();
+    await clickCard(translate("migration.sendLink"));
+
+    const resend = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.startsWith(translate("migration.resendLink"))
+    );
+    expect(resend).toBeTruthy();
+    // The countdown starts immediately, so the button is disabled and says so.
+    expect(resend?.textContent).toContain("60s");
+    expect(resend?.hasAttribute("disabled")).toBe(true);
+  });
+
+  it("tells the user the send limit lifts, rather than to contact support", async () => {
+    // The account-creation cap is for the life of the account; this one is a
+    // window. Reusing that copy here would send people to support over a wait.
+    sendMigrationLinkMock.mockRejectedValue(
+      new Error("Maximum confirmation sends exceeded")
+    );
+    await reachChooseMethod();
+    await clickCard(translate("migration.sendLink"));
+
+    const text = container.textContent ?? "";
+    expect(text).toContain(translate("migration.errorTooManyLinkSends"));
+    expect(text).not.toContain(translate("migration.errorTooManySends"));
+  });
+
+  it("has no trace of the removed code step in either locale", async () => {
+    for (const locale of [ptLogin, enLogin]) {
+      const migration = locale.migration as Record<string, unknown>;
+      for (const key of [
+        "sendCode",
+        "codeDescription",
+        "verifyCodeTitle",
+        "verificationCode",
+        "resendCode",
+        "errorInvalidCode",
+        "errorSendCode",
+        "errorResendCode",
+      ]) {
+        expect(migration[key]).toBeUndefined();
+      }
+      expect(migration.linkSentTitle).toBeTruthy();
+      expect(migration.linkSentDescription).toBeTruthy();
     }
   });
 });

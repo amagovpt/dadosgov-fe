@@ -38,23 +38,25 @@ export async function searchMigrationAccount(
 }
 
 
-export async function sendMigrationCode(): Promise<{ sent: boolean }> {
-  const res = await fetch("/saml/migration/send-code", {
+// Mails a validation link to the address already on the candidate account.
+// Takes no argument on purpose: the recipient is never one the caller names.
+export async function sendMigrationLink(): Promise<{ sent: boolean }> {
+  const res = await fetch("/saml/migration/send-link", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to send migration code");
+    throw new Error(data.error || "Failed to send migration link");
   }
   return await res.json();
 }
 
 
+// Only the password proof remains: ownership by email is now proved by
+// following the validation link, which the backend consumes on its own route.
 export async function confirmMigration(
-  payload:
-    | { method: "code"; code: string }
-    | { method: "password"; email: string; password: string }
+  payload: { method: "password"; email: string; password: string }
 ): Promise<{ success: boolean }> {
   const res = await fetch("/saml/migration/confirm", {
     method: "POST",

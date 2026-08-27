@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
-import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
+import { fetchMigrationPending, searchMigrationAccount, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +19,7 @@ type Step =
   | "search"
   | "confirm-account"
   | "choose-method"
-  | "verify-code"
+  | "link-sent"
   | "enter-email"
   | "confirmation-pending"
   | "success"
@@ -43,8 +43,8 @@ export default function MigrateAccountClient() {
   const [searchLastName, setSearchLastName] = useState("");
   const [searchByName, setSearchByName] = useState(false);
 
-  // Code verification
-  const [code, setCode] = useState("");
+  // Validation-link branch: the cooldown on the resend button. The backend
+  // caps the sends; this only stops the button being hammered.
   const [resendCountdown, setResendCountdown] = useState(0);
 
   // Account-creation branch: the address the user submits, and the one the
@@ -160,46 +160,46 @@ export default function MigrateAccountClient() {
     }
   }, [searchByName, searchFirstName, searchLastName, searchEmail]);
 
-  const handleSendCode = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await sendMigrationCode();
-      setResendCountdown(60);
-      setStep("verify-code");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("migration.errorSendCode"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // The backend answers a spent allowance with this exact string. Its own
+  // message, not the account-creation one: that cap is for the life of the
+  // account, this one lifts after an hour, so "contact support" would be
+  // wrong advice here.
+  const linkSendError = useCallback(
+    (err: unknown) => {
+      const message = err instanceof Error ? err.message : "";
+      return message === "Maximum confirmation sends exceeded"
+        ? t("migration.errorTooManyLinkSends")
+        : t("migration.errorSendLink");
+    },
+    [t]
+  );
 
-  const handleResendCode = useCallback(async () => {
+  const handleSendLink = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      await sendMigrationCode();
-      setResendCountdown(60);
-      setCode("");
+      await sendMigrationLink();
+      setResendCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
+      setStep("link-sent");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("migration.errorResendCode"));
+      setError(linkSendError(err));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [linkSendError]);
 
-  const handleConfirmCode = useCallback(async () => {
+  const handleResendLink = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      await confirmMigration({ method: "code", code });
-      setStep("success");
+      await sendMigrationLink();
+      setResendCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("migration.errorInvalidCode"));
+      setError(linkSendError(err));
     } finally {
       setIsLoading(false);
     }
-  }, [code]);
+  }, [linkSendError]);
 
   const handleLogin = useCallback(async () => {
     setIsLoading(true);
@@ -618,7 +618,7 @@ export default function MigrateAccountClient() {
 
               <div className="flex flex-col gap-16">
                 <button
-                  onClick={handleSendCode}
+                  onClick={handleSendLink}
                   disabled={isLoading}
                   className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
                 >
@@ -627,10 +627,10 @@ export default function MigrateAccountClient() {
                   </div>
                   <div>
                     <p className="text-lg-bold text-brand-blue-dark">
-                      {t("migration.sendCode")}
+                      {t("migration.sendLink")}
                     </p>
                     <p className="text-sm text-neutral-700">
-                      {t("migration.codeDescription", { email: maskedEmail || t("migration.email") })}
+                      {t("migration.sendLinkDescription", { email: maskedEmail || t("migration.email") })}
                     </p>
                   </div>
                 </button>
@@ -666,45 +666,31 @@ export default function MigrateAccountClient() {
             </div>
           )}
 
-          {/* Step: Verify by code */}
-          {step === "verify-code" && (
-            <div className="flex flex-col gap-24">
-              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
-                <Icon name="agora-line-mail" className="h-24 w-24 text-brand-blue-primary" />
+          {/* Step: the validation link is out. Same layout as the
+              confirmation-pending screen the account-creation branch ends on,
+              because it is the same situation: the mail is what carries the
+              flow on, and nothing here is authenticated until it is followed. */}
+          {step === "link-sent" && (
+            <div className="flex flex-col items-center gap-24 text-center">
+              <div className="bg-blue-100 w-fit rounded-full p-24">
+                <Icon name="agora-line-mail" className="text-brand-blue-dark h-48 w-48" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.verifyCodeTitle")}</h2>
-              <p className="text-neutral-900">
-                {t("migration.codeDescription", { email: maskedEmail })}
-              </p>
+              <h2 className="text-xl-bold text-brand-blue-dark">
+                {t("migration.linkSentTitle")}
+              </h2>
+              <p className="text-neutral-900">{t("migration.linkSentDescription")}</p>
 
-              <InputText
-                label={t("migration.verificationCode")}
-                placeholder="000000"
-                id="migration-code"
-                name="migration-code"
-                className="w-full"
-                value={code}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
-                disabled={isLoading}
-              />
-
-              <div className="flex items-center gap-16">
-                <Button
-                  variant="primary"
-                  onClick={handleConfirmCode}
-                  disabled={isLoading || code.length !== 6}
-                  className="px-48"
-                >
-                  {isLoading ? t("migration.checking") : t("migration.verify")}
-                </Button>
-                <Button
-                  variant="neutral"
-                  onClick={handleResendCode}
-                  disabled={isLoading || resendCountdown > 0}
-                >
-                  {resendCountdown > 0 ? `${t("migration.resendCode")} (${resendCountdown}s)` : t("migration.resendCode")}
-                </Button>
-              </div>
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={handleResendLink}
+                disabled={isLoading || resendCountdown > 0}
+                className="text-sm h-auto p-0"
+              >
+                {resendCountdown > 0
+                  ? `${t("migration.resendLink")} (${resendCountdown}s)`
+                  : t("migration.resendLink")}
+              </Button>
 
               <Button
                 variant="primary"
