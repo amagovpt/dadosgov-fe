@@ -6,6 +6,36 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(admin): widen column sorting across the backoffice tables**
+  - Sorting was uneven across the admin lists: the system topics table had none
+    at all, the system harvesters view declared it on one column where the org
+    view had four, and the organizations, posts and members tables each rendered
+    a column that could not be sorted. Every one of those columns is now
+    sortable, in both directions.
+  - Nothing new was built for it — the existing `useAdminListController`,
+    `useClientTableState` and `listHelpers` were enough, and a column becomes
+    sortable by declaring `sortField`. The mechanism follows how each screen gets
+    its data: organizations sorts through the API, which already supported
+    `datasets` and `reuses`; topics, harvesters, posts and members sort the whole
+    loaded set client-side.
+  - Topics moves from server pagination to one request for the whole catalogue,
+    because two of its four columns are counts the API cannot sort by, so
+    server-side sorting could never have covered the table. Its effect no longer
+    refetches on page change, which would otherwise overwrite the set being
+    sliced.
+  - The org discussions view was requesting the endpoint's default of 20 records
+    and then paginating those, so both the list and its total were truncated for
+    any organization with more. It now asks for the whole set, which is also what
+    makes sorting mean anything there, and the title column becomes sortable.
+  - The system harvesters last-run cell showed only the end timestamp while the
+    comparator ordered by start-then-end-then-created. It now shows the same
+    value it is sorted by, so the arrow cannot promise an order the rows do not
+    show.
+  - Sorting the organizations table by member count is not included: the metric
+    exists on the model but not in the API's sort choices, which answers 400, and
+    this screen paginates and searches server-side so a client-side sort would
+    order one page while claiming to order the catalogue.
+
 - **fix(harvesters): authorize the harvester preview instead of relying on it not being checked**
   - The edit screen previewed through `POST /harvest/source/preview/` without ever
     naming an organization. That endpoint only tests
