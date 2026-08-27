@@ -1,6 +1,7 @@
 import type { Post, PostCreatePayload, PostUpdatePayload } from "@/service/types/posts";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 export async function fetchPosts(
@@ -25,6 +26,7 @@ export async function fetchPosts(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching posts:", error);
     return {
       data: [],
@@ -58,6 +60,7 @@ export async function fetchPost(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching post:", error);
     return null;
   }
@@ -85,6 +88,7 @@ export async function createPost(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error creating post:", error);
     return null;
   }
@@ -113,6 +117,7 @@ export async function updatePost(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error updating post:", error);
     return null;
   }
@@ -142,6 +147,7 @@ export async function fetchAdminPosts(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching admin posts:", error);
     return { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null };
   }
@@ -165,6 +171,7 @@ export async function publishPost(id: string): Promise<Post | null> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error publishing post:", error);
     return null;
   }
@@ -188,6 +195,7 @@ export async function unpublishPost(id: string): Promise<Post | null> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error unpublishing post:", error);
     return null;
   }
@@ -211,6 +219,7 @@ export async function deletePost(id: string): Promise<boolean> {
 
     return true;
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error deleting post:", error);
     return false;
   }
@@ -241,6 +250,7 @@ export async function uploadPostImage(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error uploading post image:", error);
     return null;
   }

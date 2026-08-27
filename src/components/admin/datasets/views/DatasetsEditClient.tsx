@@ -40,6 +40,7 @@ import DatasetsEditMetadataTab from "@/components/admin/datasets/edit-tabs/Datas
 import DatasetsEditResourcesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditResourcesTab";
 import DatasetsEditDiscussionsTab from "@/components/admin/datasets/edit-tabs/DatasetsEditDiscussionsTab";
 import DatasetsEditActivitiesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditActivitiesTab";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -169,8 +170,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         setResourceTypes(resTypes);
 
         suggestSpatialZones("", 20).then((results) => {
-          spatialZoneSearchRef.current = results;
-          setSpatialZoneSearch(results);
+          spatialZoneSearchRef.current = results ?? [];
+          setSpatialZoneSearch(results ?? []);
         });
 
         if (ds.spatial?.zones?.length) {
@@ -499,6 +500,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             {dataset.private ? t("edit.statusDraft") : t("edit.statusPublic")}
           </Pill>
           {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
+          <DatasetBadges badges={dataset.badges} />
           <span className="admin-edit-info__stat">
             <svg
               width="14"
@@ -641,8 +643,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                   }
                   suggestSpatialZones(q, 50)
                     .then((results) => {
-                      spatialZoneSearchRef.current = results;
-                      setSpatialZoneSearch(results);
+                      spatialZoneSearchRef.current = results ?? [];
+                      setSpatialZoneSearch(results ?? []);
                     })
                     .catch(() => {
                       spatialZoneSearchRef.current = [];

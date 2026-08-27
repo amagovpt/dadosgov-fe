@@ -17,8 +17,6 @@ import { isPathRestricted } from "./utils/matchRestrictedPath";
  *   3) Inject `X-Forwarded-Host` on backend-proxied routes so Flask
  *      (ProxyFix, SERVER_NAME) sees the expected host when the frontend
  *      runs in Docker.
- *   4) Expose the request pathname as `x-pathname` so Server Components (which
- *      have no `usePathname()`) can build locale-aware redirect targets.
  *
  * The CSP is intentionally built here (not in `next.config.ts`) because
  * the nonce must be regenerated per request — static headers in
@@ -34,7 +32,7 @@ const BACKEND_PROXY_PATHS = ["/api/", "/saml/", "/logout/", "/get-csrf", "/s/", 
 // (auto-submit forms with their own CSP); double-CSP would break the SAML
 // dance. Backend-proxied paths return raw upstream responses and should
 // inherit the upstream CSP (or none).
-const NO_CSP_PATHS = ["/saml/", "/api/", "/s/", "/swaggerui/", "/confirm", "/reset", "/get-csrf"];
+const NO_CSP_PATHS = ["/saml/", "/api/", "/s/", "/swaggerui/", "/confirm/", "/reset/", "/get-csrf"];
 
 function generateNonce(): string {
   const bytes = new Uint8Array(16);
@@ -82,11 +80,6 @@ export async function proxy(request: NextRequest) {
   const skipCsp = NO_CSP_PATHS.some((p) => pathname.startsWith(p));
 
   const requestHeaders = new Headers(request.headers);
-
-  // Server Components have no `usePathname()`. The server-side API error
-  // interceptor needs the current path to build `/login?next=…` when a session
-  // has expired mid-render.
-  requestHeaders.set("x-pathname", pathname);
 
   if (isBackendProxy && BACKEND_HOST) {
     requestHeaders.set("X-Forwarded-Host", BACKEND_HOST);
@@ -147,7 +140,7 @@ export const config = {
   matcher: [
     {
       source:
-        "/((?!api/|auth/|internal-api/|confirm/|reset/|confirm-change-email/|assets/|swaggerui/|s/|saml/|get-csrf|_next/static|.*\\..*|_next/image|favicon.ico|favicon.png|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|eot)$).*)",
+        "/((?!api/|auth/|internal-api/|confirm/|reset/|confirm-change-email/|assets/|swaggerui/|s/|saml/|get-csrf|_next/|\\.well-known/|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?|ttf|otf|eot|css|js|mjs|map)$).*)",
     },
   ],
 };

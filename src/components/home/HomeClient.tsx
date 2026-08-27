@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Button, CardArticle } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/service/types/dataset";
 import { Post } from "@/service/types/posts";
@@ -10,6 +9,7 @@ import { SiteMetrics } from "@/service/types/shared";
 import { format } from "date-fns";
 import { enGB, pt } from "date-fns/locale";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
 import { Hero } from "@/components/Shared/Hero";
@@ -227,6 +227,7 @@ export default function HomeClient({
                     ...dataset,
                     last_modified: timeAgo,
                     link: `/datasets/${dataset.slug}`,
+                    titleBadges: <DatasetBadges badges={dataset.badges} />,
                   } as CardMetricsProps;
                   return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />;
                 })

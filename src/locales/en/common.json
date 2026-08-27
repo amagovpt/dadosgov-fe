@@ -46,7 +46,7 @@
   "backToArticles": "Back to articles",
   "loading": "Loading...",
   "notFound": {
-    "error": "Erro 404",
+    "error": "Error 404",
     "title": "Page not found",
     "subtitle": "We could not find the resource you are looking for.",
     "description": "The content may have been removed, changed, or the address you entered may not be correct. Explore the available datasets or return to the home page to continue your search.",
@@ -149,7 +149,9 @@
       "searchIn": "Search “{{query}}” in {{type}}"
     },
     "noResultsFor": "No results found for \"{{query}}\"",
-    "tryDifferentTerms": "Try searching with different terms."
+    "tryDifferentTerms": "Try searching with different terms.",
+    "error": "The search could not be completed.",
+    "retry": "Try again"
   },
   "filters": {
     "format": {
@@ -267,10 +269,6 @@
     "harvester": "A harvester",
     "organization": "An organisation"
   },
-  "listingError": {
-    "title": "Unable to load",
-    "subtitle": "An error occurred while contacting the server. Please try again in a few moments."
-  },
   "apiError": {
     "serverErrorTitle": "Service unavailable",
     "serverErrorDescription": "A server error occurred. Please try again in a few moments.",
@@ -278,11 +276,39 @@
     "networkErrorDescription": "Could not reach the server. Please check your internet connection.",
     "sessionExpiredTitle": "Session expired",
     "sessionExpiredDescription": "Please sign in again to continue.",
-    "pageErrorTitle": "This page could not be loaded",
-    "pageErrorSubtitle": "The service may be temporarily unavailable.",
-    "pageErrorDescription": "Please try again shortly. If the problem persists, contact support.",
-    "pageErrorReference": "Reference: {{digest}}",
+    "navigationErrorTitle": "Unable to process the request",
+    "navigationErrorDescription": "We apologize, something unexpected occurred."
+  },
+  "errorCode": "Error {{status}}",
+  "error500": {
+    "error": "Error 500",
+    "title": "Something went wrong",
+    "subtitle": "We could not complete your request at this time.",
+    "description": "A problem occurred while processing the requested information. Please try again in a few moments or return to the homepage to continue browsing the portal.",
+    "refresh": "Refresh page"
+  },
+  "errorAccess": {
+    "error": "Error 401/403",
+    "title": "Restricted access",
+    "subtitle": "You are not authorised to access this content.",
+    "description": "This resource requires authentication or specific permissions. If you believe you should have access, check your credentials or contact the platform administrator.",
     "backToHome": "Back to homepage"
+  },
+  "errorNetwork": {
+    "error": "No connection",
+    "title": "Could not reach the server",
+    "subtitle": "The portal was unable to contact our services.",
+    "description": "Please check your internet connection and try again. If your connection is working, the service may be temporarily unavailable.",
+    "refresh": "Refresh page"
+  },
+  "errorMaintenance": {
+    "title": "Portal temporarily unavailable",
+    "subtitle": "We are making improvements to the platform.",
+    "description": "To ensure the quality, security and availability of our services, Dados.gov.pt is temporarily under maintenance. Thank you for your understanding — we look forward to welcoming you back shortly."
+  },
+  "errorHelp": {
+    "title": "Need help?",
+    "email": "arte@arte.gov.pt"
   },
   "retry": "Try again",
   "discussions": {

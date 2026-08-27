@@ -11,6 +11,7 @@ import {
   chunkedUploadFetch,
   translateUploadErrorPayload,
 } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 // ── Community Resources CRUD (TICKET-31) ─────────────────────────────
@@ -38,6 +39,7 @@ export async function fetchMyCommunityResources(
       previous_page: page > 1 ? `${page - 1}` : null,
     };
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching my community resources:", error);
     return {
       data: [],
@@ -64,6 +66,7 @@ export async function fetchMyOrgCommunityResources(
       throw new Error(`Failed to fetch org community resources: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching org community resources:", error);
     return {
       data: [],
@@ -89,7 +92,8 @@ export async function fetchAllCommunityResources(
     if (!res.ok) return { data: [], total: 0 };
     const json = await res.json();
     return { data: json.data || [], total: json.total || 0 };
-  } catch {
+  } catch (error) {
+    rethrowControlFlow(error);
     return { data: [], total: 0 };
   }
 }
@@ -108,7 +112,8 @@ export async function fetchCommunityResourcesByDataset(
     if (!res.ok) return { data: [], total: 0 };
     const json = await res.json();
     return { data: json.data || [], total: json.total || 0 };
-  } catch {
+  } catch (error) {
+    rethrowControlFlow(error);
     return { data: [], total: 0 };
   }
 }
@@ -201,6 +206,7 @@ export async function fetchOrgCommunityResources(
       throw new Error(`Failed to fetch org community resources: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching org community resources:", error);
     return {
       data: [],

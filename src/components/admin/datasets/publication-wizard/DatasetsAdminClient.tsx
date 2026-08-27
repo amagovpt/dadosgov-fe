@@ -370,9 +370,9 @@ export default function DatasetsAdminClient({
         setFrequencies(frequenciesData);
         setGranularities(granularitiesData);
         setHasDatasets(myDatasetsData.data.length > 0);
-        setTags(tagsData);
-        spatialZoneSearchRef.current = zonesData;
-        setSpatialZoneSearch(zonesData);
+        setTags(tagsData ?? []);
+        spatialZoneSearchRef.current = zonesData ?? [];
+        setSpatialZoneSearch(zonesData ?? []);
         setResourceTypes(resTypes);
         setAllowedExtensions(extData);
       } catch (error) {
@@ -387,7 +387,7 @@ export default function DatasetsAdminClient({
     if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
-        const res = await suggestTags(q, 20);
+        const res = (await suggestTags(q, 20)) ?? [];
         setTagSearch(res);
       } catch {
         setTagSearch([]);
@@ -443,8 +443,8 @@ export default function DatasetsAdminClient({
     if (!q) return;
     suggestSpatialZones(q, 20)
       .then((results) => {
-        spatialZoneSearchRef.current = results;
-        setSpatialZoneSearch(results);
+        spatialZoneSearchRef.current = results ?? [];
+        setSpatialZoneSearch(results ?? []);
       })
       .catch(() => {
         spatialZoneSearchRef.current = [];

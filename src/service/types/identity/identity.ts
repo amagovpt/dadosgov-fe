@@ -25,6 +25,11 @@ export interface UserRef {
   uri: string;
   page: string;
   saml_login?: boolean;
+  email?: string | null;
+  // True while the account still has a minted saml-* placeholder email;
+  // optional so an older backend (without the field) simply disables the
+  // complete-registration gate.
+  pending_registration?: boolean | null;
   roles?: string[];
   organizations?: Organization[];
   last_modified?: string;
@@ -101,6 +106,7 @@ export interface Badge {
 export interface OrganizationMetrics {
   datasets: number;
   dataservices: number;
+  discussions?: number;
   followers: number;
   members: number;
   reuses: number;
@@ -229,4 +235,3 @@ export interface UserSuggestion {
   avatar_thumbnail: string | null;
   score: number;
 }
-

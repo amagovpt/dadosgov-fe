@@ -59,7 +59,13 @@ export async function confirmMigration(
 }
 
 
-export async function skipMigration(): Promise<{ success: boolean }> {
+export async function skipMigration(): Promise<{
+  success: boolean;
+  // True when the new account got a saml-* placeholder email (CMD brought
+  // no usable email): the wizard must send the user to /complete-registration.
+  // Optional so an older backend (without the field) keeps the old behavior.
+  pending_registration?: boolean;
+}> {
   const res = await fetch("/saml/migration/skip", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

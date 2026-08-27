@@ -18,6 +18,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { ErrorState } from "@/components/Shared/ErrorState";
 import { Dataset } from "@/service/types/dataset";
 import { Follow, UserFollowing, UserPublic } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
@@ -43,14 +44,6 @@ export default function PublicProfileClient() {
   const slug = params?.slug as string;
   const isOwnProfile = user?.slug === slug;
 
-  // User profile endpoints now require authentication (LEDG-2113 / VULN-2092).
-  // Gate anonymous visitors to login, preserving the profile as the return URL.
-  useEffect(() => {
-    if (!isAuthLoading && !user) {
-      router.push(`/login?next=${encodeURIComponent(`/users/${slug}`)}`);
-    }
-  }, [isAuthLoading, user, slug, router]);
-
   const [profileUser, setProfileUser] = useState<UserPublic | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [reuses, setReuses] = useState<Reuse[]>([]);
@@ -67,8 +60,9 @@ export default function PublicProfileClient() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
-    // Wait for auth to resolve; anonymous visitors are redirected to login by
-    // the gate effect above, so don't attempt the (now authenticated) fetches.
+    // Wait for auth to resolve. Anonymous visitors render the 401 page below
+    // instead (profile endpoints require authentication: LEDG-2113 / VULN-2092),
+    // so don't attempt the fetches that would only be refused.
     if (isAuthLoading || !user) return;
     async function loadData() {
       try {
@@ -192,6 +186,8 @@ export default function PublicProfileClient() {
   const initials = displayUser
     ? `${displayUser.first_name?.charAt(0).toUpperCase() ?? ""}${displayUser.last_name?.charAt(0).toUpperCase() ?? ""}`
     : "U";
+
+  if (!isAuthLoading && !user) return <ErrorState status={401} />;
 
   return (
     <div className="container mx-auto mb-64">

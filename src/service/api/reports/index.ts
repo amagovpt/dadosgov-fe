@@ -5,6 +5,7 @@ import type {
 } from "@/service/types/notifications-reporting";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 // --- Reports ---
@@ -15,6 +16,7 @@ export async function fetchReportReasons(): Promise<ReportReason[]> {
     if (!res.ok) throw new Error(`Failed to fetch report reasons: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching report reasons:", error);
     return [];
   }
@@ -59,6 +61,7 @@ export async function fetchReports(
     if (!res.ok) throw new Error(`Failed to fetch reports: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching reports:", error);
     return { data: [], page, page_size: pageSize, total: 0, next_page: null, previous_page: null };
   }

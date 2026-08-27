@@ -5,6 +5,7 @@ import { ToggleGroup, Toggle, usePopupContext } from "@ama-pt/agora-design-syste
 import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
+import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { Frequency, Granularity, License } from "@/service/types/catalog";
 import { Dataset } from "@/service/types/dataset";
@@ -18,7 +19,6 @@ import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 import { twJoin } from "tailwind-merge";
-import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
 import FoNoResults from "../common/FoNoResults";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -204,12 +204,7 @@ export default function DatasetsClient({
                     : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
                 )}
               >
-                {listData.error ? (
-                  <ListingErrorBanner
-                    entity={tds("theDatasets")}
-                    errorStatus={listData.errorStatus}
-                  />
-                ) : datasets.length > 0 ? (
+                {datasets.length > 0 ? (
                   datasets.map((dataset) => {
                     const timeAgo = formatDateToTimeAgo(
                       dataset.last_modified || dataset.created_at,
@@ -219,6 +214,7 @@ export default function DatasetsClient({
                       ...dataset,
                       last_modified: timeAgo,
                       link: `/datasets/${dataset.slug}`,
+                      titleBadges: <DatasetBadges badges={dataset.badges} />,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />;
                   })

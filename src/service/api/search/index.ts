@@ -5,6 +5,7 @@ import type { Reuse } from "@/service/types/reuse";
 import type { GlobalSearchSuggestion } from "@/service/types/search";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 export async function searchDatasets(
@@ -22,6 +23,7 @@ export async function searchDatasets(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error searching datasets:", error);
     return {
       data: [],
@@ -50,6 +52,7 @@ export async function searchOrganizations(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error searching organizations:", error);
     return {
       data: [],
@@ -78,6 +81,7 @@ export async function searchReuses(
     }
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error searching reuses:", error);
     return {
       data: [],
@@ -91,7 +95,13 @@ export async function searchReuses(
 }
 
 
-export async function suggestTags(query: string, size: number = 10): Promise<TagSuggestion[]> {
+/**
+ * Returns `null` when the request failed, as opposed to `[]` for a search that
+ * ran and matched nothing. Callers that only need a list use `?? []`; the ones
+ * that must tell a failure apart from an empty result check for `null` — see
+ * `rethrowControlFlow`, whose own docstring names this exact confusion.
+ */
+export async function suggestTags(query: string, size: number = 10): Promise<TagSuggestion[] | null> {
   try {
     const res = await fetch(
       `${API_BASE_URL}/tags/suggest/?q=${encodeURIComponent(query)}&size=${size}`,
@@ -100,8 +110,9 @@ export async function suggestTags(query: string, size: number = 10): Promise<Tag
     if (!res.ok) throw new Error(`Failed to suggest tags: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting tags:", error);
-    return [];
+    return null;
   }
 }
 
@@ -122,6 +133,7 @@ export async function suggestGlobalSearch(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching search suggestions:", error);
     return [];
   }
@@ -130,10 +142,16 @@ export async function suggestGlobalSearch(
 
 // --- Spatial / Geographic ---
 
+/**
+ * Returns `null` when the request failed, as opposed to `[]` for a search that
+ * ran and matched nothing. Callers that only need a list use `?? []`; the ones
+ * that must tell a failure apart from an empty result check for `null` — see
+ * `rethrowControlFlow`, whose own docstring names this exact confusion.
+ */
 export async function suggestSpatialZones(
   query: string,
   size: number = 10
-): Promise<SpatialZone[]> {
+): Promise<SpatialZone[] | null> {
   try {
     const res = await fetch(
       `${API_BASE_URL}/spatial/zones/suggest/?q=${encodeURIComponent(query)}&size=${size}`,
@@ -142,8 +160,9 @@ export async function suggestSpatialZones(
     if (!res.ok) throw new Error(`Failed to suggest spatial zones: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting spatial zones:", error);
-    return [];
+    return null;
   }
 }
 
@@ -164,6 +183,7 @@ export async function getSpatialZones(
       })
     );
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching spatial zones:", error);
     return [];
   }
@@ -183,6 +203,7 @@ export async function suggestUsers(query: string, size: number = 20): Promise<Us
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error suggesting users:", error);
     return [];
   }

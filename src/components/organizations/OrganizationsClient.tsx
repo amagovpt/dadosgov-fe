@@ -15,7 +15,6 @@ import { OrganizationBadges } from "@/components/organizations/OrganizationBadge
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
 import { twJoin } from "tailwind-merge";
-import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
 import { FrontOfficePage } from "@/service/types/shared/common";
 
@@ -159,12 +158,7 @@ export default function OrganizationsClient({
                     : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
                 )}
               >
-                {listData.error ? (
-                  <ListingErrorBanner
-                    entity={tOrg("theOrganizations")}
-                    errorStatus={listData.errorStatus}
-                  />
-                ) : organizations.length > 0 ? (
+                {organizations.length > 0 ? (
                   organizations.map((org) => {
                     const timeAgo = formatDateToTimeAgo(
                       org.last_modified,

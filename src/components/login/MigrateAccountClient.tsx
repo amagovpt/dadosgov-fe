@@ -41,6 +41,10 @@ export default function MigrateAccountClient() {
   const [code, setCode] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
 
+  // Set when the skipped (new) account got a saml-* placeholder email: the
+  // success redirect must land on /complete-registration instead of home.
+  const [needsEmail, setNeedsEmail] = useState(false);
+
   // Default account login (email + password)
   const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -166,7 +170,8 @@ export default function MigrateAccountClient() {
     setIsLoading(true);
     setError(null);
     try {
-      await skipMigration();
+      const data = await skipMigration();
+      setNeedsEmail(Boolean(data.pending_registration));
       setStep("success-new");
     } catch {
       setError(t("migration.errorCreateAccount"));
@@ -186,14 +191,18 @@ export default function MigrateAccountClient() {
     }
   }, [hasCandidate]);
 
-  // Redirect after success (account linked or new account created)
+  // Redirect after success (account linked or new account created). A new
+  // account holding a placeholder email must complete registration first.
+  // Full reload on purpose: it refreshes AuthContext with the new session.
   useEffect(() => {
     if (step !== "success" && step !== "success-new") return;
+    const destination =
+      step === "success-new" && needsEmail ? "/complete-registration" : "/";
     const timer = setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = destination;
     }, 3000);
     return () => clearTimeout(timer);
-  }, [step]);
+  }, [step, needsEmail]);
 
   if (step === "loading") {
     return (
