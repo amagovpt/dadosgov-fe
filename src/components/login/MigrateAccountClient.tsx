@@ -4,18 +4,24 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
-import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration } from "@/service/api/migration";
+import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
 import { useTranslation } from "react-i18next";
 
+// Same shape check and cooldown as CompleteRegistrationClient, the portal's
+// other "submit an email, then check your inbox" screen.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const RESEND_CONFIRM_COOLDOWN_SECONDS = 60;
+
 type Step =
   | "loading"
-  | "choice"
   | "login"
   | "search"
   | "confirm-account"
   | "choose-method"
   | "verify-code"
+  | "enter-email"
+  | "confirmation-pending"
   | "success"
   | "success-new";
 
@@ -41,9 +47,14 @@ export default function MigrateAccountClient() {
   const [code, setCode] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
 
-  // Set when the skipped (new) account got a saml-* placeholder email: the
-  // success redirect must land on /complete-registration instead of home.
-  const [needsEmail, setNeedsEmail] = useState(false);
+  // Account-creation branch: the address the user submits, and the one the
+  // account ended up with (echoed by the backend for the "check your email"
+  // screen). No session exists at that point — the confirmation link is what
+  // eventually grants one.
+  const [newEmail, setNewEmail] = useState("");
+  const [createdEmail, setCreatedEmail] = useState("");
+  const [resendConfirmCountdown, setResendConfirmCountdown] = useState(0);
+  const [resendNotice, setResendNotice] = useState<string | null>(null);
 
   // Default account login (email + password)
   const [loginEmail, setLoginEmail] = useState("");
@@ -55,17 +66,41 @@ export default function MigrateAccountClient() {
       try {
         const data = await fetchMigrationPending();
         if (!data.pending) {
+          // The wizard is over, but the account it created is still waiting
+          // on its confirmation link — a repeat CMD login lands here. Say so
+          // and offer a resend, instead of a silent bounce to the login.
+          if (data.awaiting_confirmation) {
+            if (data.email) setMaskedEmail(data.email);
+            setStep("confirmation-pending");
+            return;
+          }
           router.push("/login");
           return;
         }
         if (data.email) setMaskedEmail(data.email);
         setHasCandidate(Boolean(data.candidate));
+        // Pre-fill the creation step with the CMD address when it is free.
+        // It still has to be submitted explicitly — this is a convenience,
+        // not a decision taken on the user's behalf.
+        if (data.suggested_email) setNewEmail(data.suggested_email);
         if (data.first_name) setLegacyFirstName(data.first_name);
         if (data.last_name) setLegacyLastName(data.last_name);
 
-        // The flow always starts by asking the user whether they
-        // already have an account or want to create a new one.
-        setStep("choice");
+        // The backend already decided which branch this is, back when the
+        // CMD returned — asking the user to repeat that decision added a step
+        // and a choice they are not equipped to make. Three outcomes:
+        //   candidate  -> one legacy account matched: go link it
+        //   no_match   -> nothing matched at all: go create an account
+        //   otherwise  -> several homonyms matched, so nobody can say which
+        //                 is theirs: let them find it, with a way out to
+        //                 create a new one from there.
+        if (data.candidate) {
+          setStep("confirm-account");
+        } else if (data.no_match) {
+          setStep("enter-email");
+        } else {
+          setStep("search");
+        }
       } catch {
         router.push("/login");
       }
@@ -79,6 +114,13 @@ export default function MigrateAccountClient() {
     const timer = setTimeout(() => setResendCountdown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [resendCountdown]);
+
+  // Same ticker for the confirmation-link resend on the terminal screen.
+  useEffect(() => {
+    if (resendConfirmCountdown <= 0) return;
+    const timer = setTimeout(() => setResendConfirmCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendConfirmCountdown]);
 
   const handleSearch = useCallback(async () => {
     setIsLoading(true);
@@ -94,6 +136,11 @@ export default function MigrateAccountClient() {
         const pending = await fetchMigrationPending();
         if (pending.first_name) setLegacyFirstName(pending.first_name);
         if (pending.last_name) setLegacyLastName(pending.last_name);
+        // The search just made this session candidate-bearing. Without this
+        // the back controls, which branch on hasCandidate, would send the user
+        // to the search again and make them find the account a second time —
+        // harmless while the choice step absorbed them, a dead loop now.
+        setHasCandidate(Boolean(pending.candidate));
         setStep("confirm-account");
       } else {
         setError(t("migration.errorNotFound"));
@@ -166,19 +213,74 @@ export default function MigrateAccountClient() {
     }
   }, [loginEmail, password, t]);
 
-  const handleSkip = useCallback(async () => {
+  // Creating an account no longer happens on this click: the user must supply
+  // an email first, and prove it is theirs before the account has a session.
+  const handleSkip = useCallback(() => {
+    setError(null);
+    setStep("enter-email");
+  }, []);
+
+  const handleCreateAccount = useCallback(async () => {
+    const email = newEmail.trim();
+    if (!EMAIL_RE.test(email)) {
+      setError(t("migration.errorInvalidEmail"));
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
-      const data = await skipMigration();
-      setNeedsEmail(Boolean(data.pending_registration));
+      const data = await skipMigration(email);
+      setCreatedEmail(data.email || email);
+      setResendConfirmCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
       setStep("success-new");
-    } catch {
-      setError(t("migration.errorCreateAccount"));
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "";
+      // Each rejection is correctable in place — the pending migration
+      // survives the error, so the user can fix the address and resubmit.
+      if (code === "email_taken") {
+        setError(t("migration.errorEmailTaken"));
+      } else if (code === "invalid_email" || code === "email_required") {
+        setError(t("migration.errorInvalidEmail"));
+      } else if (code === "nic_required") {
+        // The identity carried no NIC, so it cannot create an account through
+        // this flow. Nothing the user can correct here — say so rather than
+        // leaving them retrying a form that will never succeed.
+        setError(t("migration.errorNicRequired"));
+      } else if (code === "identity_already_registered") {
+        setError(t("migration.errorIdentityRegistered"));
+      } else if (code === "too_many_sends") {
+        setError(t("migration.errorTooManySends"));
+      } else {
+        setError(t("migration.errorCreateAccount"));
+      }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [newEmail, t]);
+
+  const handleResendConfirmation = useCallback(async () => {
+    setError(null);
+    setResendNotice(null);
+    setIsLoading(true);
+    try {
+      const data = await resendMigrationConfirmation();
+      if (data.confirmed) {
+        setResendNotice(t("migration.confirmationAlreadyDone"));
+      } else {
+        setResendNotice(t("migration.confirmationResent"));
+        setResendConfirmCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
+      }
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "";
+      setError(
+        code === "Maximum confirmation sends exceeded"
+          ? t("migration.errorTooManySends")
+          : t("migration.errorResendConfirmation")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [t]);
 
   const handleForgotPassword = useCallback(() => {
     setError(null);
@@ -191,18 +293,17 @@ export default function MigrateAccountClient() {
     }
   }, [hasCandidate]);
 
-  // Redirect after success (account linked or new account created). A new
-  // account holding a placeholder email must complete registration first.
-  // Full reload on purpose: it refreshes AuthContext with the new session.
+  // Redirect after the account was LINKED — that branch proved ownership by
+  // password or emailed code, so it holds a session. Full reload on purpose:
+  // it refreshes AuthContext. The new-account branch is deliberately excluded:
+  // it ends unauthenticated, waiting on the confirmation link.
   useEffect(() => {
-    if (step !== "success" && step !== "success-new") return;
-    const destination =
-      step === "success-new" && needsEmail ? "/complete-registration" : "/";
+    if (step !== "success") return;
     const timer = setTimeout(() => {
-      window.location.href = destination;
+      window.location.href = "/";
     }, 3000);
     return () => clearTimeout(timer);
-  }, [step, needsEmail]);
+  }, [step]);
 
   if (step === "loading") {
     return (
@@ -226,7 +327,7 @@ export default function MigrateAccountClient() {
             {t("migration.linkTitle")}
           </h1>
 
-          {step !== "success" && step !== "success-new" && step !== "choice" && (
+          {step !== "success" && step !== "success-new" && step !== "confirmation-pending" && (
             <p className="text-lg mb-32 text-neutral-700">
               {t("migration.linkDescription")}
             </p>
@@ -239,66 +340,6 @@ export default function MigrateAccountClient() {
           )}
 
           {/* Step: Initial choice — link an existing account or create a new one */}
-          {step === "choice" && (
-            <div className="flex flex-col gap-24">
-              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
-                <Icon name="agora-line-user" className="h-24 w-24 text-brand-blue-primary" />
-              </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">
-                {hasCandidate
-                  ? t("migration.accountFound")
-                  : t("migration.hasAccount")}
-              </h2>
-              <p className="text-neutral-900">
-                {hasCandidate
-                  ? t("migration.accountFoundDescription")
-                  : t("migration.noAccountDescription")}
-              </p>
-
-              <div className="flex flex-col gap-16">
-                <button
-                  onClick={() => {
-                    setError(null);
-                    setStep("login");
-                  }}
-                  disabled={isLoading}
-                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
-                >
-                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
-                    <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
-                  </div>
-                  <div>
-                    <p className="text-lg-bold text-brand-blue-dark">{t("migration.existingAccount")}</p>
-                    <p className="text-sm text-neutral-700">
-                      {t("migration.existingAccountDescription")}
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={handleSkip}
-                  disabled={isLoading}
-                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
-                >
-                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
-                    <Icon
-                      name="agora-line-add-circle"
-                      className="h-24 w-24 text-brand-blue-primary"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-lg-bold text-brand-blue-dark">{t("migration.newAccount")}</p>
-                    <p className="text-sm text-neutral-700">
-                      {isLoading
-                        ? t("migration.creatingAccount")
-                        : t("migration.newAccountDescription")}
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Step: Default account login (email + password) */}
           {step === "login" && (
             <div className="flex flex-col gap-24">
@@ -358,7 +399,9 @@ export default function MigrateAccountClient() {
                 variant="primary"
                 appearance="link"
                 onClick={() => {
-                  setStep("choice");
+                  // The choice step is gone; go back to wherever this user
+                  // would have started from.
+                  setStep(hasCandidate ? "confirm-account" : "search");
                   setError(null);
                 }}
                 className="text-sm h-auto p-0"
@@ -639,16 +682,111 @@ export default function MigrateAccountClient() {
             </div>
           )}
 
-          {/* Step: Success — new account created */}
+          {/* Step: A confirmation is already pending for this identity's
+              account. Reached by logging in again with the CMD before
+              following the link. Terminal and unauthenticated. */}
+          {step === "confirmation-pending" && (
+            <div className="flex flex-col items-center gap-24 text-center">
+              <div className="bg-blue-100 w-fit rounded-full p-24">
+                <Icon name="agora-line-mail" className="text-brand-blue-dark h-48 w-48" />
+              </div>
+              <h2 className="text-xl-bold text-brand-blue-dark">
+                {t("migration.confirmationPendingTitle")}
+              </h2>
+              <p className="text-neutral-900">
+                {t("migration.confirmationPendingDescription", { email: maskedEmail || "" })}
+              </p>
+
+              {resendNotice && <p className="text-green-700">{resendNotice}</p>}
+
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={handleResendConfirmation}
+                disabled={isLoading || resendConfirmCountdown > 0}
+                className="text-sm h-auto p-0"
+              >
+                {resendConfirmCountdown > 0
+                  ? `${t("migration.resendConfirmation")} (${resendConfirmCountdown}s)`
+                  : t("migration.resendConfirmation")}
+              </Button>
+            </div>
+          )}
+
+          {/* Step: Collect the email the new account will be created with.
+              Cannot be skipped: no account exists until this is submitted. */}
+          {step === "enter-email" && (
+            <div className="flex flex-col gap-16">
+              <p className="text-neutral-900">{t("migration.enterEmailDescription")}</p>
+
+              <InputText
+                label={t("migration.email")}
+                placeholder={t("migration.emailPlaceholder")}
+                id="new-account-email"
+                name="new-account-email"
+                type="email"
+                className="w-full"
+                value={newEmail}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setNewEmail(e.target.value);
+                  setError(null);
+                }}
+                disabled={isLoading}
+              />
+
+              <div className="mt-16 flex gap-16">
+                <Button
+                  variant="primary"
+                  onClick={handleCreateAccount}
+                  disabled={isLoading || !newEmail.trim()}
+                  className="px-48"
+                >
+                  {isLoading ? t("migration.creatingAccount") : t("migration.createAccount")}
+                </Button>
+              </div>
+
+              {/* Someone sent straight here because nothing matched may still
+                  have an account registered under different details. */}
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={() => {
+                  setStep("search");
+                  setError(null);
+                }}
+                className="text-sm h-auto p-0"
+              >
+                {t("migration.searchMyAccount")}
+              </Button>
+            </div>
+          )}
+
+          {/* Step: Account created, confirmation sent. Terminal and
+              UNAUTHENTICATED — the link in the email is what grants access,
+              so there is nothing to redirect to. */}
           {step === "success-new" && (
             <div className="flex flex-col items-center gap-24 text-center">
-              <div className="bg-green-100 w-fit rounded-full p-24">
-                <Icon name="agora-line-check-circle" className="text-green-600 h-48 w-48" />
+              <div className="bg-blue-100 w-fit rounded-full p-24">
+                <Icon name="agora-line-mail" className="text-brand-blue-dark h-48 w-48" />
               </div>
               <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.successNewTitle")}</h2>
               <p className="text-neutral-900">
-                {t("migration.successNewDescription")}
+                {t("migration.successNewDescription", { email: createdEmail })}
               </p>
+
+              {resendNotice && <p className="text-green-700">{resendNotice}</p>}
+
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={handleResendConfirmation}
+                disabled={isLoading || resendConfirmCountdown > 0}
+                className="text-sm h-auto p-0"
+              >
+                {resendConfirmCountdown > 0
+                  ? `${t("migration.resendConfirmation")} (${resendConfirmCountdown}s)`
+                  : t("migration.resendConfirmation")}
+              </Button>
             </div>
           )}
         </div>
