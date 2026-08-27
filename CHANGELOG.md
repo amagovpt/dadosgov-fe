@@ -6,6 +6,39 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(migrate-account): stop asking what the backend already decided, and confirm the email before granting a session**
+  - The account-linking wizard opened on a manual choice — "Já possuo uma conta"
+    / "Criar nova conta" — repeating a decision the backend had already taken
+    when the CMD returned, and one the user is not equipped to make: whether a
+    legacy account matches depends on an email and name comparison they never
+    see. The wizard now reads that decision and opens on the right step. Three
+    outcomes, because the backend distinguishes them: one matching account goes
+    straight to linking, nothing matched goes straight to account creation, and
+    several homonyms go to the search — that last case still needs a human,
+    since nobody can say which account is whose, and falling into account
+    creation there would strand people who do have one.
+  - Creating an account no longer happens on a click. A new step collects an
+    email address, pre-filled with the CMD's own when no account holds it but
+    always requiring an explicit submission, and the account is created only
+    once that is supplied. Rejections (malformed, already in use) are
+    distinguishable and correctable in place — which needed `skipMigration` to
+    read the error body, something it alone among its siblings did not do, so
+    every failure arrived as one opaque message.
+  - The success screen changes nature: it no longer assumes a session and
+    redirects, because by design there is not one. It names the address the
+    confirmation link went to and offers a resend on a 60s cooldown. Logging in
+    with the CMD again before following the link — the obvious thing to try —
+    now lands on a screen that explains why access is still blocked, rather
+    than a silent bounce to the login.
+  - Clicking the confirmation link finally renders something. The backend
+    already redirected to the homepage with a `?flash=` marker, but nothing
+    displayed it. Three outcomes are shown, not two: an already-used link is a
+    success from the user's point of view, and reporting it as invalid sent
+    them chasing a problem they did not have.
+  - Requires the matching backend release: the wizard now sends an email to
+    `POST /saml/migration/skip` and reads two new fields from the pending
+    endpoint.
+
 - **feat(admin): widen column sorting across the backoffice tables**
   - Sorting was uneven across the admin lists: the system topics table had none
     at all, the system harvesters view declared it on one column where the org
