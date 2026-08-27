@@ -46,3 +46,17 @@ describe("sortPosts by type", () => {
     expect(posts).toEqual(original);
   });
 });
+
+/**
+ * `published` is `string | null`, so the previous `Number(a.published)` was NaN and
+ * sorting by state silently did nothing. It groups by whether the post is published.
+ */
+describe("sortPosts by status", () => {
+  const draft = makePost({ id: "p-4", published: null });
+  const live = makePost({ id: "p-5", published: "2026-02-01T00:00:00Z" });
+
+  it("groups drafts before published ascending, and the reverse descending", () => {
+    expect(ids(sortPosts([live, draft], "status", "ascending"))).toEqual(["p-4", "p-5"]);
+    expect(ids(sortPosts([draft, live], "status", "descending"))).toEqual(["p-5", "p-4"]);
+  });
+});

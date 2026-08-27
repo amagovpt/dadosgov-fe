@@ -155,7 +155,12 @@ export function createOrgHarvesterColumns({
       sortType: "date",
       renderCell: (harvester) =>
         harvester.last_job
-          ? formatDateToDMY(harvester.last_job.started ?? harvester.last_job.ended ?? "")
+          ? formatDateToDMY(
+              harvester.last_job.started ??
+                harvester.last_job.ended ??
+                harvester.last_job.created ??
+                ""
+            )
           : labels.notYet,
     },
     {
@@ -236,7 +241,12 @@ export function createSystemHarvesterColumns({
       header: labels.lastJob,
       renderCell: (harvester) =>
         harvester.last_job
-          ? formatDateToDMY(harvester.last_job.started ?? harvester.last_job.ended ?? "")
+          ? formatDateToDMY(
+              harvester.last_job.started ??
+                harvester.last_job.ended ??
+                harvester.last_job.created ??
+                ""
+            )
           : labels.notYet,
     },
     {

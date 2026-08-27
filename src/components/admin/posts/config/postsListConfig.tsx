@@ -64,7 +64,7 @@ export function sortPosts(posts: Post[], sortField: PostSortField | null, sortOr
     // `kind` has exactly two values, so this groups news and pages the same way the
     // type filter above does. Ordering is by the raw value, not the translated label.
     type: (a, b) => Number(a.kind === "page") - Number(b.kind === "page"),
-    status: (a, b) => Number(a.published) - Number(b.published),
+    status: (a, b) => Number(Boolean(a.published)) - Number(Boolean(b.published)),
     created_at: createDateSorter((post) => post.created_at),
     last_modified: createDateSorter((post) => post.last_modified),
   });

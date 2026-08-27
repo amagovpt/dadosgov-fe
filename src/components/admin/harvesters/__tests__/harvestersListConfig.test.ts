@@ -153,10 +153,14 @@ describe("sortHarvesters", () => {
       last_job: { started: "2026-05-01T00:00:00Z" } as HarvestSource["last_job"],
     });
     const never = makeHarvester({ id: "s-7", last_job: null });
-    expect(ids(sortHarvesters([started, never, earlier], "last_job", "ascending"))).toEqual([
-      "s-7",
-      "s-6",
-      "s-5",
-    ]);
+    // A job that was created but never started still orders by `created`, which is
+    // what the cell shows too.
+    const createdOnly = makeHarvester({
+      id: "s-8",
+      last_job: { created: "2026-04-30T00:00:00Z" } as HarvestSource["last_job"],
+    });
+    expect(
+      ids(sortHarvesters([started, never, earlier, createdOnly], "last_job", "ascending"))
+    ).toEqual(["s-7", "s-8", "s-6", "s-5"]);
   });
 });
