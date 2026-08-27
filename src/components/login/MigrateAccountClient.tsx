@@ -21,6 +21,7 @@ type Step =
   | "choose-method"
   | "verify-code"
   | "enter-email"
+  | "confirmation-pending"
   | "success"
   | "success-new";
 
@@ -65,6 +66,14 @@ export default function MigrateAccountClient() {
       try {
         const data = await fetchMigrationPending();
         if (!data.pending) {
+          // The wizard is over, but the account it created is still waiting
+          // on its confirmation link — a repeat CMD login lands here. Say so
+          // and offer a resend, instead of a silent bounce to the login.
+          if (data.awaiting_confirmation) {
+            if (data.email) setMaskedEmail(data.email);
+            setStep("confirmation-pending");
+            return;
+          }
           router.push("/login");
           return;
         }
@@ -299,7 +308,7 @@ export default function MigrateAccountClient() {
             {t("migration.linkTitle")}
           </h1>
 
-          {step !== "success" && step !== "success-new" && (
+          {step !== "success" && step !== "success-new" && step !== "confirmation-pending" && (
             <p className="text-lg mb-32 text-neutral-700">
               {t("migration.linkDescription")}
             </p>
@@ -651,6 +660,37 @@ export default function MigrateAccountClient() {
               <p className="text-neutral-900">
                 {t("migration.successDescription")}
               </p>
+            </div>
+          )}
+
+          {/* Step: A confirmation is already pending for this identity's
+              account. Reached by logging in again with the CMD before
+              following the link. Terminal and unauthenticated. */}
+          {step === "confirmation-pending" && (
+            <div className="flex flex-col items-center gap-24 text-center">
+              <div className="bg-blue-100 w-fit rounded-full p-24">
+                <Icon name="agora-line-mail" className="text-brand-blue-dark h-48 w-48" />
+              </div>
+              <h2 className="text-xl-bold text-brand-blue-dark">
+                {t("migration.confirmationPendingTitle")}
+              </h2>
+              <p className="text-neutral-900">
+                {t("migration.confirmationPendingDescription", { email: maskedEmail || "" })}
+              </p>
+
+              {resendNotice && <p className="text-green-700">{resendNotice}</p>}
+
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={handleResendConfirmation}
+                disabled={isLoading || resendConfirmCountdown > 0}
+                className="text-sm h-auto p-0"
+              >
+                {resendConfirmCountdown > 0
+                  ? `${t("migration.resendConfirmation")} (${resendConfirmCountdown}s)`
+                  : t("migration.resendConfirmation")}
+              </Button>
             </div>
           )}
 

@@ -123,4 +123,19 @@ describe("MigrateAccountClient initial step", () => {
 
     expect(pushMock).toHaveBeenCalledWith("/login");
   });
+
+  it("explains the pending confirmation instead of bouncing to the login", async () => {
+    // A repeat CMD login before following the link lands here: the wizard is
+    // over, so pending is false, but silently bouncing to /login would leave
+    // the user with no idea why they cannot get in.
+    const text = await render({
+      pending: false,
+      awaiting_confirmation: true,
+      email: "t***@example.pt",
+    });
+
+    expect(text).toContain(translate("migration.confirmationPendingTitle"));
+    expect(text).toContain(translate("migration.resendConfirmation"));
+    expect(pushMock).not.toHaveBeenCalled();
+  });
 });

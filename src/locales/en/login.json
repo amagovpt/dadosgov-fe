@@ -126,7 +126,9 @@
     "confirmationAlreadyDone": "Your email is already confirmed. You can sign in with your Chave Móvel Digital.",
     "errorInvalidEmail": "Enter a valid email address.",
     "errorEmailTaken": "An account with this email already exists. Use another address, or go back to link the existing account.",
-    "errorResendConfirmation": "Could not resend the email. Please try again later."
+    "errorResendConfirmation": "Could not resend the email. Please try again later.",
+    "confirmationPendingTitle": "Confirmation still pending",
+    "confirmationPendingDescription": "Your account has been created, but the email address is not confirmed yet. Follow the link we sent to {{email}}, then sign in with your Chave Móvel Digital."
   },
   "terms": {
     "title": "Terms and conditions",

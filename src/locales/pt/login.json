@@ -126,7 +126,9 @@
     "confirmationAlreadyDone": "O seu email já está confirmado. Pode entrar com a Chave Móvel Digital.",
     "errorInvalidEmail": "Indique um endereço de email válido.",
     "errorEmailTaken": "Já existe uma conta com este email. Use outro endereço, ou volte atrás para associar a conta existente.",
-    "errorResendConfirmation": "Não foi possível reenviar o email. Tente novamente mais tarde."
+    "errorResendConfirmation": "Não foi possível reenviar o email. Tente novamente mais tarde.",
+    "confirmationPendingTitle": "Confirmação em falta",
+    "confirmationPendingDescription": "A sua conta já foi criada, mas ainda não confirmou o endereço de email. Siga o link que enviámos para {{email}} e, depois disso, entre com a Chave Móvel Digital."
   },
   "terms": {
     "title": "Termos e condições",
