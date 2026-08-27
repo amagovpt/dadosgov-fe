@@ -149,11 +149,6 @@ body {
   pointer-events: none;
 }
 
-/* Hide languages selector (temporarily) */
-header.sticky .languages-panel-menu {
-  display: none !important;
-}
-
 /* 3.1 Main Header */
 @media (min-width: 1280px) {
   .agora-header .navigation-links-layout .links {

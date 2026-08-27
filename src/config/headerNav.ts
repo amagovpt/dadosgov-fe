@@ -9,6 +9,7 @@ export interface LanguageOption {
   value: string;
   label: string;
   abbr: string;
+  icon: string;
 }
 
 export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: boolean | null }>(
@@ -18,10 +19,8 @@ export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: b
 
 
 export const languages: LanguageOption[] = [
-  { value: "pt", label: "Português", abbr: "PT" },
-  { value: "en", label: "English", abbr: "EN" },
-  { value: "es", label: "Español", abbr: "ES" },
-  { value: "fr", label: "Français", abbr: "FR" },
+  { value: "pt", label: "Português", abbr: "PT", icon: "/Icons/languages/pt.svg" },
+  { value: "en", label: "English", abbr: "EN", icon: "/Icons/languages/en.svg" },
 ];
 
 export const areas: AreaOption[] = [

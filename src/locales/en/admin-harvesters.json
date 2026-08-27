@@ -110,6 +110,8 @@
     "typePlaceholder": "Select a type...",
     "searchInputPlaceholder": "Type to search...",
     "noResults": "No results found",
+    "typesLoading": "Loading types...",
+    "typesUnavailable": "The harvester types could not be loaded. Reload the page and try again.",
     "filtersTitle": "Filters",
     "filterModeField": "Mode",
     "filterModeInclude": "Include",
@@ -126,8 +128,6 @@
     "autoArchive": "Automatic archiving",
     "autoArchiveShort": "Automatic archive",
     "advancedTitle": "Advanced",
-    "configureRemoteUrlPrefix": "Configure remote URL prefix",
-    "remoteUrlPrefix": "Remote URL prefix",
     "schedulePlaceholder": "Mask: * * * * * (example: 0 12 * * *)",
     "scheduleError": "The schedule must have exactly 5 space-separated fields, each field being a number or * (minute hour day-of-month month day-of-week).",
     "saveSuccess": "Saved successfully.",
@@ -138,13 +138,30 @@
     "validationErrors": {
       "producer": "Select a producer organization.",
       "name": "Enter the harvester name.",
-      "url": "Enter the harvester URL."
+      "url": "Enter the harvester URL.",
+      "type": "Select a harvester type."
     },
     "saveErrorRetry": "Try again.",
     "saveError": "Error saving ({{status}}) — {{message}}",
     "filterLabels": {
       "organization": "Organization",
-      "tag": "Tag"
+      "tags": "Tag",
+      "publisher": "Publisher"
+    },
+    "featureLabels": {
+      "geodcatap": "GeoDCAT-AP",
+      "inspire": "Harvest Inspire datasets"
+    },
+    "extraConfigLabels": {
+      "remote_url_prefix": "Remote URL prefix",
+      "geozones": "Geozones",
+      "license": "Default license"
+    },
+    "configure": "Configure",
+    "extraConfigHelp": {
+      "remote_url_prefix": "A prefix used to build the remote URL of the harvested items.",
+      "geozones": "Comma-separated GeoZone identifiers, e.g. pt:concelho:1106",
+      "license": "Identifier of the license to fall back on, e.g. cc-by"
     }
   },
   "fields": {
@@ -152,8 +169,13 @@
     "producerLabel": "Confirm the identity you want to use for publication. *",
     "producerPlaceholder": "Select the producer...",
     "producerError": "Select an organization",
+    "producerSearchPlaceholder": "Type to search...",
+    "producerMinChars": "Type at least {{count}} characters to search...",
+    "producerSearching": "Searching...",
+    "producerNoResults": "No organization found",
+    "producerNoEligibleOrg": "A harvester can only be created on behalf of an organization you administer. Your account does not administer any organization.",
+    "producerCreateOrganization": "Create an organization",
     "description": "Description",
-    "descriptionRequired": "Description *",
     "name": "Name *",
     "namePlaceholder": "Enter the name here",
     "descriptionPlaceholder": "Enter the description here",

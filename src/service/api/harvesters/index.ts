@@ -9,6 +9,7 @@ import type {
 } from "@/service/types/harvester";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 // ── Harvesters CRUD (TICKET-32) ──────────────────────────────────────
@@ -25,6 +26,7 @@ export async function fetchHarvesters(
     if (!res.ok) throw new Error(`Failed to fetch harvesters: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching harvesters:", error);
     return {
       data: [],
@@ -48,6 +50,7 @@ export async function fetchHarvester(id: string): Promise<HarvestSource | null> 
     if (!res.ok) throw new Error(`Failed to fetch harvester: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching harvester:", error);
     return null;
   }
@@ -151,6 +154,7 @@ export async function fetchHarvestJobs(
     if (!res.ok) throw new Error(`Failed to fetch harvest jobs: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching harvest jobs:", error);
     return {
       data: [],
@@ -175,6 +179,7 @@ export async function fetchHarvestJob(
     if (!res.ok) throw new Error(`Failed to fetch harvest job: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching harvest job:", error);
     return null;
   }
@@ -222,6 +227,29 @@ export async function rejectHarvestSource(
 }
 
 
+/**
+ * Preview a source that already exists, by id.
+ *
+ * The companion to `previewHarvestSource`, and the right call whenever the
+ * config being previewed is the stored one: authorization is per source
+ * (`source.permissions["preview"]`), which covers the owner and an
+ * organization's editors — where the config-payload route can only authorize
+ * against an organization, and so answers 403 to both.
+ */
+export async function previewHarvestSourceById(id: string): Promise<HarvestPreviewJob> {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/preview/`, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
+
 export async function previewHarvestSource(
   payload: HarvestSourceCreatePayload
 ): Promise<HarvestPreviewJob> {
@@ -248,6 +276,7 @@ export async function fetchHarvestBackends(): Promise<HarvestBackend[]> {
     if (!res.ok) throw new Error(`Failed to fetch harvest backends: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching harvest backends:", error);
     return [];
   }
@@ -268,6 +297,7 @@ export async function fetchOrgHarvesters(
       throw new Error(`Failed to fetch org harvesters: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching org harvesters:", error);
     return {
       data: [],

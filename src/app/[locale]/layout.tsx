@@ -1,33 +1,23 @@
 import type { Metadata } from "next";
-import { Noto_Sans, Noto_Sans_Mono } from "next/font/google";
+import { notoSans, notoSansMono } from "../fonts";
 import "./globals.css";
 import { HeaderWrapper } from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
 import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
+import { ToastProviderWrapper } from "@/providers/ToastProviderWrapper";
+import { ApiErrorProvider } from "@/providers/ApiErrorProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import { siteConfig } from "@/config/site";
 import ScrollTop from "@/components/ScrollTop";
 import NewAccountNotice from "@/components/login/NewAccountNotice";
+import CompleteRegistrationGate from "@/components/login/CompleteRegistrationGate";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
 import { ReactNode, Suspense } from "react";
-import { getHeaderNavigation } from "@/service/commom/header";
-import type { HeaderNavigationData } from "@/service/types/header";
-import { Footer as FooterType } from "@/service/types/header/footer";
-import { getFooter } from "@/service/commom/footer";
+import { loadShellData } from "@/service/commom/shell";
 import { i18nConfig } from "@/config/i18nConfig";
 import initTranslations from "../i18n";
 import TranslationsProvider from "@/providers/TranslationProvider";
-
-const notoSans = Noto_Sans({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-});
-
-const notoSansMono = Noto_Sans_Mono({
-  variable: "--font-noto-sans-mono",
-  subsets: ["latin"],
-});
 
 const namespaces = [
   "common",
@@ -113,21 +103,9 @@ export default async function RootLayout({
     namespaces,
   });
 
-  let headerNavigation: HeaderNavigationData;
-  try {
-    headerNavigation = await getHeaderNavigation(locale);
-  } catch (error) {
-    console.error("Error fetching header navigation:", error);
-    headerNavigation = {} as HeaderNavigationData;
-  }
-
-  let footerData: FooterType;
-  try {
-    footerData = await getFooter(locale);
-  } catch (error) {
-    console.error("Error fetching footer data:", error);
-    footerData = {} as FooterType;
-  }
+  // Throws when both halves of the shell are unavailable, which sends the
+  // request to `app/global-error.tsx` rather than serving an empty frame.
+  const { headerNavigation, footerData } = await loadShellData(locale);
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
@@ -135,17 +113,24 @@ export default async function RootLayout({
         <AuthProvider>
           <ApolloWrapper>
             <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
-              <PopupProviderWrapper>
-                <ScrollTop />
-                <div className="flex min-h-screen w-full flex-col">
-                  <HeaderWrapper data={headerNavigation} />
-                  <Suspense fallback={null}>
-                    <NewAccountNotice />
-                  </Suspense>
-                  <div className="">{children}</div>
-                  <Footer data={footerData} />
-                </div>
-              </PopupProviderWrapper>
+              <ToastProviderWrapper>
+                <ApiErrorProvider>
+                  <PopupProviderWrapper>
+                    <ScrollTop />
+                    <div className="flex min-h-screen w-full flex-col">
+                      <HeaderWrapper data={headerNavigation} />
+                      <Suspense fallback={null}>
+                        <NewAccountNotice />
+                      </Suspense>
+                      <Suspense fallback={null}>
+                        <CompleteRegistrationGate />
+                      </Suspense>
+                      <div className="">{children}</div>
+                      <Footer data={footerData} />
+                    </div>
+                  </PopupProviderWrapper>
+                </ApiErrorProvider>
+              </ToastProviderWrapper>
             </TranslationsProvider>
           </ApolloWrapper>
         </AuthProvider>

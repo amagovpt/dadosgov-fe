@@ -6,7 +6,11 @@ import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
-import { createTopicColumns } from "./topicsListConfig";
+import {
+  createTopicColumns,
+  topicSortFieldMap,
+  type TopicSortField,
+} from "./topicsListConfig";
 import { fetchTopics } from "@/service/api/discussions-topics";
 import { Topic } from "@/service/types/topic";
 import type { BoTopicsPage } from "@/service/types/admin/topics";
@@ -20,8 +24,17 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
   const [topics, setTopics] = useState<Topic[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const { currentPage, setCurrentPage, pageSize, setPageSize } = useAdminListController({
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    sortParam,
+    getSortOrder,
+    handleSort,
+  } = useAdminListController<TopicSortField>({
     initialFilters: {},
+    sortFieldMap: topicSortFieldMap,
   });
 
   useEffect(() => {
@@ -29,7 +42,7 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
 
     const run = async () => {
       try {
-        const response = await fetchTopics(currentPage, pageSize);
+        const response = await fetchTopics(currentPage, pageSize, sortParam);
         if (!isActive) return;
         setTopics(response.data || []);
         setTotalItems(response.total || 0);
@@ -48,7 +61,7 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
     return () => {
       isActive = false;
     };
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, sortParam]);
 
   const columns = useMemo(
     () =>
@@ -86,7 +99,13 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
         />
       }
     >
-      <AdminListTable items={topics} columns={columns} getRowKey={(topic) => topic.id} />
+      <AdminListTable
+        items={topics}
+        columns={columns}
+        getRowKey={(topic) => topic.id}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+      />
     </AdminListPage>
   );
 }

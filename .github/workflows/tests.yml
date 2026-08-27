@@ -1,0 +1,75 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npx vitest run --reporter=default 2>&1 | tee /tmp/head-tests.log
+
+      # A suite can be turned green by removing or skipping tests rather than by fixing the
+      # code. On a pull request, compare the head's test counts against the base branch and
+      # fail when the suite shrank or gained skips. This check lives here, and not in the
+      # local tooling, because CI is the one place a coding agent cannot reach.
+      - name: Guard against a shrinking suite
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          git checkout --quiet ${{ github.event.pull_request.base.sha }}
+          npm ci --silent
+          # The base branch is allowed to be red; only its counts are needed.
+          npx vitest run --reporter=default > /tmp/base-tests.log 2>&1 || true
+          python3 - <<'PY'
+          import re, sys
+
+          def counts(path):
+              text = open(path, encoding="utf-8", errors="replace").read()
+              line = re.search(r"Tests\s+(.*?)\((\d+)\)", text)
+              if not line:
+                  return None, None
+              skipped = re.search(r"(\d+) skipped", line.group(1))
+              return int(line.group(2)), int(skipped.group(1)) if skipped else 0
+
+          head_total, head_skipped = counts("/tmp/head-tests.log")
+          base_total, base_skipped = counts("/tmp/base-tests.log")
+          print(f"base: {base_total} tests, {base_skipped} skipped")
+          print(f"head: {head_total} tests, {head_skipped} skipped")
+
+          if head_total is None:
+              sys.exit("Could not read the head test counts — refusing to pass silently.")
+          if base_total is None:
+              print("Could not read the base counts; skipping the comparison.")
+              sys.exit(0)
+
+          problems = []
+          if head_total < base_total:
+              problems.append(f"the suite shrank: {base_total} -> {head_total} tests")
+          if head_skipped > base_skipped:
+              problems.append(f"more tests are skipped: {base_skipped} -> {head_skipped}")
+          if problems:
+              sys.exit(
+                  "Suite weakened — " + "; ".join(problems) + ".\n"
+                  "If removing or skipping a test is genuinely correct, say so in the PR "
+                  "description so a reviewer signs it off deliberately."
+              )
+          print("Suite did not shrink.")
+          PY

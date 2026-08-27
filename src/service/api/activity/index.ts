@@ -1,6 +1,7 @@
 import type { Activity } from "@/service/types/catalog";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 // --- Activity ---
@@ -18,6 +19,7 @@ export async function fetchActivity(
     if (!res.ok) throw new Error(`Failed to fetch activity: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching activity:", error);
     return {
       data: [],

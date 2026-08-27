@@ -54,7 +54,7 @@ export function DataStoriesFilters({
       return;
     }
     try {
-      const results = await suggestTags(query);
+      const results = (await suggestTags(query)) ?? [];
       setFilterTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
     } catch {
       setFilterTagOptions([]);

@@ -1,4 +1,8 @@
 import type { NextRequest } from "next/server";
+import {
+  SKIP_GLOBAL_ERROR_HANDLING,
+  type FetchInitWithPolicy,
+} from "@/service/utils/apiErrorPolicy";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:7000";
 const BACKEND_HOST = process.env.BACKEND_HOST || "";
@@ -50,16 +54,25 @@ export function forwardedHeaders(request: NextRequest): Record<string, string> {
   return headers;
 }
 
+/**
+ * These route handlers exist to proxy the backend, so they must forward its
+ * status verbatim. `SKIP_GLOBAL_ERROR_HANDLING` keeps the server-side error
+ * interceptor out of the way: without it, `/auth/me` calling
+ * `${BACKEND_URL}/api/1/me/` would turn the expected 401 of a stale cookie
+ * into a redirect, replacing the handler's JSON with an HTML login page.
+ * The browser-side interceptor still sees whatever the handler returns.
+ */
 export async function backendFetch(path: string, init?: RequestInit): Promise<Response> {
   const url = `${BACKEND_URL}${path}`;
+  const base: FetchInitWithPolicy = { ...init, [SKIP_GLOBAL_ERROR_HANDLING]: true };
   if (BACKEND_HOST) {
     const headers = new Headers(init?.headers);
     if (!headers.has("Host")) {
       headers.set("Host", BACKEND_HOST);
     }
-    return fetch(url, { ...init, headers });
+    return fetch(url, { ...base, headers });
   }
-  return fetch(url, init);
+  return fetch(url, base);
 }
 
 export { BACKEND_URL };

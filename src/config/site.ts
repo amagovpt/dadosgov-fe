@@ -111,7 +111,6 @@ export const externalServicesConfig = {
   metricsApi: "https://metric-api.data.gouv.fr", // TODO: Replace with PT URL
   metricsSince: "2022-07-01",
   schemaValidataUrl: "https://validata.fr", // TODO: Replace with PT URL
-  tabularApiUrl: "https://tabular-api.data.gouv.fr", // TODO: Replace with PT URL
   schemaPublishingUrl: "https://publier.etalab.studio/fr", // TODO: Replace with PT URL
   schemasSite: {
     url: "https://schema.data.gouv.fr/",

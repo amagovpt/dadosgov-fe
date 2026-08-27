@@ -8,6 +8,7 @@ import type {
 } from "@/service/types/identity";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL, translateUploadErrorPayload } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 /**
@@ -34,6 +35,7 @@ export async function fetchUserProfile(userId: string): Promise<UserPublic | nul
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching user profile:", error);
     throw error;
   }
@@ -92,6 +94,7 @@ export async function fetchUserActivity(
     if (!res.ok) throw new Error(`Failed to fetch user activity: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching user activity:", error);
     return {
       data: [],
@@ -133,6 +136,7 @@ export async function fetchUsers(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching users:", error);
     return {
       data: [],
@@ -163,6 +167,7 @@ export async function fetchUser(id: string): Promise<UserAdmin | null> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching user:", error);
     return null;
   }
@@ -191,6 +196,7 @@ export async function updateUser(
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error updating user:", error);
     return null;
   }
@@ -214,6 +220,7 @@ export async function deleteUser(id: string): Promise<boolean> {
 
     return true;
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error deleting user:", error);
     return false;
   }
@@ -233,6 +240,7 @@ export async function fetchUserRoles(): Promise<UserRole[]> {
 
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching user roles:", error);
     return [];
   }

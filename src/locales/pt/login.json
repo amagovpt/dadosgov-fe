@@ -176,6 +176,34 @@
     "errorRequest": "Erro ao redefinir a palavra-passe. Tente novamente.",
     "errorConnection": "Erro de ligação. Tente novamente."
   },
+  "completeRegistration": {
+    "metadata": {
+      "title": "Concluir registo - dados.gov.pt",
+      "description": "Indique um endereço de e-mail válido para concluir o registo da sua conta no portal dados.gov.pt."
+    },
+    "loading": "A carregar...",
+    "title": "Concluir registo",
+    "description": "A sua autenticação (Chave Móvel Digital ou eIDAS) não disponibilizou um endereço de e-mail utilizável, pelo que a sua conta foi criada com um endereço temporário. Para concluir o registo, indique um endereço de e-mail válido — vamos enviar-lhe um link de confirmação.",
+    "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
+    "emailLabel": "Endereço de e-mail *",
+    "emailConfirmLabel": "Confirmar endereço de e-mail *",
+    "emailPlaceholder": "exemplo@email.pt",
+    "invalidEmail": "Introduza um endereço de e-mail válido.",
+    "mismatch": "Os endereços de e-mail não coincidem.",
+    "submit": "Enviar link de confirmação",
+    "submitting": "A enviar...",
+    "errorRequest": "Erro ao registar o endereço de e-mail. Verifique o endereço e tente novamente.",
+    "errorRateLimited": "Demasiadas tentativas. Aguarde um momento e tente novamente.",
+    "sentTitle": "Verifique a sua caixa de correio",
+    "sentDescription": "Enviámos um link de confirmação para {{email}}. Abra o e-mail e clique no link para concluir o registo. Se não o encontrar, verifique a pasta de spam.",
+    "resend": "Reenviar e-mail",
+    "changeAddress": "Usar outro endereço",
+    "flash": {
+      "alreadyTaken": "Esse endereço de e-mail já está associado a outra conta. Indique um endereço diferente.",
+      "invalid": "O link de confirmação é inválido. Solicite um novo link.",
+      "expired": "O link de confirmação expirou. Enviámos um novo link para o endereço indicado."
+    }
+  },
   "errors": {
     "requiredFields": "Por favor, preencha todos os campos obrigatórios.",
     "loginFailed": "Ocorreu um erro ao tentar iniciar sessão.",

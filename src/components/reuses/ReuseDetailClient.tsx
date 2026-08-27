@@ -52,6 +52,7 @@ export default function ReuseDetailClient({
   const canEdit = reuse.permissions?.edit ?? false;
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [discussionCount, setDiscussionCount] = useState(reuse.metrics.discussions || 0);
 
   const descMeasureRef = useRef<HTMLDivElement>(null);
   const descTitleRef = useRef<HTMLDivElement>(null);
@@ -300,7 +301,7 @@ export default function ReuseDetailClient({
             </TabBodyWrapper>
           </Tab>
           <Tab active={tabParam === "discussions" || undefined}>
-            <TabHeader>{tr("detail.discussions")}</TabHeader>
+            <TabHeader>{tr("detail.discussions", { count: discussionCount })}</TabHeader>
             <TabBodyWrapper bleedClassName="bg-neutral-50">
               <div>
                 <div className="mb-24">
@@ -315,7 +316,11 @@ export default function ReuseDetailClient({
                     }
                   />
                 </div>
-                <DiscussionSection entityId={reuse.id} entityClass="Reuse" />
+                <DiscussionSection
+                  entityId={reuse.id}
+                  entityClass="Reuse"
+                  onCountChange={setDiscussionCount}
+                />
               </div>
             </TabBodyWrapper>
           </Tab>

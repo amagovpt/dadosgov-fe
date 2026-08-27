@@ -15,6 +15,12 @@ import { InputText } from "@ama-pt/agora-design-system";
  * 2. useLayoutEffect cursor restoration — after each render triggered by
  *    the user typing, restores the saved cursor position AFTER Agora's
  *    internal effect runs (effects fire bottom-up: child before parent).
+ *
+ * It also flips one Agora default. Agora's inputs declare `required = true`
+ * and only drop it when the field is `disabled` or `readOnly`, so forwarding an
+ * absent `required` marked every optional field as mandatory and blocked the
+ * form on it — which is what happened to the harvester config fields. Here the
+ * default is `false`, so a field is required only where a caller says so.
  */
 
 interface IsolatedInputProps {
@@ -43,7 +49,7 @@ const IsolatedInput = React.memo(function IsolatedInput({
   hasFeedback,
   feedbackState,
   errorFeedbackText,
-  required,
+  required = false,
   maxLength,
   disabled,
   inputMode,

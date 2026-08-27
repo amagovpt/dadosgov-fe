@@ -6,6 +6,7 @@ import type {
 } from "@/service/types/identity";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL } from "@/service/utils/API";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
 // --- Followers ---
@@ -24,6 +25,7 @@ export async function fetchFollowers(
     if (!res.ok) throw new Error(`Failed to fetch followers: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching followers:", error);
     return {
       data: [],
@@ -52,6 +54,7 @@ export async function fetchUserFollowers(
     if (!res.ok) throw new Error(`Failed to fetch user followers: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching user followers:", error);
     return {
       data: [],
@@ -77,6 +80,7 @@ export async function fetchMyFollowing(
     if (!res.ok) throw new Error(`Failed to fetch following: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching following:", error);
     return {
       data: [],
@@ -105,6 +109,7 @@ export async function fetchUserFollowing(
     if (!res.ok) throw new Error(`Failed to fetch user following: ${res.statusText}`);
     return await res.json();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Error fetching user following:", error);
     return {
       data: [],
@@ -174,7 +179,8 @@ export async function isFollowing(
     if (!res.ok) return false;
     const data = await res.json();
     return data.total > 0;
-  } catch {
+  } catch (error) {
+    rethrowControlFlow(error);
     return false;
   }
 }
