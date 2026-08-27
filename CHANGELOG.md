@@ -6,6 +6,18 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **chore(ci): run the test and typecheck workflows once per push, not twice**
+  - Both workflows triggered on `push` **and** `pull_request` with no branch
+    filter, so every push to a branch with an open PR started two identical runs
+    of each — four jobs, and the tests one runs `npm ci` twice on its own to
+    compare test counts against the base branch. The `push` trigger is now
+    limited to the environment branches (`develop`, `tst`, `ppr`, `main`), which
+    is what `udata-pt` already does, and feature branches stay covered by
+    `pull_request`.
+  - Added `concurrency` with `cancel-in-progress`, so a second push supersedes
+    the run for the first instead of queueing behind it. Nothing about what the
+    suites check changes.
+
 - **fix(migrate-account): the wizard follows the answer instead of reporting a rejection**
   - On the account-creation step, typing the address of one's own portal
     account got "an account with this email already exists" — and a message

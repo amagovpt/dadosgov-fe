@@ -1,8 +1,16 @@
 name: Tests
 
 on:
+  # Environment branches only. Feature branches are covered by the pull_request
+  # trigger, so this avoids running the suite twice per PR -- both events fire on
+  # every push to a branch that has one open.
   push:
+    branches: [develop, tst, ppr, main]
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   unit:
