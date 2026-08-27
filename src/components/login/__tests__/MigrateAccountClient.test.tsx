@@ -11,6 +11,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ptLogin from "@/locales/pt/login.json";
+import enLogin from "@/locales/en/login.json";
 
 const translate = (key: string): string => {
   const raw = key
@@ -28,17 +29,23 @@ vi.mock("react-i18next", () => ({
 }));
 
 const pushMock = vi.fn();
+// One stable object, not a fresh one per render. The bootstrap effect depends
+// on the router, so handing it a new identity every render re-runs the effect
+// after every state change — which silently re-routes the wizard back to the
+// step the backend chose, undoing whatever the test just did.
+const routerMock = { push: pushMock };
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: pushMock }),
+  useRouter: () => routerMock,
 }));
 
 const fetchMigrationPendingMock = vi.fn();
+const skipMigrationMock = vi.fn();
 vi.mock("@/service/api/migration", () => ({
   fetchMigrationPending: () => fetchMigrationPendingMock(),
   searchMigrationAccount: vi.fn(),
   sendMigrationCode: vi.fn(),
   confirmMigration: vi.fn(),
-  skipMigration: vi.fn(),
+  skipMigration: (email: string) => skipMigrationMock(email),
   resendMigrationConfirmation: vi.fn(),
 }));
 
@@ -55,6 +62,52 @@ const ENTER_EMAIL_TEXT = translate("migration.enterEmailDescription");
 let container: HTMLDivElement;
 let root: Root;
 
+/** Press a button by its visible label. */
+async function clickButton(label: string) {
+  const button = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === label
+  );
+  if (!button) throw new Error(`button not found: ${label}`);
+  await act(async () => {
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
+/** Type an address on the enter-email step and submit it. */
+async function submitNewEmail(email: string) {
+  const input = container.querySelector<HTMLInputElement>("#new-account-email");
+  if (!input) throw new Error("not on the enter-email step");
+  const setValue = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value"
+  )?.set;
+  await act(async () => {
+    setValue?.call(input, email);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  const create = translate("migration.createAccount");
+  const button = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === create
+  );
+  if (!button) throw new Error("create-account button not found");
+  // detail: 1 is load-bearing. The design-system Button only forwards onClick
+  // for events with a click count — a bare MouseEvent, and HTMLElement.click(),
+  // both carry detail 0 and are silently ignored.
+  await act(async () => {
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+  });
+  // The handler awaits the skip and, on the divert, a second pending read;
+  // one microtask turn is not enough to see the end of that chain.
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  return container.textContent ?? "";
+}
+
 async function render(pending: Record<string, unknown>) {
   fetchMigrationPendingMock.mockResolvedValue(pending);
   await act(async () => {
@@ -67,12 +120,36 @@ async function render(pending: Record<string, unknown>) {
   return container.textContent ?? "";
 }
 
+// React only lets act() flush effects and microtasks when the environment
+// declares itself as a test one. Without this, act() still renders but does
+// not settle the promise chain behind a click, so anything asserted after an
+// async handler reads the pre-handler DOM.
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+// The design-system Button reads matchMedia on click and jsdom has no
+// implementation, so any test that actually presses a button dies on an
+// uncaught TypeError. Stubbed here rather than in a global setup file, to keep
+// the shim next to the tests that need it.
+if (!window.matchMedia) {
+  window.matchMedia = ((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  })) as unknown as typeof window.matchMedia;
+}
+
 beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
   pushMock.mockClear();
   fetchMigrationPendingMock.mockReset();
+  skipMigrationMock.mockReset();
 });
 
 afterEach(() => {
@@ -142,5 +219,114 @@ describe("MigrateAccountClient initial step", () => {
     expect(text).toContain(translate("migration.confirmationPendingTitle"));
     expect(text).toContain(translate("migration.resendConfirmation"));
     expect(pushMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("MigrateAccountClient account creation step", () => {
+  const NO_MATCH = { pending: true, candidate: false, no_match: true };
+
+  it("routes an own-legacy-email submission to the linking branch", async () => {
+    // LEDG-2351: the address the user types is their own portal account. The
+    // backend refuses it as a creation but points it as the candidate, and the
+    // wizard has to follow — telling them "already registered" here sends them
+    // back to retype an address the server has just resolved.
+    const text = await render(NO_MATCH);
+    expect(text).toContain(ENTER_EMAIL_TEXT);
+
+    skipMigrationMock.mockResolvedValue({
+      success: false,
+      candidate_found: true,
+      email: "j***@example.pt",
+    });
+    // The second pending read is the one handleCreateAccount makes after the
+    // divert; it has to report the now-pointed candidate, or hasCandidate
+    // stays false and the back controls loop the user through the search.
+    fetchMigrationPendingMock.mockResolvedValue({
+      pending: true,
+      candidate: true,
+      first_name: "Joana",
+      last_name: "Pinto",
+    });
+
+    const after = await submitNewEmail("joana@example.pt");
+
+    expect(after).toContain(CONFIRM_ACCOUNT_TEXT);
+    expect(after).toContain("j***@example.pt");
+    expect(after).not.toContain(translate("migration.errorEmailTaken"));
+  });
+
+  it("still creates the account when the address is free", async () => {
+    // Criterion 7: the creation branch is untouched for people who really
+    // have no account.
+    await render(NO_MATCH);
+
+    skipMigrationMock.mockResolvedValue({ success: true, email: "nova@example.pt" });
+    const after = await submitNewEmail("nova@example.pt");
+
+    expect(after).toContain(translate("migration.successNewTitle"));
+    expect(after).not.toContain(CONFIRM_ACCOUNT_TEXT);
+  });
+
+  it("says the account cannot be linked when the address is not claimable", async () => {
+    // A taken address with no candidate_found now means exactly one thing:
+    // an account holds it that this identity cannot claim. The message has to
+    // say that, not point at a step that does not exist.
+    await render(NO_MATCH);
+
+    skipMigrationMock.mockRejectedValue(new Error("email_taken"));
+    const after = await submitNewEmail("alguem@example.pt");
+
+    expect(after).toContain(translate("migration.errorEmailTaken"));
+    expect(after).toContain(ENTER_EMAIL_TEXT);
+    expect(after).not.toContain(CONFIRM_ACCOUNT_TEXT);
+  });
+
+  it("explains itself instead of looping when the offered account is turned down", async () => {
+    // Divert -> "não é a minha conta" -> same address again. Without a memory
+    // of the refusal this diverts for ever, and the user who wants a new
+    // account with that address never learns why they are not getting one.
+    await render(NO_MATCH);
+
+    skipMigrationMock.mockResolvedValue({
+      success: false,
+      candidate_found: true,
+      email: "j***@example.pt",
+    });
+    fetchMigrationPendingMock.mockResolvedValue({
+      pending: true,
+      candidate: true,
+      first_name: "Joana",
+      last_name: "Pinto",
+    });
+
+    const diverted = await submitNewEmail("joana@example.pt");
+    expect(diverted).toContain(CONFIRM_ACCOUNT_TEXT);
+
+    await clickButton(translate("migration.confirmNo"));
+    expect(container.textContent).toContain(ENTER_EMAIL_TEXT);
+    expect(container.textContent).toContain(translate("migration.errorEmailTaken"));
+
+    // Submitting the same address again must not divert a second time — nor
+    // in a different case, which the backend resolves to the same account.
+    const again = await submitNewEmail("JOANA@example.pt");
+    expect(again).toContain(ENTER_EMAIL_TEXT);
+    expect(again).toContain(translate("migration.errorEmailTaken"));
+    expect(again).not.toContain(CONFIRM_ACCOUNT_TEXT);
+  });
+
+  it("does not send the user back to a step that is not behind them", async () => {
+    // The old copy read "volte atrás para associar a conta existente". There is
+    // no back: this step is reached straight off the CMD return, and the way to
+    // the linking branch is a link called "Já tenho conta — procurar". Now that
+    // a claimable address routes there by itself, this message only ever means
+    // the account cannot be linked — in both locales.
+    for (const message of [
+      ptLogin.migration.errorEmailTaken,
+      enLogin.migration.errorEmailTaken,
+    ]) {
+      expect(message).toBeTruthy();
+      expect(message.toLowerCase()).not.toContain("volte atrás");
+      expect(message.toLowerCase()).not.toContain("go back");
+    }
   });
 });

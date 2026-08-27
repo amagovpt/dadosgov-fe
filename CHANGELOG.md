@@ -6,6 +6,36 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(migrate-account): the wizard follows the answer instead of reporting a rejection**
+  - On the account-creation step, typing the address of one's own portal
+    account got "an account with this email already exists" — and a message
+    telling the user to go back and link it, when the way there is not back
+    but a link called "Já tenho conta — procurar", and when the server had
+    just resolved that very account. `skipMigration` now recognises the
+    backend's `candidate_found` and returns it as an outcome rather than
+    throwing, and the creation handler routes to the confirm-account step with
+    the masked address, exactly as the search does — including re-reading the
+    pending state so the back controls do not loop the user through the search
+    a second time.
+  - **Nothing is linked by this.** The confirm-account step still asks whether
+    the account is theirs, and ownership is still proven afterwards by password
+    or by a code mailed to that account. The account-creation branch is
+    unchanged for people who really have no account.
+  - The remaining rejection now means one thing only — an account holds the
+    address and this identity cannot claim it — so `errorEmailTaken` says that,
+    instead of pointing at a step that does not exist.
+  - **Deploy the backend release first.** The new field rides on the existing
+    status code and error key, so an older backend never sends it — but this
+    build has also narrowed the already-registered message to "cannot be
+    linked, contact support", which is false advice while the backend still
+    refuses an address the user could in fact claim.
+  - Turning down the offered account no longer loops. "Não é a minha conta"
+    returns to the creation step with the address-taken message, and
+    submitting that same address again repeats the explanation instead of
+    silently offering the same account for ever. A failure to re-read the
+    pending state after a divert no longer strands the user either: the
+    candidate is pointed server-side regardless, so the wizard goes on.
+
 - **feat(migrate-account): stop asking what the backend already decided, and confirm the email before granting a session**
   - The account-linking wizard opened on a manual choice — "Já possuo uma conta"
     / "Criar nova conta" — repeating a decision the backend had already taken
