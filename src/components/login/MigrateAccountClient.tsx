@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchMigrationPending, searchMigrationAccount, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
@@ -13,6 +13,15 @@ import { useTranslation } from "react-i18next";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESEND_CONFIRM_COOLDOWN_SECONDS = 60;
 
+// Outcomes the backend's confirm-link route forwards as ?flash=... → i18n key.
+// Same latch-and-strip shape as CompleteRegistrationClient.
+const FLASH_ERRORS: Record<string, string> = {
+  migration_link_expired: "migration.flash.linkExpired",
+  migration_link_invalid: "migration.flash.linkInvalid",
+  migration_link_too_many_sends: "migration.flash.linkTooManySends",
+  migration_link_already_done: "migration.flash.linkAlreadyDone",
+};
+
 type Step =
   | "loading"
   | "login"
@@ -20,6 +29,7 @@ type Step =
   | "confirm-account"
   | "choose-method"
   | "link-sent"
+  | "link-error"
   | "enter-email"
   | "confirmation-pending"
   | "success"
@@ -28,8 +38,17 @@ type Step =
 export default function MigrateAccountClient() {
   const { t } = useTranslation("login");
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const [step, setStep] = useState<Step>("loading");
+  // Latched on the first render, before the bootstrap effect can act on it.
+  // Without the latch the strip below would erase the reason for being here.
+  const [flashKey] = useState<string | null>(() => {
+    const flash = searchParams.get("flash");
+    return flash ? (FLASH_ERRORS[flash] ?? null) : null;
+  });
+
+  const [step, setStep] = useState<Step>(flashKey ? "link-error" : "loading");
   const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
   const [hasCandidate, setHasCandidate] = useState(false);
   const [legacyFirstName, setLegacyFirstName] = useState<string | null>(null);
@@ -70,6 +89,10 @@ export default function MigrateAccountClient() {
 
   // Check pending migration on mount
   useEffect(() => {
+    // A visitor arriving from a spent or expired link has no wizard session,
+    // and the bootstrap below answers that with router.push("/login") — which
+    // would swallow the very message they were sent here to read.
+    if (flashKey) return;
     async function check() {
       try {
         const data = await fetchMigrationPending();
@@ -114,7 +137,16 @@ export default function MigrateAccountClient() {
       }
     }
     check();
-  }, [router]);
+  }, [router, flashKey]);
+
+  // Strip the ?flash= parameter once it has been latched.
+  useEffect(() => {
+    if (!searchParams.get("flash")) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("flash");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [searchParams, pathname, router]);
 
   // Resend countdown timer
   useEffect(() => {
@@ -746,6 +778,28 @@ export default function MigrateAccountClient() {
                 {resendConfirmCountdown > 0
                   ? `${t("migration.resendConfirmation")} (${resendConfirmCountdown}s)`
                   : t("migration.resendConfirmation")}
+              </Button>
+            </div>
+          )}
+
+          {/* Step: the emailed link did not work out. Reached by redirect
+              from the backend's confirm-link route, with no session — the
+              recovery is to authenticate again, since after a consumed or
+              re-pointed link there is nothing left to resend from. The one
+              exception is the expired case, where the backend has already
+              mailed a fresh link before redirecting here. */}
+          {step === "link-error" && (
+            <div className="flex flex-col items-center gap-24 text-center">
+              <div className="bg-blue-100 w-fit rounded-full p-24">
+                <Icon name="agora-line-mail" className="text-brand-blue-dark h-48 w-48" />
+              </div>
+              <h2 className="text-xl-bold text-brand-blue-dark">
+                {t("migration.linkErrorTitle")}
+              </h2>
+              <p className="text-neutral-900">{flashKey ? t(flashKey) : ""}</p>
+
+              <Button variant="primary" onClick={() => router.push("/login")}>
+                {t("migration.linkErrorAction")}
               </Button>
             </div>
           )}

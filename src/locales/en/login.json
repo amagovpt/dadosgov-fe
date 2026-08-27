@@ -129,7 +129,15 @@
     "sendLinkDescription": "We send a confirmation link to {{email}}. Just click the link to finish linking.",
     "resendLink": "Resend link",
     "errorSendLink": "The confirmation link could not be sent. Please try again later.",
-    "errorTooManyLinkSends": "The send limit for this account has been reached. Try again later, or link the account with your password."
+    "errorTooManyLinkSends": "The send limit for this account has been reached. Try again later, or link the account with your password.",
+    "linkErrorTitle": "The link could not be validated",
+    "linkErrorAction": "Sign in again",
+    "flash": {
+      "linkExpired": "The link has expired. We have just sent you a new one — check your inbox, and your spam folder if you cannot find it.",
+      "linkInvalid": "This link is no longer valid. It may have been used, expired, or the account it pointed at may have changed since. Sign in again with Chave Móvel Digital or eIDAS to start over.",
+      "linkTooManySends": "The send limit for this account has been reached. Try again later, or link the account with your password.",
+      "linkAlreadyDone": "This account is already linked to your digital identity. Sign in with Chave Móvel Digital or eIDAS."
+    }
   },
   "terms": {
     "title": "Terms and conditions",

@@ -129,7 +129,15 @@
     "sendLinkDescription": "Enviamos um link de confirmação para {{email}}. Basta clicar no link para concluir a associação.",
     "resendLink": "Reenviar link",
     "errorSendLink": "Não foi possível enviar o link de confirmação. Tente novamente mais tarde.",
-    "errorTooManyLinkSends": "Foi atingido o limite de envios para esta conta. Tente novamente mais tarde, ou associe a conta com a sua palavra-passe."
+    "errorTooManyLinkSends": "Foi atingido o limite de envios para esta conta. Tente novamente mais tarde, ou associe a conta com a sua palavra-passe.",
+    "linkErrorTitle": "Não foi possível validar o link",
+    "linkErrorAction": "Voltar a autenticar-me",
+    "flash": {
+      "linkExpired": "O link expirou. Acabámos de lhe enviar um novo — verifique a sua caixa de entrada e, se não o encontrar, veja o spam.",
+      "linkInvalid": "Este link já não é válido. Pode ter sido usado, ter expirado, ou a conta indicada ter entretanto mudado. Autentique-se de novo com a Chave Móvel Digital ou eIDAS para recomeçar.",
+      "linkTooManySends": "Foi atingido o limite de envios para esta conta. Tente novamente mais tarde, ou associe a conta com a sua palavra-passe.",
+      "linkAlreadyDone": "Esta conta já está associada à sua identidade digital. Entre com a Chave Móvel Digital ou eIDAS."
+    }
   },
   "terms": {
     "title": "Termos e condições",
