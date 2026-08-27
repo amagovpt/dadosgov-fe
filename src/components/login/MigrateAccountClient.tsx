@@ -230,6 +230,22 @@ export default function MigrateAccountClient() {
     setError(null);
     try {
       const data = await skipMigration(email);
+      if (data.candidate_found) {
+        // The address is already an account of the user's own, and the backend
+        // has pointed it as the candidate. Telling them "email already
+        // registered" here would send them back to retype an address the
+        // server has just resolved; go where the answer is instead. Nothing is
+        // linked yet — confirm-account asks, and ownership is proven after it.
+        setMaskedEmail(data.email || null);
+        const pending = await fetchMigrationPending();
+        if (pending.first_name) setLegacyFirstName(pending.first_name);
+        if (pending.last_name) setLegacyLastName(pending.last_name);
+        // Same reason as in handleSearch: this session just became
+        // candidate-bearing, and the back controls branch on hasCandidate.
+        setHasCandidate(Boolean(pending.candidate));
+        setStep("confirm-account");
+        return;
+      }
       setCreatedEmail(data.email || email);
       setResendConfirmCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
       setStep("success-new");
