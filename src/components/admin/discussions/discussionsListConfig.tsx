@@ -4,14 +4,14 @@ import StatusDot from "@/components/admin/StatusDot";
 import type { Discussion } from "@/service/types/discussion";
 import { formatDateToDMY } from "@/utils/formatDate";
 
-/**
- * The discussions endpoint paginates but cannot sort, so the org view loads the whole set
- * for an organization once and sorts client-side. Keep this in sync with the API page_size
- * ceiling if an organization ever outgrows a single request.
- */
-export const DISCUSSIONS_FETCH_PAGE_SIZE = 9999;
-
 export type DiscussionSortField = "title" | "created" | "closed";
+
+/** TS key -> the key the discussions endpoint accepts in `sort`. */
+export const discussionSortFieldMap: Record<DiscussionSortField, string> = {
+  title: "title",
+  created: "created",
+  closed: "closed",
+};
 export type DiscussionListSortField = "status";
 
 interface OrgDiscussionColumnsOptions {
