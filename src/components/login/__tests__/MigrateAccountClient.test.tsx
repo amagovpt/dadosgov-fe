@@ -62,6 +62,20 @@ const ENTER_EMAIL_TEXT = translate("migration.enterEmailDescription");
 let container: HTMLDivElement;
 let root: Root;
 
+/** Press a button by its visible label. */
+async function clickButton(label: string) {
+  const button = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === label
+  );
+  if (!button) throw new Error(`button not found: ${label}`);
+  await act(async () => {
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
 /** Type an address on the enter-email step and submit it. */
 async function submitNewEmail(email: string) {
   const input = container.querySelector<HTMLInputElement>("#new-account-email");
@@ -265,6 +279,38 @@ describe("MigrateAccountClient account creation step", () => {
     expect(after).toContain(translate("migration.errorEmailTaken"));
     expect(after).toContain(ENTER_EMAIL_TEXT);
     expect(after).not.toContain(CONFIRM_ACCOUNT_TEXT);
+  });
+
+  it("explains itself instead of looping when the offered account is turned down", async () => {
+    // Divert -> "não é a minha conta" -> same address again. Without a memory
+    // of the refusal this diverts for ever, and the user who wants a new
+    // account with that address never learns why they are not getting one.
+    await render(NO_MATCH);
+
+    skipMigrationMock.mockResolvedValue({
+      success: false,
+      candidate_found: true,
+      email: "j***@example.pt",
+    });
+    fetchMigrationPendingMock.mockResolvedValue({
+      pending: true,
+      candidate: true,
+      first_name: "Joana",
+      last_name: "Pinto",
+    });
+
+    const diverted = await submitNewEmail("joana@example.pt");
+    expect(diverted).toContain(CONFIRM_ACCOUNT_TEXT);
+
+    await clickButton(translate("migration.confirmNo"));
+    expect(container.textContent).toContain(ENTER_EMAIL_TEXT);
+    expect(container.textContent).toContain(translate("migration.errorEmailTaken"));
+
+    // Submitting the very same address again must not divert a second time.
+    const again = await submitNewEmail("joana@example.pt");
+    expect(again).toContain(ENTER_EMAIL_TEXT);
+    expect(again).toContain(translate("migration.errorEmailTaken"));
+    expect(again).not.toContain(CONFIRM_ACCOUNT_TEXT);
   });
 
   it("does not send the user back to a step that is not behind them", async () => {

@@ -52,6 +52,14 @@ export default function MigrateAccountClient() {
   // screen). No session exists at that point — the confirmation link is what
   // eventually grants one.
   const [newEmail, setNewEmail] = useState("");
+  // The address whose divert the user has already turned down. Without it,
+  // saying "not my account" and pressing Criar conta again silently diverts to
+  // the same screen for ever, with nothing explaining why the account is not
+  // being created.
+  const [declinedCandidateEmail, setDeclinedCandidateEmail] = useState<string | null>(null);
+  // The address that produced the confirm-account screen currently on show,
+  // when it got there through a divert rather than through the search.
+  const [divertedEmail, setDivertedEmail] = useState<string | null>(null);
   const [createdEmail, setCreatedEmail] = useState("");
   const [resendConfirmCountdown, setResendConfirmCountdown] = useState(0);
   const [resendNotice, setResendNotice] = useState<string | null>(null);
@@ -217,8 +225,17 @@ export default function MigrateAccountClient() {
   // an email first, and prove it is theirs before the account has a session.
   const handleSkip = useCallback(() => {
     setError(null);
+    // Arriving here from a divert means the user has just been shown the
+    // account this address belongs to and said it is not theirs. The address
+    // is still taken, so creating an account with it cannot work — record the
+    // refusal so the next submission explains that instead of looping.
+    if (divertedEmail) {
+      setDeclinedCandidateEmail(divertedEmail);
+      setDivertedEmail(null);
+      setError(t("migration.errorEmailTaken"));
+    }
     setStep("enter-email");
-  }, []);
+  }, [divertedEmail, t]);
 
   const handleCreateAccount = useCallback(async () => {
     const email = newEmail.trim();
@@ -231,18 +248,33 @@ export default function MigrateAccountClient() {
     try {
       const data = await skipMigration(email);
       if (data.candidate_found) {
+        if (declinedCandidateEmail === email) {
+          // Already offered, already turned down. Sending them round again
+          // would be a loop with no explanation; the address is taken either
+          // way, so say so.
+          setError(t("migration.errorEmailTaken"));
+          return;
+        }
         // The address is already an account of the user's own, and the backend
         // has pointed it as the candidate. Telling them "email already
         // registered" here would send them back to retype an address the
         // server has just resolved; go where the answer is instead. Nothing is
         // linked yet — confirm-account asks, and ownership is proven after it.
         setMaskedEmail(data.email || null);
-        const pending = await fetchMigrationPending();
-        if (pending.first_name) setLegacyFirstName(pending.first_name);
-        if (pending.last_name) setLegacyLastName(pending.last_name);
-        // Same reason as in handleSearch: this session just became
-        // candidate-bearing, and the back controls branch on hasCandidate.
-        setHasCandidate(Boolean(pending.candidate));
+        // The candidate is pointed server-side whatever happens next, so a
+        // failure to re-read the names must not strand the user on a step the
+        // session has already moved past — go on without them.
+        try {
+          const pending = await fetchMigrationPending();
+          if (pending.first_name) setLegacyFirstName(pending.first_name);
+          if (pending.last_name) setLegacyLastName(pending.last_name);
+          // Same reason as in handleSearch: this session just became
+          // candidate-bearing, and the back controls branch on hasCandidate.
+          setHasCandidate(Boolean(pending.candidate));
+        } catch {
+          setHasCandidate(true);
+        }
+        setDivertedEmail(email);
         setStep("confirm-account");
         return;
       }
@@ -272,7 +304,7 @@ export default function MigrateAccountClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [newEmail, t]);
+  }, [newEmail, t, declinedCandidateEmail]);
 
   const handleResendConfirmation = useCallback(async () => {
     setError(null);
