@@ -6,11 +6,9 @@ import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import {
   createTopicColumns,
-  sortTopics,
-  TOPICS_FETCH_PAGE_SIZE,
+  topicSortFieldMap,
   type TopicSortField,
 } from "./topicsListConfig";
 import { fetchTopics } from "@/service/api/discussions-topics";
@@ -24,18 +22,19 @@ interface SystemTopicsClientProps {
 export default function SystemTopicsClient({ pageContent }: SystemTopicsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-topics"]);
   const [topics, setTopics] = useState<Topic[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const {
     currentPage,
     setCurrentPage,
     pageSize,
     setPageSize,
-    sortField,
-    sortOrder,
+    sortParam,
     getSortOrder,
     handleSort,
   } = useAdminListController<TopicSortField>({
     initialFilters: {},
+    sortFieldMap: topicSortFieldMap,
   });
 
   useEffect(() => {
@@ -43,9 +42,10 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
 
     const run = async () => {
       try {
-        const response = await fetchTopics(1, TOPICS_FETCH_PAGE_SIZE);
+        const response = await fetchTopics(currentPage, pageSize, sortParam);
         if (!isActive) return;
         setTopics(response.data || []);
+        setTotalItems(response.total || 0);
       } catch (error) {
         if (!isActive) return;
         console.error("Error loading topics:", error);
@@ -61,17 +61,7 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
     return () => {
       isActive = false;
     };
-  }, []);
-
-  const sortedTopics = useMemo(
-    () => sortTopics(topics, sortField, sortOrder),
-    [topics, sortField, sortOrder]
-  );
-
-  const paginatedTopics = useMemo(
-    () => paginateItems(sortedTopics, currentPage, pageSize),
-    [sortedTopics, currentPage, pageSize]
-  );
+  }, [currentPage, pageSize, sortParam]);
 
   const columns = useMemo(
     () =>
@@ -93,8 +83,8 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
       ]}
       title={pageContent.systemHero?.title ?? ""}
       isLoading={isLoading}
-      count={sortedTopics.length}
-      hasItems={sortedTopics.length > 0}
+      count={totalItems}
+      hasItems={topics.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -110,7 +100,7 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
       }
     >
       <AdminListTable
-        items={paginatedTopics}
+        items={topics}
         columns={columns}
         getRowKey={(topic) => topic.id}
         getSortOrder={getSortOrder}
