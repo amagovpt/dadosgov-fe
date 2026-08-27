@@ -9,6 +9,7 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import {
   createDateSorter,
+  createLocaleStringSorter,
   paginateItems,
   sortItems,
 } from "@/utils/admin-lists/listHelpers";
@@ -21,6 +22,7 @@ import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDeta
 import AdminEmptyState from "../AdminEmptyState";
 import {
   createOrgDiscussionColumns,
+  DISCUSSIONS_FETCH_PAGE_SIZE,
   type DiscussionSortField,
 } from "./discussionsListConfig";
 import type { BoDiscussionsPage } from "@/service/types/admin/discussions";
@@ -62,7 +64,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     async function loadDiscussions() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgDiscussions(orgId);
+        const data = await fetchOrgDiscussions(orgId, 1, DISCUSSIONS_FETCH_PAGE_SIZE);
         setDiscussions(data.data ?? []);
       } catch (error) {
         console.error("Error loading discussions:", error);
@@ -77,6 +79,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
   const sortedDiscussions = useMemo(
     () =>
       sortItems(discussions, sortField, sortOrder, {
+        title: createLocaleStringSorter((discussion) => discussion.title),
         created: createDateSorter((discussion) => discussion.created),
         closed: createDateSorter((discussion) => discussion.closed),
       }),
