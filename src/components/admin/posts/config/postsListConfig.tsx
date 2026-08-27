@@ -11,7 +11,7 @@ import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { Post } from "@/service/types/posts";
 
-export type PostSortField = "name" | "status" | "created_at" | "last_modified";
+export type PostSortField = "name" | "type" | "status" | "created_at" | "last_modified";
 
 export interface PostColumnLabels {
   title: string;
@@ -61,6 +61,9 @@ export function filterPosts(
 export function sortPosts(posts: Post[], sortField: PostSortField | null, sortOrder: SortOrder) {
   return sortItems(posts, sortField, sortOrder, {
     name: createLocaleStringSorter((post) => post.name),
+    // `kind` has exactly two values, so this groups news and pages the same way the
+    // type filter above does. Ordering is by the raw value, not the translated label.
+    type: (a, b) => Number(a.kind === "page") - Number(b.kind === "page"),
     status: (a, b) => Number(a.published) - Number(b.published),
     created_at: createDateSorter((post) => post.created_at),
     last_modified: createDateSorter((post) => post.last_modified),
@@ -80,6 +83,8 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
     {
       id: "type",
       header: labels.type,
+      sortField: "type",
+      sortType: "string",
       renderCell: (post) => (post.kind === "page" ? labels.page : labels.news),
     },
     {
