@@ -215,5 +215,14 @@
     "samlBadResponse": "Erro ao iniciar autenticação. O servidor não respondeu corretamente.",
     "samlIncomplete": "Erro ao iniciar autenticação. Resposta incompleta do servidor.",
     "samlConnection": "Não foi possível contactar o servidor de autenticação. Verifique a sua ligação."
+  },
+  "confirmEmailNotice": {
+    "successTitle": "Email confirmado",
+    "successDescription": "O seu endereço de email está confirmado. Entre com a Chave Móvel Digital para aceder à sua conta.",
+    "alreadyTitle": "Email já confirmado",
+    "alreadyDescription": "Este link já tinha sido usado — o seu email está confirmado. Basta entrar com a Chave Móvel Digital.",
+    "errorTitle": "Link inválido ou expirado",
+    "errorDescription": "Não foi possível confirmar o email com este link. Entre de novo com a Chave Móvel Digital para receber um link novo.",
+    "close": "Fechar"
   }
 }

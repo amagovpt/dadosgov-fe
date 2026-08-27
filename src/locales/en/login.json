@@ -215,5 +215,14 @@
     "samlBadResponse": "Error starting authentication. The server did not respond correctly.",
     "samlIncomplete": "Error starting authentication. Incomplete response from the server.",
     "samlConnection": "Could not reach the authentication server. Please check your connection."
+  },
+  "confirmEmailNotice": {
+    "successTitle": "Email confirmed",
+    "successDescription": "Your email address is confirmed. Sign in with your Chave Móvel Digital to access your account.",
+    "alreadyTitle": "Email already confirmed",
+    "alreadyDescription": "This link had already been used — your email is confirmed. Just sign in with your Chave Móvel Digital.",
+    "errorTitle": "Invalid or expired link",
+    "errorDescription": "This link could not confirm your email. Sign in with your Chave Móvel Digital again to get a new one.",
+    "close": "Close"
   }
 }
