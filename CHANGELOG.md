@@ -6,6 +6,35 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(admin): widen column sorting across the backoffice tables**
+  - Sorting was uneven across the admin lists: the system topics table had none
+    at all, the system harvesters view declared it on one column where the org
+    view had four, and the organizations, posts and members tables each rendered
+    a column that could not be sorted. Those columns are now sortable, in both
+    directions, and nothing new was built for it — the existing
+    `useAdminListController`, `useClientTableState` and `listHelpers` were
+    enough, since a column becomes sortable by declaring `sortField`.
+  - The mechanism follows how each screen gets its data, because a client-side
+    sort over a server-paginated table orders one page while the arrow claims to
+    order the set. Topics, discussions, organizations and users sort through the
+    API; harvesters, posts and members sort the whole set they already load.
+  - The org discussions view was the worst case: it asked for discussions without
+    a page size, received the endpoint's default of 20, and sorted and paginated
+    those — so both the list and its total were truncated for any organization
+    with more. It now sorts and paginates on the server, which the endpoint
+    supports for title, creation and closing date.
+  - The system harvesters last-run cell showed only the end timestamp while the
+    comparator ordered by start-then-end-then-created. Cell and comparator now
+    agree, so the arrow cannot promise an order the rows do not show. Sorting
+    posts by state was also silently doing nothing: `published` is a date string,
+    so the old numeric comparison produced NaN.
+  - Two columns keep no sort control, on purpose. The topics dataset and reuse
+    counts are not serialised by the API at all, so they render 0 for every topic
+    and an arrow there would order nothing. Sorting organizations by member count
+    needs a sort key the API does not offer, and this screen paginates and
+    searches server-side, so a client-side sort would order one page. Both need a
+    backend change, tracked separately.
+
 - **fix(harvesters): authorize the harvester preview instead of relying on it not being checked**
   - The edit screen previewed through `POST /harvest/source/preview/` without ever
     naming an organization. That endpoint only tests
