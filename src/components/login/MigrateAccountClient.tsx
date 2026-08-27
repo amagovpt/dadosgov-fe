@@ -230,7 +230,7 @@ export default function MigrateAccountClient() {
     // is still taken, so creating an account with it cannot work — record the
     // refusal so the next submission explains that instead of looping.
     if (divertedEmail) {
-      setDeclinedCandidateEmail(divertedEmail);
+      setDeclinedCandidateEmail(divertedEmail.toLowerCase());
       setDivertedEmail(null);
       setError(t("migration.errorEmailTaken"));
     }
@@ -248,7 +248,10 @@ export default function MigrateAccountClient() {
     try {
       const data = await skipMigration(email);
       if (data.candidate_found) {
-        if (declinedCandidateEmail === email) {
+        // Compared case-insensitively, because the backend resolves the
+        // address that way: retyping the same account in another case is the
+        // same refusal, not a new one.
+        if (declinedCandidateEmail === email.toLowerCase()) {
           // Already offered, already turned down. Sending them round again
           // would be a loop with no explanation; the address is taken either
           // way, so say so.

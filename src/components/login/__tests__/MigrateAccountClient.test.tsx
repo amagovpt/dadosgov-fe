@@ -306,8 +306,9 @@ describe("MigrateAccountClient account creation step", () => {
     expect(container.textContent).toContain(ENTER_EMAIL_TEXT);
     expect(container.textContent).toContain(translate("migration.errorEmailTaken"));
 
-    // Submitting the very same address again must not divert a second time.
-    const again = await submitNewEmail("joana@example.pt");
+    // Submitting the same address again must not divert a second time — nor
+    // in a different case, which the backend resolves to the same account.
+    const again = await submitNewEmail("JOANA@example.pt");
     expect(again).toContain(ENTER_EMAIL_TEXT);
     expect(again).toContain(translate("migration.errorEmailTaken"));
     expect(again).not.toContain(CONFIRM_ACCOUNT_TEXT);
