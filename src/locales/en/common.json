@@ -149,7 +149,9 @@
       "searchIn": "Search “{{query}}” in {{type}}"
     },
     "noResultsFor": "No results found for \"{{query}}\"",
-    "tryDifferentTerms": "Try searching with different terms."
+    "tryDifferentTerms": "Try searching with different terms.",
+    "error": "The search could not be completed.",
+    "retry": "Try again"
   },
   "filters": {
     "format": {

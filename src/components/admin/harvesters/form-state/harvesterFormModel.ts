@@ -70,6 +70,16 @@ interface HarvesterPreviewValues
   fallbackName: string;
   fallbackUrl: string;
   schedule: string;
+  /**
+   * The producer organization of the source being previewed, when it has one.
+   *
+   * Sent so the preview is authorized against that organization — and so it
+   * reflects what a real run produces: the backends attribute the previewed
+   * datasets to `source.organization` when there is one and fall back to
+   * `source.owner` otherwise, and `owner` is filled in from the session, so
+   * omitting this attributed them to whoever clicked preview.
+   */
+  organization?: string;
 }
 
 export function validateHarvesterDetails(
@@ -231,6 +241,10 @@ export function buildHarvesterPreviewPayload(
     schedule: values.schedule.trim() || undefined,
     active: values.active,
     autoarchive: values.autoarchive,
+    // Omitted, not sent empty, for an owner-only source: the key must be absent
+    // so the API reads the preview as owner-attributed rather than rejecting an
+    // empty organization reference.
+    ...(values.organization ? { organization: values.organization } : {}),
     ...buildStoredConfig(filters, values, values.storedConfig),
   };
 }

@@ -227,6 +227,29 @@ export async function rejectHarvestSource(
 }
 
 
+/**
+ * Preview a source that already exists, by id.
+ *
+ * The companion to `previewHarvestSource`, and the right call whenever the
+ * config being previewed is the stored one: authorization is per source
+ * (`source.permissions["preview"]`), which covers the owner and an
+ * organization's editors — where the config-payload route can only authorize
+ * against an organization, and so answers 403 to both.
+ */
+export async function previewHarvestSourceById(id: string): Promise<HarvestPreviewJob> {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/preview/`, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
+
 export async function previewHarvestSource(
   payload: HarvestSourceCreatePayload
 ): Promise<HarvestPreviewJob> {

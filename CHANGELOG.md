@@ -6,6 +6,88 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(admin): widen column sorting across the backoffice tables**
+  - Sorting was uneven across the admin lists: the system topics table had none
+    at all, the system harvesters view declared it on one column where the org
+    view had four, and the organizations, posts and members tables each rendered
+    a column that could not be sorted. Those columns are now sortable, in both
+    directions, and nothing new was built for it — the existing
+    `useAdminListController`, `useClientTableState` and `listHelpers` were
+    enough, since a column becomes sortable by declaring `sortField`.
+  - The mechanism follows how each screen gets its data, because a client-side
+    sort over a server-paginated table orders one page while the arrow claims to
+    order the set. Topics, discussions, organizations and users sort through the
+    API; harvesters, posts and members sort the whole set they already load.
+  - The org discussions view was the worst case: it asked for discussions without
+    a page size, received the endpoint's default of 20, and sorted and paginated
+    those — so both the list and its total were truncated for any organization
+    with more. It now sorts and paginates on the server, which the endpoint
+    supports for title, creation and closing date.
+  - The system harvesters last-run cell showed only the end timestamp while the
+    comparator ordered by start-then-end-then-created. Cell and comparator now
+    agree, so the arrow cannot promise an order the rows do not show. Sorting
+    posts by state was also silently doing nothing: `published` is a date string,
+    so the old numeric comparison produced NaN.
+  - Two columns keep no sort control, on purpose. The topics dataset and reuse
+    counts are not serialised by the API at all, so they render 0 for every topic
+    and an arrow there would order nothing. Sorting organizations by member count
+    needs a sort key the API does not offer, and this screen paginates and
+    searches server-side, so a client-side sort would order one page. Both need a
+    backend change, tracked separately.
+
+- **fix(harvesters): authorize the harvester preview instead of relying on it not being checked**
+  - The edit screen previewed through `POST /harvest/source/preview/` without ever
+    naming an organization. That endpoint only tests
+    `organization.permissions["harvest"]` when the payload names one, so this was
+    the one path in the backoffice reaching a branch with no authorization test at
+    all — and it worked *because* nothing checked it. It also made the preview
+    lie: the harvest backends attribute previewed datasets to the source's
+    organization when there is one and fall back to the owner otherwise, with the
+    owner filled in from the session, so the preview showed the datasets belonging
+    to whoever clicked it rather than to the producer.
+  - The payload now names the source's organization, and the screen picks the
+    route that can actually authorize the person asking. Previewing an unsaved
+    config only makes sense with edit rights, and without them every field in the
+    configuration tab is disabled — so the config is the stored one, and
+    `GET /harvest/source/<id>/preview/` returns the same preview while authorizing
+    per source through `source.permissions["preview"]`. The route is chosen on
+    edit rights *and* the source having an organization, because those are the two
+    things the config route needs to authorize anyone: an organization's editors
+    have neither, and the owner of an owner-only source has edit rights but no
+    organization to be authorized against, so both go through the per-source
+    route that admits them.
+  - The preview button now follows `canPreview`, from the same backend-computed
+    `source.permissions` the save and delete buttons already use. It was the only
+    action on the form rendered unconditionally, and the harvester detail routes
+    sit under no route guard, so any authenticated account saw it.
+
+- **fix(filters): the advanced-filter search boxes now query the API, and a failure says so**
+  - Typing in **Palavras-chave**, **Formatos** or **Cobertura Espacial** returned
+    "Nenhum resultado encontrado" for every term, because the request was never
+    made. The sidebar handed `onSearchChange` the group's *translated label*
+    while the datasets filters compared it against internal identifiers —
+    `"tags"`, `"format"`, `"geozone"`. Nothing matched, so no suggestion was ever
+    fetched. Confirmed in a browser: with the three suggest endpoints
+    intercepted, no request was ever observed.
+  - Routing now goes by the group's `param` — the query-string name, stable
+    across locales and label changes — and every caller of the shared sidebar
+    compares params, including the reuses and organizations filters, which
+    happened to work by comparing the translated label. Two contracts in one
+    shared component is what produced the bug. The search page and the data
+    stories declare advanced filters that nothing renders, so they were never
+    affected and are left alone.
+  - A failure is also no longer painted as "no results". The suggest helpers
+    return `null` on failure instead of the `[]` they returned for both cases,
+    the sidebar gained an opt-in error state with a retry action, rendered
+    alongside the option list so it is still reported when the filter already
+    has a selection, and the datasets and reuses filters pass it. The requests
+    are debounced by 300 ms and a stale answer is discarded, so a slow failure
+    cannot show an error over a query that was answered. The console logging that
+    the failures already had is untouched. This is the confusion
+    `rethrowControlFlow` describes in its own docstring: "the backend being down
+    … renders as an empty result set, indistinguishable from a search that found
+    nothing".
+
 - **fix(datasets): stop collapsing multi-value listing filters into one value**
   - Selecting a second option in "Cobertura espacial" or "Granularidade
     espacial" emptied the listing. The datasets page read those two params with

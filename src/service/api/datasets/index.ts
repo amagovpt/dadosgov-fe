@@ -528,7 +528,13 @@ export async function fetchAllowedExtensions(): Promise<string[]> {
 }
 
 
-export async function suggestFormats(query: string): Promise<FormatSuggestion[]> {
+/**
+ * Returns `null` when the request failed, as opposed to `[]` for a search that
+ * ran and matched nothing. Callers that only need a list use `?? []`; the ones
+ * that must tell a failure apart from an empty result check for `null` — see
+ * `rethrowControlFlow`, whose own docstring names this exact confusion.
+ */
+export async function suggestFormats(query: string): Promise<FormatSuggestion[] | null> {
   try {
     const res = await fetch(
       `${API_BASE_URL}/datasets/suggest/formats/?q=${encodeURIComponent(query)}`,
@@ -539,7 +545,7 @@ export async function suggestFormats(query: string): Promise<FormatSuggestion[]>
   } catch (error) {
     rethrowControlFlow(error);
     console.error("Error suggesting formats:", error);
-    return [];
+    return null;
   }
 }
 

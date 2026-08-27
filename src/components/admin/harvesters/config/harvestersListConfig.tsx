@@ -13,7 +13,13 @@ import { can } from "@/utils/permissions";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { getHarvesterStatus, type HarvesterStatusLabels } from "@/utils/harvesterStatus";
 
-export type HarvesterSortField = "name" | "status" | "created_at" | "last_job";
+export type HarvesterSortField =
+  | "name"
+  | "status"
+  | "created_at"
+  | "last_job"
+  | "implementation"
+  | "datasets";
 
 /**
  * The harvest sources endpoint paginates but cannot search, filter by status or sort, so
@@ -67,6 +73,8 @@ export function sortHarvesters(
     status: createLocaleStringSorter(getHarvesterStatusSortValue),
     created_at: createDateSorter((harvester) => harvester.created_at),
     last_job: (a, b) => getLastJobTimestamp(a) - getLastJobTimestamp(b),
+    implementation: createLocaleStringSorter((harvester) => harvester.backend),
+    datasets: (a, b) => (a.datasets_count ?? 0) - (b.datasets_count ?? 0),
   });
 }
 
@@ -128,6 +136,8 @@ export function createOrgHarvesterColumns({
     },
     {
       id: "implementation",
+      sortField: "implementation",
+      sortType: "string",
       header: labels.implementation,
       renderCell: (harvester) => harvester.backend,
     },
@@ -145,11 +155,18 @@ export function createOrgHarvesterColumns({
       sortType: "date",
       renderCell: (harvester) =>
         harvester.last_job
-          ? formatDateToDMY(harvester.last_job.started ?? harvester.last_job.ended ?? "")
+          ? formatDateToDMY(
+              harvester.last_job.started ??
+                harvester.last_job.ended ??
+                harvester.last_job.created ??
+                ""
+            )
           : labels.notYet,
     },
     {
       id: "datasets",
+      sortField: "datasets",
+      sortType: "numeric",
       header: labels.datasets,
       renderCell: (harvester) => harvester.datasets_count ?? 0,
     },
@@ -186,6 +203,8 @@ export function createSystemHarvesterColumns({
   return [
     {
       id: "name",
+      sortField: "name",
+      sortType: "string",
       header: labels.name,
       renderCell: (harvester) => (
         <TextLink href={`/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
@@ -203,22 +222,37 @@ export function createSystemHarvesterColumns({
     },
     {
       id: "implementation",
+      sortField: "implementation",
+      sortType: "string",
       header: labels.implementation,
       renderCell: (harvester) => harvester.backend,
     },
     {
       id: "created_at",
+      sortField: "created_at",
+      sortType: "date",
       header: labels.createdAt,
       renderCell: (harvester) => formatDateToDMY(harvester.created_at),
     },
     {
       id: "last_job",
+      sortField: "last_job",
+      sortType: "date",
       header: labels.lastJob,
       renderCell: (harvester) =>
-        harvester.last_job?.ended ? formatDateToDMY(harvester.last_job.ended) : labels.notYet,
+        harvester.last_job
+          ? formatDateToDMY(
+              harvester.last_job.started ??
+                harvester.last_job.ended ??
+                harvester.last_job.created ??
+                ""
+            )
+          : labels.notYet,
     },
     {
       id: "datasets",
+      sortField: "datasets",
+      sortType: "numeric",
       header: labels.datasets,
       renderCell: (harvester) => harvester.datasets_count ?? 0,
     },

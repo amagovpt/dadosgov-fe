@@ -91,6 +91,14 @@ interface HarvesterConfigFormProps {
   // only preview. Default true for the create flow (no source yet).
   canEdit?: boolean;
   canDelete?: boolean;
+  // Whether this user may preview at all — `source.permissions["preview"]`
+  // (HarvestSourcePermission: owner, org-admin, org-editor). Kept separate from
+  // `canEdit` because the two rights genuinely differ, in both directions: an
+  // org editor may preview without editing, and the owner of an owner-only
+  // source may edit without the config-preview route being able to authorize
+  // them. The detail screen reads both to pick the route. Nothing on the create
+  // flow has a source yet, hence the default.
+  canPreview?: boolean;
   deleteCard?: AdminCard;
   auxiliaryItems?: AdminAuxiliaryItem[];
   // Whether the "advanced" fields (URL, implementation type, schedule, toggles)
@@ -139,6 +147,7 @@ export function HarvesterConfigForm({
   onDelete,
   canEdit = true,
   canDelete = true,
+  canPreview = true,
   deleteCard,
   auxiliaryItems,
   canEditAdvanced,
@@ -487,17 +496,19 @@ export function HarvesterConfigForm({
           </div>
 
           <div className="admin-page__actions flex justify-end gap-16">
-            <Button
-              appearance="outline"
-              variant="primary"
-              type="button"
-              disabled={isPreviewing || !!scheduleError}
-              onClick={onPreview}
-            >
-              {isPreviewing
-                ? t("admin-harvesters:actions.previewing")
-                : t("admin-harvesters:actions.preview")}
-            </Button>
+            {canPreview && (
+              <Button
+                appearance="outline"
+                variant="primary"
+                type="button"
+                disabled={isPreviewing || !!scheduleError}
+                onClick={onPreview}
+              >
+                {isPreviewing
+                  ? t("admin-harvesters:actions.previewing")
+                  : t("admin-harvesters:actions.preview")}
+              </Button>
+            )}
             {canEdit && (
               <Button
                 variant="primary"
