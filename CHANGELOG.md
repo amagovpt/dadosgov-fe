@@ -17,15 +17,17 @@ This project has no version tags, so entries are grouped by month (newest first)
     arriving that way has no wizard session, and the bootstrap effect answers a
     missing session by pushing to `/login`, which swallowed the message they
     were sent to read: the flash is latched on the first render and the
-    bootstrap skipped entirely when it is set. Expired says a fresh link is
-    already on its way; used, superseded and over-the-limit offer
-    re-authentication, there being no session left to resend from.
+    bootstrap skipped entirely when it is set. Every case — expired, used,
+    superseded — offers re-authentication, there being no session left to
+    resend from, and the backend deliberately not reissuing from a link click.
   - The send-limit message is its own rather than the account-creation one:
     that cap lasts the life of the account, this one lifts after an hour, so
     "contact support" would be the wrong advice.
   - `confirmMigration` stays for the password proof, narrowed to that arm;
     `sendMigrationCode` and the code-step strings are gone from both locales.
-  - Depends on the matching backend change, which must be deployed first.
+  - **Depends on the matching backend change, which must be deployed first**:
+    this screen calls `POST /saml/migration/send-link`, which does not exist
+    until that lands.
 
 - **chore(ci): run the test and typecheck workflows once per push, not twice**
   - Both workflows triggered on `push` **and** `pull_request` with no branch

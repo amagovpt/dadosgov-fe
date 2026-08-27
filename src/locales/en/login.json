@@ -133,9 +133,8 @@
     "linkErrorTitle": "The link could not be validated",
     "linkErrorAction": "Sign in again",
     "flash": {
-      "linkExpired": "The link has expired. We have just sent you a new one — check your inbox, and your spam folder if you cannot find it.",
+      "linkExpired": "The link has expired — it is valid for 30 minutes. Sign in again with Chave Móvel Digital or eIDAS to get a new one.",
       "linkInvalid": "This link is no longer valid. It may have been used, expired, or the account it pointed at may have changed since. Sign in again with Chave Móvel Digital or eIDAS to start over.",
-      "linkTooManySends": "The send limit for this account has been reached. Try again later, or link the account with your password.",
       "linkAlreadyDone": "This account is already linked to your digital identity. Sign in with Chave Móvel Digital or eIDAS."
     }
   },

@@ -18,7 +18,6 @@ const RESEND_CONFIRM_COOLDOWN_SECONDS = 60;
 const FLASH_ERRORS: Record<string, string> = {
   migration_link_expired: "migration.flash.linkExpired",
   migration_link_invalid: "migration.flash.linkInvalid",
-  migration_link_too_many_sends: "migration.flash.linkTooManySends",
   migration_link_already_done: "migration.flash.linkAlreadyDone",
 };
 
