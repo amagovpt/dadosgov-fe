@@ -128,7 +128,10 @@
     "errorEmailTaken": "Já existe uma conta com este email. Use outro endereço, ou volte atrás para associar a conta existente.",
     "errorResendConfirmation": "Não foi possível reenviar o email. Tente novamente mais tarde.",
     "confirmationPendingTitle": "Confirmação em falta",
-    "confirmationPendingDescription": "A sua conta já foi criada, mas ainda não confirmou o endereço de email. Siga o link que enviámos para {{email}} e, depois disso, entre com a Chave Móvel Digital."
+    "confirmationPendingDescription": "A sua conta já foi criada, mas ainda não confirmou o endereço de email. Siga o link que enviámos para {{email}} e, depois disso, entre com a Chave Móvel Digital.",
+    "errorNicRequired": "A identidade autenticada não trouxe o número de identificação civil, pelo que não é possível criar a conta por esta via. Contacte o suporte do dados.gov.pt.",
+    "errorIdentityRegistered": "Já existe uma conta associada a esta identidade. Entre com a Chave Móvel Digital.",
+    "errorTooManySends": "Foi atingido o limite de emails de confirmação para esta conta. Contacte o suporte do dados.gov.pt."
   },
   "terms": {
     "title": "Termos e condições",

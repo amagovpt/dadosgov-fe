@@ -136,6 +136,11 @@ export default function MigrateAccountClient() {
         const pending = await fetchMigrationPending();
         if (pending.first_name) setLegacyFirstName(pending.first_name);
         if (pending.last_name) setLegacyLastName(pending.last_name);
+        // The search just made this session candidate-bearing. Without this
+        // the back controls, which branch on hasCandidate, would send the user
+        // to the search again and make them find the account a second time —
+        // harmless while the choice step absorbed them, a dead loop now.
+        setHasCandidate(Boolean(pending.candidate));
         setStep("confirm-account");
       } else {
         setError(t("migration.errorNotFound"));
@@ -236,6 +241,15 @@ export default function MigrateAccountClient() {
         setError(t("migration.errorEmailTaken"));
       } else if (code === "invalid_email" || code === "email_required") {
         setError(t("migration.errorInvalidEmail"));
+      } else if (code === "nic_required") {
+        // The identity carried no NIC, so it cannot create an account through
+        // this flow. Nothing the user can correct here — say so rather than
+        // leaving them retrying a form that will never succeed.
+        setError(t("migration.errorNicRequired"));
+      } else if (code === "identity_already_registered") {
+        setError(t("migration.errorIdentityRegistered"));
+      } else if (code === "too_many_sends") {
+        setError(t("migration.errorTooManySends"));
       } else {
         setError(t("migration.errorCreateAccount"));
       }
@@ -256,8 +270,13 @@ export default function MigrateAccountClient() {
         setResendNotice(t("migration.confirmationResent"));
         setResendConfirmCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
       }
-    } catch {
-      setError(t("migration.errorResendConfirmation"));
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "";
+      setError(
+        code === "Maximum confirmation sends exceeded"
+          ? t("migration.errorTooManySends")
+          : t("migration.errorResendConfirmation")
+      );
     } finally {
       setIsLoading(false);
     }

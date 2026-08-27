@@ -106,15 +106,20 @@ describe("MigrateAccountClient initial step", () => {
   });
 
   it("never renders the removed choice step", async () => {
+    // Asserting on the old button labels would be vacuous: their locale keys
+    // were deleted in the same change, so translate() would fall back to the
+    // key path and the assertion could not fail even if the step were still
+    // there. Assert instead that every mount lands on one of the three real
+    // destinations, which is what "the choice step is gone" actually means.
+    const destinations = [CONFIRM_ACCOUNT_TEXT, ENTER_EMAIL_TEXT, SEARCH_TEXT];
+
     for (const pending of [
       { pending: true, candidate: true },
       { pending: true, candidate: false, no_match: true },
       { pending: true, candidate: false, no_match: false },
     ]) {
       const text = await render(pending);
-      // The two buttons the ticket removed.
-      expect(text).not.toContain("Já possuo uma conta");
-      expect(text).not.toContain("Criar nova conta");
+      expect(destinations.filter((d) => text.includes(d))).toHaveLength(1);
     }
   });
 
