@@ -11,6 +11,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ptLogin from "@/locales/pt/login.json";
+import enLogin from "@/locales/en/login.json";
 
 const translate = (key: string): string => {
   const raw = key
@@ -264,5 +265,21 @@ describe("MigrateAccountClient account creation step", () => {
     expect(after).toContain(translate("migration.errorEmailTaken"));
     expect(after).toContain(ENTER_EMAIL_TEXT);
     expect(after).not.toContain(CONFIRM_ACCOUNT_TEXT);
+  });
+
+  it("does not send the user back to a step that is not behind them", async () => {
+    // The old copy read "volte atrás para associar a conta existente". There is
+    // no back: this step is reached straight off the CMD return, and the way to
+    // the linking branch is a link called "Já tenho conta — procurar". Now that
+    // a claimable address routes there by itself, this message only ever means
+    // the account cannot be linked — in both locales.
+    for (const message of [
+      ptLogin.migration.errorEmailTaken,
+      enLogin.migration.errorEmailTaken,
+    ]) {
+      expect(message).toBeTruthy();
+      expect(message.toLowerCase()).not.toContain("volte atrás");
+      expect(message.toLowerCase()).not.toContain("go back");
+    }
   });
 });
