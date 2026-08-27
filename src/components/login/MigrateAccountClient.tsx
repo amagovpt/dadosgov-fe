@@ -15,7 +15,6 @@ const RESEND_CONFIRM_COOLDOWN_SECONDS = 60;
 
 type Step =
   | "loading"
-  | "choice"
   | "login"
   | "search"
   | "confirm-account"
@@ -78,9 +77,21 @@ export default function MigrateAccountClient() {
         if (data.first_name) setLegacyFirstName(data.first_name);
         if (data.last_name) setLegacyLastName(data.last_name);
 
-        // The flow always starts by asking the user whether they
-        // already have an account or want to create a new one.
-        setStep("choice");
+        // The backend already decided which branch this is, back when the
+        // CMD returned — asking the user to repeat that decision added a step
+        // and a choice they are not equipped to make. Three outcomes:
+        //   candidate  -> one legacy account matched: go link it
+        //   no_match   -> nothing matched at all: go create an account
+        //   otherwise  -> several homonyms matched, so nobody can say which
+        //                 is theirs: let them find it, with a way out to
+        //                 create a new one from there.
+        if (data.candidate) {
+          setStep("confirm-account");
+        } else if (data.no_match) {
+          setStep("enter-email");
+        } else {
+          setStep("search");
+        }
       } catch {
         router.push("/login");
       }
@@ -288,7 +299,7 @@ export default function MigrateAccountClient() {
             {t("migration.linkTitle")}
           </h1>
 
-          {step !== "success" && step !== "success-new" && step !== "choice" && (
+          {step !== "success" && step !== "success-new" && (
             <p className="text-lg mb-32 text-neutral-700">
               {t("migration.linkDescription")}
             </p>
@@ -301,66 +312,6 @@ export default function MigrateAccountClient() {
           )}
 
           {/* Step: Initial choice — link an existing account or create a new one */}
-          {step === "choice" && (
-            <div className="flex flex-col gap-24">
-              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
-                <Icon name="agora-line-user" className="h-24 w-24 text-brand-blue-primary" />
-              </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">
-                {hasCandidate
-                  ? t("migration.accountFound")
-                  : t("migration.hasAccount")}
-              </h2>
-              <p className="text-neutral-900">
-                {hasCandidate
-                  ? t("migration.accountFoundDescription")
-                  : t("migration.noAccountDescription")}
-              </p>
-
-              <div className="flex flex-col gap-16">
-                <button
-                  onClick={() => {
-                    setError(null);
-                    setStep("login");
-                  }}
-                  disabled={isLoading}
-                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
-                >
-                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
-                    <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
-                  </div>
-                  <div>
-                    <p className="text-lg-bold text-brand-blue-dark">{t("migration.existingAccount")}</p>
-                    <p className="text-sm text-neutral-700">
-                      {t("migration.existingAccountDescription")}
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={handleSkip}
-                  disabled={isLoading}
-                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
-                >
-                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
-                    <Icon
-                      name="agora-line-add-circle"
-                      className="h-24 w-24 text-brand-blue-primary"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-lg-bold text-brand-blue-dark">{t("migration.newAccount")}</p>
-                    <p className="text-sm text-neutral-700">
-                      {isLoading
-                        ? t("migration.creatingAccount")
-                        : t("migration.newAccountDescription")}
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Step: Default account login (email + password) */}
           {step === "login" && (
             <div className="flex flex-col gap-24">
@@ -420,7 +371,9 @@ export default function MigrateAccountClient() {
                 variant="primary"
                 appearance="link"
                 onClick={() => {
-                  setStep("choice");
+                  // The choice step is gone; go back to wherever this user
+                  // would have started from.
+                  setStep(hasCandidate ? "confirm-account" : "search");
                   setError(null);
                 }}
                 className="text-sm h-auto p-0"
