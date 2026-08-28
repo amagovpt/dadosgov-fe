@@ -280,27 +280,22 @@ describe("MigrateAccountClient initial step", () => {
 describe("MigrateAccountClient account creation step", () => {
   const NO_MATCH = { pending: true, candidate: false, no_match: true };
 
-  it("routes an own-legacy-email submission to the credentials screen", async () => {
-    // LEDG-2351: the address the user types is their own portal account. The
-    // backend refuses it as a creation but points it as the candidate, and the
-    // wizard has to follow — telling them "already registered" here sends them
-    // back to retype an address the server has just resolved. It now lands on
-    // the credentials screen, pre-filled, so only the password is left to give.
+  it("answers a taken address exactly as a free one", async () => {
+    // LEDG-2361. The wizard used to route on whether the address was already
+    // taken -- straight to the credentials screen for a claimable account, an
+    // error for anything else -- which made it an enumeration oracle for
+    // anyone holding a CMD session. The backend now answers both cases the
+    // same, and the wizard must not reintroduce the distinction: one outcome,
+    // whatever the address turns out to be. What tells the two apart is the
+    // mail, which only the address's owner can read.
     const text = await render(NO_MATCH);
     expect(text).toContain(ENTER_EMAIL_TEXT);
 
-    skipMigrationMock.mockResolvedValue({
-      success: false,
-      candidate_found: true,
-      email: "j***@example.pt",
-    });
+    skipMigrationMock.mockResolvedValue({ success: true, email: "joana@example.pt" });
+    const taken = await submitNewEmail("joana@example.pt");
 
-    const after = await submitNewEmail("joana@example.pt");
-
-    expect(after).toContain(CREDENTIALS_TEXT);
-    expect(after).not.toContain(translate("migration.errorEmailTaken"));
-    const emailInput = container.querySelector<HTMLInputElement>("#login-email");
-    expect(emailInput?.value).toBe("joana@example.pt");
+    expect(taken).toContain(translate("migration.successNewTitle"));
+    expect(taken).not.toContain(CREDENTIALS_TEXT);
   });
 
   it("still creates the account when the address is free", async () => {
@@ -315,33 +310,20 @@ describe("MigrateAccountClient account creation step", () => {
     expect(after).not.toContain(CREDENTIALS_TEXT);
   });
 
-  it("says the account cannot be linked when the address is not claimable", async () => {
-    // A taken address with no candidate_found now means exactly one thing:
-    // an account holds it that this identity cannot claim. The message has to
-    // say that, not point at a step that does not exist.
-    await render(NO_MATCH);
-
-    skipMigrationMock.mockRejectedValue(new Error("email_taken"));
-    const after = await submitNewEmail("alguem@example.pt");
-
-    expect(after).toContain(translate("migration.errorEmailTaken"));
-    expect(after).toContain(ENTER_EMAIL_TEXT);
-    expect(after).not.toContain(CREDENTIALS_TEXT);
-  });
-
-  it("does not send the user back to a step that is not behind them", async () => {
-    // The old copy read "volte atrás para associar a conta existente". There is
-    // no back: this step is reached straight off the CMD return, and the way to
-    // the linking branch is a link called "Já tenho conta — procurar". Now that
-    // a claimable address routes there by itself, this message only ever means
-    // the account cannot be linked — in both locales.
-    for (const message of [
-      ptLogin.migration.errorEmailTaken,
-      enLogin.migration.errorEmailTaken,
-    ]) {
-      expect(message).toBeTruthy();
-      expect(message.toLowerCase()).not.toContain("volte atrás");
-      expect(message.toLowerCase()).not.toContain("go back");
+  it("keeps the post-submission copy true whether or not an account was created", () => {
+    // Both screens the wizard can show after a submission are reached in both
+    // cases now, so neither may claim an account was created -- "a sua conta
+    // ja foi criada" is false for someone whose address already had one, and
+    // saying it would give the answer away in prose.
+    for (const locale of [ptLogin, enLogin]) {
+      for (const key of ["successNewDescription", "confirmationPendingDescription"] as const) {
+        const message = locale.migration[key];
+        expect(message).toBeTruthy();
+        expect(message).toContain("{{email}}");
+        for (const claim of ["conta foi criada", "conta ja foi criada", "conta já foi criada", "account has been created", "account was created"]) {
+          expect(message.toLowerCase()).not.toContain(claim.toLowerCase());
+        }
+      }
     }
   });
 });

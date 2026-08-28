@@ -63,17 +63,16 @@ export async function confirmMigration(
 }
 
 
+// The backend answers this the same way whether or not the address already
+// has an account, so there is nothing here to branch on: an address that is
+// taken gets a mail of its own and this call still resolves. Anything the
+// wizard could route on would be the enumeration oracle back again, one layer
+// up.
 export async function skipMigration(email: string): Promise<{
   success: boolean;
-  // The address the account was created with, echoed back so the wizard can
-  // tell the user where the confirmation link went. When candidate_found is
-  // set this is instead the MASKED address of the legacy account that was
-  // found — never the address the user submitted.
+  // The address the mail went to, echoed back in the normalised form the
+  // backend stores — the caller's own input either way, never a lookup result.
   email?: string;
-  // The submitted address belongs to a legacy account this identity can
-  // legitimately claim, and the backend has pointed it as the candidate. Not
-  // a failure to report: the wizard continues into the linking branch.
-  candidate_found?: boolean;
 }> {
   const res = await fetch("/saml/migration/skip", {
     method: "POST",
@@ -82,16 +81,10 @@ export async function skipMigration(email: string): Promise<{
   });
   if (!res.ok) {
     // The error code carries which rejection it was (invalid_email,
-    // email_taken, ...) so the caller can say something useful; throwing a
-    // fixed string here would flatten them all into one message.
+    // nic_required, ...) so the caller can say something useful; throwing a
+    // fixed string here would flatten them all into one message. None of them
+    // depends on whether the address exists.
     const data = await res.json().catch(() => ({}));
-    if (data.candidate_found) {
-      // Refused as an account creation, but it resolved to an account the
-      // user can link. Returning it keeps the outcome on the success path,
-      // where the caller can route on it, instead of encoding "go here next"
-      // in a thrown string.
-      return { success: false, candidate_found: true, email: data.email };
-    }
     throw new Error(data.error || "Failed to skip migration");
   }
   return await res.json();

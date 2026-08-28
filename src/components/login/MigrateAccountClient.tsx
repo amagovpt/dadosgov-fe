@@ -233,19 +233,15 @@ function MigrateAccountWizard() {
     setIsLoading(true);
     setError(null);
     try {
+      // One outcome, on purpose. The backend used to say whether the address
+      // was already taken, and routing on that answer is what made the wizard
+      // an enumeration oracle for anyone holding a CMD session. Both cases now
+      // end here, and what differs is only the mail that arrives: a
+      // confirmation link for a new account, or a notice that one already
+      // exists. That costs the shortcut LEDG-2351 added -- the owner of a
+      // legacy address is no longer walked straight to the credentials screen
+      // -- and the mail tells them what to do instead.
       const data = await skipMigration(email);
-      if (data.candidate_found) {
-        // The address the user typed is already an account of their own.
-        // "Email já registado" would send them back to retype an address the
-        // server has just resolved (LEDG-2351); go where the answer is. The
-        // credentials screen is that answer now, pre-filled with the address
-        // they just typed, so all that is left to supply is the password.
-        // Nothing is linked yet -- the click on the mailed link does that.
-        setLoginEmail(email);
-        setPassword("");
-        setStep("login");
-        return;
-      }
       setCreatedEmail(data.email || email);
       setResendConfirmCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
       setStep("success-new");
@@ -253,9 +249,8 @@ function MigrateAccountWizard() {
       const code = err instanceof Error ? err.message : "";
       // Each rejection is correctable in place — the pending migration
       // survives the error, so the user can fix the address and resubmit.
-      if (code === "email_taken") {
-        setError(t("migration.errorEmailTaken"));
-      } else if (code === "invalid_email" || code === "email_required") {
+      // None of them depends on whether the address already has an account.
+      if (code === "invalid_email" || code === "email_required") {
         setError(t("migration.errorInvalidEmail"));
       } else if (code === "nic_required") {
         // The identity carried no NIC, so it cannot create an account through
