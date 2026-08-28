@@ -5,8 +5,10 @@ const BASE_URL = "http://localhost:3000";
 /**
  * Account migration flow at /migrate-account.
  *
- * The page is a multi-step wizard (search → confirm-account → choose-method →
- * verify-code | verify-password → success) gated by `fetchMigrationPending()`.
+ * The page is a multi-step wizard (login → link-sent, or enter-email →
+ * success-new) gated by `fetchMigrationPending()`. The password says which
+ * legacy account to link; ownership of its email is always proved by following
+ * the validation link mailed to it, which is also what starts the session.
  * Without a pending migration the client redirects to /login. These
  * tests exercise the page surface that is reachable without a valid migration
  * cookie; deeper steps require backend-seeded migration state and stay skipped.
@@ -119,9 +121,10 @@ test.describe("Migrate Account Page", () => {
   });
 
   test.skip(
-    "MA-07: Email-code verification path completes (needs backend-seeded migration)",
+    "MA-07: Validation-link path completes (needs backend-seeded migration)",
     async () => {
-      // Requires a pending migration in MongoDB and a deliverable inbox.
+      // Requires a pending migration in MongoDB, a deliverable inbox, and the
+      // token from the mailed link.
     }
   );
 

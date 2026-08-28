@@ -6,6 +6,184 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(migrate-account)!: one answer on the creation step, whatever the address turns out to be**
+  - The step routed on the backend's `candidate_found`: a claimable legacy
+    address went to the credentials screen, anything else taken raised "already
+    registered". Both readings answered, for any address anyone typed, whether
+    it has an account at the portal — the enumeration oracle the backend has
+    just stopped answering, reintroduced a layer up. `skipMigration` no longer
+    reads the field, and every submission lands on the mailbox screen. What
+    tells the two cases apart is the mail, which only the address's owner can
+    read.
+  - The copy of both post-submission screens loses its claim that an account
+    was created. "A sua conta já foi criada" is false for someone whose address
+    already had one, and the `confirmation-pending` screen is what a reload
+    shows next — saying it there would give the answer away in prose after the
+    API stopped giving it away in JSON. Both locales; `errorEmailTaken` goes
+    with the branch that raised it.
+  - The cost is the shortcut this replaces: the owner of a legacy address is
+    no longer walked straight to the credentials screen, and reads what to do
+    in the mail instead.
+  - Deploy this before the backend change. Against the old backend a taken
+    address still answers 409, which this client no longer special-cases, so
+    the user sees the generic creation error — degraded but correctable. The
+    reverse pairing is worse: the old client would promise a confirmation link
+    that was never sent.
+
+- **feat(login): make the email tab the account-association entry point**
+  - The "E-mail e palavra-passe" tab showed a password form and only revealed
+    the migration notice once the backend refused the login. The notice is now
+    the tab: the discontinuation warning, "Associar conta à Chave Móvel Digital"
+    and "Associar conta à Autenticação Europeia" with their support links, and
+    the "Representa uma entidade?" box. `EmailLoginForm` is gone, and with it
+    the last password sign-in surface in the frontend.
+  - Both buttons start a SAML login, so they carry the same `samlEnabled` gate
+    the CMD and eIDAS tabs use — otherwise an environment with SAML off would
+    leave the only controls on the tab firing a request that cannot succeed —
+    and they render the SAML error themselves, which nothing on this tab did
+    except the form that is now gone.
+  - The organisation box renders `StatusCard` directly instead of reusing
+    `SupportStatusCard`: that component carries page layout of its own and is
+    already rendered once below the tabs, so reusing it would stack two boxes
+    and nest a 12-column grid inside the tab panel.
+- **feat(migrate-account)!: land on the legacy credentials and finish by link**
+  - Three screens stood between the CMD/eIDAS return and the credentials the
+    user is actually asked for: "is this yours?", an account search, and a
+    choice of proof. The credentials screen does not depend on a candidate being
+    pointed — the backend links whichever account the password proves, homonyms
+    included — so a matched candidate and an ambiguous set of homonyms land on
+    the same screen and the user types the address they know. Only `no_match`
+    still opens account creation.
+  - The password no longer ends the flow: the wizard goes to "Validar email"
+    with the resend cooldown already armed, and the success screen and its
+    redirect to an authenticated home page are gone along with the session they
+    claimed. Every destination that pointed at a removed step is re-pointed, so
+    nothing dangles — including the own-email divert, which now lands on the
+    credentials screen pre-filled with the address just typed.
+  - A correct password can now fail on the send cap or on a lost wizard session.
+    Both are distinguished, because falling through to "credenciais inválidas"
+    would tell the user their password is wrong when it is not.
+  - Every screen names the provider the backend reports, so an eIDAS user stops
+    reading "Chave Móvel Digital"; `signInDescription` no longer promises the
+    account "será associada", which the click now does. The 25 locale keys
+    belonging to the removed screens are deleted rather than left for a
+    translator to maintain.
+- **feat(migrate-account): offer password recovery inline**
+  - "Esqueceu-se da palavra-passe?" navigated to screens that no longer exist.
+    Recovery now runs as a step inside the wizard, so the pending migration —
+    and the identity just proved at Autenticação.gov — survives it and the user
+    can come back and finish. The wizard wraps itself in
+    `GoogleReCaptchaProvider`, conditional on the key: without a provider the
+    recovery request goes out with a null token and the backend rejects it, so
+    the failure is silent rather than loud.
+- **test(e2e): authenticate through the login route instead of the form**
+  - `performLogin` drove the password form, which is what produced the
+    storage-state every backoffice project depends on. It now posts the same
+    fields to the same route through `page.request`, which shares the browser
+    context's cookie jar and baseURL, so the setup files and the disposable
+    project on port 3001 are unchanged.
+- **Deploy the backend change first**: the wizard depends on the new
+  `{"sent": true}` contract of `POST /saml/migration/confirm` and on the
+  provider field in `GET /saml/migration/pending`.
+
+- **feat(migrate-account): validate the legacy account by link instead of a code**
+  - The linking branch no longer asks for a 6-digit code. Choosing the email
+    method now sends a validation link to the address already on the account
+    and shows a waiting screen — "Validar email" — in the same shape as the one
+    the account-creation branch ends on, with the same resend-behind-a-cooldown
+    control. Following the link is what links the account and signs the user
+    in; nothing here is authenticated before that.
+  - A failed click comes back as `/migrate-account?flash=...`. A visitor
+    arriving that way has no wizard session, and the bootstrap effect answers a
+    missing session by pushing to `/login`, which swallowed the message they
+    were sent to read: the flash is latched on the first render and the
+    bootstrap skipped entirely when it is set. Every case — expired, used,
+    superseded — offers re-authentication, there being no session left to
+    resend from, and the backend deliberately not reissuing from a link click.
+  - The send-limit message is its own rather than the account-creation one:
+    that cap lasts the life of the account, this one lifts after an hour, so
+    "contact support" would be the wrong advice.
+  - `confirmMigration` stays for the password proof, narrowed to that arm;
+    `sendMigrationCode` and the code-step strings are gone from both locales.
+  - **Depends on the matching backend change, which must be deployed first**:
+    this screen calls `POST /saml/migration/send-link`, which does not exist
+    until that lands.
+
+- **chore(ci): run the test and typecheck workflows once per push, not twice**
+  - Both workflows triggered on `push` **and** `pull_request` with no branch
+    filter, so every push to a branch with an open PR started two identical runs
+    of each — four jobs, and the tests one runs `npm ci` twice on its own to
+    compare test counts against the base branch. The `push` trigger is now
+    limited to the environment branches (`develop`, `tst`, `ppr`, `main`), which
+    is what `udata-pt` already does, and feature branches stay covered by
+    `pull_request`.
+  - Added `concurrency` with `cancel-in-progress`, so a second push supersedes
+    the run for the first instead of queueing behind it. Nothing about what the
+    suites check changes.
+
+- **fix(migrate-account): the wizard follows the answer instead of reporting a rejection**
+  - On the account-creation step, typing the address of one's own portal
+    account got "an account with this email already exists" — and a message
+    telling the user to go back and link it, when the way there is not back
+    but a link called "Já tenho conta — procurar", and when the server had
+    just resolved that very account. `skipMigration` now recognises the
+    backend's `candidate_found` and returns it as an outcome rather than
+    throwing, and the creation handler routes to the confirm-account step with
+    the masked address, exactly as the search does — including re-reading the
+    pending state so the back controls do not loop the user through the search
+    a second time.
+  - **Nothing is linked by this.** The confirm-account step still asks whether
+    the account is theirs, and ownership is still proven afterwards by password
+    or by a code mailed to that account. The account-creation branch is
+    unchanged for people who really have no account.
+  - The remaining rejection now means one thing only — an account holds the
+    address and this identity cannot claim it — so `errorEmailTaken` says that,
+    instead of pointing at a step that does not exist.
+  - **Deploy the backend release first.** The new field rides on the existing
+    status code and error key, so an older backend never sends it — but this
+    build has also narrowed the already-registered message to "cannot be
+    linked, contact support", which is false advice while the backend still
+    refuses an address the user could in fact claim.
+  - Turning down the offered account no longer loops. "Não é a minha conta"
+    returns to the creation step with the address-taken message, and
+    submitting that same address again repeats the explanation instead of
+    silently offering the same account for ever. A failure to re-read the
+    pending state after a divert no longer strands the user either: the
+    candidate is pointed server-side regardless, so the wizard goes on.
+
+- **feat(migrate-account): stop asking what the backend already decided, and confirm the email before granting a session**
+  - The account-linking wizard opened on a manual choice — "Já possuo uma conta"
+    / "Criar nova conta" — repeating a decision the backend had already taken
+    when the CMD returned, and one the user is not equipped to make: whether a
+    legacy account matches depends on an email and name comparison they never
+    see. The wizard now reads that decision and opens on the right step. Three
+    outcomes, because the backend distinguishes them: one matching account goes
+    straight to linking, nothing matched goes straight to account creation, and
+    several homonyms go to the search — that last case still needs a human,
+    since nobody can say which account is whose, and falling into account
+    creation there would strand people who do have one.
+  - Creating an account no longer happens on a click. A new step collects an
+    email address, pre-filled with the CMD's own when no account holds it but
+    always requiring an explicit submission, and the account is created only
+    once that is supplied. Rejections (malformed, already in use) are
+    distinguishable and correctable in place — which needed `skipMigration` to
+    read the error body, something it alone among its siblings did not do, so
+    every failure arrived as one opaque message.
+  - The success screen changes nature: it no longer assumes a session and
+    redirects, because by design there is not one. It names the address the
+    confirmation link went to and offers a resend on a 60s cooldown. Logging in
+    with the CMD again before following the link — the obvious thing to try —
+    now lands on a screen that explains why access is still blocked, rather
+    than a silent bounce to the login.
+  - Clicking the confirmation link finally renders something. The backend
+    already redirected to the homepage with a `?flash=` marker, but nothing
+    displayed it. Three outcomes are shown, not two: an already-used link is a
+    success from the user's point of view, and reporting it as invalid sent
+    them chasing a problem they did not have.
+  - Requires the matching backend release: the wizard now sends an email to
+    `POST /saml/migration/skip` and reads two new fields from the pending
+    endpoint.
+
 - **feat(admin): widen column sorting across the backoffice tables**
   - Sorting was uneven across the admin lists: the system topics table had none
     at all, the system harvesters view declared it on one column where the org

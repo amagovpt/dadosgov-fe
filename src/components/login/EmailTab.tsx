@@ -1,32 +1,24 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@ama-pt/agora-design-system";
-import { EmailLoginForm } from "./EmailLoginForm";
 import { MigrationNotice } from "./MigrationNotice";
-import { PasswordRecoveryView } from "./PasswordRecoveryView";
 import { Typograph } from "../Shared/Generics/Typograph";
 
 export function EmailTab({
-  prefilledEmail,
+  samlEnabled,
   isLoading,
   error,
-  migrationRequired,
-  onLogin,
   onSaml,
   onEidas,
 }: {
-  prefilledEmail: string;
+  samlEnabled: boolean;
   isLoading: boolean;
   error: string | null;
-  migrationRequired: boolean;
-  onLogin: (email: string, password: string) => void;
   onSaml: () => void;
   onEidas: () => void;
 }) {
   const { t } = useTranslation("login");
-  const [showRecovery, setShowRecovery] = useState(false);
 
   return (
     <div className="rounded-8">
@@ -46,19 +38,13 @@ export function EmailTab({
         </div>
         <div className="my-32 h-[2px] w-full bg-neutral-400" />
         <div className="flex flex-col gap-32">
-          {migrationRequired ? (
-            <MigrationNotice onSaml={onSaml} onEidas={onEidas} />
-          ) : showRecovery ? (
-            <PasswordRecoveryView onBack={() => setShowRecovery(false)} />
-          ) : (
-            <EmailLoginForm
-              prefilledEmail={prefilledEmail}
-              isLoading={isLoading}
-              error={error}
-              onSubmit={onLogin}
-              onForgotPassword={() => setShowRecovery(true)}
-            />
-          )}
+          <MigrationNotice
+            samlEnabled={samlEnabled}
+            isLoading={isLoading}
+            error={error}
+            onSaml={onSaml}
+            onEidas={onEidas}
+          />
         </div>
       </div>
     </div>
