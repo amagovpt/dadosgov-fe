@@ -118,7 +118,9 @@
     "entityLink": "Ajuda e contactos",
     "providerCmd": "Chave Móvel Digital",
     "providerEidas": "Autenticação Europeia",
-    "errorSessionLost": "A sessão de associação expirou. Volte a autenticar-se com a Chave Móvel Digital ou com a Autenticação Europeia."
+    "errorSessionLost": "A sessão de associação expirou. Volte a autenticar-se com a Chave Móvel Digital ou com a Autenticação Europeia.",
+    "linkTitleGeneric": "Associar conta",
+    "errorNicMissing": "A identidade autenticada não trouxe o número de identificação civil, pelo que não é possível associar a conta por esta via. Contacte o suporte do dados.gov.pt."
   },
   "terms": {
     "title": "Termos e condições",
@@ -165,10 +167,10 @@
     "submit": "Redefinir palavra-passe",
     "submitting": "A guardar...",
     "successTitle": "Palavra-passe redefinida",
-    "successDescription": "A sua palavra-passe foi alterada com sucesso. Já pode iniciar sessão com a nova palavra-passe.",
-    "signIn": "Iniciar sessão",
+    "successDescription": "A sua palavra-passe foi alterada com sucesso. Já pode usá-la para associar a conta à sua Chave Móvel Digital ou à Autenticação Europeia.",
     "errorRequest": "Erro ao redefinir a palavra-passe. Tente novamente.",
-    "errorConnection": "Erro de ligação. Tente novamente."
+    "errorConnection": "Erro de ligação. Tente novamente.",
+    "continueAction": "Associar conta"
   },
   "completeRegistration": {
     "metadata": {

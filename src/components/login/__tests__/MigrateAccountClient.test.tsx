@@ -449,6 +449,19 @@ describe("MigrateAccountClient validation-link step", () => {
     expect(text).not.toContain(translate("migration.errorTooManySends"));
   });
 
+  it("does not send the user round again when the identity carries no civil id", async () => {
+    // Nothing to bind, and re-authenticating produces an identical session:
+    // reading this as "session expired" would loop the user for ever.
+    confirmMigrationMock.mockRejectedValue(new Error("nic_required"));
+    await reachCredentials();
+
+    const text = await proveByPassword();
+
+    expect(text).toContain(translate("migration.errorNicMissing"));
+    expect(text).not.toContain(translate("migration.errorSessionLost"));
+    expect(text).not.toContain(translate("migration.errorInvalidCredentials"));
+  });
+
   it("does not blame the password when the wizard session is gone", async () => {
     confirmMigrationMock.mockRejectedValue(new Error("No pending migration"));
     await reachCredentials();
@@ -546,6 +559,22 @@ describe("MigrateAccountClient link-error step", () => {
     expect(container.textContent).toContain(translate("migration.flash.linkInvalid"));
   });
 
+  it("does not guess a provider on a screen that never read one", async () => {
+    // The bootstrap is skipped when a flash brought the user here, so the
+    // provider was never fetched — and defaulting to CMD would show "Chave
+    // Móvel Digital" to every eIDAS user whose link went stale.
+    await renderWithFlash("migration_link_expired");
+
+    const text = container.textContent ?? "";
+    expect(text).toContain(translate("migration.linkTitleGeneric"));
+    // Neither provider is picked. The flash copy names both on purpose —
+    // "autentique-se de novo com a CMD ou eIDAS" — which is not a guess.
+    for (const name of [CMD, EIDAS]) {
+      expect(text).not.toContain(translate("migration.linkTitle", { provider: name }));
+      expect(text).not.toContain(translate("migration.linkDescription", { provider: name }));
+    }
+  });
+
   it("ignores an unknown flash and runs the wizard normally", async () => {
     searchParamsMock = new URLSearchParams("flash=something_else");
     const text = await render({ pending: true, candidate: true, email: "j***@example.pt" });
@@ -589,6 +618,23 @@ describe("MigrateAccountClient password recovery", () => {
       expect(locale.migration.forgotPassword).toBeTruthy();
       expect(locale.migration.forgotPassword.toLowerCase()).not.toContain("validar por email");
       expect(locale.migration.forgotPassword.toLowerCase()).not.toContain("validate by email");
+    }
+  });
+});
+
+/**
+ * LEDG-2360: /login no longer offers a password form, so anything that
+ * promised a password sign-in there is now false.
+ */
+describe("password reset copy after the email tab changed", () => {
+  it("points at linking the account, not at signing in with the password", () => {
+    for (const locale of [ptLogin, enLogin]) {
+      const reset = locale.resetPassword as Record<string, string | undefined>;
+      expect(reset.signIn).toBeUndefined();
+      expect(reset.continueAction).toBeTruthy();
+      expect(reset.successDescription).toBeTruthy();
+      expect(reset.successDescription!.toLowerCase()).not.toContain("iniciar sessão");
+      expect(reset.successDescription!.toLowerCase()).not.toContain("now sign in");
     }
   });
 });

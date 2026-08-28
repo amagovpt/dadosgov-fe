@@ -210,6 +210,10 @@ function MigrateAccountWizard() {
         setError(t("migration.errorMaximumAttempts"));
       } else if (message === "Maximum confirmation sends exceeded") {
         setError(t("migration.errorTooManyLinkSends"));
+      } else if (message === "nic_required") {
+        // Nothing to bind: the assertion carried no civil id. Not recoverable
+        // by re-authenticating, so it must not say the session expired.
+        setError(t("migration.errorNicMissing"));
       } else if (message === "No pending migration") {
         setError(t("migration.errorSessionLost"));
       } else {
@@ -318,10 +322,20 @@ function MigrateAccountWizard() {
 
         <div className="mt-64 max-w-[560px]">
           <h1 className="mb-16 text-2xl-medium text-brand-blue-dark">
-            {t("migration.linkTitle", { provider: providerName })}
+            {/* The bootstrap is skipped when a flash brought the user here, so
+                the provider was never read: naming one would be a guess, and
+                on this screen it would always guess CMD. */}
+            {step === "link-error"
+              ? t("migration.linkTitleGeneric")
+              : t("migration.linkTitle", { provider: providerName })}
           </h1>
 
-          {step !== "success-new" && step !== "confirmation-pending" && step !== "recover" && (
+          {/* link-error is excluded for the same reason as the h1: the provider
+              was never read there. It carries its own title and reason. */}
+          {step !== "success-new" &&
+            step !== "confirmation-pending" &&
+            step !== "recover" &&
+            step !== "link-error" && (
             <p className="text-lg mb-32 text-neutral-700">
               {t("migration.linkDescription", { provider: providerName })}
             </p>
@@ -503,9 +517,10 @@ function MigrateAccountWizard() {
           {/* Step: the emailed link did not work out. Reached by redirect
               from the backend's confirm-link route, with no session — the
               recovery is to authenticate again, since after a consumed or
-              re-pointed link there is nothing left to resend from. The one
-              exception is the expired case, where the backend has already
-              mailed a fresh link before redirecting here. */}
+              re-pointed link there is nothing left to resend from. That holds
+              for the expired case too: the backend deliberately does not
+              reissue from a link click, because mail scanners open links
+              before their owners do. */}
           {step === "link-error" && (
             <div className="flex flex-col items-center gap-24 text-center">
               <div className="bg-blue-100 w-fit rounded-full p-24">

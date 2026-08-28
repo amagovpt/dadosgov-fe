@@ -118,7 +118,9 @@
     "entityLink": "Help and contacts",
     "providerCmd": "Chave Móvel Digital",
     "providerEidas": "European Authentication",
-    "errorSessionLost": "The linking session has expired. Sign in again with Chave Móvel Digital or with European Authentication."
+    "errorSessionLost": "The linking session has expired. Sign in again with Chave Móvel Digital or with European Authentication.",
+    "linkTitleGeneric": "Link account",
+    "errorNicMissing": "The authenticated identity did not provide a civil identification number, so the account cannot be linked this way. Please contact dados.gov.pt support."
   },
   "terms": {
     "title": "Terms and conditions",
@@ -165,10 +167,10 @@
     "submit": "Reset password",
     "submitting": "Saving...",
     "successTitle": "Password reset",
-    "successDescription": "Your password was changed successfully. You can now sign in with your new password.",
-    "signIn": "Sign in",
+    "successDescription": "Your password has been changed. You can now use it to link your account to your Chave Móvel Digital or to European Authentication.",
     "errorRequest": "Error resetting password. Please try again.",
-    "errorConnection": "Connection error. Please try again."
+    "errorConnection": "Connection error. Please try again.",
+    "continueAction": "Link account"
   },
   "completeRegistration": {
     "metadata": {
