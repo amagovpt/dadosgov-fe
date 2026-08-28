@@ -1,9 +1,13 @@
 /**
- * LEDG-2349: the wizard used to open on a manual choice — "Já possuo uma
- * conta" / "Criar nova conta" — repeating a decision the backend had already
- * taken when the CMD returned. It now consumes that decision and opens on the
- * right step directly. These tests pin the three-way routing, since getting it
- * wrong sends people to the wrong branch of an account-linking flow.
+ * LEDG-2349 removed the manual "Já possuo uma conta" / "Criar nova conta"
+ * choice; LEDG-2360 removes the three screens that still stood between the
+ * CMD return and the credentials the user is asked for — "is this yours?", the
+ * account search, and the choice of proof. What is left is: type the account's
+ * email and password, then follow the link that gets mailed to it.
+ *
+ * These tests pin the routing and the fact that no step ends authenticated,
+ * since getting either wrong misroutes an account-linking flow or claims a
+ * session that does not exist.
  */
 
 import React, { act } from "react";
@@ -13,7 +17,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ptLogin from "@/locales/pt/login.json";
 import enLogin from "@/locales/en/login.json";
 
-const translate = (key: string): string => {
+// Interpolates, because the provider name is now part of the copy on every
+// screen: without it these tests could not tell "Associar conta à Chave Móvel
+// Digital" from "Associar conta à Autenticação Europeia".
+const translate = (key: string, vars?: Record<string, unknown>): string => {
   const raw = key
     .split(".")
     .reduce<unknown>(
@@ -21,7 +28,8 @@ const translate = (key: string): string => {
         node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined,
       ptLogin
     );
-  return typeof raw === "string" ? raw : key;
+  if (typeof raw !== "string") return key;
+  return raw.replace(/\{\{(\w+)\}\}/g, (_match, name: string) => String(vars?.[name] ?? ""));
 };
 
 vi.mock("react-i18next", () => ({
@@ -47,11 +55,11 @@ vi.mock("next/navigation", () => ({
 const fetchMigrationPendingMock = vi.fn();
 const skipMigrationMock = vi.fn();
 const sendMigrationLinkMock = vi.fn();
+const confirmMigrationMock = vi.fn();
 vi.mock("@/service/api/migration", () => ({
   fetchMigrationPending: () => fetchMigrationPendingMock(),
-  searchMigrationAccount: vi.fn(),
   sendMigrationLink: () => sendMigrationLinkMock(),
-  confirmMigration: vi.fn(),
+  confirmMigration: (payload: unknown) => confirmMigrationMock(payload),
   skipMigration: (email: string) => skipMigrationMock(email),
   resendMigrationConfirmation: vi.fn(),
 }));
@@ -60,11 +68,21 @@ vi.mock("@/components/Shared/BreadcrumbDynamic", () => ({
   default: () => null,
 }));
 
+// The wizard wraps itself in the reCAPTCHA provider so the inline recovery has
+// one. The real provider injects a remote script, which jsdom cannot fetch and
+// which none of these tests are about.
+vi.mock("react-google-recaptcha-v3", () => ({
+  GoogleReCaptchaProvider: ({ children }: { children: React.ReactNode }) => children,
+  useGoogleReCaptcha: () => ({ executeRecaptcha: undefined }),
+}));
+
 import MigrateAccountClient from "../MigrateAccountClient";
 
-const CONFIRM_ACCOUNT_TEXT = translate("migration.confirmTitle");
-const SEARCH_TEXT = translate("migration.searchTitle");
+const CMD = translate("migration.providerCmd");
+const EIDAS = translate("migration.providerEidas");
+const CREDENTIALS_TEXT = translate("migration.signInDescription", { provider: CMD });
 const ENTER_EMAIL_TEXT = translate("migration.enterEmailDescription");
+const LINK_SENT_TEXT = translate("migration.linkSentTitle");
 
 let container: HTMLDivElement;
 let root: Root;
@@ -115,8 +133,22 @@ async function submitNewEmail(email: string) {
   return container.textContent ?? "";
 }
 
+let mounted = false;
+
 async function render(pending: Record<string, unknown>) {
   fetchMigrationPendingMock.mockResolvedValue(pending);
+  // A fresh mount per call. The bootstrap effect runs once per component
+  // instance, so rendering a second payload into the same root leaves the
+  // wizard on whatever step the first payload chose — and every assertion
+  // about the second one passes without testing anything.
+  if (mounted) {
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  }
+  mounted = true;
   await act(async () => {
     root.render(<MigrateAccountClient />);
   });
@@ -154,12 +186,14 @@ beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
+  mounted = false;
   pushMock.mockClear();
   replaceMock.mockClear();
   searchParamsMock = new URLSearchParams();
   fetchMigrationPendingMock.mockReset();
   skipMigrationMock.mockReset();
   sendMigrationLinkMock.mockReset();
+  confirmMigrationMock.mockReset();
 });
 
 afterEach(() => {
@@ -168,10 +202,21 @@ afterEach(() => {
 });
 
 describe("MigrateAccountClient initial step", () => {
-  it("goes straight to the linking branch when one account matched", async () => {
+  it("lands on the credentials screen when one account matched", async () => {
     const text = await render({ pending: true, candidate: true, first_name: "Ana" });
 
-    expect(text).toContain(CONFIRM_ACCOUNT_TEXT);
+    expect(text).toContain(CREDENTIALS_TEXT);
+    expect(text).not.toContain(ENTER_EMAIL_TEXT);
+  });
+
+  it("lands on the same credentials screen when several homonyms matched", async () => {
+    // candidate false with no_match false is the ambiguous case: accounts do
+    // match the name, but nobody can say which one is theirs. It used to open a
+    // search; the credentials screen answers it directly, because the backend
+    // links whichever account the password proves — homonyms included.
+    const text = await render({ pending: true, candidate: false, no_match: false });
+
+    expect(text).toContain(CREDENTIALS_TEXT);
     expect(text).not.toContain(ENTER_EMAIL_TEXT);
   });
 
@@ -179,26 +224,14 @@ describe("MigrateAccountClient initial step", () => {
     const text = await render({ pending: true, candidate: false, no_match: true });
 
     expect(text).toContain(ENTER_EMAIL_TEXT);
-    expect(text).not.toContain(CONFIRM_ACCOUNT_TEXT);
+    expect(text).not.toContain(CREDENTIALS_TEXT);
   });
 
-  it("offers the search when several homonyms matched, rather than assuming no account", async () => {
-    // candidate false with no_match false is the ambiguous case: accounts do
-    // match the name, but nobody can say which one is theirs. Falling into
-    // account creation here would strand people with an existing account.
-    const text = await render({ pending: true, candidate: false, no_match: false });
-
-    expect(text).toContain(SEARCH_TEXT);
-    expect(text).not.toContain(ENTER_EMAIL_TEXT);
-  });
-
-  it("never renders the removed choice step", async () => {
-    // Asserting on the old button labels would be vacuous: their locale keys
-    // were deleted in the same change, so translate() would fall back to the
-    // key path and the assertion could not fail even if the step were still
-    // there. Assert instead that every mount lands on one of the three real
-    // destinations, which is what "the choice step is gone" actually means.
-    const destinations = [CONFIRM_ACCOUNT_TEXT, ENTER_EMAIL_TEXT, SEARCH_TEXT];
+  it("never renders a step between the identity and the credentials", async () => {
+    // Asserting on the removed screens' labels would be vacuous once their
+    // locale keys go. Assert instead that every mount lands on exactly one of
+    // the two real destinations, which is what "the steps are gone" means.
+    const destinations = [CREDENTIALS_TEXT, ENTER_EMAIL_TEXT];
 
     for (const pending of [
       { pending: true, candidate: true },
@@ -208,6 +241,18 @@ describe("MigrateAccountClient initial step", () => {
       const text = await render(pending);
       expect(destinations.filter((d) => text.includes(d))).toHaveLength(1);
     }
+  });
+
+  it("names the provider that started the flow, not always the CMD", async () => {
+    // Criterion 7: the same screens serve eIDAS. Nothing on this side can
+    // infer the provider — both ACS routes converge before the wizard opens.
+    const cmd = await render({ pending: true, candidate: true, provider: "cmd" });
+    expect(cmd).toContain(translate("migration.linkTitle", { provider: CMD }));
+    expect(cmd).not.toContain(EIDAS);
+
+    const eidas = await render({ pending: true, candidate: true, provider: "eidas" });
+    expect(eidas).toContain(translate("migration.linkTitle", { provider: EIDAS }));
+    expect(eidas).toContain(translate("migration.signInDescription", { provider: EIDAS }));
   });
 
   it("sends the user back to the login when there is no pending migration", async () => {
@@ -235,11 +280,12 @@ describe("MigrateAccountClient initial step", () => {
 describe("MigrateAccountClient account creation step", () => {
   const NO_MATCH = { pending: true, candidate: false, no_match: true };
 
-  it("routes an own-legacy-email submission to the linking branch", async () => {
+  it("routes an own-legacy-email submission to the credentials screen", async () => {
     // LEDG-2351: the address the user types is their own portal account. The
     // backend refuses it as a creation but points it as the candidate, and the
     // wizard has to follow — telling them "already registered" here sends them
-    // back to retype an address the server has just resolved.
+    // back to retype an address the server has just resolved. It now lands on
+    // the credentials screen, pre-filled, so only the password is left to give.
     const text = await render(NO_MATCH);
     expect(text).toContain(ENTER_EMAIL_TEXT);
 
@@ -248,21 +294,13 @@ describe("MigrateAccountClient account creation step", () => {
       candidate_found: true,
       email: "j***@example.pt",
     });
-    // The second pending read is the one handleCreateAccount makes after the
-    // divert; it has to report the now-pointed candidate, or hasCandidate
-    // stays false and the back controls loop the user through the search.
-    fetchMigrationPendingMock.mockResolvedValue({
-      pending: true,
-      candidate: true,
-      first_name: "Joana",
-      last_name: "Pinto",
-    });
 
     const after = await submitNewEmail("joana@example.pt");
 
-    expect(after).toContain(CONFIRM_ACCOUNT_TEXT);
-    expect(after).toContain("j***@example.pt");
+    expect(after).toContain(CREDENTIALS_TEXT);
     expect(after).not.toContain(translate("migration.errorEmailTaken"));
+    const emailInput = container.querySelector<HTMLInputElement>("#login-email");
+    expect(emailInput?.value).toBe("joana@example.pt");
   });
 
   it("still creates the account when the address is free", async () => {
@@ -274,7 +312,7 @@ describe("MigrateAccountClient account creation step", () => {
     const after = await submitNewEmail("nova@example.pt");
 
     expect(after).toContain(translate("migration.successNewTitle"));
-    expect(after).not.toContain(CONFIRM_ACCOUNT_TEXT);
+    expect(after).not.toContain(CREDENTIALS_TEXT);
   });
 
   it("says the account cannot be linked when the address is not claimable", async () => {
@@ -288,40 +326,7 @@ describe("MigrateAccountClient account creation step", () => {
 
     expect(after).toContain(translate("migration.errorEmailTaken"));
     expect(after).toContain(ENTER_EMAIL_TEXT);
-    expect(after).not.toContain(CONFIRM_ACCOUNT_TEXT);
-  });
-
-  it("explains itself instead of looping when the offered account is turned down", async () => {
-    // Divert -> "não é a minha conta" -> same address again. Without a memory
-    // of the refusal this diverts for ever, and the user who wants a new
-    // account with that address never learns why they are not getting one.
-    await render(NO_MATCH);
-
-    skipMigrationMock.mockResolvedValue({
-      success: false,
-      candidate_found: true,
-      email: "j***@example.pt",
-    });
-    fetchMigrationPendingMock.mockResolvedValue({
-      pending: true,
-      candidate: true,
-      first_name: "Joana",
-      last_name: "Pinto",
-    });
-
-    const diverted = await submitNewEmail("joana@example.pt");
-    expect(diverted).toContain(CONFIRM_ACCOUNT_TEXT);
-
-    await clickButton(translate("migration.confirmNo"));
-    expect(container.textContent).toContain(ENTER_EMAIL_TEXT);
-    expect(container.textContent).toContain(translate("migration.errorEmailTaken"));
-
-    // Submitting the same address again must not divert a second time — nor
-    // in a different case, which the backend resolves to the same account.
-    const again = await submitNewEmail("JOANA@example.pt");
-    expect(again).toContain(ENTER_EMAIL_TEXT);
-    expect(again).toContain(translate("migration.errorEmailTaken"));
-    expect(again).not.toContain(CONFIRM_ACCOUNT_TEXT);
+    expect(after).not.toContain(CREDENTIALS_TEXT);
   });
 
   it("does not send the user back to a step that is not behind them", async () => {
@@ -348,64 +353,130 @@ describe("MigrateAccountClient account creation step", () => {
  * authenticated until the link in the mail is followed.
  */
 describe("MigrateAccountClient validation-link step", () => {
-  /** The method buttons wrap a title and a description, so their textContent
-   *  is never just the label clickButton matches on. */
-  async function clickCard(label: string) {
-    const button = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes(label)
-    );
-    if (!button) throw new Error(`card not found: ${label}`);
-    await act(async () => {
-      button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
-    });
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+  /** Fill the credentials screen and submit it. */
+  async function proveByPassword(email = "joana@example.pt", pwd = "S3cretPass!") {
+    const setValue = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    )?.set;
+    for (const [selector, value] of [
+      ["#login-email", email],
+      ["#login-password", pwd],
+    ] as const) {
+      const input = container.querySelector<HTMLInputElement>(selector);
+      if (!input) throw new Error(`not on the credentials step: ${selector}`);
+      await act(async () => {
+        setValue?.call(input, value);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+    await clickButton(translate("migration.linkAccount", { provider: CMD }));
+    return container.textContent ?? "";
   }
 
-  async function reachChooseMethod() {
+  async function reachCredentials() {
     await render({ pending: true, candidate: true, email: "j***@example.pt" });
-    await clickButton(translate("migration.confirmYes"));
   }
 
-  it("shows the validation-link screen with the ticket's copy after sending", async () => {
-    sendMigrationLinkMock.mockResolvedValue({ sent: true });
-    await reachChooseMethod();
+  it("shows the validation-link screen with the ticket's copy after the proof", async () => {
+    confirmMigrationMock.mockResolvedValue({ sent: true });
+    await reachCredentials();
 
-    await clickCard(translate("migration.sendLink"));
+    const text = await proveByPassword();
 
-    expect(sendMigrationLinkMock).toHaveBeenCalledTimes(1);
-    const text = container.textContent ?? "";
-    expect(text).toContain(translate("migration.linkSentTitle"));
+    expect(confirmMigrationMock).toHaveBeenCalledWith({
+      method: "password",
+      email: "joana@example.pt",
+      password: "S3cretPass!",
+    });
+    expect(text).toContain(LINK_SENT_TEXT);
     expect(text).toContain(translate("migration.linkSentDescription"));
   });
 
+  it("claims no session of its own — the click is what grants one", async () => {
+    // The password used to end the flow on a success screen that redirected to
+    // an authenticated home page. It no longer links anything, so a success
+    // screen here would be a lie.
+    confirmMigrationMock.mockResolvedValue({ sent: true });
+    await reachCredentials();
+
+    const text = await proveByPassword();
+
+    expect(text).toContain(LINK_SENT_TEXT);
+    // The success screen and its redirect are gone, not merely unreachable.
+    expect(container.querySelector(".text-green-600")).toBeNull();
+  });
+
   it("holds the resend behind a visible cooldown", async () => {
-    sendMigrationLinkMock.mockResolvedValue({ sent: true });
-    await reachChooseMethod();
-    await clickCard(translate("migration.sendLink"));
+    confirmMigrationMock.mockResolvedValue({ sent: true });
+    await reachCredentials();
+    await proveByPassword();
 
     const resend = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.startsWith(translate("migration.resendLink"))
     );
     expect(resend).toBeTruthy();
-    // The countdown starts immediately, so the button is disabled and says so.
+    // The send already happened server-side, so the countdown starts at once.
     expect(resend?.textContent).toContain("60s");
     expect(resend?.hasAttribute("disabled")).toBe(true);
   });
 
-  it("tells the user the send limit lifts, rather than to contact support", async () => {
-    // The account-creation cap is for the life of the account; this one is a
-    // window. Reusing that copy here would send people to support over a wait.
-    sendMigrationLinkMock.mockRejectedValue(
+  it("keeps a wrong password on the same screen, with the identity intact", async () => {
+    // Criterion 4: the user is one typo away from the only screen that can
+    // identify their account; bouncing them anywhere would cost the identity.
+    confirmMigrationMock.mockRejectedValue(new Error("Invalid credentials"));
+    await reachCredentials();
+
+    const text = await proveByPassword("joana@example.pt", "wrong");
+
+    expect(text).toContain(translate("migration.errorInvalidCredentials"));
+    expect(text).toContain(CREDENTIALS_TEXT);
+    expect(text).not.toContain(LINK_SENT_TEXT);
+  });
+
+  it("does not blame the password when it was the send limit", async () => {
+    // A correct password can now fail on the send cap. Falling through to
+    // "credenciais inválidas" would tell the user their password is wrong.
+    confirmMigrationMock.mockRejectedValue(
       new Error("Maximum confirmation sends exceeded")
     );
-    await reachChooseMethod();
-    await clickCard(translate("migration.sendLink"));
+    await reachCredentials();
 
-    const text = container.textContent ?? "";
+    const text = await proveByPassword();
+
     expect(text).toContain(translate("migration.errorTooManyLinkSends"));
+    expect(text).not.toContain(translate("migration.errorInvalidCredentials"));
     expect(text).not.toContain(translate("migration.errorTooManySends"));
+  });
+
+  it("does not send the user round again when the identity carries no civil id", async () => {
+    // Nothing to bind, and re-authenticating produces an identical session:
+    // reading this as "session expired" would loop the user for ever.
+    confirmMigrationMock.mockRejectedValue(new Error("nic_required"));
+    await reachCredentials();
+
+    const text = await proveByPassword();
+
+    expect(text).toContain(translate("migration.errorNicMissing"));
+    expect(text).not.toContain(translate("migration.errorSessionLost"));
+    expect(text).not.toContain(translate("migration.errorInvalidCredentials"));
+  });
+
+  it("does not blame the password when the wizard session is gone", async () => {
+    confirmMigrationMock.mockRejectedValue(new Error("No pending migration"));
+    await reachCredentials();
+
+    const text = await proveByPassword();
+
+    expect(text).toContain(translate("migration.errorSessionLost"));
+    expect(text).not.toContain(translate("migration.errorInvalidCredentials"));
+  });
+
+  it("invites the resend in the ticket's words", async () => {
+    for (const locale of [ptLogin, enLogin]) {
+      expect(locale.migration.resendLink).toBeTruthy();
+      expect(locale.migration.resendLink).not.toBe("Reenviar link");
+    }
   });
 
   it("has no trace of the removed code step in either locale", async () => {
@@ -420,6 +491,16 @@ describe("MigrateAccountClient validation-link step", () => {
         "errorInvalidCode",
         "errorSendCode",
         "errorResendCode",
+        // LEDG-2360: the screens between the identity and the credentials.
+        "confirmTitle",
+        "confirmYes",
+        "confirmNo",
+        "searchTitle",
+        "verifyTitle",
+        "sendLink",
+        "knowPassword",
+        "successTitle",
+        "successDescription",
       ]) {
         expect(migration[key]).toBeUndefined();
       }
@@ -478,11 +559,82 @@ describe("MigrateAccountClient link-error step", () => {
     expect(container.textContent).toContain(translate("migration.flash.linkInvalid"));
   });
 
+  it("does not guess a provider on a screen that never read one", async () => {
+    // The bootstrap is skipped when a flash brought the user here, so the
+    // provider was never fetched — and defaulting to CMD would show "Chave
+    // Móvel Digital" to every eIDAS user whose link went stale.
+    await renderWithFlash("migration_link_expired");
+
+    const text = container.textContent ?? "";
+    expect(text).toContain(translate("migration.linkTitleGeneric"));
+    // Neither provider is picked. The flash copy names both on purpose —
+    // "autentique-se de novo com a CMD ou eIDAS" — which is not a guess.
+    for (const name of [CMD, EIDAS]) {
+      expect(text).not.toContain(translate("migration.linkTitle", { provider: name }));
+      expect(text).not.toContain(translate("migration.linkDescription", { provider: name }));
+    }
+  });
+
   it("ignores an unknown flash and runs the wizard normally", async () => {
     searchParamsMock = new URLSearchParams("flash=something_else");
     const text = await render({ pending: true, candidate: true, email: "j***@example.pt" });
 
-    expect(text).toContain(CONFIRM_ACCOUNT_TEXT);
+    expect(text).toContain(CREDENTIALS_TEXT);
     expect(fetchMigrationPendingMock).toHaveBeenCalled();
+  });
+});
+
+/**
+ * LEDG-2360, criterion 4: a forgotten password must not cost the identity.
+ * The old link navigated to the "is this yours?" screen or the search, both of
+ * which are gone; recovery now runs inside the wizard, so the pending
+ * migration survives it and the user can come back and finish.
+ */
+describe("MigrateAccountClient password recovery", () => {
+  it("offers recovery from the credentials screen and comes back to it", async () => {
+    await render({ pending: true, candidate: true, email: "j***@example.pt" });
+    expect(container.textContent).toContain(CREDENTIALS_TEXT);
+
+    await clickButton(translate("migration.forgotPassword"));
+
+    const recovering = container.textContent ?? "";
+    expect(recovering).toContain(translate("recovery.title"));
+    expect(recovering).not.toContain(CREDENTIALS_TEXT);
+    expect(container.querySelector("#recovery-email")).toBeTruthy();
+    // Recovery is a detour, not a destination: nothing sent the user away.
+    expect(pushMock).not.toHaveBeenCalled();
+
+    await clickButton(translate("recovery.back"));
+
+    const back = container.textContent ?? "";
+    expect(back).toContain(CREDENTIALS_TEXT);
+    expect(container.querySelector("#login-email")).toBeTruthy();
+  });
+
+  it("asks to recover the password, not to validate by email", async () => {
+    // The old label promised "Validar por email", a path that no longer
+    // exists on this screen.
+    for (const locale of [ptLogin, enLogin]) {
+      expect(locale.migration.forgotPassword).toBeTruthy();
+      expect(locale.migration.forgotPassword.toLowerCase()).not.toContain("validar por email");
+      expect(locale.migration.forgotPassword.toLowerCase()).not.toContain("validate by email");
+    }
+  });
+});
+
+/**
+ * LEDG-2360: /login no longer offers a password form, so anything that
+ * promised a password sign-in there is now false.
+ */
+describe("password reset copy after the email tab changed", () => {
+  it("points at linking the account, not at signing in with the password", () => {
+    for (const locale of [ptLogin, enLogin]) {
+      const reset = locale.resetPassword as Record<string, string | undefined>;
+      expect(reset.signIn).toBeUndefined();
+      expect(reset.continueAction).toBeTruthy();
+      expect(reset.successDescription).toBeTruthy();
+      expect(reset.successDescription!.toLowerCase()).not.toContain("iniciar sessão");
+      expect(reset.successDescription!.toLowerCase()).not.toContain("now sign in");
+    }
   });
 });

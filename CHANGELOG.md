@@ -6,6 +6,62 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): make the email tab the account-association entry point**
+  - The "E-mail e palavra-passe" tab showed a password form and only revealed
+    the migration notice once the backend refused the login. The notice is now
+    the tab: the discontinuation warning, "Associar conta à Chave Móvel Digital"
+    and "Associar conta à Autenticação Europeia" with their support links, and
+    the "Representa uma entidade?" box. `EmailLoginForm` is gone, and with it
+    the last password sign-in surface in the frontend.
+  - Both buttons start a SAML login, so they carry the same `samlEnabled` gate
+    the CMD and eIDAS tabs use — otherwise an environment with SAML off would
+    leave the only controls on the tab firing a request that cannot succeed —
+    and they render the SAML error themselves, which nothing on this tab did
+    except the form that is now gone.
+  - The organisation box renders `StatusCard` directly instead of reusing
+    `SupportStatusCard`: that component carries page layout of its own and is
+    already rendered once below the tabs, so reusing it would stack two boxes
+    and nest a 12-column grid inside the tab panel.
+- **feat(migrate-account)!: land on the legacy credentials and finish by link**
+  - Three screens stood between the CMD/eIDAS return and the credentials the
+    user is actually asked for: "is this yours?", an account search, and a
+    choice of proof. The credentials screen does not depend on a candidate being
+    pointed — the backend links whichever account the password proves, homonyms
+    included — so a matched candidate and an ambiguous set of homonyms land on
+    the same screen and the user types the address they know. Only `no_match`
+    still opens account creation.
+  - The password no longer ends the flow: the wizard goes to "Validar email"
+    with the resend cooldown already armed, and the success screen and its
+    redirect to an authenticated home page are gone along with the session they
+    claimed. Every destination that pointed at a removed step is re-pointed, so
+    nothing dangles — including the own-email divert, which now lands on the
+    credentials screen pre-filled with the address just typed.
+  - A correct password can now fail on the send cap or on a lost wizard session.
+    Both are distinguished, because falling through to "credenciais inválidas"
+    would tell the user their password is wrong when it is not.
+  - Every screen names the provider the backend reports, so an eIDAS user stops
+    reading "Chave Móvel Digital"; `signInDescription` no longer promises the
+    account "será associada", which the click now does. The 25 locale keys
+    belonging to the removed screens are deleted rather than left for a
+    translator to maintain.
+- **feat(migrate-account): offer password recovery inline**
+  - "Esqueceu-se da palavra-passe?" navigated to screens that no longer exist.
+    Recovery now runs as a step inside the wizard, so the pending migration —
+    and the identity just proved at Autenticação.gov — survives it and the user
+    can come back and finish. The wizard wraps itself in
+    `GoogleReCaptchaProvider`, conditional on the key: without a provider the
+    recovery request goes out with a null token and the backend rejects it, so
+    the failure is silent rather than loud.
+- **test(e2e): authenticate through the login route instead of the form**
+  - `performLogin` drove the password form, which is what produced the
+    storage-state every backoffice project depends on. It now posts the same
+    fields to the same route through `page.request`, which shares the browser
+    context's cookie jar and baseURL, so the setup files and the disposable
+    project on port 3001 are unchanged.
+- **Deploy the backend change first**: the wizard depends on the new
+  `{"sent": true}` contract of `POST /saml/migration/confirm` and on the
+  provider field in `GET /saml/migration/pending`.
+
 - **feat(migrate-account): validate the legacy account by link instead of a code**
   - The linking branch no longer asks for a 6-digit code. Choosing the email
     method now sends a validation link to the address already on the account

@@ -10,7 +10,6 @@ import {
   TabBody,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
-import { login } from "@/service/api/auth";
 import { buildSamlEndpoint, sanitizeNextUrl, submitSamlForm } from "./loginUtils";
 import { SupportStatusCard } from "./LoginShared";
 import { CmdModalContent } from "./CmdModalContent";
@@ -24,13 +23,11 @@ export function LoginContent() {
   const { t } = useTranslation("login");
   const searchParams = useSearchParams();
   const nextUrl = sanitizeNextUrl(searchParams.get("next"));
-  const prefilledEmail = searchParams.get("email") || "";
 
   const [cmdModalOpen, setCmdModalOpen] = useState(false);
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [migrationRequired, setMigrationRequired] = useState(false);
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
@@ -46,37 +43,6 @@ export function LoginContent() {
 
   const handleSamlLogin = () => runSamlLogin("/saml/login");
   const handleEidasLogin = () => runSamlLogin("/saml/eidas/login");
-
-  const handleEmailLogin = async (email: string, password: string) => {
-    if (!email || !password) {
-      setError(t("errors.requiredFields"));
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const payload = new FormData();
-      payload.append("email", email);
-      payload.append("password", password);
-      payload.append("remember", "y");
-
-      await login(payload);
-      window.location.href = nextUrl;
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : t("errors.loginFailed");
-      if (message === "migration_required") {
-        setMigrationRequired(true);
-        setError(null);
-      } else {
-        setError(message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const openCmdModal = () => {
     setCmdModalOpen(true);
@@ -138,11 +104,9 @@ export function LoginContent() {
                 <TabHeader>{t("tabs.email")}</TabHeader>
                 <TabBody>
                   <EmailTab
-                    prefilledEmail={prefilledEmail}
+                    samlEnabled={samlEnabled}
                     isLoading={isLoading}
                     error={error}
-                    migrationRequired={migrationRequired}
-                    onLogin={handleEmailLogin}
                     onSaml={handleSamlLogin}
                     onEidas={handleEidasLogin}
                   />

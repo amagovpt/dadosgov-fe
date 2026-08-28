@@ -86,7 +86,7 @@ export function ResetPasswordClient({ token }: Props) {
                     className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={() => (window.location.href = localizeHref("/login"))}
                   >
-                    {t("resetPassword.signIn")}
+                    {t("resetPassword.continueAction")}
                   </Button>
                 </div>
               </div>

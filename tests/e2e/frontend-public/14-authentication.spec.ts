@@ -1,5 +1,5 @@
 import { test, expect, type Locator, type Page } from "playwright/test";
-import { ADMIN_CREDS, loginAsAdmin } from "../../helpers/auth";
+import { loginAsAdmin } from "../../helpers/auth";
 
 const LOGIN_URL = "/login";
 
@@ -100,24 +100,26 @@ test.describe("Authentication Page", () => {
     // Skipped: requires backend to be running with seeded users
   });
 
-  test("AU-09: Email tab - submit button stays disabled when fields are empty", async ({
+  test("AU-09: Email tab offers the two account-linking actions, not a password form", async ({
     page,
   }) => {
     const emailTab = await getTabByText(page, /E-mail e palavra-passe/i);
     await emailTab.click();
 
-    // The login form is rendered in main; the same form is also embedded in the
-    // mobile accordion menu, so we scope to the main element.
+    // The tab is the entry point for linking a legacy account to CMD/eIDAS;
+    // password sign-in is being discontinued, so there is no form here.
     const main = page.locator("main");
-    const emailInput = main.locator("#login-email").first();
-    const passwordInput = main.locator("#login-password").first();
-    await expect(emailInput).toBeVisible({ timeout: 10000 });
-    await expect(passwordInput).toBeVisible({ timeout: 10000 });
-
-    const submitButton = main
-      .getByRole("button", { name: /^Autenticar$/i })
-      .first();
-    await expect(submitButton).toBeDisabled();
+    await expect(
+      main.getByText(/vai ser descontinuada/i).first()
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      main.getByRole("button", { name: /Associar conta à Chave Móvel Digital/i }).first()
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      main.getByRole("button", { name: /Associar conta à Autenticação Europeia/i }).first()
+    ).toBeVisible({ timeout: 10000 });
+    await expect(main.locator("#login-email")).toHaveCount(0);
+    await expect(main.locator("#login-password")).toHaveCount(0);
   });
 
   test("AU-10: Terms link to /faqs/terms is reachable from CMD tab", async ({
@@ -200,43 +202,4 @@ test.describe("Authentication - Post-login redirect", () => {
     expect(href).toContain(encodeURIComponent("/datasets"));
   });
 
-  // Requires seeded e2e-admin user: run `udata user create --admin` with e2e-admin@dados.gov.pt
-  test("AU-16: After email/password login, user is redirected back to the page they came from", async ({
-    page,
-  }) => {
-    const targetPage = "/datasets";
-    await page.goto(`/login?next=${encodeURIComponent(targetPage)}`);
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(2000);
-
-    const emailTab = page.getByText(/E-mail e palavra-passe/i).first();
-    await emailTab.scrollIntoViewIfNeeded();
-    await emailTab.click();
-    await page.waitForTimeout(500);
-
-    const main = page.locator("main");
-
-    const emailInput = main.locator("#login-email").first();
-    await emailInput.scrollIntoViewIfNeeded();
-    await emailInput.fill(ADMIN_CREDS.email);
-
-    const passwordInput = main.locator("#login-password").first();
-    await passwordInput.scrollIntoViewIfNeeded();
-    await passwordInput.fill(ADMIN_CREDS.password);
-
-    const termsCheckbox = main
-      .getByRole("checkbox", { name: /aceito os termos/i })
-      .first();
-    await termsCheckbox.check();
-
-    const submitBtn = main.locator("form button[type='submit']").first();
-    await submitBtn.scrollIntoViewIfNeeded();
-    await submitBtn.click();
-
-    await page.waitForURL((url) => url.pathname === targetPage, {
-      timeout: 30000,
-      waitUntil: "networkidle",
-    });
-    expect(page.url()).toContain(targetPage);
-  });
 });
