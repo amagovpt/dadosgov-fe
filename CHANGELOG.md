@@ -34,7 +34,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     with the resend cooldown already armed, and the success screen and its
     redirect to an authenticated home page are gone along with the session they
     claimed. Every destination that pointed at a removed step is re-pointed, so
-    nothing dangles — including the LEDG-2351 divert, which now lands on the
+    nothing dangles — including the own-email divert, which now lands on the
     credentials screen pre-filled with the address just typed.
   - A correct password can now fail on the send cap or on a lost wizard session.
     Both are distinguished, because falling through to "credenciais inválidas"
