@@ -59,12 +59,10 @@
     "errorConnection": "Erro de ligação. Tente novamente."
   },
   "migration": {
-    "title": "Migração obrigatória",
-    "description": "O login por email e palavra-passe vai ser descontinuado. Para continuar a aceder ao portal, é necessário migrar a sua conta para a Chave Móvel Digital (CMD) ou autenticação europeia (eIDAS).",
-    "howToTitle": "Como migrar?",
-    "howToDescription": "Autentique-se com a Chave Móvel Digital (separador \"CMD\") ou com a autenticação europeia (separador \"eIDAS\"). O sistema detetará a sua conta existente e guiá-lo-á pelo processo de migração. Os seus dados (conjuntos de dados, organizações, reutilizações) serão mantidos.",
-    "migrateCmd": "Migrar com CMD",
-    "migrateEidas": "Migrar com eIDAS",
+    "title": "A autenticação com email e palavra-passe vai ser descontinuada",
+    "description": "Para poder continuar a autenticar-se em dados.gov, tem de associar a conta à sua Chave Móvel Digital (CMD) ou à Autenticação Europeia (eIDAS).",
+    "migrateCmd": "Associar conta à Chave Móvel Digital",
+    "migrateEidas": "Associar conta à Autenticação Europeia",
     "loading": "A carregar...",
     "linkTitle": "Associar conta à Chave Móvel Digital",
     "linkDescription": "Para associar a sua Chave Móvel Digital a uma conta existente no portal, precisa de verificar a propriedade dessa conta.",
@@ -136,7 +134,13 @@
       "linkExpired": "O link expirou — é válido durante 30 minutos. Autentique-se de novo com a Chave Móvel Digital ou eIDAS para receber um link novo.",
       "linkInvalid": "Este link já não é válido. Pode ter sido usado, ter expirado, ou a conta indicada ter entretanto mudado. Autentique-se de novo com a Chave Móvel Digital ou eIDAS para recomeçar.",
       "linkAlreadyDone": "Esta conta já está associada à sua identidade digital. Entre com a Chave Móvel Digital ou eIDAS."
-    }
+    },
+    "noCmdPrompt": "Não tem Chave Móvel Digital?",
+    "noCmdLink": "Saiba como ativar",
+    "eidasLearnMore": "Saiba mais sobre a Autenticação Europeia",
+    "entityTitle": "Representa uma entidade?",
+    "entityDescription": "Se representa uma entidade e precisa de apoio para associar a conta, fale connosco.",
+    "entityLink": "Ajuda e contactos"
   },
   "terms": {
     "title": "Termos e condições",

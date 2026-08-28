@@ -59,12 +59,10 @@
     "errorConnection": "Connection error. Please try again."
   },
   "migration": {
-    "title": "Mandatory migration",
-    "description": "Sign in with email and password will be discontinued. To keep accessing the portal, you must migrate your account to the Digital Mobile Key (CMD) or European authentication (eIDAS).",
-    "howToTitle": "How to migrate?",
-    "howToDescription": "Sign in with the Digital Mobile Key (\"CMD\" tab) or with European authentication (\"eIDAS\" tab). The system will detect your existing account and guide you through the migration process. Your data (datasets, organizations, reuses) will be kept.",
-    "migrateCmd": "Migrate with CMD",
-    "migrateEidas": "Migrate with eIDAS",
+    "title": "Signing in with an email and password is being discontinued",
+    "description": "To keep signing in to dados.gov, you must link your account to your Chave Móvel Digital (CMD) or to European Authentication (eIDAS).",
+    "migrateCmd": "Link account to Chave Móvel Digital",
+    "migrateEidas": "Link account to European Authentication",
     "loading": "Loading...",
     "linkTitle": "Link account to Digital Mobile Key",
     "linkDescription": "To link your Digital Mobile Key to an existing portal account, you need to verify ownership of that account.",
@@ -136,7 +134,13 @@
       "linkExpired": "The link has expired — it is valid for 30 minutes. Sign in again with Chave Móvel Digital or eIDAS to get a new one.",
       "linkInvalid": "This link is no longer valid. It may have been used, expired, or the account it pointed at may have changed since. Sign in again with Chave Móvel Digital or eIDAS to start over.",
       "linkAlreadyDone": "This account is already linked to your digital identity. Sign in with Chave Móvel Digital or eIDAS."
-    }
+    },
+    "noCmdPrompt": "Do not have a Chave Móvel Digital?",
+    "noCmdLink": "Learn how to activate one",
+    "eidasLearnMore": "Learn more about European Authentication",
+    "entityTitle": "Do you represent an organisation?",
+    "entityDescription": "If you represent an organisation and need help linking the account, get in touch.",
+    "entityLink": "Help and contacts"
   },
   "terms": {
     "title": "Terms and conditions",
