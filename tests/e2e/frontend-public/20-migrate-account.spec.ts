@@ -5,10 +5,10 @@ const BASE_URL = "http://localhost:3000";
 /**
  * Account migration flow at /migrate-account.
  *
- * The page is a multi-step wizard (search → confirm-account → choose-method →
- * link-sent | login → success) gated by `fetchMigrationPending()`. Ownership of
- * the legacy account is proved either by following a validation link mailed to
- * that account, or by its password.
+ * The page is a multi-step wizard (login → link-sent, or enter-email →
+ * success-new) gated by `fetchMigrationPending()`. The password says which
+ * legacy account to link; ownership of its email is always proved by following
+ * the validation link mailed to it, which is also what starts the session.
  * Without a pending migration the client redirects to /login. These
  * tests exercise the page surface that is reachable without a valid migration
  * cookie; deeper steps require backend-seeded migration state and stay skipped.

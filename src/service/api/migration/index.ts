@@ -18,22 +18,13 @@ export async function fetchMigrationPending(): Promise<{
   awaiting_confirmation?: boolean;
   first_name?: string;
   last_name?: string;
+  // Which identity provider started the flow. Every screen names it, and
+  // nothing on this side can infer it: both ACS routes converge on the same
+  // redirect. Defaults to CMD server-side for sessions older than the field.
+  provider?: "cmd" | "eidas";
 }> {
   const res = await fetch("/saml/migration/pending", { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch migration status");
-  return await res.json();
-}
-
-
-export async function searchMigrationAccount(
-  payload: { email?: string; first_name?: string; last_name?: string }
-): Promise<{ found: boolean; email?: string }> {
-  const res = await fetch("/saml/migration/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("Failed to search migration account");
   return await res.json();
 }
 
@@ -53,11 +44,12 @@ export async function sendMigrationLink(): Promise<{ sent: boolean }> {
 }
 
 
-// Only the password proof remains: ownership by email is now proved by
-// following the validation link, which the backend consumes on its own route.
+// The password says WHICH account to link; it does not complete the link.
+// The backend mails the validation link and reports that it went out — the
+// click is what binds the identity and starts a session.
 export async function confirmMigration(
   payload: { method: "password"; email: string; password: string }
-): Promise<{ success: boolean }> {
+): Promise<{ sent: boolean }> {
   const res = await fetch("/saml/migration/confirm", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

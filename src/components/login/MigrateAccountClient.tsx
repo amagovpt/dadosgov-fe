@@ -4,8 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
-import { fetchMigrationPending, searchMigrationAccount, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
-import AppIcon from "../Primitives/AppIcon";
+import { fetchMigrationPending, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
 import { useTranslation } from "react-i18next";
 
 // Same shape check and cooldown as CompleteRegistrationClient, the portal's
@@ -21,17 +20,18 @@ const FLASH_ERRORS: Record<string, string> = {
   migration_link_already_done: "migration.flash.linkAlreadyDone",
 };
 
+// The credentials screen resolves the account by itself -- the password names
+// it and the backend links whichever one it proves -- so the steps that used
+// to ask "is this yours?", offer a search, or offer a choice of proof are gone
+// (LEDG-2360). And no step ends authenticated any more: the validation link
+// does that, on its own route.
 type Step =
   | "loading"
   | "login"
-  | "search"
-  | "confirm-account"
-  | "choose-method"
   | "link-sent"
   | "link-error"
   | "enter-email"
   | "confirmation-pending"
-  | "success"
   | "success-new";
 
 export default function MigrateAccountClient() {
@@ -49,17 +49,11 @@ export default function MigrateAccountClient() {
 
   const [step, setStep] = useState<Step>(flashKey ? "link-error" : "loading");
   const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
-  const [hasCandidate, setHasCandidate] = useState(false);
-  const [legacyFirstName, setLegacyFirstName] = useState<string | null>(null);
-  const [legacyLastName, setLegacyLastName] = useState<string | null>(null);
+  // Which identity is being linked. Named on every screen, and only the
+  // backend knows it -- both ACS routes converge before the wizard opens.
+  const [provider, setProvider] = useState<"cmd" | "eidas">("cmd");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Search form
-  const [searchEmail, setSearchEmail] = useState("");
-  const [searchFirstName, setSearchFirstName] = useState("");
-  const [searchLastName, setSearchLastName] = useState("");
-  const [searchByName, setSearchByName] = useState(false);
 
   // Validation-link branch: the cooldown on the resend button. The backend
   // caps the sends; this only stops the button being hammered.
@@ -70,14 +64,6 @@ export default function MigrateAccountClient() {
   // screen). No session exists at that point — the confirmation link is what
   // eventually grants one.
   const [newEmail, setNewEmail] = useState("");
-  // The address whose divert the user has already turned down. Without it,
-  // saying "not my account" and pressing Criar conta again silently diverts to
-  // the same screen for ever, with nothing explaining why the account is not
-  // being created.
-  const [declinedCandidateEmail, setDeclinedCandidateEmail] = useState<string | null>(null);
-  // The address that produced the confirm-account screen currently on show,
-  // when it got there through a divert rather than through the search.
-  const [divertedEmail, setDivertedEmail] = useState<string | null>(null);
   const [createdEmail, setCreatedEmail] = useState("");
   const [resendConfirmCountdown, setResendConfirmCountdown] = useState(0);
   const [resendNotice, setResendNotice] = useState<string | null>(null);
@@ -108,28 +94,22 @@ export default function MigrateAccountClient() {
           return;
         }
         if (data.email) setMaskedEmail(data.email);
-        setHasCandidate(Boolean(data.candidate));
+        if (data.provider) setProvider(data.provider);
         // Pre-fill the creation step with the CMD address when it is free.
         // It still has to be submitted explicitly — this is a convenience,
         // not a decision taken on the user's behalf.
         if (data.suggested_email) setNewEmail(data.suggested_email);
-        if (data.first_name) setLegacyFirstName(data.first_name);
-        if (data.last_name) setLegacyLastName(data.last_name);
-
-        // The backend already decided which branch this is, back when the
-        // CMD returned — asking the user to repeat that decision added a step
-        // and a choice they are not equipped to make. Three outcomes:
-        //   candidate  -> one legacy account matched: go link it
-        //   no_match   -> nothing matched at all: go create an account
-        //   otherwise  -> several homonyms matched, so nobody can say which
-        //                 is theirs: let them find it, with a way out to
-        //                 create a new one from there.
-        if (data.candidate) {
-          setStep("confirm-account");
-        } else if (data.no_match) {
+        // Two outcomes now, not three. The credentials screen does not depend
+        // on a candidate being pointed -- the backend links the account whose
+        // password is proved, homonyms included -- so a matched candidate and
+        // an ambiguous set of homonyms land on the same screen, and the user
+        // types the address they know instead of searching for it.
+        //   no_match  -> nothing matched at all: go create an account
+        //   otherwise -> go prove which account is yours
+        if (data.no_match) {
           setStep("enter-email");
         } else {
-          setStep("search");
+          setStep("login");
         }
       } catch {
         router.push("/login");
@@ -161,36 +141,6 @@ export default function MigrateAccountClient() {
     return () => clearTimeout(timer);
   }, [resendConfirmCountdown]);
 
-  const handleSearch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const payload = searchByName
-        ? { first_name: searchFirstName, last_name: searchLastName }
-        : { email: searchEmail };
-      const data = await searchMigrationAccount(payload);
-      if (data.found) {
-        setMaskedEmail(data.email || null);
-        // Re-fetch pending to get updated name from the found account
-        const pending = await fetchMigrationPending();
-        if (pending.first_name) setLegacyFirstName(pending.first_name);
-        if (pending.last_name) setLegacyLastName(pending.last_name);
-        // The search just made this session candidate-bearing. Without this
-        // the back controls, which branch on hasCandidate, would send the user
-        // to the search again and make them find the account a second time —
-        // harmless while the choice step absorbed them, a dead loop now.
-        setHasCandidate(Boolean(pending.candidate));
-        setStep("confirm-account");
-      } else {
-        setError(t("migration.errorNotFound"));
-      }
-    } catch {
-      setError(t("migration.errorSearch"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchByName, searchFirstName, searchLastName, searchEmail]);
-
   // The backend answers a spent allowance with this exact string. Its own
   // message, not the account-creation one: that cap is for the life of the
   // account, this one lifts after an hour, so "contact support" would be
@@ -204,20 +154,6 @@ export default function MigrateAccountClient() {
     },
     [t]
   );
-
-  const handleSendLink = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await sendMigrationLink();
-      setResendCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
-      setStep("link-sent");
-    } catch (err: unknown) {
-      setError(linkSendError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [linkSendError]);
 
   const handleResendLink = useCallback(async () => {
     setIsLoading(true);
@@ -237,13 +173,22 @@ export default function MigrateAccountClient() {
     setError(null);
     try {
       await confirmMigration({ method: "password", email: loginEmail, password });
-      setStep("success");
+      // The proof is in; the link is what finishes the job. Arm the cooldown
+      // here, because the send already happened on the server.
+      setResendCountdown(RESEND_CONFIRM_COOLDOWN_SECONDS);
+      setStep("link-sent");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "";
+      // A correct password can now fail on the send cap or on a broken wizard
+      // session. Both used to be impossible here, and falling through to
+      // "credenciais inválidas" would tell the user their password is wrong
+      // when it is not.
       if (message.includes("Maximum attempts")) {
-        setError(
-          t("migration.errorMaximumAttempts")
-        );
+        setError(t("migration.errorMaximumAttempts"));
+      } else if (message === "Maximum confirmation sends exceeded") {
+        setError(t("migration.errorTooManyLinkSends"));
+      } else if (message === "No pending migration") {
+        setError(t("migration.errorSessionLost"));
       } else {
         setError(t("migration.errorInvalidCredentials"));
       }
@@ -251,22 +196,6 @@ export default function MigrateAccountClient() {
       setIsLoading(false);
     }
   }, [loginEmail, password, t]);
-
-  // Creating an account no longer happens on this click: the user must supply
-  // an email first, and prove it is theirs before the account has a session.
-  const handleSkip = useCallback(() => {
-    setError(null);
-    // Arriving here from a divert means the user has just been shown the
-    // account this address belongs to and said it is not theirs. The address
-    // is still taken, so creating an account with it cannot work — record the
-    // refusal so the next submission explains that instead of looping.
-    if (divertedEmail) {
-      setDeclinedCandidateEmail(divertedEmail.toLowerCase());
-      setDivertedEmail(null);
-      setError(t("migration.errorEmailTaken"));
-    }
-    setStep("enter-email");
-  }, [divertedEmail, t]);
 
   const handleCreateAccount = useCallback(async () => {
     const email = newEmail.trim();
@@ -279,37 +208,15 @@ export default function MigrateAccountClient() {
     try {
       const data = await skipMigration(email);
       if (data.candidate_found) {
-        // Compared case-insensitively, because the backend resolves the
-        // address that way: retyping the same account in another case is the
-        // same refusal, not a new one.
-        if (declinedCandidateEmail === email.toLowerCase()) {
-          // Already offered, already turned down. Sending them round again
-          // would be a loop with no explanation; the address is taken either
-          // way, so say so.
-          setError(t("migration.errorEmailTaken"));
-          return;
-        }
-        // The address is already an account of the user's own, and the backend
-        // has pointed it as the candidate. Telling them "email already
-        // registered" here would send them back to retype an address the
-        // server has just resolved; go where the answer is instead. Nothing is
-        // linked yet — confirm-account asks, and ownership is proven after it.
-        setMaskedEmail(data.email || null);
-        // The candidate is pointed server-side whatever happens next, so a
-        // failure to re-read the names must not strand the user on a step the
-        // session has already moved past — go on without them.
-        try {
-          const pending = await fetchMigrationPending();
-          if (pending.first_name) setLegacyFirstName(pending.first_name);
-          if (pending.last_name) setLegacyLastName(pending.last_name);
-          // Same reason as in handleSearch: this session just became
-          // candidate-bearing, and the back controls branch on hasCandidate.
-          setHasCandidate(Boolean(pending.candidate));
-        } catch {
-          setHasCandidate(true);
-        }
-        setDivertedEmail(email);
-        setStep("confirm-account");
+        // The address the user typed is already an account of their own.
+        // "Email já registado" would send them back to retype an address the
+        // server has just resolved (LEDG-2351); go where the answer is. The
+        // credentials screen is that answer now, pre-filled with the address
+        // they just typed, so all that is left to supply is the password.
+        // Nothing is linked yet -- the click on the mailed link does that.
+        setLoginEmail(email);
+        setPassword("");
+        setStep("login");
         return;
       }
       setCreatedEmail(data.email || email);
@@ -338,7 +245,7 @@ export default function MigrateAccountClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [newEmail, t, declinedCandidateEmail]);
+  }, [newEmail, t]);
 
   const handleResendConfirmation = useCallback(async () => {
     setError(null);
@@ -364,28 +271,10 @@ export default function MigrateAccountClient() {
     }
   }, [t]);
 
-  const handleForgotPassword = useCallback(() => {
-    setError(null);
-    // With a known candidate account we can email a code right away;
-    // otherwise the user must locate the account first.
-    if (hasCandidate) {
-      setStep("confirm-account");
-    } else {
-      setStep("search");
-    }
-  }, [hasCandidate]);
-
-  // Redirect after the account was LINKED — that branch proved ownership by
-  // password or emailed code, so it holds a session. Full reload on purpose:
-  // it refreshes AuthContext. The new-account branch is deliberately excluded:
-  // it ends unauthenticated, waiting on the confirmation link.
-  useEffect(() => {
-    if (step !== "success") return;
-    const timer = setTimeout(() => {
-      window.location.href = "/";
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [step]);
+  // The mockup names CMD in full; eIDAS has to read correctly on the same
+  // screens, and criterion 7 requires the flow to serve both.
+  const providerName =
+    provider === "eidas" ? t("migration.providerEidas") : t("migration.providerCmd");
 
   if (step === "loading") {
     return (
@@ -406,12 +295,12 @@ export default function MigrateAccountClient() {
 
         <div className="mt-64 max-w-[560px]">
           <h1 className="mb-16 text-2xl-medium text-brand-blue-dark">
-            {t("migration.linkTitle")}
+            {t("migration.linkTitle", { provider: providerName })}
           </h1>
 
-          {step !== "success" && step !== "success-new" && step !== "confirmation-pending" && (
+          {step !== "success-new" && step !== "confirmation-pending" && (
             <p className="text-lg mb-32 text-neutral-700">
-              {t("migration.linkDescription")}
+              {t("migration.linkDescription", { provider: providerName })}
             </p>
           )}
 
@@ -428,9 +317,11 @@ export default function MigrateAccountClient() {
               <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
                 <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.signInTitle")}</h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">
+                {t("migration.signInTitle", { provider: providerName })}
+              </h2>
               <p className="text-neutral-900">
-                {t("migration.signInDescription")}
+                {t("migration.signInDescription", { provider: providerName })}
               </p>
 
               <InputText
@@ -464,235 +355,25 @@ export default function MigrateAccountClient() {
                   disabled={isLoading || !loginEmail || !password}
                   className="px-48"
                 >
-                  {isLoading ? t("migration.checking") : t("migration.linkAccount")}
+                  {isLoading
+                    ? t("migration.checking")
+                    : t("migration.linkAccount", { provider: providerName })}
                 </Button>
               </div>
 
-              <Button
-                variant="primary"
-                appearance="link"
-                onClick={handleForgotPassword}
-                className="text-sm h-auto p-0"
-              >
-                {t("migration.forgotPassword")}
-              </Button>
-
+              {/* The homonym with no account of their own used to escape by
+                  answering "no" to "is this yours?". That question is gone, so
+                  the way out lives here. */}
               <Button
                 variant="primary"
                 appearance="link"
                 onClick={() => {
-                  // The choice step is gone; go back to wherever this user
-                  // would have started from.
-                  setStep(hasCandidate ? "confirm-account" : "search");
+                  setStep("enter-email");
                   setError(null);
                 }}
                 className="text-sm h-auto p-0"
               >
-                {t("migration.back")}
-              </Button>
-            </div>
-          )}
-
-          {/* Step: Search for legacy account (when no email from SAML) */}
-          {step === "search" && (
-            <div className="flex flex-col gap-24">
-              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
-                <Icon name="agora-line-search" className="h-24 w-24 text-brand-blue-primary" />
-              </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.searchTitle")}</h2>
-              <p className="text-neutral-900">
-                {t("migration.searchDescription")}
-              </p>
-
-              <div className="mb-8 flex gap-16">
-                <Button
-                  variant={!searchByName ? "primary" : "neutral"}
-                  onClick={() => setSearchByName(false)}
-                  className="text-sm"
-                >
-                  {t("migration.byEmail")}
-                </Button>
-                <Button
-                  variant={searchByName ? "primary" : "neutral"}
-                  onClick={() => setSearchByName(true)}
-                  className="text-sm"
-                >
-                  {t("migration.byName")}
-                </Button>
-              </div>
-
-              {!searchByName ? (
-                <InputText
-                  label={t("migration.previousAccountEmail")}
-                  placeholder={t("migration.emailExample")}
-                  id="search-email"
-                  name="search-email"
-                  type="email"
-                  className="w-full"
-                  value={searchEmail}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSearchEmail(e.target.value)
-                  }
-                  disabled={isLoading}
-                />
-              ) : (
-                <>
-                  <InputText
-                    label={t("migration.firstName")}
-                    placeholder={t("migration.firstNamePlaceholder")}
-                    id="search-first-name"
-                    name="search-first-name"
-                    className="w-full"
-                    value={searchFirstName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSearchFirstName(e.target.value)
-                    }
-                    disabled={isLoading}
-                  />
-                  <InputText
-                    label={t("migration.lastName")}
-                    placeholder={t("migration.lastNamePlaceholder")}
-                    id="search-last-name"
-                    name="search-last-name"
-                    className="w-full"
-                    value={searchLastName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSearchLastName(e.target.value)
-                    }
-                    disabled={isLoading}
-                  />
-                </>
-              )}
-
-              <div className="mt-16 flex gap-16">
-                <Button
-                  variant="primary"
-                  onClick={handleSearch}
-                  disabled={
-                    isLoading ||
-                    (!searchByName && !searchEmail) ||
-                    (searchByName && (!searchFirstName || !searchLastName))
-                  }
-                  className="px-48"
-                >
-                  {isLoading ? t("migration.searching") : t("migration.searchAccount")}
-                </Button>
-                <Button variant="neutral" onClick={handleSkip} disabled={isLoading}>
-                  {t("migration.createNewAccount")}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step: Confirm legacy account details */}
-          {step === "confirm-account" && (
-            <div className="flex flex-col gap-24">
-              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
-                <Icon name="agora-line-user" className="h-24 w-24 text-brand-blue-primary" />
-              </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.confirmTitle")}</h2>
-              <p className="text-neutral-900">
-                {t("migration.confirmDescription")}
-              </p>
-
-              <div className="flex flex-col gap-16 rounded-8 border border-neutral-300 bg-neutral-50 p-24">
-                {(legacyFirstName || legacyLastName) && (
-                  <div className="flex items-center gap-12">
-                    <AppIcon name="agora-line-user" className="shrink-0 text-neutral-600" />
-                    <div>
-                      <p className="text-xs text-neutral-600">{t("migration.firstName")}</p>
-                      <p className="text-base-bold text-neutral-900">
-                        {legacyFirstName} {legacyLastName}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {maskedEmail && (
-                  <div className="flex items-center gap-12">
-                    <AppIcon name="agora-line-mail" className="shrink-0 text-neutral-600" />
-                    <div>
-                      <p className="text-xs text-neutral-600">{t("migration.email")}</p>
-                      <p className="text-base-bold text-neutral-900">{maskedEmail}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-8 flex gap-16">
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    setError(null);
-                    setStep("choose-method");
-                  }}
-                  className="px-48"
-                >
-                  {t("migration.confirmYes")}
-                </Button>
-                <Button variant="neutral" onClick={handleSkip} disabled={isLoading}>
-                  {t("migration.confirmNo")}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step: Choose verification method */}
-          {step === "choose-method" && (
-            <div className="flex flex-col gap-24">
-              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
-                <Icon name="agora-line-shield" className="h-24 w-24 text-brand-blue-primary" />
-              </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.verifyTitle")}</h2>
-              <p className="text-neutral-900">
-                {t("migration.verifyDescription")}
-              </p>
-
-              <div className="flex flex-col gap-16">
-                <button
-                  onClick={handleSendLink}
-                  disabled={isLoading}
-                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
-                >
-                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
-                    <Icon name="agora-line-mail" className="h-24 w-24 text-brand-blue-primary" />
-                  </div>
-                  <div>
-                    <p className="text-lg-bold text-brand-blue-dark">
-                      {t("migration.sendLink")}
-                    </p>
-                    <p className="text-sm text-neutral-700">
-                      {t("migration.sendLinkDescription", { email: maskedEmail || t("migration.email") })}
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setStep("login")}
-                  disabled={isLoading}
-                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
-                >
-                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
-                    <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
-                  </div>
-                  <div>
-                    <p className="text-lg-bold text-brand-blue-dark">{t("migration.knowPassword")}</p>
-                    <p className="text-sm text-neutral-700">
-                      {t("migration.passwordMethodDescription")}
-                    </p>
-                  </div>
-                </button>
-              </div>
-
-              <Button
-                variant="primary"
-                appearance="link"
-                onClick={() => {
-                  setStep("confirm-account");
-                  setError(null);
-                }}
-                className="text-sm h-auto p-0"
-              >
-                {t("migration.back")}
+                {t("migration.createNewAccount")}
               </Button>
             </div>
           )}
@@ -727,26 +408,13 @@ export default function MigrateAccountClient() {
                 variant="primary"
                 appearance="link"
                 onClick={() => {
-                  setStep("choose-method");
+                  setStep("login");
                   setError(null);
                 }}
                 className="text-sm h-auto p-0"
               >
                 {t("migration.back")}
               </Button>
-            </div>
-          )}
-
-          {/* Step: Success — existing account linked */}
-          {step === "success" && (
-            <div className="flex flex-col items-center gap-24 text-center">
-              <div className="bg-green-100 w-fit rounded-full p-24">
-                <Icon name="agora-line-check-circle" className="text-green-600 h-48 w-48" />
-              </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">{t("migration.successTitle")}</h2>
-              <p className="text-neutral-900">
-                {t("migration.successDescription")}
-              </p>
             </div>
           )}
 
@@ -836,12 +504,13 @@ export default function MigrateAccountClient() {
               </div>
 
               {/* Someone sent straight here because nothing matched may still
-                  have an account registered under different details. */}
+                  have an account under an address they know. The credentials
+                  screen is where that is settled now -- there is no search. */}
               <Button
                 variant="primary"
                 appearance="link"
                 onClick={() => {
-                  setStep("search");
+                  setStep("login");
                   setError(null);
                 }}
                 className="text-sm h-auto p-0"
