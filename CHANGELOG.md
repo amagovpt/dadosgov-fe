@@ -21,7 +21,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     shows next — saying it there would give the answer away in prose after the
     API stopped giving it away in JSON. Both locales; `errorEmailTaken` goes
     with the branch that raised it.
-  - The cost is the shortcut LEDG-2351 added: the owner of a legacy address is
+  - The cost is the shortcut this replaces: the owner of a legacy address is
     no longer walked straight to the credentials screen, and reads what to do
     in the mail instead.
   - Deploy this before the backend change. Against the old backend a taken
