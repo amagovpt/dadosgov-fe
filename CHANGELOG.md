@@ -6,6 +6,29 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(migrate-account): validate the legacy account by link instead of a code**
+  - The linking branch no longer asks for a 6-digit code. Choosing the email
+    method now sends a validation link to the address already on the account
+    and shows a waiting screen — "Validar email" — in the same shape as the one
+    the account-creation branch ends on, with the same resend-behind-a-cooldown
+    control. Following the link is what links the account and signs the user
+    in; nothing here is authenticated before that.
+  - A failed click comes back as `/migrate-account?flash=...`. A visitor
+    arriving that way has no wizard session, and the bootstrap effect answers a
+    missing session by pushing to `/login`, which swallowed the message they
+    were sent to read: the flash is latched on the first render and the
+    bootstrap skipped entirely when it is set. Every case — expired, used,
+    superseded — offers re-authentication, there being no session left to
+    resend from, and the backend deliberately not reissuing from a link click.
+  - The send-limit message is its own rather than the account-creation one:
+    that cap lasts the life of the account, this one lifts after an hour, so
+    "contact support" would be the wrong advice.
+  - `confirmMigration` stays for the password proof, narrowed to that arm;
+    `sendMigrationCode` and the code-step strings are gone from both locales.
+  - **Depends on the matching backend change, which must be deployed first**:
+    this screen calls `POST /saml/migration/send-link`, which does not exist
+    until that lands.
+
 - **chore(ci): run the test and typecheck workflows once per push, not twice**
   - Both workflows triggered on `push` **and** `pull_request` with no branch
     filter, so every push to a branch with an open PR started two identical runs

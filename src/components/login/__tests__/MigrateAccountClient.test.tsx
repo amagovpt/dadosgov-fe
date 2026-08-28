@@ -29,21 +29,28 @@ vi.mock("react-i18next", () => ({
 }));
 
 const pushMock = vi.fn();
+const replaceMock = vi.fn();
 // One stable object, not a fresh one per render. The bootstrap effect depends
 // on the router, so handing it a new identity every render re-runs the effect
 // after every state change — which silently re-routes the wizard back to the
 // step the backend chose, undoing whatever the test just did.
-const routerMock = { push: pushMock };
+const routerMock = { push: pushMock, replace: replaceMock };
+// Mutable so a test can arrive with a ?flash= the way the backend redirect
+// does; stable identity for the same reason as the router.
+let searchParamsMock = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useRouter: () => routerMock,
+  usePathname: () => "/migrate-account",
+  useSearchParams: () => searchParamsMock,
 }));
 
 const fetchMigrationPendingMock = vi.fn();
 const skipMigrationMock = vi.fn();
+const sendMigrationLinkMock = vi.fn();
 vi.mock("@/service/api/migration", () => ({
   fetchMigrationPending: () => fetchMigrationPendingMock(),
   searchMigrationAccount: vi.fn(),
-  sendMigrationCode: vi.fn(),
+  sendMigrationLink: () => sendMigrationLinkMock(),
   confirmMigration: vi.fn(),
   skipMigration: (email: string) => skipMigrationMock(email),
   resendMigrationConfirmation: vi.fn(),
@@ -148,8 +155,11 @@ beforeEach(() => {
   document.body.appendChild(container);
   root = createRoot(container);
   pushMock.mockClear();
+  replaceMock.mockClear();
+  searchParamsMock = new URLSearchParams();
   fetchMigrationPendingMock.mockReset();
   skipMigrationMock.mockReset();
+  sendMigrationLinkMock.mockReset();
 });
 
 afterEach(() => {
@@ -328,5 +338,151 @@ describe("MigrateAccountClient account creation step", () => {
       expect(message.toLowerCase()).not.toContain("volte atrás");
       expect(message.toLowerCase()).not.toContain("go back");
     }
+  });
+});
+
+/**
+ * LEDG-2357: the linking branch proves ownership of the legacy account with a
+ * validation link instead of a 6-digit code. The waiting screen it lands on is
+ * the same shape as the account-creation one, and nothing on it is
+ * authenticated until the link in the mail is followed.
+ */
+describe("MigrateAccountClient validation-link step", () => {
+  /** The method buttons wrap a title and a description, so their textContent
+   *  is never just the label clickButton matches on. */
+  async function clickCard(label: string) {
+    const button = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes(label)
+    );
+    if (!button) throw new Error(`card not found: ${label}`);
+    await act(async () => {
+      button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  }
+
+  async function reachChooseMethod() {
+    await render({ pending: true, candidate: true, email: "j***@example.pt" });
+    await clickButton(translate("migration.confirmYes"));
+  }
+
+  it("shows the validation-link screen with the ticket's copy after sending", async () => {
+    sendMigrationLinkMock.mockResolvedValue({ sent: true });
+    await reachChooseMethod();
+
+    await clickCard(translate("migration.sendLink"));
+
+    expect(sendMigrationLinkMock).toHaveBeenCalledTimes(1);
+    const text = container.textContent ?? "";
+    expect(text).toContain(translate("migration.linkSentTitle"));
+    expect(text).toContain(translate("migration.linkSentDescription"));
+  });
+
+  it("holds the resend behind a visible cooldown", async () => {
+    sendMigrationLinkMock.mockResolvedValue({ sent: true });
+    await reachChooseMethod();
+    await clickCard(translate("migration.sendLink"));
+
+    const resend = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.startsWith(translate("migration.resendLink"))
+    );
+    expect(resend).toBeTruthy();
+    // The countdown starts immediately, so the button is disabled and says so.
+    expect(resend?.textContent).toContain("60s");
+    expect(resend?.hasAttribute("disabled")).toBe(true);
+  });
+
+  it("tells the user the send limit lifts, rather than to contact support", async () => {
+    // The account-creation cap is for the life of the account; this one is a
+    // window. Reusing that copy here would send people to support over a wait.
+    sendMigrationLinkMock.mockRejectedValue(
+      new Error("Maximum confirmation sends exceeded")
+    );
+    await reachChooseMethod();
+    await clickCard(translate("migration.sendLink"));
+
+    const text = container.textContent ?? "";
+    expect(text).toContain(translate("migration.errorTooManyLinkSends"));
+    expect(text).not.toContain(translate("migration.errorTooManySends"));
+  });
+
+  it("has no trace of the removed code step in either locale", async () => {
+    for (const locale of [ptLogin, enLogin]) {
+      const migration = locale.migration as Record<string, unknown>;
+      for (const key of [
+        "sendCode",
+        "codeDescription",
+        "verifyCodeTitle",
+        "verificationCode",
+        "resendCode",
+        "errorInvalidCode",
+        "errorSendCode",
+        "errorResendCode",
+      ]) {
+        expect(migration[key]).toBeUndefined();
+      }
+      expect(migration.linkSentTitle).toBeTruthy();
+      expect(migration.linkSentDescription).toBeTruthy();
+    }
+  });
+});
+
+/**
+ * LEDG-2357: a visitor arriving from a spent or expired validation link has no
+ * wizard session, and the bootstrap effect answers a missing session with a
+ * push to /login. These pin that the reason they were sent here survives that.
+ */
+describe("MigrateAccountClient link-error step", () => {
+  async function renderWithFlash(flash: string) {
+    searchParamsMock = new URLSearchParams(`flash=${flash}`);
+    // Deliberately unset: reaching for it at all would be the bug.
+    fetchMigrationPendingMock.mockRejectedValue(new Error("must not be called"));
+    await act(async () => {
+      root.render(<MigrateAccountClient />);
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    return container.textContent ?? "";
+  }
+
+  it("shows the invalid-link message instead of bouncing to the login", async () => {
+    const text = await renderWithFlash("migration_link_invalid");
+
+    expect(text).toContain(translate("migration.flash.linkInvalid"));
+    expect(pushMock).not.toHaveBeenCalled();
+    expect(fetchMigrationPendingMock).not.toHaveBeenCalled();
+  });
+
+  it("says a fresh link is already on its way when the old one expired", async () => {
+    const text = await renderWithFlash("migration_link_expired");
+
+    expect(text).toContain(translate("migration.flash.linkExpired"));
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it("offers re-authentication as the way out", async () => {
+    await renderWithFlash("migration_link_already_done");
+
+    await clickButton(translate("migration.linkErrorAction"));
+    expect(pushMock).toHaveBeenCalledWith("/login");
+  });
+
+  it("strips the flash from the URL once it has been latched", async () => {
+    await renderWithFlash("migration_link_invalid");
+
+    expect(replaceMock).toHaveBeenCalledWith("/migrate-account", { scroll: false });
+    // Latched, so the message outlives the strip.
+    expect(container.textContent).toContain(translate("migration.flash.linkInvalid"));
+  });
+
+  it("ignores an unknown flash and runs the wizard normally", async () => {
+    searchParamsMock = new URLSearchParams("flash=something_else");
+    const text = await render({ pending: true, candidate: true, email: "j***@example.pt" });
+
+    expect(text).toContain(CONFIRM_ACCOUNT_TEXT);
+    expect(fetchMigrationPendingMock).toHaveBeenCalled();
   });
 });
