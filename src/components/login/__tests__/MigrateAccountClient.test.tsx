@@ -310,6 +310,29 @@ describe("MigrateAccountClient account creation step", () => {
     expect(after).not.toContain(CREDENTIALS_TEXT);
   });
 
+  it("does not send the user back to a step that is not behind them", () => {
+    // Carried over from the copy check that went with errorEmailTaken, and
+    // more load-bearing than before: the skip now ends the wizard session on
+    // every exit, so after a submission there is genuinely nothing behind the
+    // user -- returning to /migrate-account restarts at the CMD login. Copy
+    // that says "volte atras" or "go back" would be sending them somewhere
+    // that does not exist, which is what the removed message used to do.
+    for (const locale of [ptLogin, enLogin]) {
+      for (const key of [
+        "successNewTitle",
+        "successNewDescription",
+        "confirmationPendingTitle",
+        "confirmationPendingDescription",
+      ] as const) {
+        const message = locale.migration[key];
+        expect(message).toBeTruthy();
+        expect(message.toLowerCase()).not.toContain("volte atrás");
+        expect(message.toLowerCase()).not.toContain("volte atras");
+        expect(message.toLowerCase()).not.toContain("go back");
+      }
+    }
+  });
+
   it("keeps the post-submission copy true whether or not an account was created", () => {
     // Both screens the wizard can show after a submission are reached in both
     // cases now, so neither may claim an account was created -- "a sua conta
