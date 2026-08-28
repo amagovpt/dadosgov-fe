@@ -6,6 +6,30 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(migrate-account)!: one answer on the creation step, whatever the address turns out to be**
+  - The step routed on the backend's `candidate_found`: a claimable legacy
+    address went to the credentials screen, anything else taken raised "already
+    registered". Both readings answered, for any address anyone typed, whether
+    it has an account at the portal — the enumeration oracle the backend has
+    just stopped answering, reintroduced a layer up. `skipMigration` no longer
+    reads the field, and every submission lands on the mailbox screen. What
+    tells the two cases apart is the mail, which only the address's owner can
+    read.
+  - The copy of both post-submission screens loses its claim that an account
+    was created. "A sua conta já foi criada" is false for someone whose address
+    already had one, and the `confirmation-pending` screen is what a reload
+    shows next — saying it there would give the answer away in prose after the
+    API stopped giving it away in JSON. Both locales; `errorEmailTaken` goes
+    with the branch that raised it.
+  - The cost is the shortcut LEDG-2351 added: the owner of a legacy address is
+    no longer walked straight to the credentials screen, and reads what to do
+    in the mail instead.
+  - Deploy this before the backend change. Against the old backend a taken
+    address still answers 409, which this client no longer special-cases, so
+    the user sees the generic creation error — degraded but correctable. The
+    reverse pairing is worse: the old client would promise a confirmation link
+    that was never sent.
+
 - **feat(login): make the email tab the account-association entry point**
   - The "E-mail e palavra-passe" tab showed a password form and only revealed
     the migration notice once the backend refused the login. The notice is now
