@@ -68,6 +68,14 @@ vi.mock("@/components/Shared/BreadcrumbDynamic", () => ({
   default: () => null,
 }));
 
+// The wizard wraps itself in the reCAPTCHA provider so the inline recovery has
+// one. The real provider injects a remote script, which jsdom cannot fetch and
+// which none of these tests are about.
+vi.mock("react-google-recaptcha-v3", () => ({
+  GoogleReCaptchaProvider: ({ children }: { children: React.ReactNode }) => children,
+  useGoogleReCaptcha: () => ({ executeRecaptcha: undefined }),
+}));
+
 import MigrateAccountClient from "../MigrateAccountClient";
 
 const CMD = translate("migration.providerCmd");
@@ -544,5 +552,43 @@ describe("MigrateAccountClient link-error step", () => {
 
     expect(text).toContain(CREDENTIALS_TEXT);
     expect(fetchMigrationPendingMock).toHaveBeenCalled();
+  });
+});
+
+/**
+ * LEDG-2360, criterion 4: a forgotten password must not cost the identity.
+ * The old link navigated to the "is this yours?" screen or the search, both of
+ * which are gone; recovery now runs inside the wizard, so the pending
+ * migration survives it and the user can come back and finish.
+ */
+describe("MigrateAccountClient password recovery", () => {
+  it("offers recovery from the credentials screen and comes back to it", async () => {
+    await render({ pending: true, candidate: true, email: "j***@example.pt" });
+    expect(container.textContent).toContain(CREDENTIALS_TEXT);
+
+    await clickButton(translate("migration.forgotPassword"));
+
+    const recovering = container.textContent ?? "";
+    expect(recovering).toContain(translate("recovery.title"));
+    expect(recovering).not.toContain(CREDENTIALS_TEXT);
+    expect(container.querySelector("#recovery-email")).toBeTruthy();
+    // Recovery is a detour, not a destination: nothing sent the user away.
+    expect(pushMock).not.toHaveBeenCalled();
+
+    await clickButton(translate("recovery.back"));
+
+    const back = container.textContent ?? "";
+    expect(back).toContain(CREDENTIALS_TEXT);
+    expect(container.querySelector("#login-email")).toBeTruthy();
+  });
+
+  it("asks to recover the password, not to validate by email", async () => {
+    // The old label promised "Validar por email", a path that no longer
+    // exists on this screen.
+    for (const locale of [ptLogin, enLogin]) {
+      expect(locale.migration.forgotPassword).toBeTruthy();
+      expect(locale.migration.forgotPassword.toLowerCase()).not.toContain("validar por email");
+      expect(locale.migration.forgotPassword.toLowerCase()).not.toContain("validate by email");
+    }
   });
 });

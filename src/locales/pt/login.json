@@ -80,7 +80,7 @@
     "linkAccount": "Associar conta à {{provider}}",
     "successNewTitle": "Verifique a sua caixa de correio",
     "signInDescription": "Para associar a sua conta à {{provider}}, insira o email e a palavra-passe que usa para se autenticar em dados.gov.",
-    "forgotPassword": "Não se lembra da palavra-passe? Validar por email",
+    "forgotPassword": "Esqueceu-se da palavra-passe? Recuperar",
     "createNewAccount": "Criar conta nova",
     "successNewDescription": "Enviámos um link de confirmação para {{email}}. Depois de o seguir, entre com a Chave Móvel Digital para aceder à sua conta.",
     "enterEmailDescription": "Indique o endereço de email da sua nova conta. Vamos enviar-lhe um link para confirmar que o endereço é seu — a conta só fica activa depois disso.",

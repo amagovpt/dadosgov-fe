@@ -2,10 +2,13 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchMigrationPending, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
 import { useTranslation } from "react-i18next";
+import { PasswordRecoveryView } from "./PasswordRecoveryView";
+import { RECAPTCHA_KEY } from "./constants";
 
 // Same shape check and cooldown as CompleteRegistrationClient, the portal's
 // other "submit an email, then check your inbox" screen.
@@ -28,13 +31,33 @@ const FLASH_ERRORS: Record<string, string> = {
 type Step =
   | "loading"
   | "login"
+  | "recover"
   | "link-sent"
   | "link-error"
   | "enter-email"
   | "confirmation-pending"
   | "success-new";
 
+/**
+ * The reCAPTCHA provider has to be an ancestor of PasswordRecoveryView, which
+ * reads useGoogleReCaptcha. Without it the hook hands back no executeRecaptcha,
+ * the request goes out with recaptcha_token null, and the backend's
+ * ExtendedForgotPasswordForm rejects it — a recovery that fails silently. It
+ * lives here rather than on the page because the page is a Server Component,
+ * and it is conditional on the key exactly as LoginClient does it.
+ */
 export default function MigrateAccountClient() {
+  if (RECAPTCHA_KEY) {
+    return (
+      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY} language="pt">
+        <MigrateAccountWizard />
+      </GoogleReCaptchaProvider>
+    );
+  }
+  return <MigrateAccountWizard />;
+}
+
+function MigrateAccountWizard() {
   const { t } = useTranslation("login");
   const router = useRouter();
   const pathname = usePathname();
@@ -298,7 +321,7 @@ export default function MigrateAccountClient() {
             {t("migration.linkTitle", { provider: providerName })}
           </h1>
 
-          {step !== "success-new" && step !== "confirmation-pending" && (
+          {step !== "success-new" && step !== "confirmation-pending" && step !== "recover" && (
             <p className="text-lg mb-32 text-neutral-700">
               {t("migration.linkDescription", { provider: providerName })}
             </p>
@@ -361,6 +384,22 @@ export default function MigrateAccountClient() {
                 </Button>
               </div>
 
+              {/* Recovery runs inline: the pending migration is untouched by
+                  it, so the CMD/eIDAS identity survives and the user can come
+                  straight back and finish. Sending them to /login instead
+                  would cost them the identity they just proved. */}
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={() => {
+                  setStep("recover");
+                  setError(null);
+                }}
+                className="text-sm h-auto p-0"
+              >
+                {t("migration.forgotPassword")}
+              </Button>
+
               {/* The homonym with no account of their own used to escape by
                   answering "no" to "is this yours?". That question is gone, so
                   the way out lives here. */}
@@ -375,6 +414,18 @@ export default function MigrateAccountClient() {
               >
                 {t("migration.createNewAccount")}
               </Button>
+            </div>
+          )}
+
+          {/* Step: request a password reset without leaving the wizard. */}
+          {step === "recover" && (
+            <div className="flex flex-col gap-24">
+              <PasswordRecoveryView
+                onBack={() => {
+                  setStep("login");
+                  setError(null);
+                }}
+              />
             </div>
           )}
 

@@ -80,7 +80,7 @@
     "linkAccount": "Link account to {{provider}}",
     "successNewTitle": "Check your inbox",
     "signInDescription": "To link your account to {{provider}}, enter the email and password you use to sign in to dados.gov.",
-    "forgotPassword": "Forgot your password? Validate by email",
+    "forgotPassword": "Forgot your password? Recover it",
     "createNewAccount": "Create new account",
     "successNewDescription": "We sent a confirmation link to {{email}}. Once you follow it, sign in with your Chave Móvel Digital to access your account.",
     "enterEmailDescription": "Enter the email address for your new account. We will send you a link to confirm the address is yours — the account is only activated after that.",
