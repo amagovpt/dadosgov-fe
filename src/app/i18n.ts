@@ -50,12 +50,19 @@ export default async function initTranslations(
       // screen — a date interpolated into a string rendered as
       // "Atualizado às 01&#x2F;09&#x2F;2026" instead of "01/09/2026".
       //
-      // Safe because no translation output is injected as raw HTML: the only
-      // `dangerouslySetInnerHTML` in src/ is a pass-through prop on
-      // Shared/Generics/Typograph.tsx that nothing passes. If that ever
-      // changes, the value has to be sanitised at that call site — this
-      // setting is not the place to rely on. See src/app/__tests__/i18n.test.tsx,
-      // which pins the property this depends on.
+      // This holds only while no translation output reaches a sink that
+      // interprets markup, which was audited across the tree: no `t()` output
+      // goes to `dangerouslySetInnerHTML`, to a URL attribute, to JSON-LD, to
+      // `generateMetadata`, or to a markdown renderer.
+      //
+      // The one place raw HTML is reachable at all is the
+      // `dangerouslySetInnerHTML` pass-through on Shared/Generics/Typograph.tsx.
+      // No call site uses it today, but it is a typed, forwarded prop, so every
+      // one of them could — which is why the invariant is pinned by a test that
+      // walks the source (src/app/__tests__/i18n.test.tsx) rather than by this
+      // comment. A new sink anywhere fails that test, and the value reaching it
+      // has to be sanitised at the call site: this setting is not the thing to
+      // rely on.
       escapeValue: false,
     },
   });
