@@ -43,6 +43,21 @@ export default async function initTranslations(
     fallbackNS: namespaces[0],
     ns: namespaces,
     preload: resources ? [] : i18nConfig.locales,
+    interpolation: {
+      // i18next escapes interpolated values by default, which is redundant
+      // here and actively wrong: React escapes everything it renders as a text
+      // child, so the value gets escaped twice and the entities show up on
+      // screen — a date interpolated into a string rendered as
+      // "Atualizado às 01&#x2F;09&#x2F;2026" instead of "01/09/2026".
+      //
+      // Safe because no translation output is injected as raw HTML: the only
+      // `dangerouslySetInnerHTML` in src/ is a pass-through prop on
+      // Shared/Generics/Typograph.tsx that nothing passes. If that ever
+      // changes, the value has to be sanitised at that call site — this
+      // setting is not the place to rely on. See src/app/__tests__/i18n.test.tsx,
+      // which pins the property this depends on.
+      escapeValue: false,
+    },
   });
 
   instance.services.formatter?.add("number", (value: number, lng, options) => {
