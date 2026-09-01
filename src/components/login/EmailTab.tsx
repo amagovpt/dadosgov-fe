@@ -36,7 +36,7 @@ export function EmailTab({
             <Icon name="agora-solid-social-security" className="h-24 w-24" />
           </div>
         </div>
-        <div className="my-32 h-[2px] w-full bg-neutral-400" />
+        <div className="my-32 h-2 w-full bg-neutral-400" />
         <div className="flex flex-col gap-32">
           <MigrationNotice
             samlEnabled={samlEnabled}

@@ -2,8 +2,8 @@
 
 ## Stack
 - Next.js 16 (App Router), React 19.2, TypeScript 5 (strict mode)
-- UI: @ama-pt/agora-design-system 3.6.1 (Portuguese government "Agora" design system)
-- Styling: Tailwind CSS 3.4 (`corePlugins.preflight: false` — Agora handles resets)
+- UI: @ama-pt/agora-design-system 4.0.1 (Portuguese government "Agora" design system)
+- Styling: Tailwind CSS 4 (CSS-first — no `tailwind.config.ts`; the theme lives in `globals.css`)
 - i18n: next-i18n-router 5.5.8 + i18next / react-i18next (locales `pt`, `en`)
 - Data: Apollo Client 4 (Squidex GraphQL) + REST; date-fns 4 / dayjs
 
@@ -66,7 +66,7 @@ npm run test:e2e:backoffice # admin/backoffice
 
 ## Design System (Agora)
 
-`@ama-pt/agora-design-system` (3.6.1) is the source of truth for UI. Follow these rules:
+`@ama-pt/agora-design-system` (4.0.1) is the source of truth for UI. Follow these rules:
 
 - **Reuse before creating — do NOT add a new component when a compatible one already exists.** Always use the design-system component (or an existing project wrapper in `Primitives/` / `Shared/`). Create a custom component **only** when nothing compatible exists in `@ama-pt/agora-design-system`, `src/components/Primitives/`, or `src/components/Shared/`.
 - **Isolate design-system usage in a Client component/instance** (`'use client'`). The DS is interactive, so it must render in a client leaf.
@@ -74,13 +74,15 @@ npm run test:e2e:backoffice # admin/backoffice
 - **Import as named exports**: `import { Button, Icon } from "@ama-pt/agora-design-system"`. Rename on conflict with local components: `import { Button as ButtonADS } from "@ama-pt/agora-design-system"`.
 - **`'use client'` required** for any component that imports the design system (it is interactive and uses hooks like `usePopupContext`).
 - **Setup is already wired — do not re-add it**:
-  - CSS imports at the top of `src/app/[locale]/globals.css`: `artifacts/dist/tailwind.css` then `artifacts/dist/style.css`, **before** the `@tailwind` directives.
-  - `tailwind.config.ts` spreads `AgoraTailwindConfig` (theme, plugins, safelist) and sets `corePlugins.preflight: false`.
+  - CSS imports at the top of `src/app/[locale]/globals.css`, in this exact order: `@ama-pt/agora-design-system/theme.css`, `tailwindcss/preflight`, `@ama-pt/agora-design-system/index.css`, `tailwindcss/utilities`. This puts the DS **before** the utilities, deliberately against the DS README: the DS ships its component CSS unlayered, so loading it last makes every single-class DS rule beat the portal's utility classes on a specificity tie. Do not "fix" the order to match the README.
+  - **There is no `tailwind.config.ts`.** Tailwind v4 is configured in CSS: the Agora theme comes from the DS `theme.css`, and the portal's own tokens live in the `@theme` block of `globals.css`. `safelist` and `corePlugins` do not exist in v4 — classes built at runtime go in `@source inline(...)`.
   - `PopupProviderWrapper` is mounted in the root layout (enables dialogs/popups app-wide).
 - **Wrapper pattern**: prefer the project's thin wrappers over importing raw ADS components ad hoc.
   - `src/components/Primitives/` — Button, Icon, Cards, Dropdown, Inputs.
   - `src/components/Shared/` — Table, Accordion, Hero, Anchor.
-- **Design tokens**: use ADS color tokens (`primary-*`, `secondary-*`, `neutral-*`, `informative-*`, `success-*`, `warning-*`, `danger-*`, shades 50–900) and ADS text utilities. Project brand overrides (`brand-blue-*`, `accent-light`, `gray-medium`) live in `tailwind.config.ts` and `src/app/[locale]/globals.css`. **Avoid hardcoded hex.**
+- **Design tokens**: use ADS color tokens (`primary-*`, `secondary-*`, `neutral-*`, `informative-*`, `success-*`, `warning-*`, `danger-*`, shades 50–900) and ADS text utilities. Project brand overrides (`brand-blue-*`, `accent-light`, `gray-medium`) live in the `@theme` block of `src/app/[locale]/globals.css`. The DS theme resets the Tailwind defaults (`--color-*`, `--radius-*`, `--shadow-*`, `--spacing-*`, `--text-*`, `--breakpoint-*`: initial), so the stock palette (`red-*`, `green-*`, `blue-*`), `rounded-lg` / `shadow-sm|md|lg` and off-scale spacing (`p-1`, `p-3`, `p-5`, `h-14`) generate nothing — use the Agora tokens. **Avoid hardcoded hex.**
+- **Breakpoints**: `xs` 360 / `md` 768 / `xl` 1280 come from the DS; `sm` 576 and `lg` 1024 are portal additions declared in the `@theme` block. Anything not in that set (`2xl:`, `lg:` before it was restored, …) silently generates nothing, so **verify a new responsive prefix actually compiles** rather than assuming the Tailwind defaults exist.
+- **Whole namespaces the DS leaves to the portal**: `--leading-*`, `--tracking-*`, `--font-weight-*` (the DS declares only `bold` and `medium`) and `--container-*` (behind the named `max-w-*` sizes) are declared in the `@theme` block with the Tailwind v3 default values. Watch out for `leading-<number>`: with no `--leading-N` key, v4 falls back to `--spacing-N`, so it resolves to a pixel value instead of a line height.
 - **Icons**: naming convention `agora-line-{name}` (outline) / `agora-solid-{name}` (filled); pass via `leadingIcon` / `leadingIconHover` props.
 - **Button props**: `appearance` (`solid` | `outline` | `icon`), `variant` (`primary` | `neutral` | `danger` | …), `hasIcon`, etc.
 
@@ -144,7 +146,7 @@ When fetching dynamic data in a client component (e.g., admin pages), use `useEf
 - `src/hooks/` - Reusable React hooks (current user, listing state, URL sync)
 - `src/components/Header.tsx` / `Footer.tsx` - Layout components
 - `src/components/Primitives/` & `src/components/Shared/` - Agora design-system wrappers
-- `tailwind.config.ts` - Theme config extending `AgoraTailwindConfig`
+- `postcss.config.mjs` - PostCSS config (`@tailwindcss/postcss` only; Tailwind v4 handles prefixing)
 
 ## Changelog
 
