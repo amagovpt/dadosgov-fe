@@ -6,6 +6,27 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(i18n): stop double-escaping interpolated translation values**
+  - Dates rendered as `Atualizado às 01&#x2F;09&#x2F;2026 10:27:06` on the
+    backoffice log page. i18next escapes interpolated values by default and
+    React escapes again whatever it renders as a text child, so the value was
+    escaped twice and the entities reached the screen. The same page showed the
+    tell: `Modificado: 01/09/2026` was correct because it is rendered directly,
+    and only the interpolated string was broken.
+  - Fixed once in the i18next init instead of per call. Around ten strings
+    interpolate a date — common, datasets, profile, organizations, learning,
+    admin-logs — and all were wrong; repairing one call site would have left
+    the rest, and the next one added would regress. Removing the interpolation
+    was not an option either, since word order is per locale (`Atualizado às
+    {{time}}` against `Updated at {{time}}`), which is what interpolation is
+    for.
+  - The setting holds only while no translation output is injected as raw HTML,
+    which was audited: the single `dangerouslySetInnerHTML` in the tree is an
+    unused pass-through prop. A new test pins the property the change rests on
+    — it interpolates an attack payload, renders it, and asserts no element was
+    created and the payload survives as text. Nothing covered the real i18next
+    configuration until now, since every other test mocks `react-i18next`.
+
 - **feat(migrate-account)!: one answer on the creation step, whatever the address turns out to be**
   - The step routed on the backend's `candidate_found`: a claimable legacy
     address went to the credentials screen, anything else taken raised "already
