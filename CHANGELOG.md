@@ -6,6 +6,37 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(i18n): stop double-escaping interpolated translation values**
+  - Dates rendered as `Atualizado às 01&#x2F;09&#x2F;2026 10:27:06` on the
+    backoffice log page. i18next escapes interpolated values by default and
+    React escapes again whatever it renders as a text child, so the value was
+    escaped twice and the entities reached the screen. The same page showed the
+    tell: `Modificado: 01/09/2026` was correct because it is rendered directly,
+    and only the interpolated string was broken.
+  - Fixed once in the i18next init instead of per call. Around ten strings
+    interpolate a date — common, datasets, profile, organizations, learning,
+    admin-logs — and all were wrong; repairing one call site would have left
+    the rest, and the next one added would regress. Removing the interpolation
+    was not an option either, since word order is per locale (`Atualizado às
+    {{time}}` against `Updated at {{time}}`), which is what interpolation is
+    for.
+  - Values interpolated into translations are not only dates: around 130 call
+    sites interpolate, and many carry untrusted data — dataset and resource
+    titles, organisation and harvester names, addresses the user typed, and the
+    search query. All of them reach React text children or non-URL attributes,
+    which React escapes on render, so this is a change of who escapes rather
+    than whether anyone does. One visible consequence beyond dates: a search
+    query containing markup is now reflected as the literal text instead of as
+    escaped entities.
+  - The setting holds only while no translation output reaches a sink that
+    interprets markup, audited across the tree — no `t()` output goes to
+    `dangerouslySetInnerHTML`, a URL attribute, JSON-LD, `generateMetadata` or a
+    markdown renderer. That invariant is now pinned by a test that walks the
+    source and fails if a raw-HTML sink appears outside the one known
+    pass-through, which is where a comment now warns about it too. Nothing
+    covered the real i18next configuration until now, since every other test
+    mocks `react-i18next`.
+
 - **feat(migrate-account)!: one answer on the creation step, whatever the address turns out to be**
   - The step routed on the backend's `candidate_found`: a claimable legacy
     address went to the credentials screen, anything else taken raised "already
