@@ -7,10 +7,9 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
-import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
-import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import {
   SystemReuseSortField,
   createReuseColumns,
@@ -71,8 +70,9 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
 
     const run = async () => {
       try {
-        const response = await fetchReuses(currentPage, pageSize, {
+        const response = await fetchReuses(usesLocalSort ? 1 : currentPage, usesLocalSort ? 9999 : pageSize, {
           q: searchQuery.trim() || undefined,
+          status: statusFilter || undefined,
           sort: sortParam,
         });
         if (!isActive) return;
@@ -93,20 +93,19 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
     return () => {
       isActive = false;
     };
-  }, [currentPage, pageSize, searchQuery, sortParam]);
+  }, [currentPage, pageSize, searchQuery, sortParam, statusFilter, usesLocalSort]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
   });
 
-  const filteredReuses = useMemo(
-    () => filterByStatus(reuses, statusFilter),
-    [reuses, statusFilter]
-  );
   const visibleReuses = useMemo(
-    () => (usesLocalSort ? sortReuses(filteredReuses, sortField, sortOrder) : filteredReuses),
-    [filteredReuses, sortField, sortOrder, usesLocalSort]
+    () =>
+      usesLocalSort
+        ? paginateItems(sortReuses(reuses, sortField, sortOrder), currentPage, pageSize)
+        : reuses,
+    [currentPage, pageSize, reuses, sortField, sortOrder, usesLocalSort]
   );
 
   return (
@@ -151,4 +150,3 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
     </AdminListPage>
   );
 }
-

@@ -1,21 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { fetchMyReuses } from "@/service/api/reuses";
+import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
-import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
+import {
+  ReuseSortField,
+  createReuseColumns,
+  reuseSortFieldMap,
+  sortReuses,
+} from "@/components/admin/reuses/config/reusesListConfig";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
 
 interface ReusesClientProps {
@@ -24,10 +29,12 @@ interface ReusesClientProps {
 
 export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
-  const { displayName } = useCurrentUser();
+  const { user, isLoading: isUserLoading } = useAuth();
+  const displayName = user ? `${user.first_name} ${user.last_name}` : "";
   const searchParams = useSearchParams();
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -35,6 +42,18 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const usesLocalSort = sortField === "status";
+  // The legacy Me list hid deleted reuses in its unfiltered view. The generic
+  // paginated endpoint includes a user's own deleted entries, so preserve that
+  // behavior locally until the API provides a non-deleted aggregate status.
+  const usesLocalFallback = usesLocalSort || !statusFilter;
+  const sortParam = useMemo(
+    () =>
+      usesLocalSort
+        ? undefined
+        : buildApiSortParam(sortField, sortOrder, reuseSortFieldMap),
+    [sortField, sortOrder, usesLocalSort],
+  );
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -44,57 +63,63 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
     setCurrentPage
   );
 
+  const loadReuses = useCallback(async () => {
+    if (isUserLoading) return;
+    if (!user?.id) {
+      setReuses([]);
+      setTotalItems(0);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetchReuses(
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? 9999 : itemsPerPage,
+        {
+          owner: user.id,
+          q: searchQuery.trim() || undefined,
+          status: statusFilter || undefined,
+          sort: sortParam,
+        },
+      );
+      setReuses(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading reuses:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, isUserLoading, itemsPerPage, searchQuery, sortParam, statusFilter, user, usesLocalFallback]);
+
   useEffect(() => {
     let isActive = true;
-
-    const run = async () => {
-      try {
-        const response = await fetchMyReuses(1, 9999);
-        if (!isActive) return;
-        setReuses(response.data || []);
-      } catch (error) {
-        if (!isActive) return;
-        console.error("Error loading reuses:", error);
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
+    const loadCurrentReuses = async () => {
+      if (isActive) await loadReuses();
     };
-
-    void run();
-
+    void loadCurrentReuses();
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [loadReuses]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
   });
 
-  const filteredReuses = useMemo(() => {
-    let result = reuses;
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter((r) => r.title.toLowerCase().includes(q));
-    }
-    if (statusFilter) {
-      result = filterByStatus(result, statusFilter);
-    } else {
-      result = result.filter((r) => !r.deleted);
-    }
-    return result;
-  }, [reuses, searchQuery, statusFilter]);
-
+  const filteredReuses = useMemo(
+    () => (statusFilter ? filterByStatus(reuses, statusFilter) : reuses.filter((reuse) => !reuse.deleted)),
+    [reuses, statusFilter],
+  );
   const sortedReuses = useMemo(
     () => sortReuses(filteredReuses, sortField, sortOrder),
     [filteredReuses, sortField, sortOrder]
   );
   const paginatedReuses = useMemo(
-    () => paginateItems(sortedReuses, currentPage, itemsPerPage),
-    [sortedReuses, currentPage, itemsPerPage]
+    () => (usesLocalFallback ? paginateItems(sortedReuses, currentPage, itemsPerPage) : sortedReuses),
+    [currentPage, itemsPerPage, sortedReuses, usesLocalFallback]
   );
   const columns = useMemo(
     () =>
@@ -123,7 +148,8 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
       })}
       title={t("admin-reuses:title")}
       isLoading={isLoading}
-      count={filteredReuses.length}
+      count={usesLocalFallback ? filteredReuses.length : totalItems}
+      hasItems={paginatedReuses.length > 0}
       currentPage={currentPage}
       pageSize={itemsPerPage}
       setCurrentPage={setCurrentPage}
@@ -161,4 +187,3 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
     </AdminListPage>
   );
 }
-

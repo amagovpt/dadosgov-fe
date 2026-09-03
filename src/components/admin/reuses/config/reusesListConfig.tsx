@@ -11,6 +11,13 @@ import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 export type ReuseSortField = "title" | "status" | "created_at" | "datasets";
 export type SystemReuseSortField = "title" | "status" | "created_at";
 
+export const reuseSortFieldMap: Record<ReuseSortField, string | null> = {
+  title: "title",
+  status: null,
+  created_at: "created",
+  datasets: "datasets",
+};
+
 export const systemReuseSortFieldMap: Record<SystemReuseSortField, string | null> = {
   title: "title",
   status: null,
@@ -143,4 +150,3 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     }),
   ];
 }
-

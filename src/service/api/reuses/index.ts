@@ -85,6 +85,7 @@ export async function fetchReuses(
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.dataset) params.set("dataset", filters.dataset);
       if (filters.sort) params.set("sort", filters.sort);
+      if (filters.status) params.set("status", filters.status);
       if (filters.modified_since) params.set("modified_since", filters.modified_since);
 
       const arrayParams: [string, string | string[] | undefined][] = [
