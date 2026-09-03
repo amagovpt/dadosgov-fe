@@ -5,5 +5,46 @@
     "createdAt": "Criado em",
     "datasets": "Conjuntos de dados",
     "reuses": "Reutilizações"
+  },
+  "filters": {
+    "search": {
+      "label": "Pesquisar temas",
+      "placeholder": "Pesquisar por nome ou conteúdo do tema"
+    },
+    "button": "Filtros",
+    "all": "Todos",
+    "clear": "Limpar filtros",
+    "private": {
+      "label": "Visibilidade",
+      "placeholder": "Filtrar por visibilidade",
+      "public": "Público",
+      "private": "Privado"
+    },
+    "featured": {
+      "label": "Em destaque",
+      "placeholder": "Filtrar por estado de destaque",
+      "featured": "Em destaque",
+      "notFeatured": "Não destacado"
+    },
+    "tag": {
+      "label": "Etiquetas",
+      "placeholder": "Etiquetas separadas por vírgulas"
+    },
+    "geozone": {
+      "label": "Zona geográfica",
+      "placeholder": "ID da zona geográfica"
+    },
+    "granularity": {
+      "label": "Granularidade espacial",
+      "placeholder": "Por exemplo: country"
+    },
+    "organization": {
+      "label": "Organização",
+      "placeholder": "ID da organização"
+    },
+    "owner": {
+      "label": "Proprietário",
+      "placeholder": "ID do utilizador"
+    }
   }
 }
