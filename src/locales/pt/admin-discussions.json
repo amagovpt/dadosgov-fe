@@ -16,6 +16,16 @@
     "open": "ABERTA",
     "closed": "FECHADA"
   },
+  "filters": {
+    "all": "Todas",
+    "search": {
+      "label": "Pesquisar discussões",
+      "placeholder": "Pesquisar por título ou conteúdo da discussão"
+    },
+    "status": {
+      "placeholder": "Filtrar por estado"
+    }
+  },
   "empty": {
     "descriptionOrganization": "Ainda não existem discussões sobre esta organização."
   },

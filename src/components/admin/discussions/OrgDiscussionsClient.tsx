@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { usePopupContext } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
@@ -47,11 +48,15 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     setCurrentPage,
     pageSize,
     setPageSize,
+    searchQuery,
+    handleSearch,
     sortParam,
     handleSort,
     getSortOrder,
-  } = useAdminListController<DiscussionSortField>({
-    initialFilters: {},
+    filters,
+    updateFilter,
+  } = useAdminListController<DiscussionSortField, { closedFilter: string }>({
+    initialFilters: { closedFilter: "" },
     sortFieldMap: discussionSortFieldMap,
   });
 
@@ -59,7 +64,11 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     async function loadDiscussions() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgDiscussions(orgId, currentPage, pageSize, sortParam);
+        const data = await fetchOrgDiscussions(orgId, currentPage, pageSize, {
+          q: searchQuery.trim() || undefined,
+          closed: filters.closedFilter === "" ? undefined : filters.closedFilter === "closed",
+          sort: sortParam,
+        });
         setDiscussions(data.data ?? []);
         setTotalItems(data.total ?? 0);
       } catch (error) {
@@ -70,24 +79,27 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     }
 
     void loadDiscussions();
-  }, [orgId, currentPage, pageSize, sortParam]);
+  }, [orgId, currentPage, pageSize, searchQuery, filters.closedFilter, sortParam]);
 
-  const openDiscussion = (discussion: Discussion) => {
-    show(
-      <DiscussionDetailPopup
-        discussion={discussion}
-        onUpdated={(updated) =>
-          setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
-        }
-        onDeleted={() => setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))}
-      />,
-      {
-        title: t("admin-discussions:popup.title"),
-        closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
-        dimensions: "l",
-      },
-    );
-  };
+  const openDiscussion = useCallback(
+    (discussion: Discussion) => {
+      show(
+        <DiscussionDetailPopup
+          discussion={discussion}
+          onUpdated={(updated) =>
+            setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+          }
+          onDeleted={() => setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))}
+        />,
+        {
+          title: t("admin-discussions:popup.title"),
+          closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+          dimensions: "l",
+        },
+      );
+    },
+    [show, t]
+  );
 
   const columns = useMemo(
     () =>
@@ -106,7 +118,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           closed: t("admin-discussions:status.closed"),
         },
       }),
-    [t],
+    [openDiscussion, t],
   );
 
   return (
@@ -123,6 +135,25 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
+      search={{
+        label: t("admin-discussions:filters.search.label"),
+        placeholder: t("admin-discussions:filters.search.placeholder"),
+        ariaLabel: t("admin-discussions:filters.search.label"),
+        onChange: handleSearch,
+      }}
+      filters={
+        <StatusFilterSelect
+          id="discussion-filter-status"
+          value={filters.closedFilter}
+          onChange={(value) => updateFilter("closedFilter", value)}
+          placeholder={t("admin-discussions:filters.status.placeholder")}
+          options={[
+            { value: "", label: t("admin-discussions:filters.all") },
+            { value: "open", label: t("admin-discussions:status.open") },
+            { value: "closed", label: t("admin-discussions:status.closed") },
+          ]}
+        />
+      }
       emptyState={
         <AdminEmptyState
           icon="agora-line-chat"

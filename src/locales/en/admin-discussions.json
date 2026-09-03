@@ -16,6 +16,16 @@
     "open": "OPEN",
     "closed": "CLOSED"
   },
+  "filters": {
+    "all": "All",
+    "search": {
+      "label": "Search discussions",
+      "placeholder": "Search by discussion title or content"
+    },
+    "status": {
+      "placeholder": "Filter by status"
+    }
+  },
   "empty": {
     "descriptionOrganization": "There are no discussions about this organization yet."
   },

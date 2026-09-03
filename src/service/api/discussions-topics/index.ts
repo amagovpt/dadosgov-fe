@@ -15,7 +15,7 @@ export async function fetchOrgDiscussions(
   orgId: string,
   page: number = 1,
   pageSize: number = 20,
-  sort?: string
+  filters?: { q?: string; closed?: boolean; sort?: string }
 ): Promise<APIResponse<Discussion>> {
   try {
     const params = new URLSearchParams({
@@ -23,7 +23,9 @@ export async function fetchOrgDiscussions(
       page: String(page),
       page_size: String(pageSize),
     });
-    if (sort) params.set("sort", sort);
+    if (filters?.q) params.set("q", filters.q);
+    if (filters?.closed !== undefined) params.set("closed", String(filters.closed));
+    if (filters?.sort) params.set("sort", filters.sort);
     const res = await fetch(`${API_BASE_URL}/discussions/?${params.toString()}`, {
       cache: "no-store",
     });
