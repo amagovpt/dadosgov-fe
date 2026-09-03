@@ -16,12 +16,41 @@ import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 // ── Community Resources CRUD (TICKET-31) ─────────────────────────────
 
+export interface CommunityResourceListFilters {
+  sort?: string;
+  owner?: string;
+  organization?: string;
+  dataset?: string;
+}
+
+function buildCommunityResourceListParams(
+  page: number,
+  pageSize: number,
+  filters?: CommunityResourceListFilters,
+): URLSearchParams {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+
+  if (filters?.sort) params.set("sort", filters.sort);
+  if (filters?.owner) params.set("owner", filters.owner);
+  if (filters?.organization) params.set("organization", filters.organization);
+  if (filters?.dataset) params.set("dataset", filters.dataset);
+
+  return params;
+}
+
 export async function fetchMyCommunityResources(
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  searchQuery?: string,
 ): Promise<APIResponse<CommunityResource>> {
   try {
-    const res = await authFetch("/me/org_community_resources/", { cache: "no-store" });
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("q", searchQuery);
+    const query = params.size ? `?${params.toString()}` : "";
+    const res = await authFetch(`/me/org_community_resources/${query}`, { cache: "no-store" });
     if (!res.ok)
       throw new Error(`Failed to fetch my community resources: ${res.statusText}`);
 
@@ -82,19 +111,27 @@ export async function fetchMyOrgCommunityResources(
 
 export async function fetchAllCommunityResources(
   page: number = 1,
-  pageSize: number = 20
-): Promise<{ data: CommunityResource[]; total: number }> {
+  pageSize: number = 20,
+  filters?: CommunityResourceListFilters,
+): Promise<APIResponse<CommunityResource>> {
   try {
-    const res = await fetch(
-      `${API_AUTH_URL}/datasets/community_resources/?page=${page}&page_size=${pageSize}`,
-      { cache: "no-store", credentials: "include" }
-    );
-    if (!res.ok) return { data: [], total: 0 };
-    const json = await res.json();
-    return { data: json.data || [], total: json.total || 0 };
+    const params = buildCommunityResourceListParams(page, pageSize, filters);
+    const res = await authFetch(`/datasets/community_resources/?${params.toString()}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`Failed to fetch community resources: ${res.statusText}`);
+    return await res.json();
   } catch (error) {
     rethrowControlFlow(error);
-    return { data: [], total: 0 };
+    console.error("Error fetching community resources:", error);
+    return {
+      data: [],
+      page: 1,
+      page_size: pageSize,
+      total: 0,
+      next_page: null,
+      previous_page: null,
+    };
   }
 }
 
@@ -195,13 +232,17 @@ export async function uploadCommunityResourceFile(
 export async function fetchOrgCommunityResources(
   org: string,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  filters?: CommunityResourceListFilters,
 ): Promise<APIResponse<CommunityResource>> {
   try {
-    const res = await fetch(
-      `${API_AUTH_URL}/datasets/community_resources/?organization=${org}&page=${page}&page_size=${pageSize}`,
-      { cache: "no-store", credentials: "include" }
-    );
+    const params = buildCommunityResourceListParams(page, pageSize, {
+      ...filters,
+      organization: org,
+    });
+    const res = await authFetch(`/datasets/community_resources/?${params.toString()}`, {
+      cache: "no-store",
+    });
     if (!res.ok)
       throw new Error(`Failed to fetch org community resources: ${res.statusText}`);
     return await res.json();

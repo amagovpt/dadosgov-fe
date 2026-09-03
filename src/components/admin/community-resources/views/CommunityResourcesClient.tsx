@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -10,6 +10,7 @@ import { CommunityResource } from "@/service/types/community-resource";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
   CommunityResourceSortField,
   createCommunityResourceColumns,
@@ -42,37 +43,41 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
     setCurrentPage
   );
 
+  const loadResources = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // This endpoint preserves the existing combined personal-and-organization
+      // scope and performs its supported title search on the server. It does
+      // not offer pagination or sorting, so those remain local below.
+      const response = await fetchMyCommunityResources(1, 9999, searchQuery.trim() || undefined);
+      setAllResources(response.data || []);
+    } catch (error) {
+      console.error("Error loading community resources:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchQuery]);
+
   useEffect(() => {
-    async function loadResources() {
-      setIsLoading(true);
-      try {
-        const response = await fetchMyCommunityResources(1, 9999);
-        setAllResources(response.data || []);
-      } catch (error) {
-        console.error("Error loading community resources:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadResources();
-  }, []);
+    let isCancelled = false;
+    const loadCurrentResources = async () => {
+      if (isCancelled) return;
+      await loadResources();
+    };
+    void loadCurrentResources();
+    return () => {
+      isCancelled = true;
+    };
+  }, [loadResources]);
 
-  const filteredResources = useMemo(() => {
-    let result = allResources;
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(
-        (r) => r.title.toLowerCase().includes(q) || (r.format && r.format.toLowerCase().includes(q))
-      );
-    }
-
-    return result;
-  }, [allResources, searchQuery]);
+  const handleSearch = useDebouncedSearch((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
 
   const sortedResources = useMemo(
-    () => sortCommunityResources(filteredResources, sortField, sortOrder),
-    [filteredResources, sortField, sortOrder]
+    () => sortCommunityResources(allResources, sortField, sortOrder),
+    [allResources, sortField, sortOrder]
   );
   const resources = useMemo(
     () => paginateItems(sortedResources, currentPage, pageSize),
@@ -120,10 +125,7 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,
-        onChange: (value) => {
-          setSearchQuery(value);
-          setCurrentPage(1);
-        },
+        onChange: handleSearch,
       }}
       emptyState={
         <AdminEmptyState
@@ -142,4 +144,3 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
     </AdminListPage>
   );
 }
-
