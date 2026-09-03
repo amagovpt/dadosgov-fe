@@ -1,22 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
-import { fetchMyDatasets } from "@/service/api/datasets";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
+import { fetchAdminDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { filterByStatus } from "@/utils/filterByStatus";
+import { useAuth } from "@/context/AuthContext";
 import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
   createDatasetColumns,
   DatasetSortField,
   sortDatasets,
+  systemDatasetSortFieldMap,
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
@@ -27,10 +28,12 @@ interface DatasetsClientProps {
 
 export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
-  const { displayName } = useCurrentUser();
+  const { user, isLoading: isUserLoading } = useAuth();
+  const displayName = user ? `${user.first_name} ${user.last_name}` : "";
   const searchParams = useSearchParams();
 
-  const [allDatasets, setAllDatasets] = useState<Dataset[]>([]);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -38,51 +41,86 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
+  const usesLocalSort = sortField === "status" || sortField === "resources" || sortField === "quality";
+
+  const sortParam = useMemo(
+    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, systemDatasetSortFieldMap)),
+    [sortField, sortOrder, usesLocalSort],
+  );
+
+  const loadDatasets = useCallback(async () => {
+    if (isUserLoading) return;
+    if (!user?.id) {
+      setDatasets([]);
+      setTotalItems(0);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
+      if (statusFilter === "public") {
+        statusFilters.private = false;
+        statusFilters.archived = false;
+        statusFilters.deleted = false;
+      } else if (statusFilter === "draft") {
+        statusFilters.private = true;
+        statusFilters.archived = false;
+        statusFilters.deleted = false;
+      } else if (statusFilter === "archived") {
+        statusFilters.archived = true;
+        statusFilters.deleted = false;
+      } else if (statusFilter === "deleted") {
+        statusFilters.deleted = true;
+      }
+
+      // File count, status, and quality have no backend sort parameter.
+      // Sort them locally and fetch all items to ensure we have the full dataset for sorting.
+      const response = await fetchAdminDatasets(
+        usesLocalSort ? 1 : currentPage,
+        usesLocalSort ? 9999 : pageSize,
+        {
+          owner: user.id,
+          q: searchQuery.trim() || undefined,
+          sort: sortParam,
+          ...statusFilters,
+        },
+      );
+      setDatasets(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading datasets:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, isUserLoading, pageSize, searchQuery, sortParam, statusFilter, user, usesLocalSort]);
 
   useEffect(() => {
-    async function loadDatasets() {
-      setIsLoading(true);
-      try {
-        const response = await fetchMyDatasets(1, 9999);
-        setAllDatasets(response.data || []);
-      } catch (error) {
-        console.error("Error loading datasets:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadDatasets();
-  }, []);
+    let isCancelled = false;
 
-  const filteredDatasets = useMemo(() => {
-    let result = allDatasets;
+    const loadCurrentDatasets = async () => {
+      if (isCancelled) return;
+      await loadDatasets();
+    };
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(
-        (dataset) =>
-          dataset.title.toLowerCase().includes(q) ||
-          (dataset.acronym && dataset.acronym.toLowerCase().includes(q)) ||
-          dataset.slug.toLowerCase().includes(q),
-      );
-    }
+    void loadCurrentDatasets();
 
-    if (statusFilter) {
-      result = filterByStatus(result, statusFilter);
-    } else {
-      result = result.filter((dataset) => !dataset.deleted);
-    }
+    return () => {
+      isCancelled = true;
+    };
+  }, [loadDatasets]);
 
-    return result;
-  }, [allDatasets, searchQuery, statusFilter]);
-
-  const sortedDatasets = useMemo(
-    () => sortDatasets(filteredDatasets, sortField, sortOrder),
-    [filteredDatasets, sortField, sortOrder],
-  );
-  const datasets = useMemo(
-    () => paginateItems(sortedDatasets, currentPage, pageSize),
-    [sortedDatasets, currentPage, pageSize],
+  const handleSearch = useDebouncedSearch((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
+  const visibleDatasets = useMemo(
+    () =>
+      usesLocalSort
+        ? paginateItems(sortDatasets(datasets, sortField, sortOrder), currentPage, pageSize)
+        : datasets,
+    [currentPage, datasets, pageSize, sortField, sortOrder, usesLocalSort],
   );
   const columns = useMemo(
     () =>
@@ -122,7 +160,8 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       })}
       title={t("admin-datasets:list.title")}
       isLoading={isLoading}
-      count={sortedDatasets.length}
+      count={totalItems}
+      hasItems={visibleDatasets.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -131,10 +170,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,
-        onChange: (value) => {
-          setSearchQuery(value);
-          setCurrentPage(1);
-        },
+        onChange: handleSearch,
       }}
       filters={
         <StatusFilterSelect
@@ -154,7 +190,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       }
     >
       <AdminListTable
-        items={datasets}
+        items={visibleDatasets}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}
