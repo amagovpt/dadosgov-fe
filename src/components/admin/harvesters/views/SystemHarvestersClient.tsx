@@ -17,7 +17,6 @@ import {
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createSystemHarvesterColumns,
-  filterHarvestersBySearch,
   filterHarvestersByStatus,
   HARVESTERS_FETCH_PAGE_SIZE,
   sortHarvesters,
@@ -32,6 +31,7 @@ interface SystemHarvestersClientProps {
 export default function SystemHarvestersClient({ pageContent }: SystemHarvestersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState<{
     variant: "success" | "danger";
@@ -54,6 +54,7 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
   } = useAdminListController<HarvesterSortField, { statusFilter: string }>({
     initialFilters: { statusFilter: "" },
   });
+  const usesLocalFallback = Boolean(filters.statusFilter) || Boolean(sortField);
 
   const applyValidationUpdate = useCallback((updated: HarvestSource) => {
     setHarvesters((prev) =>
@@ -127,38 +128,44 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     [show, hide, handleReject, t]
   );
 
+  const loadHarvesters = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchHarvesters(
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? HARVESTERS_FETCH_PAGE_SIZE : pageSize,
+        { q: searchQuery.trim() || undefined },
+      );
+      setHarvesters(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading harvesters:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, pageSize, searchQuery, usesLocalFallback]);
+
   useEffect(() => {
     let isActive = true;
-
-    const run = async () => {
+    const loadCurrentHarvesters = async () => {
+      if (!isActive) return;
       try {
-        const response = await fetchHarvesters(1, HARVESTERS_FETCH_PAGE_SIZE);
+        await loadHarvesters();
+      } catch {
         if (!isActive) return;
-        setHarvesters(response.data || []);
-      } catch (error) {
-        if (!isActive) return;
-        console.error("Error loading harvesters:", error);
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
       }
     };
-
-    void run();
+    void loadCurrentHarvesters();
 
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [loadHarvesters]);
 
   const filteredHarvesters = useMemo(
     () =>
-      filterHarvestersByStatus(
-        filterHarvestersBySearch(harvesters, searchQuery),
-        filters.statusFilter
-      ),
-    [harvesters, searchQuery, filters.statusFilter]
+      filterHarvestersByStatus(harvesters, filters.statusFilter),
+    [harvesters, filters.statusFilter]
   );
 
   const sortedHarvesters = useMemo(
@@ -167,8 +174,8 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
   );
 
   const visibleHarvesters = useMemo(
-    () => paginateItems(sortedHarvesters, currentPage, pageSize),
-    [sortedHarvesters, currentPage, pageSize]
+    () => (usesLocalFallback ? paginateItems(sortedHarvesters, currentPage, pageSize) : sortedHarvesters),
+    [currentPage, pageSize, sortedHarvesters, usesLocalFallback]
   );
 
   const columns = useMemo(
@@ -223,7 +230,8 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
       ]}
       title={t("admin-harvesters:title")}
       isLoading={isLoading}
-      count={filteredHarvesters.length}
+      count={usesLocalFallback ? filteredHarvesters.length : totalItems}
+      hasItems={visibleHarvesters.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -267,4 +275,3 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     </AdminListPage>
   );
 }
-
