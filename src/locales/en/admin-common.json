@@ -59,7 +59,13 @@
     "profile": "My profile",
     "notifications": "Notifications",
     "deleteAccount": "Delete account",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "adminAreaLabel": "Administration Area",
+    "portalTitle": "Open Data"
+  },
+  "sidebar": {
+    "expand": "Expand",
+    "close": "Close"
   },
   "deleteAccount": {
     "title": "Are you sure you want to delete this account?",
