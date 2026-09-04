@@ -55,7 +55,7 @@ function formatStatNumber(value: number): { number: string; suffix: string } {
 }
 
 interface HomeClientProps {
-  HomeHero:HomeHero;
+  HomeHero: HomeHero;
   siteMetrics: SiteMetrics;
   latestDatasets: Dataset[];
   datastories: HomeDatastories;
@@ -292,7 +292,7 @@ export default function HomeClient({
                       <CardGeneralV2
                         key={story.slug}
                         layout="image-indent"
-                        variant="white-outline"
+                        variant="white"
                         isBlockedLink
                       >
                         <ImageSectionContainer
@@ -311,12 +311,6 @@ export default function HomeClient({
                           </CardSubtitle>
                           <CardTitle>{story.title}</CardTitle>
                         </HeaderSectionContainer>
-                        {/* isBlockedLink needs a registered anchor to activate on card click. */}
-                        <FooterSectionContainer>
-                          <CardAnchor href={storyHref} onClick={pushTo(storyHref)}>
-                            {t("readMore")}
-                          </CardAnchor>
-                        </FooterSectionContainer>
                       </CardGeneralV2>
                     );
                   })}
@@ -355,7 +349,7 @@ export default function HomeClient({
                   const postHref = localizeHref(`/noticias/${post.slug}`);
                   return (
                     <div key={post.id} className="latest-news-card-wrapper h-full">
-                      <CardGeneralV2 layout="image" variant="primary-100" className="h-full">
+                      <CardGeneralV2 layout="image" variant="white" className="[&_.agora-card-general-image-section]:h-[208px] [&_.agora-card-general-image-section]:w-full [&_.agora-card-general-image-section]:overflow-hidden [&_.agora-card-general-image-section]:bg-transparent!">
                         <ImageSectionContainer src={post.image || undefined} alt={post.name} />
                         <HeaderSectionContainer>
                           <CardSubtitle>
@@ -366,7 +360,13 @@ export default function HomeClient({
                           <CardTitle>{post.name}</CardTitle>
                         </HeaderSectionContainer>
                         <FooterSectionContainer>
-                          <CardAnchor href={postHref} onClick={pushTo(postHref)}>
+                          <CardAnchor
+                            href={postHref}
+                            onClick={pushTo(postHref)}
+                            hasIcon
+                            trailingIcon="agora-line-arrow-right-circle"
+                            trailingIconHover="agora-solid-arrow-right-circle"
+                          >
                             {t("readMore")}
                           </CardAnchor>
                         </FooterSectionContainer>
