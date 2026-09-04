@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CardGeneral, Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import { Post } from "@/service/types/posts";
 
 interface ArticleCardProps {
@@ -10,6 +11,8 @@ interface ArticleCardProps {
 }
 
 export function ArticleCard({ post, formattedDate }: ArticleCardProps) {
+  const { t } = useTranslation("common");
+
   return (
     <Link
       href={`/noticias/${post.slug}`}
@@ -39,6 +42,7 @@ export function ArticleCard({ post, formattedDate }: ArticleCardProps) {
               )}
               <div className="mt-auto">
                 <div className="mt-16 flex items-center gap-8 text-primary-600">
+                  <span className="hover:underline text-m-regular">{t("readNews")}</span>
                   <Icon
                     name="agora-line-arrow-right-circle"
                     className="h-32 w-32"

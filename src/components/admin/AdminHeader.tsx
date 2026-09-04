@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import {
   Header,
@@ -50,12 +52,40 @@ function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
 export function AdminHeader() {
   const { user, samlLogin } = useAuth();
   const { show, hide } = usePopupContext();
-  const { t } = useTranslation("admin-common");
+  const { t } = useTranslation(["admin-common", "common"]);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [generalBarLabelPortalNode, setGeneralBarLabelPortalNode] =
+    useState<HTMLSpanElement | null>(null);
 
   const initials = user
     ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase()
     : "";
+
+  useLayoutEffect(() => {
+    const wrapper = wrapperRef.current;
+    const generalBar = wrapper?.querySelector(".general-bar");
+    if (!generalBar) return;
+
+    let container = generalBar.querySelector(".general-bar-label-menu") as HTMLSpanElement | null;
+    if (!container) {
+      container = document.createElement("span");
+      container.className = "general-bar-label-menu";
+      container.style.display = "flex";
+      container.style.alignItems = "center";
+
+      container.style.order = "1";
+    }
+    generalBar.appendChild(container);
+
+    queueMicrotask(() => {
+      setGeneralBarLabelPortalNode(container);
+    });
+
+    return () => {
+      generalBar.querySelector(".general-bar-label-menu")?.remove();
+      setGeneralBarLabelPortalNode(null);
+    };
+  }, []);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -163,6 +193,32 @@ export function AdminHeader() {
           </Authenticated>
         </GeneralBar>
       </Header>
+      {generalBarLabelPortalNode &&
+        createPortal(
+          <span className="whitespace-nowrap text-base font-normal text-primary-300">
+            {t("generalBarLabel")}
+          </span>,
+          generalBarLabelPortalNode
+        )}
+      <div className="flex h-96 items-center bg-neutral-100">
+        <div className="container mx-auto flex items-end justify-between">
+          <div className="flex flex-col">
+            <span className="text-base font-normal text-neutral-900">
+              {t("header.adminAreaLabel")}
+            </span>
+            <span className="text-24 font-semibold text-primary-900">
+              {t("header.portalTitle")}
+            </span>
+          </div>
+          <Image
+            src="/Logos/Dados.gov_logocores.png"
+            alt="dados.gov.pt"
+            height={43}
+            width={251}
+            className="h-auto w-[190px]"
+          />
+        </div>
+      </div>
     </div>
   );
 }

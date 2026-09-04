@@ -8,6 +8,8 @@ import { formatDateLong } from "@/utils/formatDate";
 import { ResourceExpandedContent } from "./ResourceExpandedContent";
 import { downloadUrl, formatBytes } from "./utils";
 
+const DESCRIPTION_COLLAPSE_LIMIT = 280;
+
 export const ResourceCard: React.FC<{
   resource: Resource;
   isExpanded: boolean;
@@ -19,11 +21,13 @@ export const ResourceCard: React.FC<{
   const { i18n } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
   const locale = i18n.language as "pt" | "en";
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = React.useState(false);
+  const hasLongDescription = (resource.description?.length ?? 0) > DESCRIPTION_COLLAPSE_LIMIT;
 
   return (
     <div className="bg-white flex flex-col mx-[136px] mt-16">
       <div className="flex flex-col gap-16 p-32">
-        <h4 className="text-base font-bold text-neutral-900 inline-flex items-center gap-8">
+        <h4 className="text-base font-bold text-neutral-900 inline-flex items-center gap-8 max-w-[592px]">
           {resource.title}
           <button
             type="button"
@@ -49,13 +53,34 @@ export const ResourceCard: React.FC<{
             </svg>
           </button>
         </h4>
-        <p className="text-base text-neutral-900">
+        <p className="text-base text-neutral-900 max-w-[592px]">
           {tds("resources.updatedOn", {
             date: formatDateLong(resource.last_modified ?? resource.created_at, locale),
           })}
         </p>
+        {resource.description && (
+          <>
+            <p
+              className={`text-base text-neutral-900 whitespace-pre-wrap break-words max-w-[592px]${
+                hasLongDescription && !isDescriptionExpanded ? " line-clamp-3" : ""
+              }`}
+            >
+              {resource.description}
+            </p>
+            {hasLongDescription && (
+              <button
+                type="button"
+                onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
+                className="inline-flex self-start text-primary-600 hover:underline cursor-pointer max-w-[592px]"
+                aria-expanded={isDescriptionExpanded}
+              >
+                {isDescriptionExpanded ? tds("resources.seeLess") : tds("resources.seeMore")}
+              </button>
+            )}
+          </>
+        )}
         {authorName && (
-          <p className="text-sm text-neutral-900">
+          <p className="text-sm text-neutral-900 max-w-[592px]">
             {tds("resources.by")}{" "}
             {authorUrl ? (
               <a href={authorUrl} className="text-primary-600 hover:underline">
@@ -72,7 +97,7 @@ export const ResourceCard: React.FC<{
             target="_blank"
             rel="noopener noreferrer"
             download={resource.title || ""}
-            className="inline-flex items-center gap-8 text-primary-600 hover:underline"
+            className="inline-flex items-center gap-8 text-primary-600 hover:underline w-full max-w-[592px]"
           >
             <Icon name="agora-line-document" className="w-6 h-6" />
             <span>
@@ -96,7 +121,7 @@ export const ResourceCard: React.FC<{
         <button
           type="button"
           onClick={onToggle}
-          className="inline-flex items-center gap-8 text-primary-600 hover:underline cursor-pointer py-8"
+          className="inline-flex items-center gap-8 text-primary-600 hover:underline cursor-pointer py-8 max-w-[592px]"
         >
           <Icon
             name={isExpanded ? "agora-line-chevron-up" : "agora-line-chevron-down"}

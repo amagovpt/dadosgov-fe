@@ -1488,6 +1488,11 @@ body:has(.admin-wrapper) > div > header.sticky {
   background-color: var(--color-brand-blue-secondary);
 }
 
+.admin-header .general-bar {
+  @apply container mx-auto;
+  justify-content: space-between;
+}
+
 .admin-header .authenticated-panel-menu > .agora-btn {
   background-color: var(--color-white);
   color: var(--color-primary-500);
@@ -1526,33 +1531,188 @@ body:has(.admin-wrapper) > div > header.sticky {
 .admin-layout {
   display: flex;
   flex: 1;
+  position: relative;
 }
 
 .admin-side-nav {
-  background-color: var(--color-primary-900);
-  width: 280px;
+  position: relative;
+  width: 112px;
   min-height: 100%;
   flex-shrink: 0;
+}
+
+.admin-side-nav__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 112px;
+  z-index: 30;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-primary-900);
+  overflow-y: auto;
+  transition: width 0.2s ease;
+}
+
+.admin-side-nav--expanded .admin-side-nav__panel {
+  width: 388px;
+}
+
+.admin-side-nav__toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 64px;
+  padding: 12px 12px 12px 20px;
+  color: var(--color-white);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.admin-side-nav__toggle:hover {
+  background-color: #0338a2;
+}
+
+.admin-side-nav__toggle-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.admin-side-nav__toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-white);
+  border-radius: 4px;
+}
+
+.admin-side-nav__toggle-icon-glyph {
+  width: 24px;
+  height: 24px;
+}
+
+.admin-side-nav__toggle-icon-glyph,
+.admin-side-nav__toggle-icon-glyph svg,
+.admin-side-nav__toggle-icon-glyph svg path {
+  fill: var(--color-white);
+  color: var(--color-white);
+}
+
+/* Ágora's own built-in mobile menu button (shown below the "xl" breakpoint,
+   see the toggle's own hide rule) — center it in the rail and recolor its
+   icon white, matching our toggle icon above it. Its grid is meant for a
+   full page-width layout (columns sized off the whole viewport, per
+   xs/md/xl breakpoint), so inside our 112px rail its content ends up wider
+   than the rail itself and overflows both sides symmetrically — replacing
+   it with a plain flex row (one child either way) sidesteps that grid
+   entirely instead of fighting its column math. */
+.admin-side-nav .agora-sidebar-navigation-mobile {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+}
+
+.admin-side-nav .agora-sidebar-navigation-mobile .agora-snm-menu svg,
+.admin-side-nav .agora-sidebar-navigation-mobile .agora-snm-menu svg path {
+  fill: var(--color-white);
+  color: var(--color-white);
+}
+
+.admin-side-nav--collapsed .admin-sidebar-nav__group-label {
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  text-align: center;
+}
+
+.admin-side-nav--collapsed
+  .admin-sidebar-nav.agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral.agora-sidebar-button-item,
+.admin-side-nav--collapsed .agora-anchor.agora-sidebar-anchor-item {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.admin-side-nav--collapsed .admin-sidebar-nav__group-label-text {
+  overflow: visible;
+  text-overflow: initial;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.admin-side-nav--collapsed .admin-sidebar-nav__children {
+  display: none;
 }
 
 .admin-sidebar-nav {
-  padding: 8px 0;
+  padding: 64px 0 8px;
 }
 
-.admin-sidebar-nav .agora-sidebar {
+.admin-sidebar-nav.agora-sidebar {
   background-color: transparent;
+}
+
+.admin-sidebar-nav__home-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background-color: var(--color-primary-400);
+}
+
+.admin-sidebar-nav__home-badge-icon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
 }
 
 .admin-sidebar-nav.agora-sidebar
   .agora-sidebar-item
   .agora-btn-link-neutral.agora-sidebar-button-item {
-  padding: 16px !important;
+  padding: 12px 0 !important;
   border-left: 3px solid transparent !important;
+  border-radius: 0 !important;
   overflow: hidden;
   justify-content: flex-start !important;
   text-align: left !important;
+}
+
+.admin-sidebar-nav .agora-link-wrapper {
+  padding: 0 !important;
+  min-height: auto !important;
+  min-width: auto !important;
+  width: 100%;
+border-left: none !important;
+}
+
+.admin-sidebar-nav .agora-link-wrapper:has(.admin-sidebar-nav__home-badge) {
+  padding: 64px 0 12px !important;
+}
+
+.admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item {
+  border-left: 3px solid transparent;
+  border-radius: 0 !important;
+  height: 100%;
+  width: 100%;
 }
 
 .admin-sidebar-nav.agora-sidebar
@@ -1568,19 +1728,28 @@ body:has(.admin-wrapper) > div > header.sticky {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-size: 16px;
   min-width: 0;
   overflow: hidden;
   flex: 1;
   justify-content: flex-start;
+  padding-top: 16px;
 }
 
 .admin-sidebar-nav__group-label-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
+  padding: 16px;
+}
+
+.admin-side-nav__toggle .admin-sidebar-nav__group-label-text {
+  padding: 16px 0;
+}
+
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-btn-link-neutral.agora-sidebar-button-item:has(.admin-sidebar-nav__group-label--active),
+.admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item:has(.admin-sidebar-nav__group-label--active) {
+  background-color: #0338a2 !important;
+  border-left: 3px solid var(--color-white) !important;
 }
 
 .admin-sidebar-nav__group-label--active {
@@ -1611,10 +1780,28 @@ body:has(.admin-wrapper) > div > header.sticky {
   padding-left: 16px;
 }
 
+.admin-side-nav--collapsed
+  .agora-sidebar.darkMode
+  .agora-sidebar-item
+  .agora-sidebar-anchor-item
+  .data-children-wrapper {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
 .admin-sidebar-nav__children {
   list-style: none;
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
   display: flex;
   flex-direction: column;
 }
@@ -1623,14 +1810,18 @@ body:has(.admin-wrapper) > div > header.sticky {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px;
-  padding-left: 36px;
+  padding: 16px 0;
   text-decoration: none;
   color: var(--color-white);
   font-size: 16px;
   line-height: 24px;
   transition: background-color 0.2s;
   border-left: 3px solid transparent;
+}
+
+.admin-sidebar-nav__child-item-text {
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .admin-sidebar-nav__child-item:hover {
@@ -1641,7 +1832,6 @@ body:has(.admin-wrapper) > div > header.sticky {
 .admin-sidebar-nav__child-item--active {
   background-color: #0338a2;
   border-left: 3px solid var(--color-white);
-  padding-left: 36px;
   font-weight: 700;
 }
 
@@ -2273,6 +2463,18 @@ body:has(.admin-wrapper) > div > header.sticky {
 }
 
 /* 7.8 Responsive */
+/* Below the "xl" breakpoint (1280px), Ágora's Sidebar swaps in its own
+   built-in mobile navigation (the layered-icon menu button rendered inside
+   `.admin-side-nav__panel`, unconditionally, regardless of viewport — it's
+   only ever visually redundant below this width). Our custom expand/collapse
+   toggle is a desktop-rail concept; hide it so only the native mobile
+   control remains. */
+@media (max-width: 1279px) {
+  .admin-side-nav__toggle {
+    display: none;
+  }
+}
+
 @media (max-width: 1024px) {
   .admin-new-page__cards {
     flex-direction: column;
@@ -2291,21 +2493,12 @@ body:has(.admin-wrapper) > div > header.sticky {
     max-width: 100%;
   }
 
-  .admin-side-nav {
-    width: 220px;
-  }
-
   .admin-side-nav__label {
     font-size: 11px;
   }
 
   .admin-sidebar-nav__child-item {
-    padding-left: 24px;
     font-size: 13px;
-  }
-
-  .admin-sidebar-nav__child-item--active {
-    padding-left: 21px;
   }
 
   .admin-header__content {
