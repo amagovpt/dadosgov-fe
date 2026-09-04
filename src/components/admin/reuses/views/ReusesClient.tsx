@@ -43,10 +43,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const usesLocalSort = sortField === "status";
-  // The legacy Me list hid deleted reuses in its unfiltered view. The generic
-  // paginated endpoint includes a user's own deleted entries, so preserve that
-  // behavior locally until the API provides a non-deleted aggregate status.
-  const usesLocalFallback = usesLocalSort || !statusFilter;
+  const usesLocalFallback = usesLocalSort;
   const sortParam = useMemo(
     () =>
       usesLocalSort
@@ -110,7 +107,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
   });
 
   const filteredReuses = useMemo(
-    () => (statusFilter ? filterByStatus(reuses, statusFilter) : reuses.filter((reuse) => !reuse.deleted)),
+    () => (statusFilter ? filterByStatus(reuses, statusFilter) : reuses),
     [reuses, statusFilter],
   );
   const sortedReuses = useMemo(
