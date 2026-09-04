@@ -10,6 +10,7 @@
   "endOfLine": "lf",
   "proseWrap": "preserve",
   "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./src/app/[locale]/globals.css",
   "overrides": [
     {
       "files": ["*.md", "*.mdx"],

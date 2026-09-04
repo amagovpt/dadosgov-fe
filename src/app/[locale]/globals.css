@@ -1,40 +1,163 @@
-@import url("@ama-pt/agora-design-system/artifacts/dist/tailwind.css");
-@import url("@ama-pt/agora-design-system/artifacts/dist/style.css");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* AgoraDS design tokens */
+@import "@ama-pt/agora-design-system/theme.css";
 
-/* Full icon state control for header cards */
-@layer utilities {
-  .header-card-wrapper svg.leading-icon-active,
-  .header-card-wrapper svg.trailing-icon-active {
-    display: none !important;
-  }
+/* Tailwind v4 reset */
+@import "tailwindcss/preflight";
 
-  .header-card-wrapper svg.leading-icon-default,
-  .header-card-wrapper svg.trailing-icon-default {
-    display: block !important;
-  }
+/* AgoraDS compiled styles */
+@import "@ama-pt/agora-design-system/index.css";
 
-  .header-card-wrapper svg.leading-icon-hover,
-  .header-card-wrapper svg.trailing-icon-hover {
-    display: none !important;
-  }
+/* Tailwind v4 utilities — last, so portal utilities override DS component rules */
+@import "tailwindcss/utilities";
 
-  .header-card-wrapper:hover svg.leading-icon-default,
-  .header-card-wrapper:hover svg.trailing-icon-default {
-    display: none !important;
-  }
 
-  .header-card-wrapper:hover svg.leading-icon-hover,
-  .header-card-wrapper:hover svg.trailing-icon-hover {
-    display: block !important;
-  }
+@theme {
+  /* Spacing steps outside the Agora scale (0, 8, 16, 24, 32, …). */
+  --spacing-2: 2px;
+  --spacing-4: 4px;
+  --spacing-6: 6px;
+  --spacing-12: 12px;
+  --spacing-20: 20px;
 
-  .header-card-wrapper .description {
-    display: none;
-  }
+  /* Font sizes the portal adds on top of the Agora text tokens. */
+  --text-24: 24px;
+  --text-32: 32px;
+  --text-40: 40px;
+
+  /*
+    Breakpoints the portal adds on top of the Agora scale (xs 360 / md 768 /
+    xl 1280). Restores `theme.screens` from the former `tailwind.config.ts`;
+    without them every `lg:` / `sm:` utility in the app generates nothing.
+  */
+  --breakpoint-sm: 576px;
+  --breakpoint-lg: 1024px;
+
+  /*
+    Line heights, letter spacings and font weights.
+
+    The AgoraDS theme resets `--text-*` and ships only the composite text tokens
+    (`text-m-regular`, …) plus `--leading-5`, `--font-weight-bold` and
+    `--font-weight-medium`. In v3 these namespaces kept the Tailwind defaults —
+    AgoraDS 3 never overrode `lineHeight` / `letterSpacing` / `fontWeight` — so
+    the values below are those defaults verbatim.
+
+    `--leading-6` and `--leading-8` matter beyond dead classes: with no
+    `--leading-*` key, v4 falls back to the `--spacing-*` namespace and
+    `leading-6` resolves to 6px instead of 1.5rem.
+  */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  --leading-3: 0.75rem;
+  --leading-4: 1rem;
+  --leading-6: 1.5rem;
+  --leading-7: 1.75rem;
+  --leading-8: 2rem;
+  --leading-9: 2.25rem;
+  --leading-10: 2.5rem;
+
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /*
+    Named `max-w-*` / `min-w-*` sizes read the `--container-*` namespace in v4;
+    in v3 they came from the `maxWidth` defaults, which AgoraDS 3 only extended.
+    The DS keeps its own `@utility container` (1216px), which still wins.
+  */
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-2xl: 42rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+  --container-5xl: 64rem;
+  --container-6xl: 72rem;
+  --container-7xl: 80rem;
+
+  /* dados.gov.pt brand colours. */
+  --color-accent-light: #f7f7ff;
+  --color-brand-blue-dark: #021c51;
+  --color-brand-blue-primary: #0c02cb;
+  --color-brand-blue-secondary: #050157;
+  --color-gray-medium: #64718b;
+
+  /*
+    Noto Sans is self-hosted through `next/font` (src/app/fonts.ts), which exposes
+    `--font-noto-sans` on <body>. The literal fallback matters: AgoraDS applies
+    `html { font-family: var(--font-sans, …) }`, and at <html> the next/font
+    variable is still out of scope.
+  */
+  --font-sans: var(--font-noto-sans, "Noto Sans"), sans-serif;
+}
+
+/*
+  Datastory iframe heights are authored in Squidex and applied at runtime
+  (Shared/Datastories/Sections/Iframe.tsx, Shared/InfoBlock/InfoBlockIFrame.tsx),
+  so no source scan can find them. Replaces the `safelist` array of the former
+  `tailwind.config.ts`, which Tailwind v4 ignores.
+*/
+/* prettier-ignore */
+@source inline("min-[320px]:!h-[{45,164,168,285,315,340,348,350,353,365,369,372,374,380,390,400,409,415,451}px]");
+/* prettier-ignore */
+@source inline("min-[375px]:!h-[{45,163,167,285,295,300,310,320,330,333,340,347,355,359,360,362,363,364,366,390,400,401,405,441}px]");
+/* prettier-ignore */
+@source inline("min-[425px]:!h-[{52,171,176,310,332,340,342,355,367,376,380,384,395,396,397,401,403,405,410,440,446,450,494}px]");
+/* prettier-ignore */
+@source inline("min-[768px]:!h-[{92,220,229,470,500,505,510,515,530,560,575,591,600,610,611,620,622,627,630,645,700,702,710,784}px]");
+/* prettier-ignore */
+@source inline("min-[1024px]:!h-[{128,264,277,610,660,662,670,680,690,740,758,781,800,809,810,815,820,824,825,833,860,935,940,950,1049}px]");
+/* prettier-ignore */
+@source inline("min-[1440px]:!h-[{174,320,337,800,860,870,890,900,960,986,1016,1050,1055,1060,1070,1072,1075,1080,1086,1130,1226,1250,1382}px]");
+
+/* Full icon state control for header cards.
+   Plain CSS, not `@layer utilities`: in v4 that directive builds a real cascade
+   layer, which would lose to every unlayered rule — including the AgoraDS sheet
+   imported above. These are scoped overrides, not utilities. */
+.header-card-wrapper svg.leading-icon-active,
+.header-card-wrapper svg.trailing-icon-active {
+  display: none !important;
+}
+
+.header-card-wrapper svg.leading-icon-default,
+.header-card-wrapper svg.trailing-icon-default {
+  display: block !important;
+}
+
+.header-card-wrapper svg.leading-icon-hover,
+.header-card-wrapper svg.trailing-icon-hover {
+  display: none !important;
+}
+
+.header-card-wrapper:hover svg.leading-icon-default,
+.header-card-wrapper:hover svg.trailing-icon-default {
+  display: none !important;
+}
+
+.header-card-wrapper:hover svg.leading-icon-hover,
+.header-card-wrapper:hover svg.trailing-icon-hover {
+  display: block !important;
+}
+
+.header-card-wrapper .description {
+  display: none;
 }
 
 /*
@@ -119,10 +242,6 @@ body {
   min-height: 100vh;
 }
 
-.rounded-8 {
-  border-radius: 8px;
-}
-
 .admin-page .agora-accordion .accordion-body.accordion-body-block {
   padding: 32px !important;
 }
@@ -150,16 +269,100 @@ body {
 }
 
 /* 3.1 Main Header */
-@media (min-width: 1280px) {
-  .agora-header .navigation-links-layout .links {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+/*
+  AgoraDS 4 stopped composing the navigation bar from the `container` utility. In 3 it
+  was the same 1216px centered box as the general bar:
+
+    .navigation-bar { max-width:1216px; margin-inline:auto; padding-inline:32/64/0 }
+
+  In 4 it is `margin-inline: 32px -> 64px -> 112px` with no max-width and no centering,
+  while `.general-bar` above it, `.freestyle` below it and every page section stayed a
+  1216px centered box. The two only line up at exactly 1440px (1440 - 2*112 = 1216); at
+  1920px the logo sat 240px to the left of the top bar. Put the row back in the
+  container so it tracks the top bar and the page content at every width.
+
+  `.agora-header .navigation-bar` (0,2,0) beats the DS's `.navigation-bar` (0,1,0) at
+  every breakpoint — specificity outranks media queries — so the three DS `margin-inline`
+  declarations are all overridden by the single `margin-inline: auto` here. The DS's
+  `display: flex`/`block` and `padding-block: 8px` are deliberately left alone, and
+  `.navigation-bar-bg` stays full-bleed so the white band still spans the viewport.
+*/
+.agora-header .navigation-bar {
+  max-width: 1216px;
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+
+@media (min-width: 768px) {
+  .agora-header .navigation-bar {
+    padding-inline: 64px;
   }
 }
 
-/* Center short nav labels (e.g. "API") within the 44px min click-target box,
-   so the leftover space is split symmetrically instead of all on the right. */
-.internal-navigation-list ul li .agora-link-wrapper > a {
-  justify-content: center;
+@media (min-width: 1280px) {
+  .agora-header .navigation-bar {
+    padding-inline: 0;
+  }
+}
+
+
+.agora-header .navigation-links-layout .freestyle,
+.agora-header .navigation-links-layout .links-container {
+  width: 100%;
+  max-width: 1216px;
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+
+@media (min-width: 768px) {
+  .agora-header .navigation-links-layout .freestyle,
+  .agora-header .navigation-links-layout .links-container {
+    padding-inline: 64px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .agora-header .navigation-links-layout .freestyle,
+  .agora-header .navigation-links-layout .links-container {
+    padding-inline: 0;
+  }
+}
+
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .agora-header .general-bar .panels-menu ul {
+    gap: 16px;
+  }
+}
+
+.agora-header .navigation-root-button {
+  padding-top: 8px;
+}
+
+.agora-header .logo {
+  width: 254px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+}
+
+.header-nav-cards {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .header-nav-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .header-nav-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .search-panel-menu .panel-menu-content-children {
@@ -179,11 +382,13 @@ body {
   align-items: baseline;
 }
 
-/* Target icons that should be white */
-.agora-header .icon-set svg.icon,
-.agora-languages svg.icon,
-.agora-unauthenticated svg.icon,
-.agora-header .agora-areas svg.icon {
+/* Target icons that should be white.
+
+   `.agora-languages`, `.agora-unauthenticated` and `.agora-areas` used to sit alongside
+   the selector below. None of them exists in AgoraDS 4 — and none existed in 3 either
+   (checked against the CSS the tst environment serves), so they had never matched
+   anything and only the `.icon-set` selector was ever doing the work. */
+.agora-header .icon-set svg.icon {
   fill: #ffffff;
 }
 
@@ -278,12 +483,10 @@ body {
   box-shadow: none !important;
 }
 
-.navigation-links-layout .agora-link-wrapper:has(.card-general) {
-  display: block;
-}
-
-.navigation-links-layout .agora-link-wrapper .card-general *:focus,
-.navigation-links-layout .agora-link-wrapper .card-general *:focus-visible {
+/* The card owns the whole grid cell; its inner anchors are already tabindex="-1"
+   (HeaderCard), so their focus rings would only show up on mouse interaction. */
+.header-nav-cards .card-general *:focus,
+.header-nav-cards .card-general *:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -298,47 +501,40 @@ header[data-submenu] .navigation-links-layout > .title {
 }
 
 header[data-submenu] .navigation-links-layout {
-  position: relative;
   padding-top: 80px;
 }
 
+
 /* Hide submenu items when not in a submenu */
-.agora-header .navigation-links-layout > .links > .link-wrapper:has([data-group^="submenu-"]) {
+.agora-header .header-nav-cards > [data-group^="submenu-"] {
   display: none;
 }
 
 /* Desenvolvimento submenu: hide main items, reveal submenu items */
-header[data-submenu="desenvolvimento"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="main"]) {
+header[data-submenu="desenvolvimento"] .header-nav-cards > [data-group="main"] {
   display: none;
 }
 
 header[data-submenu="desenvolvimento"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="submenu-desenvolvimento"]) {
+  .header-nav-cards
+  > [data-group="submenu-desenvolvimento"] {
   display: block;
 }
 
 /* Usar dados submenu: hide main items, reveal submenu items */
-header[data-submenu="usar-dados"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="main"]) {
+header[data-submenu="usar-dados"] .header-nav-cards > [data-group="main"] {
   display: none;
 }
 
-header[data-submenu="usar-dados"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="submenu-usar-dados"]) {
+header[data-submenu="usar-dados"] .header-nav-cards > [data-group="submenu-usar-dados"] {
   display: block;
 }
 
-/* Position the Voltar button absolutely at the top of the submenu layout */
-header[data-submenu] .navigation-links-layout > .links > .link-wrapper:has([data-is-back]) {
+/* The "Voltar" row, in the desktop dropdown: lifted out of the grid flow and parked in
+   the 80px of padding reserved at the top of the panel. The offset parent is
+   `.navigation-links-layout`, which AgoraDS 4 renders `position: absolute` — see the note
+   above about not setting `position` on it ourselves. */
+.navigation-links-layout .header-nav-cards > [data-is-back] {
   grid-column: 1 / -1 !important;
   position: absolute;
   top: 12px;
@@ -348,6 +544,17 @@ header[data-submenu] .navigation-links-layout > .links > .link-wrapper:has([data
   margin-left: auto;
   margin-right: auto;
   z-index: 1;
+}
+
+/* The same row in the responsive menu, which has neither that panel nor its reserved
+   padding. This rule used to be scoped to `header[data-submenu]`, so the absolute
+   positioning applied here too and dropped our "Voltar" on top of the design system's
+   own "Voltar ao início" at the top of the burger panel. Keep ours in the grid instead,
+   spanning the full row above the cards, so the two read as separate controls — they go
+   to different places: ours back to the parent card list, the DS's back to the menu
+   root. */
+.navigation-burger-panel .header-nav-cards > [data-is-back] {
+  grid-column: 1 / -1;
 }
 
 /* 3.4 Publish Dropdown */
@@ -420,8 +627,7 @@ header[data-auth-page][data-no-user]
   fill: var(--color-primary-600);
 }
 
-/* Ecosystem panel */
-li.ecosystem-panel-menu {
+li.ecosystem-custom-menu {
   gap: 8px;
 }
 
@@ -445,12 +651,12 @@ li.ecosystem-panel-menu {
   border-top: 4px solid var(--Neutral-200, #e1e4ea);
 }
 
-li.ecosystem-panel-menu .panel-menu-link-wrapper {
+li.ecosystem-custom-menu .panel-menu-link-wrapper {
   position: relative;
   align-self: stretch;
 }
 
-li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
+li.ecosystem-custom-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -461,20 +667,20 @@ li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::a
   background-color: var(--color-primary-600);
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper::after {
   display: none;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .children-wrapper {
   color: inherit;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -482,7 +688,7 @@ header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded
   display: none;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -490,7 +696,7 @@ header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded
   display: block;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -706,34 +912,14 @@ li.section-name:empty {
   align-items: center;
 }
 
-/* 5.6 Cards (Article) */
-.agora-card-article img.card-image.w-full {
-  border-radius: 4px;
-  width: 352px !important;
-  height: 208px;
-  object-fit: cover;
-  display: flex;
-  align-self: stretch;
-  background-color: white;
-}
-
-.card-article-3_2 .agora-card-article .container-body {
-  padding: 32px;
-  border-radius: 4px;
-}
-
-.card-article-3_2.organization_detail .agora-card-article .container-body {
-  padding: 0px;
-}
-
-.card-article-3_2 .agora-card-article .card-article-3_2-img {
+.card-article-3_2 .card-article-3_2-img {
   border-radius: 8px;
   min-width: 163px;
   min-height: 60px;
   padding: 16px;
 }
 
-.card-article-3_2 .agora-card-article .card-article-3_2-img img {
+.card-article-3_2 .card-article-3_2-img img {
   max-height: 48px;
 }
 
@@ -1206,33 +1392,6 @@ li.section-name:empty {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-}
-
-.homepage .agora-card-article.indented .container-body {
-  background: transparent;
-  border: 2px solid var(--color-white);
-}
-
-.homepage .agora-card-article.indented .container-body * {
-  color: var(--color-white);
-}
-
-.homepage .anchor-container.has-siblings {
-  height: 0;
-  padding-bottom: 32px;
-}
-
-.latest-news-section .agora-card-article .anchor-container {
-  margin-top: auto;
-}
-
-.homepage .latest-news-section .container-body {
-  background: var(--color-primary-100);
-  padding: 32px;
-}
-
-.homepage .latest-news-section .agora-card-article.default {
-  gap: 0px;
 }
 
 /* 6.2 Login */
@@ -2350,10 +2509,6 @@ border-left: none !important;
 /* ==========================================================================
    [08] UTILITIES
    ========================================================================== */
-
-.pl-0 {
-  padding-left: 0;
-}
 
 p.max-w-ch,
 .max-w-ch p,

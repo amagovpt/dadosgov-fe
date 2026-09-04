@@ -57,7 +57,7 @@ export function LoginContent() {
   const showMainView = !cmdModalOpen && !eidasModalOpen;
 
   return (
-    <main className="relative min-h-screen flex-grow bg-white">
+    <main className="relative min-h-screen grow bg-white">
       <div className="login-page container mx-auto max-w-7xl px-16 pb-64 pt-32">
         {showMainView && (
           <div>

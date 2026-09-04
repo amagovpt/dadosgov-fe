@@ -7,6 +7,7 @@ import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocalizedHref } from "@/hooks/useLocalizedHref";
+import { twMerge } from "tailwind-merge";
 
 export type CardMetricsProps = {
     link: string;
@@ -40,6 +41,7 @@ export type CardMetricsProps = {
     hideProgressBar?: boolean;
     /** Optional content (e.g. organization badges) shown under the title. */
     titleBadges?: ReactNode;
+    className?: string;
 };
 
 const PLACEHOLDER = "/images/placeholders/organization.png";
@@ -59,6 +61,7 @@ export default function CardMetrics({
     metrics,
     hideProgressBar = false,
     titleBadges,
+    className,
 }: CardMetricsProps) {
     const { t, i18n } = useTranslation("common");
     // Callers pass unprefixed links (`/datasets/<slug>`); localize here so every
@@ -94,7 +97,7 @@ export default function CardMetrics({
     return (
         <Link
             href={localizedLink}
-            className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
+            className={twMerge("card-general-listing rounded-4 overflow-hidden h-full flex flex-col", className)}
         >
             <CardGeneral
                 variant="white"

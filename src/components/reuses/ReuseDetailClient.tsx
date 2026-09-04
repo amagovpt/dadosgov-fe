@@ -10,7 +10,12 @@ import {
   Tabs,
   Tab,
   TabHeader,
-  CardArticle,
+  CardGeneralV2,
+  HeaderSectionContainer,
+  BodySectionContainer,
+  CardTitle,
+  CardSubtitle,
+  CardDescription,
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
@@ -183,55 +188,58 @@ export default function ReuseDetailClient({
 
             {/* Card Column */}
             <div className="card-article-3_2 xl:col-span-4">
-              <CardArticle
-                className="bg-[#F2F6FF]! border-none shadow-none [&_.container-body]:flex [&_.container-body]:flex-col [&_.container-body]:p-32"
-                title={reuse.title}
-                subtitle={
-                  <div className="mb-16 flex flex-col gap-24">
-                    {reuse.organization?.logo ? (
-                      <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
-                        <img src={reuse.organization.logo} alt={reuse.organization.name} />
-                      </div>
-                    ) : (
-                      <div className="text-xs shadow-sm flex h-56 w-[160px] items-center justify-center rounded-8 border border-dashed border-neutral-300 bg-white font-bold uppercase tracking-wider text-neutral-400">
-                        {reuse.organization?.name || tr("detail.noOrganization")}
-                      </div>
-                    )}
-                    {reuse.organization && (
-                      <TextLink
-                        href={`/organizations/${reuse.organization.slug}`}
-                        className="text-sm font-medium hover:text-primary-800"
-                      >
-                        {reuse.organization.name}
-                      </TextLink>
-                    )}
-                  </div>
-                }
-              >
-                <div className="flex h-full flex-col gap-24">
-                  <div className="flex flex-wrap items-center gap-16 text-[15px]">
-                    <span className="font-semibold text-neutral-900">
-                      {localizeReuseTypeId(reuse.type) || tr("detail.defaultType")}
-                    </span>
-                    <div className="flex items-center gap-8">
-                      <Icon
-                        name="agora-line-eye"
-                        className="h-20 w-20 fill-[var(--color-neutral-900)]"
-                      />
-                      <span className="text-neutral-900">
-                        {formatMetricValue(reuse.metrics?.views, 0)}
+              <CardGeneralV2 variant="primary-100" className="h-full">
+                <HeaderSectionContainer>
+                  <CardSubtitle>
+                    <div className="mb-16 flex flex-col gap-24">
+                      {reuse.organization?.logo ? (
+                        <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                          <img src={reuse.organization.logo} alt={reuse.organization.name} />
+                        </div>
+                      ) : (
+                        <div className="text-xs shadow-sm flex h-56 w-[160px] items-center justify-center rounded-8 border border-dashed border-neutral-300 bg-white font-bold uppercase tracking-wider text-neutral-400">
+                          {reuse.organization?.name || tr("detail.noOrganization")}
+                        </div>
+                      )}
+                      {reuse.organization && (
+                        <TextLink
+                          href={`/organizations/${reuse.organization.slug}`}
+                          className="text-sm font-medium hover:text-primary-800"
+                        >
+                          {reuse.organization.name}
+                        </TextLink>
+                      )}
+                    </div>
+                  </CardSubtitle>
+                  <CardTitle>{reuse.title}</CardTitle>
+                </HeaderSectionContainer>
+                <BodySectionContainer>
+                  {/* CardDescription renders a <p>, so the metrics row uses spans. */}
+                  <CardDescription>
+                    <span className="flex flex-wrap items-center gap-16 text-[15px]">
+                      <span className="font-semibold text-neutral-900">
+                        {localizeReuseTypeId(reuse.type) || tr("detail.defaultType")}
                       </span>
-                    </div>
-                    <div className="flex items-center gap-8">
-                      <Icon
-                        name="agora-line-layers-menu"
-                        className="h-20 w-20 fill-[var(--color-neutral-900)]"
-                      />
-                      <span className="text-neutral-900">{datasetRefs.length}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardArticle>
+                      <span className="flex items-center gap-8">
+                        <Icon
+                          name="agora-line-eye"
+                          className="h-20 w-20 fill-[var(--color-neutral-900)]"
+                        />
+                        <span className="text-neutral-900">
+                          {formatMetricValue(reuse.metrics?.views, 0)}
+                        </span>
+                      </span>
+                      <span className="flex items-center gap-8">
+                        <Icon
+                          name="agora-line-layers-menu"
+                          className="h-20 w-20 fill-[var(--color-neutral-900)]"
+                        />
+                        <span className="text-neutral-900">{datasetRefs.length}</span>
+                      </span>
+                    </span>
+                  </CardDescription>
+                </BodySectionContainer>
+              </CardGeneralV2>
             </div>
           </div>
         </div>
