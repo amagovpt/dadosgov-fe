@@ -31,6 +31,29 @@ This project has no version tags, so entries are grouped by month (newest first)
     `migration_required` handling, and the end-to-end assertion that the tab has a
     password form was restored — it had been inverted by the same change.
 
+- **fix(login): stop `?next=` sending an authenticated visitor off-origin**
+  - Restoring the sign-in form gave `?next=` a browser sink for the first time:
+    it now reaches `window.location.href`, where before it only became a query
+    parameter for the backend. The check standing in front of it did not hold —
+    it tested that the value starts with `/` and not with `//`, and the URL
+    parser does not read a string that way. It treats a backslash as an
+    authority separator and strips tab, LF and CR before parsing at all, so
+    `/\evil.com`, `/\/evil.com` and the tab and newline variants all resolved to
+    a different site. On a login page that is an open redirect: the visitor
+    authenticates successfully on the real portal and lands on a copy of it,
+    ready to be asked for the password again.
+  - The value is now parsed the way the browser will parse it and kept only when
+    the origin matches, so the check is about what the URL means rather than how
+    it is spelled — there is no further spelling to find. The docblock that
+    asserted an absolute URL could never get through says what actually holds it
+    up now.
+  - Accepting the terms is also a real gate again. The disabled submit button
+    was not one: implicit submission does not consult it, so pressing Enter in a
+    field sent the credentials with the consent checkbox unticked. And the form's
+    Enter handler cancelled the default action of everything inside it, which
+    meant "Recuperar palavra-passe" submitted the form instead of opening
+    recovery and the terms link could not be followed by keyboard at all.
+
 - **fix(header): put the navigation bar and the dropdown grid back in the container, and shrink the wordmark to fit its box**
   - AgoraDS 4 stopped composing the navigation bar from the `container` utility. In 3
     it was `max-width: 1216px; margin-inline: auto` with the container's own
