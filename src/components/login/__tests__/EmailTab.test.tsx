@@ -123,7 +123,10 @@ describe("EmailTab", () => {
 
     await clickButton(translate("email.recoverPassword"));
     expect(container.querySelector("#login-email")).toBeNull();
-    expect(container.textContent).toContain(translate("recovery.title"));
+    // Not recovery.title: it is the same string as email.recoverPassword, which
+    // the default form already renders in its link, so asserting it proves
+    // nothing. The back control only exists on the recovery view.
+    expect(findButton(translate("recovery.back"))).toBeTruthy();
 
     await clickButton(translate("recovery.back"));
     expect(container.querySelector("#login-email")).toBeTruthy();
@@ -138,13 +141,19 @@ describe("EmailTab", () => {
   });
 
   it("keeps the samlEnabled gate through the prop merge", async () => {
-    // The regression this guards: ppr's EmailTab passed MigrationNotice two
-    // props, so a literal restore would leave samlEnabled undefined and both
-    // linking buttons enabled with nothing behind them.
+    // Both directions, and the second is the one that matters. MigrationNotice
+    // gates on `!samlEnabled || isLoading`, so omitting the prop — the literal
+    // restore of ppr's EmailTab, which passed only two — leaves it undefined
+    // and the buttons permanently DISABLED, not enabled. Asserting only the
+    // disabled case therefore passes with the prop missing, and passed with it
+    // when this test was first written.
     await render({ migrationRequired: true, samlEnabled: false });
-
     expect(findButton(translate("migration.migrateCmd"))!.disabled).toBe(true);
     expect(findButton(translate("migration.migrateEidas"))!.disabled).toBe(true);
+
+    await render({ migrationRequired: true, samlEnabled: true });
+    expect(findButton(translate("migration.migrateCmd"))!.disabled).toBe(false);
+    expect(findButton(translate("migration.migrateEidas"))!.disabled).toBe(false);
   });
 
   it("hands the typed credentials to onLogin", async () => {
@@ -177,6 +186,52 @@ describe("EmailTab", () => {
     await clickButton(translate("email.submit"));
 
     expect(onLogin).toHaveBeenCalledWith("joana@example.pt", "S3cretPass!");
+  });
+
+  it("refuses an implicit submit with the terms unaccepted", async () => {
+    // The disabled submit button is not a gate: form.requestSubmit() does not
+    // consult it, so Enter in a field used to send the credentials with the
+    // terms — the consent for processing personal data — left unchecked.
+    const onLogin = vi.fn();
+    await render({ onLogin });
+
+    const setValue = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    )?.set;
+    for (const [selector, value] of [
+      ["#login-email", "joana@example.pt"],
+      ["#login-password", "S3cretPass!"],
+    ] as const) {
+      const input = container.querySelector<HTMLInputElement>(selector);
+      await act(async () => {
+        setValue?.call(input, value);
+        input!.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+
+    expect(container.querySelector<HTMLInputElement>("#terms-email")!.checked).toBe(false);
+    const password = container.querySelector<HTMLInputElement>("#login-password")!;
+    await act(async () => {
+      password.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    });
+
+    expect(onLogin).not.toHaveBeenCalled();
+  });
+
+  it("leaves the recovery control usable from the keyboard", async () => {
+    // The form's Enter handler used to cancel the default action of everything
+    // inside it, so Enter on this button submitted the form instead of opening
+    // recovery — and the terms link could not be followed by keyboard at all.
+    await render();
+
+    const recover = findButton(translate("email.recoverPassword"))!;
+    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    await act(async () => {
+      recover.dispatchEvent(event);
+    });
+
+    expect(event.defaultPrevented).toBe(false);
   });
 
   it("prefills the address the redirect carried", async () => {
