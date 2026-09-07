@@ -100,26 +100,33 @@ test.describe("Authentication Page", () => {
     // Skipped: requires backend to be running with seeded users
   });
 
-  test("AU-09: Email tab offers the two account-linking actions, not a password form", async ({
+  test("AU-09: Email tab - submit button stays disabled when fields are empty", async ({
     page,
   }) => {
     const emailTab = await getTabByText(page, /E-mail e palavra-passe/i);
     await emailTab.click();
 
-    // The tab is the entry point for linking a legacy account to CMD/eIDAS;
-    // password sign-in is being discontinued, so there is no form here.
+    // LEDG-2432: this assertion was inverted by 7d5c9b50, which built the tab
+    // for a migration that would be mandatory and asserted the form was gone.
+    // Migration stays optional, so the form is the tab's default view again.
+    //
+    // The migration notice is not asserted here on purpose: it is a branch the
+    // backend selects per account, by answering migration_required to a real
+    // sign-in attempt, so it is not reachable from an empty form. EmailTab's
+    // unit tests cover both branches.
+    //
+    // The login form is rendered in main; the same form is also embedded in the
+    // mobile accordion menu, so we scope to the main element.
     const main = page.locator("main");
-    await expect(
-      main.getByText(/vai ser descontinuada/i).first()
-    ).toBeVisible({ timeout: 10000 });
-    await expect(
-      main.getByRole("button", { name: /Associar conta à Chave Móvel Digital/i }).first()
-    ).toBeVisible({ timeout: 10000 });
-    await expect(
-      main.getByRole("button", { name: /Associar conta à Autenticação Europeia/i }).first()
-    ).toBeVisible({ timeout: 10000 });
-    await expect(main.locator("#login-email")).toHaveCount(0);
-    await expect(main.locator("#login-password")).toHaveCount(0);
+    const emailInput = main.locator("#login-email").first();
+    const passwordInput = main.locator("#login-password").first();
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await expect(passwordInput).toBeVisible({ timeout: 10000 });
+
+    const submitButton = main
+      .getByRole("button", { name: /^Autenticar$/i })
+      .first();
+    await expect(submitButton).toBeDisabled();
   });
 
   test("AU-10: Terms link to /faqs/terms is reachable from CMD tab", async ({
