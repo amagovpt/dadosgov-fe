@@ -15,40 +15,67 @@
  * source is the only place to assert it.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 /**
- * The two components that decide what the email tab shows. If either starts
- * reading a migration flag, the tab stops working in one of the flag's two
- * states — and which one breaks depends on which value was assumed.
+ * Every component in the login tree, not a hand-picked pair. The review of this
+ * ticket pointed out the obvious hole in listing two files: the flag could be
+ * read in LoginClient (the direct parent), in EmailLoginForm, or in constants,
+ * and passed down as a prop — same regression, guard untouched.
  */
-const GUARDED = [
-  "src/components/login/EmailTab.tsx",
-  "src/components/login/LoginContent.tsx",
-];
+const LOGIN_DIR = "src/components/login";
+const GUARDED = readdirSync(path.join(process.cwd(), LOGIN_DIR))
+  .filter((name) => /\.tsx?$/.test(name))
+  .map((name) => `${LOGIN_DIR}/${name}`);
 
 /**
- * Any spelling of the flag that could reach the browser. NEXT_PUBLIC_ is the
- * only prefix Next.js inlines into client bundles, so it is the realistic
- * shape; MIGRATION_MODE is the backend's own name for it, and would be a
- * plausible copy-paste.
+ * The environment variables the login tree is allowed to read. Asserting the
+ * exact set, rather than banning a spelling of one name, is what makes this a
+ * guard instead of a reminder: any new configuration read in this tree fails
+ * here and has to be justified in review — including a migration flag under a
+ * name nobody has thought of yet (NEXT_PUBLIC_FORCE_CMD_ONLY, and so on).
+ *
+ * Both entries are deliberate and neither decides migration:
+ *  - NEXT_PUBLIC_SAML_ENABLED says whether SAML is wired up at all, so whether
+ *    a button can work. Whether an *account* must migrate is a different
+ *    question, and it belongs to the backend, per account.
+ *  - NEXT_PUBLIC_RECAPTCHA_SITE_KEY is a public site key.
  */
-const FLAG_READ = /MIGRATION_MODE|NEXT_PUBLIC_MIGRATION/;
+const ALLOWED_ENV = ["NEXT_PUBLIC_RECAPTCHA_SITE_KEY", "NEXT_PUBLIC_SAML_ENABLED"];
+
+/** Every process.env.X read in a file, by variable name. */
+function envReads(source: string): string[] {
+  // Comments may discuss a flag to explain why it is not read, so strip them
+  // first. Line comments only: a block-comment stripper run over the whole file
+  // also eats anything between a "/*" and a "*/" inside a string literal, which
+  // would be a hole in a guard of this shape.
+  const code = source.replace(/^[ \t]*\/\/.*$/gm, "");
+  return [...code.matchAll(/process\.env(?:\.(\w+)|\[([^\]]*)\])/g)].map(
+    (m) => m[1] ?? `computed:${m[2]}`
+  );
+}
 
 describe("the email tab never decides migration from a frontend flag", () => {
-  it.each(GUARDED)("%s reads no migration flag", (relative) => {
-    const source = readFileSync(path.join(process.cwd(), relative), "utf8");
+  it("guards every component in the login tree", () => {
+    // If the directory listing ever comes back empty the assertions below pass
+    // for the wrong reason.
+    expect(GUARDED).toContain("src/components/login/EmailTab.tsx");
+    expect(GUARDED).toContain("src/components/login/LoginContent.tsx");
+    expect(GUARDED).toContain("src/components/login/LoginClient.tsx");
+    expect(GUARDED.length).toBeGreaterThan(10);
+  });
 
-    // The word may appear in a comment explaining why it is not read — strip
-    // comments before asserting, so the explanation is allowed to exist.
-    const code = source
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/^[ \t]*\/\/.*$/gm, "");
+  it.each(GUARDED)("%s reads only the configuration it is allowed to", (relative) => {
+    const reads = envReads(readFileSync(path.join(process.cwd(), relative), "utf8"));
 
-    expect(code).not.toMatch(FLAG_READ);
+    // A computed key (process.env[expr]) is refused outright: it is how a
+    // banned name gets past a check that reads source, and there is no reason
+    // for one here.
+    expect(reads.filter((name) => name.startsWith("computed:"))).toEqual([]);
+    expect(reads.filter((name) => !ALLOWED_ENV.includes(name))).toEqual([]);
   });
 
   it("still reacts to the backend's answer, which is the supported mechanism", () => {

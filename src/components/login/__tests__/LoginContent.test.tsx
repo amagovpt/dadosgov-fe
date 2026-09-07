@@ -34,7 +34,7 @@ vi.mock("react-i18next", () => ({
 
 // Stable identity: a fresh object per render re-runs any effect that depends on
 // it. Same reason as MigrateAccountClient.test.
-const searchParamsMock = new URLSearchParams();
+let searchParamsMock = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   usePathname: () => "/login",
@@ -111,6 +111,7 @@ async function signIn(email = "joana@example.pt", password = "S3cretPass!") {
 
 beforeEach(() => {
   loginMock.mockReset();
+  searchParamsMock = new URLSearchParams();
 
   if (!window.matchMedia) {
     Object.defineProperty(window, "matchMedia", {
@@ -213,6 +214,35 @@ describe("LoginContent email sign-in", () => {
 
     expect(loginMock).toHaveBeenCalledTimes(1);
     expect(text).not.toContain(translate("migration.title"));
+    expect(navigatedTo).toBe("/");
+  });
+
+  it("returns the visitor to the page ?next= carried", async () => {
+    // Without this the suite only ever saw an empty ?next=, so nextUrl was "/"
+    // and the assertion was indistinguishable from a hardcoded redirect.
+    searchParamsMock = new URLSearchParams("next=/pt/datasets");
+    loginMock.mockResolvedValue({ message: "ok" });
+
+    await act(async () => {
+      root.render(<LoginContent />);
+    });
+    await signIn();
+
+    expect(navigatedTo).toBe("/pt/datasets");
+  });
+
+  it("refuses to send the visitor off-origin, whatever ?next= says", async () => {
+    // The value reaches window.location.href, so a ?next= that escapes
+    // sanitizeNextUrl is an open redirect off a .gov.pt login page. This is the
+    // spelling that defeated the previous prefix check.
+    searchParamsMock = new URLSearchParams("next=/\\evil.com");
+    loginMock.mockResolvedValue({ message: "ok" });
+
+    await act(async () => {
+      root.render(<LoginContent />);
+    });
+    await signIn();
+
     expect(navigatedTo).toBe("/");
   });
 
