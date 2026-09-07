@@ -331,7 +331,7 @@ export default function HomeClient({
                     hasIcon={true}
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
-                    className="p-0! icon-white h-auto hover:icon-white"
+                    className="p-0! h-auto [&_.icon]:fill-white! hover:[&_.icon]:fill-white!"
                     darkMode={false}
                   >
                     <span className="text-white">{t("seeAllDataStories")}</span>
