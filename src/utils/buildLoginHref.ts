@@ -15,7 +15,11 @@ import { splitLocale } from "./stripLocale";
  * `?next=` carries them back to the page they were opening, which is the whole
  * point of sending them here — except when that page is the login form itself,
  * where it would only send them in a circle. The login side validates the value
- * again (`sanitizeNextUrl`), so an absolute URL can never come back out of it.
+ * again (`sanitizeNextUrl`), which is what stops an absolute URL coming back
+ * out of it. That claim used to be made here about a prefix test that did not
+ * hold it up: four spellings got past it (LEDG-2432), so the check now parses
+ * the value and compares origins. Do not weaken it back into a string test —
+ * this value reaches `window.location.href`.
  */
 export function buildLoginHref(pathname: string | null | undefined): string {
   const { locale, path } = splitLocale(pathname);

@@ -10,13 +10,18 @@ const CMD_ACTIVATION_URL = "https://www.autenticacao.gov.pt/cmd-pedido-chave";
 const EIDAS_INFO_URL = "https://www.autenticacao.gov.pt/eidas";
 
 /**
- * The "E-mail e palavra-passe" tab: the entry point for linking a legacy
- * account to a CMD or eIDAS identity.
+ * The account-linking branch of the "E-mail e palavra-passe" tab: how a legacy
+ * account starts being linked to a CMD or eIDAS identity.
  *
  * Both buttons start a SAML login, so they carry the same samlEnabled gate the
- * CMD and eIDAS tabs use, and they render the SAML error themselves — they are
- * the only controls on this tab now, and the form that used to display it is
- * gone.
+ * CMD and eIDAS tabs use, and they render the SAML error themselves.
+ *
+ * This is one branch of the tab, not its whole content — the sign-in form is
+ * the default view, and EmailTab shows this instead only when the backend
+ * answers migration_required for the account that just tried to sign in. The
+ * text here used to say the form was gone, which was true for as long as
+ * migration was expected to become mandatory (LEDG-2360) and wrong from the
+ * moment it stayed optional (LEDG-2432).
  */
 export function MigrationNotice({
   samlEnabled,

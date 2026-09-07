@@ -1,9 +1,14 @@
 /**
- * LEDG-2360: the "E-mail e palavra-passe" tab is no longer a password form —
- * it is where a legacy account starts being linked to a CMD or eIDAS identity.
- * These tests pin the copy and the two actions the mockup specifies, and the
- * samlEnabled gate the tab shares with the CMD and eIDAS tabs: without it the
- * only controls on the page would fire a request that cannot succeed.
+ * LEDG-2360: the "E-mail e palavra-passe" tab is where a legacy account starts
+ * being linked to a CMD or eIDAS identity. These tests pin the copy and the two
+ * actions the mockup specifies, and the samlEnabled gate the tab shares with the
+ * CMD and eIDAS tabs: without it these controls would fire a request that cannot
+ * succeed.
+ *
+ * LEDG-2432 corrected the surrounding claim: this notice is one branch of the
+ * tab, shown when the backend answers migration_required, not the tab's only
+ * content. The sign-in form is the default view again, because migration stays
+ * optional. Nothing here changed — see EmailTab.test.tsx for the branch itself.
  */
 
 import React, { act } from "react";
