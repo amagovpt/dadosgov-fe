@@ -1,7 +1,19 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { Button, CardArticle } from "@ama-pt/agora-design-system";
+// `MouseEvent` is aliased: the click-outside listener below relies on the DOM
+// global of the same name, which a bare React import would shadow.
+import { useEffect, useState, useRef, type MouseEvent as ReactMouseEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Button,
+  CardGeneralV2,
+  HeaderSectionContainer,
+  FooterSectionContainer,
+  ImageSectionContainer,
+  CardTitle,
+  CardSubtitle,
+  CardAnchor,
+} from "@ama-pt/agora-design-system";
 import { Dataset } from "@/service/types/dataset";
 import { Post } from "@/service/types/posts";
 import { Reuse } from "@/service/types/reuse";
@@ -43,7 +55,7 @@ function formatStatNumber(value: number): { number: string; suffix: string } {
 }
 
 interface HomeClientProps {
-  HomeHero:HomeHero;
+  HomeHero: HomeHero;
   siteMetrics: SiteMetrics;
   latestDatasets: Dataset[];
   datastories: HomeDatastories;
@@ -64,9 +76,19 @@ export default function HomeClient({
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
   const { t, i18n } = useTranslation("common");
-  // Design-system `mainAnchor` hrefs bypass <LocalizedLink>; localize them
+  // Design-system card anchors bypass <LocalizedLink>; localize them
   // explicitly so the i18n proxy never has to 307 (prefetch-loop fix).
   const localizeHref = useLocalizedHref();
+  const router = useRouter();
+
+  // <CardAnchor> renders a plain <a>, which would full-reload the page. Keep the
+  // real href in the DOM (SEO, middle-click, "open in new tab") and route the
+  // plain left-click through the Next router so navigation stays client-side.
+  const pushTo = (href: string) => (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    router.push(href);
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -264,29 +286,34 @@ export default function HomeClient({
             {datastories && datastories.datastories.length > 0 ? (
               <>
                 <div className="storytellings grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-                  {datastories.datastories.map((story) => (
-                    <CardArticle
-                      key={story.slug}
-                      variant="indented"
-                      image={{
-                        src:
-                          story.image && story.image[0]
-                            ? getAssets(story.image[0].id)
-                            : "/card-full-image.png",
-                        alt: story.title,
-                      }}
-                      subtitle={
-                        story.createdAt
-                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
-                          : ""
-                      }
-                      title={story.title}
-                      mainAnchor={{
-                        href: localizeHref(`/datastories/${story.slug}`),
-                      }}
-                      blockedLink={true}
-                    />
-                  ))}
+                  {datastories.datastories.map((story) => {
+                    const storyHref = localizeHref(`/datastories/${story.slug}`);
+                    return (
+                      <CardGeneralV2
+                        key={story.slug}
+                        layout="image-indent"
+                        variant="white"
+                        isBlockedLink
+                      >
+                        <ImageSectionContainer
+                          src={
+                            story.image && story.image[0]
+                              ? getAssets(story.image[0].id)
+                              : "/card-full-image.png"
+                          }
+                          alt={story.title}
+                        />
+                        <HeaderSectionContainer>
+                          <CardSubtitle>
+                            {story.createdAt
+                              ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
+                              : ""}
+                          </CardSubtitle>
+                          <CardTitle>{story.title}</CardTitle>
+                        </HeaderSectionContainer>
+                      </CardGeneralV2>
+                    );
+                  })}
                 </div>
                 <div className="mt-32">
                   <LocalizedLink href="/datastories">
@@ -318,38 +345,35 @@ export default function HomeClient({
             <h2 className="text-xl-bold text-primary-900">{t("latestNews")}</h2>
             <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {posts.length > 0 ? (
-                posts.map((post) => (
-                  <div key={post.id} className="latest-news-card-wrapper h-full">
-                    <CardArticle
-                      image={{
-                        src: post.image || undefined,
-                        alt: post.name,
-                      }}
-                      subtitle={
-                        post.created_at
-                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
-                          : ""
-                      }
-                      title={post.name}
-                      blockedLink={false}
-                    >
-                      <div className="mt-auto pt-16">
-                        <LocalizedLink href={`/noticias/${post.slug}`}>
-                          <Button
-                            variant="primary"
-                            appearance="link"
-                            hasIcon={true}
+                posts.map((post) => {
+                  const postHref = localizeHref(`/noticias/${post.slug}`);
+                  return (
+                    <div key={post.id} className="latest-news-card-wrapper h-full">
+                      <CardGeneralV2 layout="image" variant="white" className="[&_.agora-card-general-image-section]:h-[208px] [&_.agora-card-general-image-section]:w-full [&_.agora-card-general-image-section]:overflow-hidden [&_.agora-card-general-image-section]:bg-transparent!">
+                        <ImageSectionContainer src={post.image || undefined} alt={post.name} />
+                        <HeaderSectionContainer>
+                          <CardSubtitle>
+                            {post.created_at
+                              ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
+                              : ""}
+                          </CardSubtitle>
+                          <CardTitle>{post.name}</CardTitle>
+                        </HeaderSectionContainer>
+                        <FooterSectionContainer>
+                          <CardAnchor
+                            href={postHref}
+                            onClick={pushTo(postHref)}
+                            hasIcon
                             trailingIcon="agora-line-arrow-right-circle"
                             trailingIconHover="agora-solid-arrow-right-circle"
-                            className="p-0! h-auto"
                           >
-                            <span>{t("readMore")}</span>
-                          </Button>
-                        </LocalizedLink>
-                      </div>
-                    </CardArticle>
-                  </div>
-                ))
+                            {t("readMore")}
+                          </CardAnchor>
+                        </FooterSectionContainer>
+                      </CardGeneralV2>
+                    </div>
+                  );
+                })
               ) : (
                 <div className="py-32 text-center text-neutral-500 xl:col-span-3">
                   {t("404News")}

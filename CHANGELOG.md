@@ -6,6 +6,146 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(header): put the navigation bar and the dropdown grid back in the container, and shrink the wordmark to fit its box**
+  - AgoraDS 4 stopped composing the navigation bar from the `container` utility. In 3
+    it was `max-width: 1216px; margin-inline: auto` with the container's own
+    `padding-inline`, exactly like the general bar above it; in 4 it is
+    `margin-inline: 32px → 64px → 112px` with no max-width and no centering. The
+    general bar and every page section stayed a 1216px centered box, so the two
+    systems only lined up at exactly 1440px — at 1920px the logo sat 240px to the
+    left of the top bar, and below 1440px the row was narrower than the page
+    content. The row is a container again at every width.
+  - The mega-menu card grid had the same problem one level down. AgoraDS 4 gives the
+    element the portal renders its cards into a single rule — `margin-bottom: 32px;
+    padding-inline: 112px` — with no max-width and no centering, so the grid was
+    full-bleed minus a 112px gutter: 1696px wide at 1920px, against the 1216px of the
+    navigation bar directly above it. In 3 that element carried the whole container
+    recipe, which is what it carries again.
+  - Renamed the injected ecosystem `<li>` from `ecosystem-panel-menu` to
+    `ecosystem-custom-menu`. AgoraDS 4 added an ecosystem panel of its own and claimed
+    that class name, styling it with `padding-block: 14px !important` for the DS's own
+    button — so the portal's hand-made list item, which had used the name since before
+    the class existed, silently gained 28px. Its 60px anchor became 88px, which made it
+    the tallest item in the general bar and stretched the bar from 60px to 88px; the
+    design system's own buttons then sat at the top of that taller bar while the two
+    elements the portal injects centred themselves in it, giving the row two visual
+    baselines. Measured after the rename: bar back to 60px, every item centred on y=30.
+  - Stopped the submenu "Voltar" button landing on top of the design system's own
+    "Voltar ao início" in the responsive menu. The rule that lifts it out of the grid
+    was scoped to `header[data-submenu]`, so it applied in both menus — but only the
+    desktop dropdown has the panel it positions against and the 80px of padding
+    reserved for it. It is now absolute only inside `.navigation-links-layout`, and
+    stays in the grid spanning the row in the burger panel, where the two buttons read
+    as the separate controls they are: ours returns to the parent card list, the design
+    system's to the menu root.
+  - Gave the header dropdown's card grid a two-column step between 768px and 1279px.
+    It went straight from one column to three at `xl`, so the whole tablet band sat on
+    a single column — and inside the responsive menu that made each card as wide as the
+    panel (measured 957px at a 1100px viewport), stranding the icon at one edge of the
+    screen and the arrow at the other. Cards there are now 462px. Phones keep one
+    column, where a card per row is right, and the desktop dropdown still uses three.
+  - Evened out the padding on the navigation bar's dropdown root, so "Recursos" shares
+    a baseline with the five plain links beside it. The links are anchors padded
+    `8px/8px`; a dropdown root is a button that AgoraDS 4 pads `16px` top and `8px`
+    bottom (`.navigation-root-button`, another class absent from 3). Since the button
+    centres its label inside its content area, the uneven padding put that label 4px
+    lower than its neighbours. Only the top padding is overridden; the bottom keeps the
+    design system's value. Measured after: all six labels centred on the same line.
+  - Restored the 16px general-bar button gap between 768px and 1279px. AgoraDS 4
+    moved its 32px step down from the `xl` breakpoint to `md`, doubling the spacing
+    between the language, search, ecosystem and account buttons on tablet widths.
+    At 1280px and up both versions already agree on 32px.
+  - The wordmark is now `logo-dados-gov.svg`, which the repo already shipped for
+    `global-error`. Its intrinsic 254x43 is the design system's own `.logo` width, so
+    it renders undistorted with no scaling rule. It replaces a 1223x377 PNG that
+    Tailwind preflight's `img { height: auto }` stretched to 251x77 — overriding the
+    `height` attribute `next/image` writes — which had forced a local
+    `height: auto` escape hatch on a box the DS specs at 32px and dragged the row to
+    ~113px. Next 16 serves any `.svg` source unoptimized, so the priority logo now
+    also skips the image optimizer.
+  - Dropped four selectors that matched nothing: `.agora-general-bar`,
+    `.agora-languages`, `.agora-unauthenticated` and `.agora-areas`. None of them
+    exists in AgoraDS 4 — and none existed in 3 either, so the admin general bar had
+    never been flush-right with 112px padding as its rule implied. Removed rather
+    than renamed to `.general-bar`: that would not restore old behaviour, it would
+    newly override the DS layout with a padding that fights the container.
+
+- **fix(tailwind): restore the theme tokens and the override order the v4 migration dropped**
+  - The `@theme` block ported the tokens the old `tailwind.config.ts` declared
+    under `theme.extend.*`, but not the namespaces v3 left on the Tailwind
+    defaults. AgoraDS resets those namespaces to `initial`, so with nothing
+    declared they generate nothing: `sm` (576px) and `lg` (1024px) — a project
+    override of `theme.screens`, and 71 `lg:`/`sm:` utilities across 23 files,
+    the footer and every listing grid included — plus `--leading-*`,
+    `--tracking-*`, `--font-weight-*` (the DS ships only `bold` and `medium`)
+    and the `--container-*` scale behind the named `max-w-*` sizes.
+  - `leading-6` and `leading-8` were worse than missing. With no `--leading-*`
+    key, v4 falls back to the `--spacing-*` namespace, so they resolved to 6px
+    and 8px instead of 1.5rem and 2rem — crushed line height rather than a
+    utility that visibly does nothing.
+  - The AgoraDS `index.css` now loads *before* `tailwindcss/utilities`, against
+    the order the DS README gives. The DS ships its component CSS unlayered, so
+    loading it last made every single-class DS rule win the specificity tie
+    against the portal's utilities — the reverse of v3, where the DS sheets came
+    first and `@tailwind utilities` last. The portal passes `className` to DS
+    components in hundreds of places and depends on winning those ties.
+
+- **fix(header)!: rebuild the navigation bar for the AgoraDS 4 component contract**
+  - AgoraDS 4 only renders the navigation items it finds inside a
+    `<NavigationSection>`; a flat list of links and roots left the desktop bar
+    with an empty `<ul>`. The items now sit in one section.
+  - `NavigationLink` changed from a `LinkWrapper` (a `<span>`) to an `Anchor`, so
+    the nav cards were being wrapped in an href-less `<a>` — around the card's
+    own anchor — picking up the DS's `inline-flex justify-center min-h-[44px]`
+    box, its `children-wrapper` typography and its underline. That is what
+    disfigured the dropdown, and the nested anchors made the server HTML
+    unparseable and hydration diverge. The cards moved to
+    `<NavigationFreestyle>`, the DS's escape hatch for custom panel content, and
+    the portal now owns the grid (`.header-nav-cards`) and the `data-group`
+    wrappers the submenu CSS keys off — instead of reaching into the DS's
+    `.links > .link-wrapper`, which v4 both renamed and nested one level deeper.
+  - The `<Areas>` declaration left the general bar. AgoraDS 4 no longer renders
+    areas there and now reads the active area's `value` as the index of the
+    navigation section to show, so declaring the portal's areas (`"1"`/`"2"`)
+    pointed the bar at a section that does not exist. The portal only ever had
+    one visible area and portals its own general-bar label, so with none
+    declared the DS falls back to section 0 on every route — how the bar behaved
+    before.
+  - Two CSS overrides had to go the other way. `position: relative` on the open
+    panel collapsed the mega-menu to the width of its `<li>`, because v4 renders
+    the panel inline as `position: absolute; width: 100%` instead of portalling
+    it. And `.logo` became a fixed 254x32 box where v3 sized it to its content,
+    letting the 256x79 wordmark overflow the header by 23px; the box is sized to
+    the image again. The real fix there is a logo asset shaped for the DS box —
+    `logo-dados-gov.svg` already has the 254x43 viewBox the markup asks for.
+
+- **build(tailwind)!: move the theme into CSS for Tailwind v4 and AgoraDS 4**
+  - AgoraDS 4 is built on Tailwind v4, declares it as a peer dependency and no
+    longer exports `AgoraTailwindConfig` or ships `artifacts/dist/tailwind.css`.
+    It publishes `theme.css` (the `@theme` source) and `index.css` instead, so
+    the upgrade forced the Tailwind major with it — `tailwind.config.ts` is gone
+    and the theme is declared in `globals.css`.
+  - v4 ignores `safelist` and `corePlugins`, and only auto-loads a JS config
+    through `@config`. The tokens the portal adds on top of the Agora scale —
+    spacing 2/4/6/12/20, `text-24/32/40`, the brand colours and the `next/font`
+    mapping for `font-sans` — moved to an `@theme` block, without which the
+    utilities that use them are silently not generated at all.
+  - The datastory iframe heights, which come from Squidex and are applied at
+    runtime, moved from `tailwind-safelist.ts` to `@source inline(...)`. The
+    AgoraDS pattern safelist needed no port: its own `theme.css` now carries the
+    equivalent directive.
+  - The AgoraDS `theme.css` opens with a Google Fonts `@import` for Noto Sans,
+    which survives compilation and is blocked by `style-src`. The CSP was left
+    as it is: the typeface is already self-hosted through `next/font`, so the
+    block costs a console entry and nothing else, and opening the policy for a
+    font we serve ourselves would be the worse trade.
+  - The `.header-card-wrapper` overrides left `@layer utilities`. In v4 that
+    directive builds a real cascade layer, so the rules would have lost to every
+    unlayered rule, the AgoraDS sheet included. The hand-written `.rounded-8`
+    and `.pl-0` were dropped: both are AgoraDS tokens now, and as plain CSS they
+    were beating the utilities of the same name.
+
+
 - **fix(i18n): stop double-escaping interpolated translation values**
   - Dates rendered as `Atualizado às 01&#x2F;09&#x2F;2026 10:27:06` on the
     backoffice log page. i18next escapes interpolated values by default and
