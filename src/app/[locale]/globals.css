@@ -270,24 +270,7 @@ body {
 
 /* 3.1 Main Header */
 
-/*
-  AgoraDS 4 stopped composing the navigation bar from the `container` utility. In 3 it
-  was the same 1216px centered box as the general bar:
 
-    .navigation-bar { max-width:1216px; margin-inline:auto; padding-inline:32/64/0 }
-
-  In 4 it is `margin-inline: 32px -> 64px -> 112px` with no max-width and no centering,
-  while `.general-bar` above it, `.freestyle` below it and every page section stayed a
-  1216px centered box. The two only line up at exactly 1440px (1440 - 2*112 = 1216); at
-  1920px the logo sat 240px to the left of the top bar. Put the row back in the
-  container so it tracks the top bar and the page content at every width.
-
-  `.agora-header .navigation-bar` (0,2,0) beats the DS's `.navigation-bar` (0,1,0) at
-  every breakpoint — specificity outranks media queries — so the three DS `margin-inline`
-  declarations are all overridden by the single `margin-inline: auto` here. The DS's
-  `display: flex`/`block` and `padding-block: 8px` are deliberately left alone, and
-  `.navigation-bar-bg` stays full-bleed so the white band still spans the viewport.
-*/
 .agora-header .navigation-bar {
   max-width: 1216px;
   margin-inline: auto;
@@ -306,7 +289,7 @@ body {
   }
 }
 
-
+.agora-header .navigation-links-layout > .title,
 .agora-header .navigation-links-layout .freestyle,
 .agora-header .navigation-links-layout .links-container {
   width: 100%;
@@ -316,6 +299,7 @@ body {
 }
 
 @media (min-width: 768px) {
+  .agora-header .navigation-links-layout > .title,
   .agora-header .navigation-links-layout .freestyle,
   .agora-header .navigation-links-layout .links-container {
     padding-inline: 64px;
@@ -323,6 +307,7 @@ body {
 }
 
 @media (min-width: 1280px) {
+  .agora-header .navigation-links-layout > .title,
   .agora-header .navigation-links-layout .freestyle,
   .agora-header .navigation-links-layout .links-container {
     padding-inline: 0;
@@ -1612,14 +1597,7 @@ body:has(.admin-wrapper) > div > header.sticky {
   color: var(--color-white);
 }
 
-/* Ágora's own built-in mobile menu button (shown below the "xl" breakpoint,
-   see the toggle's own hide rule) — center it in the rail and recolor its
-   icon white, matching our toggle icon above it. Its grid is meant for a
-   full page-width layout (columns sized off the whole viewport, per
-   xs/md/xl breakpoint), so inside our 112px rail its content ends up wider
-   than the rail itself and overflows both sides symmetrically — replacing
-   it with a plain flex row (one child either way) sidesteps that grid
-   entirely instead of fighting its column math. */
+
 .admin-side-nav .agora-sidebar-navigation-mobile {
   display: flex;
   justify-content: center;

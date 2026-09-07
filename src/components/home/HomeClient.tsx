@@ -238,7 +238,7 @@ export default function HomeClient({
         </div>
 
         {/* Featured Datasets */}
-        <section className="w-full flex flex-col items-center justify-center pt-64">
+        <section className="w-full flex flex-col items-center justify-center py-64">
           <div className="container flex flex-col gap-32">
             <h2 className="text-xl-bold text-primary-900">{t("datasets")}</h2>
             <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
@@ -259,20 +259,18 @@ export default function HomeClient({
                 </div>
               )}
             </div>
-            <div className="mt-32">
-              <LocalizedLink href="/datasets">
-                <Button
-                  variant="primary"
-                  appearance="link"
-                  hasIcon={true}
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  className="p-0! h-auto"
-                >
-                  <span>{t("seeAllDatasets")}</span>
-                </Button>
-              </LocalizedLink>
-            </div>
+            <LocalizedLink href="/datasets">
+              <Button
+                variant="primary"
+                appearance="link"
+                hasIcon={true}
+                trailingIcon="agora-line-arrow-right-circle"
+                trailingIconHover="agora-solid-arrow-right-circle"
+                className="p-0! h-auto"
+              >
+                <span>{t("seeAllDatasets")}</span>
+              </Button>
+            </LocalizedLink>
           </div>
         </section>
 
@@ -311,25 +309,34 @@ export default function HomeClient({
                           </CardSubtitle>
                           <CardTitle>{story.title}</CardTitle>
                         </HeaderSectionContainer>
+                        <FooterSectionContainer className="hidden" >
+                          <CardAnchor
+                            href={storyHref}
+                            onClick={pushTo(storyHref)}
+                            hasIcon
+                            trailingIcon="agora-line-arrow-right-circle"
+                            trailingIconHover="agora-solid-arrow-right-circle"
+                          >
+                            {t("readMore")}
+                          </CardAnchor>
+                        </FooterSectionContainer>
                       </CardGeneralV2>
                     );
                   })}
                 </div>
-                <div className="mt-32">
-                  <LocalizedLink href="/datastories">
-                    <Button
-                      variant="primary"
-                      appearance="link"
-                      hasIcon={true}
-                      trailingIcon="agora-line-arrow-right-circle"
-                      trailingIconHover="agora-solid-arrow-right-circle"
-                      className="p-0! icon-white h-auto"
-                      darkMode={false}
-                    >
-                      <span className="text-white">{t("seeAllDataStories")}</span>
-                    </Button>
-                  </LocalizedLink>
-                </div>
+                <LocalizedLink href="/datastories">
+                  <Button
+                    variant="primary"
+                    appearance="link"
+                    hasIcon={true}
+                    trailingIcon="agora-line-arrow-right-circle"
+                    trailingIconHover="agora-solid-arrow-right-circle"
+                    className="p-0! icon-white h-auto hover:icon-white"
+                    darkMode={false}
+                  >
+                    <span className="text-white">{t("seeAllDataStories")}</span>
+                  </Button>
+                </LocalizedLink>
               </>
             ) : (
               <div className="py-32 text-center text-neutral-500 xl:col-span-3">
@@ -380,7 +387,6 @@ export default function HomeClient({
                 </div>
               )}
             </div>
-            <div className="mt-32">
               <LocalizedLink href="/noticias">
                 <Button
                   variant="primary"
@@ -393,7 +399,6 @@ export default function HomeClient({
                   <span>{t("seeAllNews")}</span>
                 </Button>
               </LocalizedLink>
-            </div>
           </div>
         </section>
 
