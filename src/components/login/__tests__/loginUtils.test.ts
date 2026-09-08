@@ -61,3 +61,39 @@ describe("sanitizeNextUrl", () => {
     expect(buildSamlEndpoint("/saml/login", sanitizeNextUrl("/\\evil.com"))).toBe("/saml/login");
   });
 });
+
+describe("buildSamlEndpoint", () => {
+  // The login screen asks whether the citizen is national or foreign, and used
+  // to throw the answer away. These pin that it now travels, and — more
+  // importantly — that it is optional: the two assertions above call this
+  // function with two arguments and must keep passing untouched.
+  it("carries the declared citizen type when the screen collected one", () => {
+    expect(buildSamlEndpoint("/saml/login", "/", "foreign")).toBe("/saml/login?citizen=foreign");
+  });
+
+  it("omits it entirely when nothing was declared", () => {
+    // eIDAS never asks, and the account-linking notice on the email tab starts
+    // a CMD login without the question. Both must send no parameter at all
+    // rather than an empty one — the backend records nothing for a value it
+    // does not recognise, and an empty string is not the same as absent.
+    expect(buildSamlEndpoint("/saml/eidas/login", "/")).toBe("/saml/eidas/login");
+    expect(buildSamlEndpoint("/saml/login", "/", undefined)).toBe("/saml/login");
+    expect(buildSamlEndpoint("/saml/login", "/", "")).toBe("/saml/login");
+  });
+
+  it("carries both parameters, each encoded, when both are present", () => {
+    expect(buildSamlEndpoint("/saml/login", "/pt/datasets?page=2", "national")).toBe(
+      "/saml/login?next=%2Fpt%2Fdatasets%3Fpage%3D2&citizen=national"
+    );
+  });
+
+  it("keeps the next-URL encoding it had before the third parameter existed", () => {
+    // Regression guard for the switch to URLSearchParams: the encoding of
+    // `next` must not have drifted, because the value reaches
+    // window.location.href on the way back.
+    expect(buildSamlEndpoint("/saml/login", "/datasets")).toBe("/saml/login?next=%2Fdatasets");
+    expect(buildSamlEndpoint("/saml/login", "/pt/datasets#resources")).toBe(
+      "/saml/login?next=%2Fpt%2Fdatasets%23resources"
+    );
+  });
+});

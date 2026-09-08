@@ -8,13 +8,27 @@ import { PRIMARY_BUTTON_CLASS, TEXT_LINK_BUTTON_CLASS } from "./constants";
 import { TermsSection } from "./LoginShared";
 import { Typograph } from "../Shared/Generics/Typograph";
 
+/**
+ * The two values the backend accepts for the declared citizen type.
+ *
+ * English, matching `auth_provider`, so one vocabulary travels from this
+ * screen to the database with no mapping in between. The radio labels and ids
+ * stay Portuguese: those are what the citizen reads, this is what we store.
+ *
+ * The backend allowlists these exact strings and drops anything else, so
+ * changing them here without changing them there records nothing at all.
+ */
+const CITIZEN_NATIONAL = "national";
+const CITIZEN_FOREIGN = "foreign";
+
 export function CmdTab({
   samlEnabled,
   onSamlLogin,
   onOpenModal,
 }: {
   samlEnabled: boolean;
-  onSamlLogin: () => void;
+  /** Receives the declared citizen type; the button stays disabled until one is chosen. */
+  onSamlLogin: (citizen: string) => void;
   onOpenModal: () => void;
 }) {
   const { t } = useTranslation("login");
@@ -62,14 +76,14 @@ export function CmdTab({
                 id="nacional"
                 name="citizen-type"
                 className="text-lg text-neutral-900"
-                onChange={() => setCitizenType("nacional")}
+                onChange={() => setCitizenType(CITIZEN_NATIONAL)}
               />
               <RadioButton
                 label={t("cmd.citizenForeign")}
                 id="estrangeiro"
                 name="citizen-type"
                 className="text-lg text-neutral-900"
-                onChange={() => setCitizenType("estrangeiro")}
+                onChange={() => setCitizenType(CITIZEN_FOREIGN)}
               />
             </div>
           </div>
@@ -86,7 +100,7 @@ export function CmdTab({
             hasIcon={true}
             trailingIcon="agora-line-arrow-right-circle"
             trailingIconHover="agora-solid-arrow-right-circle"
-            onClick={onSamlLogin}
+            onClick={() => citizenType && onSamlLogin(citizenType)}
             disabled={!samlEnabled || !citizenType || !termsAccepted}
           >
             {t("cmd.submit")}
