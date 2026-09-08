@@ -6,6 +6,19 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **test(login): pin that only the CMD tab declares a citizen type**
+  - The declared citizen type must travel from the CMD tab and *not* from the
+    account-linking notice on the email tab, which starts the same CMD login
+    but never asks the question. That distinction was held by the type checker
+    alone: the two entry points call different handlers, so merging them into
+    one optional-argument handler would compile clean while letting a
+    declaration nobody made reach the database.
+  - Two tests now observe the outgoing SAML start URL — the same place the
+    backend reads the parameter from — asserting the full URL rather than the
+    absence of one substring, so a declaration smuggled under any other name
+    fails too. The pair is deliberate: an absence assertion alone would keep
+    passing if the capture ever stopped recording.
+
 - **feat(login): send the declared citizen type with the CMD sign-in**
   - The CMD tab asks whether the citizen is national or foreign, and the answer
     was thrown away in the browser: `citizenType` only enabled the submit

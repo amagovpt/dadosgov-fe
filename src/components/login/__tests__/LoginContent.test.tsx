@@ -63,6 +63,16 @@ let container: HTMLDivElement;
 let root: Root;
 /** Where the success path sent the browser, captured from the href setter. */
 let navigatedTo: string | null = null;
+/**
+ * The SAML start URLs the page asked for, in order.
+ *
+ * submitSamlForm fetches the endpoint before it does anything else, so the
+ * fetch argument *is* the URL buildSamlEndpoint produced -- which is the point:
+ * mocking loginUtils would mock away the very thing under test. The stub then
+ * answers 503 so the function returns its error string and never reaches
+ * form.submit(), which jsdom does not implement.
+ */
+let samlRequests: string[] = [];
 
 function findButton(label: string) {
   return Array.from(container.querySelectorAll("button")).find(
@@ -112,6 +122,15 @@ async function signIn(email = "joana@example.pt", password = "S3cretPass!") {
 beforeEach(() => {
   loginMock.mockReset();
   searchParamsMock = new URLSearchParams();
+
+  samlRequests = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: RequestInfo | URL) => {
+      samlRequests.push(String(input));
+      return new Response("saml start unavailable in tests", { status: 503 });
+    })
+  );
 
   if (!window.matchMedia) {
     Object.defineProperty(window, "matchMedia", {
@@ -173,6 +192,8 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe("LoginContent email sign-in", () => {
@@ -258,5 +279,63 @@ describe("LoginContent email sign-in", () => {
     expect(payload.get("email")).toBe("maria@example.pt");
     expect(payload.get("password")).toBe("Outr4Pass!");
     expect(payload.get("remember")).toBe("y");
+  });
+});
+
+/**
+ * Which login entry points declare a citizen type, and which must not.
+ *
+ * The CMD tab asks whether the person has Portuguese or foreign nationality and
+ * sends the answer; the backend stores it as self-declared. The account-linking
+ * notice on the email tab starts the same CMD login but never asks -- so it must
+ * send nothing, and the backend records nothing rather than a guess.
+ *
+ * Until now that distinction was held by the type checker alone: the two entry
+ * points call different handlers, and making the parameter optional would let a
+ * declaration nobody made reach the database with tsc still green. These pin the
+ * behaviour instead of the signature, observing the outgoing URL -- the same
+ * place the backend reads the parameter from.
+ */
+describe("LoginContent SAML start parameters", () => {
+  /** Enable the SAML buttons; they are dead controls otherwise. */
+  function withSamlEnabled() {
+    vi.stubEnv("NEXT_PUBLIC_SAML_ENABLED", "true");
+  }
+
+  async function click(el: Element | null | undefined, what: string) {
+    if (!el) throw new Error(`not rendered: ${what}`);
+    await act(async () => {
+      el.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    });
+  }
+
+  it("sends no citizen parameter from the account-linking notice", async () => {
+    withSamlEnabled();
+    loginMock.mockRejectedValue(new Error("migration_required"));
+
+    await act(async () => {
+      root.render(<LoginContent />);
+    });
+    await signIn();
+    await click(findButton(translate("migration.migrateCmd")), "migrate-with-CMD button");
+
+    // Not just "no citizen=": the whole URL, so a parameter added under any
+    // other name fails here too.
+    expect(samlRequests).toEqual(["/saml/login"]);
+  });
+
+  it("sends the declared citizen type from the CMD tab", async () => {
+    // The counterpart of the test above. Without it, a fetch stub that stopped
+    // recording would leave that one passing on an empty array forever.
+    withSamlEnabled();
+
+    await act(async () => {
+      root.render(<LoginContent />);
+    });
+    await click(container.querySelector("#estrangeiro"), "foreign-nationality radio");
+    await click(container.querySelector("#terms-cmd"), "terms checkbox");
+    await click(findButton(translate("cmd.submit")), "CMD sign-in button");
+
+    expect(samlRequests).toEqual(["/saml/login?citizen=foreign"]);
   });
 });
