@@ -44,25 +44,6 @@ export default async function initTranslations(
     ns: namespaces,
     preload: resources ? [] : i18nConfig.locales,
     interpolation: {
-      // i18next escapes interpolated values by default, which is redundant
-      // here and actively wrong: React escapes everything it renders as a text
-      // child, so the value gets escaped twice and the entities show up on
-      // screen — a date interpolated into a string rendered as
-      // "Atualizado às 01&#x2F;09&#x2F;2026" instead of "01/09/2026".
-      //
-      // This holds only while no translation output reaches a sink that
-      // interprets markup, which was audited across the tree: no `t()` output
-      // goes to `dangerouslySetInnerHTML`, to a URL attribute, to JSON-LD, to
-      // `generateMetadata`, or to a markdown renderer.
-      //
-      // The one place raw HTML is reachable at all is the
-      // `dangerouslySetInnerHTML` pass-through on Shared/Generics/Typograph.tsx.
-      // No call site uses it today, but it is a typed, forwarded prop, so every
-      // one of them could — which is why the invariant is pinned by a test that
-      // walks the source (src/app/__tests__/i18n.test.tsx) rather than by this
-      // comment. A new sink anywhere fails that test, and the value reaching it
-      // has to be sanitised at the call site: this setting is not the thing to
-      // rely on.
       escapeValue: false,
     },
   });

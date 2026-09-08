@@ -28,7 +28,7 @@ export default function AdminLayout({
     children,
 }: AdminLayoutProps) {
     return (
-        <div className="w-full flex flex-col gap-32 px-104 pt-32 pb-64 admin-page">
+        <div className="w-full flex flex-col gap-32 px-104 py-64 admin-page">
             <div className="w-full flex flex-col gap-64 pb-32">
                 <div className="w-full">
                     <Breadcrumb
