@@ -36,18 +36,28 @@ export function LoginContent() {
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
-  const runSamlLogin = async (base: string) => {
+  const runSamlLogin = async (base: string, citizen?: string) => {
     setIsLoading(true);
     setError(null);
-    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl), t);
+    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl, citizen), t);
     if (samlError) {
       setError(samlError);
     }
     setIsLoading(false);
   };
 
-  const handleSamlLogin = () => runSamlLogin("/saml/login");
+  // The CMD tab asks whether the citizen is national or foreign and now sends
+  // the answer, which the backend records as self-declared. eIDAS does not ask,
+  // so its start carries no such parameter.
+  const handleSamlLogin = (citizen: string) => runSamlLogin("/saml/login", citizen);
   const handleEidasLogin = () => runSamlLogin("/saml/eidas/login");
+
+  // The account-linking notice on the email tab also starts a CMD login, but
+  // that screen never asks the question -- so it declares nothing, and the
+  // backend records nothing rather than a guess. Kept as its own handler
+  // instead of making the parameter optional at the call site, so the two
+  // entry points cannot be confused for one.
+  const handleMigrationSamlLogin = () => runSamlLogin("/saml/login");
 
   const handleEmailLogin = async (email: string, password: string) => {
     if (!email || !password) {
@@ -148,7 +158,7 @@ export function LoginContent() {
                     error={error}
                     migrationRequired={migrationRequired}
                     onLogin={handleEmailLogin}
-                    onSaml={handleSamlLogin}
+                    onSaml={handleMigrationSamlLogin}
                     onEidas={handleEidasLogin}
                   />
                 </TabBody>

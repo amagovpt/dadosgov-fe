@@ -48,8 +48,27 @@ export function sanitizeNextUrl(raw: string | null): string {
   }
 }
 
-export function buildSamlEndpoint(base: string, nextUrl: string): string {
-  return nextUrl !== "/" ? `${base}?next=${encodeURIComponent(nextUrl)}` : base;
+/**
+ * The SAML start endpoint, with the parameters the backend expects.
+ *
+ * `nextUrl` is a URL, which is why it goes through `sanitizeNextUrl` before
+ * reaching here — it ends up in `window.location.href` on the way back, and
+ * four spellings once got past a prefix test (LEDG-2432).
+ *
+ * `citizen` is not a URL. It is one of two fixed values the login screen
+ * collects, nothing parses it as a location, and the backend accepts it only
+ * against an exact allowlist and drops anything else. It is encoded here for
+ * the same reason every query value is, not because it is untrusted input to
+ * this function. Keep it that way: if this parameter ever carries something
+ * open-ended, it needs its own validation and this comment stops being true.
+ */
+export function buildSamlEndpoint(base: string, nextUrl: string, citizen?: string): string {
+  const params = new URLSearchParams();
+  if (nextUrl !== "/") params.set("next", nextUrl);
+  if (citizen) params.set("citizen", citizen);
+
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
 }
 
 export async function submitSamlForm(endpoint: string, t: TFunction): Promise<string | null> {
