@@ -6,6 +6,31 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): send the declared citizen type with the CMD sign-in**
+  - The CMD tab asks whether the citizen is national or foreign, and the answer
+    was thrown away in the browser: `citizenType` only enabled the submit
+    button, `onSamlLogin` took no argument, and nothing reached the backend. We
+    were asking a question and discarding the answer.
+  - It now travels as `?citizen=` on the SAML start, and the backend records it
+    as **self-declared** in its own field. It gates nothing — it comes from a
+    radio button and anyone can put whatever they like in a query parameter —
+    and the backend accepts only an exact allowlist, dropping anything else
+    rather than storing it raw or substituting a default.
+  - The radio values change from `"nacional"`/`"estrangeiro"` to
+    `"national"`/`"foreign"` so one vocabulary travels from this screen to the
+    database with no mapping in between, matching the provider field. The
+    labels and ids stay Portuguese: those are what the citizen reads.
+  - `buildSamlEndpoint` gains an optional third parameter and now builds its
+    query with `URLSearchParams`. `next` is a URL and keeps going through
+    `sanitizeNextUrl` — it reaches `window.location.href` on the way back, and
+    four spellings once got past a prefix test there — while `citizen` is one of
+    two fixed values that nothing parses as a location. A test pins that the
+    encoding of `next` did not drift with the switch.
+  - The account-linking notice on the email tab also starts a CMD login, but
+    that screen never asks the question, so it gets its own handler and sends
+    no parameter. Kept separate rather than making the argument optional at the
+    call site, so the two entry points cannot be confused for one.
+
 - **fix(login): restore the email/password form alongside the migration entry point**
   - The "E-mail e palavra-passe" tab had been reduced to the migration notice on
     the assumption that linking a legacy account to CMD/eIDAS would become
