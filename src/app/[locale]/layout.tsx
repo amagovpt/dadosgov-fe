@@ -10,6 +10,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { siteConfig } from "@/config/site";
 import ScrollTop from "@/components/ScrollTop";
 import NewAccountNotice from "@/components/login/NewAccountNotice";
+import ConfirmEmailNotice from "@/components/login/ConfirmEmailNotice";
 import CompleteRegistrationGate from "@/components/login/CompleteRegistrationGate";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
@@ -121,6 +122,9 @@ export default async function RootLayout({
                       <HeaderWrapper data={headerNavigation} />
                       <Suspense fallback={null}>
                         <NewAccountNotice />
+                      </Suspense>
+                      <Suspense fallback={null}>
+                        <ConfirmEmailNotice />
                       </Suspense>
                       <Suspense fallback={null}>
                         <CompleteRegistrationGate />

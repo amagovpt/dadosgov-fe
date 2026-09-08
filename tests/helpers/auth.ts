@@ -1,46 +1,34 @@
 import { Page } from "playwright/test";
 
 /**
- * Authenticate via the email/password tab. Used by both:
- *   - the storage-state setup (runs once, saves cookies to disk)
- *   - any spec that explicitly logs in via the UI
+ * Authenticate through the login route, not through the login form.
  *
- * The login page exposes 3 Agora tabs: "Chave Móvel Digital (CMD)",
- * "Autenticação europeia (eIDAS)", and "E-mail e palavra-passe". The form is
- * also embedded in the mobile menu accordion, so we scope to <main> to avoid
- * strict-mode duplicates.
+ * The "E-mail e palavra-passe" tab is the account-association entry point now
+ * (LEDG-2360) and carries no password form, so there is no UI left to drive.
+ * This posts exactly what that form posted, to exactly the route it posted to
+ * — src/app/auth/login/route.ts, which mints the CSRF token server-side and
+ * returns the backend's session cookies with Domain stripped. Behaviour is
+ * therefore unchanged, including the migration check that route performs.
+ *
+ * `page.request` and not a bare `request` fixture: it shares the browser
+ * context's cookie jar and baseURL, so `page.context().storageState()` still
+ * captures the session and the disposable backoffice project keeps hitting
+ * its own port. The terms checkbox the form gated on was client-only and was
+ * never part of the request.
+ *
+ * Every caller navigates right after, so this deliberately leaves the page
+ * where it was instead of paying for a round trip nobody reads.
  */
 async function performLogin(page: Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(2000);
-
-  const emailTab = page.getByText(/E-mail e palavra-passe/i).first();
-  await emailTab.scrollIntoViewIfNeeded();
-  await emailTab.click();
-  await page.waitForTimeout(500);
-
-  const main = page.locator("main");
-
-  const emailInput = main.locator("#login-email").first();
-  await emailInput.scrollIntoViewIfNeeded();
-  await emailInput.fill(email);
-
-  const passwordInput = main.locator("#login-password").first();
-  await passwordInput.scrollIntoViewIfNeeded();
-  await passwordInput.fill(password);
-
-  const termsCheckbox = main.getByRole("checkbox", { name: /aceito os termos/i }).first();
-  await termsCheckbox.check();
-
-  const submitBtn = main.locator("form button[type='submit']").first();
-  await submitBtn.scrollIntoViewIfNeeded();
-  await submitBtn.click();
-
-  await page.waitForURL((url) => !url.pathname.includes("/login"), {
-    timeout: 30000,
-    waitUntil: "networkidle",
+  const response = await page.request.post("/auth/login", {
+    form: { email, password, remember: "y" },
   });
+
+  if (!response.ok()) {
+    throw new Error(
+      `Login failed for ${email}: ${response.status()} ${await response.text()}`
+    );
+  }
 }
 
 export const ADMIN_CREDS = {

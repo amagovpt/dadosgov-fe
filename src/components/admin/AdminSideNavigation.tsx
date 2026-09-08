@@ -63,7 +63,7 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
                 className="admin-side-nav__toggle-icon-glyph"
               />
             </span>
-            <span className="admin-sidebar-nav__group-label-text text-base font-medium">
+            <span className="admin-sidebar-nav__group-label-text text-m-regular">
               {isExpanded ? t("sidebar.close") : t("sidebar.expand")}
             </span>
           </span>
@@ -97,7 +97,7 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
                               <Icon name={item.icon} className="admin-sidebar-nav__group-icon" />
                             )
                           )}
-                          <span className="admin-sidebar-nav__group-label-text text-base font-medium">
+                          <span className="admin-sidebar-nav__group-label-text text-m-regular text-nowrap">
                             {item.label}
                           </span>
                         </span>

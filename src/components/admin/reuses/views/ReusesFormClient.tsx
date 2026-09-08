@@ -102,6 +102,12 @@ export default function ReusesFormClient({
   const [producerId, setProducerId] = useState<string>("user");
 
   useEffect(() => {
+    if (apiError) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [apiError]);
+
+  useEffect(() => {
     fetchReuseTypes().then(setReuseTypes);
     fetchReuseTopics().then(setReuseTopics);
   }, []);
@@ -186,6 +192,8 @@ export default function ReusesFormClient({
   );
 
   const handleStep1Next = async () => {
+    setApiError(null);
+
     const errors = validateReuseDetails({
       name: reuseName,
       url: reuseLink,
@@ -401,6 +409,7 @@ export default function ReusesFormClient({
             onReuseLinkChange={(event) => {
               const value = event.target.value;
               setReuseLink(value);
+              setApiError(null);
               if (value.trim()) {
                 clearError("reuseLink");
                 setReuseLinkInvalid(!normalizeReuseUrl(value));

@@ -265,7 +265,7 @@ export default function SearchClient() {
       return;
     }
     try {
-      const results = await suggestTags(q);
+      const results = (await suggestTags(q)) ?? [];
       setFilterTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
     } catch {
       setFilterTagOptions([]);
@@ -278,7 +278,7 @@ export default function SearchClient() {
       return;
     }
     try {
-      const results = await suggestFormats(q);
+      const results = (await suggestFormats(q)) ?? [];
       setFilterFormatOptions(results.map((f) => ({ id: f.text, name: f.text })));
     } catch {
       setFilterFormatOptions([]);
@@ -291,7 +291,7 @@ export default function SearchClient() {
       return;
     }
     try {
-      const results = await suggestSpatialZones(q);
+      const results = (await suggestSpatialZones(q)) ?? [];
       setFilterZoneOptions(results.map((z) => ({ id: z.id, name: z.name })));
     } catch {
       setFilterZoneOptions([]);

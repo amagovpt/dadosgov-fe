@@ -17,17 +17,16 @@ import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sect
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
+import {
+  localizeExtraConfigHelp as localizeBackendExtraConfigHelp,
+  localizeExtraConfigLabel as localizeBackendExtraConfigLabel,
+  localizeFeatureLabel as localizeBackendFeatureLabel,
+  localizeFilterLabel as localizeBackendFilterLabel,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import type { HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
 import { getEditHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
-
-const FILTER_KEY_LABELS: Record<string, string> = {
-  Organization: "organization",
-  Tag: "tag",
-  Publisher: "publisher",
-  "Remote ID": "remoteId",
-};
 
 // Schedule ("Planeamento") is a cron expression with exactly 5 fields
 // (minuto hora dia mês dia-da-semana), each field being a number or "*".
@@ -63,6 +62,17 @@ interface HarvesterConfigFormProps {
   setSelectedBackend: (v: string) => void;
   backends: HarvestBackend[];
   activeBackendFilters: { key: string; label: string }[];
+  /**
+   * The features and extra configs the selected backend declares, and the
+   * values held for them. This screen had no controls for either, so a
+   * harvester created with them could be read and changed only through the API.
+   */
+  activeBackendFeatures: HarvestBackend["features"];
+  activeBackendExtraConfigs: HarvestBackend["extra_configs"];
+  featureValues: Record<string, boolean>;
+  extraConfigValues: Record<string, string>;
+  onToggleFeature: (key: string) => void;
+  onExtraConfigChange: (key: string, value: string) => void;
   formErrors: Partial<Record<string, boolean | string>>;
   clearError: (field: HarvesterFormField) => void;
   addFilter: () => void;
@@ -70,8 +80,6 @@ interface HarvesterConfigFormProps {
   updateFilter: (index: number, field: string, value: string) => void;
   setHarvesterSchedule: (v: string) => void;
   isSaving: boolean;
-  saveSuccess: boolean;
-  saveError: string | null;
   onSave: () => void;
   isPreviewing: boolean;
   previewJob: HarvestPreviewJob | null;
@@ -83,6 +91,14 @@ interface HarvesterConfigFormProps {
   // only preview. Default true for the create flow (no source yet).
   canEdit?: boolean;
   canDelete?: boolean;
+  // Whether this user may preview at all — `source.permissions["preview"]`
+  // (HarvestSourcePermission: owner, org-admin, org-editor). Kept separate from
+  // `canEdit` because the two rights genuinely differ, in both directions: an
+  // org editor may preview without editing, and the owner of an owner-only
+  // source may edit without the config-preview route being able to authorize
+  // them. The detail screen reads both to pick the route. Nothing on the create
+  // flow has a source yet, hence the default.
+  canPreview?: boolean;
   deleteCard?: AdminCard;
   auxiliaryItems?: AdminAuxiliaryItem[];
   // Whether the "advanced" fields (URL, implementation type, schedule, toggles)
@@ -110,6 +126,12 @@ export function HarvesterConfigForm({
   setSelectedBackend,
   backends,
   activeBackendFilters,
+  activeBackendFeatures,
+  activeBackendExtraConfigs,
+  featureValues,
+  extraConfigValues,
+  onToggleFeature,
+  onExtraConfigChange,
   formErrors,
   clearError,
   addFilter,
@@ -117,8 +139,6 @@ export function HarvesterConfigForm({
   updateFilter,
   setHarvesterSchedule,
   isSaving,
-  saveSuccess,
-  saveError,
   onSave,
   isPreviewing,
   previewJob,
@@ -127,6 +147,7 @@ export function HarvesterConfigForm({
   onDelete,
   canEdit = true,
   canDelete = true,
+  canPreview = true,
   deleteCard,
   auxiliaryItems,
   canEditAdvanced,
@@ -134,10 +155,10 @@ export function HarvesterConfigForm({
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
   const scheduleErrorMessage = t("admin-harvesters:form.scheduleError");
-  const localizeFilterLabel = (label: string) => {
-    const key = FILTER_KEY_LABELS[label];
-    return key ? t(`admin-harvesters:form.filterLabels.${key}`) : label;
-  };
+  const localizeFilterLabel = (filter: { key: string; label: string }) =>
+    localizeBackendFilterLabel(filter, (subkey) =>
+      t(`admin-harvesters:form.filterLabels.${subkey}`),
+    );
 
   // Basic fields (name, description, filters) follow `canEdit`; advanced fields
   // (URL, implementation type, schedule, toggles) follow `canEditAdvanced`,
@@ -209,7 +230,6 @@ export function HarvesterConfigForm({
             hasHarvesterNameError={!!formErrors.harvesterName}
             hasHarvesterUrlError={!!formErrors.harvesterUrl}
             namePlaceholder=""
-            descriptionLabel={t("admin-harvesters:fields.descriptionRequired")}
             descriptionPlaceholder=""
             urlPlaceholder=""
             nameDisabled={basicDisabled}
@@ -237,6 +257,7 @@ export function HarvesterConfigForm({
               placeholder=""
               id="harvester-type"
               defaultValue={selectedBackend}
+              required
               disabled={advancedDisabled}
               searchable
               searchInputPlaceholder={t("admin-harvesters:form.searchInputPlaceholder")}
@@ -269,6 +290,7 @@ export function HarvesterConfigForm({
                             label={t("admin-harvesters:form.filterModeField")}
                             placeholder=""
                             id={`filter-mode-${index}`}
+                            required={false}
                             defaultValue={filter.mode}
                             disabled={basicDisabled}
                             onChange={(opts) => {
@@ -290,6 +312,7 @@ export function HarvesterConfigForm({
                             label={t("admin-harvesters:form.filterKeyField")}
                             placeholder={t("admin-harvesters:form.filterKeyPlaceholder")}
                             id={`filter-type-${index}`}
+                            required={false}
                             defaultValue={filter.type}
                             disabled={basicDisabled}
                             onChange={(opts) => {
@@ -304,12 +327,18 @@ export function HarvesterConfigForm({
                                   value={f.key}
                                   selected={filter.type === f.key}
                                 >
-                                  {localizeFilterLabel(f.label)}
+                                  {localizeFilterLabel(f)}
                                 </DropdownOption>
                               ))}
                             </DropdownSection>
                           </InputSelect>
                         </div>
+                        {/*
+                          Every control here says whether it is required rather
+                          than inheriting Agora's default of `true`. This is the
+                          one admin form without `noValidate`, so a filter added
+                          and left empty blocked saving the whole harvester.
+                        */}
                         <div className="mt-8 flex items-center gap-8">
                           <div className="flex-1">
                             <InputText
@@ -319,6 +348,7 @@ export function HarvesterConfigForm({
                               placeholder=""
                               id={`filter-value-${index}`}
                               defaultValue={filter.value}
+                              required={false}
                               disabled={basicDisabled}
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 updateFilter(index, "value", e.target.value)
@@ -397,6 +427,38 @@ export function HarvesterConfigForm({
               </div>
             )}
 
+            {activeBackendFeatures.length > 0 && (
+              <div className="flex flex-col gap-16">
+                {activeBackendFeatures.map((feature) => (
+                  <Switch
+                    key={feature.key}
+                    label={localizeBackendFeatureLabel(feature, (subkey) =>
+                      t(`admin-harvesters:form.featureLabels.${subkey}`),
+                    )}
+                    checked={featureValues[feature.key] ?? feature.default ?? false}
+                    onChange={() => onToggleFeature(feature.key)}
+                    disabled={advancedDisabled}
+                  />
+                ))}
+              </div>
+            )}
+
+            {activeBackendExtraConfigs.map((extraConfig) => (
+              <IsolatedInput
+                key={extraConfig.key}
+                label={localizeBackendExtraConfigLabel(extraConfig, (subkey) =>
+                  t(`admin-harvesters:form.extraConfigLabels.${subkey}`),
+                )}
+                placeholder={localizeBackendExtraConfigHelp(extraConfig, (subkey) =>
+                  t(`admin-harvesters:form.extraConfigHelp.${subkey}`),
+                )}
+                id={`extra-config-${extraConfig.key}`}
+                defaultValue={extraConfigValues[extraConfig.key] ?? ""}
+                disabled={advancedDisabled}
+                onChange={(value) => onExtraConfigChange(extraConfig.key, value)}
+              />
+            ))}
+
             <div className="flex gap-48">
               <Switch
                 label={t("admin-harvesters:form.enabled")}
@@ -433,25 +495,20 @@ export function HarvesterConfigForm({
             />
           </div>
 
-          {saveSuccess && (
-            <p className="text-sm text-green-600 text-right">
-              {t("admin-harvesters:form.saveSuccess")}
-            </p>
-          )}
-          {saveError && <p className="text-sm text-red-600 text-right">{saveError}</p>}
-
           <div className="admin-page__actions flex justify-end gap-16">
-            <Button
-              appearance="outline"
-              variant="primary"
-              type="button"
-              disabled={isPreviewing || !!scheduleError}
-              onClick={onPreview}
-            >
-              {isPreviewing
-                ? t("admin-harvesters:actions.previewing")
-                : t("admin-harvesters:actions.preview")}
-            </Button>
+            {canPreview && (
+              <Button
+                appearance="outline"
+                variant="primary"
+                type="button"
+                disabled={isPreviewing || !!scheduleError}
+                onClick={onPreview}
+              >
+                {isPreviewing
+                  ? t("admin-harvesters:actions.previewing")
+                  : t("admin-harvesters:actions.preview")}
+              </Button>
+            )}
             {canEdit && (
               <Button
                 variant="primary"

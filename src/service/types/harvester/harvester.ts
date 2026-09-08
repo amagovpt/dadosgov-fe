@@ -110,8 +110,6 @@ export interface HarvestSourceCreatePayload {
   organization?: string;
   schedule?: string;
   config?: Record<string, unknown>;
-  filters?: Record<string, unknown>[];
-  features?: Record<string, boolean>;
   active?: boolean;
   autoarchive?: boolean;
 }
@@ -124,8 +122,6 @@ export interface HarvestSourceUpdatePayload {
   organization?: string;
   schedule?: string;
   config?: Record<string, unknown>;
-  filters?: Record<string, unknown>[];
-  features?: Record<string, boolean>;
   active?: boolean;
   autoarchive?: boolean;
 }
@@ -135,6 +131,8 @@ export interface HarvestBackend {
   label: string;
   filters: { label: string; key: string; type: string; description: string }[];
   features: { label: string; key: string; description: string; default: boolean }[];
-  extra_configs: { label: string; key: string; description: string; default: string }[];
+  // `harvest_extra_fields` drops the `type` that `as_dict()` emits and marshals
+  // `default` as a string field the backend never sets, so it arrives as null.
+  extra_configs: { label: string; key: string; description: string; default: string | null }[];
 }
 

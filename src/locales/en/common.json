@@ -23,6 +23,7 @@
   "updatedAt": "Updated on {{date}}",
   "readMore": "Read more",
   "readLess": "Read less",
+  "readNews": "Read news",
   "seeAllDatasets": "See all datasets",
   "seeAllDataStories": "See all Data Stories",
   "seeAllNews": "See all news",
@@ -149,7 +150,9 @@
       "searchIn": "Search “{{query}}” in {{type}}"
     },
     "noResultsFor": "No results found for \"{{query}}\"",
-    "tryDifferentTerms": "Try searching with different terms."
+    "tryDifferentTerms": "Try searching with different terms.",
+    "error": "The search could not be completed.",
+    "retry": "Try again"
   },
   "filters": {
     "format": {

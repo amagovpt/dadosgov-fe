@@ -16,7 +16,9 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createOrgHarvesterColumns,
+  filterHarvestersBySearch,
   filterHarvestersByStatus,
+  HARVESTERS_FETCH_PAGE_SIZE,
   sortHarvesters,
   type HarvesterSortField,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
@@ -42,6 +44,8 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
     currentPage,
     setCurrentPage,
     pageSize,
+    searchQuery,
+    handleSearch,
     sortField,
     sortOrder,
     handleSort,
@@ -67,7 +71,7 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
     async function loadHarvesters() {
       setIsLoading(true);
       try {
-        const response = await fetchOrgHarvesters(resolvedOrgId, 1, 9999);
+        const response = await fetchOrgHarvesters(resolvedOrgId, 1, HARVESTERS_FETCH_PAGE_SIZE);
         setHarvesters(response.data || []);
       } catch (error) {
         console.error("Error loading org harvesters:", error);
@@ -80,8 +84,12 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
   }, [orgId]);
 
   const filteredHarvesters = useMemo(
-    () => filterHarvestersByStatus(harvesters, filters.statusFilter),
-    [harvesters, filters.statusFilter]
+    () =>
+      filterHarvestersByStatus(
+        filterHarvestersBySearch(harvesters, searchQuery),
+        filters.statusFilter
+      ),
+    [harvesters, searchQuery, filters.statusFilter]
   );
 
   const sortedHarvesters = useMemo(
@@ -155,6 +163,7 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,
+        onChange: handleSearch,
       }}
       filters={
         <StatusFilterSelect

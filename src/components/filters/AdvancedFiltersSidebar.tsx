@@ -19,6 +19,14 @@ export interface AdvancedFilterGroup {
   minCharsMessage?: string;
   emptyMessage?: string;
   /**
+   * True when the last suggestion request for this group failed. Kept separate
+   * from an empty `data`, because "the search could not run" and "the search
+   * found nothing" must not read the same to the user (LEDG-2326).
+   */
+  hasError?: boolean;
+  /** Overrides the default error message, in the shape of `emptyMessage`. */
+  errorMessage?: string;
+  /**
    * Display labels for selected ids (`suggest` groups only). Lets a selected
    * item keep its human-readable name once it drops out of the live
    * suggestions list (e.g. after clearing the search input).
@@ -31,7 +39,12 @@ interface AdvancedFiltersSidebarProps {
   searchQueries: Record<string, string>;
   getActiveValues: (paramName: string) => string[];
   onToggleValue: (paramName: string, value: string) => void;
-  onSearchChange: (groupName: string, value: string) => void;
+  /**
+   * Called with the group's `param` — its query-string name — not its display
+   * label. Callers route on it to know which suggestion to fetch; a translated
+   * label could never be compared safely (LEDG-2326).
+   */
+  onSearchChange: (paramName: string, value: string) => void;
   onClearGroup?: (paramName: string) => void;
   showClearActions?: boolean;
   checkboxIdPrefix: string;
@@ -54,7 +67,7 @@ export function AdvancedFiltersSidebar({
   return (
     <Sidebar variant="filter" className="font-bold">
       {groups.map((group) => {
-        const searchQuery = searchQueries[group.name] || "";
+        const searchQuery = searchQueries[group.param] || "";
         const activeValues = getActiveValues(group.param);
         const activeCount = activeValues.length;
 
@@ -106,7 +119,7 @@ export function AdvancedFiltersSidebar({
                     hideLabel
                     placeholder={group.searchPlaceholder || t("search.placeholder")}
                     value={searchQuery}
-                    onChange={(event) => onSearchChange(group.name, event.target.value)}
+                    onChange={(event) => onSearchChange(group.param, event.target.value)}
                   />
                   <Icon
                     name="agora-solid-search"
@@ -137,12 +150,26 @@ export function AdvancedFiltersSidebar({
                       {group.minCharsMessage || t("search.minCharsMessage")}
                     </p>
                   )
-                ) : (
+                ) : group.hasError ? null : (
                   <p className="text-sm text-neutral-500">
                     {group.emptyMessage || t("search.noResults")}
                   </p>
                 )}
               </div>
+              {group.hasError && (
+                <div className="mt-2 flex flex-col items-start gap-2">
+                  <p className="text-sm text-danger-700" role="status">
+                    {group.errorMessage || t("search.error")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onSearchChange(group.param, searchQuery)}
+                    className="text-xs cursor-pointer text-primary-500 underline hover:text-primary-700"
+                  >
+                    {t("search.retry")}
+                  </button>
+                </div>
+              )}
             </div>
           </SidebarItem>
         );

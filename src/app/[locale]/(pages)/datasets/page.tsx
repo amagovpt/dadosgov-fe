@@ -1,5 +1,5 @@
 import { fetchDatasetsListing } from "@/service/api/datasets";
-import { DatasetFilters } from "@/service/types/dataset";
+import { parseDatasetsFiltersFromSearchParams } from "@/utils/datasetsListingQuery";
 import DatasetsClient from "@/components/datasets/DatasetsClient";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 import { Metadata } from "next";
@@ -48,26 +48,13 @@ export default async function Page({
   const resolved = await searchParams;
   const page = Number(resolved?.page) || 1;
 
-  const filters: DatasetFilters = {};
-  if (resolved?.q) filters.q = String(resolved.q);
-  if (resolved?.tag) filters.tag = resolved.tag;
-  if (resolved?.license) filters.license = resolved.license;
-  if (resolved?.format) filters.format = resolved.format;
-  if (resolved?.frequency) filters.frequency = resolved.frequency;
-  if (resolved?.schema) filters.schema = String(resolved.schema);
-  if (resolved?.geozone) filters.geozone = String(resolved.geozone);
-  if (resolved?.granularity) filters.granularity = String(resolved.granularity);
-  if (resolved?.organization) filters.organization = resolved.organization;
-  if (resolved?.badge) filters.badge = resolved.badge;
-  if (resolved?.sort) filters.sort = String(resolved.sort);
-  if (resolved?.featured) filters.featured = resolved.featured === "true";
-  if (resolved?.modified_since) filters.modified_since = String(resolved.modified_since);
-
-  // Relevance sort: when no search query, fall back to default (most recent first)
-  const apiFilters = { ...filters };
-  if (!apiFilters.sort && !apiFilters.q) {
-    apiFilters.sort = "-created";
-  }
+  // Parsed by the shared helper (which also applies the default sort) rather
+  // than field by field here. The hand-rolled copy this replaces read `geozone`
+  // and `granularity` through `String(...)`, so two selected values arrived as
+  // the array stringified to `"a,b"` — a value matching nothing, which is why
+  // the spatial filters returned an empty listing as soon as a second option
+  // was picked.
+  const apiFilters = parseDatasetsFiltersFromSearchParams(resolved);
 
   // LEDG-1836: one aggregated call replaces the prior Promise.all of 14 fetches
   // (listing + 9 filter counts + organizations + licenses + frequencies + granularities).

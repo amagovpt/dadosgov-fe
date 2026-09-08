@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
-import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
@@ -12,8 +11,10 @@ import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import { createHarvester, previewHarvestSource } from "@/service/api/harvesters";
 import type { HarvestPreviewJob } from "@/service/types/harvester";
 import HarvesterProducerSection from "@/components/admin/harvesters/form-sections/HarvesterProducerSection";
+import { useHarvesterProducerOptions } from "@/components/admin/harvesters/hooks/useHarvesterProducerOptions";
 import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sections/HarvesterDescriptionSection";
 import HarvesterImplementationSection from "@/components/admin/harvesters/form-sections/HarvesterImplementationSection";
+import { useHarvesterBackendOptions } from "@/components/admin/harvesters/hooks/useHarvesterBackendOptions";
 import HarvesterPreviewSection from "@/components/admin/harvesters/form-sections/HarvesterPreviewSection";
 import HarvesterPublishStep from "@/components/admin/harvesters/form-steps/HarvesterPublishStep";
 import { getCreateHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
@@ -22,6 +23,13 @@ import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import {
+  seedFeatureValues,
+  toggleFeatureValue,
+  selectBackendExtraConfigs,
+  selectBackendFeatures,
+  selectBackendFilters,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 import {
   buildHarvesterCreatePayload,
   type HarvesterFormField,
@@ -34,7 +42,8 @@ interface HarvestersNewClientProps {
 
 export default function HarvestersNewClient({ pageContent }: HarvestersNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
-  const { user } = useAuth();
+  const producer = useHarvesterProducerOptions();
+  const backendOptions = useHarvesterBackendOptions();
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 3;
@@ -48,9 +57,9 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ mode: string; type: string; value: string }[]>([]);
   const [selectedType, setSelectedType] = useState("");
-  const [isGeoDcat, setIsGeoDcat] = useState(false);
-  const [showRemoteUrlPrefix, setShowRemoteUrlPrefix] = useState(false);
-  const [remoteUrlPrefix, setRemoteUrlPrefix] = useState("");
+  const [featureValues, setFeatureValues] = useState<Record<string, boolean>>({});
+  const [extraConfigValues, setExtraConfigValues] = useState<Record<string, string>>({});
+  const [visibleExtraConfigKeys, setVisibleExtraConfigKeys] = useState<string[]>([]);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewJob, setPreviewJob] = useState<HarvestPreviewJob | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -66,10 +75,27 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors<HarvesterFormField>();
 
+  // The keys the selected backend declares. `HarvestConfigField` rejects any
+  // other key, so seeding a filter with a literal (it used to be "organization")
+  // only works by accident and breaks as soon as a backend declares something
+  // else. The edit screen derives it through the same selector.
+  const activeBackendFilters = useMemo(
+    () => selectBackendFilters(backendOptions.backends, selectedType),
+    [backendOptions.backends, selectedType],
+  );
+  const activeBackendFeatures = useMemo(
+    () => selectBackendFeatures(backendOptions.backends, selectedType),
+    [backendOptions.backends, selectedType],
+  );
+  const activeBackendExtraConfigs = useMemo(
+    () => selectBackendExtraConfigs(backendOptions.backends, selectedType),
+    [backendOptions.backends, selectedType],
+  );
+
   function addFilter() {
     setFilters((previousFilters) => [
       ...previousFilters,
-      { mode: "include", type: "organization", value: "" },
+      { mode: "include", type: activeBackendFilters[0]?.key ?? "", value: "" },
     ]);
   }
 
@@ -95,6 +121,11 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
       active: isEnabled,
       autoarchive: isAutoArchive,
       filters,
+      // Keyed on what the selected backend declares, and re-seeded when the
+      // type changes, so a value left over from another type cannot reach the
+      // API — `HarvestConfigField` rejects any key the backend does not declare.
+      features: featureValues,
+      extraConfigs: extraConfigValues,
     });
   }
 
@@ -122,11 +153,14 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
       producer: selectedProducerRef.current,
       name: harvesterName,
       url: harvesterUrl,
+      backend: selectedTypeRef.current,
       requireOrganizationProducer: true,
+      requireBackend: true,
       messages: {
         harvesterProducer: t("admin-harvesters:form.validationErrors.producer"),
         harvesterName: t("admin-harvesters:form.validationErrors.name"),
         harvesterUrl: t("admin-harvesters:form.validationErrors.url"),
+        harvesterType: t("admin-harvesters:form.validationErrors.type"),
       },
     });
 
@@ -209,13 +243,17 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                 </p>
 
                 <HarvesterProducerSection
-                  organizations={(user?.organizations || []).map((organization) => ({
-                    id: organization.id,
-                    name: organization.name,
-                  }))}
+                  organizations={producer.organizations}
                   selectedProducerRef={selectedProducerRef}
                   hasProducerError={hasError("harvesterProducer")}
-                  onProducerChange={() => clearError("harvesterProducer")}
+                  onProducerChange={(value) => {
+                    producer.rememberSelection(value);
+                    clearError("harvesterProducer");
+                  }}
+                  searchable={producer.isSearchable}
+                  onSearch={producer.onSearch}
+                  searchNoResultsText={producer.noResultsText}
+                  hasNoEligibleOrganization={producer.hasNoEligibleOrganization}
                 />
 
                 <HarvesterDescriptionSection
@@ -238,30 +276,55 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
                 />
 
                 <HarvesterImplementationSection
+                  backends={backendOptions.backends}
+                  activeBackendFilters={activeBackendFilters}
+                  typeNoResultsText={backendOptions.noResultsText}
+                  hasNoBackend={backendOptions.hasNoBackend}
+                  hasTypeError={hasError("harvesterType")}
                   selectedTypeRef={selectedTypeRef}
                   selectedType={selectedType}
                   filters={filters}
-                  isGeoDcat={isGeoDcat}
-                  showRemoteUrlPrefix={showRemoteUrlPrefix}
-                  remoteUrlPrefix={remoteUrlPrefix}
+                  activeBackendFeatures={activeBackendFeatures}
+                  activeBackendExtraConfigs={activeBackendExtraConfigs}
+                  featureValues={featureValues}
+                  extraConfigValues={extraConfigValues}
+                  visibleExtraConfigKeys={visibleExtraConfigKeys}
                   isEnabled={isEnabled}
                   isAutoArchive={isAutoArchive}
                   onTypeChange={(value) => {
                     setSelectedType(value);
-                    setShowRemoteUrlPrefix(false);
-                    setRemoteUrlPrefix("");
-                    setIsGeoDcat(false);
+                    if (value) clearError("harvesterType");
+                    // Re-seed from the new backend's own metadata: a feature or
+                    // extra config the previous type declared is not a key this
+                    // one accepts, and `HarvestConfigField` would reject it.
+                    setFeatureValues(
+                      seedFeatureValues(selectBackendFeatures(backendOptions.backends, value)),
+                    );
+                    setExtraConfigValues({});
+                    setVisibleExtraConfigKeys([]);
                     setFilters([]);
                   }}
                   onAddFilter={addFilter}
                   onRemoveFilter={removeFilter}
                   onUpdateFilter={updateFilter}
-                  onToggleGeoDcat={() => setIsGeoDcat((value) => !value)}
-                  onShowRemoteUrlPrefix={() => setShowRemoteUrlPrefix(true)}
-                  onRemoteUrlPrefixChange={(event) => setRemoteUrlPrefix(event.target.value)}
-                  onClearRemoteUrlPrefix={() => {
-                    setShowRemoteUrlPrefix(false);
-                    setRemoteUrlPrefix("");
+                  onToggleFeature={(key) =>
+                    setFeatureValues((previous) => toggleFeatureValue(previous, key, activeBackendFeatures))
+                  }
+                  onShowExtraConfig={(key) =>
+                    setVisibleExtraConfigKeys((previous) =>
+                      previous.includes(key) ? previous : [...previous, key],
+                    )
+                  }
+                  onExtraConfigChange={(key, value) =>
+                    setExtraConfigValues((previous) => ({ ...previous, [key]: value }))
+                  }
+                  onClearExtraConfig={(key) => {
+                    setVisibleExtraConfigKeys((previous) => previous.filter((item) => item !== key));
+                    setExtraConfigValues((previous) => {
+                      const next = { ...previous };
+                      delete next[key];
+                      return next;
+                    });
                   }}
                   onToggleEnabled={() => setIsEnabled((value) => !value)}
                   onToggleAutoArchive={() => setIsAutoArchive((value) => !value)}

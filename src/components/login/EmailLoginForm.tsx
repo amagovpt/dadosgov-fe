@@ -33,6 +33,12 @@ export function EmailLoginForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // The disabled submit button is not the gate it looks like: implicit
+    // submission does not consult it, so pressing Enter in a field used to send
+    // the credentials with the terms unaccepted. The terms are the consent for
+    // processing personal data, so the check belongs here, where every path
+    // through the form passes.
+    if (!loginEmail || !loginPassword || !termsAccepted) return;
     onSubmit(loginEmail, loginPassword);
   };
 
@@ -50,10 +56,18 @@ export function EmailLoginForm({
         className="flex flex-col gap-24"
         onSubmit={handleSubmit}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            e.currentTarget.requestSubmit();
-          }
+          // Only from a text field. This used to fire on any Enter that reached
+          // the form, which cancelled the default action of everything inside
+          // it: focusing "Recuperar palavra-passe" and pressing Enter submitted
+          // the form instead of opening recovery, and the terms link could not
+          // be followed by keyboard at all. Enter in an <input> already submits
+          // natively, so the handler is only here to keep that working while
+          // the rest of the form stops being hijacked.
+          if (e.key !== "Enter") return;
+          if (!(e.target instanceof HTMLInputElement)) return;
+          if (e.target.type === "checkbox") return;
+          e.preventDefault();
+          e.currentTarget.requestSubmit();
         }}
       >
         <InputText

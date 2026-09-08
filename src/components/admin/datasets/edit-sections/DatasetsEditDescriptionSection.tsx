@@ -61,6 +61,7 @@ export default function DatasetsEditDescriptionSection({
           placeholder={t("edit.titlePlaceholder")}
           id="edit-title"
           defaultValue={loadedTitle}
+          required
           onChange={onTitleChange}
           hasError={!!formErrors.title}
           hasFeedback={!!formErrors.title}

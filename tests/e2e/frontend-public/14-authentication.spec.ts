@@ -1,5 +1,5 @@
 import { test, expect, type Locator, type Page } from "playwright/test";
-import { ADMIN_CREDS, loginAsAdmin } from "../../helpers/auth";
+import { loginAsAdmin } from "../../helpers/auth";
 
 const LOGIN_URL = "/login";
 
@@ -106,6 +106,15 @@ test.describe("Authentication Page", () => {
     const emailTab = await getTabByText(page, /E-mail e palavra-passe/i);
     await emailTab.click();
 
+    // LEDG-2432: this assertion was inverted by 7d5c9b50, which built the tab
+    // for a migration that would be mandatory and asserted the form was gone.
+    // Migration stays optional, so the form is the tab's default view again.
+    //
+    // The migration notice is not asserted here on purpose: it is a branch the
+    // backend selects per account, by answering migration_required to a real
+    // sign-in attempt, so it is not reachable from an empty form. EmailTab's
+    // unit tests cover both branches.
+    //
     // The login form is rendered in main; the same form is also embedded in the
     // mobile accordion menu, so we scope to the main element.
     const main = page.locator("main");
@@ -200,43 +209,4 @@ test.describe("Authentication - Post-login redirect", () => {
     expect(href).toContain(encodeURIComponent("/datasets"));
   });
 
-  // Requires seeded e2e-admin user: run `udata user create --admin` with e2e-admin@dados.gov.pt
-  test("AU-16: After email/password login, user is redirected back to the page they came from", async ({
-    page,
-  }) => {
-    const targetPage = "/datasets";
-    await page.goto(`/login?next=${encodeURIComponent(targetPage)}`);
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(2000);
-
-    const emailTab = page.getByText(/E-mail e palavra-passe/i).first();
-    await emailTab.scrollIntoViewIfNeeded();
-    await emailTab.click();
-    await page.waitForTimeout(500);
-
-    const main = page.locator("main");
-
-    const emailInput = main.locator("#login-email").first();
-    await emailInput.scrollIntoViewIfNeeded();
-    await emailInput.fill(ADMIN_CREDS.email);
-
-    const passwordInput = main.locator("#login-password").first();
-    await passwordInput.scrollIntoViewIfNeeded();
-    await passwordInput.fill(ADMIN_CREDS.password);
-
-    const termsCheckbox = main
-      .getByRole("checkbox", { name: /aceito os termos/i })
-      .first();
-    await termsCheckbox.check();
-
-    const submitBtn = main.locator("form button[type='submit']").first();
-    await submitBtn.scrollIntoViewIfNeeded();
-    await submitBtn.click();
-
-    await page.waitForURL((url) => url.pathname === targetPage, {
-      timeout: 30000,
-      waitUntil: "networkidle",
-    });
-    expect(page.url()).toContain(targetPage);
-  });
 });

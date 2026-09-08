@@ -14,7 +14,8 @@ import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 export async function fetchOrgDiscussions(
   orgId: string,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  sort?: string
 ): Promise<APIResponse<Discussion>> {
   try {
     const params = new URLSearchParams({
@@ -22,6 +23,7 @@ export async function fetchOrgDiscussions(
       page: String(page),
       page_size: String(pageSize),
     });
+    if (sort) params.set("sort", sort);
     const res = await fetch(`${API_BASE_URL}/discussions/?${params.toString()}`, {
       cache: "no-store",
     });
@@ -85,13 +87,15 @@ export async function fetchDiscussions(
 
 export async function fetchTopics(
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  sort?: string
 ): Promise<APIResponse<Topic>> {
   try {
-    const res = await fetch(
-      `${API_V2_BASE_URL}/topics/?page=${page}&page_size=${pageSize}`,
-      { cache: "no-store" }
-    );
+    const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+    if (sort) params.set("sort", sort);
+    const res = await fetch(`${API_V2_BASE_URL}/topics/?${params.toString()}`, {
+      cache: "no-store",
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch topics: ${res.statusText}`);

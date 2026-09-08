@@ -38,7 +38,7 @@
     "noOrganization": "Sem organização",
     "defaultType": "Aplicação",
     "description": "Descrição",
-    "discussions": "Discussões",
+    "discussions": "Discussões ({{count}})",
     "tags": "Etiquetas",
     "lastUpdate": "Última atualização",
     "creationDate": "Data de criação",

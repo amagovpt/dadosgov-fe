@@ -30,6 +30,8 @@ export function LoginContent() {
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set only from the backend's `migration_required` answer, never from a config
+  // flag read here — see the note in EmailTab (LEDG-2432).
   const [migrationRequired, setMigrationRequired] = useState(false);
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
@@ -65,8 +67,10 @@ export function LoginContent() {
       await login(payload);
       window.location.href = nextUrl;
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : t("errors.loginFailed");
+      const message = err instanceof Error ? err.message : t("errors.loginFailed");
+      // /auth/login answers 403 { message: "migration_required" } when
+      // /saml/migration/check says this account must link to CMD/eIDAS first.
+      // The notice is shown because the backend said so, for this account.
       if (message === "migration_required") {
         setMigrationRequired(true);
         setError(null);
@@ -91,7 +95,7 @@ export function LoginContent() {
   const showMainView = !cmdModalOpen && !eidasModalOpen;
 
   return (
-    <main className="relative min-h-screen flex-grow bg-white">
+    <main className="relative min-h-screen grow bg-white">
       <div className="login-page container mx-auto max-w-7xl px-16 pb-64 pt-32">
         {showMainView && (
           <div>
@@ -138,6 +142,7 @@ export function LoginContent() {
                 <TabHeader>{t("tabs.email")}</TabHeader>
                 <TabBody>
                   <EmailTab
+                    samlEnabled={samlEnabled}
                     prefilledEmail={prefilledEmail}
                     isLoading={isLoading}
                     error={error}

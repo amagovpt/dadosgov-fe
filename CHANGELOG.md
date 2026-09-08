@@ -6,6 +6,674 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): restore the email/password form alongside the migration entry point**
+  - The "E-mail e palavra-passe" tab had been reduced to the migration notice on
+    the assumption that linking a legacy account to CMD/eIDAS would become
+    mandatory. It stays optional, so accounts that had not migrated were left with
+    no way into the portal at all — the tab held the only sign-in form, and the
+    wizard's credentials screen proves ownership during linking rather than
+    granting a session.
+  - The form is the tab's default view again, with password recovery reachable from
+    it. This is a merge and not a revert: the notice keeps the shape it grew
+    (SAML gate, the two linking actions, support links), and the tab still offers
+    the association path — it just stops being the only thing there. `EmailTab` now
+    takes the union of both prop sets, so the notice still receives `samlEnabled`
+    and its dead-control gate survives; restoring the older component wholesale
+    would have passed two props instead of five and disabled that gate silently.
+  - The notice appears because the backend asked for it, per account: `/auth/login`
+    answers `403 { message: "migration_required" }` after consulting
+    `/saml/migration/check`, and that answer is the only thing that flips the tab.
+    Nothing in the frontend reads the migration setting, which is what makes the
+    tab behave correctly whichever value it holds — reading it here is what removed
+    the form in the first place. A source-level test pins that, because no render
+    distinguishes "the backend told us" from "we guessed from configuration".
+  - Covered by new unit tests for the tab's three-way branch and for the
+    `migration_required` handling, and the end-to-end assertion that the tab has a
+    password form was restored — it had been inverted by the same change.
+
+- **fix(login): stop `?next=` sending an authenticated visitor off-origin**
+  - Restoring the sign-in form gave `?next=` a browser sink for the first time:
+    it now reaches `window.location.href`, where before it only became a query
+    parameter for the backend. The check standing in front of it did not hold —
+    it tested that the value starts with `/` and not with `//`, and the URL
+    parser does not read a string that way. It treats a backslash as an
+    authority separator and strips tab, LF and CR before parsing at all, so
+    `/\evil.com`, `/\/evil.com` and the tab and newline variants all resolved to
+    a different site. On a login page that is an open redirect: the visitor
+    authenticates successfully on the real portal and lands on a copy of it,
+    ready to be asked for the password again.
+  - The value is now parsed the way the browser will parse it and kept only when
+    the origin matches, so the check is about what the URL means rather than how
+    it is spelled — there is no further spelling to find. The docblock that
+    asserted an absolute URL could never get through says what actually holds it
+    up now.
+  - Accepting the terms is also a real gate again. The disabled submit button
+    was not one: implicit submission does not consult it, so pressing Enter in a
+    field sent the credentials with the consent checkbox unticked. And the form's
+    Enter handler cancelled the default action of everything inside it, which
+    meant "Recuperar palavra-passe" submitted the form instead of opening
+    recovery and the terms link could not be followed by keyboard at all.
+
+- **fix(header): put the navigation bar and the dropdown grid back in the container, and shrink the wordmark to fit its box**
+  - AgoraDS 4 stopped composing the navigation bar from the `container` utility. In 3
+    it was `max-width: 1216px; margin-inline: auto` with the container's own
+    `padding-inline`, exactly like the general bar above it; in 4 it is
+    `margin-inline: 32px → 64px → 112px` with no max-width and no centering. The
+    general bar and every page section stayed a 1216px centered box, so the two
+    systems only lined up at exactly 1440px — at 1920px the logo sat 240px to the
+    left of the top bar, and below 1440px the row was narrower than the page
+    content. The row is a container again at every width.
+  - The mega-menu card grid had the same problem one level down. AgoraDS 4 gives the
+    element the portal renders its cards into a single rule — `margin-bottom: 32px;
+    padding-inline: 112px` — with no max-width and no centering, so the grid was
+    full-bleed minus a 112px gutter: 1696px wide at 1920px, against the 1216px of the
+    navigation bar directly above it. In 3 that element carried the whole container
+    recipe, which is what it carries again.
+  - Renamed the injected ecosystem `<li>` from `ecosystem-panel-menu` to
+    `ecosystem-custom-menu`. AgoraDS 4 added an ecosystem panel of its own and claimed
+    that class name, styling it with `padding-block: 14px !important` for the DS's own
+    button — so the portal's hand-made list item, which had used the name since before
+    the class existed, silently gained 28px. Its 60px anchor became 88px, which made it
+    the tallest item in the general bar and stretched the bar from 60px to 88px; the
+    design system's own buttons then sat at the top of that taller bar while the two
+    elements the portal injects centred themselves in it, giving the row two visual
+    baselines. Measured after the rename: bar back to 60px, every item centred on y=30.
+  - Stopped the submenu "Voltar" button landing on top of the design system's own
+    "Voltar ao início" in the responsive menu. The rule that lifts it out of the grid
+    was scoped to `header[data-submenu]`, so it applied in both menus — but only the
+    desktop dropdown has the panel it positions against and the 80px of padding
+    reserved for it. It is now absolute only inside `.navigation-links-layout`, and
+    stays in the grid spanning the row in the burger panel, where the two buttons read
+    as the separate controls they are: ours returns to the parent card list, the design
+    system's to the menu root.
+  - Gave the header dropdown's card grid a two-column step between 768px and 1279px.
+    It went straight from one column to three at `xl`, so the whole tablet band sat on
+    a single column — and inside the responsive menu that made each card as wide as the
+    panel (measured 957px at a 1100px viewport), stranding the icon at one edge of the
+    screen and the arrow at the other. Cards there are now 462px. Phones keep one
+    column, where a card per row is right, and the desktop dropdown still uses three.
+  - Evened out the padding on the navigation bar's dropdown root, so "Recursos" shares
+    a baseline with the five plain links beside it. The links are anchors padded
+    `8px/8px`; a dropdown root is a button that AgoraDS 4 pads `16px` top and `8px`
+    bottom (`.navigation-root-button`, another class absent from 3). Since the button
+    centres its label inside its content area, the uneven padding put that label 4px
+    lower than its neighbours. Only the top padding is overridden; the bottom keeps the
+    design system's value. Measured after: all six labels centred on the same line.
+  - Restored the 16px general-bar button gap between 768px and 1279px. AgoraDS 4
+    moved its 32px step down from the `xl` breakpoint to `md`, doubling the spacing
+    between the language, search, ecosystem and account buttons on tablet widths.
+    At 1280px and up both versions already agree on 32px.
+  - The wordmark is now `logo-dados-gov.svg`, which the repo already shipped for
+    `global-error`. Its intrinsic 254x43 is the design system's own `.logo` width, so
+    it renders undistorted with no scaling rule. It replaces a 1223x377 PNG that
+    Tailwind preflight's `img { height: auto }` stretched to 251x77 — overriding the
+    `height` attribute `next/image` writes — which had forced a local
+    `height: auto` escape hatch on a box the DS specs at 32px and dragged the row to
+    ~113px. Next 16 serves any `.svg` source unoptimized, so the priority logo now
+    also skips the image optimizer.
+  - Dropped four selectors that matched nothing: `.agora-general-bar`,
+    `.agora-languages`, `.agora-unauthenticated` and `.agora-areas`. None of them
+    exists in AgoraDS 4 — and none existed in 3 either, so the admin general bar had
+    never been flush-right with 112px padding as its rule implied. Removed rather
+    than renamed to `.general-bar`: that would not restore old behaviour, it would
+    newly override the DS layout with a padding that fights the container.
+
+- **fix(tailwind): restore the theme tokens and the override order the v4 migration dropped**
+  - The `@theme` block ported the tokens the old `tailwind.config.ts` declared
+    under `theme.extend.*`, but not the namespaces v3 left on the Tailwind
+    defaults. AgoraDS resets those namespaces to `initial`, so with nothing
+    declared they generate nothing: `sm` (576px) and `lg` (1024px) — a project
+    override of `theme.screens`, and 71 `lg:`/`sm:` utilities across 23 files,
+    the footer and every listing grid included — plus `--leading-*`,
+    `--tracking-*`, `--font-weight-*` (the DS ships only `bold` and `medium`)
+    and the `--container-*` scale behind the named `max-w-*` sizes.
+  - `leading-6` and `leading-8` were worse than missing. With no `--leading-*`
+    key, v4 falls back to the `--spacing-*` namespace, so they resolved to 6px
+    and 8px instead of 1.5rem and 2rem — crushed line height rather than a
+    utility that visibly does nothing.
+  - The AgoraDS `index.css` now loads *before* `tailwindcss/utilities`, against
+    the order the DS README gives. The DS ships its component CSS unlayered, so
+    loading it last made every single-class DS rule win the specificity tie
+    against the portal's utilities — the reverse of v3, where the DS sheets came
+    first and `@tailwind utilities` last. The portal passes `className` to DS
+    components in hundreds of places and depends on winning those ties.
+
+- **fix(header)!: rebuild the navigation bar for the AgoraDS 4 component contract**
+  - AgoraDS 4 only renders the navigation items it finds inside a
+    `<NavigationSection>`; a flat list of links and roots left the desktop bar
+    with an empty `<ul>`. The items now sit in one section.
+  - `NavigationLink` changed from a `LinkWrapper` (a `<span>`) to an `Anchor`, so
+    the nav cards were being wrapped in an href-less `<a>` — around the card's
+    own anchor — picking up the DS's `inline-flex justify-center min-h-[44px]`
+    box, its `children-wrapper` typography and its underline. That is what
+    disfigured the dropdown, and the nested anchors made the server HTML
+    unparseable and hydration diverge. The cards moved to
+    `<NavigationFreestyle>`, the DS's escape hatch for custom panel content, and
+    the portal now owns the grid (`.header-nav-cards`) and the `data-group`
+    wrappers the submenu CSS keys off — instead of reaching into the DS's
+    `.links > .link-wrapper`, which v4 both renamed and nested one level deeper.
+  - The `<Areas>` declaration left the general bar. AgoraDS 4 no longer renders
+    areas there and now reads the active area's `value` as the index of the
+    navigation section to show, so declaring the portal's areas (`"1"`/`"2"`)
+    pointed the bar at a section that does not exist. The portal only ever had
+    one visible area and portals its own general-bar label, so with none
+    declared the DS falls back to section 0 on every route — how the bar behaved
+    before.
+  - Two CSS overrides had to go the other way. `position: relative` on the open
+    panel collapsed the mega-menu to the width of its `<li>`, because v4 renders
+    the panel inline as `position: absolute; width: 100%` instead of portalling
+    it. And `.logo` became a fixed 254x32 box where v3 sized it to its content,
+    letting the 256x79 wordmark overflow the header by 23px; the box is sized to
+    the image again. The real fix there is a logo asset shaped for the DS box —
+    `logo-dados-gov.svg` already has the 254x43 viewBox the markup asks for.
+
+- **build(tailwind)!: move the theme into CSS for Tailwind v4 and AgoraDS 4**
+  - AgoraDS 4 is built on Tailwind v4, declares it as a peer dependency and no
+    longer exports `AgoraTailwindConfig` or ships `artifacts/dist/tailwind.css`.
+    It publishes `theme.css` (the `@theme` source) and `index.css` instead, so
+    the upgrade forced the Tailwind major with it — `tailwind.config.ts` is gone
+    and the theme is declared in `globals.css`.
+  - v4 ignores `safelist` and `corePlugins`, and only auto-loads a JS config
+    through `@config`. The tokens the portal adds on top of the Agora scale —
+    spacing 2/4/6/12/20, `text-24/32/40`, the brand colours and the `next/font`
+    mapping for `font-sans` — moved to an `@theme` block, without which the
+    utilities that use them are silently not generated at all.
+  - The datastory iframe heights, which come from Squidex and are applied at
+    runtime, moved from `tailwind-safelist.ts` to `@source inline(...)`. The
+    AgoraDS pattern safelist needed no port: its own `theme.css` now carries the
+    equivalent directive.
+  - The AgoraDS `theme.css` opens with a Google Fonts `@import` for Noto Sans,
+    which survives compilation and is blocked by `style-src`. The CSP was left
+    as it is: the typeface is already self-hosted through `next/font`, so the
+    block costs a console entry and nothing else, and opening the policy for a
+    font we serve ourselves would be the worse trade.
+  - The `.header-card-wrapper` overrides left `@layer utilities`. In v4 that
+    directive builds a real cascade layer, so the rules would have lost to every
+    unlayered rule, the AgoraDS sheet included. The hand-written `.rounded-8`
+    and `.pl-0` were dropped: both are AgoraDS tokens now, and as plain CSS they
+    were beating the utilities of the same name.
+
+
+- **fix(i18n): stop double-escaping interpolated translation values**
+  - Dates rendered as `Atualizado às 01&#x2F;09&#x2F;2026 10:27:06` on the
+    backoffice log page. i18next escapes interpolated values by default and
+    React escapes again whatever it renders as a text child, so the value was
+    escaped twice and the entities reached the screen. The same page showed the
+    tell: `Modificado: 01/09/2026` was correct because it is rendered directly,
+    and only the interpolated string was broken.
+  - Fixed once in the i18next init instead of per call. Around ten strings
+    interpolate a date — common, datasets, profile, organizations, learning,
+    admin-logs — and all were wrong; repairing one call site would have left
+    the rest, and the next one added would regress. Removing the interpolation
+    was not an option either, since word order is per locale (`Atualizado às
+    {{time}}` against `Updated at {{time}}`), which is what interpolation is
+    for.
+  - Values interpolated into translations are not only dates: around 130 call
+    sites interpolate, and many carry untrusted data — dataset and resource
+    titles, organisation and harvester names, addresses the user typed, and the
+    search query. All of them reach React text children or non-URL attributes,
+    which React escapes on render, so this is a change of who escapes rather
+    than whether anyone does. One visible consequence beyond dates: a search
+    query containing markup is now reflected as the literal text instead of as
+    escaped entities.
+  - The setting holds only while no translation output reaches a sink that
+    interprets markup, audited across the tree — no `t()` output goes to
+    `dangerouslySetInnerHTML`, a URL attribute, JSON-LD, `generateMetadata` or a
+    markdown renderer. That invariant is now pinned by a test that walks the
+    source and fails if a raw-HTML sink appears outside the one known
+    pass-through, which is where a comment now warns about it too. Nothing
+    covered the real i18next configuration until now, since every other test
+    mocks `react-i18next`.
+
+- **feat(migrate-account)!: one answer on the creation step, whatever the address turns out to be**
+  - The step routed on the backend's `candidate_found`: a claimable legacy
+    address went to the credentials screen, anything else taken raised "already
+    registered". Both readings answered, for any address anyone typed, whether
+    it has an account at the portal — the enumeration oracle the backend has
+    just stopped answering, reintroduced a layer up. `skipMigration` no longer
+    reads the field, and every submission lands on the mailbox screen. What
+    tells the two cases apart is the mail, which only the address's owner can
+    read.
+  - The copy of both post-submission screens loses its claim that an account
+    was created. "A sua conta já foi criada" is false for someone whose address
+    already had one, and the `confirmation-pending` screen is what a reload
+    shows next — saying it there would give the answer away in prose after the
+    API stopped giving it away in JSON. Both locales; `errorEmailTaken` goes
+    with the branch that raised it.
+  - The cost is the shortcut this replaces: the owner of a legacy address is
+    no longer walked straight to the credentials screen, and reads what to do
+    in the mail instead.
+  - Deploy this before the backend change. Against the old backend a taken
+    address still answers 409, which this client no longer special-cases, so
+    the user sees the generic creation error — degraded but correctable. The
+    reverse pairing is worse: the old client would promise a confirmation link
+    that was never sent.
+
+- **feat(login): make the email tab the account-association entry point**
+  - The "E-mail e palavra-passe" tab showed a password form and only revealed
+    the migration notice once the backend refused the login. The notice is now
+    the tab: the discontinuation warning, "Associar conta à Chave Móvel Digital"
+    and "Associar conta à Autenticação Europeia" with their support links, and
+    the "Representa uma entidade?" box. `EmailLoginForm` is gone, and with it
+    the last password sign-in surface in the frontend.
+  - Both buttons start a SAML login, so they carry the same `samlEnabled` gate
+    the CMD and eIDAS tabs use — otherwise an environment with SAML off would
+    leave the only controls on the tab firing a request that cannot succeed —
+    and they render the SAML error themselves, which nothing on this tab did
+    except the form that is now gone.
+  - The organisation box renders `StatusCard` directly instead of reusing
+    `SupportStatusCard`: that component carries page layout of its own and is
+    already rendered once below the tabs, so reusing it would stack two boxes
+    and nest a 12-column grid inside the tab panel.
+- **feat(migrate-account)!: land on the legacy credentials and finish by link**
+  - Three screens stood between the CMD/eIDAS return and the credentials the
+    user is actually asked for: "is this yours?", an account search, and a
+    choice of proof. The credentials screen does not depend on a candidate being
+    pointed — the backend links whichever account the password proves, homonyms
+    included — so a matched candidate and an ambiguous set of homonyms land on
+    the same screen and the user types the address they know. Only `no_match`
+    still opens account creation.
+  - The password no longer ends the flow: the wizard goes to "Validar email"
+    with the resend cooldown already armed, and the success screen and its
+    redirect to an authenticated home page are gone along with the session they
+    claimed. Every destination that pointed at a removed step is re-pointed, so
+    nothing dangles — including the own-email divert, which now lands on the
+    credentials screen pre-filled with the address just typed.
+  - A correct password can now fail on the send cap or on a lost wizard session.
+    Both are distinguished, because falling through to "credenciais inválidas"
+    would tell the user their password is wrong when it is not.
+  - Every screen names the provider the backend reports, so an eIDAS user stops
+    reading "Chave Móvel Digital"; `signInDescription` no longer promises the
+    account "será associada", which the click now does. The 25 locale keys
+    belonging to the removed screens are deleted rather than left for a
+    translator to maintain.
+- **feat(migrate-account): offer password recovery inline**
+  - "Esqueceu-se da palavra-passe?" navigated to screens that no longer exist.
+    Recovery now runs as a step inside the wizard, so the pending migration —
+    and the identity just proved at Autenticação.gov — survives it and the user
+    can come back and finish. The wizard wraps itself in
+    `GoogleReCaptchaProvider`, conditional on the key: without a provider the
+    recovery request goes out with a null token and the backend rejects it, so
+    the failure is silent rather than loud.
+- **test(e2e): authenticate through the login route instead of the form**
+  - `performLogin` drove the password form, which is what produced the
+    storage-state every backoffice project depends on. It now posts the same
+    fields to the same route through `page.request`, which shares the browser
+    context's cookie jar and baseURL, so the setup files and the disposable
+    project on port 3001 are unchanged.
+- **Deploy the backend change first**: the wizard depends on the new
+  `{"sent": true}` contract of `POST /saml/migration/confirm` and on the
+  provider field in `GET /saml/migration/pending`.
+
+- **feat(migrate-account): validate the legacy account by link instead of a code**
+  - The linking branch no longer asks for a 6-digit code. Choosing the email
+    method now sends a validation link to the address already on the account
+    and shows a waiting screen — "Validar email" — in the same shape as the one
+    the account-creation branch ends on, with the same resend-behind-a-cooldown
+    control. Following the link is what links the account and signs the user
+    in; nothing here is authenticated before that.
+  - A failed click comes back as `/migrate-account?flash=...`. A visitor
+    arriving that way has no wizard session, and the bootstrap effect answers a
+    missing session by pushing to `/login`, which swallowed the message they
+    were sent to read: the flash is latched on the first render and the
+    bootstrap skipped entirely when it is set. Every case — expired, used,
+    superseded — offers re-authentication, there being no session left to
+    resend from, and the backend deliberately not reissuing from a link click.
+  - The send-limit message is its own rather than the account-creation one:
+    that cap lasts the life of the account, this one lifts after an hour, so
+    "contact support" would be the wrong advice.
+  - `confirmMigration` stays for the password proof, narrowed to that arm;
+    `sendMigrationCode` and the code-step strings are gone from both locales.
+  - **Depends on the matching backend change, which must be deployed first**:
+    this screen calls `POST /saml/migration/send-link`, which does not exist
+    until that lands.
+
+- **chore(ci): run the test and typecheck workflows once per push, not twice**
+  - Both workflows triggered on `push` **and** `pull_request` with no branch
+    filter, so every push to a branch with an open PR started two identical runs
+    of each — four jobs, and the tests one runs `npm ci` twice on its own to
+    compare test counts against the base branch. The `push` trigger is now
+    limited to the environment branches (`develop`, `tst`, `ppr`, `main`), which
+    is what `udata-pt` already does, and feature branches stay covered by
+    `pull_request`.
+  - Added `concurrency` with `cancel-in-progress`, so a second push supersedes
+    the run for the first instead of queueing behind it. Nothing about what the
+    suites check changes.
+
+- **fix(migrate-account): the wizard follows the answer instead of reporting a rejection**
+  - On the account-creation step, typing the address of one's own portal
+    account got "an account with this email already exists" — and a message
+    telling the user to go back and link it, when the way there is not back
+    but a link called "Já tenho conta — procurar", and when the server had
+    just resolved that very account. `skipMigration` now recognises the
+    backend's `candidate_found` and returns it as an outcome rather than
+    throwing, and the creation handler routes to the confirm-account step with
+    the masked address, exactly as the search does — including re-reading the
+    pending state so the back controls do not loop the user through the search
+    a second time.
+  - **Nothing is linked by this.** The confirm-account step still asks whether
+    the account is theirs, and ownership is still proven afterwards by password
+    or by a code mailed to that account. The account-creation branch is
+    unchanged for people who really have no account.
+  - The remaining rejection now means one thing only — an account holds the
+    address and this identity cannot claim it — so `errorEmailTaken` says that,
+    instead of pointing at a step that does not exist.
+  - **Deploy the backend release first.** The new field rides on the existing
+    status code and error key, so an older backend never sends it — but this
+    build has also narrowed the already-registered message to "cannot be
+    linked, contact support", which is false advice while the backend still
+    refuses an address the user could in fact claim.
+  - Turning down the offered account no longer loops. "Não é a minha conta"
+    returns to the creation step with the address-taken message, and
+    submitting that same address again repeats the explanation instead of
+    silently offering the same account for ever. A failure to re-read the
+    pending state after a divert no longer strands the user either: the
+    candidate is pointed server-side regardless, so the wizard goes on.
+
+- **feat(migrate-account): stop asking what the backend already decided, and confirm the email before granting a session**
+  - The account-linking wizard opened on a manual choice — "Já possuo uma conta"
+    / "Criar nova conta" — repeating a decision the backend had already taken
+    when the CMD returned, and one the user is not equipped to make: whether a
+    legacy account matches depends on an email and name comparison they never
+    see. The wizard now reads that decision and opens on the right step. Three
+    outcomes, because the backend distinguishes them: one matching account goes
+    straight to linking, nothing matched goes straight to account creation, and
+    several homonyms go to the search — that last case still needs a human,
+    since nobody can say which account is whose, and falling into account
+    creation there would strand people who do have one.
+  - Creating an account no longer happens on a click. A new step collects an
+    email address, pre-filled with the CMD's own when no account holds it but
+    always requiring an explicit submission, and the account is created only
+    once that is supplied. Rejections (malformed, already in use) are
+    distinguishable and correctable in place — which needed `skipMigration` to
+    read the error body, something it alone among its siblings did not do, so
+    every failure arrived as one opaque message.
+  - The success screen changes nature: it no longer assumes a session and
+    redirects, because by design there is not one. It names the address the
+    confirmation link went to and offers a resend on a 60s cooldown. Logging in
+    with the CMD again before following the link — the obvious thing to try —
+    now lands on a screen that explains why access is still blocked, rather
+    than a silent bounce to the login.
+  - Clicking the confirmation link finally renders something. The backend
+    already redirected to the homepage with a `?flash=` marker, but nothing
+    displayed it. Three outcomes are shown, not two: an already-used link is a
+    success from the user's point of view, and reporting it as invalid sent
+    them chasing a problem they did not have.
+  - Requires the matching backend release: the wizard now sends an email to
+    `POST /saml/migration/skip` and reads two new fields from the pending
+    endpoint.
+
+- **feat(admin): widen column sorting across the backoffice tables**
+  - Sorting was uneven across the admin lists: the system topics table had none
+    at all, the system harvesters view declared it on one column where the org
+    view had four, and the organizations, posts and members tables each rendered
+    a column that could not be sorted. Those columns are now sortable, in both
+    directions, and nothing new was built for it — the existing
+    `useAdminListController`, `useClientTableState` and `listHelpers` were
+    enough, since a column becomes sortable by declaring `sortField`.
+  - The mechanism follows how each screen gets its data, because a client-side
+    sort over a server-paginated table orders one page while the arrow claims to
+    order the set. Topics, discussions, organizations and users sort through the
+    API; harvesters, posts and members sort the whole set they already load.
+  - The org discussions view was the worst case: it asked for discussions without
+    a page size, received the endpoint's default of 20, and sorted and paginated
+    those — so both the list and its total were truncated for any organization
+    with more. It now sorts and paginates on the server, which the endpoint
+    supports for title, creation and closing date.
+  - The system harvesters last-run cell showed only the end timestamp while the
+    comparator ordered by start-then-end-then-created. Cell and comparator now
+    agree, so the arrow cannot promise an order the rows do not show. Sorting
+    posts by state was also silently doing nothing: `published` is a date string,
+    so the old numeric comparison produced NaN.
+  - Two columns keep no sort control, on purpose. The topics dataset and reuse
+    counts are not serialised by the API at all, so they render 0 for every topic
+    and an arrow there would order nothing. Sorting organizations by member count
+    needs a sort key the API does not offer, and this screen paginates and
+    searches server-side, so a client-side sort would order one page. Both need a
+    backend change, tracked separately.
+
+- **fix(harvesters): authorize the harvester preview instead of relying on it not being checked**
+  - The edit screen previewed through `POST /harvest/source/preview/` without ever
+    naming an organization. That endpoint only tests
+    `organization.permissions["harvest"]` when the payload names one, so this was
+    the one path in the backoffice reaching a branch with no authorization test at
+    all — and it worked *because* nothing checked it. It also made the preview
+    lie: the harvest backends attribute previewed datasets to the source's
+    organization when there is one and fall back to the owner otherwise, with the
+    owner filled in from the session, so the preview showed the datasets belonging
+    to whoever clicked it rather than to the producer.
+  - The payload now names the source's organization, and the screen picks the
+    route that can actually authorize the person asking. Previewing an unsaved
+    config only makes sense with edit rights, and without them every field in the
+    configuration tab is disabled — so the config is the stored one, and
+    `GET /harvest/source/<id>/preview/` returns the same preview while authorizing
+    per source through `source.permissions["preview"]`. The route is chosen on
+    edit rights *and* the source having an organization, because those are the two
+    things the config route needs to authorize anyone: an organization's editors
+    have neither, and the owner of an owner-only source has edit rights but no
+    organization to be authorized against, so both go through the per-source
+    route that admits them.
+  - The preview button now follows `canPreview`, from the same backend-computed
+    `source.permissions` the save and delete buttons already use. It was the only
+    action on the form rendered unconditionally, and the harvester detail routes
+    sit under no route guard, so any authenticated account saw it.
+
+- **fix(filters): the advanced-filter search boxes now query the API, and a failure says so**
+  - Typing in **Palavras-chave**, **Formatos** or **Cobertura Espacial** returned
+    "Nenhum resultado encontrado" for every term, because the request was never
+    made. The sidebar handed `onSearchChange` the group's *translated label*
+    while the datasets filters compared it against internal identifiers —
+    `"tags"`, `"format"`, `"geozone"`. Nothing matched, so no suggestion was ever
+    fetched. Confirmed in a browser: with the three suggest endpoints
+    intercepted, no request was ever observed.
+  - Routing now goes by the group's `param` — the query-string name, stable
+    across locales and label changes — and every caller of the shared sidebar
+    compares params, including the reuses and organizations filters, which
+    happened to work by comparing the translated label. Two contracts in one
+    shared component is what produced the bug. The search page and the data
+    stories declare advanced filters that nothing renders, so they were never
+    affected and are left alone.
+  - A failure is also no longer painted as "no results". The suggest helpers
+    return `null` on failure instead of the `[]` they returned for both cases,
+    the sidebar gained an opt-in error state with a retry action, rendered
+    alongside the option list so it is still reported when the filter already
+    has a selection, and the datasets and reuses filters pass it. The requests
+    are debounced by 300 ms and a stale answer is discarded, so a slow failure
+    cannot show an error over a query that was answered. The console logging that
+    the failures already had is untouched. This is the confusion
+    `rethrowControlFlow` describes in its own docstring: "the backend being down
+    … renders as an empty result set, indistinguishable from a search that found
+    nothing".
+
+- **fix(datasets): stop collapsing multi-value listing filters into one value**
+  - Selecting a second option in "Cobertura espacial" or "Granularidade
+    espacial" emptied the listing. The datasets page read those two params with
+    `String(...)`, so two selected values arrived as the array stringified to
+    `"a,b"` — one value matching no zone and no granularity. The backend had
+    accepted repeats all along: `?granularity=country` returns 212 datasets,
+    `?granularity=other` 1052, and picking both returned 0 instead of the union.
+  - The page had grown its own copy of the query parsing next to
+    `parseDatasetsFilters`, and only the copy in the page was wrong. It now uses
+    the shared helper, which gained a variant for the `Record<string, string |
+    string[]>` shape a Server Component receives, and lists every repeatable
+    param in one place — so a filter can no longer be multi-value in the URL and
+    single-value on the way to the API. Covered by unit tests on the parser.
+- **fix(datasets): drop `format_family` values the API would reject**
+  - The API declares `format_family` with a closed set of choices and answers 400
+    on anything else, and the listing fetch deliberately has no fallback, so
+    forwarding an unknown value took the whole `/datasets` page to the error
+    boundary — an HTTP 500 from `?format_family=garbage`, from a comma-joined
+    `tabular,documents`, or from the pre-rename `structured`. Any mangled or
+    hand-edited link could trigger it, while every other listing filter degrades
+    to an empty result instead.
+  - Values outside the known families are dropped in the parser, so such URLs
+    render the unfiltered listing. Only params the API constrains with `choices=`
+    are filtered this way: the others accept anything and must stay forwarded,
+    since dropping an unknown value there would silently widen the listing
+    instead of narrowing it. The family list is now shared between the parser and
+    the sidebar, so validation happens against the very list the UI renders.
+
+- **fix(datasets): make the "Outros" format option filter instead of clearing**
+  - The "Formato" sidebar group carried its own copy of the backend's format
+    lists and expanded a selection into `?format=csv&format=xls&…`. "Outros"
+    cannot be written that way — it is the complement of the other groups — so
+    the option deleted the param and wrote nothing, behaving exactly like
+    "Todos", with no count next to it either.
+  - The group now sends `?format_family=` and its options are the backend's
+    format families, so the extension lists live in one place instead of two
+    copies that a comment asked readers to keep in sync, and each option's count
+    comes from the same query the filter applies. Two option ids are renamed to
+    their family (`structured` → `machine_readable`, `geographic` →
+    `geographical`); the visible labels are unchanged in both locales.
+    Selecting a group no longer wipes individual formats chosen in the advanced
+    filters — the group owns `format_family`, the advanced filter owns `format`,
+    and the backend combines them as an AND.
+  - Needs the backend that serves `?format_family=` deployed first: the API
+    ignores unknown params, so a frontend arriving alone would leave the group
+    returning every dataset.
+- **fix(admin): an optional input is no longer marked as required**
+  - Agora's inputs declare `required = true` and only drop it when the field is
+    `disabled` or `readOnly`, so a caller that simply omits the prop gets the
+    opposite of what the code reads like. `IsolatedInput` forwarded that absent
+    value straight through, which marked every optional admin field as
+    mandatory. On the harvester screen that blocked saving an edit on the default
+    license and the geographic zones - two settings the backend never required,
+    and which were empty on every harvester configured before they existed.
+  - The default is flipped in `IsolatedInput` rather than patched at each call
+    site, so the next optional field added anywhere in the admin does not
+    inherit the bug. The three fields that really are mandatory - a dataset's
+    title, a reuse's name and its URL, all `required` in the API - now say so
+    explicitly; a dataset's acronym and the harvester schedule stop claiming it.
+  - The harvester edit screen is the one admin form without `noValidate`, which
+    is why it was the only place the default actually blocked a submit instead of
+    just drawing a marker. Every control on that form now states whether it is
+    required, so the filter value - which is not an `IsolatedInput` and could
+    block the same way once a filter was added - stops relying on the default too.
+  - This is the cause behind the hand-written asterisk removed from the
+    harvester description: that label was compensating for the same default.
+
+- **fix(admin-harvesters): the harvester description is no longer marked as required**
+  - The edit screen labelled it "Descrição *" while the creation screen labelled
+    it "Descrição", nothing in either screen validated it, and the backend calls
+    it optional details about the harvester. The asterisk and the translation key
+    that carried it are gone, along with the label override prop that existed
+    only for them, so both screens agree with each other and with the API.
+  - The backend stopped reading that field as a configuration blob: the CKAN PT
+    harvester's default license and geographic zones are ordinary harvest
+    settings now, so the generic settings section renders them like any other and
+    they get Portuguese labels instead of the English ones the API sends.
+  - Those settings also show the explanation the API sends with them, which no
+    harvester screen rendered before. It matters here because the geographic zones
+    are typed as one comma-separated value, and nothing in the form said so.
+
+- **fix(admin-harvesters): keep the GeoDCAT-AP and remote URL prefix settings**
+  - The creation wizard collected the GeoDCAT-AP switch and the "Remote URL
+    prefix" field and submitted neither. Both are real harvest config, read when
+    the harvester runs, so whoever configured them saw them accepted in the form
+    and lost without a word — the same silent drop the harvester filters had.
+  - Both are now sent inside the single `config` object the API reads. The three
+    parts of that object — filters, features and extra configs — are composed in
+    one place, because building it once per part would leave only the last and
+    drop the others.
+  - Which fields appear, and the keys they submit, now come from the backend
+    metadata instead of a hand-written list of implementation types. That gives a
+    UI to the "Inspire" option of the OpenDataSoft PT backend, which has been
+    declared all along and was reachable from no screen.
+  - The edit screen gained controls for both, seeded from what is stored. It had
+    none at all, so a harvester created with these settings could be seen only
+    through the API and changed only through it.
+  - Clearing the last setting a harvester has now works. A save that carried no
+    configuration at all used to leave the stored one untouched, so blanking the
+    remote URL prefix — or removing the last filter — reported success and
+    changed nothing.
+  - A save keeps the configuration keys no screen shows, instead of replacing the
+    whole configuration with what the form knows about.
+  - Values are always gated by what the selected implementation declares, on both
+    screens, so changing the type no longer leaves the previous type's settings
+    behind to be refused by the API.
+  - No stored harvester is affected: these settings were never written by the
+    interface, and a harvester that has none behaves exactly as before — the
+    harvest falls back to each option's declared default.
+- **fix(admin-harvesters): keep the filters set when a harvester is created**
+  - A "Marcação" filter added in the creation wizard never reached the
+    harvester. The select emitted the key `tag` while every backend that
+    supports the filter declares `tags`, and the harvest config validation
+    rejects any key the selected backend does not declare — the key goes
+    straight into the CKAN Solr query, where `tags` is the indexed field.
+  - The filter keys and the visibility of the whole filters block now come from
+    the same backend metadata the edit screen reads, instead of from literals in
+    the wizard. That also stops hiding the block for the OpenDataSoft PT and OGC
+    backends, both of which declare filters the API accepts.
+  - The creation payload sent the filters at the top level of the request, where
+    the API has no such field and dropped them without an error, so a harvester
+    created through the wizard was created unfiltered whatever key was used.
+    They are now nested under `config`, like the update and preview payloads
+    always were.
+  - A row whose key was deselected — clicking the already-selected option clears
+    the selection — is dropped instead of submitted. Now that the field reaches
+    the API, an empty key would answer 400 and block the wizard on the step it
+    was previously passing by discarding the filters.
+  - The filter labels are translated by key rather than by the label the API
+    sends: those labels are marshalled in the deployment's default language, so
+    matching on the English ones never worked and the edit screen showed the
+    API's own wording instead of the portal's.
+  - No stored harvester is affected: the API only ever accepted filter keys the
+    backend declares, so the wrong key could not be persisted — on creation it
+    was discarded with the rest of the field, and on edit it was filtered out
+    before the request and would have been refused anyway.
+- **fix(admin-harvesters): list every enabled harvest backend in the creation "Tipo" field**
+  - The creation wizard decided the "Tipo" options locally, with ten
+    `DropdownOption` literals, while the edit screen listed whatever
+    `GET /api/1/harvest/backends/` returned. Five enabled backends
+    (`apambiente`, `ine`, `inehvd`, `dgt`, `dgtIne`) were therefore impossible
+    to pick when creating a harvester, and the labels of the ones that were
+    listed did not match the `display_name` each backend declares.
+  - The literal also ignored the deployment's `HARVESTER_BACKENDS`, so it could
+    offer a type disabled in that environment whose submission
+    `POST /harvest/sources/` then rejects — the `backend` field is an enum over
+    the enabled backends. Both screens now read the same endpoint, so a backend
+    registered in udata shows up in the wizard without a frontend change.
+  - When the endpoint answers with nothing to offer, an explicit warning
+    replaces the select instead of leaving a blank required field. Step 1 now
+    validates the type as well: an empty one used to pass validation and reach
+    the API as `backend: "dcat"`, so a failed catalogue request could silently
+    create a DCAT source against a CKAN URL.
+  - The select is seeded from the type already chosen, so stepping back from
+    the preview no longer shows the placeholder over a type the wizard would
+    still submit.
+- **fix(harvesters): scope the producer select to what the user may harvest for**
+  - The "Produtor" field of the harvester wizard was fed only by the
+    memberships in `/api/1/me/`, which have nothing to do with the global
+    admin role. A portal admin with no memberships therefore saw an empty
+    required select and could not pass step 1, even though the backend lets
+    them create a source for any organization (every udata `Permission`
+    carries `RoleNeed("admin")`). Admins now get a server-side organization
+    typeahead over `/organizations/suggest/` — debounced, seeded with a
+    non-empty list, and keeping the chosen organization pinned so a later
+    search does not clear the selection.
+  - For everyone else the list is filtered by the backend-computed
+    `permissions.harvest` flag, the same check `POST /harvest/sources/`
+    performs. Organization editors no longer see organizations whose
+    submission would fail with a 403; when nothing is eligible an explicit
+    warning with a link to create an organization replaces the silently
+    empty select.
+- **fix(admin-harvesters): search the whole harvester catalogue, not the visible page**
+  - The backoffice harvester lists paginated on the server but searched and
+    filtered in memory, so both only ever saw the current page: matches on
+    later pages stayed invisible unless the page size was raised, and the
+    results counter and paginator kept reporting the unfiltered total, which
+    announced pages that rendered empty.
+  - The sources endpoint cannot search, filter by validation state or sort, and
+    the catalogue is small, so the system view now loads it once and does all
+    three client-side — the shape the organization view already used. The
+    counter and paginator describe the filtered set, so a search with no
+    matches shows the empty state instead of an empty table with live
+    pagination, and column sorting covers the whole set rather than one page.
+  - The organization view's search input had no change handler and the
+    controller's query was never read, leaving a field that looked functional
+    and did nothing; it now runs the same filter, combined with the status
+    filter.
+
 - **feat(auth): complete-registration page for CMD accounts without a usable email**
   - CMD/SAML accounts created without a usable email carry a minted
     `saml-*@autenticacao.gov.pt` placeholder. The backend now redirects such

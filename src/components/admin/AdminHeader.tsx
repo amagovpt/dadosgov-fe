@@ -118,7 +118,7 @@ export function AdminHeader() {
   }, [show, hide, t]);
 
   return (
-    <div ref={wrapperRef} className="admin-header">
+    <div ref={wrapperRef} className="admin-header [&_.navigation-bar]:hidden">
       <Header darkMode>
         <div className="admin-header__search-left">
           <SearchDropdown
@@ -195,18 +195,18 @@ export function AdminHeader() {
       </Header>
       {generalBarLabelPortalNode &&
         createPortal(
-          <span className="whitespace-nowrap text-base font-normal text-primary-300">
+          <span className="whitespace-nowrap text-m-regular text-primary-300">
             {t("generalBarLabel")}
           </span>,
           generalBarLabelPortalNode
         )}
-      <div className="flex h-96 items-center bg-neutral-100">
-        <div className="container mx-auto flex items-end justify-between">
+      <div className="flex w-full justify-center items-center bg-neutral-100">
+        <div className="container flex items-end justify-between py-16">
           <div className="flex flex-col">
-            <span className="text-base font-normal text-neutral-900">
+            <span className="text-m-regular text-neutral-900">
               {t("header.adminAreaLabel")}
             </span>
-            <span className="text-24 font-semibold text-primary-900">
+            <span className="text-xl-semibold text-primary-900">
               {t("header.portalTitle")}
             </span>
           </div>

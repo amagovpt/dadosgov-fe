@@ -4,11 +4,13 @@ import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers"
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { Organization } from "@/service/types/identity";
 
-export type OrganizationSortField = "name" | "created_at";
+export type OrganizationSortField = "name" | "created_at" | "datasets" | "reuses";
 
 export const organizationSortFieldMap: Record<OrganizationSortField, string> = {
   name: "name",
   created_at: "created",
+  datasets: "datasets",
+  reuses: "reuses",
 };
 
 interface OrganizationColumnsOptions {
@@ -53,11 +55,15 @@ export function createOrganizationColumns({
     {
       id: "datasets",
       header: labels.datasets,
+      sortField: "datasets",
+      sortType: "numeric",
       renderCell: (organization) => organization.metrics?.datasets ?? 0,
     },
     {
       id: "reuses",
       header: labels.reuses,
+      sortField: "reuses",
+      sortType: "numeric",
       renderCell: (organization) => organization.metrics?.reuses ?? 0,
     },
     {

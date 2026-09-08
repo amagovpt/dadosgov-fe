@@ -6,6 +6,7 @@ import { StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
@@ -16,7 +17,9 @@ import {
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createSystemHarvesterColumns,
+  filterHarvestersBySearch,
   filterHarvestersByStatus,
+  HARVESTERS_FETCH_PAGE_SIZE,
   sortHarvesters,
   type HarvesterSortField,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
@@ -29,7 +32,6 @@ interface SystemHarvestersClientProps {
 export default function SystemHarvestersClient({ pageContent }: SystemHarvestersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState<{
     variant: "success" | "danger";
@@ -125,31 +127,14 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     [show, hide, handleReject, t]
   );
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      setIsLoading(true);
-      setCurrentPage(page);
-    },
-    [setCurrentPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (nextPageSize: number) => {
-      setIsLoading(true);
-      setPageSize(nextPageSize);
-    },
-    [setPageSize]
-  );
-
   useEffect(() => {
     let isActive = true;
 
     const run = async () => {
       try {
-        const response = await fetchHarvesters(currentPage, pageSize);
+        const response = await fetchHarvesters(1, HARVESTERS_FETCH_PAGE_SIZE);
         if (!isActive) return;
         setHarvesters(response.data || []);
-        setTotalItems(response.total || 0);
       } catch (error) {
         if (!isActive) return;
         console.error("Error loading harvesters:", error);
@@ -165,19 +150,25 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     return () => {
       isActive = false;
     };
-  }, [currentPage, pageSize]);
+  }, []);
 
-  const filteredHarvesters = useMemo(() => {
-    let result = harvesters;
-    if (searchQuery.trim()) {
-      const query = searchQuery.trim().toLowerCase();
-      result = result.filter((harvester) => harvester.name.toLowerCase().includes(query));
-    }
-    return filterHarvestersByStatus(result, filters.statusFilter);
-  }, [harvesters, searchQuery, filters.statusFilter]);
-  const visibleHarvesters = useMemo(
+  const filteredHarvesters = useMemo(
+    () =>
+      filterHarvestersByStatus(
+        filterHarvestersBySearch(harvesters, searchQuery),
+        filters.statusFilter
+      ),
+    [harvesters, searchQuery, filters.statusFilter]
+  );
+
+  const sortedHarvesters = useMemo(
     () => sortHarvesters(filteredHarvesters, sortField, sortOrder),
     [filteredHarvesters, sortField, sortOrder]
+  );
+
+  const visibleHarvesters = useMemo(
+    () => paginateItems(sortedHarvesters, currentPage, pageSize),
+    [sortedHarvesters, currentPage, pageSize]
   );
 
   const columns = useMemo(
@@ -232,12 +223,11 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
       ]}
       title={t("admin-harvesters:title")}
       isLoading={isLoading}
-      count={totalItems}
-      hasItems={visibleHarvesters.length > 0}
+      count={filteredHarvesters.length}
       currentPage={currentPage}
       pageSize={pageSize}
-      setCurrentPage={handlePageChange}
-      setPageSize={handlePageSizeChange}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
       search={{
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",

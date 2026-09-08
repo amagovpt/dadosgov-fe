@@ -7,11 +7,6 @@ import { usePopupContext } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import {
-  createDateSorter,
-  paginateItems,
-  sortItems,
-} from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
@@ -21,6 +16,7 @@ import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDeta
 import AdminEmptyState from "../AdminEmptyState";
 import {
   createOrgDiscussionColumns,
+  discussionSortFieldMap,
   type DiscussionSortField,
 } from "./discussionsListConfig";
 import type { BoDiscussionsPage } from "@/service/types/admin/discussions";
@@ -44,26 +40,28 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
   const { show } = usePopupContext();
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const {
     currentPage,
     setCurrentPage,
     pageSize,
     setPageSize,
-    sortField,
-    sortOrder,
+    sortParam,
     handleSort,
     getSortOrder,
   } = useAdminListController<DiscussionSortField>({
     initialFilters: {},
+    sortFieldMap: discussionSortFieldMap,
   });
 
   useEffect(() => {
     async function loadDiscussions() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgDiscussions(orgId);
+        const data = await fetchOrgDiscussions(orgId, currentPage, pageSize, sortParam);
         setDiscussions(data.data ?? []);
+        setTotalItems(data.total ?? 0);
       } catch (error) {
         console.error("Error loading discussions:", error);
       } finally {
@@ -72,21 +70,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     }
 
     void loadDiscussions();
-  }, [orgId]);
-
-  const sortedDiscussions = useMemo(
-    () =>
-      sortItems(discussions, sortField, sortOrder, {
-        created: createDateSorter((discussion) => discussion.created),
-        closed: createDateSorter((discussion) => discussion.closed),
-      }),
-    [discussions, sortField, sortOrder],
-  );
-
-  const paginatedDiscussions = useMemo(
-    () => paginateItems(sortedDiscussions, currentPage, pageSize),
-    [sortedDiscussions, currentPage, pageSize],
-  );
+  }, [orgId, currentPage, pageSize, sortParam]);
 
   const openDiscussion = (discussion: Discussion) => {
     show(
@@ -134,7 +118,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
       ]}
       title={pageContent.orgHero?.title ?? ""}
       isLoading={isLoading}
-      count={discussions.length}
+      count={totalItems}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -148,7 +132,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
       }
     >
       <AdminListTable
-        items={paginatedDiscussions}
+        items={discussions}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}

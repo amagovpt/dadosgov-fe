@@ -134,8 +134,6 @@ export async function fetchDatasets(
     if (filters) {
       if (filters.q) params.set("q", filters.q);
       if (filters.schema) params.set("schema", filters.schema);
-      if (filters.geozone) params.set("geozone", filters.geozone);
-      if (filters.granularity) params.set("granularity", filters.granularity);
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.owner) params.set("owner", filters.owner);
@@ -144,6 +142,9 @@ export async function fetchDatasets(
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
+        ["geozone", filters.geozone],
+        ["granularity", filters.granularity],
+        ["format_family", filters.format_family],
         ["license", filters.license],
         ["format", filters.format],
         ["frequency", filters.frequency],
@@ -203,8 +204,6 @@ export async function fetchAdminDatasets(
     if (filters) {
       if (filters.q) params.set("q", filters.q);
       if (filters.schema) params.set("schema", filters.schema);
-      if (filters.geozone) params.set("geozone", filters.geozone);
-      if (filters.granularity) params.set("granularity", filters.granularity);
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.private !== undefined) params.set("private", String(filters.private));
@@ -213,6 +212,9 @@ export async function fetchAdminDatasets(
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
+        ["geozone", filters.geozone],
+        ["granularity", filters.granularity],
+        ["format_family", filters.format_family],
         ["license", filters.license],
         ["format", filters.format],
         ["frequency", filters.frequency],
@@ -526,7 +528,13 @@ export async function fetchAllowedExtensions(): Promise<string[]> {
 }
 
 
-export async function suggestFormats(query: string): Promise<FormatSuggestion[]> {
+/**
+ * Returns `null` when the request failed, as opposed to `[]` for a search that
+ * ran and matched nothing. Callers that only need a list use `?? []`; the ones
+ * that must tell a failure apart from an empty result check for `null` — see
+ * `rethrowControlFlow`, whose own docstring names this exact confusion.
+ */
+export async function suggestFormats(query: string): Promise<FormatSuggestion[] | null> {
   try {
     const res = await fetch(
       `${API_BASE_URL}/datasets/suggest/formats/?q=${encodeURIComponent(query)}`,
@@ -537,7 +545,7 @@ export async function suggestFormats(query: string): Promise<FormatSuggestion[]>
   } catch (error) {
     rethrowControlFlow(error);
     console.error("Error suggesting formats:", error);
-    return [];
+    return null;
   }
 }
 
@@ -640,8 +648,6 @@ export async function fetchDatasetsListing(
   if (filters) {
     if (filters.q) params.set("q", filters.q);
     if (filters.schema) params.set("schema", filters.schema);
-    if (filters.geozone) params.set("geozone", filters.geozone);
-    if (filters.granularity) params.set("granularity", filters.granularity);
     if (filters.sort) params.set("sort", filters.sort);
     if (filters.featured !== undefined) params.set("featured", String(filters.featured));
     if (filters.owner) params.set("owner", filters.owner);
@@ -650,6 +656,9 @@ export async function fetchDatasetsListing(
 
     const arrayParams: [string, string | string[] | undefined][] = [
       ["tag", filters.tag],
+      ["geozone", filters.geozone],
+      ["granularity", filters.granularity],
+      ["format_family", filters.format_family],
       ["license", filters.license],
       ["format", filters.format],
       ["frequency", filters.frequency],
