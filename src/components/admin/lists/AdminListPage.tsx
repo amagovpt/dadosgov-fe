@@ -64,10 +64,12 @@ export default function AdminListPage({
   const shouldRenderToolbar = Boolean(search || filters || toolbarActions);
   const shouldRenderTable = hasItems ?? count > 0;
   const defaultLoadingContent = <p className="text-sm text-neutral-700">{t("loading")}</p>;
+  const isInitialLoading = isLoading && !shouldRenderTable;
+  const isRefreshing = isLoading && shouldRenderTable;
 
   return (
     <AdminLayout title={title} breadcrumbItems={breadcrumbItems} headerAction={headerAction}>
-      {resultsCount ?? <ResultsCount count={count} isLoading={isLoading} />}
+      {resultsCount ?? <ResultsCount count={count} isLoading={isInitialLoading} />}
 
       {shouldRenderToolbar && (
         <div className="mb-24 flex items-end gap-16">
@@ -91,19 +93,21 @@ export default function AdminListPage({
 
       {feedback}
 
-      {isLoading ? (
+      {isInitialLoading ? (
         loadingContent ?? defaultLoadingContent
       ) : shouldRenderTable ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={count}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
-          paginationOptions={paginationOptions}
-        >
-          {children}
-        </AdminPaginatedTable>
+        <div aria-busy={isRefreshing}>
+          <AdminPaginatedTable
+            pageSize={pageSize}
+            totalItems={count}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            setPageSize={setPageSize}
+            paginationOptions={paginationOptions}
+          >
+            {children}
+          </AdminPaginatedTable>
+        </div>
       ) : (
         emptyState
       )}
