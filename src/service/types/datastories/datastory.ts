@@ -116,7 +116,7 @@ export type IframeSection = {
   id: string;
   title?: string;
   description?: string;
-  links: Anchor[];
+  links?: Anchor[];
   iframe: Iframe[];
 };
 
