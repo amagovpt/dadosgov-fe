@@ -30,7 +30,7 @@ export default function Iframe({ id, title, description, links, iframe, classNam
               className="text-m-light whitespace-pre-wrap text-black"
               description={formatHtmlParagraphs(description) as string[]}
             />
-            {links.map((link) => {
+            {links && links.map((link) => {
               return (
                 <LinkWrapper
                   key={link.children}
