@@ -43,12 +43,9 @@ export function isWithinDateLimit(dateStr: string | null | undefined): boolean {
   const limit = new Date(dateStr);
   if (Number.isNaN(limit.getTime())) return true;
 
-  const isDateOnly =
-    limit.getUTCHours() === 0 &&
-    limit.getUTCMinutes() === 0 &&
-    limit.getUTCSeconds() === 0 &&
-    limit.getUTCMilliseconds() === 0;
-  if (isDateOnly) limit.setUTCDate(limit.getUTCDate() + 1);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+    limit.setUTCDate(limit.getUTCDate() + 1);
+  }
 
   return Date.now() < limit.getTime();
 }
