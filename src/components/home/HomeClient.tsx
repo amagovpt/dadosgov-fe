@@ -34,6 +34,7 @@ import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { highlightText } from "@/utils/highlightText";
 import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { LocalizedLink } from "@/components/Shared/LocalizedLink";
+import Anchor from "../Shared/Anchor";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -387,18 +388,18 @@ export default function HomeClient({
                 </div>
               )}
             </div>
-              <LocalizedLink href="/noticias">
-                <Button
-                  variant="primary"
-                  appearance="link"
-                  hasIcon={true}
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  className="p-0! h-auto"
-                >
-                  <span>{t("seeAllNews")}</span>
-                </Button>
-              </LocalizedLink>
+            <LocalizedLink href="/noticias">
+              <Button
+                variant="primary"
+                appearance="link"
+                hasIcon={true}
+                trailingIcon="agora-line-arrow-right-circle"
+                trailingIconHover="agora-solid-arrow-right-circle"
+                className="p-0! h-auto"
+              >
+                <span>{t("seeAllNews")}</span>
+              </Button>
+            </LocalizedLink>
           </div>
         </section>
 
@@ -411,8 +412,11 @@ export default function HomeClient({
                 {usedDailyBy && usedDailyBy.length > 0 ? (
                   usedDailyBy.map((entry, index) => (
                     <div key={index} className="col-span-2 flex items-center justify-center">
-                      <Image src={getAssets(entry.logo[0].id)} alt={entry.alt} width={160} height={75} className="object-contain" />
-                    </div>))
+                      <Anchor href={entry.anchor?.href}>
+                        <Image src={getAssets(entry.logo[0].id)} alt={entry.alt} width={160} height={75} className="object-contain" />
+                      </Anchor>
+                    </div>
+                  ))
                 ) : (
                   <div className="py-32 text-center text-neutral-500 xl:col-span-12">
                     {t("404Organizations")}

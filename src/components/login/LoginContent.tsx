@@ -10,6 +10,7 @@ import {
   TabBody,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { login } from "@/service/api/auth";
 import { buildSamlEndpoint, sanitizeNextUrl, submitSamlForm } from "./loginUtils";
 import { SupportStatusCard } from "./LoginShared";
 import { CmdModalContent } from "./CmdModalContent";
@@ -23,26 +24,73 @@ export function LoginContent() {
   const { t } = useTranslation("login");
   const searchParams = useSearchParams();
   const nextUrl = sanitizeNextUrl(searchParams.get("next"));
+  const prefilledEmail = searchParams.get("email") || "";
 
   const [cmdModalOpen, setCmdModalOpen] = useState(false);
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set only from the backend's `migration_required` answer, never from a config
+  // flag read here — see the note in EmailTab (LEDG-2432).
+  const [migrationRequired, setMigrationRequired] = useState(false);
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
-  const runSamlLogin = async (base: string) => {
+  const runSamlLogin = async (base: string, citizen?: string) => {
     setIsLoading(true);
     setError(null);
-    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl), t);
+    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl, citizen), t);
     if (samlError) {
       setError(samlError);
     }
     setIsLoading(false);
   };
 
-  const handleSamlLogin = () => runSamlLogin("/saml/login");
+  // The CMD tab asks whether the citizen is national or foreign and now sends
+  // the answer, which the backend records as self-declared. eIDAS does not ask,
+  // so its start carries no such parameter.
+  const handleSamlLogin = (citizen: string) => runSamlLogin("/saml/login", citizen);
   const handleEidasLogin = () => runSamlLogin("/saml/eidas/login");
+
+  // The account-linking notice on the email tab also starts a CMD login, but
+  // that screen never asks the question -- so it declares nothing, and the
+  // backend records nothing rather than a guess. Kept as its own handler
+  // instead of making the parameter optional at the call site, so the two
+  // entry points cannot be confused for one.
+  const handleMigrationSamlLogin = () => runSamlLogin("/saml/login");
+
+  const handleEmailLogin = async (email: string, password: string) => {
+    if (!email || !password) {
+      setError(t("errors.requiredFields"));
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const payload = new FormData();
+      payload.append("email", email);
+      payload.append("password", password);
+      payload.append("remember", "y");
+
+      await login(payload);
+      window.location.href = nextUrl;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t("errors.loginFailed");
+      // /auth/login answers 403 { message: "migration_required" } when
+      // /saml/migration/check says this account must link to CMD/eIDAS first.
+      // The notice is shown because the backend said so, for this account.
+      if (message === "migration_required") {
+        setMigrationRequired(true);
+        setError(null);
+      } else {
+        setError(message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const openCmdModal = () => {
     setCmdModalOpen(true);
@@ -105,9 +153,12 @@ export function LoginContent() {
                 <TabBody>
                   <EmailTab
                     samlEnabled={samlEnabled}
+                    prefilledEmail={prefilledEmail}
                     isLoading={isLoading}
                     error={error}
-                    onSaml={handleSamlLogin}
+                    migrationRequired={migrationRequired}
+                    onLogin={handleEmailLogin}
+                    onSaml={handleMigrationSamlLogin}
                     onEidas={handleEidasLogin}
                   />
                 </TabBody>
