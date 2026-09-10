@@ -27,8 +27,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     statusCard = {};
   }
 
-  // A visibilidade do status card é decidida no servidor: comparar a data no
-  // cliente divergiria do render do servidor junto ao instante do limite.
   const showStatusCard = Boolean(statusCard.isActive) && isWithinDateLimit(statusCard.dateLimit);
 
   return (
