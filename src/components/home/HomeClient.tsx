@@ -35,6 +35,8 @@ import { highlightText } from "@/utils/highlightText";
 import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import Anchor from "../Shared/Anchor";
+import { StatusCard as StatusCardType } from "@/service/types/home/home";
+import StatusCard from "@/components/Shared/StatusCard";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -58,6 +60,7 @@ function formatStatNumber(value: number): { number: string; suffix: string } {
 interface HomeClientProps {
   HomeHero: HomeHero;
   siteMetrics: SiteMetrics;
+  statusCard?: StatusCardType;
   latestDatasets: Dataset[];
   datastories: HomeDatastories;
   latestReuses: Reuse[];
@@ -72,7 +75,8 @@ export default function HomeClient({
   datastories,
   latestReuses,
   posts,
-  usedDailyBy
+  usedDailyBy,
+  statusCard,
 }: HomeClientProps) {
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
@@ -239,7 +243,23 @@ export default function HomeClient({
         </div>
 
         {/* Featured Datasets */}
-        <section className="w-full flex flex-col items-center justify-center py-64">
+        <section className="w-full flex flex-col items-center justify-center py-64 gap-32">
+          {statusCard && (
+            <div className="container flex flex-col gap-32 [&_.description]:max-w-[632px]!">
+              <StatusCard {...{
+                variant: statusCard.variant,
+                showIcon: statusCard.showIcon,
+                pillText: statusCard.pillText,
+                title: statusCard.title,
+                description: statusCard.description,
+                anchor: statusCard.anchor && {
+                  href: statusCard.anchor?.href || "",
+                  children: statusCard.anchor?.children || "",
+                },
+                anchorOnRightSide: statusCard.anchorOnRightSide,
+              }} />
+            </div>
+          )}
           <div className="container flex flex-col gap-32">
             <h2 className="text-xl-bold text-primary-900">{t("datasets")}</h2>
             <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
