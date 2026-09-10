@@ -1,4 +1,5 @@
-import { Image } from "@/service/types/shared";
+import { Anchor, Image } from "@/service/types/shared";
+import { StatusCardType } from "@ama-pt/agora-design-system";
 
 export type Datastory = {
   slug: string;
@@ -27,8 +28,21 @@ export type UsedDailyBy = {
   logo: Image[];
 };
 
+export type StatusCard = {
+  isActive?: boolean;
+  variant?: StatusCardType;
+  showIcon?: boolean;
+  pillText?: string;
+  title?: string;
+  description?: string;
+  anchor?: Anchor;
+  anchorOnRightSide?: boolean;
+  dateLimit?: string;
+};
+
 export type Home = {
   hero: HomeHero;
+  statusCard: StatusCard;
   datastories: HomeDatastories;
   usedDailyBy: UsedDailyBy[];
 };

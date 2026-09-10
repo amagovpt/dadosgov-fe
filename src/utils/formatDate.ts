@@ -38,6 +38,21 @@ export function formatDateToDMY(dateStr: string | null | undefined, fallback: st
   return `${d}/${m}/${y}`;
 }
 
+export function isWithinDateLimit(dateStr: string | null | undefined): boolean {
+  if (!dateStr) return true;
+  const limit = new Date(dateStr);
+  if (Number.isNaN(limit.getTime())) return true;
+
+  const isDateOnly =
+    limit.getUTCHours() === 0 &&
+    limit.getUTCMinutes() === 0 &&
+    limit.getUTCSeconds() === 0 &&
+    limit.getUTCMilliseconds() === 0;
+  if (isDateOnly) limit.setUTCDate(limit.getUTCDate() + 1);
+
+  return Date.now() < limit.getTime();
+}
+
 /** BCP-47 tag for each supported UI locale, for `Intl` / `toLocaleString`. */
 export const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
 
