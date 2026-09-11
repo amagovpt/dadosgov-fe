@@ -1,7 +1,7 @@
 import { Datastories } from "@/service/types/datastories/datastories";
 import { DataStoriesFilterState } from "@/service/types/datastories/filters";
 
-export const DATA_STORIES_PAGE_SIZE = 12;
+export const DATA_STORIES_PAGE_SIZE = 8;
 
 function daysAgo(dateStr: string, days: number): boolean {
   return (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
@@ -58,4 +58,3 @@ export function sortDataStories(stories: Datastories): Datastories {
 export function paginateDataStories(stories: Datastories, page: number, pageSize = DATA_STORIES_PAGE_SIZE): Datastories {
   return stories.slice((page - 1) * pageSize, page * pageSize);
 }
-

@@ -61,7 +61,7 @@ export default async function Page({
   // Relay the real client IP on the SSR fetch (which, on a listing-cache miss,
   // goes direct to the backend) so the limiter keys per visitor, not the Next IP.
   const forwarded = await serverForwardedHeaders();
-  const data = await fetchDatasetsListing(page, 20, apiFilters, forwarded);
+  const data = await fetchDatasetsListing(page, 12, apiFilters, forwarded);
 
   // Get page content (hero, search, noResults) from the CMS. The CMS is the
   // source of truth, but it must not be able to take the listing down: on error

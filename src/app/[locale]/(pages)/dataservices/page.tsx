@@ -51,7 +51,7 @@ export default async function DataservicesPage({
   }
   const filters = parseDataservicesFilters(params_);
 
-  const initialData = await fetchDataservices(page, 20, filters);
+  const initialData = await fetchDataservices(page, 8, filters);
 
   // Get page content (hero, search, noResults) from the CMS. The CMS is the
   // source of truth, but it must not be able to take the listing down: on error
