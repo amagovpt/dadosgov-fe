@@ -235,7 +235,7 @@ export default function DatasetsClient({
           </div>
         </div>
         {/* Pagination */}
-        <div className="flex w-1/2 justify-center mt-8">
+        <div className="w-1/2 mt-8">
           <Pagination
             currentPage={activePage}
             totalItems={total}
