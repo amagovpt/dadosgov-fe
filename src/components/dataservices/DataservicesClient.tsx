@@ -97,7 +97,7 @@ export default function DataservicesClient({
       />
 
       {/* Main Content */}
-      <div className="container flex flex-col items-center justify-center gap-24 py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-64">
         {/* Filters toggle + results count + sort */}
         <div className="flex w-full flex-col gap-16 xl:flex-row">
           <div className="flex w-full flex-row items-end gap-32">
@@ -271,7 +271,7 @@ export default function DataservicesClient({
         </div>
 
         {/* Pagination */}
-        <div className="flex w-1/2 justify-center">
+        <div className="flex w-1/2 justify-center mt-8">
           <Pagination
             currentPage={activePage}
             totalItems={total}
