@@ -7,6 +7,7 @@ import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
 import { ToastProviderWrapper } from "@/providers/ToastProviderWrapper";
 import { ApiErrorProvider } from "@/providers/ApiErrorProvider";
 import { AuthProvider } from "@/context/AuthContext";
+import { ActiveProfileProvider } from "@/context/ActiveProfileContext";
 import { siteConfig } from "@/config/site";
 import ScrollTop from "@/components/ScrollTop";
 import NewAccountNotice from "@/components/login/NewAccountNotice";
@@ -112,31 +113,33 @@ export default async function RootLayout({
     <html lang={locale} data-scroll-behavior="smooth">
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <AuthProvider>
-          <ApolloWrapper>
-            <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
-              <ToastProviderWrapper>
-                <ApiErrorProvider>
-                  <PopupProviderWrapper>
-                    <ScrollTop />
-                    <div className="flex min-h-screen w-full flex-col">
-                      <HeaderWrapper data={headerNavigation} />
-                      <Suspense fallback={null}>
-                        <NewAccountNotice />
-                      </Suspense>
-                      <Suspense fallback={null}>
-                        <ConfirmEmailNotice />
-                      </Suspense>
-                      <Suspense fallback={null}>
-                        <CompleteRegistrationGate />
-                      </Suspense>
-                      <div className="">{children}</div>
-                      <Footer data={footerData} />
-                    </div>
-                  </PopupProviderWrapper>
-                </ApiErrorProvider>
-              </ToastProviderWrapper>
-            </TranslationsProvider>
-          </ApolloWrapper>
+          <ActiveProfileProvider>
+            <ApolloWrapper>
+              <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
+                <ToastProviderWrapper>
+                  <ApiErrorProvider>
+                    <PopupProviderWrapper>
+                      <ScrollTop />
+                      <div className="flex min-h-screen w-full flex-col">
+                        <HeaderWrapper data={headerNavigation} />
+                        <Suspense fallback={null}>
+                          <NewAccountNotice />
+                        </Suspense>
+                        <Suspense fallback={null}>
+                          <ConfirmEmailNotice />
+                        </Suspense>
+                        <Suspense fallback={null}>
+                          <CompleteRegistrationGate />
+                        </Suspense>
+                        <div className="">{children}</div>
+                        <Footer data={footerData} />
+                      </div>
+                    </PopupProviderWrapper>
+                  </ApiErrorProvider>
+                </ToastProviderWrapper>
+              </TranslationsProvider>
+            </ApolloWrapper>
+          </ActiveProfileProvider>
         </AuthProvider>
       </body>
     </html>

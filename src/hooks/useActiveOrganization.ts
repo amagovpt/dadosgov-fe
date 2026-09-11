@@ -1,30 +1,27 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useActiveProfile } from "@/context/ActiveProfileContext";
 import { Organization } from "@/service/types/identity";
 
 export function useActiveOrganization() {
   const { user, isLoading } = useAuth();
-  const organizations = useMemo<Organization[]>(
-    () => user?.organizations ?? [],
-    [user],
-  );
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const { activeProfile, setActiveProfile } = useActiveProfile();
+  const organizations = useMemo<Organization[]>(() => user?.organizations ?? [], [user]);
 
   const activeOrg = useMemo<Organization | null>(() => {
     if (organizations.length === 0) return null;
-    if (selectedOrgId) {
-      return (
-        organizations.find((o) => o.id === selectedOrgId) ?? organizations[0]
-      );
+    if (activeProfile.type === "organization") {
+      return organizations.find((o) => o.id === activeProfile.orgId) ?? organizations[0];
     }
     return organizations[0];
-  }, [organizations, selectedOrgId]);
+  }, [organizations, activeProfile]);
 
-  const selectOrganization = useCallback((orgId: string) => {
-    setSelectedOrgId(orgId);
-  }, []);
+  const selectOrganization = useCallback(
+    (orgId: string) => setActiveProfile({ type: "organization", orgId }),
+    [setActiveProfile]
+  );
 
   return {
     organizations,

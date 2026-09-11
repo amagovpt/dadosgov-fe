@@ -8,6 +8,9 @@ import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import type { AdminNavLink, AdminSideNavigationData } from "@/service/types/admin-side-navigation";
 import { stripLocale } from "@/utils/stripLocale";
+import { useAuth } from "@/context/AuthContext";
+import { useActiveProfile } from "@/context/ActiveProfileContext";
+import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 
 interface NavChild {
   label: string;
@@ -29,18 +32,37 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
   const { t } = useTranslation("admin-common");
   const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
-  // usePathname() is locale-prefixed (`/pt/admin/...`) because prefixDefault is
-  // true; normalize before matching so `/admin`-anchored logic keeps working.
   const localePath = useMemo(() => stripLocale(pathname), [pathname]);
+  const { isAdmin } = useAuth();
+  const { activeProfile } = useActiveProfile();
+  const { activeOrg } = useActiveOrganization();
 
   const items = useMemo<NavChild[]>(() => {
+    if (activeProfile.type === "organization" && activeOrg) {
+      const orgBase = `/admin/org/${activeOrg.id}`;
+      return (data?.orgChildren ?? [])
+        .filter((child) => child.enabled !== false)
+        .map((child) =>
+          toNavChild({ ...child, href: `${orgBase}/${child.href.replace(/^\/+/, "")}` })
+        );
+    }
+
+    if (activeProfile.type === "system" && isAdmin) {
+      const systemGroup = (data?.groups ?? []).find(
+        (group) => group.enabled !== false && group.key === "system"
+      );
+      return (systemGroup?.children ?? [])
+        .filter((child) => child.enabled !== false)
+        .map(toNavChild);
+    }
+
     const profileGroup = (data?.groups ?? []).find(
       (group) => group.enabled !== false && group.key !== "organization" && group.key !== "system"
     );
     return (profileGroup?.children ?? [])
       .filter((child) => child.enabled !== false)
       .map(toNavChild);
-  }, [data]);
+  }, [data, activeProfile, activeOrg, isAdmin]);
 
   const homeLink = data?.homeLink;
   const showHomeLink = Boolean(homeLink?.label) && homeLink?.enabled !== false;
