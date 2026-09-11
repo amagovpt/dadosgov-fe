@@ -1,5 +1,13 @@
 {
   "title": "Reutilizações",
+  "kicker": "Dados Abertos",
+  "heroTitle": "Gestão de reutilizações",
+  "create": "Criar reutilização",
+  "myListTitle": "As minhas reutilizações",
+  "emptyTitlePrefix": "Não foram encontradas",
+  "emptyTitleHighlight": "reutilizações",
+  "emptySubtitle": "Ainda não existem publicações associadas à sua conta",
+  "emptyDescription": "Utilize a opção \"Criar reutilização\" para adicionar uma nova publicação. As reutilizações criadas ficarão disponíveis para consulta e gestão nesta área.",
   "columns": {
     "title": "Título da reutilização",
     "titleShort": "Título",

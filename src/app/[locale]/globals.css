@@ -1658,8 +1658,8 @@ body:has(.admin-wrapper) > div > header.sticky {
 }
 
 .admin-sidebar-nav__home-badge-icon {
-  width: 24px;
-  height: 24px;
+  width: 38px;
+  height: 38px;
   filter: brightness(0) invert(1);
 }
 
@@ -1829,11 +1829,63 @@ border-left: none !important;
 .admin-layout__content {
   flex: 1;
   min-width: 0;
+  min-height: 1360px;
 }
 
 .admin-page .admin-search-wrapper {
   width: 100%;
   max-width: 654px;
+}
+
+.admin-page .admin-search-wrapper .agora-btn.magnifier-icon,
+.admin-page .admin-search-wrapper .agora-btn.magnifier-icon:hover:not(:disabled),
+.admin-page .admin-search-wrapper .agora-btn.magnifier-icon:active:not(:disabled) {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px;
+}
+
+.admin-page .admin-search-wrapper .input-search-bar-container {
+  padding: 4px;
+  padding-inline-start: 16px;
+}
+
+.admin-page .admin-search-wrapper .agora-input-search-bar .input-search-bar-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-primary-900);
+}
+
+.admin-page .admin-search-wrapper .input-label-wrapper {
+  margin-bottom: 8px;
+}
+
+.admin-page .admin-search-wrapper .agora-input-search-bar .input-search-bar-container {
+  border-color: var(--color-neutral-700);
+}
+
+.admin-page .admin-page__empty .description {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-neutral-900);
+  max-width: 592px;
+}
+
+.admin-page .admin-page__empty .title {
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--color-primary-600);
+  margin-bottom: 8px;
+}
+
+.admin-page .admin-page__empty .subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin-bottom: 4px;
 }
 
 /* Admin page - empty state (no results) */
@@ -1920,6 +1972,12 @@ border-left: none !important;
 .admin-page {
   --admin-auxiliar-width: 360px;
   --admin-auxiliar-gap: 70px;
+}
+
+@media (min-width: 1280px) {
+  .admin-page {
+    transform: translateX(-56px);
+  }
 }
 
 .admin-page [class*="agora-pill"] .children-wrapper {
@@ -2484,6 +2542,40 @@ border-left: none !important;
   }
 }
 
+@media (max-width: 767px) {
+  .admin-side-nav {
+    width: 64px;
+  }
+
+  .admin-side-nav__panel {
+    width: 64px;
+  }
+
+  .admin-page .agora-toggle-group.horizontal {
+    flex-direction: column;
+  }
+
+  .admin-page .agora-toggle-group.horizontal .agora-toggle.agora-toggle-button {
+    border-radius: 0;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  .admin-page .agora-toggle-group.horizontal .agora-toggle.agora-toggle-button:first-of-type {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-top-width: 2px;
+  }
+
+  .admin-page .agora-toggle-group.horizontal .agora-toggle.agora-toggle-button:last-of-type {
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-width: 2px;
+  }
+}
+
 /* ==========================================================================
    [08] UTILITIES
    ========================================================================== */
@@ -2563,45 +2655,74 @@ div.max-w-ch,
   min-height: 200px;
   padding: 16px;
   outline: none;
+  font-family: inherit;
   font-size: 15px;
   line-height: 1.7;
   color: var(--color-neutral-900, #111827);
 }
 
-.rte-content .tiptap p {
+/* Keep rich-text markup independent from Agora's global element selectors.
+   Rich text is stored as semantic HTML, so its descendants must use browser
+   defaults and the explicit rules below rather than the app-wide body styles. */
+.rte-content .tiptap > *,
+.rte-content .tiptap > * *,
+.rich-text-content > *,
+.rich-text-content > * * {
+  all: revert;
+  box-sizing: border-box;
+}
+
+.rte-content .tiptap p,
+.rich-text-content p {
   margin: 0.5em 0;
 }
 
-.rte-content .tiptap h2 {
+.rte-content .tiptap :is(strong, b),
+.rich-text-content :is(strong, b) {
+  font-weight: 700;
+}
+
+.rte-content .tiptap :is(em, i),
+.rich-text-content :is(em, i) {
+  font-style: italic;
+}
+
+.rte-content .tiptap h2,
+.rich-text-content h2 {
   font-size: 1.5em;
   font-weight: 700;
   margin: 1em 0 0.5em;
 }
 
-.rte-content .tiptap h3 {
+.rte-content .tiptap h3,
+.rich-text-content h3 {
   font-size: 1.25em;
   font-weight: 600;
   margin: 0.8em 0 0.4em;
 }
 
-.rte-content .tiptap ul {
+.rte-content .tiptap ul,
+.rich-text-content ul {
   list-style: disc;
   padding-left: 1.5em;
 }
 
-.rte-content .tiptap ol {
+.rte-content .tiptap ol,
+.rich-text-content ol {
   list-style: decimal;
   padding-left: 1.5em;
 }
 
-.rte-content .tiptap blockquote {
+.rte-content .tiptap blockquote,
+.rich-text-content blockquote {
   border-left: 3px solid var(--color-neutral-300, #d1d5db);
   padding-left: 1em;
   color: var(--color-neutral-600, #4b5563);
   font-style: italic;
 }
 
-.rte-content .tiptap pre {
+.rte-content .tiptap pre,
+.rich-text-content pre {
   background: var(--color-neutral-100, #f3f4f6);
   padding: 12px;
   border-radius: 4px;
@@ -2610,31 +2731,37 @@ div.max-w-ch,
   font-size: 14px;
 }
 
-.rte-content .tiptap a {
+.rte-content .tiptap a,
+.rich-text-content a {
   color: var(--color-primary-600, #2563eb);
   text-decoration: underline;
 }
 
-.rte-content .tiptap img {
+.rte-content .tiptap img,
+.rich-text-content img {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
 }
 
-.rte-content .tiptap table {
+.rte-content .tiptap table,
+.rich-text-content table {
   border-collapse: collapse;
   width: 100%;
   margin: 1em 0;
 }
 
 .rte-content .tiptap th,
-.rte-content .tiptap td {
+.rte-content .tiptap td,
+.rich-text-content th,
+.rich-text-content td {
   border: 1px solid var(--color-neutral-300, #d1d5db);
   padding: 8px 12px;
   text-align: left;
 }
 
-.rte-content .tiptap th {
+.rte-content .tiptap th,
+.rich-text-content th {
   background: var(--color-neutral-100, #f3f4f6);
   font-weight: 600;
 }
