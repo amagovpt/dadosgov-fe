@@ -1,6 +1,7 @@
 "use client";
 
 import { CardNoResults, IconName } from "@ama-pt/agora-design-system";
+import type { ReactNode } from "react";
 import AppIcon from "../Primitives/AppIcon";
 import Button from "../Primitives/Button";
 import { useRouter } from "next/navigation";
@@ -10,7 +11,9 @@ import type { FoListPageNoResults } from "@/service/types/shared";
 
 export interface AdminEmptyStateI {
   icon?: IconName;
-  title?: string;
+  illustration?: ReactNode;
+  title?: ReactNode;
+  subtitle?: ReactNode;
   description?: string;
   noResults?: FoListPageNoResults;
   createUrl?: string;
@@ -18,7 +21,8 @@ export interface AdminEmptyStateI {
 }
 
 export default function AdminEmptyState(props: AdminEmptyStateI) {
-  const { icon, title, description, noResults, createUrl, createTitle } = props;
+  const { icon, illustration, title, subtitle, description, noResults, createUrl, createTitle } =
+    props;
   const { t } = useTranslation("admin-common");
   const routerNav = useRouter();
   const handleNavigation = useCallback(() => {
@@ -29,6 +33,7 @@ export default function AdminEmptyState(props: AdminEmptyStateI) {
 
   const emptyIcon = (noResults?.icon || icon || "agora-line-search") as IconName;
   const emptyTitle = noResults?.title ?? title ?? t("emptyState.title");
+  const emptySubtitle = noResults?.subtitle ?? subtitle;
   const emptyDescription = noResults?.description ?? description ?? t("emptyState.description");
   const actionTitle = createTitle ?? t("emptyState.create");
 
@@ -39,8 +44,9 @@ export default function AdminEmptyState(props: AdminEmptyStateI) {
           <CardNoResults
             className="admin-page__empty"
             position="center"
-            icon={<AppIcon name={emptyIcon} className="icon-xl h-12 w-12 text-primary-500" />}
+            icon={illustration ?? <AppIcon name={emptyIcon} className="icon-xl h-12 w-12 text-primary-500" />}
             title={emptyTitle}
+            subtitle={emptySubtitle}
             description={emptyDescription}
             hasAnchor={false}
             extraDescription={

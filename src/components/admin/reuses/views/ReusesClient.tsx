@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { Button } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchMyReuses } from "@/service/api/reuses";
@@ -25,6 +26,7 @@ interface ReusesClientProps {
 export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const { displayName } = useCurrentUser();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
@@ -121,7 +123,21 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
         userLabel: displayName,
         sectionLabel: t("admin-reuses:title"),
       })}
-      title={t("admin-reuses:title")}
+      title={t("admin-reuses:heroTitle")}
+      kicker={t("admin-reuses:kicker")}
+      listTitle={t("admin-reuses:myListTitle")}
+      resultsCount={null}
+      headerAction={
+        <Button
+          variant="primary"
+          hasIcon
+          leadingIcon="agora-line-plus-circle"
+          leadingIconHover="agora-solid-plus-circle"
+          onClick={() => router.push("/admin/reuses/new")}
+        >
+          {t("admin-reuses:create")}
+        </Button>
+      }
       isLoading={isLoading}
       count={filteredReuses.length}
       currentPage={currentPage}
@@ -146,8 +162,15 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
       }
       emptyState={
         <AdminEmptyState
-          noResults={pageContent.myNoResults}
-          createUrl="/admin/reuses/new"
+          illustration={<img src="/emoji-empty.svg" alt="" width={280} height={143} />}
+          title={
+            <div className="title">
+              {t("admin-reuses:emptyTitlePrefix")}{" "}
+              <b className="font-bold">{t("admin-reuses:emptyTitleHighlight")}</b>
+            </div>
+          }
+          subtitle={t("admin-reuses:emptySubtitle")}
+          description={t("admin-reuses:emptyDescription")}
         />
       }
     >

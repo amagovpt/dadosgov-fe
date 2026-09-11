@@ -110,6 +110,7 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
         sectionLabel: t("admin-community-resources:title"),
       })}
       title={t("admin-community-resources:title")}
+      resultsCount={null}
       isLoading={isLoading}
       count={sortedResources.length}
       currentPage={currentPage}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { Button } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -28,6 +29,7 @@ interface DatasetsClientProps {
 export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const { displayName } = useCurrentUser();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [allDatasets, setAllDatasets] = useState<Dataset[]>([]);
@@ -120,7 +122,22 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
         userLabel: displayName,
         sectionLabel: t("admin-datasets:list.title"),
       })}
-      title={t("admin-datasets:list.title")}
+      title={t("admin-datasets:list.heroTitle")}
+      kicker={t("admin-datasets:list.kicker")}
+      description={t("admin-datasets:list.heroDescription")}
+      listTitle={t("admin-datasets:list.myListTitle")}
+      resultsCount={null}
+      headerAction={
+        <Button
+          variant="primary"
+          hasIcon
+          leadingIcon="agora-line-plus-circle"
+          leadingIconHover="agora-solid-plus-circle"
+          onClick={() => router.push("/admin/datasets/new")}
+        >
+          {t("admin-datasets:list.create")}
+        </Button>
+      }
       isLoading={isLoading}
       count={sortedDatasets.length}
       currentPage={currentPage}
@@ -148,8 +165,15 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       }
       emptyState={
         <AdminEmptyState
-          noResults={pageContent.myNoResults}
-          createUrl="/admin/datasets/new"
+          illustration={<img src="/emoji-empty.svg" alt="" width={280} height={143} />}
+          title={
+            <div className="title">
+              {t("admin-datasets:list.emptyTitlePrefix")}{" "}
+              <b className="font-bold">{t("admin-datasets:list.emptyTitleHighlight")}</b>
+            </div>
+          }
+          subtitle={t("admin-datasets:list.emptySubtitle")}
+          description={t("admin-datasets:list.emptyDescription")}
         />
       }
     >

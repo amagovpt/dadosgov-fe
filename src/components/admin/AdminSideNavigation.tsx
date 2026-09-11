@@ -120,8 +120,8 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
                             <Image
                               src="/favicon.png"
                               alt=""
-                              width={24}
-                              height={24}
+                              width={38}
+                              height={38}
                               className="admin-sidebar-nav__home-badge-icon"
                             />
                           </span>
