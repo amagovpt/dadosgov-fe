@@ -15,6 +15,23 @@ export async function getHome(locale: string = "pt"): Promise<Home> {
                 description
               }
             }
+            statusCard {
+              ${locale} {
+                isActive
+                pillText
+                title
+                description
+                variant
+                showIcon
+                anchor {
+                  children
+                  href
+                  icon
+                }
+                anchorOnRightSide
+                dateLimit
+              }
+            }
             datastories {
               ${locale}{
                 description

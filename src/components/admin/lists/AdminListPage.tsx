@@ -19,6 +19,9 @@ type SearchConfig = {
 
 interface AdminListPageProps {
   title: string;
+  kicker?: string;
+  description?: string;
+  listTitle?: string;
   breadcrumbItems: AdminLayoutProps["breadcrumbItems"];
   headerAction?: ReactNode;
   isLoading: boolean;
@@ -41,6 +44,9 @@ interface AdminListPageProps {
 
 export default function AdminListPage({
   title,
+  kicker,
+  description,
+  listTitle,
   breadcrumbItems,
   headerAction,
   isLoading,
@@ -68,26 +74,39 @@ export default function AdminListPage({
   const isRefreshing = isLoading && shouldRenderTable;
 
   return (
-    <AdminLayout title={title} breadcrumbItems={breadcrumbItems} headerAction={headerAction}>
+    <AdminLayout
+      title={title}
+      kicker={kicker}
+      description={description}
+      breadcrumbItems={breadcrumbItems}
+      headerAction={headerAction}
+    >
+      {listTitle && (
+        <h2 className="text-xl-bold text-brand-blue-secondary mb-32">{listTitle}</h2>
+      )}
       {resultsCount ?? <ResultsCount count={count} isLoading={isInitialLoading} />}
 
       {shouldRenderToolbar && (
-        <div className="mb-24 flex items-end gap-16">
-          {search && (
-            <div className="admin-search-wrapper">
-              <InputSearchBar
-                hasVoiceActionButton={false}
-                label={search.label}
-                placeholder={search.placeholder}
-                aria-label={search.ariaLabel ?? search.label ?? search.placeholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  search.onChange?.(e.target.value);
-                }}
-              />
+        <div className="mb-32 flex flex-col gap-32">
+          {filters}
+          {(search || toolbarActions) && (
+            <div className="flex items-end gap-16">
+              {search && (
+                <div className="admin-search-wrapper">
+                  <InputSearchBar
+                    hasVoiceActionButton={false}
+                    label={search.label}
+                    placeholder={search.placeholder}
+                    aria-label={search.ariaLabel ?? search.label ?? search.placeholder}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      search.onChange?.(e.target.value);
+                    }}
+                  />
+                </div>
+              )}
+              {toolbarActions}
             </div>
           )}
-          {filters}
-          {toolbarActions}
         </div>
       )}
 

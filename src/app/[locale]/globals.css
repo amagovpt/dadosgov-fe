@@ -1,40 +1,163 @@
-@import url("@ama-pt/agora-design-system/artifacts/dist/tailwind.css");
-@import url("@ama-pt/agora-design-system/artifacts/dist/style.css");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* AgoraDS design tokens */
+@import "@ama-pt/agora-design-system/theme.css";
 
-/* Full icon state control for header cards */
-@layer utilities {
-  .header-card-wrapper svg.leading-icon-active,
-  .header-card-wrapper svg.trailing-icon-active {
-    display: none !important;
-  }
+/* Tailwind v4 reset */
+@import "tailwindcss/preflight";
 
-  .header-card-wrapper svg.leading-icon-default,
-  .header-card-wrapper svg.trailing-icon-default {
-    display: block !important;
-  }
+/* AgoraDS compiled styles */
+@import "@ama-pt/agora-design-system/index.css";
 
-  .header-card-wrapper svg.leading-icon-hover,
-  .header-card-wrapper svg.trailing-icon-hover {
-    display: none !important;
-  }
+/* Tailwind v4 utilities — last, so portal utilities override DS component rules */
+@import "tailwindcss/utilities";
 
-  .header-card-wrapper:hover svg.leading-icon-default,
-  .header-card-wrapper:hover svg.trailing-icon-default {
-    display: none !important;
-  }
 
-  .header-card-wrapper:hover svg.leading-icon-hover,
-  .header-card-wrapper:hover svg.trailing-icon-hover {
-    display: block !important;
-  }
+@theme {
+  /* Spacing steps outside the Agora scale (0, 8, 16, 24, 32, …). */
+  --spacing-2: 2px;
+  --spacing-4: 4px;
+  --spacing-6: 6px;
+  --spacing-12: 12px;
+  --spacing-20: 20px;
 
-  .header-card-wrapper .description {
-    display: none;
-  }
+  /* Font sizes the portal adds on top of the Agora text tokens. */
+  --text-24: 24px;
+  --text-32: 32px;
+  --text-40: 40px;
+
+  /*
+    Breakpoints the portal adds on top of the Agora scale (xs 360 / md 768 /
+    xl 1280). Restores `theme.screens` from the former `tailwind.config.ts`;
+    without them every `lg:` / `sm:` utility in the app generates nothing.
+  */
+  --breakpoint-sm: 576px;
+  --breakpoint-lg: 1024px;
+
+  /*
+    Line heights, letter spacings and font weights.
+
+    The AgoraDS theme resets `--text-*` and ships only the composite text tokens
+    (`text-m-regular`, …) plus `--leading-5`, `--font-weight-bold` and
+    `--font-weight-medium`. In v3 these namespaces kept the Tailwind defaults —
+    AgoraDS 3 never overrode `lineHeight` / `letterSpacing` / `fontWeight` — so
+    the values below are those defaults verbatim.
+
+    `--leading-6` and `--leading-8` matter beyond dead classes: with no
+    `--leading-*` key, v4 falls back to the `--spacing-*` namespace and
+    `leading-6` resolves to 6px instead of 1.5rem.
+  */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  --leading-3: 0.75rem;
+  --leading-4: 1rem;
+  --leading-6: 1.5rem;
+  --leading-7: 1.75rem;
+  --leading-8: 2rem;
+  --leading-9: 2.25rem;
+  --leading-10: 2.5rem;
+
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /*
+    Named `max-w-*` / `min-w-*` sizes read the `--container-*` namespace in v4;
+    in v3 they came from the `maxWidth` defaults, which AgoraDS 3 only extended.
+    The DS keeps its own `@utility container` (1216px), which still wins.
+  */
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-2xl: 42rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+  --container-5xl: 64rem;
+  --container-6xl: 72rem;
+  --container-7xl: 80rem;
+
+  /* dados.gov.pt brand colours. */
+  --color-accent-light: #f7f7ff;
+  --color-brand-blue-dark: #021c51;
+  --color-brand-blue-primary: #0c02cb;
+  --color-brand-blue-secondary: #050157;
+  --color-gray-medium: #64718b;
+
+  /*
+    Noto Sans is self-hosted through `next/font` (src/app/fonts.ts), which exposes
+    `--font-noto-sans` on <body>. The literal fallback matters: AgoraDS applies
+    `html { font-family: var(--font-sans, …) }`, and at <html> the next/font
+    variable is still out of scope.
+  */
+  --font-sans: var(--font-noto-sans, "Noto Sans"), sans-serif;
+}
+
+/*
+  Datastory iframe heights are authored in Squidex and applied at runtime
+  (Shared/Datastories/Sections/Iframe.tsx, Shared/InfoBlock/InfoBlockIFrame.tsx),
+  so no source scan can find them. Replaces the `safelist` array of the former
+  `tailwind.config.ts`, which Tailwind v4 ignores.
+*/
+/* prettier-ignore */
+@source inline("min-[320px]:!h-[{45,164,168,285,315,340,348,350,353,365,369,372,374,380,390,400,409,415,451}px]");
+/* prettier-ignore */
+@source inline("min-[375px]:!h-[{45,163,167,285,295,300,310,320,330,333,340,347,355,359,360,362,363,364,366,390,400,401,405,441}px]");
+/* prettier-ignore */
+@source inline("min-[425px]:!h-[{52,171,176,310,332,340,342,355,367,376,380,384,395,396,397,401,403,405,410,440,446,450,494}px]");
+/* prettier-ignore */
+@source inline("min-[768px]:!h-[{92,220,229,470,500,505,510,515,530,560,575,591,600,610,611,620,622,627,630,645,700,702,710,784}px]");
+/* prettier-ignore */
+@source inline("min-[1024px]:!h-[{128,264,277,610,660,662,670,680,690,740,758,781,800,809,810,815,820,824,825,833,860,935,940,950,1049}px]");
+/* prettier-ignore */
+@source inline("min-[1440px]:!h-[{174,320,337,800,860,870,890,900,960,986,1016,1050,1055,1060,1070,1072,1075,1080,1086,1130,1226,1250,1382}px]");
+
+/* Full icon state control for header cards.
+   Plain CSS, not `@layer utilities`: in v4 that directive builds a real cascade
+   layer, which would lose to every unlayered rule — including the AgoraDS sheet
+   imported above. These are scoped overrides, not utilities. */
+.header-card-wrapper svg.leading-icon-active,
+.header-card-wrapper svg.trailing-icon-active {
+  display: none !important;
+}
+
+.header-card-wrapper svg.leading-icon-default,
+.header-card-wrapper svg.trailing-icon-default {
+  display: block !important;
+}
+
+.header-card-wrapper svg.leading-icon-hover,
+.header-card-wrapper svg.trailing-icon-hover {
+  display: none !important;
+}
+
+.header-card-wrapper:hover svg.leading-icon-default,
+.header-card-wrapper:hover svg.trailing-icon-default {
+  display: none !important;
+}
+
+.header-card-wrapper:hover svg.leading-icon-hover,
+.header-card-wrapper:hover svg.trailing-icon-hover {
+  display: block !important;
+}
+
+.header-card-wrapper .description {
+  display: none;
 }
 
 /*
@@ -119,10 +242,6 @@ body {
   min-height: 100vh;
 }
 
-.rounded-8 {
-  border-radius: 8px;
-}
-
 .admin-page .agora-accordion .accordion-body.accordion-body-block {
   padding: 32px !important;
 }
@@ -150,16 +269,85 @@ body {
 }
 
 /* 3.1 Main Header */
-@media (min-width: 1280px) {
-  .agora-header .navigation-links-layout .links {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+
+.agora-header .navigation-bar {
+  max-width: 1216px;
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+
+@media (min-width: 768px) {
+  .agora-header .navigation-bar {
+    padding-inline: 64px;
   }
 }
 
-/* Center short nav labels (e.g. "API") within the 44px min click-target box,
-   so the leftover space is split symmetrically instead of all on the right. */
-.internal-navigation-list ul li .agora-link-wrapper > a {
-  justify-content: center;
+@media (min-width: 1280px) {
+  .agora-header .navigation-bar {
+    padding-inline: 0;
+  }
+}
+
+.agora-header .navigation-links-layout > .title,
+.agora-header .navigation-links-layout .freestyle,
+.agora-header .navigation-links-layout .links-container {
+  width: 100%;
+  max-width: 1216px;
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+
+@media (min-width: 768px) {
+  .agora-header .navigation-links-layout > .title,
+  .agora-header .navigation-links-layout .freestyle,
+  .agora-header .navigation-links-layout .links-container {
+    padding-inline: 64px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .agora-header .navigation-links-layout > .title,
+  .agora-header .navigation-links-layout .freestyle,
+  .agora-header .navigation-links-layout .links-container {
+    padding-inline: 0;
+  }
+}
+
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .agora-header .general-bar .panels-menu ul {
+    gap: 16px;
+  }
+}
+
+.agora-header .navigation-root-button {
+  padding-top: 8px;
+}
+
+.agora-header .logo {
+  width: 254px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+}
+
+.header-nav-cards {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .header-nav-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .header-nav-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .search-panel-menu .panel-menu-content-children {
@@ -179,11 +367,13 @@ body {
   align-items: baseline;
 }
 
-/* Target icons that should be white */
-.agora-header .icon-set svg.icon,
-.agora-languages svg.icon,
-.agora-unauthenticated svg.icon,
-.agora-header .agora-areas svg.icon {
+/* Target icons that should be white.
+
+   `.agora-languages`, `.agora-unauthenticated` and `.agora-areas` used to sit alongside
+   the selector below. None of them exists in AgoraDS 4 — and none existed in 3 either
+   (checked against the CSS the tst environment serves), so they had never matched
+   anything and only the `.icon-set` selector was ever doing the work. */
+.agora-header .icon-set svg.icon {
   fill: #ffffff;
 }
 
@@ -278,12 +468,10 @@ body {
   box-shadow: none !important;
 }
 
-.navigation-links-layout .agora-link-wrapper:has(.card-general) {
-  display: block;
-}
-
-.navigation-links-layout .agora-link-wrapper .card-general *:focus,
-.navigation-links-layout .agora-link-wrapper .card-general *:focus-visible {
+/* The card owns the whole grid cell; its inner anchors are already tabindex="-1"
+   (HeaderCard), so their focus rings would only show up on mouse interaction. */
+.header-nav-cards .card-general *:focus,
+.header-nav-cards .card-general *:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -298,47 +486,40 @@ header[data-submenu] .navigation-links-layout > .title {
 }
 
 header[data-submenu] .navigation-links-layout {
-  position: relative;
   padding-top: 80px;
 }
 
+
 /* Hide submenu items when not in a submenu */
-.agora-header .navigation-links-layout > .links > .link-wrapper:has([data-group^="submenu-"]) {
+.agora-header .header-nav-cards > [data-group^="submenu-"] {
   display: none;
 }
 
 /* Desenvolvimento submenu: hide main items, reveal submenu items */
-header[data-submenu="desenvolvimento"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="main"]) {
+header[data-submenu="desenvolvimento"] .header-nav-cards > [data-group="main"] {
   display: none;
 }
 
 header[data-submenu="desenvolvimento"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="submenu-desenvolvimento"]) {
+  .header-nav-cards
+  > [data-group="submenu-desenvolvimento"] {
   display: block;
 }
 
 /* Usar dados submenu: hide main items, reveal submenu items */
-header[data-submenu="usar-dados"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="main"]) {
+header[data-submenu="usar-dados"] .header-nav-cards > [data-group="main"] {
   display: none;
 }
 
-header[data-submenu="usar-dados"]
-  .navigation-links-layout
-  > .links
-  > .link-wrapper:has([data-group="submenu-usar-dados"]) {
+header[data-submenu="usar-dados"] .header-nav-cards > [data-group="submenu-usar-dados"] {
   display: block;
 }
 
-/* Position the Voltar button absolutely at the top of the submenu layout */
-header[data-submenu] .navigation-links-layout > .links > .link-wrapper:has([data-is-back]) {
+/* The "Voltar" row, in the desktop dropdown: lifted out of the grid flow and parked in
+   the 80px of padding reserved at the top of the panel. The offset parent is
+   `.navigation-links-layout`, which AgoraDS 4 renders `position: absolute` — see the note
+   above about not setting `position` on it ourselves. */
+.navigation-links-layout .header-nav-cards > [data-is-back] {
   grid-column: 1 / -1 !important;
   position: absolute;
   top: 12px;
@@ -348,6 +529,17 @@ header[data-submenu] .navigation-links-layout > .links > .link-wrapper:has([data
   margin-left: auto;
   margin-right: auto;
   z-index: 1;
+}
+
+/* The same row in the responsive menu, which has neither that panel nor its reserved
+   padding. This rule used to be scoped to `header[data-submenu]`, so the absolute
+   positioning applied here too and dropped our "Voltar" on top of the design system's
+   own "Voltar ao início" at the top of the burger panel. Keep ours in the grid instead,
+   spanning the full row above the cards, so the two read as separate controls — they go
+   to different places: ours back to the parent card list, the DS's back to the menu
+   root. */
+.navigation-burger-panel .header-nav-cards > [data-is-back] {
+  grid-column: 1 / -1;
 }
 
 /* 3.4 Publish Dropdown */
@@ -420,8 +612,7 @@ header[data-auth-page][data-no-user]
   fill: var(--color-primary-600);
 }
 
-/* Ecosystem panel */
-li.ecosystem-panel-menu {
+li.ecosystem-custom-menu {
   gap: 8px;
 }
 
@@ -445,12 +636,12 @@ li.ecosystem-panel-menu {
   border-top: 4px solid var(--Neutral-200, #e1e4ea);
 }
 
-li.ecosystem-panel-menu .panel-menu-link-wrapper {
+li.ecosystem-custom-menu .panel-menu-link-wrapper {
   position: relative;
   align-self: stretch;
 }
 
-li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
+li.ecosystem-custom-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -461,20 +652,20 @@ li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::a
   background-color: var(--color-primary-600);
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper::after {
   display: none;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .children-wrapper {
   color: inherit;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -482,7 +673,7 @@ header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded
   display: none;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -490,7 +681,7 @@ header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded
   display: block;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -706,34 +897,14 @@ li.section-name:empty {
   align-items: center;
 }
 
-/* 5.6 Cards (Article) */
-.agora-card-article img.card-image.w-full {
-  border-radius: 4px;
-  width: 352px !important;
-  height: 208px;
-  object-fit: cover;
-  display: flex;
-  align-self: stretch;
-  background-color: white;
-}
-
-.card-article-3_2 .agora-card-article .container-body {
-  padding: 32px;
-  border-radius: 4px;
-}
-
-.card-article-3_2.organization_detail .agora-card-article .container-body {
-  padding: 0px;
-}
-
-.card-article-3_2 .agora-card-article .card-article-3_2-img {
+.card-article-3_2 .card-article-3_2-img {
   border-radius: 8px;
   min-width: 163px;
   min-height: 60px;
   padding: 16px;
 }
 
-.card-article-3_2 .agora-card-article .card-article-3_2-img img {
+.card-article-3_2 .card-article-3_2-img img {
   max-height: 48px;
 }
 
@@ -1208,33 +1379,6 @@ li.section-name:empty {
   flex-direction: column;
 }
 
-.homepage .agora-card-article.indented .container-body {
-  background: transparent;
-  border: 2px solid var(--color-white);
-}
-
-.homepage .agora-card-article.indented .container-body * {
-  color: var(--color-white);
-}
-
-.homepage .anchor-container.has-siblings {
-  height: 0;
-  padding-bottom: 32px;
-}
-
-.latest-news-section .agora-card-article .anchor-container {
-  margin-top: auto;
-}
-
-.homepage .latest-news-section .container-body {
-  background: var(--color-primary-100);
-  padding: 32px;
-}
-
-.homepage .latest-news-section .agora-card-article.default {
-  gap: 0px;
-}
-
 /* 6.2 Login */
 .login-page .agora-tabs.desktop .tab-panel.current-neutral,
 .login-page .agora-tabs.desktop.vertically .tab-list.desktop .tab-list-item.active.current-neutral {
@@ -1329,9 +1473,9 @@ body:has(.admin-wrapper) > div > header.sticky {
   background-color: var(--color-brand-blue-secondary);
 }
 
-.admin-header .agora-header .agora-general-bar {
-  justify-content: flex-end;
-  padding: 0 112px;
+.admin-header .general-bar {
+  @apply container mx-auto;
+  justify-content: space-between;
 }
 
 .admin-header .authenticated-panel-menu > .agora-btn {
@@ -1372,33 +1516,181 @@ body:has(.admin-wrapper) > div > header.sticky {
 .admin-layout {
   display: flex;
   flex: 1;
+  position: relative;
 }
 
 .admin-side-nav {
-  background-color: var(--color-primary-900);
-  width: 280px;
+  position: relative;
+  width: 112px;
   min-height: 100%;
   flex-shrink: 0;
+}
+
+.admin-side-nav__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 112px;
+  z-index: 30;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-primary-900);
+  overflow-y: auto;
+  transition: width 0.2s ease;
+}
+
+.admin-side-nav--expanded .admin-side-nav__panel {
+  width: 388px;
+}
+
+.admin-side-nav__toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 64px;
+  padding: 12px 12px 12px 20px;
+  color: var(--color-white);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.admin-side-nav__toggle:hover {
+  background-color: #0338a2;
+}
+
+.admin-side-nav__toggle-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.admin-side-nav__toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-white);
+  border-radius: 4px;
+}
+
+.admin-side-nav__toggle-icon-glyph {
+  width: 24px;
+  height: 24px;
+}
+
+.admin-side-nav__toggle-icon-glyph,
+.admin-side-nav__toggle-icon-glyph svg,
+.admin-side-nav__toggle-icon-glyph svg path {
+  fill: var(--color-white);
+  color: var(--color-white);
+}
+
+
+.admin-side-nav .agora-sidebar-navigation-mobile {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+}
+
+.admin-side-nav .agora-sidebar-navigation-mobile .agora-snm-menu svg,
+.admin-side-nav .agora-sidebar-navigation-mobile .agora-snm-menu svg path {
+  fill: var(--color-white);
+  color: var(--color-white);
+}
+
+.admin-side-nav--collapsed .admin-sidebar-nav__group-label {
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  text-align: center;
+}
+
+.admin-side-nav--collapsed
+  .admin-sidebar-nav.agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral.agora-sidebar-button-item,
+.admin-side-nav--collapsed .agora-anchor.agora-sidebar-anchor-item {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.admin-side-nav--collapsed .admin-sidebar-nav__group-label-text {
+  overflow: visible;
+  text-overflow: initial;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.admin-side-nav--collapsed .admin-sidebar-nav__children {
+  display: none;
 }
 
 .admin-sidebar-nav {
-  padding: 8px 0;
+  padding: 64px 0 8px;
 }
 
-.admin-sidebar-nav .agora-sidebar {
+.admin-sidebar-nav.agora-sidebar {
   background-color: transparent;
+}
+
+.admin-sidebar-nav__home-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background-color: var(--color-primary-400);
+}
+
+.admin-sidebar-nav__home-badge-icon {
+  width: 38px;
+  height: 38px;
+  filter: brightness(0) invert(1);
 }
 
 .admin-sidebar-nav.agora-sidebar
   .agora-sidebar-item
   .agora-btn-link-neutral.agora-sidebar-button-item {
-  padding: 16px !important;
+  padding: 12px 0 !important;
   border-left: 3px solid transparent !important;
+  border-radius: 0 !important;
   overflow: hidden;
   justify-content: flex-start !important;
   text-align: left !important;
+}
+
+.admin-sidebar-nav .agora-link-wrapper {
+  padding: 0 !important;
+  min-height: auto !important;
+  min-width: auto !important;
+  width: 100%;
+border-left: none !important;
+}
+
+.admin-sidebar-nav .agora-link-wrapper:has(.admin-sidebar-nav__home-badge) {
+  padding: 64px 0 12px !important;
+}
+
+.admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item {
+  border-left: 3px solid transparent;
+  border-radius: 0 !important;
+  height: 100%;
+  width: 100%;
 }
 
 .admin-sidebar-nav.agora-sidebar
@@ -1414,19 +1706,28 @@ body:has(.admin-wrapper) > div > header.sticky {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-size: 16px;
   min-width: 0;
   overflow: hidden;
   flex: 1;
   justify-content: flex-start;
+  padding-top: 16px;
 }
 
 .admin-sidebar-nav__group-label-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
+  padding: 16px;
+}
+
+.admin-side-nav__toggle .admin-sidebar-nav__group-label-text {
+  padding: 16px 0;
+}
+
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-btn-link-neutral.agora-sidebar-button-item:has(.admin-sidebar-nav__group-label--active),
+.admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item:has(.admin-sidebar-nav__group-label--active) {
+  background-color: #0338a2 !important;
+  border-left: 3px solid var(--color-white) !important;
 }
 
 .admin-sidebar-nav__group-label--active {
@@ -1457,10 +1758,28 @@ body:has(.admin-wrapper) > div > header.sticky {
   padding-left: 16px;
 }
 
+.admin-side-nav--collapsed
+  .agora-sidebar.darkMode
+  .agora-sidebar-item
+  .agora-sidebar-anchor-item
+  .data-children-wrapper {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
 .admin-sidebar-nav__children {
   list-style: none;
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
   display: flex;
   flex-direction: column;
 }
@@ -1469,14 +1788,18 @@ body:has(.admin-wrapper) > div > header.sticky {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px;
-  padding-left: 36px;
+  padding: 16px 0;
   text-decoration: none;
   color: var(--color-white);
   font-size: 16px;
   line-height: 24px;
   transition: background-color 0.2s;
   border-left: 3px solid transparent;
+}
+
+.admin-sidebar-nav__child-item-text {
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .admin-sidebar-nav__child-item:hover {
@@ -1487,7 +1810,6 @@ body:has(.admin-wrapper) > div > header.sticky {
 .admin-sidebar-nav__child-item--active {
   background-color: #0338a2;
   border-left: 3px solid var(--color-white);
-  padding-left: 36px;
   font-weight: 700;
 }
 
@@ -1507,11 +1829,63 @@ body:has(.admin-wrapper) > div > header.sticky {
 .admin-layout__content {
   flex: 1;
   min-width: 0;
+  min-height: 1360px;
 }
 
 .admin-page .admin-search-wrapper {
   width: 100%;
   max-width: 654px;
+}
+
+.admin-page .admin-search-wrapper .agora-btn.magnifier-icon,
+.admin-page .admin-search-wrapper .agora-btn.magnifier-icon:hover:not(:disabled),
+.admin-page .admin-search-wrapper .agora-btn.magnifier-icon:active:not(:disabled) {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px;
+}
+
+.admin-page .admin-search-wrapper .input-search-bar-container {
+  padding: 4px;
+  padding-inline-start: 16px;
+}
+
+.admin-page .admin-search-wrapper .agora-input-search-bar .input-search-bar-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-primary-900);
+}
+
+.admin-page .admin-search-wrapper .input-label-wrapper {
+  margin-bottom: 8px;
+}
+
+.admin-page .admin-search-wrapper .agora-input-search-bar .input-search-bar-container {
+  border-color: var(--color-neutral-700);
+}
+
+.admin-page .admin-page__empty .description {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-neutral-900);
+  max-width: 592px;
+}
+
+.admin-page .admin-page__empty .title {
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--color-primary-600);
+  margin-bottom: 8px;
+}
+
+.admin-page .admin-page__empty .subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin-bottom: 4px;
 }
 
 /* Admin page - empty state (no results) */
@@ -1598,6 +1972,12 @@ body:has(.admin-wrapper) > div > header.sticky {
 .admin-page {
   --admin-auxiliar-width: 360px;
   --admin-auxiliar-gap: 70px;
+}
+
+@media (min-width: 1280px) {
+  .admin-page {
+    transform: translateX(-56px);
+  }
 }
 
 .admin-page [class*="agora-pill"] .children-wrapper {
@@ -2119,6 +2499,18 @@ body:has(.admin-wrapper) > div > header.sticky {
 }
 
 /* 7.8 Responsive */
+/* Below the "xl" breakpoint (1280px), Ágora's Sidebar swaps in its own
+   built-in mobile navigation (the layered-icon menu button rendered inside
+   `.admin-side-nav__panel`, unconditionally, regardless of viewport — it's
+   only ever visually redundant below this width). Our custom expand/collapse
+   toggle is a desktop-rail concept; hide it so only the native mobile
+   control remains. */
+@media (max-width: 1279px) {
+  .admin-side-nav__toggle {
+    display: none;
+  }
+}
+
 @media (max-width: 1024px) {
   .admin-new-page__cards {
     flex-direction: column;
@@ -2137,21 +2529,12 @@ body:has(.admin-wrapper) > div > header.sticky {
     max-width: 100%;
   }
 
-  .admin-side-nav {
-    width: 220px;
-  }
-
   .admin-side-nav__label {
     font-size: 11px;
   }
 
   .admin-sidebar-nav__child-item {
-    padding-left: 24px;
     font-size: 13px;
-  }
-
-  .admin-sidebar-nav__child-item--active {
-    padding-left: 21px;
   }
 
   .admin-header__content {
@@ -2159,13 +2542,43 @@ body:has(.admin-wrapper) > div > header.sticky {
   }
 }
 
+@media (max-width: 767px) {
+  .admin-side-nav {
+    width: 64px;
+  }
+
+  .admin-side-nav__panel {
+    width: 64px;
+  }
+
+  .admin-page .agora-toggle-group.horizontal {
+    flex-direction: column;
+  }
+
+  .admin-page .agora-toggle-group.horizontal .agora-toggle.agora-toggle-button {
+    border-radius: 0;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  .admin-page .agora-toggle-group.horizontal .agora-toggle.agora-toggle-button:first-of-type {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-top-width: 2px;
+  }
+
+  .admin-page .agora-toggle-group.horizontal .agora-toggle.agora-toggle-button:last-of-type {
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-width: 2px;
+  }
+}
+
 /* ==========================================================================
    [08] UTILITIES
    ========================================================================== */
-
-.pl-0 {
-  padding-left: 0;
-}
 
 p.max-w-ch,
 .max-w-ch p,
@@ -2242,45 +2655,74 @@ div.max-w-ch,
   min-height: 200px;
   padding: 16px;
   outline: none;
+  font-family: inherit;
   font-size: 15px;
   line-height: 1.7;
   color: var(--color-neutral-900, #111827);
 }
 
-.rte-content .tiptap p {
+/* Keep rich-text markup independent from Agora's global element selectors.
+   Rich text is stored as semantic HTML, so its descendants must use browser
+   defaults and the explicit rules below rather than the app-wide body styles. */
+.rte-content .tiptap > *,
+.rte-content .tiptap > * *,
+.rich-text-content > *,
+.rich-text-content > * * {
+  all: revert;
+  box-sizing: border-box;
+}
+
+.rte-content .tiptap p,
+.rich-text-content p {
   margin: 0.5em 0;
 }
 
-.rte-content .tiptap h2 {
+.rte-content .tiptap :is(strong, b),
+.rich-text-content :is(strong, b) {
+  font-weight: 700;
+}
+
+.rte-content .tiptap :is(em, i),
+.rich-text-content :is(em, i) {
+  font-style: italic;
+}
+
+.rte-content .tiptap h2,
+.rich-text-content h2 {
   font-size: 1.5em;
   font-weight: 700;
   margin: 1em 0 0.5em;
 }
 
-.rte-content .tiptap h3 {
+.rte-content .tiptap h3,
+.rich-text-content h3 {
   font-size: 1.25em;
   font-weight: 600;
   margin: 0.8em 0 0.4em;
 }
 
-.rte-content .tiptap ul {
+.rte-content .tiptap ul,
+.rich-text-content ul {
   list-style: disc;
   padding-left: 1.5em;
 }
 
-.rte-content .tiptap ol {
+.rte-content .tiptap ol,
+.rich-text-content ol {
   list-style: decimal;
   padding-left: 1.5em;
 }
 
-.rte-content .tiptap blockquote {
+.rte-content .tiptap blockquote,
+.rich-text-content blockquote {
   border-left: 3px solid var(--color-neutral-300, #d1d5db);
   padding-left: 1em;
   color: var(--color-neutral-600, #4b5563);
   font-style: italic;
 }
 
-.rte-content .tiptap pre {
+.rte-content .tiptap pre,
+.rich-text-content pre {
   background: var(--color-neutral-100, #f3f4f6);
   padding: 12px;
   border-radius: 4px;
@@ -2289,31 +2731,37 @@ div.max-w-ch,
   font-size: 14px;
 }
 
-.rte-content .tiptap a {
+.rte-content .tiptap a,
+.rich-text-content a {
   color: var(--color-primary-600, #2563eb);
   text-decoration: underline;
 }
 
-.rte-content .tiptap img {
+.rte-content .tiptap img,
+.rich-text-content img {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
 }
 
-.rte-content .tiptap table {
+.rte-content .tiptap table,
+.rich-text-content table {
   border-collapse: collapse;
   width: 100%;
   margin: 1em 0;
 }
 
 .rte-content .tiptap th,
-.rte-content .tiptap td {
+.rte-content .tiptap td,
+.rich-text-content th,
+.rich-text-content td {
   border: 1px solid var(--color-neutral-300, #d1d5db);
   padding: 8px 12px;
   text-align: left;
 }
 
-.rte-content .tiptap th {
+.rte-content .tiptap th,
+.rich-text-content th {
   background: var(--color-neutral-100, #f3f4f6);
   font-weight: 600;
 }
