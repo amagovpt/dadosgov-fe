@@ -36,7 +36,8 @@ import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
  */
 export async function fetchMyDatasets(
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  search?: string,
 ): Promise<APIResponse<Dataset>> {
   try {
     const res = await authFetch("/me/datasets/", { cache: "no-store" });
@@ -47,7 +48,11 @@ export async function fetchMyDatasets(
 
     const raw: Dataset[] = await res.json();
     // Keep only personal datasets: owner must exist and organization must be absent
-    const allDatasets = raw.filter((d) => !!d.owner && !d.organization);
+    const normalizedSearch = search?.trim().toLocaleLowerCase();
+    const personal = raw.filter((dataset) => !!dataset.owner && !dataset.organization);
+    const allDatasets = normalizedSearch
+      ? personal.filter((dataset) => dataset.title.toLocaleLowerCase().includes(normalizedSearch))
+      : personal;
     const total = allDatasets.length;
     const start = (page - 1) * pageSize;
     const data = allDatasets.slice(start, start + pageSize);
