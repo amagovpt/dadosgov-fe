@@ -215,14 +215,19 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
                   }
                 />
               ) : (
-                <DatasetMetricsTable
-                  datasets={datasets}
-                  total={datasetsTotal}
-                  page={datasetsPage}
-                  onPageChange={setDatasetsPage}
-                  pageSize={datasetsPageSize}
-                  onPageSizeChange={setDatasetsPageSize}
-                />
+                <>
+                  <p className="text-sm mb-16 text-neutral-700">
+                    {t("admin-statistics:states.results", { count: datasetsTotal })}
+                  </p>
+                  <DatasetMetricsTable
+                    datasets={datasets}
+                    total={datasetsTotal}
+                    page={datasetsPage}
+                    onPageChange={setDatasetsPage}
+                    pageSize={datasetsPageSize}
+                    onPageSizeChange={setDatasetsPageSize}
+                  />
+                </>
               )}
             </div>
           </TabBody>
