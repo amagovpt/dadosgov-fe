@@ -16,8 +16,8 @@ import { useAuth } from "@/context/AuthContext";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { fetchMyDataservices } from "@/service/api/dataservices";
-import { fetchMyDatasets } from "@/service/api/datasets";
-import { fetchMyReuses } from "@/service/api/reuses";
+import { fetchAdminDatasets } from "@/service/api/datasets";
+import { fetchReuses } from "@/service/api/reuses";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import type { Dataset } from "@/service/types/dataset";
 import type { Reuse } from "@/service/types/reuse";
@@ -83,10 +83,13 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
       }
       setIsDatasetsLoading(true);
       try {
-        const result = await fetchMyDatasets(
+        const result = await fetchAdminDatasets(
           datasetsPage,
           datasetsPageSize,
-          datasetsSearch,
+          {
+            owner: user.id,
+            q: datasetsSearch.trim() || undefined,
+          },
         );
         setDatasets(result.data);
         setDatasetsTotal(result.total);
@@ -110,10 +113,13 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
       }
       setIsReusesLoading(true);
       try {
-        const result = await fetchMyReuses(
+        const result = await fetchReuses(
           reusesPage,
           reusesPageSize,
-          reusesSearch
+          {
+            owner: user.id,
+            q: reusesSearch.trim() || undefined,
+          },
         );
         setReuses(result.data);
         setReusesTotal(result.total);

@@ -252,53 +252,6 @@ export async function fetchOrgDatasets(
   }
 }
 
-export async function fetchMyOrgDatasets(
-  organizationId: string,
-  page: number = 1,
-  pageSize: number = 20,
-  search?: string,
-): Promise<APIResponse<Dataset>> {
-  try {
-    const params = new URLSearchParams();
-    if (search?.trim()) params.set("q", search.trim());
-    const query = params.size ? `?${params.toString()}` : "";
-    const res = await fetch(`${API_AUTH_URL}/me/org_datasets/${query}`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch my organization datasets: ${res.statusText}`);
-    }
-
-    const raw: Dataset[] = await res.json();
-    const allDatasets = raw.filter((dataset) => dataset.organization?.id === organizationId);
-    const total = allDatasets.length;
-    const start = (page - 1) * pageSize;
-
-    return {
-      data: allDatasets.slice(start, start + pageSize),
-      page,
-      page_size: pageSize,
-      total,
-      next_page: start + pageSize < total ? String(page + 1) : null,
-      previous_page: page > 1 ? String(page - 1) : null,
-    };
-  } catch (error) {
-    rethrowControlFlow(error);
-    console.error("Error fetching my organization datasets:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-
 export async function fetchOrgReuses(org: string): Promise<Reuse[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/organizations/${org}/reuses/`, {

@@ -20,12 +20,9 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { fetchOrgDataservices } from "@/service/api/dataservices";
-import {
-  fetchMyOrgReuses,
-  fetchMyOrgDatasets,
-  fetchOrgMetrics,
-  fetchOrganization,
-} from "@/service/api/organizations";
+import { fetchAdminDatasets } from "@/service/api/datasets";
+import { fetchReuses } from "@/service/api/reuses";
+import { fetchOrgMetrics, fetchOrganization } from "@/service/api/organizations";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
@@ -108,11 +105,13 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
     async function loadDatasets() {
       setIsDatasetsLoading(true);
       try {
-        const res = await fetchMyOrgDatasets(
-          orgId,
+        const res = await fetchAdminDatasets(
           datasetsPage,
           datasetsPageSize,
-          datasetsSearch,
+          {
+            organization: orgId,
+            q: datasetsSearch.trim() || undefined,
+          },
         );
         setDatasets(res.data);
         setDatasetsTotal(res.total);
@@ -147,11 +146,13 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
     async function loadReuses() {
       setIsReusesLoading(true);
       try {
-        const response = await fetchMyOrgReuses(
-          orgId,
+        const response = await fetchReuses(
           reusesPage,
           reusesPageSize,
-          reusesSearch,
+          {
+            organization: orgId,
+            q: reusesSearch.trim() || undefined,
+          },
         );
         setReuses(response.data);
         setReusesTotal(response.total);
