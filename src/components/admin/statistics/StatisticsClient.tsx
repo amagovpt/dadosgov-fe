@@ -15,7 +15,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
-import { fetchMyDataservices } from "@/service/api/dataservices";
+import { fetchAdminDataservices } from "@/service/api/dataservices";
 import { fetchAdminDatasets } from "@/service/api/datasets";
 import { fetchReuses } from "@/service/api/reuses";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -133,9 +133,15 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
   }, [isUserLoading, reusesPage, reusesPageSize, reusesSearch, user]);
   useEffect(() => {
     async function loadDataservicesTotal() {
+      if (isUserLoading) return;
+      if (!user?.id) {
+        setDataservicesTotal(0);
+        setIsDataservicesLoading(false);
+        return;
+      }
       setIsDataservicesLoading(true);
       try {
-        const result = await fetchMyDataservices(1, 1);
+        const result = await fetchAdminDataservices(1, 1, { owner: user.id });
         setDataservicesTotal(result.total);
       } catch (error) {
         console.error("Error loading dataservice statistics:", error);
@@ -144,7 +150,7 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
       }
     }
     void loadDataservicesTotal();
-  }, []);
+  }, [isUserLoading, user]);
 
   const handleDatasetsSearch = useDebouncedSearch((value: string) => {
     setDatasetsSearch(value);
