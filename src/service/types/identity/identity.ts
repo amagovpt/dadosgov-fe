@@ -30,6 +30,16 @@ export interface UserRef {
   // optional so an older backend (without the field) simply disables the
   // complete-registration gate.
   pending_registration?: boolean | null;
+  /**
+   * The address the CMD assertion carried, offered as a prefill on the
+   * registration completion screen. Served only on the caller's own user and
+   * only while the account is still pending.
+   *
+   * Always emitted, so `null` is the ordinary answer, not an absence: eIDAS
+   * never supplies an email (its Minimum Data Set has no such attribute) and
+   * a CMD assertion may carry none. Test the VALUE, never the key.
+   */
+  pending_registration_email?: string | null;
   roles?: string[];
   organizations?: Organization[];
   last_modified?: string;
