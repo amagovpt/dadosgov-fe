@@ -179,4 +179,19 @@ describe("CompleteRegistrationClient", () => {
     expect(requestEmailChangeMock).toHaveBeenCalledWith("pedro.nunes@example.org");
   });
 
+  it("renders the association-refused flash", async () => {
+    searchParamsMock = new URLSearchParams("flash=registration_association_refused");
+    await render();
+
+    expect(container.textContent).toContain(
+      translate("completeRegistration.flash.associationRefused")
+    );
+  });
+
+  it("ignores a flash code it does not know", async () => {
+    searchParamsMock = new URLSearchParams("flash=something_else");
+    await render();
+
+    expect(container.textContent).not.toContain("something_else");
+  });
 });

@@ -16,6 +16,11 @@ const FLASH_ERRORS: Record<string, string> = {
   change_email_already_taken: "completeRegistration.flash.alreadyTaken",
   change_email_invalid: "completeRegistration.flash.invalid",
   change_email_expired: "completeRegistration.flash.expired",
+  // Emitted by the association link click, not by confirm-change-email. The
+  // string is shared verbatim with the backend (see
+  // REGISTRATION_ASSOCIATION_REFUSED_FLASH) and with CompleteRegistrationGate,
+  // which has to forward it for the message to survive the redirect here.
+  registration_association_refused: "completeRegistration.flash.associationRefused",
 };
 
 const RESEND_COOLDOWN_SECONDS = 60;

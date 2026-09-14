@@ -197,7 +197,8 @@
     "flash": {
       "alreadyTaken": "That email address is already associated with another account. Please provide a different one.",
       "invalid": "The confirmation link is invalid. Please request a new one.",
-      "expired": "The confirmation link has expired. We sent a new link to the address you provided."
+      "expired": "The confirmation link has expired. We sent a new link to the address you provided.",
+      "associationRefused": "The existing account could not be linked: the temporary account created for this sign-in already holds content of its own. Please contact support so both accounts can be sorted out together."
     }
   },
   "errors": {

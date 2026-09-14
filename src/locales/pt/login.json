@@ -197,7 +197,8 @@
     "flash": {
       "alreadyTaken": "Esse endereço de e-mail já está associado a outra conta. Indique um endereço diferente.",
       "invalid": "O link de confirmação é inválido. Solicite um novo link.",
-      "expired": "O link de confirmação expirou. Enviámos um novo link para o endereço indicado."
+      "expired": "O link de confirmação expirou. Enviámos um novo link para o endereço indicado.",
+      "associationRefused": "Não foi possível associar à conta existente: a conta temporária criada para esta autenticação já tem conteúdo próprio. Contacte o apoio para que as duas contas sejam tratadas em conjunto."
     }
   },
   "errors": {

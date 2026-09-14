@@ -10,6 +10,10 @@ const FORWARDED_FLASHES = new Set([
   "change_email_already_taken",
   "change_email_invalid",
   "change_email_expired",
+  // The association link's own refusal. Without this line a citizen who is
+  // still pending lands back here with the flash stripped, and the screen
+  // silently repeats the request that has just been refused.
+  "registration_association_refused",
 ]);
 
 /**
