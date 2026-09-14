@@ -348,7 +348,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 <Language
                   key={lang.value}
                   value={lang.value}
-                  label={lang.label}
+                  label={t(lang.labelKey)}
                   abbr={lang.abbr}
                   icon={lang.icon}
                   checked={currentLocale === lang.value}
