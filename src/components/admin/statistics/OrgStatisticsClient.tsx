@@ -240,6 +240,10 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
           <TabHeader>{t("admin-statistics:tabs.datasets")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: datasetsTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
@@ -311,6 +315,10 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
           <TabHeader>{t("admin-statistics:tabs.dataservices")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: dataservicesTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
@@ -414,6 +422,10 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
           <TabHeader>{t("admin-statistics:tabs.reuses")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: reusesTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar

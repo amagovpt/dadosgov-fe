@@ -191,6 +191,10 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
           <TabHeader>{t("admin-statistics:tabs.datasets")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: datasetsTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
@@ -227,19 +231,14 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
                   }
                 />
               ) : (
-                <>
-                  <p className="text-sm mb-16 text-neutral-700">
-                    {t("admin-statistics:states.results", { count: datasetsTotal })}
-                  </p>
-                  <DatasetMetricsTable
-                    datasets={datasets}
-                    total={datasetsTotal}
-                    page={datasetsPage}
-                    onPageChange={setDatasetsPage}
-                    pageSize={datasetsPageSize}
-                    onPageSizeChange={setDatasetsPageSize}
-                  />
-                </>
+                <DatasetMetricsTable
+                  datasets={datasets}
+                  total={datasetsTotal}
+                  page={datasetsPage}
+                  onPageChange={setDatasetsPage}
+                  pageSize={datasetsPageSize}
+                  onPageSizeChange={setDatasetsPageSize}
+                />
               )}
             </div>
           </TabBody>
@@ -249,6 +248,10 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
           <TabHeader>{t("admin-statistics:tabs.reuses")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: reusesTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
@@ -260,14 +263,11 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
                   />
                 </div>
               </div>
+
               {isReusesLoading && reuses.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : reuses.length === 0 ? (
-                <>
-                  <p className="text-sm mb-16 text-neutral-700">
-                    {t("admin-statistics:states.results", { count: 0 })}
-                  </p>
-                  <CardNoResults
+                <CardNoResults
                     position="center"
                     icon={
                       <img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />
@@ -287,21 +287,15 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
                       </div>
                     }
                   />
-                </>
               ) : (
-                <>
-                  <p className="text-sm mb-16 text-neutral-700">
-                    {t("admin-statistics:states.results", { count: reusesTotal })}
-                  </p>
-                  <ReuseMetricsTable
-                    reuses={reuses}
-                    total={reusesTotal}
-                    page={reusesPage}
-                    onPageChange={setReusesPage}
-                    pageSize={reusesPageSize}
-                    onPageSizeChange={setReusesPageSize}
-                  />
-                </>
+                <ReuseMetricsTable
+                  reuses={reuses}
+                  total={reusesTotal}
+                  page={reusesPage}
+                  onPageChange={setReusesPage}
+                  pageSize={reusesPageSize}
+                  onPageSizeChange={setReusesPageSize}
+                />
               )}
             </div>
           </TabBody>
