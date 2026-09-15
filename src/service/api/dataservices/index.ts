@@ -82,11 +82,37 @@ export async function fetchMyDataservices(
 export interface DataserviceListFilters {
   q?: string;
   sort?: string;
+  owner?: string;
   organization?: string | string[];
   access_type?: string;
   organization_badge?: string;
   modified_since?: string;
   dataset?: string;
+}
+
+function buildDataserviceListParams(
+  page: number,
+  pageSize: number,
+  filters?: DataserviceListFilters,
+): URLSearchParams {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("page_size", String(pageSize));
+  if (filters?.q) params.set("q", filters.q);
+  if (filters?.sort) params.set("sort", filters.sort);
+  if (filters?.owner) params.set("owner", filters.owner);
+  if (filters?.access_type) params.set("access_type", filters.access_type);
+  if (filters?.organization_badge) params.set("organization_badge", filters.organization_badge);
+  if (filters?.modified_since) params.set("modified_since", filters.modified_since);
+  if (filters?.dataset) params.set("dataset", filters.dataset);
+
+  const organization = filters?.organization;
+  if (organization) {
+    for (const item of Array.isArray(organization) ? organization : [organization]) {
+      if (item) params.append("organization", item);
+    }
+  }
+  return params;
 }
 
 export async function fetchDataservices(
@@ -95,22 +121,7 @@ export async function fetchDataservices(
   filters?: DataserviceListFilters
 ): Promise<APIResponse<Dataservice>> {
   try {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("page_size", String(pageSize));
-    if (filters?.q) params.set("q", filters.q);
-    if (filters?.sort) params.set("sort", filters.sort);
-    if (filters?.access_type) params.set("access_type", filters.access_type);
-    if (filters?.organization_badge) params.set("organization_badge", filters.organization_badge);
-    if (filters?.modified_since) params.set("modified_since", filters.modified_since);
-    if (filters?.dataset) params.set("dataset", filters.dataset);
-    // Multi-value filters
-    const organization = filters?.organization;
-    if (organization) {
-      for (const item of Array.isArray(organization) ? organization : [organization]) {
-        if (item) params.append("organization", item);
-      }
-    }
+    const params = buildDataserviceListParams(page, pageSize, filters);
 
     const res = await fetch(
       `${API_BASE_URL}/dataservices/?${params.toString()}`,
@@ -136,15 +147,49 @@ export async function fetchDataservices(
   }
 }
 
+/**
+ * Fetch dataservices through the authenticated route. This keeps private
+ * personal entries visible while using the normal paginated listing API.
+ */
+export async function fetchAdminDataservices(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: DataserviceListFilters,
+): Promise<APIResponse<Dataservice>> {
+  try {
+    const params = buildDataserviceListParams(page, pageSize, filters);
+    const res = await authFetch(`/dataservices/?${params.toString()}`, { cache: "no-store" });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch authenticated dataservices: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    rethrowControlFlow(error);
+    console.error("Error fetching authenticated dataservices:", error);
+    return {
+      data: [],
+      page: 1,
+      page_size: pageSize,
+      total: 0,
+      next_page: null,
+      previous_page: null,
+    };
+  }
+}
+
 
 export async function fetchOrgDataservices(
   org: string,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  filters?: DataserviceListFilters,
 ): Promise<APIResponse<Dataservice>> {
   try {
+    const params = buildDataserviceListParams(page, pageSize, filters);
+    params.set("organization", org);
     const res = await fetch(
-      `${API_BASE_URL}/dataservices/?organization=${org}&page=${page}&page_size=${pageSize}`,
+      `${API_BASE_URL}/dataservices/?${params.toString()}`,
       { cache: "no-store" }
     );
 

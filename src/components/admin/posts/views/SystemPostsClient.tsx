@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button, InputSelect } from "@ama-pt/agora-design-system";
@@ -8,7 +8,7 @@ import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchAdminPosts } from "@/service/api/posts";
 import type { Post } from "@/service/types/posts";
@@ -16,7 +16,7 @@ import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import {
   createPostColumns,
-  filterPosts,
+  postSortFieldMap,
   sortPosts,
   type PostSortField,
 } from "@/components/admin/posts/config/postsListConfig";
@@ -28,9 +28,9 @@ interface SystemPostsClientProps {
 
 export default function SystemPostsClient({ pageContent }: SystemPostsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-posts"]);
-  const fetchPageSize = 100;
   const router = useRouter();
-  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const {
     currentPage,
@@ -48,48 +48,55 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
   } = useAdminListController<PostSortField, { typeFilter: string; statusFilter: string }>({
     initialFilters: { typeFilter: "", statusFilter: "" },
   });
+  const usesLocalFallback = Boolean(filters.statusFilter) || sortField === "type";
+  const sortParam = useMemo(
+    () =>
+      usesLocalFallback
+        ? undefined
+        : buildApiSortParam(sortField, sortOrder, postSortFieldMap),
+    [sortField, sortOrder, usesLocalFallback],
+  );
+
+  const loadPosts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchAdminPosts(
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? 9999 : pageSize,
+        {
+          q: searchQuery.trim() || undefined,
+          kind: filters.typeFilter || undefined,
+          sort: sortParam,
+        },
+      );
+      setPosts(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading posts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, filters.typeFilter, pageSize, searchQuery, sortParam, usesLocalFallback]);
 
   useEffect(() => {
     let isActive = true;
-
-    const run = async () => {
-      try {
-        const firstResponse = await fetchAdminPosts(1, fetchPageSize);
-        let data = firstResponse.data || [];
-        const totalAvailable = firstResponse.total || data.length;
-        const totalPages = Math.ceil(totalAvailable / fetchPageSize);
-
-        if (totalPages > 1) {
-          const remainingResponses = await Promise.all(
-            Array.from({ length: totalPages - 1 }, (_, index) =>
-              fetchAdminPosts(index + 2, fetchPageSize)
-            )
-          );
-          data = data.concat(remainingResponses.flatMap((response) => response.data || []));
-        }
-
-        if (!isActive) return;
-        setAllPosts(data);
-      } catch (error) {
-        if (!isActive) return;
-        console.error("Error loading posts:", error);
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
+    const loadCurrentPosts = async () => {
+      if (isActive) await loadPosts();
     };
-
-    void run();
-
+    void loadCurrentPosts();
     return () => {
       isActive = false;
     };
-  }, [fetchPageSize]);
+  }, [loadPosts]);
 
   const filteredPosts = useMemo(
-    () => filterPosts(allPosts, searchQuery, filters.typeFilter, filters.statusFilter),
-    [allPosts, searchQuery, filters.typeFilter, filters.statusFilter]
+    () =>
+      filters.statusFilter
+        ? posts.filter((post) =>
+            filters.statusFilter === "published" ? Boolean(post.published) : !post.published
+          )
+        : posts,
+    [filters.statusFilter, posts]
   );
 
   const sortedPosts = useMemo(
@@ -98,8 +105,8 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
   );
 
   const paginatedPosts = useMemo(
-    () => paginateItems(sortedPosts, currentPage, pageSize),
-    [sortedPosts, currentPage, pageSize]
+    () => (usesLocalFallback ? paginateItems(sortedPosts, currentPage, pageSize) : sortedPosts),
+    [currentPage, pageSize, sortedPosts, usesLocalFallback]
   );
 
   const columns = useMemo(
@@ -128,7 +135,7 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
       ]}
       title={pageContent.systemHero?.title ?? ""}
       isLoading={isLoading}
-      count={sortedPosts.length}
+      count={usesLocalFallback ? filteredPosts.length : totalItems}
       hasItems={paginatedPosts.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}

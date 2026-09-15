@@ -252,7 +252,6 @@ export async function fetchOrgDatasets(
   }
 }
 
-
 export async function fetchOrgReuses(org: string): Promise<Reuse[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/organizations/${org}/reuses/`, {
@@ -270,7 +269,6 @@ export async function fetchOrgReuses(org: string): Promise<Reuse[]> {
     return [];
   }
 }
-
 
 // --- Organization Membership ---
 

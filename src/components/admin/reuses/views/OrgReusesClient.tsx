@@ -1,22 +1,27 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { fetchOrgReuses } from "@/service/api/organizations";
+import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import { filterByStatus } from "@/utils/filterByStatus";
 import { buildOrganizationAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
-import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
+import {
+  ReuseSortField,
+  createReuseColumns,
+  reuseSortFieldMap,
+  sortReuses,
+} from "@/components/admin/reuses/config/reusesListConfig";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
 
 interface OrgReusesClientProps {
@@ -34,12 +39,22 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
   const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const usesLocalSort = sortField === "status";
+  const sortParam = useMemo(
+    () =>
+      usesLocalSort
+        ? undefined
+        : buildApiSortParam(sortField, sortOrder, reuseSortFieldMap),
+    [sortField, sortOrder, usesLocalSort],
+  );
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -49,41 +64,58 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
     setCurrentPage
   );
 
+  const loadReuses = useCallback(async () => {
+    if (!resolvedOrgId) {
+      setReuses([]);
+      setTotalItems(0);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetchReuses(
+        usesLocalSort ? 1 : currentPage,
+        usesLocalSort ? 9999 : itemsPerPage,
+        {
+          organization: resolvedOrgId,
+          q: searchQuery.trim() || undefined,
+          status: statusFilter || undefined,
+          sort: sortParam,
+        },
+      );
+      setReuses(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading org reuses:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, itemsPerPage, resolvedOrgId, searchQuery, sortParam, statusFilter, usesLocalSort]);
+
   useEffect(() => {
-    if (!resolvedOrgId) return;
-
     let isCancelled = false;
-    const timeoutId = setTimeout(() => {
-      setIsLoading(true);
-      void fetchOrgReuses(resolvedOrgId)
-        .then((data) => {
-          if (!isCancelled) setReuses(data || []);
-        })
-        .catch((error) => {
-          console.error("Error loading org reuses:", error);
-        })
-        .finally(() => {
-          if (!isCancelled) setIsLoading(false);
-        });
-    }, 0);
-
+    const loadCurrentReuses = async () => {
+      if (!isCancelled) await loadReuses();
+    };
+    void loadCurrentReuses();
     return () => {
       isCancelled = true;
-      clearTimeout(timeoutId);
     };
-  }, [resolvedOrgId]);
+  }, [loadReuses]);
 
-  const filteredReuses = useMemo(
-    () => filterByStatus(reuses, statusFilter),
-    [reuses, statusFilter]
-  );
+  const handleSearch = useDebouncedSearch((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
+
   const sortedReuses = useMemo(
-    () => sortReuses(filteredReuses, sortField, sortOrder),
-    [filteredReuses, sortField, sortOrder]
+    () => sortReuses(reuses, sortField, sortOrder),
+    [reuses, sortField, sortOrder]
   );
   const paginatedReuses = useMemo(
-    () => paginateItems(sortedReuses, currentPage, itemsPerPage),
-    [sortedReuses, currentPage, itemsPerPage]
+    () => (usesLocalSort ? paginateItems(sortedReuses, currentPage, itemsPerPage) : sortedReuses),
+    [currentPage, itemsPerPage, sortedReuses, usesLocalSort]
   );
   const columns = useMemo(
     () =>
@@ -121,7 +153,8 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
       })}
       title={t("admin-reuses:title")}
       isLoading={isLoading}
-      count={filteredReuses.length}
+      count={usesLocalSort ? reuses.length : totalItems}
+      hasItems={paginatedReuses.length > 0}
       currentPage={currentPage}
       pageSize={itemsPerPage}
       setCurrentPage={setCurrentPage}
@@ -130,6 +163,7 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,
+        onChange: handleSearch,
       }}
       filters={
         <StatusFilterSelect
@@ -157,4 +191,3 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
     </AdminListPage>
   );
 }
-

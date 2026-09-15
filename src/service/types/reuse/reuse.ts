@@ -24,6 +24,7 @@ export interface ReuseFilters {
   owner?: string;
   dataset?: string;
   sort?: string;
+  status?: string;
   modified_since?: string;
 }
 
@@ -90,4 +91,3 @@ export interface ReuseUpdatePayload {
   archived?: string | null;
   extras?: Record<string, unknown>;
 }
-
