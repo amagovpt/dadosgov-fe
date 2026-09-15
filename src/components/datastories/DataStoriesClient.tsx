@@ -144,11 +144,11 @@ export default function DataStoriesClient({
                         }}
                         category={story.organizationName}
                         title={<div className="text-xl-bold underline">{story.title}</div>}
-                        description={
+                        /*description={
                           <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                             {formatHtmlParagraphs(story.description)}
                           </p>
-                        }
+                        }*/
                         date={
                           <span className="font-[300]">
                             {t("publishedTimeAgo", { timeAgo: timeAgo })}
