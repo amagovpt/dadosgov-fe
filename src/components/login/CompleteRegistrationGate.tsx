@@ -27,9 +27,13 @@ const FORWARDED_FLASHES = new Set([
  * homepage with a `?flash=` code — the redirect forwards it so the page can
  * explain what went wrong.
  *
- * Renders nothing; mounted globally next to <NewAccountNotice /> in the
- * locale layout. Route handlers (/auth/*, /saml/*) live outside [locale]
- * and are unaffected.
+ * Renders nothing. Mounted in BOTH route-group layouts — `(pages)/layout.tsx`
+ * next to <NewAccountNotice />, and `(admin)/layout.tsx` on its own — because
+ * "every localized page" above has to keep meaning every page. `AdminRouteGuard`
+ * gates on session, role and organization, never on `pending_registration`, so
+ * dropping this from the backoffice would leave it the one area such an account
+ * could still reach. Route handlers (/auth/*, /saml/*) live outside [locale] and
+ * are unaffected.
  */
 export default function CompleteRegistrationGate() {
   const { isLoading, pendingRegistration } = useAuth();

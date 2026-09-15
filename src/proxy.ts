@@ -99,7 +99,7 @@ export async function proxy(request: NextRequest) {
       const disabledPaths = await getRouteRestrictions(localeSegment);
       if (isPathRestricted(pathname, disabledPaths)) {
         // Rewrite inside the locale so the `[...not-found]` catch-all picks it
-        // up and renders `[locale]/not-found.tsx` with the site chrome. The
+        // up and renders `(pages)/not-found.tsx` with the site chrome. The
         // bare `/_not-found` is Next's internal route, which sits outside the
         // `[locale]` layout and renders the unstyled builtin 404.
         const notFoundUrl = new URL(`/${localeSegment}/_not-found`, request.url);

@@ -32,7 +32,9 @@ import {
   AuthenticatedBodyLink,
   AuthenticatedFooter,
   AuthenticatedFooterAction,
-  Icon,
+  EcosystemPanel,
+  EcosystemPanelAnchor,
+  EcosystemPanelTitle,
   NavigationBar,
   NavigationFreestyle,
   NavigationLink,
@@ -50,7 +52,6 @@ import { useCurrentLocale, useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { LocalizedLink } from "./Shared/LocalizedLink";
 import { isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
-import Anchor from "./Shared/Anchor";
 
 export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const { topLevelLinks = [], authMenuItems = [], dropdowns = [], ecosytems } = data;
@@ -106,70 +107,11 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     };
   }, []);
 
-  const [ecosystemOpen, setEcosystemOpen] = useState(false);
-  const [ecosystemBtnPortalNode, setEcosystemBtnPortalNode] = useState<HTMLLIElement | null>(null);
-  const [ecosystemPanelNode, setEcosystemPanelNode] = useState<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    const panelsList = document.querySelector("header.sticky .panels-menu > ul");
-    if (!panelsList) return;
-
-
-    let li = panelsList.querySelector(".ecosystem-custom-menu") as HTMLLIElement | null;
-    if (!li) {
-      li = document.createElement("li");
-      li.className = "ecosystem-custom-menu";
-      li.style.display = "flex";
-      li.style.alignItems = "stretch";
-      const authLi = panelsList.lastElementChild;
-      if (authLi) {
-        panelsList.insertBefore(li, authLi);
-      } else {
-        panelsList.appendChild(li);
-      }
-    }
-
-    let panelDiv = document.querySelector(".ecosystem-panel-container") as HTMLDivElement | null;
-    if (!panelDiv) {
-      panelDiv = document.createElement("div");
-      panelDiv.className = "ecosystem-panel-container";
-      document.body.appendChild(panelDiv);
-    }
-
-    queueMicrotask(() => {
-      setEcosystemBtnPortalNode(li);
-      setEcosystemPanelNode(panelDiv);
-    });
-
-    return () => {
-      panelsList.querySelector(".ecosystem-custom-menu")?.remove();
-      document.querySelector(".ecosystem-panel-container")?.remove();
-      setEcosystemBtnPortalNode(null);
-      setEcosystemPanelNode(null);
-    };
-  }, []);
-
-  // Keep the ecosystem <li> immediately before the auth slot across
-  // Authenticated <-> Unauthenticated transitions (React appends the newly
-  // mounted one at the physical end of the list, after our DOM-injected
-  // ecosystem <li>, so this just re-asserts the intended order).
-  useLayoutEffect(() => {
-    const panelsList = document.querySelector("header.sticky .panels-menu > ul");
-    if (!panelsList) return;
-
-    const ecosystemLi = panelsList.querySelector(".ecosystem-custom-menu");
-    const lastChild = panelsList.lastElementChild;
-    if (ecosystemLi && lastChild && lastChild !== ecosystemLi) {
-      panelsList.insertBefore(ecosystemLi, lastChild);
-    }
-  }, [user]);
-
   const [submenu, setSubmenu] = useState<string | null>(null);
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
     setSubmenu(null);
-    setEcosystemOpen(false);
   }
 
   useEffect(() => {
@@ -190,20 +132,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     router.refresh();
   };
 
-  // Position ecosystem panel right below the panels-menu bar (covering the nav bar)
-  useEffect(() => {
-    if (!ecosystemOpen) return;
-    const panelDiv = document.querySelector(".ecosystem-panel-container") as HTMLDivElement | null;
-    if (!panelDiv) return;
-    const panelsMenu = document.querySelector("header.sticky .panels-menu");
-    if (panelsMenu) {
-      const rect = panelsMenu.getBoundingClientRect();
-      panelDiv.style.top = `${rect.bottom}px`;
-      panelDiv.style.maxHeight = `${window.innerHeight - rect.bottom}px`;
-      panelDiv.style.overflowY = "auto";
-    }
-  }, [ecosystemOpen, ecosystemPanelNode]);
-
   // Mark header when on auth pages so CSS can style the "Autenticar" button
   const isAuthPage = localePath === "/login";
 
@@ -214,9 +142,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     const target = e.target as HTMLElement;
     if (!target.closest(".header-nav-cards")) {
       setSubmenu(null);
-    }
-    if (!target.closest("li.ecosystem-custom-menu") && !target.closest(".ecosystem-custom-panel")) {
-      setEcosystemOpen(false);
     }
   }, []);
 
@@ -318,7 +243,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   return (
     <>
       <header
-        className="sticky top-0 z-sticky [&_.custom-search-layout]:!m-0 [&_.custom-search-layout]:!mx-auto"
+        className="[&_.custom-search-layout]:m-0! [&_.custom-search-layout]:mx-auto! [&_.ecosystem-panel-title]:text-m-bold!"
         data-submenu={submenu ?? undefined}
         data-auth-page={isAuthPage || undefined}
         data-no-user={!user || undefined}
@@ -368,6 +293,44 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 </div>
               </CustomSearch>
             </Search>
+            <EcosystemPanel
+              text={<span>{t("header.ecosystem")}</span>}
+              logo={
+                <Image
+                  src="/Ecossistema/arte_black_simple.svg"
+                  alt="arte.gov.pt"
+                  width={42}
+                  height={16}
+                  className="h-16 w-auto self-center"
+                />
+              }
+            >
+              <EcosystemPanelTitle>{ecosytems?.description ?? ""}</EcosystemPanelTitle>
+              {ecosystemEntries.map((item) => (
+                <EcosystemPanelAnchor
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  appearance="link"
+                >
+                  <span
+                    className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+                    style={{ backgroundColor: item.bgColor ?? undefined }}
+                  >
+                    <span className="relative block h-20 w-20">
+                      <Image
+                        src={item.logo ?? ""}
+                        alt={item.label}
+                        fill
+                        className="object-contain"
+                      />
+                    </span>
+                  </span>
+                  <span className="text-base font-medium">{item.label}</span>
+                </EcosystemPanelAnchor>
+              ))}
+            </EcosystemPanel>
 
             {user ? (
               <Authenticated
@@ -515,86 +478,14 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
       </header>
       {generalBarLabelPortalNode &&
         createPortal(
-          <span className="text-sm font-regular hidden text-primary-900 md:inline">
+          // Shown only from xl: below it the general bar has no room to spare, and this
+          // is the one item on the row without a min-width, so it absorbs the squeeze by
+          // wrapping. `text-m-regular` is the DS token — `text-sm`/`font-regular` are not
+          // in the DS theme and emitted nothing (same markup as the admin header).
+          <span className="whitespace-nowrap text-m-regular hidden text-primary-900 xl:inline">
             {t("generalBarLabel")}
           </span>,
           generalBarLabelPortalNode
-        )}
-      {ecosystemBtnPortalNode &&
-        createPortal(
-          <>
-            <span className="agora-link-wrapper agora-link-wrapper-link-neutral custom-header-link-wrapper panel-menu-link-wrapper inline-flex items-center !px-8">
-              <a
-                className="link-with-icon"
-                href="#"
-                aria-expanded={ecosystemOpen}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setEcosystemOpen((o) => !o);
-                }}
-              >
-                <div className="icon-wrapper leading flex items-center">
-                  <Icon name="agora-line-dashboard" className="h-24 w-24" />
-                </div>
-                <span className="children-wrapper hidden md:inline">{t("header.ecosystem")}</span>
-                <Image
-                  src="/Ecossistema/arte_black_simple.svg"
-                  alt="arte.gov.pt"
-                  width={42}
-                  height={16}
-                  className="ml-8 hidden h-16 w-auto self-center md:block"
-                />
-              </a>
-            </span>
-          </>,
-          ecosystemBtnPortalNode
-        )}
-      {ecosystemPanelNode &&
-        ecosystemOpen &&
-        createPortal(
-          <div className="ecosystem-custom-panel">
-            <div className="container mx-auto flex w-full flex-col py-16 md:flex-row md:py-32">
-              <div className="flex flex-1 flex-col gap-16 pl-0 md:gap-32">
-                <div className="flex flex-row items-start gap-32">
-                  <p className="text-base font-bold text-primary-900">
-                    {ecosytems?.description ?? ""}
-                  </p>
-                </div>
-                <div>
-                  <ul className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
-                    {ecosystemEntries.map((item) => (
-                      <li key={item.href} className="w-full max-w-full">
-                        <Anchor
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          appearance="link"
-                        >
-                          <div className="flex items-center gap-8 py-8">
-                            <div
-                              className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
-                              style={{ backgroundColor: item.bgColor ?? undefined }}
-                            >
-                              <div className="relative h-[20px] w-[20px]">
-                                <Image
-                                  src={item.logo ?? ""}
-                                  alt={item.label}
-                                  fill
-                                  className="object-contain"
-                                />
-                              </div>
-                            </div>
-                            <span className="text-base font-medium">{item.label}</span>
-                          </div>
-                        </Anchor>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>,
-          ecosystemPanelNode
         )}
     </>
   );
