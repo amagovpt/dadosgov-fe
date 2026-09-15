@@ -55,11 +55,6 @@
     "unpdf": "^1.6.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
-  "overrides": {
-    "next": {
-      "postcss": "^8.5.12"
-    }
-  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
@@ -74,10 +69,10 @@
     "jsdom": "^25.0.1",
     "pg": "^8.20.0",
     "playwright": "^1.58.2",
-    "postcss": "^8.5.26",
+    "postcss": "^8.5.28",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5",
     "vitest": "^4.1.11"
   }

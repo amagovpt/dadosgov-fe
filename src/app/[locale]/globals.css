@@ -1448,10 +1448,6 @@ li.section-name:empty {
    ========================================================================== */
 
 /* 7.1 Admin Wrapper & Header */
-body:has(.admin-wrapper) > div > header.sticky {
-  display: none;
-}
-
 .admin-wrapper {
   display: flex;
   flex-direction: column;
