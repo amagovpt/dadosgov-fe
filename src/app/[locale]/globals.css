@@ -685,57 +685,8 @@ header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expande
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
-  svg {
+  svg { 
   fill: currentColor;
-}
-
-/* ==========================================================================
-   [04] FOOTER
-   ========================================================================== */
-
-footer img {
-  height: 30px;
-}
-
-.border-t.border-neutral-500.border-footer {
-  opacity: 0.5;
-}
-
-.grid.items-center.xs\:grid-cols-4.md\:grid-cols-8.xl\:grid-cols-12.gap-32.xs\:pt-32.md\:pt-64.xs\:pb-32.xl\:pb-64 {
-  display: none;
-}
-
-nav.flex.items-center.justify-center.w-full.h-\[126px\].border-b-2.border-white\/5.xl\:justify-center.xl\:border-r-2.xl\:h-full.xl\:w-\[40\%\] {
-  width: 384px;
-  flex-shrink: 0;
-}
-
-.flex.flex-col.mx-\[-64px\].xl\:flex-row.xl\:h-\[260px\] {
-  display: flex;
-  flex-direction: inherit;
-  padding-left: 112px;
-  padding-right: 112px;
-}
-
-ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
-  display: flex;
-  justify-content: space-evenly;
-  gap: 0;
-  width: 100%;
-}
-
-.flex.flex-col.pt-32.xs\:mx-64.xl\:w-\[60\%\].xl\:items-end.xl\:justify-center {
-  margin-left: 0px;
-  flex: 1;
-  width: auto;
-  padding-top: 64px;
-  padding-bottom: 64px;
-  gap: 32px;
-}
-
-.container.mx-auto.px-4.py-12.xl\:py-64 {
-  max-width: 1440px;
-  padding: 64px;
 }
 
 /* ==========================================================================
