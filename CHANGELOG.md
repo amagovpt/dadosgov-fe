@@ -6,6 +6,26 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): the registration completion screen prefills the CMD address and explains a refused association**
+  - The address the Chave Móvel Digital asserted is now offered back in the email
+    field, with a line saying where it came from. It stays an ordinary editable
+    input and the confirmation field is deliberately left empty: the assertion
+    proves the identity, never that the mailbox is reachable, so the address is
+    still read and confirmed by a person.
+  - eIDAS carries no email at all — its Minimum Data Set has no such attribute —
+    so the field is simply empty there, as it is for a CMD sign-in that brought
+    none. Against a backend that does not serve the field, the screen behaves
+    exactly as it did before.
+  - The screen's own copy no longer claims the sign-in "did not provide a usable
+    email address", which stopped being true the moment one is prefilled above it.
+  - **The gate forwards one more flash code.** The association link can come back
+    refused, and without the code on the gate's allowlist the citizen was
+    redirected with the message stripped — landing on a screen that silently
+    repeated the request that had just been refused.
+  - First tests for either component: the completion screen and its gate had none,
+    and the flash allowlist is a contract with the backend whose only failure
+    symptom is a person stuck on a page that will not explain itself.
+
 - **test(login): pin that only the CMD tab declares a citizen type**
   - The declared citizen type must travel from the CMD tab and *not* from the
     account-linking notice on the email tab, which starts the same CMD login

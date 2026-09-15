@@ -19,6 +19,7 @@ interface AuthContextProps {
   // True while the account still has a saml-* placeholder email: the user
   // must provide a real email on /complete-registration before browsing.
   pendingRegistration: boolean;
+  pendingRegistrationEmail: string | null;
   isAdmin: boolean;
   hasOrganization: boolean;
   refresh: () => Promise<void>;
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextProps>({
   isLoading: true,
   samlLogin: false,
   pendingRegistration: false,
+  pendingRegistrationEmail: null,
   isAdmin: false,
   hasOrganization: false,
   refresh: async () => {},
@@ -69,6 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const pendingRegistration = user?.pending_registration ?? false;
+  // ?? null, not ?? "": an older backend omits the field entirely, and the
+  // screen must then behave exactly as it did before rather than prefill an
+  // empty string over whatever the user may already be typing.
+  const pendingRegistrationEmail = user?.pending_registration_email ?? null;
 
   return (
     <AuthContext.Provider
@@ -77,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         samlLogin,
         pendingRegistration,
+        pendingRegistrationEmail,
         isAdmin,
         hasOrganization,
         refresh,

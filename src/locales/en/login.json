@@ -178,7 +178,8 @@
     },
     "loading": "Loading...",
     "title": "Complete registration",
-    "description": "Your authentication (Chave Móvel Digital or eIDAS) did not provide a usable email address, so your account was created with a temporary one. To complete your registration, provide a valid email address — we will send you a confirmation link.",
+    "description": "Your account was created with a temporary address. To finish registering, enter your email address — we will send you a confirmation link. If that address already belongs to an account of yours, the link connects this sign-in to it.",
+    "prefillNotice": "This is the address linked to your sign-in. You can change it if you would rather use another.",
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",
     "emailLabel": "Email address *",
     "emailConfirmLabel": "Confirm email address *",
@@ -196,7 +197,8 @@
     "flash": {
       "alreadyTaken": "That email address is already associated with another account. Please provide a different one.",
       "invalid": "The confirmation link is invalid. Please request a new one.",
-      "expired": "The confirmation link has expired. We sent a new link to the address you provided."
+      "expired": "The confirmation link has expired. We sent a new link to the address you provided.",
+      "associationRefused": "The existing account could not be linked: the temporary account created for this sign-in already holds content of its own. Please contact support so both accounts can be sorted out together."
     }
   },
   "errors": {
