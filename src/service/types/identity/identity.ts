@@ -32,6 +32,7 @@ export interface UserRef {
   pending_registration?: boolean | null;
   roles?: string[];
   organizations?: Organization[];
+  metrics?: UserMetrics;
   last_modified?: string;
 }
 
