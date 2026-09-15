@@ -179,6 +179,30 @@ describe("CompleteRegistrationClient", () => {
     expect(requestEmailChangeMock).toHaveBeenCalledWith("pedro.nunes@example.org");
   });
 
+  it("always surfaces the existing-account path, in every case", async () => {
+    // This notice is the only thing on the screen that tells somebody they may
+    // type the address of an account they already have. There is no second
+    // button to discover it from -- a button would have to disclose whether
+    // the address exists -- so if this line is not visible, that path is
+    // invisible. It must therefore show in EVERY case, not only the prefilled
+    // one, because the person most likely to need it is the one the assertion
+    // brought no address for.
+    const notice = translate("completeRegistration.existingAccountNotice");
+
+    await render();
+    expect(container.textContent).toContain(notice);
+
+    await act(async () => root.unmount());
+    root = createRoot(container);
+    authMock.pendingRegistrationEmail = "pedro.nunes@example.org";
+    await render();
+    expect(container.textContent).toContain(notice);
+
+    // And it survives typing: it describes what the field accepts, not a state.
+    await typeInto(emailField()!, "outro@example.org");
+    expect(container.textContent).toContain(notice);
+  });
+
   it("renders the association-refused flash", async () => {
     searchParamsMock = new URLSearchParams("flash=registration_association_refused");
     await render();
