@@ -210,6 +210,20 @@ export default function CompleteRegistrationClient() {
                       {t("completeRegistration.prefillNotice")}
                     </p>
                   )}
+                  {/* The one signal that the association path exists at all.
+                      It used to be the last sentence of the paragraph above,
+                      where it read as a footnote — and this screen has no
+                      other way of telling somebody that typing the address of
+                      an account they already have is a supported thing to do,
+                      because the alternative (a second button) would have to
+                      disclose whether that address exists. */}
+                  <div className="mb-16">
+                    <StatusCard
+                      variant="informative"
+                      showIcon
+                      description={t("completeRegistration.existingAccountNotice")}
+                    />
+                  </div>
                   <p className="text-sm text-neutral-700">
                     {t("completeRegistration.requiredFields")}
                   </p>

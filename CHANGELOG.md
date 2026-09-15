@@ -6,6 +6,20 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): the completion screen says out loud that you can use an existing account's email**
+  - The sentence that tells somebody they may type the address of an account they
+    already have was the **last clause of a paragraph**, where it read as a footnote.
+    It is now an informative card of its own, above the fields.
+  - It is the **only** signal that path exists. The screen deliberately has no second
+    button — one would have to disclose whether the address exists, which is the
+    account oracle this flow was built without — so a person who does not read that
+    line has no way to discover the option at all.
+  - Shown in **every** case, not only when the field arrives prefilled: the person most
+    likely to need it is the one whose sign-in brought no address, and who is therefore
+    staring at an empty field with no idea their old account is reachable from here.
+  - The copy now says what actually happens — the data stays, and from then on the
+    sign-in is by digital identity — instead of only naming the mechanism.
+
 - **feat(login): the registration completion screen prefills the CMD address and explains a refused association**
   - The address the Chave Móvel Digital asserted is now offered back in the email
     field, with a line saying where it came from. It stays an ordinary editable
