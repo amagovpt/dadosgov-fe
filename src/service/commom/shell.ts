@@ -9,7 +9,7 @@ import type { Footer } from "@/service/types/header/footer";
  * Thrown when the portal's shell cannot be built at all: both CMS singletons
  * that feed the header and the footer failed, so the visitor would get a page
  * framed by an empty header and an empty footer — a broken shell pretending to
- * be up. Letting it out of the root layout hands the request to
+ * be up. Letting it out of the public layout hands the request to
  * `app/global-error.tsx` instead.
  */
 export class ShellUnavailableError extends Error {
@@ -25,7 +25,7 @@ export interface ShellData {
 }
 
 /**
- * Load the navigation and the footer for the root layout, and decide whether
+ * Load the navigation and the footer for the public layout, and decide whether
  * what came back is still a portal.
  *
  * Both queries hit the same Squidex endpoint, which is what makes the rule

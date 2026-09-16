@@ -24,22 +24,22 @@ export default function NotFound() {
                 name="agora-line-hardware-settings"
                 aria-hidden
                 focusable={false}
-                className="!h-[280px] !min-h-[280px] !w-[280px] !min-w-[280px] shrink-0 !fill-white"
+                className="h-[280px]! min-h-[280px]! w-[280px]! min-w-[280px]! shrink-0 fill-white!"
               />
             </Suspense>
           </Hero.Content>
           <Hero.Content>
             <div className="flex flex-col gap-16 h-full justify-center">
-              <Pill variant="primary" size="large" appearance="solid" className="!text-neutral-900 !bg-secondary-200">
+              <Pill variant="primary" size="large" appearance="solid" className="text-neutral-900! bg-secondary-200!">
                 {t("notFound.error")}
               </Pill>
               <Hero.Title>{t("notFound.title")}</Hero.Title>
               <Hero.Description description={
                 <div className="flex flex-col gap-16 w-full">
-                  <span className="!text-m-bold !text-white">
+                  <span className="text-m-bold! text-white!">
                     {t("notFound.subtitle")}
                   </span>
-                  <span className="!text-m-regular !text-white">
+                  <span className="text-m-regular! text-white!">
                     {t("notFound.description")}
                   </span>
                 </div>
@@ -58,11 +58,11 @@ export default function NotFound() {
           <div className="w-full flex items-center justify-between flex-col xl:flex-row gap-16 xl:gap-0 mb-128">
             <div
               id="not-found-search-bar"
-              className="w-full xl:w-2/3 flex-shrink-0"
+              className="w-full xl:w-2/3 shrink-0"
             >
               <SearchDropdown
                 id="404-search" placeholder={t("header.searchPlaceholder")}
-                classname="[&_.input-search-bar-container]:!border-0 py-0 w-full"
+                classname="[&_.input-search-bar-container]:border-0! py-0 w-full"
                 label=""
               />
 

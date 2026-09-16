@@ -612,10 +612,6 @@ header[data-auth-page][data-no-user]
   fill: var(--color-primary-600);
 }
 
-li.ecosystem-custom-menu {
-  gap: 8px;
-}
-
 @media (max-width: 767px) {
   header.sticky .panels-menu .search-panel-menu .children-wrapper,
   header.sticky .panels-menu .unauthenticated-panel-menu .children-wrapper {
@@ -623,49 +619,47 @@ li.ecosystem-custom-menu {
   }
 }
 
-.ecosystem-panel-container {
-  position: fixed;
-  left: 0;
-  right: 0;
-  z-index: 9999;
+/* The DS jumps straight from one column to four at 768px. */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .ecosystem-panel-menu-content .ecosystem-panel-anchor-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.ecosystem-custom-panel {
-  background-color: rgb(241, 243, 248);
-  box-shadow: 0px 16px 16px 0px #00000029;
-  border-top: 4px solid var(--Neutral-200, #e1e4ea);
+.ecosystem-panel-menu-content {
+  max-width: 1216px;
+  margin-inline: auto;
+  padding-inline: 32px;
 }
 
-li.ecosystem-custom-menu .panel-menu-link-wrapper {
-  position: relative;
-  align-self: stretch;
+@media (min-width: 768px) {
+  .ecosystem-panel-menu-content {
+    padding-inline: 64px;
+  }
 }
 
-li.ecosystem-custom-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  height: 4px;
-  width: 100%;
-  background-color: var(--color-primary-600);
+/* Past 1280px the 1216px box is narrower than the screen, so the gutter comes from
+   the centring — this is what the DS's own `container` utility does. */
+@media (min-width: 1280px) {
+  .ecosystem-panel-menu-content {
+    padding-inline: 0;
+  }
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper::after {
   display: none;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .children-wrapper {
   color: inherit;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -673,7 +667,7 @@ header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expande
   display: none;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -681,7 +675,7 @@ header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expande
   display: block;
 }
 
-header[data-auth-page][data-no-user]:has(li.ecosystem-custom-menu a[aria-expanded="true"])
+header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="true"])
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
@@ -1405,10 +1399,6 @@ li.section-name:empty {
    ========================================================================== */
 
 /* 7.1 Admin Wrapper & Header */
-body:has(.admin-wrapper) > div > header.sticky {
-  display: none;
-}
-
 .admin-wrapper {
   display: flex;
   flex-direction: column;
