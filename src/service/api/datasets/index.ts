@@ -692,7 +692,7 @@ export async function fetchDatasetsListing(
   //
   // No fallback here on purpose: a listing that cannot be fetched has no page
   // to render, so the failure propagates out of the Server Component and
-  // `[locale]/error.tsx` decides what the visitor gets — the previous page back
+  // `(pages)/error.tsx` decides what the visitor gets — the previous page back
   // with a toast, or the error page on a cold load.
   return cachedListingFetch<DatasetsListingResponse>(url, forwarded);
 }

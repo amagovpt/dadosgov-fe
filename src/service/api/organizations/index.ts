@@ -552,7 +552,7 @@ export async function fetchOrganizationsListing(
   // the real client IP so the backend keys the limiter per visitor instead
   // of the Next.js server IP.
   //
-  // See fetchDatasetsListing: a failure propagates to `[locale]/error.tsx`
+  // See fetchDatasetsListing: a failure propagates to `(pages)/error.tsx`
   // rather than degrading into an empty listing.
   return cachedListingFetch<OrganizationsListingResponse>(url, forwarded);
 }

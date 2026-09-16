@@ -87,7 +87,7 @@ export default function AdminListPage({
       {resultsCount ?? <ResultsCount count={count} isLoading={isInitialLoading} />}
 
       {shouldRenderToolbar && (
-        <div className="mb-32 flex flex-col gap-32">
+        <div className="flex flex-col gap-32">
           {filters}
           {(search || toolbarActions) && (
             <div className="flex items-end gap-16">
@@ -115,7 +115,7 @@ export default function AdminListPage({
       {isInitialLoading ? (
         loadingContent ?? defaultLoadingContent
       ) : shouldRenderTable ? (
-        <div aria-busy={isRefreshing}>
+        <div aria-busy={isRefreshing} className="flex flex-col gap-16 overflow-auto xl:overflow-hidden [&_.agora-table-pagination]:w-full!">
           <AdminPaginatedTable
             pageSize={pageSize}
             totalItems={count}

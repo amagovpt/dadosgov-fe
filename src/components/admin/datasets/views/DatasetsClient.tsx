@@ -22,6 +22,7 @@ import {
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+import Image from "next/image";
 
 interface DatasetsClientProps {
   pageContent: BoDatasetsPage;
@@ -201,7 +202,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       }
       emptyState={
         <AdminEmptyState
-          illustration={<img src="/emoji-empty.svg" alt="" width={280} height={143} />}
+          illustration={<Image src="/emoji-empty.svg" alt="" width={280} height={143} />}
           title={
             <div className="title">
               {t("admin-datasets:list.emptyTitlePrefix")}{" "}
