@@ -32,7 +32,7 @@ export default function AdminLayout({
     children,
 }: AdminLayoutProps) {
     return (
-        <div className="container mx-auto flex flex-col gap-64 pt-32 pb-64 admin-page">
+        <div className="container flex flex-col gap-64 pt-64 pb-96">
             <div className="w-full flex flex-col gap-32">
                 <div className="w-full">
                     <Breadcrumb
@@ -43,7 +43,7 @@ export default function AdminLayout({
                     />
                 </div>
 
-                <div className="flex flex-col items-start gap-24 lg:flex-row lg:items-end lg:justify-between">
+                <div className="w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between">
                     <div className="flex flex-col gap-8 max-w-[696px]">
                         {kicker && <span className="text-sm text-neutral-700">{kicker}</span>}
                         <h1 className="text-2xl-bold text-brand-blue-secondary">
@@ -54,9 +54,9 @@ export default function AdminLayout({
                     {headerAction}
                 </div>
             </div>
-            <div>
+            <>
                 {children}
-            </div>
+            </>
         </div>
     )
 }

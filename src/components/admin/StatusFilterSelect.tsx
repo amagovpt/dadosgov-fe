@@ -53,35 +53,37 @@ export function StatusFilterSelect({
     ];
 
   return (
-    <ToggleGroup
-      id={id}
-      className={className}
-      variant="primary"
-      appearance="button"
-      orientation={isVertical ? "vertical" : "horizontal"}
-      fullWidth
-      multiple={false}
-      value={value || defaultValue || ""}
-      onChange={(vals) => onChange(vals[0] ?? "")}
-    >
-      {opts.map((o) => {
-        const icon = o.icon ?? DEFAULT_STATUS_ICONS[o.value];
-        const iconHover = icon?.startsWith("agora-line-")
-          ? icon.replace("agora-line-", "agora-solid-")
-          : undefined;
-        return (
-          <Toggle
-            key={o.value}
-            value={o.value}
-            hasIcon={Boolean(icon)}
-            leadingIcon={icon}
-            leadingIconHover={iconHover}
-          >
-            {o.label}
-          </Toggle>
-        );
-      })}
-    </ToggleGroup>
+    <div className="flex w-full overflow-auto py-2">
+      <ToggleGroup
+        id={id}
+        className={className}
+        variant="primary"
+        appearance="button"
+        orientation={isVertical ? "vertical" : "horizontal"}
+        fullWidth
+        multiple={false}
+        value={value || defaultValue || ""}
+        onChange={(vals) => onChange(vals[0] ?? "")}
+      >
+        {opts.map((o) => {
+          const icon = o.icon ?? DEFAULT_STATUS_ICONS[o.value];
+          const iconHover = icon?.startsWith("agora-line-")
+            ? icon.replace("agora-line-", "agora-solid-")
+            : undefined;
+          return (
+            <Toggle
+              key={o.value}
+              value={o.value}
+              hasIcon={Boolean(icon)}
+              leadingIcon={icon}
+              leadingIconHover={iconHover}
+            >
+              {o.label}
+            </Toggle>
+          );
+        })}
+      </ToggleGroup>
+    </div>
   );
 }
 

@@ -1,18 +1,20 @@
 "use client";
 
 import { ErrorState } from "@/components/Shared/ErrorState";
+import { PortalErrorFrame } from "@/components/Shared/PortalErrorFrame";
 import { useNavigationRollback } from "@/providers/ApiErrorProvider";
 import { apiFailureFromDigest, isRefusal } from "@/service/utils/apiErrorPolicy";
 import { useEffect } from "react";
 
-export default function LocaleError({
+export function RouteErrorBoundary({
   error,
   reset,
+  withPortalHeader = false,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  withPortalHeader?: boolean;
 }) {
-
   const status = apiFailureFromDigest(error.digest);
   const rollingBack = useNavigationRollback(!isRefusal(status));
 
@@ -21,9 +23,9 @@ export default function LocaleError({
     console.error("[error-boundary]", error);
   }, [error]);
 
-  // Blank for the frame it takes the bfcache to put the previous page back.
-  // The layout is still mounted, so the header and the footer stay put.
   if (rollingBack) return null;
 
-  return <ErrorState reset={reset} status={status} />;
+  const errorPage = <ErrorState reset={reset} status={status} />;
+
+  return withPortalHeader ? <PortalErrorFrame>{errorPage}</PortalErrorFrame> : errorPage;
 }
