@@ -6,6 +6,40 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): the completion screen says out loud that you can use an existing account's email**
+  - The sentence that tells somebody they may type the address of an account they
+    already have was the **last clause of a paragraph**, where it read as a footnote.
+    It is now an informative card of its own, above the fields.
+  - It is the **only** signal that path exists. The screen deliberately has no second
+    button — one would have to disclose whether the address exists, which is the
+    account oracle this flow was built without — so a person who does not read that
+    line has no way to discover the option at all.
+  - Shown in **every** case, not only when the field arrives prefilled: the person most
+    likely to need it is the one whose sign-in brought no address, and who is therefore
+    staring at an empty field with no idea their old account is reachable from here.
+  - The copy now says what actually happens — the data stays, and from then on the
+    sign-in is by digital identity — instead of only naming the mechanism.
+
+- **feat(login): the registration completion screen prefills the CMD address and explains a refused association**
+  - The address the Chave Móvel Digital asserted is now offered back in the email
+    field, with a line saying where it came from. It stays an ordinary editable
+    input and the confirmation field is deliberately left empty: the assertion
+    proves the identity, never that the mailbox is reachable, so the address is
+    still read and confirmed by a person.
+  - eIDAS carries no email at all — its Minimum Data Set has no such attribute —
+    so the field is simply empty there, as it is for a CMD sign-in that brought
+    none. Against a backend that does not serve the field, the screen behaves
+    exactly as it did before.
+  - The screen's own copy no longer claims the sign-in "did not provide a usable
+    email address", which stopped being true the moment one is prefilled above it.
+  - **The gate forwards one more flash code.** The association link can come back
+    refused, and without the code on the gate's allowlist the citizen was
+    redirected with the message stripped — landing on a screen that silently
+    repeated the request that had just been refused.
+  - First tests for either component: the completion screen and its gate had none,
+    and the flash allowlist is a contract with the backend whose only failure
+    symptom is a person stuck on a page that will not explain itself.
+
 - **test(login): pin that only the CMD tab declares a citizen type**
   - The declared citizen type must travel from the CMD tab and *not* from the
     account-linking notice on the email tab, which starts the same CMD login

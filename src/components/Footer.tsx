@@ -41,9 +41,9 @@ export type FooterBottomI = {
 
 const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
   return (
-    <div className="container mx-auto flex flex-col gap-32 py-32 lg:py-64">
+    <div className="flex flex-col gap-32 px-32 py-32 md:px-64 xl:px-112 xl:py-64">
       <h3 className="text-l-bold text-white">{title}</h3>
-      <div className="grid grid-cols-1 gap-32 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-32 md:grid-cols-2 xl:grid-cols-3">
         {groups
           ?.filter((g) => g.enabled === true)
           ?.map((group, idx) => (
@@ -77,22 +77,20 @@ const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
 
 const FooterBrands = () => {
   return (
-    <div className="container mx-auto flex flex-wrap items-center gap-48 py-64">
+    <div className="flex flex-wrap items-center gap-32 px-32 py-32 md:gap-48 md:px-64 md:py-64 xl:px-112">
       <Image
         src={"/Logos/pt-republic-color.svg"}
         alt="Agora"
         height={48}
         width={160}
-        style={{ height: 48, width: "auto" }}
-        className="object-contain"
+        className="h-40 w-auto object-contain md:h-48"
       />
       <Image
         src={"/Logos/Logotipo_ARTE__Horizontal_branco_pt.svg"}
         alt="Agora"
         height={48}
         width={160}
-        style={{ height: 48, width: "auto" }}
-        className="object-contain"
+        className="h-40 w-auto object-contain md:h-48"
       />
     </div>
   );
@@ -158,45 +156,32 @@ const FooterBottom = ({ description, logos, social, related, copyright }: Footer
   ];
 
   const linksSectionContent = [
-    <LinksSectionSocialLinks
-      key={"footer-social-links"}
-      linksSectionSocialAriaLabel={t("social")}
-      className="flex flex-col w-full items-start border-t-2 border-t-[#ffffff0d] py-32 lg:w-1/3 lg:border-t-0 [&_ul]:flex [&_ul]:flex-row [&_ul]:flex-wrap [&_ul]:gap-8"
-    >
+    <LinksSectionSocialLinks key={"footer-social-links"} linksSectionSocialAriaLabel={t("social")}>
       {linksSectionSocialContent}
     </LinksSectionSocialLinks>,
     <LinksSectionRelatedLinks
       key={"footer-related-links"}
       linksSectionRelatedAriaLabel={t("external")}
-      className="flex flex-1 flex-col items-start gap-32 border-t-2 border-t-[#ffffff0d] border-l-2 border-l-[#ffffff0d] px-32 py-32 pl-32 lg:px-0 lg:py-0 lg:items-end lg:border-t-0 lg:py-32 pb-64 lg:pl-[100px] lg:my-32 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-4 [&_ul]:lg:flex-row [&_ul]:lg:flex-wrap [&_ul]:lg:justify-end [&_ul]:lg:gap-32 [&_ul]:lg:gap-y-0"
     >
       {linksSectionRelatedContent}
     </LinksSectionRelatedLinks>,
   ];
 
   return (
-    <div>
-      <FooterADS variant="primary-900">
-        <FinancingSectionContainer
-          aria-label={t("partners")}
-          className="relative mx-auto flex justify-between gap-32 py-32 before:absolute before:left-1/2 before:top-0 before:w-screen before:-translate-x-1/2 before:border-t-2 before:border-[#ffffff0d] before:content-[''] after:absolute after:bottom-0 after:left-1/2 after:w-screen after:-translate-x-1/2 after:border-b-2 after:border-[#ffffff0d] after:content-[''] lg:container [&_ul]:flex [&_ul]:flex-1 [&_ul]:gap-32"
-        >
-          {financingSectionContent}
-        </FinancingSectionContainer>
-        <LinksSectionContainer aria-label={t("related")} className="mx-auto lg:container flex">
-          {linksSectionContent}
-        </LinksSectionContainer>
-      </FooterADS>
-    </div>
+    <FooterADS variant="primary-900">
+      <FinancingSectionContainer financingSectionAriaLabel={t("partners")}>
+        {financingSectionContent}
+      </FinancingSectionContainer>
+      <LinksSectionContainer>{linksSectionContent}</LinksSectionContainer>
+    </FooterADS>
   );
 };
-
 
 export default function Footer({ data }: FooterI) {
   const { t } = useTranslation("footer");
 
   return (
-    <footer className="overflow-x-hidden bg-primary-900 text-white" aria-label={t("footer")}>
+    <footer className="bg-primary-900 text-white" aria-label={t("footer")}>
       <FooterNavigation title={data.title} groups={data.groups} />
       <FooterBrands />
       <FooterBottom

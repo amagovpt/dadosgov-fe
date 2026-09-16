@@ -77,7 +77,11 @@
     "portal": "Portal",
     "portuguese": "Português",
     "selectProfile": "Selecione outro perfil ({{count}})",
-    "administratorProfile": "Administrador"
+    "administratorProfile": "Administrador",
+    "languages": {
+      "portuguese": "Português",
+      "english": "Inglês"
+    }
   },
   "results_one": "{{count, number}} resultado",
   "results_other": "{{count, number}} resultados",
