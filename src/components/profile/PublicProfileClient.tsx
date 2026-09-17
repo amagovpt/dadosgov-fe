@@ -96,6 +96,7 @@ export default function PublicProfileClient() {
   }, [slug, isOwnProfile, user, isAuthLoading]);
 
   const displayUser = isOwnProfile ? user : profileUser;
+  const displayedFollowersTotal = displayUser?.metrics?.followers ?? followersTotal;
 
   const handleToggleSubscriptions = async () => {
     if (showSubscriptions) {
@@ -140,7 +141,8 @@ export default function PublicProfileClient() {
 
   useEffect(() => {
     const targetId = displayUser?.id;
-    if (targetId) {
+    const metricFollowers = displayUser?.metrics?.followers;
+    if (typeof metricFollowers !== "number" && targetId) {
       fetchUserFollowers(targetId, 1, 1).then((res) => {
         setFollowersTotal(res.total ?? 0);
       });
@@ -150,7 +152,7 @@ export default function PublicProfileClient() {
         setSubscriptionsTotal(res.total ?? 0);
       });
     }
-  }, [displayUser?.id, isOwnProfile]);
+  }, [displayUser?.id, displayUser?.metrics?.followers, isOwnProfile]);
 
   const totalPages = Math.ceil(datasets.length / itemsPerPage);
 
@@ -260,8 +262,8 @@ export default function PublicProfileClient() {
               leadingIconHover="agora-solid-tag"
               onClick={handleToggleFollowers}
             >
-              {followersTotal}{" "}
-              {t("followers", { count: followersTotal })}
+              {displayedFollowersTotal}{" "}
+              {t("followers", { count: displayedFollowersTotal })}
             </Button>
           </div>
 
@@ -470,8 +472,8 @@ export default function PublicProfileClient() {
       {showFollowers && (
         <div className="mt-48">
           <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
-            {followersTotal}{" "}
-            {t("followers", { count: followersTotal })}
+            {displayedFollowersTotal}{" "}
+            {t("followers", { count: displayedFollowersTotal })}
           </h2>
 
           {isLoadingFollowers ? (

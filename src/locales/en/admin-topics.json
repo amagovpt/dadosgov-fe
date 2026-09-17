@@ -5,5 +5,46 @@
     "createdAt": "Created on",
     "datasets": "Datasets",
     "reuses": "Reuses"
+  },
+  "filters": {
+    "search": {
+      "label": "Search topics",
+      "placeholder": "Search by topic name or content"
+    },
+    "button": "Filters",
+    "all": "All",
+    "clear": "Clear filters",
+    "private": {
+      "label": "Visibility",
+      "placeholder": "Filter by visibility",
+      "public": "Public",
+      "private": "Private"
+    },
+    "featured": {
+      "label": "Featured",
+      "placeholder": "Filter by featured status",
+      "featured": "Featured",
+      "notFeatured": "Not featured"
+    },
+    "tag": {
+      "label": "Tags",
+      "placeholder": "Comma-separated tags"
+    },
+    "geozone": {
+      "label": "Geozone",
+      "placeholder": "Geozone ID"
+    },
+    "granularity": {
+      "label": "Spatial granularity",
+      "placeholder": "For example: country"
+    },
+    "organization": {
+      "label": "Organization",
+      "placeholder": "Organization ID"
+    },
+    "owner": {
+      "label": "Owner",
+      "placeholder": "User ID"
+    }
   }
 }

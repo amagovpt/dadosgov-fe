@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -12,11 +12,13 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   DataserviceSortField,
   createDataserviceColumns,
+  dataserviceSortFieldMap,
   sortDataservices,
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
@@ -37,12 +39,22 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
   const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [apis, setApis] = useState<Dataservice[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<DataserviceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const usesLocalFallback = Boolean(statusFilter) || sortField === "status";
+  const sortParam = useMemo(
+    () =>
+      sortField === "status"
+        ? undefined
+        : buildApiSortParam(sortField, sortOrder, dataserviceSortFieldMap),
+    [sortField, sortOrder],
+  );
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -57,9 +69,9 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
     () => sortDataservices(filteredApis, sortField, sortOrder),
     [filteredApis, sortField, sortOrder]
   );
-  const paginatedApis = useMemo(
-    () => paginateItems(sortedApis, currentPage, pageSize),
-    [sortedApis, currentPage, pageSize]
+  const visibleApis = useMemo(
+    () => (usesLocalFallback ? paginateItems(sortedApis, currentPage, pageSize) : sortedApis),
+    [currentPage, pageSize, sortedApis, usesLocalFallback],
   );
   const columns = useMemo(
     () =>
@@ -78,21 +90,50 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
     [t]
   );
 
-  useEffect(() => {
-    if (!resolvedOrgId) return;
-    async function loadDataservices() {
-      setIsLoading(true);
-      try {
-        const response = await fetchOrgDataservices(resolvedOrgId!, 1, 9999);
-        setApis(response.data || []);
-      } catch (error) {
-        console.error("Error loading org dataservices:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  const loadDataservices = useCallback(async () => {
+    if (!resolvedOrgId) {
+      setApis([]);
+      setTotalItems(0);
+      setIsLoading(false);
+      return;
     }
-    loadDataservices();
-  }, [resolvedOrgId]);
+
+    setIsLoading(true);
+    try {
+      const response = await fetchOrgDataservices(
+        resolvedOrgId,
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? 9999 : pageSize,
+        {
+          q: searchQuery.trim() || undefined,
+          sort: sortParam,
+        },
+      );
+      setApis(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading org dataservices:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, pageSize, resolvedOrgId, searchQuery, sortParam, usesLocalFallback]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const loadCurrentDataservices = async () => {
+      if (isCancelled) return;
+      await loadDataservices();
+    };
+    void loadCurrentDataservices();
+    return () => {
+      isCancelled = true;
+    };
+  }, [loadDataservices]);
+
+  const handleSearch = useDebouncedSearch((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
 
   return (
     <AdminListPage
@@ -103,7 +144,8 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
       ]}
       title={t("admin-dataservices:title")}
       isLoading={isLoading}
-      count={filteredApis.length}
+      count={usesLocalFallback ? filteredApis.length : totalItems}
+      hasItems={visibleApis.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -112,6 +154,7 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,
+        onChange: handleSearch,
       }}
       filters={
         <StatusFilterSelect
@@ -130,7 +173,7 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
       }
     >
       <AdminListTable
-        items={paginatedApis}
+        items={visibleApis}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}
@@ -139,4 +182,3 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
     </AdminListPage>
   );
 }
-

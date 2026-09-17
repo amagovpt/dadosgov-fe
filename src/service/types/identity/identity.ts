@@ -42,6 +42,7 @@ export interface UserRef {
   pending_registration_email?: string | null;
   roles?: string[];
   organizations?: Organization[];
+  metrics?: UserMetrics;
   last_modified?: string;
 }
 
