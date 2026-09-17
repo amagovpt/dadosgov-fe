@@ -60,7 +60,7 @@ export default function PublicationsClient({
   );
 
   return (
-    <div className="container flex flex-col items-center justify-center gap-32 py-32">
+    <div className="container flex flex-col items-center justify-center gap-32 pt-32 pb-64">
       <div className="w-full flex justify-between items-end border-b-2 border-neutral-200 mb-24 pb-12 pt-32">
         <span className="text-neutral-900 text-m-regular">
           {t("publications.results", { count: total })}
@@ -163,7 +163,7 @@ export default function PublicationsClient({
         </div>
       )}
 
-      <div className="mt-8 flex w-full justify-center">
+      <div className="w-1/2">
         <Pagination currentPage={currentPage} totalItems={total} pageSize={PUBLICATIONS_PAGE_SIZE} />
       </div>
     </div>
