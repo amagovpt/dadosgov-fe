@@ -6,8 +6,8 @@ import { Noto_Sans, Noto_Sans_Mono } from "next/font/google";
  * `next/font` hashes the loaded font per call site, so declaring them here
  * rather than in the layout lets `global-error.tsx` — which renders its own
  * `<html>`/`<body>` outside the layout — apply the very same
- * `--font-noto-sans` variable that `tailwind.config.ts` maps `font-sans` to,
- * instead of falling back to the generic `sans-serif`.
+ * `--font-noto-sans` variable that the `@theme` block in `globals.css` maps
+ * `font-sans` to, instead of falling back to the generic `sans-serif`.
  */
 export const notoSans = Noto_Sans({
   variable: "--font-noto-sans",

@@ -2,7 +2,6 @@
 
 import {
   ComponentProps,
-  Fragment,
   MouseEvent,
   ReactElement,
   useCallback,
@@ -21,8 +20,6 @@ import {
   Brand,
   Logo,
   GeneralBar,
-  Areas,
-  Area,
   Languages,
   Language,
   Search,
@@ -35,10 +32,14 @@ import {
   AuthenticatedBodyLink,
   AuthenticatedFooter,
   AuthenticatedFooterAction,
-  Icon,
+  EcosystemPanel,
+  EcosystemPanelAnchor,
+  EcosystemPanelTitle,
   NavigationBar,
+  NavigationFreestyle,
   NavigationLink,
   NavigationRoot,
+  NavigationSection,
   Button,
   HeaderElement,
 } from "@ama-pt/agora-design-system";
@@ -49,9 +50,8 @@ import { logout } from "@/service/api/auth";
 import { stripLocale } from "@/utils/stripLocale";
 import { useCurrentLocale, useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { LocalizedLink } from "./Shared/LocalizedLink";
-import { areas, isEnabled, languages } from "@/config/headerNav";
+import { isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
-import Anchor from "./Shared/Anchor";
 
 export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const { topLevelLinks = [], authMenuItems = [], dropdowns = [], ecosytems } = data;
@@ -107,70 +107,11 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     };
   }, []);
 
-  const [ecosystemOpen, setEcosystemOpen] = useState(false);
-  const [ecosystemBtnPortalNode, setEcosystemBtnPortalNode] = useState<HTMLLIElement | null>(null);
-  const [ecosystemPanelNode, setEcosystemPanelNode] = useState<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    const panelsList = document.querySelector("header.sticky .panels-menu > ul");
-    if (!panelsList) return;
-
-    let li = panelsList.querySelector(".ecosystem-panel-menu") as HTMLLIElement | null;
-    if (!li) {
-      li = document.createElement("li");
-      li.className = "ecosystem-panel-menu";
-      li.style.display = "flex";
-      li.style.alignItems = "stretch";
-      const authLi = panelsList.lastElementChild;
-      if (authLi) {
-        panelsList.insertBefore(li, authLi);
-      } else {
-        panelsList.appendChild(li);
-      }
-    }
-
-    let panelDiv = document.querySelector(".ecosystem-panel-container") as HTMLDivElement | null;
-    if (!panelDiv) {
-      panelDiv = document.createElement("div");
-      panelDiv.className = "ecosystem-panel-container";
-      document.body.appendChild(panelDiv);
-    }
-
-    queueMicrotask(() => {
-      setEcosystemBtnPortalNode(li);
-      setEcosystemPanelNode(panelDiv);
-    });
-
-    return () => {
-      panelsList.querySelector(".ecosystem-panel-menu")?.remove();
-      document.querySelector(".ecosystem-panel-container")?.remove();
-      setEcosystemBtnPortalNode(null);
-      setEcosystemPanelNode(null);
-    };
-  }, []);
-
-  // Keep the ecosystem <li> immediately before the auth slot across
-  // Authenticated <-> Unauthenticated transitions (React appends the newly
-  // mounted one at the physical end of the list, after our DOM-injected
-  // ecosystem <li>, so this just re-asserts the intended order).
-  useLayoutEffect(() => {
-    const panelsList = document.querySelector("header.sticky .panels-menu > ul");
-    if (!panelsList) return;
-
-    const ecosystemLi = panelsList.querySelector(".ecosystem-panel-menu");
-    const lastChild = panelsList.lastElementChild;
-    if (ecosystemLi && lastChild && lastChild !== ecosystemLi) {
-      panelsList.insertBefore(ecosystemLi, lastChild);
-    }
-  }, [user]);
-
   const [submenu, setSubmenu] = useState<string | null>(null);
-  const selectedArea = localePath === "/login" ? "2" : "1";
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
     setSubmenu(null);
-    setEcosystemOpen(false);
   }
 
   useEffect(() => {
@@ -191,31 +132,16 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     router.refresh();
   };
 
-  // Position ecosystem panel right below the panels-menu bar (covering the nav bar)
-  useEffect(() => {
-    if (!ecosystemOpen) return;
-    const panelDiv = document.querySelector(".ecosystem-panel-container") as HTMLDivElement | null;
-    if (!panelDiv) return;
-    const panelsMenu = document.querySelector("header.sticky .panels-menu");
-    if (panelsMenu) {
-      const rect = panelsMenu.getBoundingClientRect();
-      panelDiv.style.top = `${rect.bottom}px`;
-      panelDiv.style.maxHeight = `${window.innerHeight - rect.bottom}px`;
-      panelDiv.style.overflowY = "auto";
-    }
-  }, [ecosystemOpen, ecosystemPanelNode]);
-
   // Mark header when on auth pages so CSS can style the "Autenticar" button
   const isAuthPage = localePath === "/login";
 
-  // Reset submenu when clicking anywhere outside the card grid (.links)
+  // Reset submenu when clicking anywhere outside the card grid. The grid is now
+  // `.header-nav-cards` (we render it inside <NavigationFreestyle>); it used to be
+  // the AgoraDS 3 `.links` container, which the DS no longer renders for us.
   const handleHeaderClickCapture = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (!target.closest(".links")) {
+    if (!target.closest(".header-nav-cards")) {
       setSubmenu(null);
-    }
-    if (!target.closest("li.ecosystem-panel-menu") && !target.closest(".ecosystem-custom-panel")) {
-      setEcosystemOpen(false);
     }
   }, []);
 
@@ -238,8 +164,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     }
   }, [submenu, allSubmenus]);
 
-  const currentAreaLabel = areas.find((a) => a.value === selectedArea)?.label || t("header.portal");
-
   const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
     // Close all menus/panels via design system API
     if (headerRef.current?.closeAll) {
@@ -252,8 +176,13 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     }
   };
 
-  // Renders a HeaderCard inside a NavigationLink. Cards with `opensSubmenu` get
-  // the button wrapper that switches the active submenu instead of navigating.
+  // Renders one HeaderCard as a direct grid item of `.header-nav-cards`. Cards with
+  // `opensSubmenu` get the button wrapper that switches the active submenu instead
+  // of navigating. The `data-group` attribute is what the submenu CSS keys off.
+  //
+  // Deliberately NOT wrapped in <NavigationLink>: in AgoraDS 4 that component's
+  // props are AnchorProps and it renders an <a>, so the card — which carries its
+  // own anchor — would end up nested inside one. See <NavigationFreestyle> below.
   const renderCard = (card: HeaderNavCard, dataGroup: string) => {
     const cardEl = (
       <HeaderCard
@@ -265,59 +194,56 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
         onLinkClick={handleLinkClick}
       />
     );
-    return (
-      <NavigationLink key={card.id} appearance="link">
-        {card.opensSubmenu ? (
-          <div
-            data-group={dataGroup}
-            role="button"
-            tabIndex={0}
-            onClickCapture={(e) => {
-              e.preventDefault();
-              setSubmenu(card.opensSubmenu!);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setSubmenu(card.opensSubmenu!);
-              }
-            }}
-            className="cursor-pointer"
-          >
-            {cardEl}
-          </div>
-        ) : (
-          <div data-group={dataGroup}>{cardEl}</div>
-        )}
-      </NavigationLink>
+    return card.opensSubmenu ? (
+      <div
+        key={card.id}
+        data-group={dataGroup}
+        role="button"
+        tabIndex={0}
+        onClickCapture={(e) => {
+          e.preventDefault();
+          setSubmenu(card.opensSubmenu!);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setSubmenu(card.opensSubmenu!);
+          }
+        }}
+        className="cursor-pointer"
+      >
+        {cardEl}
+      </div>
+    ) : (
+      <div key={card.id} data-group={dataGroup}>
+        {cardEl}
+      </div>
     );
   };
 
   // "Voltar" button that closes the active submenu.
   const renderBackButton = (submenuId: string) => (
-    <NavigationLink key={`back-${submenuId}`} appearance="link">
-      <div data-group={`submenu-${submenuId}`} data-is-back="true">
-        <Button
-          appearance="link"
-          variant="neutral"
-          hasIcon
-          leadingIcon="agora-line-arrow-left-anchor"
-          leadingIconHover="agora-solid-arrow-left-anchor"
-          onClick={(e) => {
-            e.stopPropagation();
-            setSubmenu(null);
-          }}
-        >
-          {t("header.back")}
-        </Button>
-      </div>
-    </NavigationLink>
+    <div key={`back-${submenuId}`} data-group={`submenu-${submenuId}`} data-is-back="true">
+      <Button
+        appearance="link"
+        variant="neutral"
+        hasIcon
+        leadingIcon="agora-line-arrow-left-anchor"
+        leadingIconHover="agora-solid-arrow-left-anchor"
+        onClick={(e) => {
+          e.stopPropagation();
+          setSubmenu(null);
+        }}
+      >
+        {t("header.back")}
+      </Button>
+    </div>
   );
 
   return (
     <>
       <header
-        className="sticky top-0 z-sticky [&_.custom-search-layout]:!m-0 [&_.custom-search-layout]:!mx-auto"
+        className="[&_.custom-search-layout]:m-0! [&_.custom-search-layout]:mx-auto! [&_.ecosystem-panel-title]:text-m-bold!"
         data-submenu={submenu ?? undefined}
         data-auth-page={isAuthPage || undefined}
         data-no-user={!user || undefined}
@@ -331,7 +257,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   src="/Logos/Dados.gov_logocores.png"
                   alt="dados.gov.pt"
                   height={43}
-                  width={251}
+                  width={254}
                   priority
                 />
               </LocalizedLink>
@@ -339,30 +265,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
           </Brand>
 
           <GeneralBar aria-label={t("header.generalNavigation")}>
-            <Areas
-              aria-label={t("header.portalAreas")}
-              // @ts-expect-error - Prop label does exist in component logic
-              label={currentAreaLabel}
-              onChange={() => {}}
-            >
-              {areas.map((area) => {
-                const areaEl = (
-                  <Area
-                    value={area.value}
-                    label={area.value === "1" ? t("header.portal") : area.label}
-                    onClick={() => router.push(localizeHref(area.href))}
-                    active={selectedArea === area.value}
-                  />
-                );
-                return area.hidden ? (
-                  <div key={area.value} className="hidden">
-                    {areaEl}
-                  </div>
-                ) : (
-                  <Fragment key={area.value}>{areaEl}</Fragment>
-                );
-              })}
-            </Areas>
             <Languages
               aria-label={t("header.selectLanguage")}
               onChange={handleLanguageChange}
@@ -371,7 +273,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 <Language
                   key={lang.value}
                   value={lang.value}
-                  label={lang.label}
+                  label={t(lang.labelKey)}
                   abbr={lang.abbr}
                   icon={lang.icon}
                   checked={currentLocale === lang.value}
@@ -391,6 +293,44 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                 </div>
               </CustomSearch>
             </Search>
+            <EcosystemPanel
+              text={<span>{t("header.ecosystem")}</span>}
+              logo={
+                <Image
+                  src="/Ecossistema/arte_black_simple.svg"
+                  alt="arte.gov.pt"
+                  width={42}
+                  height={16}
+                  className="h-16 w-auto self-center"
+                />
+              }
+            >
+              <EcosystemPanelTitle>{ecosytems?.description ?? ""}</EcosystemPanelTitle>
+              {ecosystemEntries.map((item) => (
+                <EcosystemPanelAnchor
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  appearance="link"
+                >
+                  <span
+                    className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+                    style={{ backgroundColor: item.bgColor ?? undefined }}
+                  >
+                    <span className="relative block h-20 w-20">
+                      <Image
+                        src={item.logo ?? ""}
+                        alt={item.label}
+                        fill
+                        className="object-contain"
+                      />
+                    </span>
+                  </span>
+                  <span className="text-base font-medium">{item.label}</span>
+                </EcosystemPanelAnchor>
+              ))}
+            </EcosystemPanel>
 
             {user ? (
               <Authenticated
@@ -489,124 +429,63 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             modalAriaLabel={t("header.navigationMenu")}
             modalCloseLabel={t("header.close")}
           >
-            {[
-              ...topLevelLinks
-                .filter((link) => isEnabled(link, !!user))
-                .map((link) => (
-                  <NavigationLink key={link.id ?? link.href} appearance="link">
-                    <LocalizedLink href={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
+            <NavigationSection>
+              {[
+                ...topLevelLinks
+                  .filter((link) => isEnabled(link, !!user))
+                  .map((link) => (
+                    <NavigationLink
+                      key={link.id ?? link.href}
+                      href={localizeHref(link.href)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLinkClick(e, link.href);
+                      }}
+                    >
                       {link.label}
-                    </LocalizedLink>
-                  </NavigationLink>
-                )),
-              ...dropdowns
-                .filter((d) => isEnabled(d.root, !!user))
-                .map((d) => (
-                  <NavigationRoot key={d.root.id} label={d.root.label}>
-                    {d.root.cards
-                      .filter((card) => isEnabled(card, !!user))
-                      .flatMap((card) => {
-                        const mainEl = renderCard(card, "main");
-                        const submenu = card.opensSubmenu
-                          ? d.submenus.find((s) => s.id === card.opensSubmenu)
-                          : undefined;
-                        if (!submenu) return [mainEl];
-                        return [
-                          mainEl,
-                          renderBackButton(submenu.id),
-                          ...submenu.cards
-                            .filter((c) => isEnabled(c, !!user))
-                            .map((c) => renderCard(c, `submenu-${submenu.id}`)),
-                        ];
-                      })}
-                  </NavigationRoot>
-                )),
-            ]}
+                    </NavigationLink>
+                  )),
+                ...dropdowns
+                  .filter((d) => isEnabled(d.root, !!user))
+                  .map((d) => (
+                    <NavigationRoot key={d.root.id} label={d.root.label}>
+                      <NavigationFreestyle>
+                        <div className="header-nav-cards">
+                          {d.root.cards
+                            .filter((card) => isEnabled(card, !!user))
+                            .flatMap((card) => {
+                              const mainEl = renderCard(card, "main");
+                              const submenu = card.opensSubmenu
+                                ? d.submenus.find((s) => s.id === card.opensSubmenu)
+                                : undefined;
+                              if (!submenu) return [mainEl];
+                              return [
+                                mainEl,
+                                renderBackButton(submenu.id),
+                                ...submenu.cards
+                                  .filter((c) => isEnabled(c, !!user))
+                                  .map((c) => renderCard(c, `submenu-${submenu.id}`)),
+                              ];
+                            })}
+                        </div>
+                      </NavigationFreestyle>
+                    </NavigationRoot>
+                  )),
+              ]}
+            </NavigationSection>
           </NavigationBar>
         </AgoraHeader>
       </header>
       {generalBarLabelPortalNode &&
         createPortal(
-          <span className="text-sm font-regular hidden text-primary-900 md:inline">
+          // Shown only from xl: below it the general bar has no room to spare, and this
+          // is the one item on the row without a min-width, so it absorbs the squeeze by
+          // wrapping. `text-m-regular` is the DS token — `text-sm`/`font-regular` are not
+          // in the DS theme and emitted nothing (same markup as the admin header).
+          <span className="whitespace-nowrap text-m-regular hidden text-primary-900 xl:inline">
             {t("generalBarLabel")}
           </span>,
           generalBarLabelPortalNode
-        )}
-      {ecosystemBtnPortalNode &&
-        createPortal(
-          <>
-            <span className="agora-link-wrapper agora-link-wrapper-link-neutral custom-header-link-wrapper panel-menu-link-wrapper inline-flex items-center !px-8">
-              <a
-                className="link-with-icon"
-                href="#"
-                aria-expanded={ecosystemOpen}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setEcosystemOpen((o) => !o);
-                }}
-              >
-                <div className="icon-wrapper leading flex items-center">
-                  <Icon name="agora-line-dashboard" className="h-24 w-24" />
-                </div>
-                <span className="children-wrapper hidden md:inline">{t("header.ecosystem")}</span>
-                <Image
-                  src="/Ecossistema/arte_black_simple.svg"
-                  alt="arte.gov.pt"
-                  width={42}
-                  height={16}
-                  className="ml-8 hidden h-16 w-auto self-center md:block"
-                />
-              </a>
-            </span>
-          </>,
-          ecosystemBtnPortalNode
-        )}
-      {ecosystemPanelNode &&
-        ecosystemOpen &&
-        createPortal(
-          <div className="ecosystem-custom-panel">
-            <div className="container mx-auto flex w-full flex-col py-16 md:flex-row md:py-32">
-              <div className="flex flex-1 flex-col gap-16 pl-0 md:gap-32">
-                <div className="flex flex-row items-start gap-32">
-                  <p className="text-base font-bold text-primary-900">
-                    {ecosytems?.description ?? ""}
-                  </p>
-                </div>
-                <div>
-                  <ul className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
-                    {ecosystemEntries.map((item) => (
-                      <li key={item.href} className="w-full max-w-full">
-                        <Anchor
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          appearance="link"
-                        >
-                          <div className="flex items-center gap-8 py-8">
-                            <div
-                              className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
-                              style={{ backgroundColor: item.bgColor ?? undefined }}
-                            >
-                              <div className="relative h-[20px] w-[20px]">
-                                <Image
-                                  src={item.logo ?? ""}
-                                  alt={item.label}
-                                  fill
-                                  className="object-contain"
-                                />
-                              </div>
-                            </div>
-                            <span className="text-base font-medium">{item.label}</span>
-                          </div>
-                        </Anchor>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>,
-          ecosystemPanelNode
         )}
     </>
   );

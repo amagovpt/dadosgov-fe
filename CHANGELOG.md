@@ -6,6 +6,475 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): the completion screen says out loud that you can use an existing account's email**
+  - The sentence that tells somebody they may type the address of an account they
+    already have was the **last clause of a paragraph**, where it read as a footnote.
+    It is now an informative card of its own, above the fields.
+  - It is the **only** signal that path exists. The screen deliberately has no second
+    button — one would have to disclose whether the address exists, which is the
+    account oracle this flow was built without — so a person who does not read that
+    line has no way to discover the option at all.
+  - Shown in **every** case, not only when the field arrives prefilled: the person most
+    likely to need it is the one whose sign-in brought no address, and who is therefore
+    staring at an empty field with no idea their old account is reachable from here.
+  - The copy now says what actually happens — the data stays, and from then on the
+    sign-in is by digital identity — instead of only naming the mechanism.
+
+- **feat(login): the registration completion screen prefills the CMD address and explains a refused association**
+  - The address the Chave Móvel Digital asserted is now offered back in the email
+    field, with a line saying where it came from. It stays an ordinary editable
+    input and the confirmation field is deliberately left empty: the assertion
+    proves the identity, never that the mailbox is reachable, so the address is
+    still read and confirmed by a person.
+  - eIDAS carries no email at all — its Minimum Data Set has no such attribute —
+    so the field is simply empty there, as it is for a CMD sign-in that brought
+    none. Against a backend that does not serve the field, the screen behaves
+    exactly as it did before.
+  - The screen's own copy no longer claims the sign-in "did not provide a usable
+    email address", which stopped being true the moment one is prefilled above it.
+  - **The gate forwards one more flash code.** The association link can come back
+    refused, and without the code on the gate's allowlist the citizen was
+    redirected with the message stripped — landing on a screen that silently
+    repeated the request that had just been refused.
+  - First tests for either component: the completion screen and its gate had none,
+    and the flash allowlist is a contract with the backend whose only failure
+    symptom is a person stuck on a page that will not explain itself.
+
+- **test(login): pin that only the CMD tab declares a citizen type**
+  - The declared citizen type must travel from the CMD tab and *not* from the
+    account-linking notice on the email tab, which starts the same CMD login
+    but never asks the question. That distinction was held by the type checker
+    alone: the two entry points call different handlers, so merging them into
+    one optional-argument handler would compile clean while letting a
+    declaration nobody made reach the database.
+  - Two tests now observe the outgoing SAML start URL — the same place the
+    backend reads the parameter from — asserting the full URL rather than the
+    absence of one substring, so a declaration smuggled under any other name
+    fails too. The pair is deliberate: an absence assertion alone would keep
+    passing if the capture ever stopped recording.
+
+- **feat(login): send the declared citizen type with the CMD sign-in**
+  - The CMD tab asks whether the citizen is national or foreign, and the answer
+    was thrown away in the browser: `citizenType` only enabled the submit
+    button, `onSamlLogin` took no argument, and nothing reached the backend. We
+    were asking a question and discarding the answer.
+  - It now travels as `?citizen=` on the SAML start, and the backend records it
+    as **self-declared** in its own field. It gates nothing — it comes from a
+    radio button and anyone can put whatever they like in a query parameter —
+    and the backend accepts only an exact allowlist, dropping anything else
+    rather than storing it raw or substituting a default.
+  - The radio values change from `"nacional"`/`"estrangeiro"` to
+    `"national"`/`"foreign"` so one vocabulary travels from this screen to the
+    database with no mapping in between, matching the provider field. The
+    labels and ids stay Portuguese: those are what the citizen reads.
+  - `buildSamlEndpoint` gains an optional third parameter and now builds its
+    query with `URLSearchParams`. `next` is a URL and keeps going through
+    `sanitizeNextUrl` — it reaches `window.location.href` on the way back, and
+    four spellings once got past a prefix test there — while `citizen` is one of
+    two fixed values that nothing parses as a location. A test pins that the
+    encoding of `next` did not drift with the switch.
+  - The account-linking notice on the email tab also starts a CMD login, but
+    that screen never asks the question, so it gets its own handler and sends
+    no parameter. Kept separate rather than making the argument optional at the
+    call site, so the two entry points cannot be confused for one.
+
+- **fix(login): restore the email/password form alongside the migration entry point**
+  - The "E-mail e palavra-passe" tab had been reduced to the migration notice on
+    the assumption that linking a legacy account to CMD/eIDAS would become
+    mandatory. It stays optional, so accounts that had not migrated were left with
+    no way into the portal at all — the tab held the only sign-in form, and the
+    wizard's credentials screen proves ownership during linking rather than
+    granting a session.
+  - The form is the tab's default view again, with password recovery reachable from
+    it. This is a merge and not a revert: the notice keeps the shape it grew
+    (SAML gate, the two linking actions, support links), and the tab still offers
+    the association path — it just stops being the only thing there. `EmailTab` now
+    takes the union of both prop sets, so the notice still receives `samlEnabled`
+    and its dead-control gate survives; restoring the older component wholesale
+    would have passed two props instead of five and disabled that gate silently.
+  - The notice appears because the backend asked for it, per account: `/auth/login`
+    answers `403 { message: "migration_required" }` after consulting
+    `/saml/migration/check`, and that answer is the only thing that flips the tab.
+    Nothing in the frontend reads the migration setting, which is what makes the
+    tab behave correctly whichever value it holds — reading it here is what removed
+    the form in the first place. A source-level test pins that, because no render
+    distinguishes "the backend told us" from "we guessed from configuration".
+  - Covered by new unit tests for the tab's three-way branch and for the
+    `migration_required` handling, and the end-to-end assertion that the tab has a
+    password form was restored — it had been inverted by the same change.
+
+- **fix(login): stop `?next=` sending an authenticated visitor off-origin**
+  - Restoring the sign-in form gave `?next=` a browser sink for the first time:
+    it now reaches `window.location.href`, where before it only became a query
+    parameter for the backend. The check standing in front of it did not hold —
+    it tested that the value starts with `/` and not with `//`, and the URL
+    parser does not read a string that way. It treats a backslash as an
+    authority separator and strips tab, LF and CR before parsing at all, so
+    `/\evil.com`, `/\/evil.com` and the tab and newline variants all resolved to
+    a different site. On a login page that is an open redirect: the visitor
+    authenticates successfully on the real portal and lands on a copy of it,
+    ready to be asked for the password again.
+  - The value is now parsed the way the browser will parse it and kept only when
+    the origin matches, so the check is about what the URL means rather than how
+    it is spelled — there is no further spelling to find. The docblock that
+    asserted an absolute URL could never get through says what actually holds it
+    up now.
+  - Accepting the terms is also a real gate again. The disabled submit button
+    was not one: implicit submission does not consult it, so pressing Enter in a
+    field sent the credentials with the consent checkbox unticked. And the form's
+    Enter handler cancelled the default action of everything inside it, which
+    meant "Recuperar palavra-passe" submitted the form instead of opening
+    recovery and the terms link could not be followed by keyboard at all.
+
+- **fix(header): put the navigation bar and the dropdown grid back in the container, and shrink the wordmark to fit its box**
+  - AgoraDS 4 stopped composing the navigation bar from the `container` utility. In 3
+    it was `max-width: 1216px; margin-inline: auto` with the container's own
+    `padding-inline`, exactly like the general bar above it; in 4 it is
+    `margin-inline: 32px → 64px → 112px` with no max-width and no centering. The
+    general bar and every page section stayed a 1216px centered box, so the two
+    systems only lined up at exactly 1440px — at 1920px the logo sat 240px to the
+    left of the top bar, and below 1440px the row was narrower than the page
+    content. The row is a container again at every width.
+  - The mega-menu card grid had the same problem one level down. AgoraDS 4 gives the
+    element the portal renders its cards into a single rule — `margin-bottom: 32px;
+    padding-inline: 112px` — with no max-width and no centering, so the grid was
+    full-bleed minus a 112px gutter: 1696px wide at 1920px, against the 1216px of the
+    navigation bar directly above it. In 3 that element carried the whole container
+    recipe, which is what it carries again.
+  - Renamed the injected ecosystem `<li>` from `ecosystem-panel-menu` to
+    `ecosystem-custom-menu`. AgoraDS 4 added an ecosystem panel of its own and claimed
+    that class name, styling it with `padding-block: 14px !important` for the DS's own
+    button — so the portal's hand-made list item, which had used the name since before
+    the class existed, silently gained 28px. Its 60px anchor became 88px, which made it
+    the tallest item in the general bar and stretched the bar from 60px to 88px; the
+    design system's own buttons then sat at the top of that taller bar while the two
+    elements the portal injects centred themselves in it, giving the row two visual
+    baselines. Measured after the rename: bar back to 60px, every item centred on y=30.
+  - Stopped the submenu "Voltar" button landing on top of the design system's own
+    "Voltar ao início" in the responsive menu. The rule that lifts it out of the grid
+    was scoped to `header[data-submenu]`, so it applied in both menus — but only the
+    desktop dropdown has the panel it positions against and the 80px of padding
+    reserved for it. It is now absolute only inside `.navigation-links-layout`, and
+    stays in the grid spanning the row in the burger panel, where the two buttons read
+    as the separate controls they are: ours returns to the parent card list, the design
+    system's to the menu root.
+  - Gave the header dropdown's card grid a two-column step between 768px and 1279px.
+    It went straight from one column to three at `xl`, so the whole tablet band sat on
+    a single column — and inside the responsive menu that made each card as wide as the
+    panel (measured 957px at a 1100px viewport), stranding the icon at one edge of the
+    screen and the arrow at the other. Cards there are now 462px. Phones keep one
+    column, where a card per row is right, and the desktop dropdown still uses three.
+  - Evened out the padding on the navigation bar's dropdown root, so "Recursos" shares
+    a baseline with the five plain links beside it. The links are anchors padded
+    `8px/8px`; a dropdown root is a button that AgoraDS 4 pads `16px` top and `8px`
+    bottom (`.navigation-root-button`, another class absent from 3). Since the button
+    centres its label inside its content area, the uneven padding put that label 4px
+    lower than its neighbours. Only the top padding is overridden; the bottom keeps the
+    design system's value. Measured after: all six labels centred on the same line.
+  - Restored the 16px general-bar button gap between 768px and 1279px. AgoraDS 4
+    moved its 32px step down from the `xl` breakpoint to `md`, doubling the spacing
+    between the language, search, ecosystem and account buttons on tablet widths.
+    At 1280px and up both versions already agree on 32px.
+  - The wordmark is now `logo-dados-gov.svg`, which the repo already shipped for
+    `global-error`. Its intrinsic 254x43 is the design system's own `.logo` width, so
+    it renders undistorted with no scaling rule. It replaces a 1223x377 PNG that
+    Tailwind preflight's `img { height: auto }` stretched to 251x77 — overriding the
+    `height` attribute `next/image` writes — which had forced a local
+    `height: auto` escape hatch on a box the DS specs at 32px and dragged the row to
+    ~113px. Next 16 serves any `.svg` source unoptimized, so the priority logo now
+    also skips the image optimizer.
+  - Dropped four selectors that matched nothing: `.agora-general-bar`,
+    `.agora-languages`, `.agora-unauthenticated` and `.agora-areas`. None of them
+    exists in AgoraDS 4 — and none existed in 3 either, so the admin general bar had
+    never been flush-right with 112px padding as its rule implied. Removed rather
+    than renamed to `.general-bar`: that would not restore old behaviour, it would
+    newly override the DS layout with a padding that fights the container.
+
+- **fix(tailwind): restore the theme tokens and the override order the v4 migration dropped**
+  - The `@theme` block ported the tokens the old `tailwind.config.ts` declared
+    under `theme.extend.*`, but not the namespaces v3 left on the Tailwind
+    defaults. AgoraDS resets those namespaces to `initial`, so with nothing
+    declared they generate nothing: `sm` (576px) and `lg` (1024px) — a project
+    override of `theme.screens`, and 71 `lg:`/`sm:` utilities across 23 files,
+    the footer and every listing grid included — plus `--leading-*`,
+    `--tracking-*`, `--font-weight-*` (the DS ships only `bold` and `medium`)
+    and the `--container-*` scale behind the named `max-w-*` sizes.
+  - `leading-6` and `leading-8` were worse than missing. With no `--leading-*`
+    key, v4 falls back to the `--spacing-*` namespace, so they resolved to 6px
+    and 8px instead of 1.5rem and 2rem — crushed line height rather than a
+    utility that visibly does nothing.
+  - The AgoraDS `index.css` now loads *before* `tailwindcss/utilities`, against
+    the order the DS README gives. The DS ships its component CSS unlayered, so
+    loading it last made every single-class DS rule win the specificity tie
+    against the portal's utilities — the reverse of v3, where the DS sheets came
+    first and `@tailwind utilities` last. The portal passes `className` to DS
+    components in hundreds of places and depends on winning those ties.
+
+- **fix(header)!: rebuild the navigation bar for the AgoraDS 4 component contract**
+  - AgoraDS 4 only renders the navigation items it finds inside a
+    `<NavigationSection>`; a flat list of links and roots left the desktop bar
+    with an empty `<ul>`. The items now sit in one section.
+  - `NavigationLink` changed from a `LinkWrapper` (a `<span>`) to an `Anchor`, so
+    the nav cards were being wrapped in an href-less `<a>` — around the card's
+    own anchor — picking up the DS's `inline-flex justify-center min-h-[44px]`
+    box, its `children-wrapper` typography and its underline. That is what
+    disfigured the dropdown, and the nested anchors made the server HTML
+    unparseable and hydration diverge. The cards moved to
+    `<NavigationFreestyle>`, the DS's escape hatch for custom panel content, and
+    the portal now owns the grid (`.header-nav-cards`) and the `data-group`
+    wrappers the submenu CSS keys off — instead of reaching into the DS's
+    `.links > .link-wrapper`, which v4 both renamed and nested one level deeper.
+  - The `<Areas>` declaration left the general bar. AgoraDS 4 no longer renders
+    areas there and now reads the active area's `value` as the index of the
+    navigation section to show, so declaring the portal's areas (`"1"`/`"2"`)
+    pointed the bar at a section that does not exist. The portal only ever had
+    one visible area and portals its own general-bar label, so with none
+    declared the DS falls back to section 0 on every route — how the bar behaved
+    before.
+  - Two CSS overrides had to go the other way. `position: relative` on the open
+    panel collapsed the mega-menu to the width of its `<li>`, because v4 renders
+    the panel inline as `position: absolute; width: 100%` instead of portalling
+    it. And `.logo` became a fixed 254x32 box where v3 sized it to its content,
+    letting the 256x79 wordmark overflow the header by 23px; the box is sized to
+    the image again. The real fix there is a logo asset shaped for the DS box —
+    `logo-dados-gov.svg` already has the 254x43 viewBox the markup asks for.
+
+- **build(tailwind)!: move the theme into CSS for Tailwind v4 and AgoraDS 4**
+  - AgoraDS 4 is built on Tailwind v4, declares it as a peer dependency and no
+    longer exports `AgoraTailwindConfig` or ships `artifacts/dist/tailwind.css`.
+    It publishes `theme.css` (the `@theme` source) and `index.css` instead, so
+    the upgrade forced the Tailwind major with it — `tailwind.config.ts` is gone
+    and the theme is declared in `globals.css`.
+  - v4 ignores `safelist` and `corePlugins`, and only auto-loads a JS config
+    through `@config`. The tokens the portal adds on top of the Agora scale —
+    spacing 2/4/6/12/20, `text-24/32/40`, the brand colours and the `next/font`
+    mapping for `font-sans` — moved to an `@theme` block, without which the
+    utilities that use them are silently not generated at all.
+  - The datastory iframe heights, which come from Squidex and are applied at
+    runtime, moved from `tailwind-safelist.ts` to `@source inline(...)`. The
+    AgoraDS pattern safelist needed no port: its own `theme.css` now carries the
+    equivalent directive.
+  - The AgoraDS `theme.css` opens with a Google Fonts `@import` for Noto Sans,
+    which survives compilation and is blocked by `style-src`. The CSP was left
+    as it is: the typeface is already self-hosted through `next/font`, so the
+    block costs a console entry and nothing else, and opening the policy for a
+    font we serve ourselves would be the worse trade.
+  - The `.header-card-wrapper` overrides left `@layer utilities`. In v4 that
+    directive builds a real cascade layer, so the rules would have lost to every
+    unlayered rule, the AgoraDS sheet included. The hand-written `.rounded-8`
+    and `.pl-0` were dropped: both are AgoraDS tokens now, and as plain CSS they
+    were beating the utilities of the same name.
+
+
+- **fix(i18n): stop double-escaping interpolated translation values**
+  - Dates rendered as `Atualizado às 01&#x2F;09&#x2F;2026 10:27:06` on the
+    backoffice log page. i18next escapes interpolated values by default and
+    React escapes again whatever it renders as a text child, so the value was
+    escaped twice and the entities reached the screen. The same page showed the
+    tell: `Modificado: 01/09/2026` was correct because it is rendered directly,
+    and only the interpolated string was broken.
+  - Fixed once in the i18next init instead of per call. Around ten strings
+    interpolate a date — common, datasets, profile, organizations, learning,
+    admin-logs — and all were wrong; repairing one call site would have left
+    the rest, and the next one added would regress. Removing the interpolation
+    was not an option either, since word order is per locale (`Atualizado às
+    {{time}}` against `Updated at {{time}}`), which is what interpolation is
+    for.
+  - Values interpolated into translations are not only dates: around 130 call
+    sites interpolate, and many carry untrusted data — dataset and resource
+    titles, organisation and harvester names, addresses the user typed, and the
+    search query. All of them reach React text children or non-URL attributes,
+    which React escapes on render, so this is a change of who escapes rather
+    than whether anyone does. One visible consequence beyond dates: a search
+    query containing markup is now reflected as the literal text instead of as
+    escaped entities.
+  - The setting holds only while no translation output reaches a sink that
+    interprets markup, audited across the tree — no `t()` output goes to
+    `dangerouslySetInnerHTML`, a URL attribute, JSON-LD, `generateMetadata` or a
+    markdown renderer. That invariant is now pinned by a test that walks the
+    source and fails if a raw-HTML sink appears outside the one known
+    pass-through, which is where a comment now warns about it too. Nothing
+    covered the real i18next configuration until now, since every other test
+    mocks `react-i18next`.
+
+- **feat(migrate-account)!: one answer on the creation step, whatever the address turns out to be**
+  - The step routed on the backend's `candidate_found`: a claimable legacy
+    address went to the credentials screen, anything else taken raised "already
+    registered". Both readings answered, for any address anyone typed, whether
+    it has an account at the portal — the enumeration oracle the backend has
+    just stopped answering, reintroduced a layer up. `skipMigration` no longer
+    reads the field, and every submission lands on the mailbox screen. What
+    tells the two cases apart is the mail, which only the address's owner can
+    read.
+  - The copy of both post-submission screens loses its claim that an account
+    was created. "A sua conta já foi criada" is false for someone whose address
+    already had one, and the `confirmation-pending` screen is what a reload
+    shows next — saying it there would give the answer away in prose after the
+    API stopped giving it away in JSON. Both locales; `errorEmailTaken` goes
+    with the branch that raised it.
+  - The cost is the shortcut this replaces: the owner of a legacy address is
+    no longer walked straight to the credentials screen, and reads what to do
+    in the mail instead.
+  - Deploy this before the backend change. Against the old backend a taken
+    address still answers 409, which this client no longer special-cases, so
+    the user sees the generic creation error — degraded but correctable. The
+    reverse pairing is worse: the old client would promise a confirmation link
+    that was never sent.
+
+- **feat(login): make the email tab the account-association entry point**
+  - The "E-mail e palavra-passe" tab showed a password form and only revealed
+    the migration notice once the backend refused the login. The notice is now
+    the tab: the discontinuation warning, "Associar conta à Chave Móvel Digital"
+    and "Associar conta à Autenticação Europeia" with their support links, and
+    the "Representa uma entidade?" box. `EmailLoginForm` is gone, and with it
+    the last password sign-in surface in the frontend.
+  - Both buttons start a SAML login, so they carry the same `samlEnabled` gate
+    the CMD and eIDAS tabs use — otherwise an environment with SAML off would
+    leave the only controls on the tab firing a request that cannot succeed —
+    and they render the SAML error themselves, which nothing on this tab did
+    except the form that is now gone.
+  - The organisation box renders `StatusCard` directly instead of reusing
+    `SupportStatusCard`: that component carries page layout of its own and is
+    already rendered once below the tabs, so reusing it would stack two boxes
+    and nest a 12-column grid inside the tab panel.
+- **feat(migrate-account)!: land on the legacy credentials and finish by link**
+  - Three screens stood between the CMD/eIDAS return and the credentials the
+    user is actually asked for: "is this yours?", an account search, and a
+    choice of proof. The credentials screen does not depend on a candidate being
+    pointed — the backend links whichever account the password proves, homonyms
+    included — so a matched candidate and an ambiguous set of homonyms land on
+    the same screen and the user types the address they know. Only `no_match`
+    still opens account creation.
+  - The password no longer ends the flow: the wizard goes to "Validar email"
+    with the resend cooldown already armed, and the success screen and its
+    redirect to an authenticated home page are gone along with the session they
+    claimed. Every destination that pointed at a removed step is re-pointed, so
+    nothing dangles — including the own-email divert, which now lands on the
+    credentials screen pre-filled with the address just typed.
+  - A correct password can now fail on the send cap or on a lost wizard session.
+    Both are distinguished, because falling through to "credenciais inválidas"
+    would tell the user their password is wrong when it is not.
+  - Every screen names the provider the backend reports, so an eIDAS user stops
+    reading "Chave Móvel Digital"; `signInDescription` no longer promises the
+    account "será associada", which the click now does. The 25 locale keys
+    belonging to the removed screens are deleted rather than left for a
+    translator to maintain.
+- **feat(migrate-account): offer password recovery inline**
+  - "Esqueceu-se da palavra-passe?" navigated to screens that no longer exist.
+    Recovery now runs as a step inside the wizard, so the pending migration —
+    and the identity just proved at Autenticação.gov — survives it and the user
+    can come back and finish. The wizard wraps itself in
+    `GoogleReCaptchaProvider`, conditional on the key: without a provider the
+    recovery request goes out with a null token and the backend rejects it, so
+    the failure is silent rather than loud.
+- **test(e2e): authenticate through the login route instead of the form**
+  - `performLogin` drove the password form, which is what produced the
+    storage-state every backoffice project depends on. It now posts the same
+    fields to the same route through `page.request`, which shares the browser
+    context's cookie jar and baseURL, so the setup files and the disposable
+    project on port 3001 are unchanged.
+- **Deploy the backend change first**: the wizard depends on the new
+  `{"sent": true}` contract of `POST /saml/migration/confirm` and on the
+  provider field in `GET /saml/migration/pending`.
+
+- **feat(migrate-account): validate the legacy account by link instead of a code**
+  - The linking branch no longer asks for a 6-digit code. Choosing the email
+    method now sends a validation link to the address already on the account
+    and shows a waiting screen — "Validar email" — in the same shape as the one
+    the account-creation branch ends on, with the same resend-behind-a-cooldown
+    control. Following the link is what links the account and signs the user
+    in; nothing here is authenticated before that.
+  - A failed click comes back as `/migrate-account?flash=...`. A visitor
+    arriving that way has no wizard session, and the bootstrap effect answers a
+    missing session by pushing to `/login`, which swallowed the message they
+    were sent to read: the flash is latched on the first render and the
+    bootstrap skipped entirely when it is set. Every case — expired, used,
+    superseded — offers re-authentication, there being no session left to
+    resend from, and the backend deliberately not reissuing from a link click.
+  - The send-limit message is its own rather than the account-creation one:
+    that cap lasts the life of the account, this one lifts after an hour, so
+    "contact support" would be the wrong advice.
+  - `confirmMigration` stays for the password proof, narrowed to that arm;
+    `sendMigrationCode` and the code-step strings are gone from both locales.
+  - **Depends on the matching backend change, which must be deployed first**:
+    this screen calls `POST /saml/migration/send-link`, which does not exist
+    until that lands.
+
+- **chore(ci): run the test and typecheck workflows once per push, not twice**
+  - Both workflows triggered on `push` **and** `pull_request` with no branch
+    filter, so every push to a branch with an open PR started two identical runs
+    of each — four jobs, and the tests one runs `npm ci` twice on its own to
+    compare test counts against the base branch. The `push` trigger is now
+    limited to the environment branches (`develop`, `tst`, `ppr`, `main`), which
+    is what `udata-pt` already does, and feature branches stay covered by
+    `pull_request`.
+  - Added `concurrency` with `cancel-in-progress`, so a second push supersedes
+    the run for the first instead of queueing behind it. Nothing about what the
+    suites check changes.
+
+- **fix(migrate-account): the wizard follows the answer instead of reporting a rejection**
+  - On the account-creation step, typing the address of one's own portal
+    account got "an account with this email already exists" — and a message
+    telling the user to go back and link it, when the way there is not back
+    but a link called "Já tenho conta — procurar", and when the server had
+    just resolved that very account. `skipMigration` now recognises the
+    backend's `candidate_found` and returns it as an outcome rather than
+    throwing, and the creation handler routes to the confirm-account step with
+    the masked address, exactly as the search does — including re-reading the
+    pending state so the back controls do not loop the user through the search
+    a second time.
+  - **Nothing is linked by this.** The confirm-account step still asks whether
+    the account is theirs, and ownership is still proven afterwards by password
+    or by a code mailed to that account. The account-creation branch is
+    unchanged for people who really have no account.
+  - The remaining rejection now means one thing only — an account holds the
+    address and this identity cannot claim it — so `errorEmailTaken` says that,
+    instead of pointing at a step that does not exist.
+  - **Deploy the backend release first.** The new field rides on the existing
+    status code and error key, so an older backend never sends it — but this
+    build has also narrowed the already-registered message to "cannot be
+    linked, contact support", which is false advice while the backend still
+    refuses an address the user could in fact claim.
+  - Turning down the offered account no longer loops. "Não é a minha conta"
+    returns to the creation step with the address-taken message, and
+    submitting that same address again repeats the explanation instead of
+    silently offering the same account for ever. A failure to re-read the
+    pending state after a divert no longer strands the user either: the
+    candidate is pointed server-side regardless, so the wizard goes on.
+
+- **feat(migrate-account): stop asking what the backend already decided, and confirm the email before granting a session**
+  - The account-linking wizard opened on a manual choice — "Já possuo uma conta"
+    / "Criar nova conta" — repeating a decision the backend had already taken
+    when the CMD returned, and one the user is not equipped to make: whether a
+    legacy account matches depends on an email and name comparison they never
+    see. The wizard now reads that decision and opens on the right step. Three
+    outcomes, because the backend distinguishes them: one matching account goes
+    straight to linking, nothing matched goes straight to account creation, and
+    several homonyms go to the search — that last case still needs a human,
+    since nobody can say which account is whose, and falling into account
+    creation there would strand people who do have one.
+  - Creating an account no longer happens on a click. A new step collects an
+    email address, pre-filled with the CMD's own when no account holds it but
+    always requiring an explicit submission, and the account is created only
+    once that is supplied. Rejections (malformed, already in use) are
+    distinguishable and correctable in place — which needed `skipMigration` to
+    read the error body, something it alone among its siblings did not do, so
+    every failure arrived as one opaque message.
+  - The success screen changes nature: it no longer assumes a session and
+    redirects, because by design there is not one. It names the address the
+    confirmation link went to and offers a resend on a 60s cooldown. Logging in
+    with the CMD again before following the link — the obvious thing to try —
+    now lands on a screen that explains why access is still blocked, rather
+    than a silent bounce to the login.
+  - Clicking the confirmation link finally renders something. The backend
+    already redirected to the homepage with a `?flash=` marker, but nothing
+    displayed it. Three outcomes are shown, not two: an already-used link is a
+    success from the user's point of view, and reporting it as invalid sent
+    them chasing a problem they did not have.
+  - Requires the matching backend release: the wizard now sends an email to
+    `POST /saml/migration/skip` and reads two new fields from the pending
+    endpoint.
+
 - **feat(admin): widen column sorting across the backoffice tables**
   - Sorting was uneven across the admin lists: the system topics table had none
     at all, the system harvesters view declared it on one column where the org

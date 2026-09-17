@@ -30,6 +30,30 @@ export async function getFaqs(slug: string, locale: string = "pt") {
                         }
                     }
                 }
+                hero {
+                  ${locale} {
+                    title
+                    description
+                  }
+                }
+                paragraph {
+                  ${locale} {
+                    id
+                    description
+                    title
+                  }
+                }
+                sitemap {
+                  ${locale} {
+                    title
+                    links {
+                      anchor {
+                        children
+                        href
+                      }
+                    }
+                  }
+                }
             }
         }
     }

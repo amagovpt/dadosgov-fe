@@ -6,6 +6,8 @@ import PublishDropdown from '../admin/PublishDropdown'
 
 export type AdminLayoutProps = {
     title: string
+    kicker?: string
+    description?: string
     breadcrumbItems: {
         label: string
         url?: string
@@ -23,13 +25,15 @@ function buildStaticAdminBreadcrumbItems(items: AdminLayoutProps["breadcrumbItem
 
 export default function AdminLayout({
     title,
+    kicker,
+    description,
     breadcrumbItems,
     headerAction = <PublishDropdown />,
     children,
 }: AdminLayoutProps) {
     return (
-        <div className="w-full flex flex-col gap-32 px-104 pt-32 pb-64 admin-page">
-            <div className="w-full flex flex-col gap-64 pb-32">
+        <div className="container flex flex-col gap-64 pt-64 pb-96">
+            <div className="w-full flex flex-col gap-32">
                 <div className="w-full">
                     <Breadcrumb
                         className="admin-breadcrumb-static"
@@ -39,16 +43,20 @@ export default function AdminLayout({
                     />
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl-bold text-brand-blue-secondary max-w-[696px]">
-                        {title}
-                    </h1>
+                <div className="w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between">
+                    <div className="flex flex-col gap-8 max-w-[696px]">
+                        {kicker && <span className="text-sm text-neutral-700">{kicker}</span>}
+                        <h1 className="text-2xl-bold text-brand-blue-secondary">
+                            {title}
+                        </h1>
+                        {description && <p className="text-base text-neutral-700">{description}</p>}
+                    </div>
                     {headerAction}
                 </div>
             </div>
-            <div>
+            <>
                 {children}
-            </div>
+            </>
         </div>
     )
 }

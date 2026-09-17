@@ -23,6 +23,7 @@
   "updatedAt": "Atualizado a {{date}}",
   "readMore": "Ler mais",
   "readLess": "Ler menos",
+  "readNews": "Ler notícia",
   "seeAllDatasets": "Ver todos os conjuntos de dados",
   "seeAllDataStories": "Ver todas as Data Stories",
   "seeAllNews": "Ver todas as novidades",
@@ -74,7 +75,11 @@
     "close": "Fechar",
     "back": "Voltar",
     "portal": "Portal",
-    "portuguese": "Português"
+    "portuguese": "Português",
+    "languages": {
+      "portuguese": "Português",
+      "english": "Inglês"
+    }
   },
   "results_one": "{{count, number}} resultado",
   "results_other": "{{count, number}} resultados",
@@ -238,7 +243,7 @@
     "themes": "Dados relacionados à cultura",
     "areas-tematicas": "Áreas temáticas",
     "roadmap": "Roteiro para dados.gov.pt",
-    "termos-de-utilizacao": "Termos de utilização",
+    "termos-de-utilizacao": "Termos e condições",
     "ajuda-e-contactos": "Ajuda e contactos",
     "sitemap": "Mapa do Site",
     "recursos": "Recursos",

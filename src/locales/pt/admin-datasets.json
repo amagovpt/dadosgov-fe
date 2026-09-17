@@ -94,6 +94,15 @@
   },
   "list": {
     "title": "Conjuntos de dados",
+    "kicker": "Dados Abertos",
+    "heroTitle": "Gestão de conjuntos de dados",
+    "myListTitle": "Os meus conjuntos de dados",
+    "emptyTitlePrefix": "Não foram encontrados",
+    "emptyTitleHighlight": "conjuntos de dados",
+    "emptySubtitle": "Ainda não existem publicações associadas à sua conta",
+    "emptyDescription": "Utilize a opção \"Criar conjunto de dados\" para adicionar uma nova publicação. Os conjuntos de dados criados ficarão disponíveis para consulta e gestão nesta área.",
+    "heroDescription": "Publique, consulte e faça a gestão dos seus conjuntos de dados. Acompanhe o estado das publicações, atualize a informação sempre que necessário e mantenha os dados disponibilizados no portal atualizados e acessíveis.",
+    "create": "Criar conjunto de dados",
     "columns": {
       "title": "Título do conjunto de dados",
       "titleShort": "Título",

@@ -23,6 +23,7 @@
   "updatedAt": "Updated on {{date}}",
   "readMore": "Read more",
   "readLess": "Read less",
+  "readNews": "Read news",
   "seeAllDatasets": "See all datasets",
   "seeAllDataStories": "See all Data Stories",
   "seeAllNews": "See all news",
@@ -74,7 +75,11 @@
     "close": "Close",
     "back": "Back",
     "portal": "Portal",
-    "portuguese": "Portuguese"
+    "portuguese": "Portuguese",
+    "languages": {
+      "portuguese": "Portuguese",
+      "english": "English"
+    }
   },
   "results_one": "{{count, number}} result",
   "results_other": "{{count, number}} results",
@@ -238,7 +243,7 @@
     "themes": "Culture-related data",
     "areas-tematicas": "Thematic areas",
     "roadmap": "dados.gov.pt roadmap",
-    "termos-de-utilizacao": "Terms of use",
+    "termos-de-utilizacao": "Terms and conditions",
     "ajuda-e-contactos": "Help and contacts",
     "sitemap": "Site map",
     "recursos": "Resources",

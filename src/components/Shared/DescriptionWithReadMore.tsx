@@ -65,7 +65,7 @@ export function DescriptionWithReadMore({
   }, [checkOverflow, text]);
 
   const markdownBlock = (
-    <div className="content-wrapper markdown-container text-m-light text-neutral-900">
+    <div className="content-wrapper markdown-container rich-text-content text-m-light text-neutral-900">
       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
         {text}
       </ReactMarkdown>

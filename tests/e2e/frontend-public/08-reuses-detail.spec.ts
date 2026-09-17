@@ -21,7 +21,7 @@ async function gotoFirstReuseDetail(page: Page) {
   await firstCard.click();
   await page.waitForURL(/reuses\/.+/, { timeout: 15000 });
   await page.waitForLoadState("networkidle");
-  // Reuse detail uses Agora's <CardArticle> for the title; the title heading is h3.
+  // Reuse detail uses Agora's <CardGeneralV2> for the title; the title heading is h3.
   await expect(
     page.getByRole("heading", { name: /Descrição/i }).first()
   ).toBeVisible({ timeout: 15000 });
@@ -40,7 +40,7 @@ test.describe("Reuse Detail Page", () => {
       .first();
     await expect(descricaoHeading).toBeVisible({ timeout: 10000 });
 
-    // Reuse title is rendered inside Agora's <CardArticle>; at minimum the
+    // Reuse title is rendered inside Agora's <CardGeneralV2>; at minimum the
     // Descrição tab and the breadcrumb prove the page is fully laid out.
     const descricaoTab = page
       .locator('[role="tab"]', { hasText: /^Descrição$/i })

@@ -114,6 +114,11 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                   id
                   description
                   title
+                  links {
+                    children
+                    href
+                    icon
+                  }
                   iframe {
                     classNameIframeBackground
                     classNames

@@ -90,7 +90,7 @@ export default async function ArticleDetailPage({
               )}
 
               {/* Content */}
-              <div className="markdown-container text-m-regular leading-7">
+              <div className="markdown-container rich-text-content text-m-regular leading-7">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeRaw, rehypeSanitize]}

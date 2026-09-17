@@ -7,7 +7,9 @@ import {
   Button,
   Icon,
   Pill,
-  CardArticle,
+  CardGeneralV2,
+  HeaderSectionContainer,
+  CardSubtitle,
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
@@ -251,32 +253,33 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
 
         <div className="w-full">
           <div
-            className="card-article-3_2 organization_detail flex h-fit flex-col"
+            className="card-article-3_2 flex h-fit flex-col"
             ref={sidebarRef}
           >
-            <CardArticle
-              className="card-detail-info mb-16 rounded-4 border-none bg-[#F2F6FF] p-32 shadow-none"
-              subtitle={
-                <div className="flex flex-col gap-16">
-                  {organization.logo ? (
-                    <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
-                      <img
-                        src={organization.logo}
-                        alt={organization.name}
-                        className="max-h-full max-w-full object-contain"
-                      />
+            <CardGeneralV2 variant="primary-100" className="card-detail-info mb-16">
+              <HeaderSectionContainer>
+                <CardSubtitle>
+                  <div className="flex flex-col gap-16">
+                    {organization.logo ? (
+                      <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                        <img
+                          src={organization.logo}
+                          alt={organization.name}
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-6 text-neutral-400">
+                        <Icon name="agora-line-building" className="h-6 w-6" />
+                      </div>
+                    )}
+                    <div className="mb-8 text-m-light text-neutral-900">
+                      {tOrg("detail.organizationLabel")}
                     </div>
-                  ) : (
-                    <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-6 text-neutral-400">
-                      <Icon name="agora-line-building" className="h-6 w-6" />
-                    </div>
-                  )}
-                  <div className="mb-8 text-m-light text-neutral-900">
-                    {tOrg("detail.organizationLabel")}
                   </div>
-                </div>
-              }
-            />
+                </CardSubtitle>
+              </HeaderSectionContainer>
+            </CardGeneralV2>
             {/* Metrics Box */}
             <div className="mb-16 grid grid-cols-2 gap-16">
               <div className="rounded-4 bg-[#F2F6FF] p-32">
