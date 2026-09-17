@@ -1,4 +1,3 @@
-
 /* AgoraDS design tokens */
 @import "@ama-pt/agora-design-system/theme.css";
 
@@ -10,7 +9,6 @@
 
 /* Tailwind v4 utilities — last, so portal utilities override DS component rules */
 @import "tailwindcss/utilities";
-
 
 @theme {
   /* Spacing steps outside the Agora scale (0, 8, 16, 24, 32, …). */
@@ -170,7 +168,6 @@
      3.1 Main Header
      3.2 Header Cards & Icons
      3.3 Header Navigation Panels
-     3.4 Publish Dropdown
   4. FOOTER .................................................... [04]
   5. UI COMPONENTS ............................................. [05]
      5.1 Newsletter Card
@@ -212,14 +209,9 @@
   --color-brand-blue-dark: var(--color-primary-900);
   --color-brand-blue-dark-rgb: 2, 28, 81;
   --color-brand-blue-primary: #0c02cb;
-  --color-brand-blue-primary-rgb: 12, 2, 203;
   --color-brand-blue-secondary: #050157;
-  --color-brand-blue-secondary-rgb: 5, 1, 87;
   --color-accent-light: #f7f7ff;
-  --color-accent-light-rgb: 247, 247, 255;
   --color-gray-medium: var(--color-neutral-700);
-  --size-32: 32px;
-  --size-64: 64px;
 }
 
 /* ==========================================================================
@@ -270,7 +262,6 @@ body {
 
 /* 3.1 Main Header */
 
-
 .agora-header .navigation-bar {
   max-width: 1216px;
   margin-inline: auto;
@@ -313,7 +304,6 @@ body {
     padding-inline: 0;
   }
 }
-
 
 @media (min-width: 768px) and (max-width: 1279px) {
   .agora-header .general-bar .panels-menu ul {
@@ -489,7 +479,6 @@ header[data-submenu] .navigation-links-layout {
   padding-top: 80px;
 }
 
-
 /* Hide submenu items when not in a submenu */
 .agora-header .header-nav-cards > [data-group^="submenu-"] {
   display: none;
@@ -500,9 +489,7 @@ header[data-submenu="desenvolvimento"] .header-nav-cards > [data-group="main"] {
   display: none;
 }
 
-header[data-submenu="desenvolvimento"]
-  .header-nav-cards
-  > [data-group="submenu-desenvolvimento"] {
+header[data-submenu="desenvolvimento"] .header-nav-cards > [data-group="submenu-desenvolvimento"] {
   display: block;
 }
 
@@ -540,30 +527,6 @@ header[data-submenu="usar-dados"] .header-nav-cards > [data-group="submenu-usar-
    root. */
 .navigation-burger-panel .header-nav-cards > [data-is-back] {
   grid-column: 1 / -1;
-}
-
-/* 3.4 Publish Dropdown */
-.publish-dropdown-hero .agora-btn.agora-btn-solid-primary,
-.bg-primary-900 .publish-dropdown-wrapper .agora-btn.agora-btn-solid-primary {
-  background-color: #fff !important;
-  color: var(--color-neutral-900) !important;
-  border-color: #fff !important;
-}
-
-.publish-dropdown-hero .agora-btn.agora-btn-solid-primary:hover,
-.bg-primary-900 .publish-dropdown-wrapper .agora-btn.agora-btn-solid-primary:hover {
-  background-color: var(--color-neutral-100) !important;
-  border-color: var(--color-neutral-100) !important;
-}
-
-.publish-dropdown-hero .agora-btn.agora-btn-solid-primary svg,
-.bg-primary-900 .publish-dropdown-wrapper .agora-btn.agora-btn-solid-primary svg {
-  fill: var(--color-neutral-900) !important;
-}
-
-.publish-dropdown-wrapper .agora-dropdown {
-  top: 100% !important;
-  margin-top: 8px;
 }
 
 /* Auth page button active state */
@@ -679,7 +642,7 @@ header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="tr
   .unauthenticated-panel-menu
   > .panel-menu-link-wrapper
   .icon-wrapper
-  svg { 
+  svg {
   fill: currentColor;
 }
 
@@ -748,39 +711,6 @@ li.section-name:empty {
 .icon-white svg,
 .homepage .agora-btn-link-primary:hover:not(:disabled).icon-white svg {
   fill: var(--color-white);
-}
-
-.stats-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border-width: 2px;
-  width: 76px;
-  height: 76px;
-  flex-shrink: 0;
-}
-
-.stats-icon-wrapper svg,
-.stats-icon-wrapper svg path,
-.stats-icon-wrapper [class*="agora-icon"] {
-  fill: currentColor;
-}
-
-.stats-icon-square {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  width: 76px;
-  height: 76px;
-  flex-shrink: 0;
-}
-
-.stats-icon-square svg,
-.stats-icon-square svg path,
-.stats-icon-square [class*="agora-icon"] {
-  fill: currentColor;
 }
 
 /* 5.3 Tabs Overrides */
@@ -943,41 +873,6 @@ li.section-name:empty {
   border-bottom: 2px solid var(--color-neutral-200);
 }
 
-.cardsnews {
-  align-items: stretch;
-}
-
-.cardsnews .agora-card-links {
-  height: 100%;
-}
-
-.cardsnews .agora-card-links .card-links-container {
-  height: 100%;
-}
-
-.cardsnews .agora-card-links .card-links-container .bottom-container {
-  margin-top: auto;
-}
-
-/* Profile organization cards — equal height alignment */
-.profile-org-cards {
-  align-items: stretch;
-}
-
-.profile-org-cards .agora-card-links {
-  height: 100%;
-}
-
-.profile-org-cards .agora-card-links .card-links-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.profile-org-cards .agora-card-links .card-links-container .bottom-container {
-  margin-top: auto;
-}
-
 /* Override icon fill and link color for reuses, article and organization pages */
 .reuse .agora-card-links.transparent .topic-item .icon,
 .article .agora-card-links.transparent .topic-item .icon,
@@ -1018,35 +913,6 @@ li.section-name:empty {
 .article .agora-card-links .link-container .icon,
 .organization .agora-card-links .link-container .icon {
   display: none;
-}
-
-/* Dataset reuse card layout */
-.dataset-reuse-card-wrapper .card-general,
-.dataset-reuse-card-wrapper .card-general > div {
-  height: 100% !important;
-  display: flex !important;
-  overflow: hidden !important;
-}
-
-.dataset-reuse-card-wrapper [class*="agora-card-image-container"] {
-  width: 300px !important;
-  min-width: 300px !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.dataset-reuse-card-wrapper img {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: cover !important;
-  border-radius: 0 !important;
-}
-
-.dataset-reuse-card-wrapper [class*="agora-card-content"] {
-  flex: 1 !important;
 }
 
 /* 5.8 Cards (No Results) */
@@ -1124,23 +990,6 @@ li.section-name:empty {
   margin: 0 !important;
 }
 
-.pagination-filters {
-  position: relative;
-  z-index: 0;
-}
-
-.pagination-filters::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0%;
-  width: 100vw;
-  transform: translateX(-50%);
-  background: var(--color-primary-50);
-  z-index: -1;
-}
-
 .sidebar-index {
   padding: 32px 64px 32px 32px;
 }
@@ -1154,10 +1003,6 @@ li.section-name:empty {
   border-color: var(--color-primary-600);
 }
 
-:has(.agora-card-no-results) .pagination-filters:before {
-  display: none;
-}
-
 /* 5.10 Toggle (Organizations Filters) */
 .organizations-filters .agora-toggle {
   width: 100%;
@@ -1166,11 +1011,6 @@ li.section-name:empty {
 .organizations-filters .agora-toggle.agora-toggle-icon {
   width: 100%;
   justify-content: flex-start;
-}
-
-.organizations-filters .agora-toggle .agora-toggle-icon-container img {
-  width: 20px;
-  height: 20px;
 }
 
 /* ---------------------------------- */
@@ -1211,16 +1051,6 @@ li.section-name:empty {
    ========================================================================== */
 
 /* 6.1 Homepage */
-.dataset-content-proper {
-  height: 112px;
-  word-wrap: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-}
-
 .card-general-listing .card-general {
   border-width: 1px !important;
 }
@@ -1465,75 +1295,6 @@ li.section-name:empty {
   display: none;
 }
 
-.admin-header .admin-profile-switcher__band {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-8);
-  width: 100%;
-  padding: var(--spacing-16) var(--spacing-24);
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-600);
-  font-size: 16px;
-  line-height: 1.5;
-  text-align: left;
-  cursor: pointer;
-}
-
-.admin-header .admin-profile-switcher__band svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-  flex-shrink: 0;
-}
-
-.admin-header .admin-profile-switcher__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.admin-header .admin-profile-switcher__option {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-16);
-  width: 100%;
-  padding: var(--spacing-16) var(--spacing-24);
-  border-bottom: 1px solid var(--color-neutral-300);
-  text-align: left;
-  cursor: pointer;
-}
-
-.admin-header .admin-profile-switcher__option:hover {
-  background-color: var(--color-neutral-50);
-}
-
-.admin-header .admin-profile-switcher__avatar {
-  flex-shrink: 0;
-}
-
-.admin-header .admin-profile-switcher__radio {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  border: 2px solid var(--color-neutral-700);
-  border-radius: 50%;
-}
-
-.admin-header .admin-profile-switcher__radio--checked {
-  border-color: var(--color-primary-600);
-}
-
-.admin-header .admin-profile-switcher__radio--checked::after {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: var(--color-primary-600);
-}
-
 /* 7.2 Side Navigation */
 .admin-layout {
   display: flex;
@@ -1541,85 +1302,12 @@ li.section-name:empty {
   position: relative;
 }
 
-.admin-side-nav {
-  position: relative;
-  width: 112px;
-  min-height: 100%;
-  flex-shrink: 0;
-}
-
-.admin-side-nav__panel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 112px;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-primary-900);
-  overflow-y: auto;
-  transition: width 0.2s ease;
-}
-
-.admin-side-nav--expanded .admin-side-nav__panel {
-  width: 388px;
-}
-
-.admin-side-nav__toggle {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  margin-top: 64px;
-  padding: 12px 12px 12px 20px;
-  color: var(--color-white);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.admin-side-nav__toggle:hover {
-  background-color: #0338a2;
-}
-
-.admin-side-nav__toggle-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 72px;
-  flex-shrink: 0;
-}
-
-.admin-side-nav__toggle-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  flex-shrink: 0;
-  border: 1px solid var(--color-white);
-  border-radius: 4px;
-}
-
-.admin-side-nav__toggle-icon-glyph {
-  width: 24px;
-  height: 24px;
-}
-
-.admin-side-nav__toggle-icon-glyph,
-.admin-side-nav__toggle-icon-glyph svg,
-.admin-side-nav__toggle-icon-glyph svg path {
-  fill: var(--color-white);
-  color: var(--color-white);
-}
-
-
+/*
+  `.admin-side-nav` carries no box of its own any more — the rail's width, its
+  `relative` positioning and the `min-height` all live on the element as
+  utilities. The class stays as the hook the overrides below hang off, and as
+  the `--collapsed` state flag.
+*/
 .admin-side-nav .agora-sidebar-navigation-mobile {
   display: flex;
   justify-content: center;
@@ -1632,13 +1320,6 @@ li.section-name:empty {
   color: var(--color-white);
 }
 
-.admin-side-nav--collapsed .admin-sidebar-nav__group-label {
-  flex-direction: column;
-  gap: 4px;
-  justify-content: center;
-  text-align: center;
-}
-
 .admin-side-nav--collapsed
   .admin-sidebar-nav.agora-sidebar
   .agora-sidebar-item
@@ -1646,18 +1327,6 @@ li.section-name:empty {
 .admin-side-nav--collapsed .agora-anchor.agora-sidebar-anchor-item {
   justify-content: center !important;
   text-align: center !important;
-}
-
-.admin-side-nav--collapsed .admin-sidebar-nav__group-label-text {
-  overflow: visible;
-  text-overflow: initial;
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-
-.admin-side-nav--collapsed .admin-sidebar-nav__children {
-  display: none;
 }
 
 .admin-sidebar-nav {
@@ -1679,12 +1348,6 @@ li.section-name:empty {
   background-color: var(--color-primary-400);
 }
 
-.admin-sidebar-nav__home-badge-icon {
-  width: 38px;
-  height: 38px;
-  filter: brightness(0) invert(1);
-}
-
 .admin-sidebar-nav.agora-sidebar
   .agora-sidebar-item
   .agora-btn-link-neutral.agora-sidebar-button-item {
@@ -1696,18 +1359,6 @@ li.section-name:empty {
   text-align: left !important;
 }
 
-.admin-sidebar-nav .agora-link-wrapper {
-  padding: 0 !important;
-  min-height: auto !important;
-  min-width: auto !important;
-  width: 100%;
-border-left: none !important;
-}
-
-.admin-sidebar-nav .agora-link-wrapper:has(.admin-sidebar-nav__home-badge) {
-  padding: 64px 0 12px !important;
-}
-
 .admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item {
   border-left: 3px solid transparent;
   border-radius: 0 !important;
@@ -1715,39 +1366,31 @@ border-left: none !important;
   width: 100%;
 }
 
+/*
+  The DS paints an anchor item's glyphs in primary-600 and ships no dark-mode
+  counterpart for the anchor variant (only for `btn-link-neutral`), so on the
+  navy rail they would read as mid-blue on navy. A `fill-white` utility on the
+  Icon cannot win against the DS's own descendant selector, hence this rule.
+*/
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-sidebar-anchor-item svg,
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-sidebar-anchor-item svg path {
+  fill: var(--color-white);
+}
+
 .admin-sidebar-nav.agora-sidebar
   .agora-sidebar-item
   .agora-btn-link-neutral.agora-sidebar-button-item
-  > *:not(.agora-icon):not([class*="icon"]) {
+  > *:not([class*="icon"]) {
   overflow: hidden;
   min-width: 0;
   flex: 1;
 }
 
-.admin-sidebar-nav__group-label {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-width: 0;
-  overflow: hidden;
-  flex: 1;
-  justify-content: flex-start;
-  padding-top: 16px;
-}
-
-.admin-sidebar-nav__group-label-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 16px;
-}
-
-.admin-side-nav__toggle .admin-sidebar-nav__group-label-text {
-  padding: 16px 0;
-}
-
-.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-btn-link-neutral.agora-sidebar-button-item:has(.admin-sidebar-nav__group-label--active),
-.admin-sidebar-nav .agora-anchor.agora-sidebar-anchor-item:has(.admin-sidebar-nav__group-label--active) {
+.admin-sidebar-nav.agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral.agora-sidebar-button-item:has(.admin-sidebar-nav__group-label--active),
+.admin-sidebar-nav
+  .agora-anchor.agora-sidebar-anchor-item:has(.admin-sidebar-nav__group-label--active) {
   background-color: #0338a2 !important;
   border-left: 3px solid var(--color-white) !important;
 }
@@ -1756,95 +1399,103 @@ border-left: none !important;
   font-weight: 700;
 }
 
+/*
+  `:not(:has(…--active))` so hovering the current row does not blank out its own
+  white stripe — the hover fill is the same #0338a2 the active row already has,
+  and the stripe is then the only thing left distinguishing it.
+*/
 .admin-sidebar-nav .agora-sidebar-item > .agora-sidebar-button-item:hover,
 .admin-sidebar-nav .agora-sidebar-item > button:hover,
 .admin-sidebar-nav .agora-sidebar-item .agora-btn-link-neutral:hover,
-.admin-side-nav .agora-sidebar .agora-sidebar-item .agora-btn-link-neutral:hover {
-  border-left: 3px solid transparent !important;
+.admin-side-nav .agora-sidebar .agora-sidebar-item .agora-btn-link-neutral:hover,
+.admin-sidebar-nav .agora-sidebar-item .agora-sidebar-anchor-item:hover {
   background-color: #0338a2 !important;
   text-decoration: none !important;
 }
 
-.admin-sidebar-nav__group-icon {
-  width: 20px;
-  height: 20px;
+.admin-sidebar-nav
+  .agora-sidebar-item
+  > .agora-sidebar-button-item:hover:not(:has(.admin-sidebar-nav__group-label--active)),
+.admin-sidebar-nav
+  .agora-sidebar-item
+  > button:hover:not(:has(.admin-sidebar-nav__group-label--active)),
+.admin-sidebar-nav
+  .agora-sidebar-item
+  .agora-btn-link-neutral:hover:not(:has(.admin-sidebar-nav__group-label--active)),
+.admin-side-nav
+  .agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral:hover:not(:has(.admin-sidebar-nav__group-label--active)) {
+  border-left: 3px solid transparent !important;
 }
 
-.admin-side-nav
-  .agora-sidebar.darkMode
-  .agora-sidebar-item
-  .agora-sidebar-anchor-item
+/*
+  The rail's rows are full-bleed and own their own insets (`groupLabel` in
+  AdminSideNavigation), so the whole li → anchor → wrapper chain is flattened to
+  a full-width flex box here rather than by arguing with each DS rule in turn.
+  The DS narrows that chain three separate ways:
+
+    - `padding-left: 16px` on the `li.agora-sidebar-item`;
+    - `px-16` and a 60px `min-width` on the `.agora-link-wrapper` span it puts
+      between the li and the anchor — 16px off each side of a 112px rail, which
+      is the bulk of it;
+    - `pl-[44px] pr-[44px]` on `.data-children-wrapper`, which the DS adds for an
+      item carrying neither a leading nor a trailing icon;
+    - `inline-flex` on the anchor and, through `*:inline-flex`, on the wrapper.
+      Inline-level boxes shrink-wrap, so `width: 100%` on the anchor alone never
+      reaches down the chain.
+
+  Left standing they hold the row box well inside the rail and — worse — leave
+  the collapsed label with no definite width, which is what stops it wrapping:
+  `overflow-wrap: break-word` only breaks a word that overflows *its own* box,
+  and a shrink-to-fit child never does. It overflows the parent instead, and is
+  clipped mid-word.
+*/
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item,
+.admin-sidebar-nav .agora-link-wrapper,
+.admin-sidebar-nav .agora-sidebar-anchor-item,
+.admin-sidebar-nav .agora-sidebar-anchor-item .data-children-wrapper {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: auto !important;
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
+}
+
+.admin-sidebar-nav .agora-link-wrapper {
+  padding-block: 0 !important;
+  border-left: none !important;
+}
+
+/*
+  The home row is the one item whose badge and label are two bare siblings
+  rather than one `groupLabel` span, so the stacking every other row gets from
+  the component has to come from here.
+*/
+.admin-sidebar-nav
+  .agora-sidebar-anchor-item:has(.admin-sidebar-nav__home-badge)
   .data-children-wrapper {
-  gap: 8px;
+  align-items: center;
+  gap: 16px;
   font-weight: 400;
-  padding-left: 16px;
+  padding-left: 16px !important;
 }
 
 .admin-side-nav--collapsed
-  .agora-sidebar.darkMode
-  .agora-sidebar-item
-  .agora-sidebar-anchor-item
+  .admin-sidebar-nav
+  .agora-sidebar-anchor-item:has(.admin-sidebar-nav__home-badge)
   .data-children-wrapper {
   flex-direction: column;
-  align-items: center;
   gap: 4px;
   text-align: center;
-  padding-left: 0;
-  padding-right: 0;
+  padding-inline: 16px !important;
 }
 
-.admin-sidebar-nav.agora-sidebar .agora-sidebar-item {
-  padding-left: 0 !important;
-  margin-left: 0 !important;
-}
-
-.admin-sidebar-nav__children {
-  list-style: none;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: flex;
-  flex-direction: column;
-}
-
-.admin-sidebar-nav__child-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 0;
-  text-decoration: none;
-  color: var(--color-white);
-  font-size: 16px;
-  line-height: 24px;
-  transition: background-color 0.2s;
-  border-left: 3px solid transparent;
-}
-
-.admin-sidebar-nav__child-item-text {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.admin-sidebar-nav__child-item:hover {
-  background-color: #0338a2;
-  border-left: 3px solid var(--color-white);
-}
-
-.admin-sidebar-nav__child-item--active {
-  background-color: #0338a2;
-  border-left: 3px solid var(--color-white);
-  font-weight: 700;
-}
-
-.admin-sidebar-nav__child-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.admin-sidebar-nav__child-icon,
-.admin-sidebar-nav__child-icon svg,
-.admin-sidebar-nav__child-icon svg path {
-  fill: var(--color-white);
-  color: var(--color-white);
+/* The gap that sets the home row apart from the navigation above it. */
+.admin-sidebar-nav.agora-sidebar .agora-sidebar-item:has(.admin-sidebar-nav__home-badge) {
+  padding-top: 64px !important;
+  padding-bottom: 12px !important;
 }
 
 /* 7.3 Content Area */
@@ -1916,56 +1567,11 @@ border-left: none !important;
   gap: 32px;
 }
 
-.admin-page__sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex-shrink: 0;
-  width: 340px;
-}
-
-.admin-page__count {
-  font-size: 14px;
-  line-height: 24px;
-  color: var(--color-neutral-900);
-  text-transform: uppercase;
-}
-
 .admin-page__content {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.admin-page__empty .agora-card-no-results__anchor {
-  background-color: var(--color-primary-900);
-  color: var(--color-white);
-  border: none;
-  border-radius: 4px;
-  padding: 8px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 28px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.admin-page__empty .agora-card-no-results__anchor:hover {
-  background-color: var(--color-primary-700);
-  text-decoration: none;
-}
-
-.admin-page__empty-icon {
-  width: 80px;
-  height: 80px;
-}
-
-.admin-page__empty-icon svg {
-  width: 80px;
-  height: 80px;
-  fill: var(--color-brand-blue-secondary);
 }
 
 .admin-new-page__cards {
@@ -2109,44 +1715,6 @@ border-left: none !important;
   display: flex;
   justify-content: flex-end;
   gap: 18px;
-}
-
-.admin-page__actions--between {
-  justify-content: space-between;
-}
-
-/* Info card (unused but kept for reference) */
-.admin-page__info-card {
-  display: flex;
-  gap: 8px;
-  padding: 16px;
-  background-color: var(--color-informative-50, #e5f6ff);
-  border-radius: 4px;
-}
-
-.admin-page__info-icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  color: var(--color-informative-600, #00598c);
-}
-
-.admin-page__info-icon svg {
-  fill: var(--color-informative-600, #00598c);
-}
-
-.admin-page__info-title {
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 28px;
-  color: var(--color-neutral-900);
-}
-
-.admin-page__info-description {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 28px;
-  color: var(--color-neutral-900);
 }
 
 /* Auxiliar sidebar */
@@ -2306,27 +1874,6 @@ border-left: none !important;
   background-color: transparent;
 }
 
-.statistics-grid {
-  display: flex;
-  gap: 0;
-}
-
-.statistics-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 32px;
-  border-right: 1px solid var(--color-neutral-200);
-}
-
-.statistics-item:first-child {
-  padding-left: 0;
-}
-
-.statistics-item:last-child {
-  border-right: none;
-}
-
 /* Admin edit info section */
 .admin-edit-info {
   display: flex;
@@ -2430,11 +1977,6 @@ border-left: none !important;
   fill: var(--color-neutral-900) !important;
 }
 
-.dataset-edit-danger-actions .status-card,
-.dataset-edit-danger-actions .status-card * {
-  text-align: left !important;
-}
-
 /* Profile form width */
 .admin-layout__content .admin-page .agora-tabs .admin-page__form {
   max-width: 100%;
@@ -2450,16 +1992,6 @@ border-left: none !important;
   border-radius: 4px;
   overflow: visible;
   position: relative;
-}
-
-.profile-edit-dropdown {
-  min-width: 250px !important;
-  width: max-content !important;
-}
-
-.profile-edit-dropdown .agora-dropdown-section-options {
-  max-height: none !important;
-  overflow: visible !important;
 }
 
 .profile-card__avatar-container {
@@ -2521,18 +2053,6 @@ border-left: none !important;
 }
 
 /* 7.8 Responsive */
-/* Below the "xl" breakpoint (1280px), Ágora's Sidebar swaps in its own
-   built-in mobile navigation (the layered-icon menu button rendered inside
-   `.admin-side-nav__panel`, unconditionally, regardless of viewport — it's
-   only ever visually redundant below this width). Our custom expand/collapse
-   toggle is a desktop-rail concept; hide it so only the native mobile
-   control remains. */
-@media (max-width: 1279px) {
-  .admin-side-nav__toggle {
-    display: none;
-  }
-}
-
 @media (max-width: 1024px) {
   .admin-new-page__cards {
     flex-direction: column;
@@ -2550,28 +2070,10 @@ border-left: none !important;
     flex: 1;
     max-width: 100%;
   }
-
-  .admin-side-nav__label {
-    font-size: 11px;
-  }
-
-  .admin-sidebar-nav__child-item {
-    font-size: 13px;
-  }
-
-  .admin-header__content {
-    padding: 0 24px;
-  }
 }
 
 @media (max-width: 767px) {
-  .admin-side-nav {
-    width: 64px;
-  }
-
-  .admin-side-nav__panel {
-    width: 64px;
-  }
+  /* The 64px mobile rail is `max-md:w-64` on the element itself. */
 
   .admin-page .agora-toggle-group.horizontal {
     flex-direction: column;

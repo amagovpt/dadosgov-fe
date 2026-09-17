@@ -20,6 +20,20 @@ interface ProfileOption {
   srcPath: string;
 }
 
+const BAND_CLASSES =
+  "flex w-full cursor-pointer items-center gap-8 bg-primary-50 px-24 py-16 " +
+  "text-left text-base leading-normal text-primary-600";
+
+const OPTION_CLASSES =
+  "flex w-full cursor-pointer items-center gap-16 border-b border-neutral-300 " +
+  "px-24 py-16 text-left hover:bg-neutral-50";
+
+const RADIO_CLASSES = "flex size-20 shrink-0 items-center justify-center rounded-full border-2";
+
+const RADIO_CHECKED_CLASSES =
+  "border-primary-600 after:size-[10px] after:rounded-full after:bg-primary-600 " +
+  "after:content-['']";
+
 export function AdminProfileSwitcher({
   headerRef,
   headerHandleRef,
@@ -54,7 +68,7 @@ export function AdminProfileSwitcher({
           label: org.name,
           href: "/admin/org/datasets",
           avatarType: org.logo_thumbnail ? "image" : "icon",
-          srcPath: org.logo_thumbnail || "agora-line-user-group",
+          srcPath: org.logo_thumbnail || "agora-line-briefcase",
         })
       ),
     ];
@@ -64,7 +78,7 @@ export function AdminProfileSwitcher({
         label: t("header.administratorProfile"),
         href: "/admin/system/datasets",
         avatarType: "icon",
-        srcPath: "agora-line-shield",
+        srcPath: "agora-line-buildings",
       });
     }
     return list;
@@ -111,18 +125,19 @@ export function AdminProfileSwitcher({
   if (!portalNode || options.length <= 1) return null;
 
   return createPortal(
-    <div className="admin-profile-switcher__panel" data-open={isSwitching}>
+    <div data-open={isSwitching}>
       {isSwitching ? (
         <>
-          <button
-            type="button"
-            className="admin-profile-switcher__band"
-            onClick={() => setIsSwitching(false)}
-          >
-            <Icon name="agora-line-chevron-left" aria-hidden />
+          <button type="button" className={BAND_CLASSES} onClick={() => setIsSwitching(false)}>
+            <Icon
+              name="agora-line-chevron-left"
+              dimensions="s"
+              className="shrink-0 fill-current"
+              aria-hidden
+            />
             <span>{t("header.back")}</span>
           </button>
-          <ul className="admin-profile-switcher__list" role="radiogroup">
+          <ul className="m-0 list-none p-0" role="radiogroup">
             {options.map((option) => {
               const isActive = isSameProfile(option.profile, activeProfile);
               return (
@@ -131,14 +146,14 @@ export function AdminProfileSwitcher({
                     type="button"
                     role="radio"
                     aria-checked={isActive}
-                    className="admin-profile-switcher__option"
+                    className={OPTION_CLASSES}
                     onClick={() => selectProfile(option)}
                   >
                     <Avatar
                       avatarType={option.avatarType}
                       srcPath={option.srcPath}
                       alt=""
-                      className="admin-profile-switcher__avatar"
+                      className="shrink-0"
                     />
                     <span
                       className={`flex-1 text-m-regular ${isActive ? "text-primary-600" : "text-neutral-900"}`}
@@ -147,7 +162,9 @@ export function AdminProfileSwitcher({
                     </span>
                     <span
                       aria-hidden
-                      className={`admin-profile-switcher__radio ${isActive ? "admin-profile-switcher__radio--checked" : ""}`}
+                      className={`${RADIO_CLASSES} ${
+                        isActive ? RADIO_CHECKED_CLASSES : "border-neutral-700"
+                      }`}
                     />
                   </button>
                 </li>
@@ -156,15 +173,16 @@ export function AdminProfileSwitcher({
           </ul>
         </>
       ) : (
-        <button
-          type="button"
-          className="admin-profile-switcher__band"
-          onClick={() => setIsSwitching(true)}
-        >
+        <button type="button" className={BAND_CLASSES} onClick={() => setIsSwitching(true)}>
           <span className="flex-1 text-left">
             {t("header.selectProfile", { count: options.length })}
           </span>
-          <Icon name="agora-line-chevron-right" aria-hidden />
+          <Icon
+            name="agora-line-chevron-right"
+            dimensions="s"
+            className="shrink-0 fill-current"
+            aria-hidden
+          />
         </button>
       )}
     </div>,
