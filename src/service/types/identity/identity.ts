@@ -56,6 +56,17 @@ export interface UserRef {
    * Served only on the caller's own user; `null` on anybody else's.
    */
   migration_invite?: boolean | null;
+  /**
+   * True while this account can still link a CMD/eIDAS identity at all.
+   *
+   * 🚩 NOT the same question as `migration_invite`, and the difference is one
+   * condition: this one ignores a dismissal. The notice hides when somebody
+   * presses "Not now"; the permanent entry point in the profile must not, or
+   * the notice would have closed the door behind itself.
+   *
+   * Optional and null on anybody else's user, like its sibling.
+   */
+  migration_link_available?: boolean | null;
   roles?: string[];
   organizations?: Organization[];
   metrics?: UserMetrics;

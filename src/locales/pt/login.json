@@ -233,6 +233,7 @@
     "linkEidas": "Associar à Autenticação Europeia",
     "dismiss": "Agora não",
     "close": "Fechar aviso",
-    "error": "Não foi possível iniciar a associação. Tente novamente mais tarde."
+    "error": "Não foi possível iniciar a associação. Tente novamente mais tarde.",
+    "sectionTitle": "Autenticação com identidade digital"
   }
 }

@@ -23,6 +23,10 @@ interface AuthContextProps {
   // The optional CMD/eIDAS linking invite, as decided by the backend for this
   // account. Read here, never derived: see UserRef.migration_invite.
   migrationInvite: boolean;
+  // Whether the linking flow is still reachable AT ALL. Deliberately NOT the
+  // same as migrationInvite: that one goes false on dismissal, and the
+  // permanent entry point must survive it.
+  migrationLinkAvailable: boolean;
   isAdmin: boolean;
   hasOrganization: boolean;
   refresh: () => Promise<void>;
@@ -35,6 +39,7 @@ const AuthContext = createContext<AuthContextProps>({
   pendingRegistration: false,
   pendingRegistrationEmail: null,
   migrationInvite: false,
+  migrationLinkAvailable: false,
   isAdmin: false,
   hasOrganization: false,
   refresh: async () => {},
@@ -83,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // behaviour then. The value is the backend's answer for THIS account and is
   // never combined with anything read here.
   const migrationInvite = user?.migration_invite ?? false;
+  const migrationLinkAvailable = user?.migration_link_available ?? false;
 
   return (
     <AuthContext.Provider
@@ -93,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         pendingRegistration,
         pendingRegistrationEmail,
         migrationInvite,
+        migrationLinkAvailable,
         isAdmin,
         hasOrganization,
         refresh,

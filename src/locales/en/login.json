@@ -233,6 +233,7 @@
     "linkEidas": "Link to European Authentication",
     "dismiss": "Not now",
     "close": "Close notice",
-    "error": "The linking flow could not be started. Please try again later."
+    "error": "The linking flow could not be started. Please try again later.",
+    "sectionTitle": "Sign in with a digital identity"
   }
 }
