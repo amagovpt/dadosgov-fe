@@ -6,6 +6,20 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): a refused sign-in now says why, and the invite names its condition**
+  - The backend has always redirected every refused SAML sign-in to `/login?saml_error=…`
+    and nothing on that screen read it, so the citizen landed on a clean login page with
+    no idea why they were not signed in. Known codes now get their own sentence and
+    anything else gets a generic one -- silence is what the screen used to offer, and it
+    leaves people concluding the portal is broken.
+  - The case that motivated it: pressing **Associar** with an identity that already
+    belongs to another account used to sign the citizen into that other account without a
+    word. They walked away believing the link had worked, and found out when the invite
+    came back. Now it stops, says the identity belongs to another account, says their own
+    account was left as it was, and points at the transfer path for content.
+  - The invite also names the condition up front -- linking only works on an identity no
+    other account holds -- so the refusal is known before the round-trip, not after it.
+
 - **fix(login): the invited link now stays on the account the person clicked from**
   - The wizard identifies the account to link by the password proved on its screen. In
     the mandatory mode that is the only evidence there is -- the citizen arrives
