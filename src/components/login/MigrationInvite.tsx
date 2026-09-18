@@ -32,7 +32,7 @@ import { submitSamlForm } from "./loginUtils";
  */
 export function MigrationInvite() {
   const { t } = useTranslation("login");
-  const { migrationInvite, refresh } = useAuth();
+  const { migrationInvite, isLoading: authLoading, refresh } = useAuth();
   const [dismissed, setDismissed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,13 @@ export function MigrationInvite() {
   // `migrationInvite` above.
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
-  if (!migrationInvite || dismissed) return null;
+  // isLoading is in the condition for hydration, not for looks: /me is fetched
+  // in the browser, so the server renders nothing and a client that answered
+  // before React hydrated would render the notice into HTML that never had it.
+  // React then reports a mismatch and throws the tree away. Waiting for the
+  // answer makes both passes agree on "nothing", and the notice appears on the
+  // render after it.
+  if (authLoading || !migrationInvite || dismissed) return null;
 
   const startLink = async (endpoint: string) => {
     setIsLoading(true);
@@ -79,7 +85,7 @@ export function MigrationInvite() {
     >
       <div className="flex items-start gap-16">
         <Icon
-          name="agora-line-information-circle"
+          name="agora-line-info-mark"
           className="h-24 w-24 shrink-0 text-informative-600"
           aria-hidden
         />

@@ -13,7 +13,7 @@
  * configuration does NOT contain, the source is the only place to assert it.
  */
 
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -26,7 +26,7 @@ function samlPathsCalledFromSource(): string[] {
   const found = new Set<string>();
 
   const walk = (dir: string) => {
-    for (const entry of require("node:fs").readdirSync(dir, { withFileTypes: true })) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         walk(full);

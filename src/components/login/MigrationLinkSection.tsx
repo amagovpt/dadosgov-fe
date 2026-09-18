@@ -24,7 +24,7 @@ import { submitSamlForm } from "./loginUtils";
  */
 export function MigrationLinkSection() {
   const { t } = useTranslation("login");
-  const { migrationLinkAvailable } = useAuth();
+  const { migrationLinkAvailable, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +32,9 @@ export function MigrationLinkSection() {
   // whether an ACCOUNT should link — that is the backend's answer above.
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
-  if (!migrationLinkAvailable) return null;
+  // Same reason as its sibling: /me is fetched in the browser, so rendering
+  // before the answer arrives makes the server and the client disagree.
+  if (authLoading || !migrationLinkAvailable) return null;
 
   const startLink = async (endpoint: string) => {
     setIsLoading(true);

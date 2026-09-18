@@ -111,6 +111,17 @@ describe("the optional CMD/eIDAS linking invite", () => {
     vi.clearAllMocks();
   });
 
+  it("renders nothing while the backend's answer is still in flight", () => {
+    // Hydration, not looks: /me is fetched in the browser, so the server
+    // renders nothing. A client that answered before React hydrated would
+    // render the notice into HTML that never had it, React would report a
+    // mismatch and throw the tree away -- which is what the dev server
+    // reported on the first real page load.
+    useAuth.mockReturnValue({ migrationInvite: true, isLoading: true, refresh: vi.fn() });
+    renderInvite();
+    expect(container.textContent).toBe("");
+  });
+
   it("renders nothing when the backend is not inviting this account", () => {
     useAuth.mockReturnValue({ migrationInvite: false, refresh: vi.fn() });
     renderInvite();
