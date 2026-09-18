@@ -34,10 +34,10 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
   const pageTitle = pageContent.createHero?.title ?? "";
 
-  const orgBase = activeOrg ? `/admin/org/${activeOrg.id}` : "/admin/org";
+  const orgBase = resolvedOrgId ? `/admin/org/${resolvedOrgId}` : "/admin/org";
 
   const buildStepUrl = (step: number) => {
-    return `/admin/org/datasets/new?step=${step}`;
+    return `${orgBase}/datasets/new?step=${step}`;
   };
 
   const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);

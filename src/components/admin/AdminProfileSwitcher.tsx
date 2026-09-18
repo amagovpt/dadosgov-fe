@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,8 @@ import {
   isSameProfile,
   type ActiveProfile,
 } from "@/context/ActiveProfileContext";
+import { localizeHref } from "@/utils/localizeHref";
+import { splitLocale } from "@/utils/stripLocale";
 
 interface ProfileOption {
   profile: ActiveProfile;
@@ -42,9 +44,10 @@ export function AdminProfileSwitcher({
   headerHandleRef: RefObject<HeaderElement | null>;
 }) {
   const { user, isAdmin } = useAuth();
-  const { activeProfile, setActiveProfile } = useActiveProfile();
+  const { activeProfile, organizations } = useActiveProfile();
   const { t } = useTranslation("common");
   const router = useRouter();
+  const { locale } = splitLocale(usePathname());
   const [portalNode, setPortalNode] = useState<HTMLDivElement | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
 
@@ -62,11 +65,11 @@ export function AdminProfileSwitcher({
         avatarType: user.avatar_thumbnail ? "image" : initials ? "initials" : "icon",
         srcPath: user.avatar_thumbnail || initials || "agora-line-user",
       },
-      ...(user.organizations ?? []).map(
+      ...organizations.map(
         (org): ProfileOption => ({
           profile: { type: "organization", orgId: org.id },
           label: org.name,
-          href: "/admin/org/datasets",
+          href: `/admin/org/${org.id}/datasets`,
           avatarType: org.logo_thumbnail ? "image" : "icon",
           srcPath: org.logo_thumbnail || "agora-line-briefcase",
         })
@@ -82,7 +85,7 @@ export function AdminProfileSwitcher({
       });
     }
     return list;
-  }, [user, isAdmin, initials, t]);
+  }, [user, isAdmin, initials, t, organizations]);
 
   useEffect(() => {
     const drawerHeader = headerRef.current?.querySelector(".agora-drawer .authenticated-header");
@@ -92,9 +95,7 @@ export function AdminProfileSwitcher({
     container.className = "admin-profile-switcher";
     drawerHeader.insertAdjacentElement("afterend", container);
 
-    queueMicrotask(() => {
-      setPortalNode(container);
-    });
+    setPortalNode(container);
 
     return () => {
       container.remove();
@@ -108,6 +109,7 @@ export function AdminProfileSwitcher({
       ?.closest(".agora-dialog");
     if (!dialog) return;
 
+    // Agora Header does not expose a drawer-close callback.
     const observer = new MutationObserver(() => {
       if (dialog.classList.contains("closed")) setIsSwitching(false);
     });
@@ -116,10 +118,9 @@ export function AdminProfileSwitcher({
   }, [headerRef]);
 
   const selectProfile = (option: ProfileOption) => {
-    setActiveProfile(option.profile);
     setIsSwitching(false);
     headerHandleRef.current?.closeAll?.();
-    router.push(option.href);
+    router.push(localizeHref(option.href, locale));
   };
 
   if (!portalNode || options.length <= 1) return null;
@@ -141,7 +142,7 @@ export function AdminProfileSwitcher({
             {options.map((option) => {
               const isActive = isSameProfile(option.profile, activeProfile);
               return (
-                <li key={option.href + option.label}>
+                <li key={option.href}>
                   <button
                     type="button"
                     role="radio"

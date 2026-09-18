@@ -40,7 +40,7 @@ export function createOrganizationColumns({
       sortField: "name",
       sortType: "string",
       renderCell: (organization) => (
-        <TextLink href={`/admin/org/${organization.id}/profile`}>
+        <TextLink href={`/admin/org/${organization.id}/datasets`}>
           {organization.name}
         </TextLink>
       ),
@@ -86,4 +86,3 @@ export function createOrganizationColumns({
     }),
   ];
 }
-

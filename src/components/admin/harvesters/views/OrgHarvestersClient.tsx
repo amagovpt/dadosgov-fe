@@ -32,7 +32,7 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const params = useParams();
   const orgIdFromUrl = params?.orgId as string | undefined;
-  const { activeOrg, isLoading: isOrgLoading, selectOrganization } = useActiveOrganization();
+  const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const orgId = orgIdFromUrl || activeOrg?.id;
   const { user } = useAuth();
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
@@ -56,12 +56,6 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
     initialFilters: { statusFilter: "" },
   });
   const usesLocalFallback = Boolean(filters.statusFilter) || Boolean(sortField);
-
-  useEffect(() => {
-    if (orgIdFromUrl && activeOrg?.id !== orgIdFromUrl) {
-      selectOrganization(orgIdFromUrl);
-    }
-  }, [orgIdFromUrl, activeOrg?.id, selectOrganization]);
 
   const loadHarvesters = useCallback(async () => {
     if (!orgId) {
