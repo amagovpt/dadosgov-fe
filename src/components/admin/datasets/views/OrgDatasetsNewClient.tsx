@@ -6,8 +6,6 @@ import { useTranslation } from "react-i18next";
 import { Button, CardAction, StatusCard } from "@ama-pt/agora-design-system";
 import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -27,8 +25,6 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
   const routeOrgId = routeParams?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
   const resolvedOrgId = routeOrgId || activeOrg?.id;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
@@ -46,8 +42,6 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         {
           label: t("admin-datasets:form.breadcrumbs.datasets"),
           url: resolvedOrgId ? `/admin/org/${resolvedOrgId}/datasets` : "#",

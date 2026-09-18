@@ -287,12 +287,11 @@ export default function HarvesterDetailClient({
 
   const breadcrumbItems = orgId
     ? [
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-harvesters:title"), url: `/admin/org/${orgId}/harvesters` },
         { label: source.name, url: "#" },
       ]
     : [
-        { label: t("admin-common:breadcrumbs.system"), url: "/admin/system/harvesters" },
+        { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
         { label: source.name, url: "#" },
       ];
 

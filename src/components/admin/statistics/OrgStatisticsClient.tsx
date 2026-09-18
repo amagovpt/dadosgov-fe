@@ -201,8 +201,6 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: org?.name || t("admin-statistics:tabs.organization"), url: "#" },
         { label: t("admin-statistics:breadcrumbs.organization"), url: "/admin/org/statistics" },
       ]}
       title={pageContent.orgHero?.title ?? ""}

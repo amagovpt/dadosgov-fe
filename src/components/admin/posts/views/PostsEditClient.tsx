@@ -338,7 +338,6 @@ export default function PostsEditClient({ pageContent }: PostsEditClientProps) {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-posts:new.breadcrumbsHome"), url: "/admin" },
         { label: t("admin-posts:title"), url: "/admin/system/posts" },
         { label: post.name },
       ]}

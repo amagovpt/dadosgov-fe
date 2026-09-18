@@ -8,9 +8,6 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
-import { buildOrganizationAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -35,8 +32,6 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
   const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const resolvedOrgId = routeOrgId ?? activeOrg?.id;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -146,11 +141,7 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
 
   return (
     <AdminListPage
-      breadcrumbItems={buildOrganizationAdminBreadcrumbItems({
-        t,
-        organizationLabel: orgName ?? undefined,
-        sectionLabel: t("admin-reuses:title"),
-      })}
+      breadcrumbItems={[{ label: t("admin-reuses:title") }]}
       title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={usesLocalSort ? reuses.length : totalItems}

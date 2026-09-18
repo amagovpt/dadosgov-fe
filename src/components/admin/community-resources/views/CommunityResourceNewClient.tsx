@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import CommunityResourceFormClient from "@/components/admin/community-resources/views/CommunityResourceFormClient";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
@@ -21,7 +20,6 @@ export default function CommunityResourceNewClient({
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { displayName } = useCurrentUser();
   const datasetId = searchParams.get("dataset_id") || "";
   const totalSteps = 2;
   const currentStep = Number(searchParams.get("step")) || 1;
@@ -32,8 +30,6 @@ export default function CommunityResourceNewClient({
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
         {
           label: t("admin-community-resources:title"),
           url: "/admin/me/community-resources",

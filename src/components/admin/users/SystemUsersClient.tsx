@@ -118,8 +118,6 @@ export default function SystemUsersClient({ pageContent }: SystemUsersClientProp
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-users:title"), url: "/admin/system/users" },
       ]}
       title={pageContent.systemHero?.title ?? ""}

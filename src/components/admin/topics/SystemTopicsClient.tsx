@@ -143,8 +143,6 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-topics:title"), url: "/admin/system/topics" },
       ]}
       title={pageContent.systemHero?.title ?? ""}
