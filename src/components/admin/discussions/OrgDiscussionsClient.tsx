@@ -11,8 +11,6 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
 import AdminEmptyState from "../AdminEmptyState";
 import {
@@ -37,9 +35,7 @@ interface OrgDiscussionsClientProps {
 
 export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussionsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-discussions"]);
-  const { user } = useAuth();
   const { show } = usePopupContext();
-  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,8 +120,6 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-discussions:title") },
       ]}
       title={pageContent.orgHero?.title ?? ""}

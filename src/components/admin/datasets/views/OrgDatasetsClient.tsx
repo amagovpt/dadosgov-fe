@@ -8,8 +8,6 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { Dataset } from "@/service/types/dataset";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -36,8 +34,6 @@ interface OrgDatasetsClientProps {
 
 export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,8 +161,6 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-datasets:list.title"), url: "#" },
       ]}
       title={t("admin-datasets:list.title")}

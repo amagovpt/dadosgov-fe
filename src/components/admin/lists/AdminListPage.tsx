@@ -84,7 +84,7 @@ export default function AdminListPage({
       {listTitle && (
         <h2 className="text-xl-bold text-brand-blue-secondary mb-32">{listTitle}</h2>
       )}
-      {resultsCount ?? <ResultsCount count={count} isLoading={isInitialLoading} />}
+      {/* {resultsCount ?? <ResultsCount count={count} isLoading={isInitialLoading} />} */}
 
       {shouldRenderToolbar && (
         <div className="flex flex-col gap-32">

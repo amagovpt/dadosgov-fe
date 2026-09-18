@@ -224,8 +224,6 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
       ]}
       title={t("admin-harvesters:title")}

@@ -385,8 +385,6 @@ export default function CommunityResourceEditClient({
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         {
           label: t("admin-community-resources:title"),
           url: "/admin/system/community-resources",

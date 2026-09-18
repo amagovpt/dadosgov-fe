@@ -98,8 +98,6 @@ export default function DiscussionsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: activeOrg?.name || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-discussions:title"), url: "/admin/org/discussions" },
       ]}
       title={t("admin-discussions:title")}

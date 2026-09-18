@@ -122,8 +122,6 @@ export default function SystemCommunityResourcesClient({
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         {
           label: t("admin-community-resources:title"),
           url: "/admin/system/community-resources",

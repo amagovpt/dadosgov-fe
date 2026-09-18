@@ -195,7 +195,6 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
         {
           label: pageTitle,
