@@ -91,6 +91,18 @@ describe("the login screen explains a refused SAML sign-in", () => {
 
     expect(text).toContain(ptLogin.samlErrors.invite_identity_already_linked);
     expect(ptLogin.samlErrors.invite_identity_already_linked).toContain("ficou como estava");
+    // And that they are not stuck: somebody who has just been refused wants to
+    // know whether they broke something before anything else.
+    expect(ptLogin.samlErrors.invite_identity_already_linked).toContain(
+      "pode continuar a usá-la"
+    );
+
+    // 🚩 NO IDENTITIES, masked or otherwise. This text is rendered from a code
+    // carried in the query string, which lands in browser history, in Referer
+    // headers sent to whatever site the person visits next, and in proxy logs.
+    // The rule is written next to _reject_saml_login; this is what keeps it
+    // true on the screen that reads it.
+    expect(text).not.toMatch(/@[a-z]/i);
   });
 
   it("says something for a code it does not know", () => {
