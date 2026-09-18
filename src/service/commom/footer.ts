@@ -27,7 +27,13 @@ export async function getFooter(locale: string = "pt"): Promise<Footer> {
                 }
                 logos {
                     ${locale} {
-                        icon
+                        image {
+                            url
+                            fileName
+                            id
+                            slug
+                        }
+                        href
                         alt
                     }
                 }
