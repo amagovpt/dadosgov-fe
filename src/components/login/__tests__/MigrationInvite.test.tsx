@@ -128,6 +128,14 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(container.textContent).toBe("");
   });
 
+  it("says up front that linking only works on an identity nobody else holds", () => {
+    // The condition that most invites misreading. Somebody whose CMD already
+    // belongs to another account is refused at the END of the round-trip --
+    // saying it here saves the trip, and saves them believing it worked.
+    renderInvite();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.onlyIfFree);
+  });
+
   it("renders nothing on the pages that ARE the linking flow", () => {
     // Found on screen, not by a test: the notice is mounted in the public
     // layout, and /migrate-account is a public page -- so somebody halfway

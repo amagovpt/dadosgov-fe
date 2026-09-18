@@ -126,6 +126,14 @@ export function MigrationInvite() {
           <Typograph tag="p" className="text-sm text-neutral-700">
             {t("migrationInvite.confirmStep")}
           </Typograph>
+          {/* The condition that most invites misreading, said where it is
+              read: linking stamps an identity onto an account that has none.
+              Somebody whose CMD already belongs to another account is refused
+              at the END of the round-trip, and saying it here saves the trip
+              -- and saves them believing it worked. */}
+          <Typograph tag="p" className="text-sm text-neutral-700">
+            {t("migrationInvite.onlyIfFree")}
+          </Typograph>
         </div>
         <button
           type="button"
