@@ -79,7 +79,7 @@ export default async function ArticleListPage({
           </div>
         </Hero.Actions>
       </Hero.Root>
-      <div className="container flex flex-col items-center justify-center gap-32 py-32">
+      <div className="container flex flex-col items-center justify-center gap-32 pt-32 pb-64">
         <div className="flex w-full flex-col items-center justify-end">
           <div className="flex w-full items-end gap-16">
             <ResultsCount
@@ -107,7 +107,7 @@ export default async function ArticleListPage({
             </div>
           )}
         </div>
-        <div className="flex justify-center">
+        <div className="w-1/2">
           <Pagination
             currentPage={currentPage}
             totalItems={total}

@@ -20,7 +20,10 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { fetchOrgDataservices } from "@/service/api/dataservices";
-import { fetchOrgDatasets, fetchOrgMetrics, fetchOrgReuses, fetchOrganization } from "@/service/api/organizations";
+import { fetchAdminDatasets } from "@/service/api/datasets";
+import { fetchReuses } from "@/service/api/reuses";
+import { fetchOrgMetrics, fetchOrganization } from "@/service/api/organizations";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
 import type { Organization, OrganizationMetrics } from "@/service/types/identity";
@@ -53,6 +56,7 @@ function getSummaryCardLabel(card: AdminCard, value?: SummaryCardValue) {
 export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatisticsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-statistics"]);
   const orgCards = pageContent.orgSummaryCards ?? [];
+  const [activeTab, setActiveTab] = useState(0);
   const [org, setOrg] = useState<Organization | null>(null);
   const [metrics, setMetrics] = useState<OrganizationMetrics | null>(null);
   const [isOrgLoading, setIsOrgLoading] = useState(true);
@@ -62,17 +66,21 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
   const [datasetsPage, setDatasetsPage] = useState(1);
   const [datasetsPageSize, setDatasetsPageSize] = useState(PAGE_SIZE);
   const [isDatasetsLoading, setIsDatasetsLoading] = useState(true);
+  const [datasetsSearch, setDatasetsSearch] = useState("");
 
   const [dataservices, setDataservices] = useState<Dataservice[]>([]);
   const [dataservicesTotal, setDataservicesTotal] = useState(0);
   const [dataservicesPage, setDataservicesPage] = useState(1);
   const [dataservicesPageSize, setDataservicesPageSize] = useState(PAGE_SIZE);
   const [isDataservicesLoading, setIsDataservicesLoading] = useState(true);
+  const [dataservicesSearch, setDataservicesSearch] = useState("");
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
+  const [reusesTotal, setReusesTotal] = useState(0);
   const [reusesPage, setReusesPage] = useState(1);
   const [reusesPageSize, setReusesPageSize] = useState(PAGE_SIZE);
   const [isReusesLoading, setIsReusesLoading] = useState(true);
+  const [reusesSearch, setReusesSearch] = useState("");
 
   useEffect(() => {
     async function loadOrgData() {
@@ -97,7 +105,14 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
     async function loadDatasets() {
       setIsDatasetsLoading(true);
       try {
-        const res = await fetchOrgDatasets(orgId, datasetsPage, datasetsPageSize);
+        const res = await fetchAdminDatasets(
+          datasetsPage,
+          datasetsPageSize,
+          {
+            organization: orgId,
+            q: datasetsSearch.trim() || undefined,
+          },
+        );
         setDatasets(res.data);
         setDatasetsTotal(res.total);
       } catch (error) {
@@ -107,13 +122,15 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
       }
     }
     loadDatasets();
-  }, [orgId, datasetsPage, datasetsPageSize]);
+  }, [orgId, datasetsPage, datasetsPageSize, datasetsSearch]);
 
   useEffect(() => {
     async function loadDataservices() {
       setIsDataservicesLoading(true);
       try {
-        const res = await fetchOrgDataservices(orgId, dataservicesPage, dataservicesPageSize);
+        const res = await fetchOrgDataservices(orgId, dataservicesPage, dataservicesPageSize, {
+          q: dataservicesSearch.trim() || undefined,
+        });
         setDataservices(res.data);
         setDataservicesTotal(res.total);
       } catch (error) {
@@ -123,14 +140,22 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
       }
     }
     loadDataservices();
-  }, [orgId, dataservicesPage, dataservicesPageSize]);
+  }, [orgId, dataservicesPage, dataservicesPageSize, dataservicesSearch]);
 
   useEffect(() => {
     async function loadReuses() {
       setIsReusesLoading(true);
       try {
-        const data = await fetchOrgReuses(orgId);
-        setReuses(data);
+        const response = await fetchReuses(
+          reusesPage,
+          reusesPageSize,
+          {
+            organization: orgId,
+            q: reusesSearch.trim() || undefined,
+          },
+        );
+        setReuses(response.data);
+        setReusesTotal(response.total);
       } catch (error) {
         console.error("Error loading org reuses:", error);
       } finally {
@@ -138,16 +163,25 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
       }
     }
     loadReuses();
-  }, [orgId]);
+  }, [orgId, reusesPage, reusesPageSize, reusesSearch]);
 
-  const reusesPagedData = reuses.slice(
-    (reusesPage - 1) * reusesPageSize,
-    reusesPage * reusesPageSize
-  );
+  const handleDatasetsSearch = useDebouncedSearch((value: string) => {
+    setDatasetsSearch(value);
+    setDatasetsPage(1);
+  });
+  const handleDataservicesSearch = useDebouncedSearch((value: string) => {
+    setDataservicesSearch(value);
+    setDataservicesPage(1);
+  });
+  const handleReusesSearch = useDebouncedSearch((value: string) => {
+    setReusesSearch(value);
+    setReusesPage(1);
+  });
+
   const orgSummaryCardValues = [
     { isLoading: isDatasetsLoading, value: datasetsTotal },
     { isLoading: isDataservicesLoading, value: dataservicesTotal },
-    { isLoading: isReusesLoading, value: reuses.length },
+    { isLoading: isReusesLoading, value: reusesTotal },
     { value: metrics?.views ?? 0 },
     { value: metrics?.resource_downloads ?? 0 },
     { value: metrics?.dataservice_views ?? 0 },
@@ -173,8 +207,8 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
       ]}
       title={pageContent.orgHero?.title ?? ""}
     >
-      <Tabs>
-        <Tab active>
+      <Tabs onTabActivation={setActiveTab}>
+        <Tab active={activeTab === 0}>
           <TabHeader>{t("admin-statistics:tabs.organization")}</TabHeader>
           <TabBody>
             <div className="mt-48">
@@ -202,17 +236,22 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
           </TabBody>
         </Tab>
 
-        <Tab>
+        <Tab active={activeTab === 1}>
           <TabHeader>{t("admin-statistics:tabs.datasets")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: datasetsTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={pageContent.datasetsSearch?.label ?? ""}
                     placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
                     aria-label={pageContent.datasetsSearch?.label ?? ""}
+                    onChange={(event) => handleDatasetsSearch(event.target.value)}
                   />
                 </div>
                 <Button
@@ -235,7 +274,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                 </Button>
               </div>
 
-              {isDatasetsLoading ? (
+              {isDatasetsLoading && datasets.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : datasets.length === 0 ? (
                 <CardNoResults
@@ -272,17 +311,22 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
           </TabBody>
         </Tab>
 
-        <Tab>
+        <Tab active={activeTab === 2}>
           <TabHeader>{t("admin-statistics:tabs.dataservices")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: dataservicesTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={pageContent.dataservicesSearch?.label ?? ""}
                     placeholder={pageContent.dataservicesSearch?.placeholder ?? ""}
                     aria-label={pageContent.dataservicesSearch?.label ?? ""}
+                    onChange={(event) => handleDataservicesSearch(event.target.value)}
                   />
                 </div>
                 <Button
@@ -296,7 +340,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                 </Button>
               </div>
 
-              {isDataservicesLoading ? (
+              {isDataservicesLoading && dataservices.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : dataservices.length === 0 ? (
                 <CardNoResults
@@ -374,22 +418,27 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
           </TabBody>
         </Tab>
 
-        <Tab>
+        <Tab active={activeTab === 3}>
           <TabHeader>{t("admin-statistics:tabs.reuses")}</TabHeader>
           <TabBody>
             <div className="mt-24">
+              <p className="text-sm mb-16 text-neutral-700">
+                {t("admin-statistics:states.results", { count: reusesTotal })}
+              </p>
+
               <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={pageContent.reusesSearch?.label ?? ""}
                     placeholder={pageContent.reusesSearch?.placeholder ?? ""}
                     aria-label={pageContent.reusesSearch?.label ?? ""}
+                    onChange={(event) => handleReusesSearch(event.target.value)}
                   />
                 </div>
               </div>
 
-              {isReusesLoading ? (
+              {isReusesLoading && reuses.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : reuses.length === 0 ? (
                 <CardNoResults
@@ -414,8 +463,8 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                 />
               ) : (
                 <ReuseMetricsTable
-                  reuses={reusesPagedData}
-                  total={reuses.length}
+                  reuses={reuses}
+                  total={reusesTotal}
                   page={reusesPage}
                   onPageChange={setReusesPage}
                   pageSize={reusesPageSize}

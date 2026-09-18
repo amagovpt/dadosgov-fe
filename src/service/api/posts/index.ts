@@ -127,15 +127,17 @@ export async function updatePost(
 export async function fetchAdminPosts(
   page: number = 1,
   pageSize: number = 100,
-  sort: string = "-created_at"
+  filters?: { q?: string; kind?: string; sort?: string },
 ): Promise<APIResponse<Post>> {
   try {
     const params = new URLSearchParams({
       page: String(page),
       page_size: String(pageSize),
-      sort,
       with_drafts: "true",
     });
+    if (filters?.q) params.set("q", filters.q);
+    if (filters?.kind) params.set("kind", filters.kind);
+    if (filters?.sort) params.set("sort", filters.sort);
     const res = await fetch(`${API_AUTH_URL}/posts/?${params.toString()}`, {
       credentials: "include",
       cache: "no-store",

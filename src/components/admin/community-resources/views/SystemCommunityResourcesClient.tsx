@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAllCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
@@ -35,6 +35,12 @@ export default function SystemCommunityResourcesClient({
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<CommunityResourceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const [totalItems, setTotalItems] = useState(0);
+  const usesLocalFallback = sortField === "status" || sortField === "created_at" || sortField === "last_modified";
+  const sortParam = useMemo(
+    () => buildApiSortParam(sortField, sortOrder, { title: "title", status: null, format: "format", created_at: null, last_modified: null }),
+    [sortField, sortOrder],
+  );
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -49,8 +55,8 @@ export default function SystemCommunityResourcesClient({
     [resources, sortField, sortOrder]
   );
   const paginatedResources = useMemo(
-    () => paginateItems(sortedResources, currentPage, pageSize),
-    [sortedResources, currentPage, pageSize]
+    () => (usesLocalFallback ? paginateItems(sortedResources, currentPage, pageSize) : sortedResources),
+    [usesLocalFallback, sortedResources, currentPage, pageSize]
   );
   const columns = useMemo(
     () =>
@@ -77,34 +83,37 @@ export default function SystemCommunityResourcesClient({
     [t]
   );
 
-  useEffect(() => {
+  const loadResources = useCallback(async () => {
     if (resourceId) {
       return;
     }
+    setIsLoading(true);
+    try {
+      const response = await fetchAllCommunityResources(
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? 9999 : pageSize,
+        { sort: sortParam },
+      );
+      setResources(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading community resources:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, pageSize, resourceId, sortParam, usesLocalFallback]);
 
-    let isActive = true;
-
-    const run = async () => {
-      try {
-        const response = await fetchAllCommunityResources(1, 9999);
-        if (!isActive) return;
-        setResources(response.data || []);
-      } catch (error) {
-        if (!isActive) return;
-        console.error("Error loading community resources:", error);
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
+  useEffect(() => {
+    let isCancelled = false;
+    const loadCurrentResources = async () => {
+      if (isCancelled) return;
+      await loadResources();
     };
-
-    void run();
-
+    void loadCurrentResources();
     return () => {
-      isActive = false;
+      isCancelled = true;
     };
-  }, [resourceId]);
+  }, [loadResources]);
 
   if (resourceId) {
     return <CommunityResourceEditClient pageContent={pageContent} />;
@@ -122,7 +131,8 @@ export default function SystemCommunityResourcesClient({
       ]}
       title={t("admin-community-resources:title")}
       isLoading={isLoading}
-      count={resources.length}
+      count={usesLocalFallback ? resources.length : totalItems}
+      hasItems={paginatedResources.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -139,4 +149,3 @@ export default function SystemCommunityResourcesClient({
     </AdminListPage>
   );
 }
-

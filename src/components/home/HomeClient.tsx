@@ -137,7 +137,7 @@ export default function HomeClient({
             <div className="container">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-24">
                 {/* Reutilizações */}
-                <div className="flex items-center gap-16">
+                <div className="flex items-center gap-16" data-testid="home-stat">
                   <div className="px-24 py-24 rounded-8 border-2 border-focus text-focus">
                     <svg
                       width="24"
@@ -169,7 +169,7 @@ export default function HomeClient({
                   </div>
                 </div>
                 {/* Utilizadores */}
-                <div className="flex items-center gap-16">
+                <div className="flex items-center gap-16" data-testid="home-stat">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#FFD700] text-[#FFD700]">
                     <AppIcon
                       name="agora-line-user-group"
@@ -192,7 +192,7 @@ export default function HomeClient({
                   </div>
                 </div>
                 {/* Conjuntos de dados */}
-                <div className="flex items-center gap-16">
+                <div className="flex items-center gap-16" data-testid="home-stat">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#A6D5FF] text-[#A6D5FF]">
                     <AppIcon
                       name="agora-line-layers-menu"
@@ -215,7 +215,7 @@ export default function HomeClient({
                   </div>
                 </div>
                 {/* Organizações */}
-                <div className="flex items-center gap-16">
+                <div className="flex items-center gap-16" data-testid="home-stat">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#CBFF3F] !text-[#CBFF3F]">
                     <AppIcon
                       name="agora-line-buildings"

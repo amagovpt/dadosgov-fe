@@ -36,7 +36,7 @@ export function StatusFilterSelect({
   const [isVertical, setIsVertical] = useState(false);
 
   useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
+    const mql = window.matchMedia("(max-width: 1028px)");
     const update = () => setIsVertical(mql.matches);
     update();
     mql.addEventListener("change", update);
@@ -55,6 +55,9 @@ export function StatusFilterSelect({
   return (
     <div className="flex w-full overflow-auto py-2">
       <ToggleGroup
+        // The design system seeds its orientation state from the prop on mount and never
+        // syncs it again, so the group has to be remounted for a breakpoint change to apply.
+        key={isVertical ? "vertical" : "horizontal"}
         id={id}
         className={className}
         variant="primary"

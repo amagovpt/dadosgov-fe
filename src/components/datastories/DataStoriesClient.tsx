@@ -78,7 +78,7 @@ export default function DataStoriesClient({
         examplesText={pageContent.search.hint}
       />
       {/* Main Content */}
-      <div className="container flex flex-col items-center justify-center gap-24 py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-64">
         {/* Results count + Sort toggles */}
         <div className="flex w-full flex-col gap-16 xl:flex-row">
           <div className="flex w-full flex-row items-end gap-32">
@@ -144,11 +144,11 @@ export default function DataStoriesClient({
                         }}
                         category={story.organizationName}
                         title={<div className="text-xl-bold underline">{story.title}</div>}
-                        description={
+                        /*description={
                           <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                             {formatHtmlParagraphs(story.description)}
                           </p>
-                        }
+                        }*/
                         date={
                           <span className="font-[300]">
                             {t("publishedTimeAgo", { timeAgo: timeAgo })}
@@ -176,16 +176,16 @@ export default function DataStoriesClient({
               )}
             </div>
 
-            {/* Pagination */}
-            <div className="mt-8 flex justify-center pb-64">
-              <Pagination
-                currentPage={activePage}
-                totalItems={total}
-                pageSize={DATA_STORIES_PAGE_SIZE}
-                baseUrl={buildUrl()}
-              />
-            </div>
           </div>
+        </div>
+        {/* Pagination */}
+        <div className="w-1/2 mt-8">
+          <Pagination
+            currentPage={activePage}
+            totalItems={total}
+            pageSize={DATA_STORIES_PAGE_SIZE}
+            baseUrl={buildUrl()}
+          />
         </div>
       </div>
     </main>
