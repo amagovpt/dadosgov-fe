@@ -106,3 +106,21 @@ export async function resendMigrationConfirmation(): Promise<{
   }
   return await res.json();
 }
+
+
+// Records that this account is not linking right now (LEDG-2517).
+//
+// Takes no argument and sends no body: the account is read from the session on
+// the backend, never named by the caller, so a session can only ever dismiss
+// its own invite.
+//
+// Answers 200 whether or not an invite was actually being offered, so a double
+// click is not an error the caller has to explain.
+export async function dismissMigrationInvite(): Promise<{ dismissed: boolean }> {
+  const res = await fetch("/saml/migration/invite/dismiss", {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to dismiss the linking invite");
+  return await res.json();
+}

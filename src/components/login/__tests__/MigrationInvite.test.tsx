@@ -1,0 +1,195 @@
+/**
+ * LEDG-2517: the optional invitation to link a CMD/eIDAS identity.
+ *
+ * What these tests pin is the "optional" part, because that is what the notice
+ * promises and what is easiest to break: it shows only when the BACKEND says
+ * so, it can be dismissed, dismissing does not sign anybody out, and the copy
+ * says the three things the person needs before clicking -- one account per
+ * person, that linking costs the current session, and that somebody who
+ * already has two accounts can only move datasets today.
+ *
+ * The invariant that the decision is not derived here is guarded separately,
+ * by reading source (migration-flag-guard.test.ts): nothing observable in a
+ * rendered page distinguishes "the backend told us" from "we guessed".
+ */
+
+import React, { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import ptLogin from "@/locales/pt/login.json";
+
+const translate = (key: string): string => {
+  const raw = key
+    .split(".")
+    .reduce<unknown>(
+      (node, part) =>
+        node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined,
+      ptLogin
+    );
+  return typeof raw === "string" ? raw : key;
+};
+
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: translate }),
+}));
+
+const useAuth = vi.fn();
+vi.mock("@/context/AuthContext", () => ({
+  useAuth: () => useAuth(),
+}));
+
+const dismissMigrationInvite = vi.fn();
+vi.mock("@/service/api/migration", () => ({
+  dismissMigrationInvite: () => dismissMigrationInvite(),
+}));
+
+const submitSamlForm = vi.fn();
+vi.mock("../loginUtils", () => ({
+  submitSamlForm: (endpoint: string) => submitSamlForm(endpoint),
+}));
+
+import { MigrationInvite } from "../MigrationInvite";
+
+let container: HTMLDivElement;
+let root: Root;
+
+function findButton(label: string) {
+  return Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === label
+  );
+}
+
+function renderInvite() {
+  act(() => {
+    root.render(React.createElement(MigrationInvite));
+  });
+}
+
+// detail: 1 is load-bearing -- the design-system Button ignores clicks with no
+// click count, so a plain .click() renders these tests green against a button
+// that was never pressed.
+async function clickButton(label: string) {
+  const button = findButton(label);
+  expect(button, `button not found: ${label}`).toBeDefined();
+  await act(async () => {
+    button!.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+  });
+}
+
+describe("the optional CMD/eIDAS linking invite", () => {
+  beforeEach(() => {
+    // jsdom has no matchMedia, and the design-system Button reads it on click.
+    if (!window.matchMedia) {
+      Object.defineProperty(window, "matchMedia", {
+        writable: true,
+        value: (query: string) => ({
+          matches: false,
+          media: query,
+          onchange: null,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          addListener: () => {},
+          removeListener: () => {},
+          dispatchEvent: () => false,
+        }),
+      });
+    }
+
+    useAuth.mockReturnValue({ migrationInvite: true, refresh: vi.fn() });
+    dismissMigrationInvite.mockResolvedValue({ dismissed: true });
+    submitSamlForm.mockResolvedValue(null);
+    process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    vi.clearAllMocks();
+  });
+
+  it("renders nothing when the backend is not inviting this account", () => {
+    useAuth.mockReturnValue({ migrationInvite: false, refresh: vi.fn() });
+    renderInvite();
+    expect(container.textContent).toBe("");
+  });
+
+  it("says that the portal allows one account per person", () => {
+    renderInvite();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.oneAccount);
+  });
+
+  it("says the invite is optional FOR NOW, not optional forever", () => {
+    // "É facultativo" read alone promises it stays that way, and it does not:
+    // LEDG-1277 makes authentication mandatory. Saying so before the person
+    // decides beats letting them feel misled when it changes.
+    renderInvite();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.optional);
+    expect(ptLogin.migrationInvite.optional).toContain("Por agora");
+  });
+
+  it("says that the linked account stays the same account", () => {
+    // The invite is worthless if it reads as "start again elsewhere". What it
+    // offers is one account reachable two ways.
+    renderInvite();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.result);
+  });
+
+  it("warns that linking costs the current session, before the click", () => {
+    // The ACS issues a fresh session cookie, so the person is signed out until
+    // they finish. Discovering that mid-flow reads as a bug.
+    renderInvite();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.sessionWarning);
+  });
+
+  it("tells somebody who already has two accounts what they can and cannot do", () => {
+    // Linking does not merge. Today only datasets can be moved -- reuses have
+    // the logic and no button, APIs have nothing (LEDG-2520) -- so the notice
+    // says so instead of leaving them hunting for it.
+    renderInvite();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.alreadyTwoDescription);
+    expect(container.textContent).toContain(ptLogin.migrationInvite.alreadyTwoLimitation);
+  });
+
+  it("starts the CMD link through the route that accepts an authenticated caller", async () => {
+    // NOT /saml/login: that one is @anonymous_user_required, and the person
+    // reading this notice signed in with a password minutes ago.
+    renderInvite();
+    await clickButton(ptLogin.migrationInvite.linkCmd);
+    expect(submitSamlForm).toHaveBeenCalledWith("/saml/link/start");
+  });
+
+  it("starts the eIDAS link through its own authenticated route", async () => {
+    renderInvite();
+    await clickButton(ptLogin.migrationInvite.linkEidas);
+    expect(submitSamlForm).toHaveBeenCalledWith("/saml/eidas/link/start");
+  });
+
+  it("can be dismissed, and tells the backend so", async () => {
+    renderInvite();
+    await clickButton(ptLogin.migrationInvite.dismiss);
+    expect(dismissMigrationInvite).toHaveBeenCalled();
+    expect(container.textContent).toBe("");
+  });
+
+  it("stays dismissed even when the backend write fails", async () => {
+    // Nothing the person can do about it, and nothing was lost: the worst case
+    // is that the notice returns on the next load, which it would have anyway.
+    dismissMigrationInvite.mockRejectedValue(new Error("offline"));
+    renderInvite();
+    await clickButton(ptLogin.migrationInvite.dismiss);
+    expect(container.textContent).toBe("");
+  });
+
+  it("disables the linking buttons when SAML is not wired up", () => {
+    // The one piece of configuration this tree may read: whether SAML exists
+    // at all. Never whether an ACCOUNT should link.
+    process.env.NEXT_PUBLIC_SAML_ENABLED = "false";
+    renderInvite();
+    expect(findButton(ptLogin.migrationInvite.linkCmd)?.disabled).toBe(true);
+    expect(findButton(ptLogin.migrationInvite.linkEidas)?.disabled).toBe(true);
+  });
+});

@@ -218,5 +218,21 @@
     "errorTitle": "Invalid or expired link",
     "errorDescription": "This link could not confirm your email. Sign in with your Chave Móvel Digital again to get a new one.",
     "close": "Close"
+  },
+  "migrationInvite": {
+    "title": "Link your account to the Digital Mobile Key or European Authentication",
+    "oneAccount": "On dados.gov each person may only have one account.",
+    "result": "Once linked, you keep the same account — your email, your datasets and your organisations — and you can sign in either with your password or with your digital identity.",
+    "optional": "For now this is optional: you can close this notice and carry on using the portal. Later on, linking will become necessary to sign in to your account.",
+    "sessionWarning": "Linking signs you out while you confirm it. You sign back in normally afterwards.",
+    "alreadyTwoTitle": "Already have two accounts on the portal?",
+    "alreadyTwoDescription": "If you already sign in with the Digital Mobile Key using another account, this notice does not merge them. Sign in to the secondary account and use Transfer on each dataset to move it to the account you want to keep — the receiving account must accept, and the transfer cannot be undone.",
+    "alreadyTwoLimitation": "For now only datasets can be transferred. For reuses and APIs, please contact us.",
+    "alreadyTwoLink": "Help and contacts",
+    "linkCmd": "Link to the Digital Mobile Key",
+    "linkEidas": "Link to European Authentication",
+    "dismiss": "Not now",
+    "close": "Close notice",
+    "error": "The linking flow could not be started. Please try again later."
   }
 }
