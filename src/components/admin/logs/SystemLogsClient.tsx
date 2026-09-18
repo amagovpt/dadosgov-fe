@@ -216,7 +216,7 @@ export default function SystemLogsClient({ pageContent }: SystemLogsClientProps)
       ) : (
         <>
           <div className="flex flex-wrap items-end gap-16 mb-16">
-            <div className="admin-search-wrapper">
+            <div className="admin-search-wrapper xl:w-1/2 w-full">
               <InputSelect
                 id="log-file-select"
                 label={t("admin-logs:select.label")}

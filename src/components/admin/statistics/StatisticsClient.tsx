@@ -196,7 +196,7 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
               </p>
 
               <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={pageContent.datasetsSearch?.label ?? ""}

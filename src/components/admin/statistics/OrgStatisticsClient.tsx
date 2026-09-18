@@ -245,7 +245,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
               </p>
 
               <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={pageContent.datasetsSearch?.label ?? ""}
@@ -320,7 +320,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
               </p>
 
               <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={pageContent.dataservicesSearch?.label ?? ""}
@@ -427,7 +427,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
               </p>
 
               <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={pageContent.reusesSearch?.label ?? ""}

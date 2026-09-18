@@ -92,7 +92,7 @@ export default function AdminListPage({
           {(search || toolbarActions) && (
             <div className="flex items-end gap-16">
               {search && (
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={search.label}

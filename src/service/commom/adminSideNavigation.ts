@@ -16,6 +16,7 @@ export async function getAdminSideNavigation(
                     label
                     href
                     icon
+                    logo
                     enabled
                     }
                 }
@@ -42,6 +43,7 @@ export async function getAdminSideNavigation(
                     label
                     href
                     icon
+                    logo
                     enabled
                     }
                 }

@@ -31,7 +31,7 @@ test.describe("Homepage", () => {
     await expect(heroHeading).toBeVisible({ timeout: 10000 });
 
     // Stats section
-    const stats = page.locator(".stats-icon-square").first();
+    const stats = page.getByTestId("home-stat").first();
     await expect(stats).toBeVisible({ timeout: 10000 });
 
     // Featured datasets section
@@ -96,7 +96,7 @@ test.describe("Homepage", () => {
       await expect(element).toBeVisible({ timeout: 10000 });
     }
 
-    const statsIcons = page.locator(".stats-icon-square");
+    const statsIcons = page.getByTestId("home-stat");
     await expect(statsIcons.first()).toBeVisible({ timeout: 10000 });
     const count = await statsIcons.count();
     expect(count).toBeGreaterThanOrEqual(4);
