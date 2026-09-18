@@ -113,17 +113,17 @@
   `tailwind.config.ts`, which Tailwind v4 ignores.
 */
 /* prettier-ignore */
-@source inline("min-[320px]:!h-[{45,164,168,285,315,340,348,350,353,365,369,372,374,380,390,400,409,415,451}px]");
+@source inline("min-[320px]:!h-[{45,158,164,168,285,315,340,348,350,353,365,369,372,374,380,390,400,409,415,451}px]");
 /* prettier-ignore */
-@source inline("min-[375px]:!h-[{45,163,167,285,295,300,310,320,330,333,340,347,355,359,360,362,363,364,366,390,400,401,405,441}px]");
+@source inline("min-[375px]:!h-[{45,156,163,167,285,295,300,310,320,330,333,340,347,355,359,360,362,363,364,366,380,383,390,400,401,405,410,441}px]");
 /* prettier-ignore */
-@source inline("min-[425px]:!h-[{52,171,176,310,332,340,342,355,367,376,380,384,395,396,397,401,403,405,410,440,446,450,494}px]");
+@source inline("min-[425px]:!h-[{52,165,171,176,310,332,340,342,355,367,376,380,384,395,396,397,401,403,405,410,425,440,446,450,455,494}px]");
 /* prettier-ignore */
-@source inline("min-[768px]:!h-[{92,220,229,470,500,505,510,515,530,560,575,591,600,610,611,620,622,627,630,645,700,702,710,784}px]");
+@source inline("min-[768px]:!h-[{92,218,220,229,470,500,505,510,515,530,560,575,591,600,610,611,620,622,627,630,645,655,665,700,702,710,784}px]");
 /* prettier-ignore */
-@source inline("min-[1024px]:!h-[{128,264,277,610,660,662,670,680,690,740,758,781,800,809,810,815,820,824,825,833,860,935,940,950,1049}px]");
+@source inline("min-[1024px]:!h-[{128,264,266,277,610,660,662,670,680,690,740,758,781,800,809,810,815,820,824,825,833,860,875,880,935,940,950,1049}px]");
 /* prettier-ignore */
-@source inline("min-[1440px]:!h-[{174,320,337,800,860,870,890,900,960,986,1016,1050,1055,1060,1070,1072,1075,1080,1086,1130,1226,1250,1382}px]");
+@source inline("min-[1440px]:!h-[{174,320,326,337,800,860,870,890,900,960,986,1016,1050,1055,1060,1070,1072,1075,1080,1086,1130,1150,1226,1250,1382}px]");
 
 /* Full icon state control for header cards.
    Plain CSS, not `@layer utilities`: in v4 that directive builds a real cascade
@@ -1283,15 +1283,21 @@ li.section-name:empty {
   fill: var(--color-primary-500);
 }
 
-.admin-header .authenticated-body .custom-header-link-wrapper .children-wrapper {
+/* Agora hardcodes a chevron; the header content supplies the close icon. */
+.profile-menu-header .authenticated-header .close > .icon-wrapper.trailing {
+  display: none;
+}
+
+.profile-menu-header .authenticated-body .custom-header-link-wrapper .children-wrapper {
   color: var(--color-neutral-900);
 }
 
-.admin-header .authenticated-body .custom-header-link-wrapper svg {
-  fill: var(--color-neutral-900) !important;
+.profile-menu-header .authenticated-body .custom-header-link-wrapper svg,
+.profile-menu-header .authenticated-footer .footer-action svg {
+  fill: var(--color-primary-600) !important;
 }
 
-.admin-header .admin-profile-switcher:has(> [data-open="true"]) ~ .authenticated-body {
+.profile-menu-header .admin-profile-switcher:has(> [data-open="true"]) ~ .authenticated-body {
   display: none;
 }
 

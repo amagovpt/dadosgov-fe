@@ -111,8 +111,6 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-reuses:title"), url: "/admin/system/reuses" },
       ]}
       title={t("admin-reuses:title")}

@@ -177,8 +177,6 @@ export default function SystemOrganizationsClient({ pageContent }: SystemOrganiz
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-organizations:title"), url: "/admin/system/organizations" },
       ]}
       title={t("admin-organizations:title")}

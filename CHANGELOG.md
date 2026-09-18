@@ -6,6 +6,52 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the CMD/eIDAS linking invite was unreachable, and mismatched on hydration**
+  - **The buttons answered 404 instead of starting the flow.** `next.config.ts` lists the
+    SAML rewrites one by one with no catch-all, so a backend route not named there is
+    answered by Next.js with its own 404 and never reaches Flask. The two routes that
+    start a link from an account that is already signed in were missing, so both buttons
+    were dead on the first click. A guard now reads both lists and fails on any `/saml/…`
+    path the app calls that no rewrite covers.
+  - **The notice was rendered before the backend had answered**, so the server rendered
+    nothing, the client rendered the notice, and React threw the tree away reporting a
+    hydration mismatch. Both surfaces now wait for `/me` and appear on the render after
+    it.
+  - `agora-line-information-circle` is not an icon this design system has -- it was
+    requested as a URL and 404ed. Replaced with `agora-line-info-mark`, which the
+    codebase already uses.
+
+- **feat(login): invite a password account to link a CMD/eIDAS identity, optionally**
+  - A dismissible notice for accounts that sign in with a password and hold no
+    government identity, saying the three things somebody needs before deciding: the
+    portal allows **one account per person**; linking keeps the account they already
+    have, reachable both ways, rather than starting another one elsewhere; and it is
+    optional **for now**, not optional forever, because the phrasing read alone promises
+    it stays that way and it does not.
+  - It also warns that **linking costs the current session** — the callback issues a
+    fresh session cookie, so the person is signed out until they finish. Said before the
+    click, because discovering it mid-flow reads as a bug.
+  - **Whether it shows is the backend's answer for that account**, read from `/me`.
+    Nothing reads configuration and nothing re-derives the condition: that is the
+    regression where the frontend assumed a migration flag and removed the sign-in form
+    from production.
+  - **Dismissing is "not now", never "never let me".** The notice hides, and the
+    permanent entry in the profile — beside the email and the password, which is where
+    people look for it — reads a different field that survives the dismissal. Built on
+    the same one, it would have vanished with the notice and changing your mind would
+    have meant waiting out the window.
+  - The linking wizard no longer offers **"Criar conta nova"** when the flow came from
+    the invite. In the mandatory mode that button is the emergency exit for somebody who
+    cannot prove the old account is theirs and would otherwise be locked out entirely;
+    reached from the invite, the person signed in with a password seconds ago and is
+    locked out of nothing, so it is only a way to end up with two accounts.
+  - Whoever already has two accounts is told what they can do, since linking does not
+    merge them — including the part that is not possible yet: **only datasets can be
+    transferred today**, and the transfer cannot be undone.
+  - The flag guard now names the new components explicitly. It reads one directory and
+    does not recurse, so a component placed elsewhere — or moved to where it actually
+    renders — would have left it green while proving nothing.
+
 - **feat(login): the completion screen says out loud that you can use an existing account's email**
   - The sentence that tells somebody they may type the address of an account they
     already have was the **last clause of a paragraph**, where it read as a footnote.

@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button, CardAction } from "@ama-pt/agora-design-system";
 import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
@@ -21,7 +20,6 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { displayName } = useCurrentUser();
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(
@@ -41,8 +39,6 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
         { label: t("admin-datasets:form.breadcrumbs.datasets"), url: "/admin/me/datasets" },
       ]}
       title={pageTitle}

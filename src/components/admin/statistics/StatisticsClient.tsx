@@ -14,7 +14,6 @@ import {
 } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { fetchAdminDataservices } from "@/service/api/dataservices";
 import { fetchAdminDatasets } from "@/service/api/datasets";
 import { fetchReuses } from "@/service/api/reuses";
@@ -45,7 +44,6 @@ interface StatisticsClientProps {
 export default function StatisticsClient({ pageContent }: StatisticsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-statistics"]);
   const { user, isLoading: isUserLoading } = useAuth();
-  const displayName = user ? `${user.first_name} ${user.last_name}` : "";
   const userCards = pageContent.userSummaryCards ?? [];
   const [activeTab, setActiveTab] = useState(0);
 
@@ -163,11 +161,7 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
 
   return (
     <AdminLayout
-      breadcrumbItems={buildUserAdminBreadcrumbItems({
-        t,
-        userLabel: displayName,
-        sectionLabel: t("admin-statistics:breadcrumbs.user"),
-      })}
+      breadcrumbItems={[{ label: t("admin-statistics:breadcrumbs.user") }]}
       title={pageContent.userHero?.title ?? ""}
       headerAction={null}
     >

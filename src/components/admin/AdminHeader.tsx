@@ -14,24 +14,34 @@ import {
   AuthenticatedBodyLink,
   AuthenticatedFooter,
   AuthenticatedFooterAction,
+  Icon,
   type HeaderElement,
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import { AdminProfileSwitcher } from "@/components/admin/AdminProfileSwitcher";
 import { useAuth } from "@/context/AuthContext";
+import { useActiveProfile } from "@/context/ActiveProfileContext";
 import { logout } from "@/service/api/auth";
+import { getProfileDetails } from "@/utils/profileDetails";
 
 export function AdminHeader() {
   const { user, samlLogin } = useAuth();
+  const { activeProfile, organizations, isLoading } = useActiveProfile();
   const { t } = useTranslation(["admin-common", "common"]);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dsHeaderRef = useRef<HeaderElement>(null);
   const [generalBarLabelPortalNode, setGeneralBarLabelPortalNode] =
     useState<HTMLSpanElement | null>(null);
 
-  const initials = user
-    ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase()
-    : "";
+  const profile = getProfileDetails(activeProfile, {
+    user,
+    organizations,
+    administratorLabel: t("header.administratorProfile", { ns: "common" }),
+    organizationFallbackLabel: isLoading
+      ? t("loading")
+      : t("header.selectProfile", { ns: "common" }),
+  });
 
   useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
@@ -60,7 +70,7 @@ export function AdminHeader() {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="admin-header [&_.navigation-bar]:hidden">
+    <div ref={wrapperRef} className="admin-header profile-menu-header [&_.navigation-bar]:hidden">
       <Header darkMode ref={dsHeaderRef}>
         <div className="admin-header__search-left">
           <SearchDropdown
@@ -70,19 +80,21 @@ export function AdminHeader() {
           />
         </div>
         <GeneralBar aria-label={t("header.adminOptions")}>
-          {/* Idioma oculto temporariamente */}
           <Authenticated
-            avatarType={user?.avatar_thumbnail ? "image" : initials ? "initials" : "icon"}
-            srcPath={
-              (user?.avatar_thumbnail || initials || "agora-line-user") as unknown as undefined
-            }
+            avatarType={profile.avatarType}
+            srcPath={profile.srcPath}
             hasBadge
             badgePosition="top-right"
-            alt={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`}
-            information={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`}
+            alt={profile.label}
+            information={profile.label}
           >
-            <AuthenticatedHeader>
-              {user?.first_name} {user?.last_name}
+            <AuthenticatedHeader closeAriaLabel={t("close", { ns: "common" })}>
+              {profile.label}
+              <Icon
+                name="agora-line-x"
+                className="absolute right-16 top-1/2 size-24 -translate-y-1/2 fill-white"
+                aria-hidden
+              />
             </AuthenticatedHeader>
             <AuthenticatedBody>
               <AuthenticatedBodyLink
@@ -138,15 +150,17 @@ export function AdminHeader() {
         <div className="container flex items-end justify-between py-16">
           <div className="flex flex-col">
             <span className="text-m-regular text-neutral-900">{t("header.adminAreaLabel")}</span>
-            <span className="text-xl-semibold text-primary-900">{t("header.portalTitle")}</span>
+            <span className="text-xl-semibold text-primary-900">{profile.label}</span>
           </div>
-          <Image
-            src="/Logos/Dados.gov_logocores.png"
-            alt="dados.gov.pt"
-            height={43}
-            width={251}
-            className="h-auto w-[190px]"
-          />
+          <LocalizedLink href="/">
+            <Image
+              src="/Logos/Dados.gov_logocores.png"
+              alt="dados.gov.pt"
+              height={43}
+              width={251}
+              className="h-auto w-[190px]"
+            />
+          </LocalizedLink>
         </div>
       </div>
     </div>

@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  ComponentProps,
   MouseEvent,
-  ReactElement,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -41,9 +39,11 @@ import {
   NavigationRoot,
   NavigationSection,
   Button,
+  Icon,
   HeaderElement,
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
+import { AdminProfileSwitcher } from "@/components/admin/AdminProfileSwitcher";
 import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
@@ -54,7 +54,7 @@ import { isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
 
 export const Header = ({ data }: { data: HeaderNavigationData }) => {
-  const { topLevelLinks = [], authMenuItems = [], dropdowns = [], ecosytems } = data;
+  const { topLevelLinks = [], dropdowns = [], ecosytems } = data;
 
   const ecosystemEntries = useMemo(
     () => ecosytems?.ecosystemEntries ?? [],
@@ -64,6 +64,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const allSubmenus = useMemo(() => dropdowns.flatMap((d) => d.submenus ?? []), [dropdowns]);
 
   const headerRef = useRef<HeaderElement>(null);
+  const wrapperRef = useRef<HTMLElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   // usePathname() is locale-prefixed (`/pt/login`); normalize for route
@@ -74,12 +75,10 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const localizeHref = useLocalizedHref();
   const currentLocale = useCurrentLocale();
   const { user, samlLogin } = useAuth();
-  const { t } = useTranslation("common");
+  const { t } = useTranslation(["common", "admin-common"]);
   const initials = user
     ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase()
     : "";
-  const adminItem = authMenuItems.find((i) => i.id === "admin");
-  const logoutItem = authMenuItems.find((i) => i.id === "logout");
 
   const [generalBarLabelPortalNode, setGeneralBarLabelPortalNode] =
     useState<HTMLSpanElement | null>(null);
@@ -243,7 +242,8 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   return (
     <>
       <header
-        className="[&_.custom-search-layout]:m-0! [&_.custom-search-layout]:mx-auto! [&_.ecosystem-panel-title]:text-m-bold!"
+        ref={wrapperRef}
+        className="profile-menu-header [&_.custom-search-layout]:m-0! [&_.custom-search-layout]:mx-auto! [&_.ecosystem-panel-title]:text-m-bold!"
         data-submenu={submenu ?? undefined}
         data-auth-page={isAuthPage || undefined}
         data-no-user={!user || undefined}
@@ -335,51 +335,37 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             {user ? (
               <Authenticated
                 avatarType={user.avatar_thumbnail ? "image" : initials ? "initials" : "icon"}
-                srcPath={
-                  (user.avatar_thumbnail || initials || "agora-line-user") as unknown as undefined
-                }
+                srcPath={user.avatar_thumbnail || initials || "agora-line-user"}
                 alt={`${user.first_name} ${user.last_name}`}
                 information={`${user.first_name} ${user.last_name}`}
               >
-                <AuthenticatedHeader>
+                <AuthenticatedHeader closeAriaLabel={t("close")}>
                   {user.first_name} {user.last_name}
+                  <Icon
+                    name="agora-line-x"
+                    className="absolute right-16 top-1/2 size-24 -translate-y-1/2 fill-white"
+                    aria-hidden
+                  />
                 </AuthenticatedHeader>
                 <AuthenticatedBody>
-                  {[
-                    <AuthenticatedBodyLink
-                      key="profile"
-                      hasIcon
-                      leadingIcon="agora-line-user"
-                      leadingIconHover="agora-solid-user"
-                    >
-                      <LocalizedLink href={`/users/${user.slug}`}>
-                        {t("header.profile")}
-                      </LocalizedLink>
-                    </AuthenticatedBodyLink>,
-                    adminItem ? (
-                      <AuthenticatedBodyLink
-                        key="admin"
-                        hasIcon
-                        leadingIcon="agora-line-hardware-settings"
-                        leadingIconHover="agora-solid-hardware-settings"
-                      >
-                        <LocalizedLink href={adminItem.href ?? "#"}>{adminItem.label}</LocalizedLink>
-                      </AuthenticatedBodyLink>
-                    ) : null,
-                    <AuthenticatedBodyLink
-                      key="notifications"
-                      hasIcon
-                      leadingIcon="agora-line-mega-phone"
-                      leadingIconHover="agora-solid-mega-phone"
-                    >
-                      <LocalizedLink href="/admin/notificacoes">
-                        {t("header.notifications")}
-                      </LocalizedLink>
-                    </AuthenticatedBodyLink>,
-                  ].filter(
-                    (el): el is ReactElement<ComponentProps<typeof AuthenticatedBodyLink>> =>
-                      el !== null
-                  )}
+                  <AuthenticatedBodyLink
+                    hasIcon
+                    leadingIcon="agora-line-user"
+                    leadingIconHover="agora-solid-user"
+                  >
+                    <LocalizedLink href={`/users/${user.slug}`}>
+                      {t("header.profile", { ns: "admin-common" })}
+                    </LocalizedLink>
+                  </AuthenticatedBodyLink>
+                  <AuthenticatedBodyLink
+                    hasIcon
+                    leadingIcon="agora-line-mega-phone"
+                    leadingIconHover="agora-solid-mega-phone"
+                  >
+                    <LocalizedLink href="/admin/notificacoes">
+                      {t("header.notifications", { ns: "admin-common" })}
+                    </LocalizedLink>
+                  </AuthenticatedBodyLink>
                 </AuthenticatedBody>
                 <AuthenticatedFooter>
                   <AuthenticatedFooterAction
@@ -400,7 +386,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       window.location.href = "/";
                     }}
                   >
-                    {logoutItem?.label ?? t("header.logout")}
+                    {t("header.logout", { ns: "admin-common" })}
                   </AuthenticatedFooterAction>
                 </AuthenticatedFooter>
               </Authenticated>
@@ -475,6 +461,13 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             </NavigationSection>
           </NavigationBar>
         </AgoraHeader>
+        {user && (
+          <AdminProfileSwitcher
+            headerRef={wrapperRef}
+            headerHandleRef={headerRef}
+            showActiveProfile={false}
+          />
+        )}
       </header>
       {generalBarLabelPortalNode &&
         createPortal(

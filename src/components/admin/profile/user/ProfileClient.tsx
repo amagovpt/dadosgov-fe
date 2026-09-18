@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { fetchMyFollowing } from "@/service/api/followers";
 import {
@@ -28,7 +27,6 @@ import {
   TabBody,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { toProxiedUrl } from "@/components/admin/profile/shared/profileUtils";
 import { ProfileCard } from "./ProfileCard";
@@ -44,7 +42,6 @@ interface ProfileClientProps {
 export default function ProfileClient({ pageContent }: ProfileClientProps) {
   const { t } = useTranslation(["admin-common", "admin-profile"]);
   const router = useRouter();
-  const { displayName } = useCurrentUser();
   const { user, samlLogin, refresh } = useAuth();
 
   const [profile, setProfile] = useState<UserPublic | null>(null);
@@ -307,11 +304,7 @@ export default function ProfileClient({ pageContent }: ProfileClientProps) {
 
   return (
     <AdminLayout
-      breadcrumbItems={buildUserAdminBreadcrumbItems({
-        t,
-        userLabel: displayName,
-        sectionLabel: t("admin-profile:breadcrumbs.profile"),
-      })}
+      breadcrumbItems={[{ label: t("admin-profile:breadcrumbs.profile") }]}
       title={pageContent.hero?.title ?? ""}
       headerAction={null}
     >

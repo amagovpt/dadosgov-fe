@@ -8,8 +8,6 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -35,8 +33,6 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
   const resolvedOrgId = routeOrgId || activeOrg?.id;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -138,8 +134,6 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-dataservices:title") },
       ]}
       title={t("admin-dataservices:title")}

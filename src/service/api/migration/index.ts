@@ -13,6 +13,11 @@ export async function fetchMigrationPending(): Promise<{
   // homonyms — both arrive with candidate false, and they need different
   // first steps. Only ever true when the identity also carries a NIC.
   no_match?: boolean;
+  // Started from the optional linking invite, as opposed to the mandatory
+  // mode. The wizard cannot tell otherwise -- both reach it through the same
+  // redirect -- and it decides which escape hatch the screen offers. Absent
+  // reads as false: the mandatory mode is the older behaviour.
+  invited?: boolean;
   // The wizard is over, but the account it created is still waiting for its
   // owner to follow the confirmation link.
   awaiting_confirmation?: boolean;
@@ -104,5 +109,23 @@ export async function resendMigrationConfirmation(): Promise<{
     const data = await res.json().catch(() => ({}));
     throw new Error(data.error || "Failed to resend confirmation");
   }
+  return await res.json();
+}
+
+
+// Records that this account is not linking right now (LEDG-2517).
+//
+// Takes no argument and sends no body: the account is read from the session on
+// the backend, never named by the caller, so a session can only ever dismiss
+// its own invite.
+//
+// Answers 200 whether or not an invite was actually being offered, so a double
+// click is not an error the caller has to explain.
+export async function dismissMigrationInvite(): Promise<{ dismissed: boolean }> {
+  const res = await fetch("/saml/migration/invite/dismiss", {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to dismiss the linking invite");
   return await res.json();
 }

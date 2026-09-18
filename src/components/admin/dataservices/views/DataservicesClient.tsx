@@ -9,7 +9,6 @@ import { fetchAdminDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -29,7 +28,6 @@ interface DataservicesClientProps {
 export default function DataservicesClient({ pageContent }: DataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const { user, isLoading: isUserLoading } = useAuth();
-  const displayName = user ? `${user.first_name} ${user.last_name}` : "";
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -131,11 +129,7 @@ export default function DataservicesClient({ pageContent }: DataservicesClientPr
 
   return (
     <AdminListPage
-      breadcrumbItems={buildUserAdminBreadcrumbItems({
-        t,
-        userLabel: displayName,
-        sectionLabel: t("admin-dataservices:title"),
-      })}
+      breadcrumbItems={[{ label: t("admin-dataservices:title") }]}
       title={t("admin-dataservices:title")}
       isLoading={isLoading}
       count={usesLocalFallback ? filteredApis.length : totalItems}

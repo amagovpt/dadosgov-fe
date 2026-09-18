@@ -9,8 +9,6 @@ import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelper
 import { fetchOrgCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   createCommunityResourceColumns,
@@ -31,8 +29,6 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const resolvedOrgId = routeOrgId || activeOrg?.id;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [resources, setResources] = useState<CommunityResource[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -136,8 +132,6 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-community-resources:title") },
       ]}
       title={t("admin-community-resources:title")}

@@ -8,9 +8,7 @@ import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import type { AdminNavLink, AdminSideNavigationData } from "@/service/types/admin-side-navigation";
 import { stripLocale } from "@/utils/stripLocale";
-import { useAuth } from "@/context/AuthContext";
 import { useActiveProfile } from "@/context/ActiveProfileContext";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { twJoin } from "tailwind-merge";
 
 interface NavChild {
@@ -45,13 +43,11 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
   const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
   const localePath = useMemo(() => stripLocale(pathname), [pathname]);
-  const { isAdmin } = useAuth();
   const { activeProfile } = useActiveProfile();
-  const { activeOrg } = useActiveOrganization();
 
   const items = useMemo<NavChild[]>(() => {
-    if (activeProfile.type === "organization" && activeOrg) {
-      const orgBase = `/admin/org/${activeOrg.id}`;
+    if (activeProfile.type === "organization") {
+      const orgBase = `/admin/org/${activeProfile.orgId}`;
       return (data?.orgChildren ?? [])
         .filter((child) => child.enabled !== false)
         .map((child) =>
@@ -59,7 +55,7 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
         );
     }
 
-    if (activeProfile.type === "system" && isAdmin) {
+    if (activeProfile.type === "system") {
       const systemGroup = (data?.groups ?? []).find(
         (group) => group.enabled !== false && group.key === "system"
       );
@@ -74,7 +70,7 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
     return (profileGroup?.children ?? [])
       .filter((child) => child.enabled !== false)
       .map(toNavChild);
-  }, [data, activeProfile, activeOrg, isAdmin]);
+  }, [data, activeProfile]);
 
   const homeLink = data?.homeLink;
   const showHomeLink = Boolean(homeLink?.label) && homeLink?.enabled !== false;
@@ -118,13 +114,15 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
           </span>
         </button>
         <Sidebar
+          // Agora retains selection in the DOM and keys items by index. Reset it on navigation.
+          key={localePath}
           variant="navigation"
           darkMode
           className="admin-sidebar-nav bg-transparent px-0 pt-64 pb-8"
         >
           {[
             ...items.map((item) => {
-              const isActive = localePath.startsWith(item.href);
+              const isActive = localePath === item.href || localePath.startsWith(`${item.href}/`);
 
               return (
                 <SidebarItem
@@ -133,28 +131,27 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
                   darkMode
                   item={{
                     children: (
-                      <Link href={item.href}>
+                      <Link href={item.href} aria-current={isActive ? "page" : undefined}>
                         <span
                           className={twJoin(
                             groupLabel,
                             isActive && "admin-sidebar-nav__group-label--active font-bold"
                           )}
                         >
-                          {item.customIcon ? (
-                            <Image
-                              src={item.customIcon}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="size-24"
-                            />
-                          ) : item.icon ? (
-                            // `fill-white` also suppresses the primary-600 fill the DS
-                            // injects when an Icon carries no `fill-` / `text-` class.
-                            <Icon name={item.icon} className="size-24 fill-white text-white" />
-                          ) : (
-                            <span aria-hidden className="size-24 shrink-0" />
-                          )}
+                          {/* Agora icons load lazily; reserve their space before the SVG arrives. */}
+                          <span aria-hidden className="flex size-24 shrink-0 items-center justify-center">
+                            {item.customIcon ? (
+                              <Image
+                                src={item.customIcon}
+                                alt=""
+                                width={24}
+                                height={24}
+                                className="size-24"
+                              />
+                            ) : item.icon ? (
+                              <Icon name={item.icon} className="size-24 fill-white text-white" />
+                            ) : null}
+                          </span>
                           <span className={`${labelText} text-m-regular`}>{item.label}</span>
                         </span>
                       </Link>

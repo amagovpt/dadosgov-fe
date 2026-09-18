@@ -10,7 +10,6 @@ import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -31,7 +30,6 @@ interface ReusesClientProps {
 export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const { user, isLoading: isUserLoading } = useAuth();
-  const displayName = user ? `${user.first_name} ${user.last_name}` : "";
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -140,11 +138,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
 
   return (
     <AdminListPage
-      breadcrumbItems={buildUserAdminBreadcrumbItems({
-        t,
-        userLabel: displayName,
-        sectionLabel: t("admin-reuses:title"),
-      })}
+      breadcrumbItems={[{ label: t("admin-reuses:title") }]}
       title={t("admin-reuses:heroTitle")}
       kicker={t("admin-reuses:kicker")}
       listTitle={t("admin-reuses:myListTitle")}

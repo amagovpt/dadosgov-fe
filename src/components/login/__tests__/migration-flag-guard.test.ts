@@ -66,6 +66,16 @@ describe("the email tab never decides migration from a frontend flag", () => {
     expect(GUARDED).toContain("src/components/login/LoginContent.tsx");
     expect(GUARDED).toContain("src/components/login/LoginClient.tsx");
     expect(GUARDED.length).toBeGreaterThan(10);
+
+    // LEDG-2517. Named explicitly, and not left to the directory listing,
+    // because the listing does not recurse: moving either of these into a
+    // subfolder — or out to src/components/profile/, which is where the
+    // second one RENDERS — would drop it from the guard silently while every
+    // behavioural test stayed green. That is the hole this assertion closes,
+    // and it is why MigrationLinkSection lives here despite being used in the
+    // profile.
+    expect(GUARDED).toContain("src/components/login/MigrationInvite.tsx");
+    expect(GUARDED).toContain("src/components/login/MigrationLinkSection.tsx");
   });
 
   it.each(GUARDED)("%s reads only the configuration it is allowed to", (relative) => {
@@ -88,5 +98,27 @@ describe("the email tab never decides migration from a frontend flag", () => {
     // meaningful while the backend-driven path is present. Delete the handler
     // and the tab would satisfy the guard by doing nothing at all.
     expect(source).toContain('message === "migration_required"');
+  });
+
+  it("decides the optional invite from the backend's answer too", () => {
+    // Same reasoning as the assertion above, for the surface LEDG-2517 adds:
+    // a component that read no flag AND asked the backend nothing would pass
+    // the env check by rendering nothing at all, so the guard has to see the
+    // backend-driven path present.
+    //
+    // The two fields are deliberately different questions and both are read:
+    // `migrationInvite` hides on dismissal, `migrationLinkAvailable` does not,
+    // which is what keeps "Not now" from meaning "never let me".
+    const invite = readFileSync(
+      path.join(process.cwd(), "src/components/login/MigrationInvite.tsx"),
+      "utf8"
+    );
+    const section = readFileSync(
+      path.join(process.cwd(), "src/components/login/MigrationLinkSection.tsx"),
+      "utf8"
+    );
+
+    expect(invite).toContain("migrationInvite");
+    expect(section).toContain("migrationLinkAvailable");
   });
 });

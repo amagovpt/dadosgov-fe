@@ -135,7 +135,6 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-organizations:title"), url: "/admin/system/organizations" },
         {
           label: pageTitle,

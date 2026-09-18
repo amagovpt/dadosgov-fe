@@ -80,7 +80,6 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-notifications:title"), url: "/admin/notificacoes" },
       ]}
       title={pageContent.hero?.title ?? ""}
