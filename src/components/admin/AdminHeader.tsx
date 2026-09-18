@@ -18,6 +18,7 @@ import {
   type HeaderElement,
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import { AdminProfileSwitcher } from "@/components/admin/AdminProfileSwitcher";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveProfile } from "@/context/ActiveProfileContext";
@@ -149,15 +150,17 @@ export function AdminHeader() {
         <div className="container flex items-end justify-between py-16">
           <div className="flex flex-col">
             <span className="text-m-regular text-neutral-900">{t("header.adminAreaLabel")}</span>
-            <span className="text-xl-semibold text-primary-900">{t("header.portalTitle")}</span>
+            <span className="text-xl-semibold text-primary-900">{profile.label}</span>
           </div>
-          <Image
-            src="/Logos/Dados.gov_logocores.png"
-            alt="dados.gov.pt"
-            height={43}
-            width={251}
-            className="h-auto w-[190px]"
-          />
+          <LocalizedLink href="/">
+            <Image
+              src="/Logos/Dados.gov_logocores.png"
+              alt="dados.gov.pt"
+              height={43}
+              width={251}
+              className="h-auto w-[190px]"
+            />
+          </LocalizedLink>
         </div>
       </div>
     </div>
