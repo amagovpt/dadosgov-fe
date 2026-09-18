@@ -1283,16 +1283,21 @@ li.section-name:empty {
   fill: var(--color-primary-500);
 }
 
-.admin-header .authenticated-body .custom-header-link-wrapper .children-wrapper {
+/* Agora hardcodes a chevron; the header content supplies the close icon. */
+.profile-menu-header .authenticated-header .close > .icon-wrapper.trailing {
+  display: none;
+}
+
+.profile-menu-header .authenticated-body .custom-header-link-wrapper .children-wrapper {
   color: var(--color-neutral-900);
 }
 
-.admin-header .authenticated-body .custom-header-link-wrapper svg,
-.admin-header .authenticated-footer .footer-action svg {
+.profile-menu-header .authenticated-body .custom-header-link-wrapper svg,
+.profile-menu-header .authenticated-footer .footer-action svg {
   fill: var(--color-primary-600) !important;
 }
 
-.admin-header .admin-profile-switcher:has(> [data-open="true"]) ~ .authenticated-body {
+.profile-menu-header .admin-profile-switcher:has(> [data-open="true"]) ~ .authenticated-body {
   display: none;
 }
 

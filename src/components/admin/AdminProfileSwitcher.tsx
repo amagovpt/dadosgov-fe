@@ -13,35 +13,33 @@ import {
 } from "@/context/ActiveProfileContext";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
+import { getProfileDetails, type ProfileDetails } from "@/utils/profileDetails";
 
-interface ProfileOption {
+interface ProfileOption extends ProfileDetails {
   profile: ActiveProfile;
-  label: string;
-  href: string;
-  avatarType: "image" | "initials" | "icon";
-  srcPath: string;
 }
 
 const BAND_CLASSES =
-  "flex w-full cursor-pointer items-center gap-8 bg-primary-50 px-24 py-16 " +
+  "flex min-h-60 w-full cursor-pointer items-center gap-8 bg-primary-200 p-16 " +
   "text-left text-base leading-normal text-primary-600";
 
 const OPTION_CLASSES =
   "flex w-full cursor-pointer items-center gap-16 border-b border-neutral-300 " +
-  "px-24 py-16 text-left hover:bg-neutral-50";
+  " p-16 text-left hover:bg-neutral-50";
 
-const RADIO_CLASSES = "flex size-20 shrink-0 items-center justify-center rounded-full border-2";
+const RADIO_CLASSES = "flex size-24 shrink-0 items-center justify-center rounded-full border-2";
 
 const RADIO_CHECKED_CLASSES =
-  "border-primary-600 after:size-[10px] after:rounded-full after:bg-primary-600 " +
-  "after:content-['']";
+  "border-primary-600 after:size-[10px] after:rounded-full border-6 radius-4";
 
 export function AdminProfileSwitcher({
   headerRef,
   headerHandleRef,
+  showActiveProfile = true,
 }: {
-  headerRef: RefObject<HTMLDivElement | null>;
+  headerRef: RefObject<HTMLElement | null>;
   headerHandleRef: RefObject<HeaderElement | null>;
+  showActiveProfile?: boolean;
 }) {
   const { user, isAdmin } = useAuth();
   const { activeProfile, organizations } = useActiveProfile();
@@ -51,41 +49,24 @@ export function AdminProfileSwitcher({
   const [portalNode, setPortalNode] = useState<HTMLDivElement | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
 
-  const initials = user
-    ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase()
-    : "";
-
   const options = useMemo<ProfileOption[]>(() => {
     if (!user) return [];
-    const list: ProfileOption[] = [
-      {
-        profile: { type: "personal" },
-        label: `${user.first_name} ${user.last_name}`,
-        href: "/admin/me/datasets",
-        avatarType: user.avatar_thumbnail ? "image" : initials ? "initials" : "icon",
-        srcPath: user.avatar_thumbnail || initials || "agora-line-user",
-      },
-      ...organizations.map(
-        (org): ProfileOption => ({
-          profile: { type: "organization", orgId: org.id },
-          label: org.name,
-          href: `/admin/org/${org.id}/datasets`,
-          avatarType: org.logo_thumbnail ? "image" : "icon",
-          srcPath: org.logo_thumbnail || "agora-line-briefcase",
-        })
-      ),
+    const profiles: ActiveProfile[] = [
+      { type: "personal" },
+      ...organizations.map((org): ActiveProfile => ({ type: "organization", orgId: org.id })),
     ];
-    if (isAdmin) {
-      list.push({
-        profile: { type: "system" },
-        label: t("header.administratorProfile"),
-        href: "/admin/system/datasets",
-        avatarType: "icon",
-        srcPath: "agora-line-buildings",
-      });
-    }
-    return list;
-  }, [user, isAdmin, initials, t, organizations]);
+    if (isAdmin) profiles.push({ type: "system" });
+
+    return profiles.map((profile) => ({
+      profile,
+      ...getProfileDetails(profile, {
+        user,
+        organizations,
+        administratorLabel: t("header.administratorProfile"),
+        organizationFallbackLabel: t("header.selectProfile"),
+      }),
+    }));
+  }, [user, isAdmin, t, organizations]);
 
   useEffect(() => {
     const drawerHeader = headerRef.current?.querySelector(".agora-drawer .authenticated-header");
@@ -101,7 +82,7 @@ export function AdminProfileSwitcher({
       container.remove();
       setPortalNode(null);
     };
-  }, [headerRef]);
+  }, [headerRef, user?.id]);
 
   useEffect(() => {
     const dialog = headerRef.current
@@ -115,7 +96,7 @@ export function AdminProfileSwitcher({
     });
     observer.observe(dialog, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
-  }, [headerRef]);
+  }, [headerRef, user?.id]);
 
   const selectProfile = (option: ProfileOption) => {
     setIsSwitching(false);
@@ -123,7 +104,7 @@ export function AdminProfileSwitcher({
     router.push(localizeHref(option.href, locale));
   };
 
-  if (!portalNode || options.length <= 1) return null;
+  if (!portalNode || options.length === 0 || (showActiveProfile && options.length === 1)) return null;
 
   return createPortal(
     <div data-open={isSwitching}>
@@ -140,7 +121,7 @@ export function AdminProfileSwitcher({
           </button>
           <ul className="m-0 list-none p-0" role="radiogroup">
             {options.map((option) => {
-              const isActive = isSameProfile(option.profile, activeProfile);
+              const isActive = showActiveProfile && isSameProfile(option.profile, activeProfile);
               return (
                 <li key={option.href}>
                   <button
@@ -175,8 +156,14 @@ export function AdminProfileSwitcher({
         </>
       ) : (
         <button type="button" className={BAND_CLASSES} onClick={() => setIsSwitching(true)}>
+          <Icon
+            name="agora-line-hardware-settings"
+            dimensions="m"
+            className="shrink-0 fill-current"
+            aria-hidden
+          />
           <span className="flex-1 text-left">
-            {t("header.selectProfile", { count: options.length })}
+            {t("header.selectProfile")}
           </span>
           <Icon
             name="agora-line-chevron-right"
