@@ -32,62 +32,20 @@ const ActiveProfileContext = createContext<ActiveProfileContextProps>({
   organizations: [],
 });
 
-function readStoredProfile(key: string): ActiveProfile {
-  try {
-    const raw = localStorage.getItem(key);
-    const profile: unknown = raw ? JSON.parse(raw) : null;
-    if (profile && typeof profile === "object" && "type" in profile) {
-      if (profile.type === "personal" || profile.type === "system") {
-        return { type: profile.type };
-      }
-      if (
-        profile.type === "organization" &&
-        "orgId" in profile &&
-        typeof profile.orgId === "string" &&
-        profile.orgId.length > 0
-      ) {
-        return { type: "organization", orgId: profile.orgId };
-      }
-    }
-  } catch {
-    // Storage may be unavailable or contain an older, invalid value.
-  }
-  return PERSONAL_PROFILE;
-}
-
-function readVisitedOrganizationIds(key: string): string[] {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(key) ?? "[]");
-    if (Array.isArray(value)) {
-      return [...new Set(value.filter((id): id is string => typeof id === "string" && id.length > 0))];
-    }
-  } catch {
-    // A missing or invalid history must not prevent navigation.
-  }
-  return [];
-}
-
 export function ActiveProfileProvider({ children }: { children: ReactNode }) {
   const { user, isAdmin, isLoading: isAuthLoading } = useAuth();
   const pathname = stripLocale(usePathname());
   const params = useParams<{ orgId?: string }>();
   const routeOrgId = params?.orgId;
-  const storageKey = user ? `dadosgov.activeProfile.${user.id}` : null;
   const userId = user?.id;
-  const visitedStorageKey = userId ? `dadosgov.visitedOrganizations.${userId}` : null;
   const [visited, setVisited] = useState<{
     userId: string;
     organizations: Record<string, Organization | null>;
   } | null>(null);
   const [preference, setPreference] = useState<{
-    key: string;
+    userId: string;
     profile: ActiveProfile;
   } | null>(null);
-  const isRestoring =
-    isAuthLoading ||
-    (storageKey !== null && preference?.key !== storageKey) ||
-    (isAdmin && !!userId && visited?.userId !== userId);
-
   const organizations = useMemo(() => {
     const memberships = user?.organizations ?? [];
     const additional =
@@ -101,50 +59,10 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
   }, [user, isAdmin, visited, userId]);
 
   useEffect(() => {
-    // Restore once per account; consumers must wait before using a default organization.
+    // Visited profiles belong only to the current account and admin session.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPreference(storageKey ? { key: storageKey, profile: readStoredProfile(storageKey) } : null);
-  }, [storageKey]);
-
-  useEffect(() => {
-    if (!isAdmin || !userId || !visitedStorageKey) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setVisited(null);
-      return;
-    }
-    let cancelled = false;
-    const ids = readVisitedOrganizationIds(visitedStorageKey);
-    const restore = async () => {
-      // Persist IDs only; refresh names, logos and availability from the API.
-      const results = await Promise.allSettled(ids.map((id) => fetchOrganization(id)));
-      if (cancelled) return;
-      const organizations = Object.fromEntries(
-        ids.map((id, index) => {
-          const result = results[index];
-          return [id, result.status === "fulfilled" ? result.value : null];
-        })
-      );
-      setVisited({ userId, organizations });
-    };
-    if (ids.length) {
-      void restore();
-    } else {
-      setVisited({ userId, organizations: {} });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [isAdmin, userId, visitedStorageKey]);
-
-  useEffect(() => {
-    if (!isAdmin || !visitedStorageKey || !visited || visited.userId !== userId) return;
-    try {
-      const ids = Object.keys(visited.organizations).filter((id) => visited.organizations[id]);
-      localStorage.setItem(visitedStorageKey, JSON.stringify(ids));
-    } catch {
-      // Keep the session's profiles usable when storage is unavailable.
-    }
-  }, [isAdmin, userId, visitedStorageKey, visited]);
+    setVisited(null);
+  }, [userId, isAdmin]);
 
   const activeProfile = useMemo<ActiveProfile>(() => {
     if (!user) return PERSONAL_PROFILE;
@@ -167,16 +85,18 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
       return validate({ type: "system" });
     }
 
-    const saved = validate(preference?.key === storageKey ? preference.profile : PERSONAL_PROFILE);
+    const saved = validate(
+      preference && preference.userId === userId ? preference.profile : PERSONAL_PROFILE
+    );
     if (pathname === "/admin/org" || pathname.startsWith("/admin/org/")) {
       if (routeOrgId) return validate({ type: "organization", orgId: routeOrgId });
-      if (isRestoring) return PERSONAL_PROFILE;
+      if (isAuthLoading) return PERSONAL_PROFILE;
       if (saved.type === "organization") return saved;
       const firstOrg = user.organizations?.[0];
       return firstOrg ? { type: "organization", orgId: firstOrg.id } : PERSONAL_PROFILE;
     }
     return saved;
-  }, [user, isAdmin, pathname, routeOrgId, preference, storageKey, isRestoring]);
+  }, [user, isAdmin, pathname, routeOrgId, preference, userId, isAuthLoading]);
 
   // System administrators can open organizations they do not belong to. Keep
   // those visited organizations available to both the selector and org pages.
@@ -191,10 +111,10 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     visited !== null &&
     visited.userId === userId &&
     Object.hasOwn(visited.organizations, externalOrgId);
-  const isLoading = isRestoring || (externalOrgId !== null && !hasResolvedOrganization);
+  const isLoading = isAuthLoading || (externalOrgId !== null && !hasResolvedOrganization);
 
   useEffect(() => {
-    if (!externalOrgId || !userId || isRestoring || hasResolvedOrganization) return;
+    if (!externalOrgId || !userId || isAuthLoading || hasResolvedOrganization) return;
     let cancelled = false;
     const remember = (org: Organization | null) => {
       if (cancelled) return;
@@ -212,21 +132,20 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [externalOrgId, userId, isRestoring, hasResolvedOrganization]);
+  }, [externalOrgId, userId, isAuthLoading, hasResolvedOrganization]);
 
   useEffect(() => {
-    if (!storageKey || isLoading) return;
-    if (preference && !isSameProfile(preference.profile, activeProfile)) {
-      // Remember the resolved route for future visits to an unscoped route.
+    if (!userId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPreference({ key: storageKey, profile: activeProfile });
+      setPreference(null);
+    } else if (
+      !isLoading &&
+      (preference?.userId !== userId || !isSameProfile(preference.profile, activeProfile))
+    ) {
+      // Remember the resolved route in memory for visits to an unscoped route.
+      setPreference({ userId, profile: activeProfile });
     }
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(activeProfile));
-    } catch {
-      // Navigation still works when the browser disallows persistence.
-    }
-  }, [activeProfile, isLoading, preference, storageKey]);
+  }, [activeProfile, isLoading, preference, userId]);
 
   const value = useMemo(
     () => ({ activeProfile, isLoading, organizations }),
