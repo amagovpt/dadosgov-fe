@@ -1287,8 +1287,9 @@ li.section-name:empty {
   color: var(--color-neutral-900);
 }
 
-.admin-header .authenticated-body .custom-header-link-wrapper svg {
-  fill: var(--color-neutral-900) !important;
+.admin-header .authenticated-body .custom-header-link-wrapper svg,
+.admin-header .authenticated-footer .footer-action svg {
+  fill: var(--color-primary-600) !important;
 }
 
 .admin-header .admin-profile-switcher:has(> [data-open="true"]) ~ .authenticated-body {
