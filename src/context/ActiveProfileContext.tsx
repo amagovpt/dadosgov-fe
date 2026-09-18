@@ -46,18 +46,6 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     userId: string;
     profile: ActiveProfile;
   } | null>(null);
-  const organizations = useMemo(() => {
-    const memberships = user?.organizations ?? [];
-    const additional =
-      isAdmin && visited !== null && visited.userId === userId
-        ? Object.values(visited.organizations).filter(
-            (org): org is Organization =>
-              !!org && !memberships.some((memberOrg) => memberOrg.id === org.id)
-          )
-        : [];
-    return [...memberships, ...additional];
-  }, [user, isAdmin, visited, userId]);
-
   useEffect(() => {
     // Visited profiles belong only to the current account and admin session.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -98,14 +86,23 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     return saved;
   }, [user, isAdmin, pathname, routeOrgId, preference, userId, isAuthLoading]);
 
-  // System administrators can open organizations they do not belong to. Keep
-  // those visited organizations available to both the selector and org pages.
+  // System administrators can open organizations they do not belong to. Only
+  // the active one is added to their membership list; cached details can be reused.
   const externalOrgId =
     isAdmin &&
     activeProfile.type === "organization" &&
     !user?.organizations?.some((org) => org.id === activeProfile.orgId)
       ? activeProfile.orgId
       : null;
+  const organizations = useMemo(() => {
+    const memberships = user?.organizations ?? [];
+    const activeExternalOrganization =
+      externalOrgId && visited && visited.userId === userId
+        ? visited.organizations[externalOrgId]
+        : null;
+    return activeExternalOrganization ? [...memberships, activeExternalOrganization] : memberships;
+  }, [user, userId, externalOrgId, visited]);
+
   const hasResolvedOrganization =
     externalOrgId !== null &&
     visited !== null &&
