@@ -19,7 +19,8 @@ export type FooterGroup = {
 };
 
 export type FooterLogo = {
-  icon: string;
+  image: Image[];
+  href: string;
   alt: string;
 };
 
