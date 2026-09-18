@@ -223,7 +223,7 @@
     "title": "Associe a sua conta à Chave Móvel Digital ou à Autenticação Europeia",
     "oneAccount": "No dados.gov cada pessoa só pode ter uma conta.",
     "result": "Ao associar, fica com a mesma conta de sempre — com o seu email, os seus conjuntos de dados e as suas organizações — e passa a poder entrar por palavra-passe ou pela sua identidade digital.",
-    "optional": "Por agora é facultativo: pode fechar este aviso e continuar a usar o portal. Mais tarde, a associação passará a ser necessária para entrar na sua conta.",
+    "optional": "Por agora é facultativo: pode fechar este aviso e continuar a usar o portal.",
     "sessionWarning": "Ao associar, vai sair da sua conta enquanto confirma a associação. Depois volta a entrar normalmente.",
     "alreadyTwoTitle": "Já tem duas contas no portal?",
     "alreadyTwoDescription": "Se já entra no portal pela Chave Móvel Digital com outra conta, este aviso não as junta. Entre na conta secundária e use Transferir em cada conjunto de dados para os passar para a conta que quer manter — a conta de destino tem de aceitar, e a transferência é irreversível.",
