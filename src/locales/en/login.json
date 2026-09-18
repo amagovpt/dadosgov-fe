@@ -119,7 +119,9 @@
     "providerEidas": "European Authentication",
     "errorSessionLost": "The linking session has expired. Sign in again with Chave Móvel Digital or with European Authentication.",
     "linkTitleGeneric": "Link account",
-    "errorNicMissing": "The authenticated identity did not provide a civil identification number, so the account cannot be linked this way. Please contact dados.gov.pt support."
+    "errorNicMissing": "The authenticated identity did not provide a civil identification number, so the account cannot be linked this way. Please contact dados.gov.pt support.",
+    "invitedAccountMismatch": "This screen is linking the account {{email}}. To link a different one, sign in to that account and start from there.",
+    "linkingAccount": "You are linking the account {{email}}."
   },
   "terms": {
     "title": "Terms and conditions",
@@ -234,6 +236,7 @@
     "dismiss": "Not now",
     "close": "Close notice",
     "error": "The linking flow could not be started. Please try again later.",
-    "sectionTitle": "Sign in with a digital identity"
+    "sectionTitle": "Sign in with a digital identity",
+    "confirmStep": "To finish, you will be asked for this account's email and password — that is how we confirm it is yours."
   }
 }

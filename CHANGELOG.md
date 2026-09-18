@@ -6,6 +6,24 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the invited link now stays on the account the person clicked from**
+  - The wizard identifies the account to link by the password proved on its screen. In
+    the mandatory mode that is the only evidence there is -- the citizen arrives
+    deauthenticated and the portal has no idea who they are. In invite mode they clicked
+    from inside an account and the portal knows which, so following the typed address
+    instead landed the identity on an account they never asked about, left the one they
+    clicked from unlinked, and said nothing. They would have found out by signing in with
+    CMD later and not recognising what they saw.
+  - Not a security hole -- reaching another account still costs that account's password.
+    It was the notice promising "you keep the account you already have" and then not.
+  - **The screen now names the account it is linking**, masked, before anything is typed,
+    so the refusal mostly stops happening. And a correct password for the wrong account no
+    longer reads as "wrong password": it says which account this screen is about and what
+    to do to link a different one.
+  - The invite also says, **before** the click, that the account's email and password will
+    be asked for at the end. Coming back from the IdP to an unexpected password prompt is
+    where people stop.
+
 - **fix(login): the CMD/eIDAS linking invite was unreachable, and mismatched on hydration**
   - **The buttons answered 404 instead of starting the flow.** `next.config.ts` lists the
     SAML rewrites one by one with no catch-all, so a backend route not named there is

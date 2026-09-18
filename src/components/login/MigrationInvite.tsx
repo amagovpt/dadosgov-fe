@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
@@ -30,9 +31,19 @@ import { submitSamlForm } from "./loginUtils";
  * returns after a month, and the way back stays open to somebody who
  * dismissed it and changed their mind.
  */
+/**
+ * The pages that ARE the linking flow. Inviting somebody to start something
+ * they are in the middle of reads as "the first step did not work" -- and the
+ * buttons would restart it from scratch, throwing away what they have already
+ * done. Matched by path segment so a locale prefix or a sub-route cannot slip
+ * past.
+ */
+const FLOW_ROUTES = ["migrate-account", "complete-registration"];
+
 export function MigrationInvite() {
   const { t } = useTranslation("login");
   const { migrationInvite, isLoading: authLoading, refresh } = useAuth();
+  const pathname = usePathname();
   const [dismissed, setDismissed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +61,9 @@ export function MigrationInvite() {
   // React then reports a mismatch and throws the tree away. Waiting for the
   // answer makes both passes agree on "nothing", and the notice appears on the
   // render after it.
-  if (authLoading || !migrationInvite || dismissed) return null;
+  const onFlowPage = (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
+
+  if (authLoading || onFlowPage || !migrationInvite || dismissed) return null;
 
   const startLink = async (endpoint: string) => {
     setIsLoading(true);
@@ -107,6 +120,11 @@ export function MigrationInvite() {
               finish. */}
           <Typograph tag="p" className="text-sm text-neutral-700">
             {t("migrationInvite.sessionWarning")}
+          </Typograph>
+          {/* Said before the click, not after the round-trip. Coming back from
+              the IdP to an unexpected password prompt is where people stop. */}
+          <Typograph tag="p" className="text-sm text-neutral-700">
+            {t("migrationInvite.confirmStep")}
           </Typograph>
         </div>
         <button
