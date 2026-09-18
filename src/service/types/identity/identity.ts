@@ -40,6 +40,22 @@ export interface UserRef {
    * a CMD assertion may carry none. Test the VALUE, never the key.
    */
   pending_registration_email?: string | null;
+  /**
+   * True when the backend is inviting this account, optionally, to link a
+   * CMD/eIDAS identity: the invite is enabled, linking is not mandatory, the
+   * account signs in with a password and holds no identity yet, and the
+   * invite has not been dismissed recently.
+   *
+   * 🚨 The whole condition is evaluated on the server, per account, and this
+   * field is the only thing the browser is told. Deriving it here — from a
+   * NEXT_PUBLIC flag, or from the shape of the user object — is the
+   * regression LEDG-2432 was: the frontend assumed a migration flag and
+   * removed the sign-in form from production.
+   *
+   * Optional so an older backend without the field simply shows no invite.
+   * Served only on the caller's own user; `null` on anybody else's.
+   */
+  migration_invite?: boolean | null;
   roles?: string[];
   organizations?: Organization[];
   metrics?: UserMetrics;
