@@ -13,6 +13,11 @@ export async function fetchMigrationPending(): Promise<{
   // homonyms — both arrive with candidate false, and they need different
   // first steps. Only ever true when the identity also carries a NIC.
   no_match?: boolean;
+  // Started from the optional linking invite, as opposed to the mandatory
+  // mode. The wizard cannot tell otherwise -- both reach it through the same
+  // redirect -- and it decides which escape hatch the screen offers. Absent
+  // reads as false: the mandatory mode is the older behaviour.
+  invited?: boolean;
   // The wizard is over, but the account it created is still waiting for its
   // owner to follow the confirmation link.
   awaiting_confirmation?: boolean;

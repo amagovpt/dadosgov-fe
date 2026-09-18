@@ -75,6 +75,13 @@ function MigrateAccountWizard() {
   // Which identity is being linked. Named on every screen, and only the
   // backend knows it -- both ACS routes converge before the wizard opens.
   const [provider, setProvider] = useState<"cmd" | "eidas">("cmd");
+  // Whether this wizard session came from the optional invite, told by the
+  // backend and never inferred here. It removes the account-creation escape:
+  // in invite mode the person entered from inside an account they proved with
+  // a password seconds ago, so that button is not a safety net -- it is the
+  // only way left to manufacture the second account the invite exists to
+  // prevent. The endpoint refuses it too, so this is the visible half.
+  const [invited, setInvited] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -118,6 +125,7 @@ function MigrateAccountWizard() {
         }
         if (data.email) setMaskedEmail(data.email);
         if (data.provider) setProvider(data.provider);
+        setInvited(Boolean(data.invited));
         // Pre-fill the creation step with the CMD address when it is free.
         // It still has to be submitted explicitly — this is a convenience,
         // not a decision taken on the user's behalf.
@@ -411,18 +419,26 @@ function MigrateAccountWizard() {
 
               {/* The homonym with no account of their own used to escape by
                   answering "no" to "is this yours?". That question is gone, so
-                  the way out lives here. */}
-              <Button
-                variant="primary"
-                appearance="link"
-                onClick={() => {
-                  setStep("enter-email");
-                  setError(null);
-                }}
-                className="text-sm h-auto p-0"
-              >
-                {t("migration.createNewAccount")}
-              </Button>
+                  the way out lives here.
+
+                  🚫 Not offered in invite mode. There the person arrived from
+                  inside an account they had just signed into with a password,
+                  so they are locked out of nothing and this is not a safety
+                  net -- it is the only way left to end up with two accounts,
+                  which is what the invite promised to avoid. */}
+              {!invited && (
+                <Button
+                  variant="primary"
+                  appearance="link"
+                  onClick={() => {
+                    setStep("enter-email");
+                    setError(null);
+                  }}
+                  className="text-sm h-auto p-0"
+                >
+                  {t("migration.createNewAccount")}
+                </Button>
+              )}
             </div>
           )}
 

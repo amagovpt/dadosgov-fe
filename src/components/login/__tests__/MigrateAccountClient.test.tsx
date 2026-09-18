@@ -227,6 +227,35 @@ describe("MigrateAccountClient initial step", () => {
     expect(text).not.toContain(CREDENTIALS_TEXT);
   });
 
+  it("offers the account-creation escape in the mandatory mode", async () => {
+    // Paired with the test below, and the pair is the point: a guard that
+    // hid this button in BOTH modes would take the emergency exit away from
+    // the people it exists for -- somebody who cannot prove the old account
+    // is theirs and would otherwise be locked out of the portal entirely.
+    const text = await render({ pending: true, candidate: true, first_name: "Ana" });
+
+    expect(text).toContain(translate("migration.createNewAccount"));
+  });
+
+  it("withholds the account-creation escape when the flow came from the invite", async () => {
+    // 🚫 There the person arrived from inside an account they had just signed
+    // into with a password, so they are locked out of nothing: the button is
+    // not a safety net, it is the only way left to end up with two accounts --
+    // which is exactly what the invite promised to avoid.
+    //
+    // The endpoint refuses it too (migration_skip stays 403 in invite mode),
+    // so this is the visible half of a guarantee that does not depend on it.
+    const text = await render({
+      pending: true,
+      candidate: true,
+      first_name: "Ana",
+      invited: true,
+    });
+
+    expect(text).toContain(CREDENTIALS_TEXT);
+    expect(text).not.toContain(translate("migration.createNewAccount"));
+  });
+
   it("never renders a step between the identity and the credentials", async () => {
     // Asserting on the removed screens' labels would be vacuous once their
     // locale keys go. Assert instead that every mount lands on exactly one of
