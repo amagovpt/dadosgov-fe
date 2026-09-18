@@ -6,6 +6,15 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the linking invite no longer appears on the pages about signing in**
+  - After a refused link it sat directly above the refusal: "Associe a sua conta à Chave
+    Móvel Digital" on top of "Não foi possível associar", with buttons that would repeat
+    the round-trip that had just failed. It reached that screen because the remember-me
+    cookie keeps `/me` answering after the refusal logged the session out.
+  - Same class as the notice appearing on `/migrate-account`, fixed earlier and in the
+    wrong file: the exclusion now covers every authentication page -- login, register,
+    reset-password -- not only the two the flow owns.
+
 - **fix(login): a refused sign-in now says why, and the invite names its condition**
   - The backend has always redirected every refused SAML sign-in to `/login?saml_error=…`
     and nothing on that screen read it, so the citizen landed on a clean login page with

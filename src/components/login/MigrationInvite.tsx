@@ -32,13 +32,32 @@ import { submitSamlForm } from "./loginUtils";
  * dismissed it and changed their mind.
  */
 /**
- * The pages that ARE the linking flow. Inviting somebody to start something
- * they are in the middle of reads as "the first step did not work" -- and the
- * buttons would restart it from scratch, throwing away what they have already
- * done. Matched by path segment so a locale prefix or a sub-route cannot slip
+ * Every page about signing in, and none of them is a place to be invited to
+ * link an account.
+ *
+ * 🚩 Two different ways it reads wrong, and both were seen on screen:
+ *
+ *  - on the flow's own pages (migrate-account, complete-registration) it
+ *    invites somebody to start what they are in the middle of, which reads as
+ *    "the first step did not work" -- and its buttons restart the flow from
+ *    scratch, throwing away what they have already done;
+ *  - on /login after a refusal it contradicts the refusal outright: "Associe a
+ *    sua conta" directly above "Não foi possível associar", with buttons that
+ *    would repeat the same doomed round-trip. The notice appears there at all
+ *    because the remember-me cookie keeps /me answering after the refusal
+ *    logged the session out.
+ *
+ * Matched by path segment so neither a locale prefix nor a sub-route slips
  * past.
  */
-const FLOW_ROUTES = ["migrate-account", "complete-registration"];
+const FLOW_ROUTES = [
+  "migrate-account",
+  "complete-registration",
+  "login",
+  "loginregister",
+  "register",
+  "reset-password",
+];
 
 export function MigrationInvite() {
   const { t } = useTranslation("login");

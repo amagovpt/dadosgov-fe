@@ -142,7 +142,19 @@ describe("the optional CMD/eIDAS linking invite", () => {
     // through the association was still being invited to start it, with a
     // dismiss button beside it. It reads as "the first step did not work",
     // and those buttons would have restarted the flow from scratch.
-    for (const route of ["/pt/migrate-account", "/en/complete-registration"]) {
+    for (const route of [
+      "/pt/migrate-account",
+      "/en/complete-registration",
+      // 🚩 And /login, which is where a refusal lands. Without it the screen
+      // says "Associe a sua conta" directly above "Não foi possível associar",
+      // and the buttons repeat the round-trip that just failed. The notice
+      // gets there because the remember-me cookie keeps /me answering after
+      // the refusal logged the session out.
+      "/pt/login",
+      "/pt/register",
+      "/pt/reset-password",
+      "/pt/loginregister",
+    ]) {
       pathname.mockReturnValue(route);
       renderInvite();
       expect(container.textContent, `still invited on ${route}`).toBe("");
