@@ -55,6 +55,18 @@ function readStoredProfile(key: string): ActiveProfile {
   return PERSONAL_PROFILE;
 }
 
+function readVisitedOrganizationIds(key: string): string[] {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(key) ?? "[]");
+    if (Array.isArray(value)) {
+      return [...new Set(value.filter((id): id is string => typeof id === "string" && id.length > 0))];
+    }
+  } catch {
+    // A missing or invalid history must not prevent navigation.
+  }
+  return [];
+}
+
 export function ActiveProfileProvider({ children }: { children: ReactNode }) {
   const { user, isAdmin, isLoading: isAuthLoading } = useAuth();
   const pathname = stripLocale(usePathname());
@@ -62,6 +74,7 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
   const routeOrgId = params?.orgId;
   const storageKey = user ? `dadosgov.activeProfile.${user.id}` : null;
   const userId = user?.id;
+  const visitedStorageKey = userId ? `dadosgov.visitedOrganizations.${userId}` : null;
   const [visited, setVisited] = useState<{
     userId: string;
     organizations: Record<string, Organization | null>;
@@ -70,7 +83,10 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     key: string;
     profile: ActiveProfile;
   } | null>(null);
-  const isRestoring = isAuthLoading || (storageKey !== null && preference?.key !== storageKey);
+  const isRestoring =
+    isAuthLoading ||
+    (storageKey !== null && preference?.key !== storageKey) ||
+    (isAdmin && !!userId && visited?.userId !== userId);
 
   const organizations = useMemo(() => {
     const memberships = user?.organizations ?? [];
@@ -89,6 +105,46 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPreference(storageKey ? { key: storageKey, profile: readStoredProfile(storageKey) } : null);
   }, [storageKey]);
+
+  useEffect(() => {
+    if (!isAdmin || !userId || !visitedStorageKey) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setVisited(null);
+      return;
+    }
+    let cancelled = false;
+    const ids = readVisitedOrganizationIds(visitedStorageKey);
+    const restore = async () => {
+      // Persist IDs only; refresh names, logos and availability from the API.
+      const results = await Promise.allSettled(ids.map((id) => fetchOrganization(id)));
+      if (cancelled) return;
+      const organizations = Object.fromEntries(
+        ids.map((id, index) => {
+          const result = results[index];
+          return [id, result.status === "fulfilled" ? result.value : null];
+        })
+      );
+      setVisited({ userId, organizations });
+    };
+    if (ids.length) {
+      void restore();
+    } else {
+      setVisited({ userId, organizations: {} });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin, userId, visitedStorageKey]);
+
+  useEffect(() => {
+    if (!isAdmin || !visitedStorageKey || !visited || visited.userId !== userId) return;
+    try {
+      const ids = Object.keys(visited.organizations).filter((id) => visited.organizations[id]);
+      localStorage.setItem(visitedStorageKey, JSON.stringify(ids));
+    } catch {
+      // Keep the session's profiles usable when storage is unavailable.
+    }
+  }, [isAdmin, userId, visitedStorageKey, visited]);
 
   const activeProfile = useMemo<ActiveProfile>(() => {
     if (!user) return PERSONAL_PROFILE;
@@ -138,7 +194,7 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
   const isLoading = isRestoring || (externalOrgId !== null && !hasResolvedOrganization);
 
   useEffect(() => {
-    if (!externalOrgId || !userId || hasResolvedOrganization) return;
+    if (!externalOrgId || !userId || isRestoring || hasResolvedOrganization) return;
     let cancelled = false;
     const remember = (org: Organization | null) => {
       if (cancelled) return;
@@ -156,7 +212,7 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [externalOrgId, userId, hasResolvedOrganization]);
+  }, [externalOrgId, userId, isRestoring, hasResolvedOrganization]);
 
   useEffect(() => {
     if (!storageKey || isLoading) return;
