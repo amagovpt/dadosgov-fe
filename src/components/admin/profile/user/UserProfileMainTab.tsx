@@ -7,6 +7,7 @@ import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import UserProfileAvatarDangerZone from "@/components/admin/profile/user/UserProfileAvatarDangerZone";
 import type { AdminCard } from "@/service/types/admin/common";
 import type { ApiToken } from "@/service/types/identity";
+import { MigrationLinkSection } from "@/components/login/MigrationLinkSection";
 
 interface UserProfileMainTabProps {
   firstName: string;
@@ -389,6 +390,13 @@ export default function UserProfileMainTab({
             </Button>
           )}
         </div>
+
+        {/* The permanent way into CMD/eIDAS linking, beside the email and the
+            password because that is where somebody looks for it. It renders
+            nothing unless the backend says this account can still link, and it
+            reads a field that survives dismissing the notice -- see the
+            component. */}
+        <MigrationLinkSection />
       </div>
 
       <div className="mt-16 flex justify-end">
