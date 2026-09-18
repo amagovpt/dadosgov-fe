@@ -6,6 +6,21 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the CMD/eIDAS linking invite was unreachable, and mismatched on hydration**
+  - **The buttons answered 404 instead of starting the flow.** `next.config.ts` lists the
+    SAML rewrites one by one with no catch-all, so a backend route not named there is
+    answered by Next.js with its own 404 and never reaches Flask. The two routes that
+    start a link from an account that is already signed in were missing, so both buttons
+    were dead on the first click. A guard now reads both lists and fails on any `/saml/…`
+    path the app calls that no rewrite covers.
+  - **The notice was rendered before the backend had answered**, so the server rendered
+    nothing, the client rendered the notice, and React threw the tree away reporting a
+    hydration mismatch. Both surfaces now wait for `/me` and appear on the render after
+    it.
+  - `agora-line-information-circle` is not an icon this design system has -- it was
+    requested as a URL and 404ed. Replaced with `agora-line-info-mark`, which the
+    codebase already uses.
+
 - **feat(login): invite a password account to link a CMD/eIDAS identity, optionally**
   - A dismissible notice for accounts that sign in with a password and hold no
     government identity, saying the three things somebody needs before deciding: the

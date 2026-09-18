@@ -110,6 +110,14 @@ describe("the permanent way back into linking", () => {
     expect(findButton(ptLogin.migrationInvite.linkCmd)).toBeDefined();
   });
 
+  it("renders nothing while the backend's answer is still in flight", () => {
+    // Same reason as its sibling: rendering before /me answers makes the
+    // server and the client disagree.
+    useAuth.mockReturnValue({ migrationLinkAvailable: true, isLoading: true });
+    renderSection();
+    expect(container.textContent).toBe("");
+  });
+
   it("renders nothing when there is nothing left to link", () => {
     // The account already holds an identity, or the feature is off. The route
     // itself refuses for the same reason, so the two cannot disagree.
