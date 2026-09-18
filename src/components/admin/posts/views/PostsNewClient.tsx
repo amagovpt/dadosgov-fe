@@ -149,7 +149,6 @@ export default function PostsNewClient({ pageContent }: PostsNewClientProps) {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("new.breadcrumbsHome"), url: "/admin" },
         { label: t("title"), url: "/admin/system/posts" },
         { label: pageContent.createHero?.title ?? "", url: "/admin/system/posts/new" },
       ]}

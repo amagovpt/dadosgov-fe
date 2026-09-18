@@ -129,8 +129,6 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-posts:title"), url: "/admin/system/posts" },
       ]}
       title={pageContent.systemHero?.title ?? ""}

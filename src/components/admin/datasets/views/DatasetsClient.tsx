@@ -11,7 +11,6 @@ import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelper
 import { fetchAdminDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
-import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
@@ -31,7 +30,6 @@ interface DatasetsClientProps {
 export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const { user, isLoading: isUserLoading } = useAuth();
-  const displayName = user ? `${user.first_name} ${user.last_name}` : "";
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -156,11 +154,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
 
   return (
     <AdminListPage
-      breadcrumbItems={buildUserAdminBreadcrumbItems({
-        t,
-        userLabel: displayName,
-        sectionLabel: t("admin-datasets:list.title"),
-      })}
+      breadcrumbItems={[{ label: t("admin-datasets:list.title") }]}
       title={t("admin-datasets:list.heroTitle")}
       kicker={t("admin-datasets:list.kicker")}
       description={t("admin-datasets:list.heroDescription")}

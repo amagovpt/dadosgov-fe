@@ -6,8 +6,6 @@ import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import { acceptMembership } from "@/service/api/organizations";
 import type { MembershipRequest, OrganizationMember } from "@/service/types/identity";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useOrganizationName } from "@/hooks/useOrganizationName";
-import { useAuth } from "@/context/AuthContext";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -30,10 +28,8 @@ interface MembersClientProps {
 export default function MembersClient({ orgId, pageContent }: MembersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-members"]);
   const { show } = usePopupContext();
-  const { user } = useAuth();
   const { activeOrg } = useActiveOrganization();
   const resolvedOrgId = orgId ?? activeOrg?.id;
-  const cachedOrgName = useOrganizationName(resolvedOrgId, user?.organizations);
   const [addMemberOpenKey, setAddMemberOpenKey] = useState(0);
   const [editMemberOpenKey, setEditMemberOpenKey] = useState(0);
   const [requestAction, setRequestAction] = useState<string | null>(null);
@@ -172,11 +168,6 @@ export default function MembersClient({ orgId, pageContent }: MembersClientProps
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        {
-          label: cachedOrgName || viewedOrg?.name || t("admin-members:organizationFallback"),
-          url: "#",
-        },
         { label: t("admin-members:breadcrumbs.members") },
       ]}
       title={pageContent.orgHero?.title ?? ""}

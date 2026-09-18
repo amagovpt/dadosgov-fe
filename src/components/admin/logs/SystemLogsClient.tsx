@@ -173,8 +173,6 @@ export default function SystemLogsClient({ pageContent }: SystemLogsClientProps)
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-logs:title"), url: "/admin/system/logs" },
       ]}
       title={pageContent.hero?.title ?? ""}

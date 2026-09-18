@@ -1,27 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { fetchCurrentUser } from "@/service/api/auth";
-import { UserRef } from "@/service/types/identity";
+import { useAuth } from "@/context/AuthContext";
 
 export function useCurrentUser() {
-  const [user, setUser] = useState<UserRef | null>(null);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await fetchCurrentUser();
-        setUser(data);
-      } catch {
-        setUser(null);
-      }
-    }
-    load();
-  }, []);
-
-  const displayName = user
-    ? `${user.first_name} ${user.last_name}`
-    : "";
+  const displayName = user ? `${user.first_name} ${user.last_name}` : "";
 
   return { user, displayName };
 }

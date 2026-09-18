@@ -109,8 +109,6 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-dataservices:title"), url: "/admin/system/dataservices" },
       ]}
       title={t("admin-dataservices:title")}

@@ -7,8 +7,6 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchMyCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
@@ -24,7 +22,6 @@ interface CommunityResourcesClientProps {
 }
 
 export default function CommunityResourcesClient({ pageContent }: CommunityResourcesClientProps) {
-  const { displayName } = useCurrentUser();
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
 
   const [allResources, setAllResources] = useState<CommunityResource[]>([]);
@@ -109,11 +106,7 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
 
   return (
     <AdminListPage
-      breadcrumbItems={buildUserAdminBreadcrumbItems({
-        t,
-        userLabel: displayName,
-        sectionLabel: t("admin-community-resources:title"),
-      })}
+      breadcrumbItems={[{ label: t("admin-community-resources:title") }]}
       title={t("admin-community-resources:title")}
       resultsCount={null}
       isLoading={isLoading}

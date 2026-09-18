@@ -119,7 +119,9 @@
     "providerEidas": "Autenticação Europeia",
     "errorSessionLost": "A sessão de associação expirou. Volte a autenticar-se com a Chave Móvel Digital ou com a Autenticação Europeia.",
     "linkTitleGeneric": "Associar conta",
-    "errorNicMissing": "A identidade autenticada não trouxe o número de identificação civil, pelo que não é possível associar a conta por esta via. Contacte o suporte do dados.gov.pt."
+    "errorNicMissing": "A identidade autenticada não trouxe o número de identificação civil, pelo que não é possível associar a conta por esta via. Contacte o suporte do dados.gov.pt.",
+    "invitedAccountMismatch": "Este ecrã está a associar a conta {{email}}. Para associar outra conta, entre nessa conta e comece a associação por lá.",
+    "linkingAccount": "Vai associar a conta {{email}}."
   },
   "terms": {
     "title": "Termos e condições",
@@ -235,6 +237,7 @@
     "close": "Fechar aviso",
     "error": "Não foi possível iniciar a associação. Tente novamente mais tarde.",
     "sectionTitle": "Autenticação com identidade digital",
+    "confirmStep": "Para concluir, vai ser pedido o email e a palavra-passe desta conta — é assim que confirmamos que é sua.",
     "onlyIfFree": "Só é possível associar se a sua Chave Móvel Digital ou Autenticação Europeia ainda não estiver ligada a outra conta do portal."
   },
   "samlErrors": {

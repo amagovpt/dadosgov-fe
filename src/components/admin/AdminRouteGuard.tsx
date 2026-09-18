@@ -75,6 +75,7 @@ export function AdminRouteGuard({
     if (
       localePath.startsWith("/admin/org") &&
       !localePath.startsWith("/admin/organizations/new") &&
+      !isAdmin &&
       !hasOrganization
     ) {
       return 403;
@@ -94,7 +95,7 @@ export function AdminRouteGuard({
       <AdminHeader />
       <div className="admin-layout">
         <AdminSideNavigation data={navigation} />
-        <div className="admin-layout__content flex items-center justify-center">
+        <div className="admin-layout__content flex items-start justify-center">
           {isLoading ? (
             <div className="flex items-center justify-center min-h-[200px]">
               <p className="text-neutral-600">{t("loading")}</p>

@@ -471,7 +471,6 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
     <AdminLayout
       title={dataservice?.title || t("admin-dataservices:edit.titleFallback")}
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
         { label: dataservice?.title || t("admin-dataservices:edit.breadcrumb"), url: "#" },
       ]}

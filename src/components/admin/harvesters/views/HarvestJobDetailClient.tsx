@@ -348,7 +348,6 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
         { label: source?.name || "Harvester", url: `/admin/harvesters/${slug}` },
         { label: job.id.toUpperCase() },
