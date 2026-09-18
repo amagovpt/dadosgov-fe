@@ -234,6 +234,11 @@
     "dismiss": "Agora não",
     "close": "Fechar aviso",
     "error": "Não foi possível iniciar a associação. Tente novamente mais tarde.",
-    "sectionTitle": "Autenticação com identidade digital"
+    "sectionTitle": "Autenticação com identidade digital",
+    "onlyIfFree": "Só é possível associar se a sua Chave Móvel Digital ou Autenticação Europeia ainda não estiver ligada a outra conta do portal."
+  },
+  "samlErrors": {
+    "invite_identity_already_linked": "Não foi possível associar: esta identidade digital já está associada a outra conta do portal. A sua conta ficou como estava. Para usar a conta que tem a identidade, entre com a Chave Móvel Digital ou a Autenticação Europeia. Para juntar o conteúdo das duas, entre na conta que quer abandonar e use Transferir em cada conjunto de dados.",
+    "generic": "Não foi possível concluir a autenticação. Tente novamente."
   }
 }
