@@ -34,6 +34,11 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: translate }),
 }));
 
+const pathname = vi.fn(() => "/pt");
+vi.mock("next/navigation", () => ({
+  usePathname: () => pathname(),
+}));
+
 const useAuth = vi.fn();
 vi.mock("@/context/AuthContext", () => ({
   useAuth: () => useAuth(),
@@ -97,6 +102,7 @@ describe("the optional CMD/eIDAS linking invite", () => {
     }
 
     useAuth.mockReturnValue({ migrationInvite: true, refresh: vi.fn() });
+    pathname.mockReturnValue("/pt");
     dismissMigrationInvite.mockResolvedValue({ dismissed: true });
     submitSamlForm.mockResolvedValue(null);
     process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
@@ -120,6 +126,19 @@ describe("the optional CMD/eIDAS linking invite", () => {
     useAuth.mockReturnValue({ migrationInvite: true, isLoading: true, refresh: vi.fn() });
     renderInvite();
     expect(container.textContent).toBe("");
+  });
+
+  it("renders nothing on the pages that ARE the linking flow", () => {
+    // Found on screen, not by a test: the notice is mounted in the public
+    // layout, and /migrate-account is a public page -- so somebody halfway
+    // through the association was still being invited to start it, with a
+    // dismiss button beside it. It reads as "the first step did not work",
+    // and those buttons would have restarted the flow from scratch.
+    for (const route of ["/pt/migrate-account", "/en/complete-registration"]) {
+      pathname.mockReturnValue(route);
+      renderInvite();
+      expect(container.textContent, `still invited on ${route}`).toBe("");
+    }
   });
 
   it("renders nothing when the backend is not inviting this account", () => {

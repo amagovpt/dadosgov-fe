@@ -52,6 +52,24 @@ export async function sendMigrationLink(): Promise<{ sent: boolean }> {
 // The password says WHICH account to link; it does not complete the link.
 // The backend mails the validation link and reports that it went out — the
 // click is what binds the identity and starts a session.
+/**
+ * A refusal that carries more than a sentence. `code` is the machine-readable
+ * reason and the fields beside it are what the screen needs to explain itself
+ * -- without them a caller can only repeat the backend's English prose, or
+ * guess.
+ */
+export class MigrationConfirmError extends Error {
+  readonly code?: string;
+  readonly expectedEmail?: string | null;
+
+  constructor(message: string, code?: string, expectedEmail?: string | null) {
+    super(message);
+    this.name = "MigrationConfirmError";
+    this.code = code;
+    this.expectedEmail = expectedEmail;
+  }
+}
+
 export async function confirmMigration(
   payload: { method: "password"; email: string; password: string }
 ): Promise<{ sent: boolean }> {
@@ -62,7 +80,11 @@ export async function confirmMigration(
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to confirm migration");
+    throw new MigrationConfirmError(
+      data.error || "Failed to confirm migration",
+      data.code,
+      data.expected_email
+    );
   }
   return await res.json();
 }
