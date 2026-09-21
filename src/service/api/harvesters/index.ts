@@ -14,13 +14,38 @@ import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 // ── Harvesters CRUD (TICKET-32) ──────────────────────────────────────
 
+export interface HarvesterListFilters {
+  owner?: string;
+  organization?: string;
+  q?: string;
+  deleted?: boolean;
+}
+
+function buildHarvesterListParams(
+  page: number,
+  pageSize: number,
+  filters?: HarvesterListFilters,
+): URLSearchParams {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  if (filters?.owner) params.set("owner", filters.owner);
+  if (filters?.organization) params.set("organization", filters.organization);
+  if (filters?.q) params.set("q", filters.q);
+  if (filters?.deleted) params.set("deleted", "true");
+  return params;
+}
+
 export async function fetchHarvesters(
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  filters?: HarvesterListFilters,
 ): Promise<APIResponse<HarvestSource>> {
   try {
+    const params = buildHarvesterListParams(page, pageSize, filters);
     const res = await fetch(
-      `${API_AUTH_URL}/harvest/sources/?page=${page}&page_size=${pageSize}`,
+      `${API_AUTH_URL}/harvest/sources/?${params.toString()}`,
       { cache: "no-store", credentials: "include" }
     );
     if (!res.ok) throw new Error(`Failed to fetch harvesters: ${res.statusText}`);
@@ -286,11 +311,13 @@ export async function fetchHarvestBackends(): Promise<HarvestBackend[]> {
 export async function fetchOrgHarvesters(
   org: string,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  filters?: HarvesterListFilters,
 ): Promise<APIResponse<HarvestSource>> {
   try {
+    const params = buildHarvesterListParams(page, pageSize, { ...filters, owner: org });
     const res = await fetch(
-      `${API_AUTH_URL}/harvest/sources/?owner=${org}&page=${page}&page_size=${pageSize}`,
+      `${API_AUTH_URL}/harvest/sources/?${params.toString()}`,
       { cache: "no-store", credentials: "include" }
     );
     if (!res.ok)

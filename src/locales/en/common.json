@@ -76,6 +76,8 @@
     "back": "Back",
     "portal": "Portal",
     "portuguese": "Portuguese",
+    "selectProfile": "Select administration area",
+    "administratorProfile": "Administrator",
     "languages": {
       "portuguese": "Portuguese",
       "english": "English"

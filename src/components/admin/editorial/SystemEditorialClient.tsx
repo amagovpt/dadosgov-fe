@@ -174,7 +174,6 @@ export default function SystemEditorialClient({ pageContent }: SystemEditorialCl
     return (
       <AdminLayout
         breadcrumbItems={[
-          { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
           { label: t("admin-editorial:title"), url: "/admin/system/editorial" },
         ]}
         title={pageContent.hero?.title ?? ""}
@@ -210,7 +209,6 @@ export default function SystemEditorialClient({ pageContent }: SystemEditorialCl
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-editorial:title"), url: "/admin/system/editorial" },
       ]}
       title={pageContent.hero?.title ?? ""}

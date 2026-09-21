@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
-import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
+import { Button, Icon, InputPassword, InputText, StatusCard } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
-import { fetchMigrationPending, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
+import { fetchMigrationPending, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation, MigrationConfirmError } from "@/service/api/migration";
 import { useTranslation } from "react-i18next";
 import { PasswordRecoveryView } from "./PasswordRecoveryView";
 import { RECAPTCHA_KEY } from "./constants";
@@ -75,6 +75,13 @@ function MigrateAccountWizard() {
   // Which identity is being linked. Named on every screen, and only the
   // backend knows it -- both ACS routes converge before the wizard opens.
   const [provider, setProvider] = useState<"cmd" | "eidas">("cmd");
+  // Whether this wizard session came from the optional invite, told by the
+  // backend and never inferred here. It removes the account-creation escape:
+  // in invite mode the person entered from inside an account they proved with
+  // a password seconds ago, so that button is not a safety net -- it is the
+  // only way left to manufacture the second account the invite exists to
+  // prevent. The endpoint refuses it too, so this is the visible half.
+  const [invited, setInvited] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -118,6 +125,7 @@ function MigrateAccountWizard() {
         }
         if (data.email) setMaskedEmail(data.email);
         if (data.provider) setProvider(data.provider);
+        setInvited(Boolean(data.invited));
         // Pre-fill the creation step with the CMD address when it is free.
         // It still has to be submitted explicitly — this is a convenience,
         // not a decision taken on the user's behalf.
@@ -202,11 +210,17 @@ function MigrateAccountWizard() {
       setStep("link-sent");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "";
-      // A correct password can now fail on the send cap or on a broken wizard
-      // session. Both used to be impossible here, and falling through to
-      // "credenciais inválidas" would tell the user their password is wrong
-      // when it is not.
-      if (message.includes("Maximum attempts")) {
+      // 🚩 A CORRECT password, for the wrong account. Only in invite mode,
+      // where the portal knows which account the person clicked from: the
+      // notice promised they keep the account they already have, so linking
+      // whichever one the password proves would quietly break that promise.
+      // It must not read as "wrong password", which is what it would if it
+      // fell through.
+      if (err instanceof MigrationConfirmError && err.code === "invited_account_mismatch") {
+        setError(
+          t("migration.invitedAccountMismatch", { email: err.expectedEmail ?? "" })
+        );
+      } else if (message.includes("Maximum attempts")) {
         setError(t("migration.errorMaximumAttempts"));
       } else if (message === "Maximum confirmation sends exceeded") {
         setError(t("migration.errorTooManyLinkSends"));
@@ -356,6 +370,19 @@ function MigrateAccountWizard() {
                 {t("migration.signInDescription", { provider: providerName })}
               </p>
 
+              {/* Which account this screen is about, said BEFORE anything is
+                  typed. The backend already sends it masked; not showing it
+                  left somebody to guess, and typing another address they own
+                  is refused (invited_account_mismatch) after the fact. With
+                  the account named, that refusal mostly stops happening. */}
+              {invited && maskedEmail && (
+                <StatusCard
+                  variant="informative"
+                  showIcon
+                  description={t("migration.linkingAccount", { email: maskedEmail })}
+                />
+              )}
+
               <InputText
                 label={t("migration.email")}
                 placeholder={t("migration.emailExample")}
@@ -411,18 +438,26 @@ function MigrateAccountWizard() {
 
               {/* The homonym with no account of their own used to escape by
                   answering "no" to "is this yours?". That question is gone, so
-                  the way out lives here. */}
-              <Button
-                variant="primary"
-                appearance="link"
-                onClick={() => {
-                  setStep("enter-email");
-                  setError(null);
-                }}
-                className="text-sm h-auto p-0"
-              >
-                {t("migration.createNewAccount")}
-              </Button>
+                  the way out lives here.
+
+                  🚫 Not offered in invite mode. There the person arrived from
+                  inside an account they had just signed into with a password,
+                  so they are locked out of nothing and this is not a safety
+                  net -- it is the only way left to end up with two accounts,
+                  which is what the invite promised to avoid. */}
+              {!invited && (
+                <Button
+                  variant="primary"
+                  appearance="link"
+                  onClick={() => {
+                    setStep("enter-email");
+                    setError(null);
+                  }}
+                  className="text-sm h-auto p-0"
+                >
+                  {t("migration.createNewAccount")}
+                </Button>
+              )}
             </div>
           )}
 

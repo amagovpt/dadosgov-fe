@@ -62,6 +62,19 @@ vi.mock("@/service/api/migration", () => ({
   confirmMigration: (payload: unknown) => confirmMigrationMock(payload),
   skipMigration: (email: string) => skipMigrationMock(email),
   resendMigrationConfirmation: vi.fn(),
+  // The real class, not a stand-in: the component narrows on `instanceof`, so
+  // a mock without it makes that check throw inside the catch and swallows
+  // every other error message the screen is supposed to show.
+  MigrationConfirmError: class MigrationConfirmError extends Error {
+    code?: string;
+    expectedEmail?: string | null;
+    constructor(message: string, code?: string, expectedEmail?: string | null) {
+      super(message);
+      this.name = "MigrationConfirmError";
+      this.code = code;
+      this.expectedEmail = expectedEmail;
+    }
+  },
 }));
 
 vi.mock("@/components/Shared/BreadcrumbDynamic", () => ({
@@ -225,6 +238,64 @@ describe("MigrateAccountClient initial step", () => {
 
     expect(text).toContain(ENTER_EMAIL_TEXT);
     expect(text).not.toContain(CREDENTIALS_TEXT);
+  });
+
+  it("offers the account-creation escape in the mandatory mode", async () => {
+    // Paired with the test below, and the pair is the point: a guard that
+    // hid this button in BOTH modes would take the emergency exit away from
+    // the people it exists for -- somebody who cannot prove the old account
+    // is theirs and would otherwise be locked out of the portal entirely.
+    const text = await render({ pending: true, candidate: true, first_name: "Ana" });
+
+    expect(text).toContain(translate("migration.createNewAccount"));
+  });
+
+  it("withholds the account-creation escape when the flow came from the invite", async () => {
+    // 🚫 There the person arrived from inside an account they had just signed
+    // into with a password, so they are locked out of nothing: the button is
+    // not a safety net, it is the only way left to end up with two accounts --
+    // which is exactly what the invite promised to avoid.
+    //
+    // The endpoint refuses it too (migration_skip stays 403 in invite mode),
+    // so this is the visible half of a guarantee that does not depend on it.
+    const text = await render({
+      pending: true,
+      candidate: true,
+      first_name: "Ana",
+      invited: true,
+    });
+
+    expect(text).toContain(CREDENTIALS_TEXT);
+    expect(text).not.toContain(translate("migration.createNewAccount"));
+  });
+
+  it("names the account it is linking, when the flow came from the invite", async () => {
+    // Said before anything is typed. The backend already sends the address
+    // masked; not showing it left somebody to guess which account this screen
+    // was about -- and typing another one they own is refused after the fact.
+    const text = await render({
+      pending: true,
+      candidate: true,
+      invited: true,
+      email: "m***@camara.pt",
+      first_name: "Maria",
+    });
+
+    expect(text).toContain("m***@camara.pt");
+  });
+
+  it("does not name an account in the mandatory flow", async () => {
+    // There the candidate was matched by NAME, which is a guess: announcing it
+    // would state as fact something the portal does not know, and the password
+    // is allowed to point somewhere else entirely.
+    const text = await render({
+      pending: true,
+      candidate: true,
+      email: "m***@camara.pt",
+      first_name: "Maria",
+    });
+
+    expect(text).not.toContain(translate("migration.linkingAccount", { email: "m***@camara.pt" }));
   });
 
   it("never renders a step between the identity and the credentials", async () => {
@@ -437,6 +508,25 @@ describe("MigrateAccountClient validation-link step", () => {
     expect(text).toContain(translate("migration.errorInvalidCredentials"));
     expect(text).toContain(CREDENTIALS_TEXT);
     expect(text).not.toContain(LINK_SENT_TEXT);
+  });
+
+  it("says which account it is linking when a CORRECT password proves another one", async () => {
+    // 🚩 The promise the notice makes -- "you keep the account you already
+    // have" -- and the path that used to break it silently: type another
+    // address you own, and the identity landed there instead, with nothing
+    // said. The password is right, so this must never read as "wrong
+    // password", and it has to name the account so the person knows what to
+    // do next.
+    const { MigrationConfirmError } = await import("@/service/api/migration");
+    confirmMigrationMock.mockRejectedValue(
+      new MigrationConfirmError("Different account", "invited_account_mismatch", "m***@camara.pt")
+    );
+    await reachCredentials();
+
+    const text = await proveByPassword();
+
+    expect(text).toContain("m***@camara.pt");
+    expect(text).not.toContain(translate("migration.errorInvalidCredentials"));
   });
 
   it("does not blame the password when it was the send limit", async () => {

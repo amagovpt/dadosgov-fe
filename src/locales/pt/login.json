@@ -119,7 +119,9 @@
     "providerEidas": "Autenticação Europeia",
     "errorSessionLost": "A sessão de associação expirou. Volte a autenticar-se com a Chave Móvel Digital ou com a Autenticação Europeia.",
     "linkTitleGeneric": "Associar conta",
-    "errorNicMissing": "A identidade autenticada não trouxe o número de identificação civil, pelo que não é possível associar a conta por esta via. Contacte o suporte do dados.gov.pt."
+    "errorNicMissing": "A identidade autenticada não trouxe o número de identificação civil, pelo que não é possível associar a conta por esta via. Contacte o suporte do dados.gov.pt.",
+    "invitedAccountMismatch": "Este ecrã está a associar a conta {{email}}. Para associar outra conta, entre nessa conta e comece a associação por lá.",
+    "linkingAccount": "Vai associar a conta {{email}}."
   },
   "terms": {
     "title": "Termos e condições",
@@ -218,5 +220,28 @@
     "errorTitle": "Link inválido ou expirado",
     "errorDescription": "Não foi possível confirmar o email com este link. Entre de novo com a Chave Móvel Digital para receber um link novo.",
     "close": "Fechar"
+  },
+  "migrationInvite": {
+    "title": "Associe a sua conta à Chave Móvel Digital ou à Autenticação Europeia",
+    "oneAccount": "No dados.gov cada pessoa só pode ter uma conta.",
+    "result": "Ao associar, fica com a mesma conta de sempre — com o seu email, os seus conjuntos de dados e as suas organizações — e passa a poder entrar por palavra-passe ou pela sua identidade digital.",
+    "optional": "Por agora é facultativo: pode fechar este aviso e continuar a usar o portal.",
+    "sessionWarning": "Ao associar, vai sair da sua conta enquanto confirma a associação. Depois volta a entrar normalmente.",
+    "alreadyTwoTitle": "Já tem duas contas no portal?",
+    "alreadyTwoDescription": "Se já entra no portal pela Chave Móvel Digital com outra conta, este aviso não as junta. Entre na conta secundária e use Transferir em cada conjunto de dados para os passar para a conta que quer manter — a conta de destino tem de aceitar, e a transferência é irreversível.",
+    "alreadyTwoLimitation": "Por agora só os conjuntos de dados podem ser transferidos. Para reutilizações e APIs, fale connosco.",
+    "alreadyTwoLink": "Ajuda e contactos",
+    "linkCmd": "Associar à Chave Móvel Digital",
+    "linkEidas": "Associar à Autenticação Europeia",
+    "dismiss": "Agora não",
+    "close": "Fechar aviso",
+    "error": "Não foi possível iniciar a associação. Tente novamente mais tarde.",
+    "sectionTitle": "Autenticação com identidade digital",
+    "confirmStep": "Para concluir, vai ser pedido o email e a palavra-passe desta conta — é assim que confirmamos que é sua.",
+    "onlyIfFree": "Só é possível associar se a sua Chave Móvel Digital ou Autenticação Europeia ainda não estiver ligada a outra conta do portal."
+  },
+  "samlErrors": {
+    "invite_identity_already_linked": "Não foi possível associar: esta identidade digital já está associada a outra conta do portal. A sua conta ficou como estava, e pode continuar a usá-la com email e palavra-passe. Para usar a conta que tem a identidade, entre com a Chave Móvel Digital ou a Autenticação Europeia. Para juntar o conteúdo das duas, entre na conta que quer abandonar e use Transferir em cada conjunto de dados.",
+    "generic": "Não foi possível concluir a autenticação. Tente novamente."
   }
 }

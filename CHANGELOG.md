@@ -6,6 +6,93 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the linking invite no longer appears on the pages about signing in**
+  - After a refused link it sat directly above the refusal: "Associe a sua conta à Chave
+    Móvel Digital" on top of "Não foi possível associar", with buttons that would repeat
+    the round-trip that had just failed. It reached that screen because the remember-me
+    cookie keeps `/me` answering after the refusal logged the session out.
+  - Same class as the notice appearing on `/migrate-account`, fixed earlier and in the
+    wrong file: the exclusion now covers every authentication page -- login, register,
+    reset-password -- not only the two the flow owns.
+
+- **fix(login): a refused sign-in now says why, and the invite names its condition**
+  - The backend has always redirected every refused SAML sign-in to `/login?saml_error=…`
+    and nothing on that screen read it, so the citizen landed on a clean login page with
+    no idea why they were not signed in. Known codes now get their own sentence and
+    anything else gets a generic one -- silence is what the screen used to offer, and it
+    leaves people concluding the portal is broken.
+  - The case that motivated it: pressing **Associar** with an identity that already
+    belongs to another account used to sign the citizen into that other account without a
+    word. They walked away believing the link had worked, and found out when the invite
+    came back. Now it stops, says the identity belongs to another account, says their own
+    account was left as it was, and points at the transfer path for content.
+  - The invite also names the condition up front -- linking only works on an identity no
+    other account holds -- so the refusal is known before the round-trip, not after it.
+
+- **fix(login): the invited link now stays on the account the person clicked from**
+  - The wizard identifies the account to link by the password proved on its screen. In
+    the mandatory mode that is the only evidence there is -- the citizen arrives
+    deauthenticated and the portal has no idea who they are. In invite mode they clicked
+    from inside an account and the portal knows which, so following the typed address
+    instead landed the identity on an account they never asked about, left the one they
+    clicked from unlinked, and said nothing. They would have found out by signing in with
+    CMD later and not recognising what they saw.
+  - Not a security hole -- reaching another account still costs that account's password.
+    It was the notice promising "you keep the account you already have" and then not.
+  - **The screen now names the account it is linking**, masked, before anything is typed,
+    so the refusal mostly stops happening. And a correct password for the wrong account no
+    longer reads as "wrong password": it says which account this screen is about and what
+    to do to link a different one.
+  - The invite also says, **before** the click, that the account's email and password will
+    be asked for at the end. Coming back from the IdP to an unexpected password prompt is
+    where people stop.
+
+- **fix(login): the CMD/eIDAS linking invite was unreachable, and mismatched on hydration**
+  - **The buttons answered 404 instead of starting the flow.** `next.config.ts` lists the
+    SAML rewrites one by one with no catch-all, so a backend route not named there is
+    answered by Next.js with its own 404 and never reaches Flask. The two routes that
+    start a link from an account that is already signed in were missing, so both buttons
+    were dead on the first click. A guard now reads both lists and fails on any `/saml/…`
+    path the app calls that no rewrite covers.
+  - **The notice was rendered before the backend had answered**, so the server rendered
+    nothing, the client rendered the notice, and React threw the tree away reporting a
+    hydration mismatch. Both surfaces now wait for `/me` and appear on the render after
+    it.
+  - `agora-line-information-circle` is not an icon this design system has -- it was
+    requested as a URL and 404ed. Replaced with `agora-line-info-mark`, which the
+    codebase already uses.
+
+- **feat(login): invite a password account to link a CMD/eIDAS identity, optionally**
+  - A dismissible notice for accounts that sign in with a password and hold no
+    government identity, saying the three things somebody needs before deciding: the
+    portal allows **one account per person**; linking keeps the account they already
+    have, reachable both ways, rather than starting another one elsewhere; and it is
+    optional **for now**, not optional forever, because the phrasing read alone promises
+    it stays that way and it does not.
+  - It also warns that **linking costs the current session** — the callback issues a
+    fresh session cookie, so the person is signed out until they finish. Said before the
+    click, because discovering it mid-flow reads as a bug.
+  - **Whether it shows is the backend's answer for that account**, read from `/me`.
+    Nothing reads configuration and nothing re-derives the condition: that is the
+    regression where the frontend assumed a migration flag and removed the sign-in form
+    from production.
+  - **Dismissing is "not now", never "never let me".** The notice hides, and the
+    permanent entry in the profile — beside the email and the password, which is where
+    people look for it — reads a different field that survives the dismissal. Built on
+    the same one, it would have vanished with the notice and changing your mind would
+    have meant waiting out the window.
+  - The linking wizard no longer offers **"Criar conta nova"** when the flow came from
+    the invite. In the mandatory mode that button is the emergency exit for somebody who
+    cannot prove the old account is theirs and would otherwise be locked out entirely;
+    reached from the invite, the person signed in with a password seconds ago and is
+    locked out of nothing, so it is only a way to end up with two accounts.
+  - Whoever already has two accounts is told what they can do, since linking does not
+    merge them — including the part that is not possible yet: **only datasets can be
+    transferred today**, and the transfer cannot be undone.
+  - The flag guard now names the new components explicitly. It reads one directory and
+    does not recurse, so a component placed elsewhere — or moved to where it actually
+    renders — would have left it green while proving nothing.
+
 - **feat(login): the completion screen says out loud that you can use an existing account's email**
   - The sentence that tells somebody they may type the address of an account they
     already have was the **last clause of a paragraph**, where it read as a footnote.

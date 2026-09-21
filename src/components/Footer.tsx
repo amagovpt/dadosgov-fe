@@ -17,6 +17,8 @@ import Image from "next/image";
 import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import { getAssets } from "@/utils/getAssets";
+import Anchor from "./Shared/Anchor";
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -103,14 +105,15 @@ const FooterBottom = ({ description, logos, social, related, copyright }: Footer
     <FooterDisclaimer key="footer-description">{description}</FooterDisclaimer>,
     ...(logos?.map((logo, index) => (
       <FooterGenericLogo key={`footer-logo-${index}`}>
-        <Image
-          src={`/Logos/${logo.icon}.svg`}
-          alt={logo.alt}
-          height={26}
-          width={100}
-          style={{ opacity: 0.5, height: 26, width: "auto" }}
-          className="object-fill"
-        />
+        <Anchor className="flex items-center gap-8" href={logo.href} target="_blank">
+          <Image
+            src={getAssets(logo.image[0].slug)}
+            alt={logo.alt}
+            height={26}
+            width={100}
+            className="object-fill opacity-50 transition-opacity hover:opacity-100 "
+          />
+        </Anchor>
       </FooterGenericLogo>
     )) ?? []),
   ];

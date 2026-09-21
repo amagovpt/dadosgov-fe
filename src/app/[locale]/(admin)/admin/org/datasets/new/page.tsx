@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import OrgDatasetsNewClient from "@/components/admin/datasets/views/OrgDatasetsNewClient";
-import { getBoDatasets, getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
+import { getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 export async function generateMetadata({
@@ -18,17 +17,6 @@ export async function generateMetadata({
   };
 }
 
-export default async function OrgDatasetsNewPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  const pageContent = await getBoDatasets(locale);
-
-  return (
-    <Suspense>
-      <OrgDatasetsNewClient pageContent={pageContent} />
-    </Suspense>
-  );
+export default function OrgDatasetsNewRedirect() {
+  return <AdminOrgRedirect targetPath="/admin/org/{orgId}/datasets/new" preserveSearchParams />;
 }

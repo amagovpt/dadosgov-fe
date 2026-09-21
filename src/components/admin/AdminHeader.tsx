@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,52 +14,34 @@ import {
   AuthenticatedBodyLink,
   AuthenticatedFooter,
   AuthenticatedFooterAction,
-  Button,
-  usePopupContext,
+  Icon,
+  type HeaderElement,
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
+import { AdminProfileSwitcher } from "@/components/admin/AdminProfileSwitcher";
 import { useAuth } from "@/context/AuthContext";
+import { useActiveProfile } from "@/context/ActiveProfileContext";
 import { logout } from "@/service/api/auth";
-
-
-function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation("admin-common");
-
-  return (
-    <div className="flex flex-col gap-16">
-      <p className="font-bold">{t("deleteAccount.irreversible")}</p>
-      <p>{t("deleteAccount.contentRemains")}</p>
-      <p>{t("deleteAccount.deletePublishedContentFirst")}</p>
-      <div className="flex justify-end gap-16 pt-16">
-        <Button appearance="outline" variant="neutral" onClick={onClose}>
-          {t("actions.cancel")}
-        </Button>
-        <Button
-          appearance="solid"
-          variant="danger"
-          hasIcon
-          leadingIcon="agora-line-trash"
-          leadingIconHover="agora-solid-trash"
-          onClick={onClose}
-        >
-          {t("actions.delete")}
-        </Button>
-      </div>
-    </div>
-  );
-}
+import { getProfileDetails } from "@/utils/profileDetails";
 
 export function AdminHeader() {
   const { user, samlLogin } = useAuth();
-  const { show, hide } = usePopupContext();
+  const { activeProfile, organizations, isLoading } = useActiveProfile();
   const { t } = useTranslation(["admin-common", "common"]);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const dsHeaderRef = useRef<HeaderElement>(null);
   const [generalBarLabelPortalNode, setGeneralBarLabelPortalNode] =
     useState<HTMLSpanElement | null>(null);
 
-  const initials = user
-    ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase()
-    : "";
+  const profile = getProfileDetails(activeProfile, {
+    user,
+    organizations,
+    administratorLabel: t("header.administratorProfile", { ns: "common" }),
+    organizationFallbackLabel: isLoading
+      ? t("loading")
+      : t("header.selectProfile", { ns: "common" }),
+  });
 
   useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
@@ -87,39 +69,9 @@ export function AdminHeader() {
     };
   }, []);
 
-  useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const btn = target.closest(".footer-action");
-      if (!btn) return;
-      const text = btn.textContent?.trim();
-      if (text === t("header.deleteAccount")) {
-        // Close the Authenticated panel before opening the popup
-        const closeBtn = wrapper.querySelector<HTMLButtonElement>(
-          ".authenticated-header .close",
-        );
-        if (closeBtn) closeBtn.click();
-
-        setTimeout(() => {
-          show(<DeleteAccountPopupContent onClose={hide} />, {
-            title: t("deleteAccount.title"),
-            closeAriaLabel: t("deleteAccount.closeAriaLabel"),
-            dimensions: "m",
-          });
-        }, 150);
-      }
-    };
-
-    wrapper.addEventListener("click", handleClick);
-    return () => wrapper.removeEventListener("click", handleClick);
-  }, [show, hide, t]);
-
   return (
-    <div ref={wrapperRef} className="admin-header [&_.navigation-bar]:hidden">
-      <Header darkMode>
+    <div ref={wrapperRef} className="admin-header profile-menu-header [&_.navigation-bar]:hidden">
+      <Header darkMode ref={dsHeaderRef}>
         <div className="admin-header__search-left">
           <SearchDropdown
             id="admin-header-search"
@@ -128,19 +80,21 @@ export function AdminHeader() {
           />
         </div>
         <GeneralBar aria-label={t("header.adminOptions")}>
-          {/* Idioma oculto temporariamente */}
           <Authenticated
-            avatarType={user?.avatar_thumbnail ? "image" : (initials ? "initials" : "icon")}
-            srcPath={
-              (user?.avatar_thumbnail || initials || "agora-line-user") as unknown as undefined
-            }
+            avatarType={profile.avatarType}
+            srcPath={profile.srcPath}
             hasBadge
             badgePosition="top-right"
-            alt={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`}
-            information={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`}
+            alt={profile.label}
+            information={profile.label}
           >
-            <AuthenticatedHeader>
-              {user?.first_name} {user?.last_name}
+            <AuthenticatedHeader closeAriaLabel={t("close", { ns: "common" })}>
+              {profile.label}
+              <Icon
+                name="agora-line-x"
+                className="absolute right-16 top-1/2 size-24 -translate-y-1/2 fill-white"
+                aria-hidden
+              />
             </AuthenticatedHeader>
             <AuthenticatedBody>
               <AuthenticatedBodyLink
@@ -160,15 +114,6 @@ export function AdminHeader() {
               {/* "As minhas definições" continua oculto até a página existir. */}
             </AuthenticatedBody>
             <AuthenticatedFooter>
-              <AuthenticatedFooterAction
-                hasIcon
-                leadingIcon="agora-line-trash"
-                leadingIconHover="agora-solid-trash"
-                variant="danger"
-                appearance="link"
-              >
-                {t("header.deleteAccount")}
-              </AuthenticatedFooterAction>
               <AuthenticatedFooterAction
                 hasIcon
                 leadingIcon="agora-line-log-out"
@@ -195,28 +140,27 @@ export function AdminHeader() {
       </Header>
       {generalBarLabelPortalNode &&
         createPortal(
-          <span className="whitespace-nowrap text-m-regular text-primary-300">
+          <span className="text-m-regular whitespace-nowrap text-primary-300">
             {t("generalBarLabel")}
           </span>,
           generalBarLabelPortalNode
         )}
-      <div className="flex w-full justify-center items-center bg-neutral-100">
+      <AdminProfileSwitcher headerRef={wrapperRef} headerHandleRef={dsHeaderRef} />
+      <div className="flex w-full items-center justify-center bg-neutral-100">
         <div className="container flex items-end justify-between py-16">
           <div className="flex flex-col">
-            <span className="text-m-regular text-neutral-900">
-              {t("header.adminAreaLabel")}
-            </span>
-            <span className="text-xl-semibold text-primary-900">
-              {t("header.portalTitle")}
-            </span>
+            <span className="text-m-regular text-neutral-900">{t("header.adminAreaLabel")}</span>
+            <span className="text-xl-semibold text-primary-900">{profile.label}</span>
           </div>
-          <Image
-            src="/Logos/Dados.gov_logocores.png"
-            alt="dados.gov.pt"
-            height={43}
-            width={251}
-            className="h-auto w-[190px]"
-          />
+          <LocalizedLink href="/">
+            <Image
+              src="/Logos/Dados.gov_logocores.png"
+              alt="dados.gov.pt"
+              height={43}
+              width={251}
+              className="h-auto w-[190px]"
+            />
+          </LocalizedLink>
         </div>
       </div>
     </div>

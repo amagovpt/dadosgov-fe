@@ -1,45 +1,38 @@
 "use client";
 
 import { Suspense, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { localizeHref } from "@/utils/localizeHref";
+import { splitLocale } from "@/utils/stripLocale";
 
 interface AdminOrgRedirectProps {
   targetPath: string;
   preserveSearchParams?: boolean;
-  requireActiveOrganization?: boolean;
 }
 
 function AdminOrgRedirectInner({
   targetPath,
   preserveSearchParams = false,
-  requireActiveOrganization = true,
 }: AdminOrgRedirectProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { locale } = splitLocale(usePathname());
   const { activeOrg, isLoading } = useActiveOrganization();
 
   useEffect(() => {
-    if (requireActiveOrganization && isLoading) return;
+    if (isLoading) return;
 
-    if (requireActiveOrganization && !activeOrg) {
-      router.replace("/admin");
+    if (!activeOrg) {
+      router.replace(localizeHref("/admin", locale));
       return;
     }
 
-    const resolvedPath = activeOrg ? targetPath.replace("{orgId}", activeOrg.id) : targetPath;
+    const resolvedPath = targetPath.replace("{orgId}", activeOrg.id);
     const params = preserveSearchParams ? searchParams.toString() : "";
 
-    router.replace(`${resolvedPath}${params ? `?${params}` : ""}`);
-  }, [
-    activeOrg,
-    isLoading,
-    preserveSearchParams,
-    requireActiveOrganization,
-    router,
-    searchParams,
-    targetPath,
-  ]);
+    router.replace(localizeHref(`${resolvedPath}${params ? `?${params}` : ""}`, locale));
+  }, [activeOrg, isLoading, preserveSearchParams, locale, router, searchParams, targetPath]);
 
   return null;
 }

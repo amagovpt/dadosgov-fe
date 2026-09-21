@@ -50,8 +50,14 @@ export function RelatedDatastories({ id, title, description, datastories }: Rela
       id={id}
       className="related-datastories flex w-full justify-center bg-primary-900 py-64"
     >
-      <InfoBlock.Root className="flex-col gap-32 lg:gap-64">
-        <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
+      <InfoBlock.Root
+        className={
+          datastories.length === 1
+            ? "flex-col gap-32 lg:flex-row lg:justify-between"
+            : "flex-col gap-32 lg:gap-64"
+        }
+      >
+        <InfoBlock.Header className="w-full gap-16 lg:w-2/5">
           <InfoBlock.Title
             titleLevel="h2"
             title={title}
@@ -64,20 +70,29 @@ export function RelatedDatastories({ id, title, description, datastories }: Rela
             />
           </InfoBlock.Content>
         </InfoBlock.Header>
-        <InfoBlock.Content className="flex flex-col gap-32">
-          <div className="grid grid-cols-12 gap-32">
-            {datastories?.map((datastory, index) => {
-              return (
-                <div
-                  className="col-span-12 h-full md:col-span-6 lg:col-span-4"
-                  key={`bignumber-${index}`}
-                >
-                  <DatastoryCard {...datastory} />
-                </div>
-              );
-            })}
+
+        {datastories.length === 1 && (
+          <div className="w-full lg:w-1/3">
+            <DatastoryCard {...datastories[0]} />
           </div>
-        </InfoBlock.Content>
+        )}
+
+        {datastories.length > 1 && (
+          <InfoBlock.Content className="flex flex-col gap-32">
+            <div className="grid grid-cols-12 gap-32">
+              {datastories?.map((datastory, index) => {
+                return (
+                  <div
+                    className="col-span-12 h-full md:col-span-6 lg:col-span-4"
+                    key={`bignumber-${index}`}
+                  >
+                    <DatastoryCard {...datastory} />
+                  </div>
+                );
+              })}
+            </div>
+          </InfoBlock.Content>
+        )}
       </InfoBlock.Root>
     </Section>
   );
