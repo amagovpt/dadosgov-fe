@@ -34,7 +34,13 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   const { t: tDs } = useTranslation("dataservices");
   const language = i18n.language as "pt" | "en";
   const [dataservice, setDataservice] = useState<Dataservice | null>(null);
-  const [swagger, setSwagger] = useState<ParsedSwagger | null>(null);
+  const [swaggerResult, setSwaggerResult] = useState<{
+    url: string;
+    spec: ParsedSwagger | null;
+  } | null>(null);
+  const documentationUrl = dataservice?.machine_documentation_url;
+  const swagger = swaggerResult?.url === documentationUrl ? swaggerResult?.spec ?? null : null;
+  const swaggerLoading = Boolean(documentationUrl) && swaggerResult?.url !== documentationUrl;
   const [swaggerOpen, setSwaggerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -61,14 +67,15 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   // Fetch and parse the OpenAPI/Swagger spec (via the SSRF-guarded proxy) once
   // the dataservice is loaded and exposes a machine documentation URL.
   useEffect(() => {
-    const url = dataservice?.machine_documentation_url;
+    const url = documentationUrl;
     if (!url) return;
-    let cancelled = false;
-    fetchSwaggerSpec(url)
-      .then((parsed) => { if (!cancelled) setSwagger(parsed); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [dataservice?.machine_documentation_url]);
+    const controller = new AbortController();
+    fetchSwaggerSpec(url, controller.signal)
+      .then((spec) => {
+        if (!controller.signal.aborted) setSwaggerResult({ url, spec });
+      });
+    return () => { controller.abort(); };
+  }, [documentationUrl]);
 
   useEffect(() => {
     if (!user || !dataservice) return;
@@ -155,7 +162,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
       dataservice.availability != null ||
       dataservice.technical_documentation_url ||
       dataservice.business_documentation_url ||
-      swagger
+      documentationUrl
   );
 
   const NOT_PROVIDED = tDs("detail.notProvided");
@@ -371,7 +378,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
 
               {(dataservice.technical_documentation_url ||
                 dataservice.business_documentation_url ||
-                swagger) && (
+                documentationUrl) && (
                 <div className="text-sm text-neutral-900">
                   <div className="mb-8">{tDs("detail.documentation")}</div>
                   <div className="flex flex-col items-start gap-8">
@@ -409,7 +416,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                         {tDs("detail.functionalDocumentation")}
                       </Button>
                     )}
-                    {swagger && (
+                    {documentationUrl && (
                       <Button
                         appearance="outline"
                         variant="neutral"
@@ -453,11 +460,12 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
       </div>
 
       {/* Swagger: parsed OpenAPI summary (mirrors data.gouv.fr) */}
-      {swagger && (
+      {documentationUrl && (
         <div className="container my-32">
           <DataserviceSwagger
             swagger={swagger}
-            machineDocumentationUrl={dataservice.machine_documentation_url as string}
+            loading={swaggerLoading}
+            machineDocumentationUrl={documentationUrl}
             open={swaggerOpen}
             onOpenChange={setSwaggerOpen}
           />

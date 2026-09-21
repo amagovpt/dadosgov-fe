@@ -105,6 +105,8 @@
     "discussions": "Discussões ({{count}})"
   },
   "swagger": {
+    "loading": "A carregar a documentação Swagger…",
+    "loadError": "Não foi possível carregar a pré-visualização. Pode consultar a documentação através da ligação «Abrir no Swagger UI».",
     "versionLabel": "Versão",
     "openInSwaggerUi": "Abrir no Swagger UI ↗",
     "baseUrl": "Base URL",

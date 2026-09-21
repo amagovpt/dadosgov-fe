@@ -105,6 +105,8 @@
     "discussions": "Discussions ({{count}})"
   },
   "swagger": {
+    "loading": "Loading Swagger documentation…",
+    "loadError": "Unable to load the preview. You can view the documentation using the “Open in Swagger UI” link.",
     "versionLabel": "Version",
     "openInSwaggerUi": "Open in Swagger UI ↗",
     "baseUrl": "Base URL",
