@@ -75,7 +75,13 @@
     "close": "Fechar",
     "back": "Voltar",
     "portal": "Portal",
-    "portuguese": "Português"
+    "portuguese": "Português",
+    "selectProfile": "Selecione área de administração",
+    "administratorProfile": "Administrador",
+    "languages": {
+      "portuguese": "Português",
+      "english": "Inglês"
+    }
   },
   "results_one": "{{count, number}} resultado",
   "results_other": "{{count, number}} resultados",

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminSideNavigation } from "@/components/admin/AdminSideNavigation";
 import { ErrorState } from "@/components/Shared/ErrorState";
+import { PortalErrorFrame } from "@/components/Shared/PortalErrorFrame";
 import { useAuth } from "@/context/AuthContext";
 import type { AdminSideNavigationData } from "@/service/types/admin-side-navigation";
 import { stripLocale } from "@/utils/stripLocale";
@@ -32,12 +33,19 @@ type Refusal = 401 | 403 | null;
  * — they are refused before a request is made.
  *
  * Owning the frame is what keeps a refusal from being furnished with the room it
- * was refused: the backoffice topbar and side navigation. A refusal renders the
- * error page and nothing else, and the portal's own header comes back on its own
- * — the root layout always renders it, and `globals.css` hides it through
- * `body:has(.admin-wrapper) > div > header.sticky`, a rule that stops matching
- * the moment this component leaves the wrapper out. Action at a distance, hence
- * the note. The public footer needs no help: it was never hidden.
+ * was refused: the backoffice topbar and side navigation. What a refusal gets
+ * instead is the portal's own frame, through `PortalErrorFrame` — an error page
+ * reads the same on both halves of the site, and the header it carries is the one
+ * way out a refused visitor still has.
+ *
+ * Nothing here has to fight the portal's header the way it used to, because a
+ * backoffice page never receives it: it belongs to `(pages)/layout.tsx`, which the
+ * `(admin)` group does not inherit, and only the refusal above asks for it back.
+ * That used to be the opposite — the root layout rendered the header for every
+ * route and a CSS rule keyed on `body:has(.admin-wrapper)` hid it after the fact,
+ * acting at a distance and, in the end, not acting at all. The footer is not part
+ * of that story: it sits in the root layout and shows on every page, backoffice
+ * included, which is also what closes the viewport under a refusal.
  *
  * While the session is still resolving the frame stays, with the placeholder
  * inside it. `useAuth` is loading on every single page load, so swapping frames
@@ -67,6 +75,7 @@ export function AdminRouteGuard({
     if (
       localePath.startsWith("/admin/org") &&
       !localePath.startsWith("/admin/organizations/new") &&
+      !isAdmin &&
       !hasOrganization
     ) {
       return 403;
@@ -74,14 +83,19 @@ export function AdminRouteGuard({
     return null;
   }, [hasOrganization, isAdmin, isLoading, localePath, user]);
 
-  if (refusal) return <ErrorState status={refusal} />;
+  if (refusal)
+    return (
+      <PortalErrorFrame>
+        <ErrorState status={refusal} />
+      </PortalErrorFrame>
+    );
 
   return (
     <div className="admin-wrapper">
       <AdminHeader />
       <div className="admin-layout">
         <AdminSideNavigation data={navigation} />
-        <div className="admin-layout__content">
+        <div className="admin-layout__content flex items-start justify-center">
           {isLoading ? (
             <div className="flex items-center justify-center min-h-[200px]">
               <p className="text-neutral-600">{t("loading")}</p>

@@ -15,7 +15,7 @@ export async function fetchOrgDiscussions(
   orgId: string,
   page: number = 1,
   pageSize: number = 20,
-  sort?: string
+  filters?: { q?: string; closed?: boolean; sort?: string }
 ): Promise<APIResponse<Discussion>> {
   try {
     const params = new URLSearchParams({
@@ -23,7 +23,9 @@ export async function fetchOrgDiscussions(
       page: String(page),
       page_size: String(pageSize),
     });
-    if (sort) params.set("sort", sort);
+    if (filters?.q) params.set("q", filters.q);
+    if (filters?.closed !== undefined) params.set("closed", String(filters.closed));
+    if (filters?.sort) params.set("sort", filters.sort);
     const res = await fetch(`${API_BASE_URL}/discussions/?${params.toString()}`, {
       cache: "no-store",
     });
@@ -85,14 +87,36 @@ export async function fetchDiscussions(
 
 // --- Topics (API v2) ---
 
+export interface TopicFilters {
+  q?: string;
+  private?: boolean;
+  tag?: string[];
+  geozone?: string;
+  granularity?: string;
+  organization?: string;
+  owner?: string;
+  featured?: boolean;
+  sort?: string;
+}
+
 export async function fetchTopics(
   page: number = 1,
   pageSize: number = 20,
-  sort?: string
+  filters?: TopicFilters
 ): Promise<APIResponse<Topic>> {
   try {
     const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
-    if (sort) params.set("sort", sort);
+    if (filters) {
+      if (filters.q) params.set("q", filters.q);
+      if (filters.private !== undefined) params.set("private", String(filters.private));
+      if (filters.geozone) params.set("geozone", filters.geozone);
+      if (filters.granularity) params.set("granularity", filters.granularity);
+      if (filters.organization) params.set("organization", filters.organization);
+      if (filters.owner) params.set("owner", filters.owner);
+      if (filters.featured !== undefined) params.set("featured", String(filters.featured));
+      if (filters.sort) params.set("sort", filters.sort);
+      filters.tag?.forEach((tag) => params.append("tag", tag));
+    }
     const res = await fetch(`${API_V2_BASE_URL}/topics/?${params.toString()}`, {
       cache: "no-store",
     });

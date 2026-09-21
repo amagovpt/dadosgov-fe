@@ -36,7 +36,7 @@ export function StatusFilterSelect({
   const [isVertical, setIsVertical] = useState(false);
 
   useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
+    const mql = window.matchMedia("(max-width: 1028px)");
     const update = () => setIsVertical(mql.matches);
     update();
     mql.addEventListener("change", update);
@@ -53,35 +53,40 @@ export function StatusFilterSelect({
     ];
 
   return (
-    <ToggleGroup
-      id={id}
-      className={className}
-      variant="primary"
-      appearance="button"
-      orientation={isVertical ? "vertical" : "horizontal"}
-      fullWidth
-      multiple={false}
-      value={value || defaultValue || ""}
-      onChange={(vals) => onChange(vals[0] ?? "")}
-    >
-      {opts.map((o) => {
-        const icon = o.icon ?? DEFAULT_STATUS_ICONS[o.value];
-        const iconHover = icon?.startsWith("agora-line-")
-          ? icon.replace("agora-line-", "agora-solid-")
-          : undefined;
-        return (
-          <Toggle
-            key={o.value}
-            value={o.value}
-            hasIcon={Boolean(icon)}
-            leadingIcon={icon}
-            leadingIconHover={iconHover}
-          >
-            {o.label}
-          </Toggle>
-        );
-      })}
-    </ToggleGroup>
+    <div className="flex w-full overflow-auto py-2">
+      <ToggleGroup
+        // The design system seeds its orientation state from the prop on mount and never
+        // syncs it again, so the group has to be remounted for a breakpoint change to apply.
+        key={isVertical ? "vertical" : "horizontal"}
+        id={id}
+        className={className}
+        variant="primary"
+        appearance="button"
+        orientation={isVertical ? "vertical" : "horizontal"}
+        fullWidth
+        multiple={false}
+        value={value || defaultValue || ""}
+        onChange={(vals) => onChange(vals[0] ?? "")}
+      >
+        {opts.map((o) => {
+          const icon = o.icon ?? DEFAULT_STATUS_ICONS[o.value];
+          const iconHover = icon?.startsWith("agora-line-")
+            ? icon.replace("agora-line-", "agora-solid-")
+            : undefined;
+          return (
+            <Toggle
+              key={o.value}
+              value={o.value}
+              hasIcon={Boolean(icon)}
+              leadingIcon={icon}
+              leadingIconHover={iconHover}
+            >
+              {o.label}
+            </Toggle>
+          );
+        })}
+      </ToggleGroup>
+    </div>
   );
 }
 

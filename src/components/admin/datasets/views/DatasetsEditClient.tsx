@@ -465,7 +465,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("edit.breadcrumbAdmin"), url: "/admin" },
         { label: t("title"), url: "/admin/me/datasets" },
         { label: dataset.title },
       ]}

@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchOrgCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   createCommunityResourceColumns,
@@ -31,8 +29,6 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const resolvedOrgId = routeOrgId || activeOrg?.id;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [resources, setResources] = useState<CommunityResource[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +36,12 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortField, setSortField] = useState<OrgCommunityResourceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const usesLocalFallback = sortField === "status" || sortField === "created_at" || sortField === "last_modified";
+  const sortParam = useMemo(
+    () => buildApiSortParam(sortField, sortOrder, { title: "title", status: null, created_at: null, last_modified: null }),
+    [sortField, sortOrder],
+  );
+  const [totalItems, setTotalItems] = useState(0);
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -49,29 +51,50 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
     setCurrentPage
   );
 
-  useEffect(() => {
-    if (!resolvedOrgId) return;
-    async function loadResources() {
-      setIsLoading(true);
-      try {
-        const response = await fetchOrgCommunityResources(resolvedOrgId!, 1, 9999);
-        setResources(response.data || []);
-      } catch (error) {
-        console.error("Error loading org community resources:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  const loadResources = useCallback(async () => {
+    if (!resolvedOrgId) {
+      setResources([]);
+      setTotalItems(0);
+      setIsLoading(false);
+      return;
     }
-    loadResources();
-  }, [resolvedOrgId]);
+
+    setIsLoading(true);
+    try {
+      const response = await fetchOrgCommunityResources(
+        resolvedOrgId,
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? 9999 : itemsPerPage,
+        { sort: sortParam },
+      );
+      setResources(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading org community resources:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, itemsPerPage, resolvedOrgId, sortParam, usesLocalFallback]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const loadCurrentResources = async () => {
+      if (isCancelled) return;
+      await loadResources();
+    };
+    void loadCurrentResources();
+    return () => {
+      isCancelled = true;
+    };
+  }, [loadResources]);
 
   const sortedResources = useMemo(
     () => sortCommunityResources(resources, sortField, sortOrder),
     [resources, sortField, sortOrder]
   );
   const paginatedResources = useMemo(
-    () => paginateItems(sortedResources, currentPage, itemsPerPage),
-    [sortedResources, currentPage, itemsPerPage]
+    () => (usesLocalFallback ? paginateItems(sortedResources, currentPage, itemsPerPage) : sortedResources),
+    [usesLocalFallback, sortedResources, currentPage, itemsPerPage]
   );
   const columns = useMemo(
     () =>
@@ -109,13 +132,12 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-community-resources:title") },
       ]}
       title={t("admin-community-resources:title")}
       isLoading={isLoading}
-      count={resources.length}
+      count={usesLocalFallback ? resources.length : totalItems}
+      hasItems={paginatedResources.length > 0}
       currentPage={currentPage}
       pageSize={itemsPerPage}
       setCurrentPage={setCurrentPage}
@@ -139,4 +161,3 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
     </AdminListPage>
   );
 }
-

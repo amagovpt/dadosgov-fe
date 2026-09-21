@@ -13,6 +13,14 @@ import type { Post } from "@/service/types/posts";
 
 export type PostSortField = "name" | "type" | "status" | "created_at" | "last_modified";
 
+export const postSortFieldMap: Record<PostSortField, string | null> = {
+  name: "name",
+  type: null,
+  status: "published",
+  created_at: "created_at",
+  last_modified: "last_modified",
+};
+
 export interface PostColumnLabels {
   title: string;
   type: string;

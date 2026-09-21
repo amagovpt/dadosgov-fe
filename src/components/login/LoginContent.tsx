@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
+  StatusCard,
   Tabs,
   Tab,
   TabHeader,
@@ -30,6 +31,12 @@ export function LoginContent() {
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 🚩 The backend redirects every refused SAML sign-in to /login?saml_error=…
+  // and, until now, nothing here read it: the citizen landed on a clean login
+  // screen with no idea why they were not signed in. Latched on first render
+  // and shown until they try again -- it explains what just happened, so it
+  // must not survive the next attempt's own outcome.
+  const [samlError] = useState<string | null>(() => searchParams.get("saml_error"));
   // Set only from the backend's `migration_required` answer, never from a config
   // flag read here — see the note in EmailTab (LEDG-2432).
   const [migrationRequired, setMigrationRequired] = useState(false);
@@ -127,6 +134,21 @@ export function LoginContent() {
                 {t("description")}
               </Typograph>
             </div>
+            {/* Why the previous attempt ended here. Codes the portal knows get
+                their own sentence; anything else gets a generic one, because
+                silence is what this screen used to offer and it left people
+                assuming the portal was broken. */}
+            {samlError && (
+              <StatusCard
+                variant={samlError === "invite_identity_already_linked" ? "informative" : "danger"}
+                showIcon
+                description={t(
+                  `samlErrors.${samlError}`,
+                  t("samlErrors.generic") as string
+                )}
+              />
+            )}
+
             <Tabs vertically className="mt-24">
               <Tab>
                 <TabHeader>{t("tabs.cmd")}</TabHeader>

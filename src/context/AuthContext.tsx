@@ -23,6 +23,14 @@ interface AuthContextProps {
   // True while the account still has a saml-* placeholder email: the user
   // must provide a real email on /complete-registration before browsing.
   pendingRegistration: boolean;
+  pendingRegistrationEmail: string | null;
+  // The optional CMD/eIDAS linking invite, as decided by the backend for this
+  // account. Read here, never derived: see UserRef.migration_invite.
+  migrationInvite: boolean;
+  // Whether the linking flow is still reachable AT ALL. Deliberately NOT the
+  // same as migrationInvite: that one goes false on dismissal, and the
+  // permanent entry point must survive it.
+  migrationLinkAvailable: boolean;
   isAdmin: boolean;
   hasOrganization: boolean;
   refresh: () => Promise<void>;
@@ -33,6 +41,9 @@ const AuthContext = createContext<AuthContextProps>({
   isLoading: true,
   samlLogin: false,
   pendingRegistration: false,
+  pendingRegistrationEmail: null,
+  migrationInvite: false,
+  migrationLinkAvailable: false,
   isAdmin: false,
   hasOrganization: false,
   refresh: async () => {},
@@ -101,6 +112,15 @@ export function AuthProvider({ children, initialSession }: {
   );
 
   const pendingRegistration = user?.pending_registration ?? false;
+  // ?? null, not ?? "": an older backend omits the field entirely, and the
+  // screen must then behave exactly as it did before rather than prefill an
+  // empty string over whatever the user may already be typing.
+  const pendingRegistrationEmail = user?.pending_registration_email ?? null;
+  // ?? false: an older backend omits the field, and no invite is the correct
+  // behaviour then. The value is the backend's answer for THIS account and is
+  // never combined with anything read here.
+  const migrationInvite = user?.migration_invite ?? false;
+  const migrationLinkAvailable = user?.migration_link_available ?? false;
 
   return (
     <AuthContext.Provider
@@ -109,6 +129,9 @@ export function AuthProvider({ children, initialSession }: {
         isLoading,
         samlLogin,
         pendingRegistration,
+        pendingRegistrationEmail,
+        migrationInvite,
+        migrationLinkAvailable,
         isAdmin,
         hasOrganization,
         refresh,

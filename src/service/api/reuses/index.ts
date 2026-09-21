@@ -14,12 +14,10 @@ import { cachedListingFetch } from "@/service/utils/listingCache";
 import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 
-/**
- * Fetch the authenticated user's reuses (paginated)
- */
 export async function fetchMyReuses(
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  search?: string
 ): Promise<APIResponse<Reuse>> {
   try {
     const res = await fetch(
@@ -32,7 +30,10 @@ export async function fetchMyReuses(
     }
 
     const raw: Reuse[] = await res.json();
-    const allReuses = raw;
+    const normalizedSearch = search?.trim().toLocaleLowerCase();
+    const allReuses = normalizedSearch
+      ? raw.filter((reuse) => reuse.title.toLocaleLowerCase().includes(normalizedSearch))
+      : raw;
     const total = allReuses.length;
     const start = (page - 1) * pageSize;
     const data = allReuses.slice(start, start + pageSize);
@@ -59,7 +60,6 @@ export async function fetchMyReuses(
   }
 }
 
-
 export async function fetchReuses(
   page: number = 1,
   pageSize: number = 20,
@@ -85,6 +85,7 @@ export async function fetchReuses(
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.dataset) params.set("dataset", filters.dataset);
       if (filters.sort) params.set("sort", filters.sort);
+      if (filters.status) params.set("status", filters.status);
       if (filters.modified_since) params.set("modified_since", filters.modified_since);
 
       const arrayParams: [string, string | string[] | undefined][] = [
@@ -366,7 +367,7 @@ export async function fetchReusesListing(
   // the real client IP so the backend keys the limiter per visitor instead
   // of the Next.js server IP.
   //
-  // See fetchDatasetsListing: a failure propagates to `[locale]/error.tsx`
+  // See fetchDatasetsListing: a failure propagates to `(pages)/error.tsx`
   // rather than degrading into an empty listing.
   return cachedListingFetch<ReusesListingResponse>(url, forwarded);
 }

@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
 import { notoSans, notoSansMono } from "../fonts";
 import "./globals.css";
-import { HeaderWrapper } from "@/components/HeaderWrapper";
-import Footer from "@/components/Footer";
 import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
 import { ToastProviderWrapper } from "@/providers/ToastProviderWrapper";
 import { ApiErrorProvider } from "@/providers/ApiErrorProvider";
 import { AuthProvider } from "@/context/AuthContext";
+import { ActiveProfileProvider } from "@/context/ActiveProfileContext";
 import { siteConfig } from "@/config/site";
 import ScrollTop from "@/components/ScrollTop";
-import NewAccountNotice from "@/components/login/NewAccountNotice";
-import ConfirmEmailNotice from "@/components/login/ConfirmEmailNotice";
-import CompleteRegistrationGate from "@/components/login/CompleteRegistrationGate";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
-import { ReactNode, Suspense } from "react";
-import { loadShellData } from "@/service/commom/shell";
+import { ReactNode } from "react";
 import { i18nConfig } from "@/config/i18nConfig";
 import initTranslations from "../i18n";
 import TranslationsProvider from "@/providers/TranslationProvider";
 import { getInitialSession } from "@/service/api/auth/server";
+import Footer from "@/components/Footer";
+import { loadShellData } from "@/service/commom/shell";
+import { ShellProvider } from "@/providers/ShellProvider";
 
 const namespaces = [
   "common",
@@ -105,40 +103,29 @@ export default async function RootLayout({
     locale,
     namespaces,
   });
-
-  // Throws when both halves of the shell are unavailable, which sends the
-  // request to `app/global-error.tsx` rather than serving an empty frame.
   const { headerNavigation, footerData } = await loadShellData(locale);
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <AuthProvider initialSession={initialSession}>
-          <ApolloWrapper>
-            <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
-              <ToastProviderWrapper>
-                <ApiErrorProvider>
-                  <PopupProviderWrapper>
-                    <ScrollTop />
-                    <div className="flex min-h-screen w-full flex-col">
-                      <HeaderWrapper data={headerNavigation} />
-                      <Suspense fallback={null}>
-                        <NewAccountNotice />
-                      </Suspense>
-                      <Suspense fallback={null}>
-                        <ConfirmEmailNotice />
-                      </Suspense>
-                      <Suspense fallback={null}>
-                        <CompleteRegistrationGate />
-                      </Suspense>
-                      <div className="">{children}</div>
-                      <Footer data={footerData} />
-                    </div>
-                  </PopupProviderWrapper>
-                </ApiErrorProvider>
-              </ToastProviderWrapper>
-            </TranslationsProvider>
-          </ApolloWrapper>
+          <ActiveProfileProvider>
+            <ApolloWrapper>
+              <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
+                <ToastProviderWrapper>
+                  <ApiErrorProvider>
+                    <PopupProviderWrapper>
+                      <ShellProvider headerNavigation={headerNavigation}>
+                        <ScrollTop />
+                        {children}
+                        <Footer data={footerData} />
+                      </ShellProvider>
+                    </PopupProviderWrapper>
+                  </ApiErrorProvider>
+                </ToastProviderWrapper>
+              </TranslationsProvider>
+            </ApolloWrapper>
+          </ActiveProfileProvider>
         </AuthProvider>
       </body>
     </html>

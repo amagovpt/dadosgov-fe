@@ -13,6 +13,11 @@ export async function fetchMigrationPending(): Promise<{
   // homonyms — both arrive with candidate false, and they need different
   // first steps. Only ever true when the identity also carries a NIC.
   no_match?: boolean;
+  // Started from the optional linking invite, as opposed to the mandatory
+  // mode. The wizard cannot tell otherwise -- both reach it through the same
+  // redirect -- and it decides which escape hatch the screen offers. Absent
+  // reads as false: the mandatory mode is the older behaviour.
+  invited?: boolean;
   // The wizard is over, but the account it created is still waiting for its
   // owner to follow the confirmation link.
   awaiting_confirmation?: boolean;
@@ -47,6 +52,24 @@ export async function sendMigrationLink(): Promise<{ sent: boolean }> {
 // The password says WHICH account to link; it does not complete the link.
 // The backend mails the validation link and reports that it went out — the
 // click is what binds the identity and starts a session.
+/**
+ * A refusal that carries more than a sentence. `code` is the machine-readable
+ * reason and the fields beside it are what the screen needs to explain itself
+ * -- without them a caller can only repeat the backend's English prose, or
+ * guess.
+ */
+export class MigrationConfirmError extends Error {
+  readonly code?: string;
+  readonly expectedEmail?: string | null;
+
+  constructor(message: string, code?: string, expectedEmail?: string | null) {
+    super(message);
+    this.name = "MigrationConfirmError";
+    this.code = code;
+    this.expectedEmail = expectedEmail;
+  }
+}
+
 export async function confirmMigration(
   payload: { method: "password"; email: string; password: string }
 ): Promise<{ sent: boolean }> {
@@ -57,7 +80,11 @@ export async function confirmMigration(
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to confirm migration");
+    throw new MigrationConfirmError(
+      data.error || "Failed to confirm migration",
+      data.code,
+      data.expected_email
+    );
   }
   return await res.json();
 }
@@ -104,5 +131,23 @@ export async function resendMigrationConfirmation(): Promise<{
     const data = await res.json().catch(() => ({}));
     throw new Error(data.error || "Failed to resend confirmation");
   }
+  return await res.json();
+}
+
+
+// Records that this account is not linking right now (LEDG-2517).
+//
+// Takes no argument and sends no body: the account is read from the session on
+// the backend, never named by the caller, so a session can only ever dismiss
+// its own invite.
+//
+// Answers 200 whether or not an invite was actually being offered, so a double
+// click is not an error the caller has to explain.
+export async function dismissMigrationInvite(): Promise<{ dismissed: boolean }> {
+  const res = await fetch("/saml/migration/invite/dismiss", {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to dismiss the linking invite");
   return await res.json();
 }

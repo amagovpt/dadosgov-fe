@@ -1,26 +1,19 @@
 "use client";
 
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Breadcrumb from '../Primitives/Breadcrumb/Breadcrumb'
 import PublishDropdown from '../admin/PublishDropdown'
+import { buildAdminBreadcrumbItems, type AdminBreadcrumbItem } from '@/utils/adminBreadcrumbs'
 
 export type AdminLayoutProps = {
     title: string
     kicker?: string
     description?: string
-    breadcrumbItems: {
-        label: string
-        url?: string
-    }[],
+    /** Section and detail items; the layout adds the administration root. */
+    breadcrumbItems: AdminBreadcrumbItem[],
     headerAction?: React.ReactNode
     children: React.ReactNode
-}
-
-function buildStaticAdminBreadcrumbItems(items: AdminLayoutProps["breadcrumbItems"]) {
-    return items.map((item, index) => ({
-        ...item,
-        url: index === items.length - 1 ? "" : item.url || "#",
-    }))
 }
 
 export default function AdminLayout({
@@ -31,19 +24,20 @@ export default function AdminLayout({
     headerAction = <PublishDropdown />,
     children,
 }: AdminLayoutProps) {
+    const { t } = useTranslation('admin-common')
     return (
-        <div className="container mx-auto flex flex-col gap-64 pt-32 pb-64 admin-page">
+        <div className="container flex flex-col gap-64 pt-64 pb-96">
             <div className="w-full flex flex-col gap-32">
                 <div className="w-full">
                     <Breadcrumb
                         className="admin-breadcrumb-static"
-                        items={buildStaticAdminBreadcrumbItems(breadcrumbItems)}
+                        items={buildAdminBreadcrumbItems({ t, items: breadcrumbItems })}
                         validateUrls={false}
                         onClickCapture={(event) => event.preventDefault()}
                     />
                 </div>
 
-                <div className="flex flex-col items-start gap-24 lg:flex-row lg:items-end lg:justify-between">
+                <div className="w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between">
                     <div className="flex flex-col gap-8 max-w-[696px]">
                         {kicker && <span className="text-sm text-neutral-700">{kicker}</span>}
                         <h1 className="text-2xl-bold text-brand-blue-secondary">
@@ -54,9 +48,9 @@ export default function AdminLayout({
                     {headerAction}
                 </div>
             </div>
-            <div>
+            <>
                 {children}
-            </div>
+            </>
         </div>
     )
 }

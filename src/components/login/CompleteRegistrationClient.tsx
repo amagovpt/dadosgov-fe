@@ -16,6 +16,11 @@ const FLASH_ERRORS: Record<string, string> = {
   change_email_already_taken: "completeRegistration.flash.alreadyTaken",
   change_email_invalid: "completeRegistration.flash.invalid",
   change_email_expired: "completeRegistration.flash.expired",
+  // Emitted by the association link click, not by confirm-change-email. The
+  // string is shared verbatim with the backend (see
+  // REGISTRATION_ASSOCIATION_REFUSED_FLASH) and with CompleteRegistrationGate,
+  // which has to forward it for the message to survive the redirect here.
+  registration_association_refused: "completeRegistration.flash.associationRefused",
 };
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -31,9 +36,15 @@ export default function CompleteRegistrationClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { user, isLoading: isAuthLoading, pendingRegistration } = useAuth();
+  const { user, isLoading: isAuthLoading, pendingRegistration, pendingRegistrationEmail } =
+    useAuth();
 
-  const [email, setEmail] = useState("");
+  const [emailInput, setEmailInput] = useState("");
+  // Whether the address field has been touched. The prefill is DERIVED from
+  // this rather than written into state by an effect: an effect would have to
+  // wait for the auth to resolve and then write, which is a cascading render,
+  // and it would refill the field the moment the user cleared it.
+  const [emailTouched, setEmailTouched] = useState(false);
   const [emailConfirm, setEmailConfirm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +85,16 @@ export default function CompleteRegistrationClient() {
     const timer = setTimeout(() => setResendCountdown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [resendCountdown]);
+
+  // The offered address until the field is touched, then whatever was typed.
+  // The confirmation field is deliberately NOT prefilled: the address is still
+  // read and confirmed by a person, which is why it is asked twice, and the
+  // assertion proves the identity, never the mailbox.
+  const email = emailTouched ? emailInput : (pendingRegistrationEmail ?? "");
+
+  // Only while the offered address is still what is on screen: once it is
+  // edited, naming its origin would describe something no longer there.
+  const prefilledFromCmd = !emailTouched && !!pendingRegistrationEmail;
 
   const emailValid = EMAIL_RE.test(email.trim());
   const emailsMatch = email.trim() !== "" && email.trim() === emailConfirm.trim();
@@ -184,6 +205,25 @@ export default function CompleteRegistrationClient() {
                   <p className="mb-8 text-neutral-900">
                     {t("completeRegistration.description")}
                   </p>
+                  {prefilledFromCmd && (
+                    <p className="mb-8 text-sm text-neutral-700">
+                      {t("completeRegistration.prefillNotice")}
+                    </p>
+                  )}
+                  {/* The one signal that the association path exists at all.
+                      It used to be the last sentence of the paragraph above,
+                      where it read as a footnote — and this screen has no
+                      other way of telling somebody that typing the address of
+                      an account they already have is a supported thing to do,
+                      because the alternative (a second button) would have to
+                      disclose whether that address exists. */}
+                  <div className="mb-16">
+                    <StatusCard
+                      variant="informative"
+                      showIcon
+                      description={t("completeRegistration.existingAccountNotice")}
+                    />
+                  </div>
                   <p className="text-sm text-neutral-700">
                     {t("completeRegistration.requiredFields")}
                   </p>
@@ -210,9 +250,10 @@ export default function CompleteRegistrationClient() {
                     autoComplete="email"
                     className="w-full"
                     value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setEmail(e.target.value)
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setEmailTouched(true);
+                      setEmailInput(e.target.value);
+                    }}
                     disabled={isSubmitting}
                     hasError={email !== "" && !emailValid}
                   />

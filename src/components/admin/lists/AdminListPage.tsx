@@ -70,6 +70,8 @@ export default function AdminListPage({
   const shouldRenderToolbar = Boolean(search || filters || toolbarActions);
   const shouldRenderTable = hasItems ?? count > 0;
   const defaultLoadingContent = <p className="text-sm text-neutral-700">{t("loading")}</p>;
+  const isInitialLoading = isLoading && !shouldRenderTable;
+  const isRefreshing = isLoading && shouldRenderTable;
 
   return (
     <AdminLayout
@@ -82,15 +84,15 @@ export default function AdminListPage({
       {listTitle && (
         <h2 className="text-xl-bold text-brand-blue-secondary mb-32">{listTitle}</h2>
       )}
-      {resultsCount !== undefined ? resultsCount : <ResultsCount count={count} isLoading={isLoading} />}
+      {/* {resultsCount ?? <ResultsCount count={count} isLoading={isInitialLoading} />} */}
 
       {shouldRenderToolbar && (
-        <div className="mb-32 flex flex-col gap-32">
+        <div className="flex flex-col gap-32">
           {filters}
           {(search || toolbarActions) && (
             <div className="flex items-end gap-16">
               {search && (
-                <div className="admin-search-wrapper">
+                <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
                     label={search.label}
@@ -110,19 +112,21 @@ export default function AdminListPage({
 
       {feedback}
 
-      {isLoading ? (
+      {isInitialLoading ? (
         loadingContent ?? defaultLoadingContent
       ) : shouldRenderTable ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={count}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
-          paginationOptions={paginationOptions}
-        >
-          {children}
-        </AdminPaginatedTable>
+        <div aria-busy={isRefreshing} className="flex flex-col gap-16 overflow-auto xl:overflow-hidden [&_.agora-table-pagination]:w-full!">
+          <AdminPaginatedTable
+            pageSize={pageSize}
+            totalItems={count}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            setPageSize={setPageSize}
+            paginationOptions={paginationOptions}
+          >
+            {children}
+          </AdminPaginatedTable>
+        </div>
       ) : (
         emptyState
       )}
