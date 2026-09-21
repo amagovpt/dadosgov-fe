@@ -19,6 +19,7 @@ import { loadShellData } from "@/service/commom/shell";
 import { i18nConfig } from "@/config/i18nConfig";
 import initTranslations from "../i18n";
 import TranslationsProvider from "@/providers/TranslationProvider";
+import { getInitialSession } from "@/service/api/auth/server";
 
 const namespaces = [
   "common",
@@ -98,6 +99,7 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: rawLocale } = await params;
+  const initialSession = getInitialSession();
   const locale = i18nConfig.locales.includes(rawLocale) ? rawLocale : i18nConfig.defaultLocale;
   const { resources } = await initTranslations({
     locale,
@@ -111,7 +113,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} data-scroll-behavior="smooth">
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
-        <AuthProvider>
+        <AuthProvider initialSession={initialSession}>
           <ApolloWrapper>
             <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
               <ToastProviderWrapper>

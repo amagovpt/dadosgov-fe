@@ -32,6 +32,7 @@
     }
   },
   "detail": {
+    "favoriteError": "Não foi possível carregar ou atualizar o estado do favorito.",
     "notFound": "API não encontrada.",
     "untitled": "Sem título",
     "noDescription": "Sem descrição",
@@ -93,6 +94,10 @@
     }
   },
   "tabs": {
+    "loadingDiscussions": "A carregar discussões…",
+    "discussionsError": "Não foi possível carregar as discussões.",
+    "loadingDatasets": "A carregar os conjuntos de dados relacionados…",
+    "datasetsError": "Não foi possível carregar os conjuntos de dados relacionados.",
     "info": "Informações",
     "relatedDatasetsCount_one": "{{count}} CONJUNTO DE DADOS RELACIONADO",
     "relatedDatasetsCount_other": "{{count}} CONJUNTOS DE DADOS RELACIONADOS",

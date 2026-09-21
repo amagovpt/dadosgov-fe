@@ -32,6 +32,7 @@
     }
   },
   "detail": {
+    "favoriteError": "Unable to update or load your favourite status.",
     "notFound": "API not found.",
     "untitled": "No title",
     "noDescription": "No description",
@@ -93,6 +94,10 @@
     }
   },
   "tabs": {
+    "loadingDiscussions": "Loading discussions…",
+    "discussionsError": "Unable to load discussions.",
+    "loadingDatasets": "Loading related datasets…",
+    "datasetsError": "Unable to load the related datasets.",
     "info": "Information",
     "relatedDatasetsCount_one": "{{count}} RELATED DATASET",
     "relatedDatasetsCount_other": "{{count}} RELATED DATASETS",

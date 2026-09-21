@@ -27,6 +27,7 @@ interface DiscussionSectionProps {
   entityId: string;
   entityClass: "Reuse" | "Dataset" | "Organization" | "Dataservice";
   onCountChange?: (count: number) => void;
+  initialData?: { data: Discussion[]; total: number };
 }
 
 interface ReplyFormProps {
@@ -132,12 +133,13 @@ export function DiscussionSection({
   entityId,
   entityClass,
   onCountChange,
+  initialData,
 }: DiscussionSectionProps) {
   const { t, i18n } = useTranslation("common");
   const { user } = useAuth();
   const { show } = usePopupContext();
-  const [discussions, setDiscussions] = useState<Discussion[]>([]);
-  const [discussionCount, setDiscussionCount] = useState(0);
+  const [discussions, setDiscussions] = useState<Discussion[]>(initialData?.data ?? []);
+  const [discussionCount, setDiscussionCount] = useState(initialData?.total ?? 0);
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [newDiscTitle, setNewDiscTitle] = useState("");
   const [newDiscMessage, setNewDiscMessage] = useState("");
@@ -155,20 +157,28 @@ export function DiscussionSection({
   );
 
   useEffect(() => {
+    if (initialData) {
+      onCountChange?.(initialData.total);
+      return;
+    }
+    let cancelled = false;
     async function load() {
       try {
         const response =
           entityClass === "Organization"
             ? await fetchOrgDiscussions(entityId)
             : await fetchDiscussions(entityId);
-        setDiscussions(response.data ?? []);
-        updateDiscussionCount(response.total ?? 0);
+        if (!cancelled) {
+          setDiscussions(response.data ?? []);
+          updateDiscussionCount(response.total ?? 0);
+        }
       } catch (error) {
         console.error("Error loading discussions:", error);
       }
     }
     load();
-  }, [entityId, entityClass, updateDiscussionCount]);
+    return () => { cancelled = true; };
+  }, [entityId, entityClass, updateDiscussionCount, initialData, onCountChange]);
 
   const handleCreateDiscussion = async () => {
     if (!newDiscTitle.trim() || !newDiscMessage.trim()) return;
