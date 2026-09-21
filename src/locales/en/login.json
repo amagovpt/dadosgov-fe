@@ -119,7 +119,9 @@
     "providerEidas": "European Authentication",
     "errorSessionLost": "The linking session has expired. Sign in again with Chave Móvel Digital or with European Authentication.",
     "linkTitleGeneric": "Link account",
-    "errorNicMissing": "The authenticated identity did not provide a civil identification number, so the account cannot be linked this way. Please contact dados.gov.pt support."
+    "errorNicMissing": "The authenticated identity did not provide a civil identification number, so the account cannot be linked this way. Please contact dados.gov.pt support.",
+    "invitedAccountMismatch": "This screen is linking the account {{email}}. To link a different one, sign in to that account and start from there.",
+    "linkingAccount": "You are linking the account {{email}}."
   },
   "terms": {
     "title": "Terms and conditions",
@@ -234,6 +236,12 @@
     "dismiss": "Not now",
     "close": "Close notice",
     "error": "The linking flow could not be started. Please try again later.",
-    "sectionTitle": "Sign in with a digital identity"
+    "sectionTitle": "Sign in with a digital identity",
+    "confirmStep": "To finish, you will be asked for this account's email and password — that is how we confirm it is yours.",
+    "onlyIfFree": "Linking is only possible if your Digital Mobile Key or European Authentication is not already tied to another account on the portal."
+  },
+  "samlErrors": {
+    "invite_identity_already_linked": "Linking was not possible: this digital identity already belongs to another account on the portal. Your account was left as it was, and you can carry on using it with email and password. To use the account that holds the identity, sign in with the Digital Mobile Key or European Authentication. To bring the content together, sign in to the account you want to leave behind and use Transfer on each dataset.",
+    "generic": "Authentication could not be completed. Please try again."
   }
 }

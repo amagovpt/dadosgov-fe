@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
-import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
+import { Button, Icon, InputPassword, InputText, StatusCard } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
-import { fetchMigrationPending, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation } from "@/service/api/migration";
+import { fetchMigrationPending, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation, MigrationConfirmError } from "@/service/api/migration";
 import { useTranslation } from "react-i18next";
 import { PasswordRecoveryView } from "./PasswordRecoveryView";
 import { RECAPTCHA_KEY } from "./constants";
@@ -210,11 +210,17 @@ function MigrateAccountWizard() {
       setStep("link-sent");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "";
-      // A correct password can now fail on the send cap or on a broken wizard
-      // session. Both used to be impossible here, and falling through to
-      // "credenciais inválidas" would tell the user their password is wrong
-      // when it is not.
-      if (message.includes("Maximum attempts")) {
+      // 🚩 A CORRECT password, for the wrong account. Only in invite mode,
+      // where the portal knows which account the person clicked from: the
+      // notice promised they keep the account they already have, so linking
+      // whichever one the password proves would quietly break that promise.
+      // It must not read as "wrong password", which is what it would if it
+      // fell through.
+      if (err instanceof MigrationConfirmError && err.code === "invited_account_mismatch") {
+        setError(
+          t("migration.invitedAccountMismatch", { email: err.expectedEmail ?? "" })
+        );
+      } else if (message.includes("Maximum attempts")) {
         setError(t("migration.errorMaximumAttempts"));
       } else if (message === "Maximum confirmation sends exceeded") {
         setError(t("migration.errorTooManyLinkSends"));
@@ -363,6 +369,19 @@ function MigrateAccountWizard() {
               <p className="text-neutral-900">
                 {t("migration.signInDescription", { provider: providerName })}
               </p>
+
+              {/* Which account this screen is about, said BEFORE anything is
+                  typed. The backend already sends it masked; not showing it
+                  left somebody to guess, and typing another address they own
+                  is refused (invited_account_mismatch) after the fact. With
+                  the account named, that refusal mostly stops happening. */}
+              {invited && maskedEmail && (
+                <StatusCard
+                  variant="informative"
+                  showIcon
+                  description={t("migration.linkingAccount", { email: maskedEmail })}
+                />
+              )}
 
               <InputText
                 label={t("migration.email")}

@@ -60,6 +60,12 @@ export function MigrationLinkSection() {
       <Typograph tag="p" className="text-sm text-neutral-700">
         {t("migrationInvite.sessionWarning")}
       </Typograph>
+      <Typograph tag="p" className="text-sm text-neutral-700">
+        {t("migrationInvite.confirmStep")}
+      </Typograph>
+      <Typograph tag="p" className="text-sm text-neutral-700">
+        {t("migrationInvite.onlyIfFree")}
+      </Typograph>
 
       {error && <StatusCard variant="danger" showIcon description={error} />}
 

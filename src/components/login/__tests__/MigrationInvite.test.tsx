@@ -34,6 +34,11 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: translate }),
 }));
 
+const pathname = vi.fn(() => "/pt");
+vi.mock("next/navigation", () => ({
+  usePathname: () => pathname(),
+}));
+
 const useAuth = vi.fn();
 vi.mock("@/context/AuthContext", () => ({
   useAuth: () => useAuth(),
@@ -97,6 +102,7 @@ describe("the optional CMD/eIDAS linking invite", () => {
     }
 
     useAuth.mockReturnValue({ migrationInvite: true, refresh: vi.fn() });
+    pathname.mockReturnValue("/pt");
     dismissMigrationInvite.mockResolvedValue({ dismissed: true });
     submitSamlForm.mockResolvedValue(null);
     process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
@@ -120,6 +126,39 @@ describe("the optional CMD/eIDAS linking invite", () => {
     useAuth.mockReturnValue({ migrationInvite: true, isLoading: true, refresh: vi.fn() });
     renderInvite();
     expect(container.textContent).toBe("");
+  });
+
+  it("says up front that linking only works on an identity nobody else holds", () => {
+    // The condition that most invites misreading. Somebody whose CMD already
+    // belongs to another account is refused at the END of the round-trip --
+    // saying it here saves the trip, and saves them believing it worked.
+    renderInvite();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.onlyIfFree);
+  });
+
+  it("renders nothing on the pages that ARE the linking flow", () => {
+    // Found on screen, not by a test: the notice is mounted in the public
+    // layout, and /migrate-account is a public page -- so somebody halfway
+    // through the association was still being invited to start it, with a
+    // dismiss button beside it. It reads as "the first step did not work",
+    // and those buttons would have restarted the flow from scratch.
+    for (const route of [
+      "/pt/migrate-account",
+      "/en/complete-registration",
+      // 🚩 And /login, which is where a refusal lands. Without it the screen
+      // says "Associe a sua conta" directly above "Não foi possível associar",
+      // and the buttons repeat the round-trip that just failed. The notice
+      // gets there because the remember-me cookie keeps /me answering after
+      // the refusal logged the session out.
+      "/pt/login",
+      "/pt/register",
+      "/pt/reset-password",
+      "/pt/loginregister",
+    ]) {
+      pathname.mockReturnValue(route);
+      renderInvite();
+      expect(container.textContent, `still invited on ${route}`).toBe("");
+    }
   });
 
   it("renders nothing when the backend is not inviting this account", () => {

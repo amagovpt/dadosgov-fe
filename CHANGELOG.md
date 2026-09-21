@@ -6,6 +6,47 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the linking invite no longer appears on the pages about signing in**
+  - After a refused link it sat directly above the refusal: "Associe a sua conta à Chave
+    Móvel Digital" on top of "Não foi possível associar", with buttons that would repeat
+    the round-trip that had just failed. It reached that screen because the remember-me
+    cookie keeps `/me` answering after the refusal logged the session out.
+  - Same class as the notice appearing on `/migrate-account`, fixed earlier and in the
+    wrong file: the exclusion now covers every authentication page -- login, register,
+    reset-password -- not only the two the flow owns.
+
+- **fix(login): a refused sign-in now says why, and the invite names its condition**
+  - The backend has always redirected every refused SAML sign-in to `/login?saml_error=…`
+    and nothing on that screen read it, so the citizen landed on a clean login page with
+    no idea why they were not signed in. Known codes now get their own sentence and
+    anything else gets a generic one -- silence is what the screen used to offer, and it
+    leaves people concluding the portal is broken.
+  - The case that motivated it: pressing **Associar** with an identity that already
+    belongs to another account used to sign the citizen into that other account without a
+    word. They walked away believing the link had worked, and found out when the invite
+    came back. Now it stops, says the identity belongs to another account, says their own
+    account was left as it was, and points at the transfer path for content.
+  - The invite also names the condition up front -- linking only works on an identity no
+    other account holds -- so the refusal is known before the round-trip, not after it.
+
+- **fix(login): the invited link now stays on the account the person clicked from**
+  - The wizard identifies the account to link by the password proved on its screen. In
+    the mandatory mode that is the only evidence there is -- the citizen arrives
+    deauthenticated and the portal has no idea who they are. In invite mode they clicked
+    from inside an account and the portal knows which, so following the typed address
+    instead landed the identity on an account they never asked about, left the one they
+    clicked from unlinked, and said nothing. They would have found out by signing in with
+    CMD later and not recognising what they saw.
+  - Not a security hole -- reaching another account still costs that account's password.
+    It was the notice promising "you keep the account you already have" and then not.
+  - **The screen now names the account it is linking**, masked, before anything is typed,
+    so the refusal mostly stops happening. And a correct password for the wrong account no
+    longer reads as "wrong password": it says which account this screen is about and what
+    to do to link a different one.
+  - The invite also says, **before** the click, that the account's email and password will
+    be asked for at the end. Coming back from the IdP to an unexpected password prompt is
+    where people stop.
+
 - **fix(login): the CMD/eIDAS linking invite was unreachable, and mismatched on hydration**
   - **The buttons answered 404 instead of starting the flow.** `next.config.ts` lists the
     SAML rewrites one by one with no catch-all, so a backend route not named there is
