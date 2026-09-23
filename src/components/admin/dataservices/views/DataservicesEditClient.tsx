@@ -738,7 +738,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
 
                   {auxiliarItems.length > 0 ? (
                     <aside className="w-[360px] max-w-full shrink-0">
-                      <div className="admin-page__auxiliar-inner">
+                      <div className="bg-neutral-100 p-32">
                         <div className="admin-page__auxiliar-header">
                           <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
                           <h2 className="admin-page__auxiliar-title">

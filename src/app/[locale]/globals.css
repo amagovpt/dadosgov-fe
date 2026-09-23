@@ -1700,13 +1700,6 @@ li.section-name:empty {
 }
 
 /* Auxiliar sidebar */
-.admin-page__auxiliar-inner {
-  background-color: var(--color-neutral-100);
-  padding: 32px;
-  position: sticky;
-  top: 80px;
-}
-
 .admin-page__auxiliar-header {
   display: flex;
   align-items: center;

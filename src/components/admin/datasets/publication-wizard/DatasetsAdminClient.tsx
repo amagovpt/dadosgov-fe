@@ -705,7 +705,7 @@ export default function DatasetsAdminClient({
       {/* Right: Auxiliar sidebar */}
       {currentStep !== 4 && auxiliarItems.length > 0 && (
         <aside className="w-[360px] max-w-full shrink-0">
-          <div className="admin-page__auxiliar-inner">
+          <div className="bg-neutral-100 p-32">
             <div className="admin-page__auxiliar-header">
               <Icon name="agora-line-question-mark" className="h-24 w-24" />
               <h2 className="admin-page__auxiliar-title">{t("admin-common:auxiliary.title")}</h2>
