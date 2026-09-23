@@ -600,9 +600,9 @@ export default function DatasetsAdminClient({
   return (
     <>
       {/* Main content area: form + auxiliar sidebar */}
-    <div className="admin-page__body">
+    <div className="flex flex-col gap-32 min-[1025px]:flex-row">
       {/* Left: Form */}
-      <div className="admin-page__form-area">
+      <div className="flex min-w-0 flex-1 flex-col gap-24">
         {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
         {currentStep === 2 && (
@@ -704,7 +704,7 @@ export default function DatasetsAdminClient({
 
       {/* Right: Auxiliar sidebar */}
       {currentStep !== 4 && auxiliarItems.length > 0 && (
-        <aside className="admin-page__auxiliar">
+        <aside className="w-[360px] max-w-full shrink-0">
           <div className="admin-page__auxiliar-inner">
             <div className="admin-page__auxiliar-header">
               <Icon name="agora-line-question-mark" className="h-24 w-24" />

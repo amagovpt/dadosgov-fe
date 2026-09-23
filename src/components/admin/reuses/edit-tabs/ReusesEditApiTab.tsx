@@ -36,8 +36,8 @@ export default function ReusesEditApiTab({
   const { t } = useTranslation("admin-reuses");
 
   return (
-    <div className="admin-page__body mt-24">
-      <div className="admin-page__form-area">
+    <div className="flex flex-col gap-32 min-[1025px]:flex-row mt-24">
+      <div className="flex min-w-0 flex-1 flex-col gap-24">
         {dataservices && dataservices.length > 0 && (
           <div className="mb-24 space-y-16">
             {dataservices.map((api) => (

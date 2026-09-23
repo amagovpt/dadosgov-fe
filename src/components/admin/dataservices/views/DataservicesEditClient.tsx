@@ -552,8 +552,8 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
             <Tab>
               <TabHeader>{t("admin-dataservices:edit.metadataTab")}</TabHeader>
               <TabBody>
-                <div className="admin-page__body">
-                  <div className="admin-page__form-area">
+                <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+                  <div className="flex min-w-0 flex-1 flex-col gap-24">
                     {dataservice.private && pageContent.draftVisibilityCard && (
                       <div className="dataset-edit-visibility-banner">
                         <StatusCard
@@ -737,7 +737,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                   </div>
 
                   {auxiliarItems.length > 0 ? (
-                    <aside className="admin-page__auxiliar">
+                    <aside className="w-[360px] max-w-full shrink-0">
                       <div className="admin-page__auxiliar-inner">
                         <div className="admin-page__auxiliar-header">
                           <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
@@ -761,7 +761,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                 })}
               </TabHeader>
               <TabBody>
-                <div className="mt-24 admin-page__form-area">
+                <div className="mt-24 flex min-w-0 flex-1 flex-col gap-24">
                   {pageContent.datasetLinksInfo ? (
                     <StatusCard
                       variant="informative"

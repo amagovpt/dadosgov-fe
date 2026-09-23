@@ -13,7 +13,7 @@ export default function AdminAuxiliarySidebar({ items }: AdminAuxiliarySidebarPr
   const { t } = useTranslation("admin-common");
 
   return (
-    <aside className="admin-page__auxiliar">
+    <aside className="w-[360px] max-w-full shrink-0">
       <div className="admin-page__auxiliar-inner">
         <div className="admin-page__auxiliar-header">
           <Icon name="agora-line-question-mark" className="h-24 w-24" />
