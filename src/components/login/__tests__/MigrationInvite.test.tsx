@@ -65,6 +65,16 @@ function findButton(label: string) {
   );
 }
 
+/**
+ * The banner is short now: the whole invitation is one click away, behind
+ * "Saber mais". These tests open it first, which is the point -- what the
+ * shortening must not do is LOSE anything, and the assertions that follow are
+ * what proves it did not.
+ */
+async function expand() {
+  await clickButton(ptLogin.migrationInvite.bannerMore);
+}
+
 function renderInvite() {
   act(() => {
     root.render(React.createElement(MigrationInvite));
@@ -128,11 +138,36 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("says up front that linking only works on an identity nobody else holds", () => {
+  it("shows one line, not the whole invitation, until it is opened", async () => {
+    // The full screen carries the whole invitation every eight days. Repeating
+    // all six sentences on every page in between is how a notice stops being
+    // read at all.
+    renderInvite();
+
+    expect(container.textContent).toContain(ptLogin.migrationInvite.bannerSummary);
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.sessionWarning);
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.alreadyTwoDescription);
+
+    await expand();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.sessionWarning);
+  });
+
+  it("offers the three buttons while it is still short", async () => {
+    // Shortening the words must not cost the actions: somebody who already
+    // knows what this is should be able to act without opening anything.
+    renderInvite();
+
+    expect(findButton(ptLogin.migrationInvite.linkCmd)).toBeDefined();
+    expect(findButton(ptLogin.migrationInvite.linkEidas)).toBeDefined();
+    expect(findButton(ptLogin.migrationInvite.dismiss)).toBeDefined();
+  });
+
+  it("says up front that linking only works on an identity nobody else holds", async () => {
     // The condition that most invites misreading. Somebody whose CMD already
     // belongs to another account is refused at the END of the round-trip --
     // saying it here saves the trip, and saves them believing it worked.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.onlyIfFree);
   });
 
@@ -182,39 +217,44 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("says that the portal allows one account per person", () => {
+  it("says that the portal allows one account per person", async () => {
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.oneAccount);
   });
 
-  it("says the invite is optional FOR NOW, not optional forever", () => {
+  it("says the invite is optional FOR NOW, not optional forever", async () => {
     // "É facultativo" read alone promises it stays that way, and it does not:
     // LEDG-1277 makes authentication mandatory. Saying so before the person
     // decides beats letting them feel misled when it changes.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.optional);
     expect(ptLogin.migrationInvite.optional).toContain("Por agora");
   });
 
-  it("says that the linked account stays the same account", () => {
+  it("says that the linked account stays the same account", async () => {
     // The invite is worthless if it reads as "start again elsewhere". What it
     // offers is one account reachable two ways.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.result);
   });
 
-  it("warns that linking costs the current session, before the click", () => {
+  it("warns that linking costs the current session, before the click", async () => {
     // The ACS issues a fresh session cookie, so the person is signed out until
     // they finish. Discovering that mid-flow reads as a bug.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.sessionWarning);
   });
 
-  it("tells somebody who already has two accounts what they can and cannot do", () => {
+  it("tells somebody who already has two accounts what they can and cannot do", async () => {
     // Linking does not merge. Today only datasets can be moved -- reuses have
     // the logic and no button, APIs have nothing (LEDG-2520) -- so the notice
     // says so instead of leaving them hunting for it.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.alreadyTwoDescription);
     expect(container.textContent).toContain(ptLogin.migrationInvite.alreadyTwoLimitation);
   });

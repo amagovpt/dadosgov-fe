@@ -239,7 +239,10 @@
     "sectionTitle": "Sign in with a digital identity",
     "confirmStep": "To finish, you will be asked for this account's email and password — that is how we confirm it is yours.",
     "onlyIfFree": "Linking is only possible if your Digital Mobile Key or European Authentication is not already tied to another account on the portal.",
-    "optionalScreen": "For now this is optional: you can choose Not now and carry on using the portal."
+    "optionalScreen": "For now this is optional: you can choose Not now and carry on using the portal.",
+    "bannerSummary": "You can link your account to the Digital Mobile Key or European Authentication — on dados.gov each person may only have one account.",
+    "bannerMore": "Find out more",
+    "bannerLess": "Show less"
   },
   "samlErrors": {
     "invite_identity_already_linked": "Linking was not possible: this digital identity already belongs to another account on the portal. Your account was left as it was, and you can carry on using it with email and password. To use the account that holds the identity, sign in with the Digital Mobile Key or European Authentication. To bring the content together, sign in to the account you want to leave behind and use Transfer on each dataset.",
