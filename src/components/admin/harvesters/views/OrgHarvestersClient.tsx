@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -10,13 +10,12 @@ import { useAdminListController } from "@/hooks/admin-lists/useAdminListControll
 import { fetchOrgHarvesters } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createOrgHarvesterColumns,
   filterHarvestersByStatus,
+  HARVESTERS_FETCH_PAGE_SIZE,
   sortHarvesters,
   type HarvesterSortField,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
@@ -31,17 +30,18 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const params = useParams();
   const orgIdFromUrl = params?.orgId as string | undefined;
-  const { activeOrg, isLoading: isOrgLoading, selectOrganization } = useActiveOrganization();
+  const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const orgId = orgIdFromUrl || activeOrg?.id;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(orgId, user?.organizations);
 
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(() => !!orgId);
   const {
     currentPage,
     setCurrentPage,
     pageSize,
+    searchQuery,
+    handleSearch,
     sortField,
     sortOrder,
     handleSort,
@@ -51,36 +51,48 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
   } = useAdminListController<HarvesterSortField, { statusFilter: string }>({
     initialFilters: { statusFilter: "" },
   });
+  const usesLocalFallback = Boolean(filters.statusFilter) || Boolean(sortField);
 
-  useEffect(() => {
-    if (orgIdFromUrl && activeOrg?.id !== orgIdFromUrl) {
-      selectOrganization(orgIdFromUrl);
-    }
-  }, [orgIdFromUrl, activeOrg?.id, selectOrganization]);
-
-  useEffect(() => {
+  const loadHarvesters = useCallback(async () => {
     if (!orgId) {
+      setHarvesters([]);
+      setTotalItems(0);
+      setIsLoading(false);
       return;
     }
-    const resolvedOrgId = orgId;
 
-    async function loadHarvesters() {
-      setIsLoading(true);
-      try {
-        const response = await fetchOrgHarvesters(resolvedOrgId, 1, 9999);
-        setHarvesters(response.data || []);
-      } catch (error) {
-        console.error("Error loading org harvesters:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    setIsLoading(true);
+    try {
+      const response = await fetchOrgHarvesters(
+        orgId,
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? HARVESTERS_FETCH_PAGE_SIZE : pageSize,
+        { q: searchQuery.trim() || undefined },
+      );
+      setHarvesters(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading org harvesters:", error);
+    } finally {
+      setIsLoading(false);
     }
+  }, [currentPage, orgId, pageSize, searchQuery, usesLocalFallback]);
 
-    void loadHarvesters();
-  }, [orgId]);
+  useEffect(() => {
+    let isCancelled = false;
+    const loadCurrentHarvesters = async () => {
+      if (isCancelled) return;
+      await loadHarvesters();
+    };
+    void loadCurrentHarvesters();
+    return () => {
+      isCancelled = true;
+    };
+  }, [loadHarvesters]);
 
   const filteredHarvesters = useMemo(
-    () => filterHarvestersByStatus(harvesters, filters.statusFilter),
+    () =>
+      filterHarvestersByStatus(harvesters, filters.statusFilter),
     [harvesters, filters.statusFilter]
   );
 
@@ -90,8 +102,8 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
   );
 
   const paginatedHarvesters = useMemo(
-    () => paginateItems(sortedHarvesters, currentPage, pageSize),
-    [sortedHarvesters, currentPage, pageSize]
+    () => (usesLocalFallback ? paginateItems(sortedHarvesters, currentPage, pageSize) : sortedHarvesters),
+    [currentPage, pageSize, sortedHarvesters, usesLocalFallback]
   );
 
   const columns = useMemo(
@@ -141,13 +153,12 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-harvesters:title"), url: `/admin/org/${orgId}/harvesters` },
       ]}
       title={t("admin-harvesters:title")}
       isLoading={isLoading}
-      count={filteredHarvesters.length}
+      count={usesLocalFallback ? filteredHarvesters.length : totalItems}
+      hasItems={paginatedHarvesters.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -155,6 +166,7 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,
+        onChange: handleSearch,
       }}
       filters={
         <StatusFilterSelect
@@ -176,4 +188,3 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
     </AdminListPage>
   );
 }
-

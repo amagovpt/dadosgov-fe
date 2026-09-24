@@ -26,7 +26,6 @@
     "description": "Explore our complete list of open-data reuses.",
     "reset": "Reset filters"
   },
-  "theReuses": "the reuses",
   "detail": {
     "untitled": "No title",
     "noDescription": "No description",
@@ -39,7 +38,7 @@
     "noOrganization": "No organisation",
     "defaultType": "Application",
     "description": "Description",
-    "discussions": "Discussions",
+    "discussions": "Discussions ({{count}})",
     "tags": "Tags",
     "lastUpdate": "Last update",
     "creationDate": "Creation date",

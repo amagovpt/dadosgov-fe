@@ -235,7 +235,6 @@ export default function UserProfileClient({ pageContent }: { pageContent: BoUser
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-users:breadcrumbs.users"), url: "/admin/system/users" },
         { label: displayName || "..." },
       ]}

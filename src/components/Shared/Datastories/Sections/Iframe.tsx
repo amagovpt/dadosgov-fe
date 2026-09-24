@@ -3,10 +3,13 @@ import { InfoBlock } from "../../InfoBlock";
 import Section from "../../Section";
 import { IframeSection } from "@/service/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { LinkWrapper } from "@ama-pt/agora-design-system";
+import Link from "next/link";
+import Icon from "@/components/Primitives/Icon";
 
 export type IframeI = Omit<IframeSection, "schemaName"> & { className?: string };
 
-export default function Iframe({ id, title, description, iframe, className }: IframeI) {
+export default function Iframe({ id, title, description, links, iframe, className }: IframeI) {
   return (
     <Section
       id={id}
@@ -24,9 +27,21 @@ export default function Iframe({ id, title, description, iframe, className }: If
               className="text-2xl font-bold text-primary-900"
             />
             <InfoBlock.Description
-              className="whitespace-pre-wrap text-m-light text-black"
+              className="text-m-light whitespace-pre-wrap text-black"
               description={formatHtmlParagraphs(description) as string[]}
             />
+            {links && links.map((link) => {
+              return (
+                <LinkWrapper
+                  key={link.children}
+                  appearance="link"
+                  className="flex w-fit items-center gap-8"
+                >
+                  <Link href={link.href}>{link.children}</Link>
+                  <Icon name={link.icon ?? "agora-line-external-link"} />
+                </LinkWrapper>
+              );
+            })}
           </InfoBlock.Header>
         </InfoBlock.Root>
       )}
@@ -42,7 +57,7 @@ export default function Iframe({ id, title, description, iframe, className }: If
             {iframe.classNameIframeBackground && (
               <div
                 className={twMerge(
-                  "absolute left-0 top-0 w-full bg-primary-100",
+                  "absolute top-0 left-0 w-full bg-primary-100",
                   iframe.classNameIframeBackground
                 )}
               />

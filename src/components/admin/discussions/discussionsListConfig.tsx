@@ -4,7 +4,14 @@ import StatusDot from "@/components/admin/StatusDot";
 import type { Discussion } from "@/service/types/discussion";
 import { formatDateToDMY } from "@/utils/formatDate";
 
-export type DiscussionSortField = "created" | "closed";
+export type DiscussionSortField = "title" | "created" | "closed";
+
+/** TS key -> the key the discussions endpoint accepts in `sort`. */
+export const discussionSortFieldMap: Record<DiscussionSortField, string> = {
+  title: "title",
+  created: "created",
+  closed: "closed",
+};
 export type DiscussionListSortField = "status";
 
 interface OrgDiscussionColumnsOptions {
@@ -90,6 +97,8 @@ export function createOrgDiscussionColumns({
       id: "title",
       header: labels.title,
       headerLabel: labels.title,
+      sortField: "title",
+      sortType: "string",
       renderCell: (discussion) => (
         <button
           className="text-left text-primary-600 underline"

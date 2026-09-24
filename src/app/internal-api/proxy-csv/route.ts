@@ -25,7 +25,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  const text = new TextDecoder("utf-8").decode(result.bytes);
+  let text: string;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(result.bytes);
+  } catch {
+    text = new TextDecoder("windows-1252").decode(result.bytes);
+  }
 
   return new NextResponse(text, {
     status: 200,

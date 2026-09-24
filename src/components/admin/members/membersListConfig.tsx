@@ -21,7 +21,7 @@ const rolePillVariant = (role: string) => {
   }
 };
 
-export type MemberSortField = "name" | "since";
+export type MemberSortField = "name" | "role" | "since";
 
 interface MemberColumnsOptions {
   isOrgAdmin: boolean;
@@ -48,6 +48,9 @@ export function sortMembers(
     name: createLocaleStringSorter(
       (member) => `${member.user.first_name ?? ""} ${member.user.last_name ?? ""}`.trim()
     ),
+    // Ordered by the raw role, not the translated label: with admin and editor as the
+    // only values the grouping is identical either way.
+    role: createLocaleStringSorter((member) => member.role),
     since: createDateSorter((member) => member.since),
   });
 }
@@ -92,6 +95,8 @@ export function createMemberColumns({
     {
       id: "role",
       header: labels.role,
+      sortField: "role",
+      sortType: "string",
       renderCell: (member) => (
         <StatusDot variant={rolePillVariant(member.role)}>
           {roleLabels[member.role] || member.role}

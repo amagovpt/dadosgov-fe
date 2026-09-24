@@ -48,6 +48,9 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
   const [isLoadingDatasets, setIsLoadingDatasets] = useState(true);
   const [isLoadingReuses, setIsLoadingReuses] = useState(true);
   const [isLoadingDataservices, setIsLoadingDataservices] = useState(true);
+  const [discussionCount, setDiscussionCount] = useState(
+    organization.metrics.discussions || 0,
+  );
 
   useEffect(() => {
     async function loadDatasets() {
@@ -291,9 +294,13 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
         {/* Tab 5: Discussões */}
         <Tab>
-          <TabHeader>{tOrg("tabs.discussions")}</TabHeader>
+          <TabHeader>{tOrg("tabs.discussions", { count: discussionCount })}</TabHeader>
           <TabBodyWrapper>
-            <DiscussionSection entityId={organization.id} entityClass="Organization" />
+            <DiscussionSection
+              entityId={organization.id}
+              entityClass="Organization"
+              onCountChange={setDiscussionCount}
+            />
           </TabBodyWrapper>
         </Tab>
         {/* Tab 6: Informações (Statistics, Members, Technical Info) */}

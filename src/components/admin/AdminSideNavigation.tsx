@@ -1,19 +1,15 @@
 "use client";
 
-import React, { useMemo, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sidebar, SidebarItem, Icon } from "@ama-pt/agora-design-system";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { fetchOrganization } from "@/service/api/organizations";
-import { Organization } from "@/service/types/identity";
-import type {
-  AdminNavLink,
-  AdminSideNavigationData,
-} from "@/service/types/admin-side-navigation";
+import { useTranslation } from "react-i18next";
+import type { AdminNavLink, AdminSideNavigationData } from "@/service/types/admin-side-navigation";
 import { stripLocale } from "@/utils/stripLocale";
+import { useActiveProfile } from "@/context/ActiveProfileContext";
+import { twJoin } from "tailwind-merge";
 
 interface NavChild {
   label: string;
@@ -22,223 +18,178 @@ interface NavChild {
   customIcon?: string;
 }
 
-interface NavGroup {
-  key: string;
-  label: string;
-  icon?: string;
-  children: NavChild[];
-}
+const PANEL_CLASSES =
+  "relative z-30 flex flex-1 flex-col bg-primary-900 " +
+  "transition-[width] duration-200 ease-[ease]";
 
-function toSentenceCase(str: string): string {
-  if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
+const TOGGLE_CLASSES =
+  "mt-64 flex shrink-0 cursor-pointer items-center overflow-hidden " +
+  "border-none bg-transparent py-12 text-left text-base " +
+  "whitespace-nowrap text-white hover:bg-[#0338a2] max-xl:hidden";
 
-function toNavChild(link: AdminNavLink, href: string): NavChild {
+const BADGE_CLASSES = "flex size-56 shrink-0 items-center justify-center rounded-8 bg-primary-400";
+
+function toNavChild(link: AdminNavLink): NavChild {
   return {
     label: link.label,
-    href,
+    href: link.href,
     icon: link.icon ?? undefined,
     customIcon: link.logo ?? undefined,
   };
 }
 
 export function AdminSideNavigation({ data }: { data: AdminSideNavigationData }) {
+  const { t } = useTranslation("admin-common");
+  const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
-  // usePathname() is locale-prefixed (`/pt/admin/...`) because prefixDefault is
-  // true; normalize before matching so `/admin`-anchored logic keeps working.
   const localePath = useMemo(() => stripLocale(pathname), [pathname]);
-  const { isAdmin } = useAuth();
-  const { organizations } = useActiveOrganization();
-  const [urlOrg, setUrlOrg] = useState<Organization | null>(null);
+  const { activeProfile } = useActiveProfile();
 
-  // Extract orgId from URL like /admin/org/{orgId}/...
-  const urlOrgId = useMemo(() => {
-    const match = localePath.match(/^\/admin\/org\/([^/]+)/);
-    return match ? match[1] : null;
-  }, [localePath]);
-
-  // Fetch org from URL if not already in user's org list
-  useEffect(() => {
-    let frameId: number | null = null;
-
-    if (!urlOrgId) {
-      frameId = requestAnimationFrame(() => {
-        setUrlOrg(null);
-      });
-      return () => {
-        if (frameId !== null) cancelAnimationFrame(frameId);
-      };
-    }
-    const alreadyLoaded = organizations.some((o) => o.id === urlOrgId || o.slug === urlOrgId);
-    if (alreadyLoaded) {
-      frameId = requestAnimationFrame(() => {
-        setUrlOrg(null);
-      });
-      return () => {
-        if (frameId !== null) cancelAnimationFrame(frameId);
-      };
-    }
-    fetchOrganization(urlOrgId)
-      .then((org) => setUrlOrg(org))
-      .catch(() => setUrlOrg(null));
-
-    return () => {
-      if (frameId !== null) cancelAnimationFrame(frameId);
-    };
-  }, [urlOrgId, organizations]);
-
-  // Static groups (profile/system) come from the Squidex singleton
-  const staticGroups = useMemo<NavGroup[]>(
-    () =>
-      (data?.groups ?? [])
-        .filter((group) => group.enabled !== false)
-        .map((group) => ({
-          key: group.key,
-          label: group.label,
-          icon: group.icon ?? undefined,
-          children: (group.children ?? [])
-            .filter((child) => child.enabled !== false)
-            .map((child) => toNavChild(child, child.href)),
-        })),
-    [data]
-  );
-
-  // Template for per-organization items; href holds the path suffix (e.g. "datasets")
-  const orgTemplate = useMemo(
-    () => (data?.orgChildren ?? []).filter((child) => child.enabled !== false),
-    [data]
-  );
-
-  const visibleGroups = useMemo(() => {
-    const buildOrgChildren = (orgBase: string): NavChild[] =>
-      orgTemplate.map((child) => toNavChild(child, `${orgBase}/${child.href.replace(/^\//, "")}`));
-
-    const profileGroups = staticGroups.filter((group) => {
-      return group.key !== "organization" && group.key !== "system";
-    });
-
-    const orgGroups: NavGroup[] =
-      orgTemplate.length > 0
-        ? organizations.map((org) => ({
-            key: "organization",
-            label: org.name,
-            children: buildOrgChildren(`/admin/org/${org.id}`),
-          }))
-        : [];
-
-    // Inject the org from the URL if it's not already in the user's org list
-    if (orgTemplate.length > 0 && urlOrg && !organizations.some((o) => o.id === urlOrg.id)) {
-      orgGroups.push({
-        key: "organization",
-        label: urlOrg.name,
-        children: buildOrgChildren(`/admin/org/${urlOrg.id}`),
-      });
+  const items = useMemo<NavChild[]>(() => {
+    if (activeProfile.type === "organization") {
+      const orgBase = `/admin/org/${activeProfile.orgId}`;
+      return (data?.orgChildren ?? [])
+        .filter((child) => child.enabled !== false)
+        .map((child) =>
+          toNavChild({ ...child, href: `${orgBase}/${child.href.replace(/^\/+/, "")}` })
+        );
     }
 
-    const systemGroups = isAdmin ? staticGroups.filter((group) => group.key === "system") : [];
+    if (activeProfile.type === "system") {
+      const systemGroup = (data?.groups ?? []).find(
+        (group) => group.enabled !== false && group.key === "system"
+      );
+      return (systemGroup?.children ?? [])
+        .filter((child) => child.enabled !== false)
+        .map(toNavChild);
+    }
 
-    return [...profileGroups, ...orgGroups, ...systemGroups];
-  }, [staticGroups, orgTemplate, isAdmin, organizations, urlOrg]);
+    const profileGroup = (data?.groups ?? []).find(
+      (group) => group.enabled !== false && group.key !== "organization" && group.key !== "system"
+    );
+    return (profileGroup?.children ?? [])
+      .filter((child) => child.enabled !== false)
+      .map(toNavChild);
+  }, [data, activeProfile]);
 
   const homeLink = data?.homeLink;
   const showHomeLink = Boolean(homeLink?.label) && homeLink?.enabled !== false;
 
+  const labelText = isExpanded
+    ? "overflow-hidden text-ellipsis whitespace-nowrap"
+    : "w-full overflow-visible text-clip whitespace-normal break-words";
+
+  const groupLabel = twJoin(
+    "flex min-w-0 flex-1 items-center overflow-hidden px-16 py-24",
+    isExpanded ? "justify-start gap-16" : "flex-col justify-center gap-4 text-center"
+  );
+
   return (
-    <nav className="admin-side-nav">
-      <Sidebar variant="navigation" darkMode className="admin-sidebar-nav">
-        {[
-          ...(showHomeLink
-            ? [
+    <nav
+      className={twJoin(
+        "admin-side-nav flex min-h-full w-112 shrink-0 flex-col max-md:w-64",
+        !isExpanded && "admin-side-nav--collapsed"
+      )}
+    >
+      <div className={twJoin(PANEL_CLASSES, isExpanded ? "w-[388px]" : "w-full")}>
+        <button
+          type="button"
+          className={twJoin(
+            TOGGLE_CLASSES,
+            isExpanded ? "justify-start pl-24" : "justify-center px-16"
+          )}
+          aria-expanded={isExpanded}
+          onClick={() => setIsExpanded((expanded) => !expanded)}
+        >
+          <span className="flex w-72 shrink-0 flex-col items-center gap-4">
+            <span className="flex size-56 shrink-0 items-center justify-center rounded-4 border border-white">
+              <Icon
+                name={isExpanded ? "agora-line-panel-left" : "agora-line-panel-right"}
+                className="size-24 fill-white text-white"
+              />
+            </span>
+            <span className={`${labelText} px-0 py-16 text-m-regular`}>
+              {isExpanded ? t("sidebar.close") : t("sidebar.expand")}
+            </span>
+          </span>
+        </button>
+        <Sidebar
+          // Agora retains selection in the DOM and keys items by index. Reset it on navigation.
+          key={localePath}
+          variant="navigation"
+          darkMode
+          className="admin-sidebar-nav bg-transparent px-0 pt-64 pb-8"
+        >
+          {[
+            ...items.map((item) => {
+              const isActive = localePath === item.href || localePath.startsWith(`${item.href}/`);
+
+              return (
+                <SidebarItem
+                  key={item.href}
+                  variant="navigation"
+                  darkMode
+                  item={{
+                    children: (
+                      <Link href={item.href} aria-current={isActive ? "page" : undefined}>
+                        <span
+                          className={twJoin(
+                            groupLabel,
+                            isActive && "admin-sidebar-nav__group-label--active font-bold"
+                          )}
+                        >
+                          {/* Agora icons load lazily; reserve their space before the SVG arrives. */}
+                          <span aria-hidden className="flex size-24 shrink-0 items-center justify-center">
+                            {item.customIcon ? (
+                              <Image
+                                src={item.customIcon}
+                                alt=""
+                                width={24}
+                                height={24}
+                                className="size-24"
+                              />
+                            ) : item.icon ? (
+                              <Icon name={item.icon} className="size-24 fill-white text-white" />
+                            ) : null}
+                          </span>
+                          <span className={`${labelText} text-m-regular`}>{item.label}</span>
+                        </span>
+                      </Link>
+                    ),
+                  }}
+                />
+              );
+            }),
+            ...(showHomeLink
+              ? [
                 <SidebarItem
                   key="home"
                   variant="navigation"
                   darkMode
-                  className="admin-sidebar-nav__home-item"
                   item={{
                     children: (
-                      <Link href={homeLink.href || "/"} className="admin-sidebar-nav__group-label">
-                        {homeLink.icon && (
-                          <Icon
-                            name={homeLink.icon}
-                            className="admin-sidebar-nav__group-icon"
+                      <Link href={homeLink.href || "/"}>
+                        <span className={`admin-sidebar-nav__home-badge ${BADGE_CLASSES}`}>
+                          <Image
+                            src="/favicon.png"
+                            alt=""
+                            width={38}
+                            height={38}
+                            className="size-[38px] brightness-0 invert"
                           />
-                        )}
-                        {homeLink.label}
+                        </span>
+                        <span className={`${labelText} text-base font-bold`}>
+                          {t("header.portalTitle")}
+                        </span>
                       </Link>
                     ),
                   }}
                 />,
               ]
-            : []),
-          ...visibleGroups.map((group) => {
-          const hasActiveChild = group.children.some(
-            (child) => localePath.startsWith(child.href),
-          );
-
-          return (
-            <SidebarItem
-              key={group.label}
-              variant="navigation"
-              darkMode
-              open={hasActiveChild}
-              item={{
-                children: (
-                  <span className={`admin-sidebar-nav__group-label ${hasActiveChild ? "admin-sidebar-nav__group-label--active" : ""}`}>
-                    {group.icon && (
-                      <Icon
-                        name={group.icon}
-                        className="admin-sidebar-nav__group-icon"
-                      />
-                    )}
-                    <span className="admin-sidebar-nav__group-label-text">{toSentenceCase(group.label)}</span>
-                  </span>
-                ),
-                hasIcon: true,
-                collapsedIconTrailing: "agora-line-chevron-up",
-                collapsedIconHoverTrailing: "agora-solid-chevron-up",
-                expandedIconTrailing: "agora-line-chevron-down",
-                expandedIconHoverTrailing: "agora-solid-chevron-down",
-              }}
-            >
-              <ul className="admin-sidebar-nav__children">
-                {group.children.map((child) => {
-                  const isActive = localePath.startsWith(child.href);
-                  return (
-                    <li key={child.href}>
-                      <Link
-                        href={child.href}
-                        className={`admin-sidebar-nav__child-item ${
-                          isActive
-                            ? "admin-sidebar-nav__child-item--active"
-                            : ""
-                        }`}
-                      >
-                        {child.customIcon ? (
-                          <Image
-                            src={child.customIcon}
-                            alt={child.label}
-                            width={20}
-                            height={20}
-                            className="admin-sidebar-nav__child-icon"
-                          />
-                        ) : child.icon ? (
-                          <Icon
-                            name={child.icon}
-                            className="admin-sidebar-nav__child-icon"
-                          />
-                        ) : null}
-                        <span>{child.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </SidebarItem>
-          );
-        }),
-        ]}
-      </Sidebar>
+              : []),
+          ]}
+        </Sidebar>
+      </div>
     </nav>
   );
 }

@@ -11,7 +11,6 @@ interface HarvesterDescriptionSectionProps {
   hasHarvesterNameError: boolean;
   hasHarvesterUrlError: boolean;
   namePlaceholder?: string;
-  descriptionLabel?: string;
   descriptionPlaceholder?: string;
   urlPlaceholder?: string;
   nameDisabled?: boolean;
@@ -29,7 +28,6 @@ export default function HarvesterDescriptionSection({
   hasHarvesterNameError,
   hasHarvesterUrlError,
   namePlaceholder,
-  descriptionLabel,
   descriptionPlaceholder,
   urlPlaceholder,
   nameDisabled = false,
@@ -41,7 +39,6 @@ export default function HarvesterDescriptionSection({
 }: HarvesterDescriptionSectionProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const resolvedNamePlaceholder = namePlaceholder ?? t("admin-harvesters:fields.namePlaceholder");
-  const resolvedDescriptionLabel = descriptionLabel ?? t("admin-harvesters:fields.description");
   const resolvedDescriptionPlaceholder =
     descriptionPlaceholder ?? t("admin-harvesters:fields.descriptionPlaceholder");
   const resolvedUrlPlaceholder = urlPlaceholder ?? t("admin-harvesters:fields.urlPlaceholder");
@@ -66,7 +63,7 @@ export default function HarvesterDescriptionSection({
         />
 
         <InputTextArea
-          label={resolvedDescriptionLabel}
+          label={t("admin-harvesters:fields.description")}
           placeholder={resolvedDescriptionPlaceholder}
           id="harvester-description"
           rows={6}

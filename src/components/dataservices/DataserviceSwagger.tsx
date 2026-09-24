@@ -6,7 +6,8 @@ import { Accordion } from "@/components/Shared/Accordion";
 import type { ParsedSwagger } from "@/utils/parseOpenApi";
 
 interface DataserviceSwaggerProps {
-  swagger: ParsedSwagger;
+  swagger: ParsedSwagger | null;
+  loading?: boolean;
   machineDocumentationUrl: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,6 +27,7 @@ const METHOD_STYLES: Record<string, string> = {
 
 export const DataserviceSwagger = ({
   swagger,
+  loading = false,
   machineDocumentationUrl,
   open,
   onOpenChange,
@@ -40,13 +42,14 @@ export const DataserviceSwagger = ({
           headingTitle="Swagger"
           headingLevel="h2"
           expanded={open}
-          onChange={(e) =>
-            onOpenChange(Boolean((e.currentTarget as { isExpanded?: boolean } | null)?.isExpanded))
-          }
+          // Ágora's synthetic change event has no currentTarget and also fires
+          // on mount. Use the explicit actions to control the expanded state.
+          onExpanded={() => onOpenChange(true)}
+          onCollapsed={() => onOpenChange(false)}
         >
           <div className="flex flex-col gap-24">
             <div className="flex flex-wrap items-center justify-between gap-16">
-              {swagger.version && (
+              {swagger?.version && (
                 <span className="text-sm text-neutral-700">
                   {tDs("swagger.versionLabel")}{" "}
                   <strong className="text-neutral-900">{swagger.version}</strong>
@@ -62,9 +65,15 @@ export const DataserviceSwagger = ({
               </a>
             </div>
 
-            {swagger.baseUrl && <CopyField label={tDs("swagger.baseUrl")} value={swagger.baseUrl} />}
+            {loading ? (
+              <p role="status">{tDs("swagger.loading")}</p>
+            ) : !swagger ? (
+              <p role="alert">{tDs("swagger.loadError")}</p>
+            ) : null}
 
-            {swagger.groups.map((group) => (
+            {swagger?.baseUrl && <CopyField label={tDs("swagger.baseUrl")} value={swagger.baseUrl} />}
+
+            {swagger?.groups.map((group) => (
               <div key={group.tag} className="flex flex-col gap-8">
                 <h3 className="text-base font-medium text-neutral-900">
                   {group.tag}{" "}
@@ -95,7 +104,7 @@ export const DataserviceSwagger = ({
               </div>
             ))}
 
-            {swagger.models.length > 0 && (
+            {swagger && swagger.models.length > 0 && (
               <div className="flex flex-col gap-8">
                 <h3 className="text-base font-medium text-neutral-900">
                   {tDs("swagger.models")}{" "}

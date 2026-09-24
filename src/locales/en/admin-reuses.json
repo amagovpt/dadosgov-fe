@@ -1,5 +1,13 @@
 {
   "title": "Reuses",
+  "kicker": "Open Data",
+  "heroTitle": "Manage reuses",
+  "create": "Create reuse",
+  "myListTitle": "My reuses",
+  "emptyTitlePrefix": "No",
+  "emptyTitleHighlight": "reuses found",
+  "emptySubtitle": "There are no publications associated with your account yet",
+  "emptyDescription": "Use the \"Create reuse\" option to add a new publication. Reuses you create will be available for browsing and management in this area.",
   "columns": {
     "title": "Reuse title",
     "titleShort": "Title",

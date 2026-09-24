@@ -41,9 +41,16 @@ export const Typograph = <T extends keyof JSX.IntrinsicElements>(
 
   const elementProps = propsWithoutTag as Record<string, unknown>;
 
+  // Whatever is passed here bypasses React's escaping, so the caller owns the
+  // sanitising. Two things in particular must not reach it unsanitised:
+  // content from the backend, and the output of `t()` — i18next's own escaping
+  // of interpolated values is deliberately off (see src/app/i18n.ts), on the
+  // grounds that React escapes text children, which this path does not.
+  // No call site uses this prop today, and a test in
+  // src/app/__tests__/i18n.test.tsx fails if a raw-HTML sink appears elsewhere.
   if (dangerouslySetInnerHTML) {
     return React.createElement(
-      tag, 
+      tag,
       {
         ...elementProps,
         dangerouslySetInnerHTML,

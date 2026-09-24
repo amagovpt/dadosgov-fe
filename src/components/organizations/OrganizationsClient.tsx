@@ -15,7 +15,6 @@ import { OrganizationBadges } from "@/components/organizations/OrganizationBadge
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
 import { twJoin } from "tailwind-merge";
-import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
 import { FrontOfficePage } from "@/service/types/shared/common";
 
@@ -91,7 +90,7 @@ export default function OrganizationsClient({
         onSearch={handleSearch}
       />
       {/* Main Content */}
-      <div className="container flex flex-col items-center justify-center gap-24 py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-64">
         {/* Results count + Sort toggles */}
         <div className="flex w-full flex-col gap-16 xl:flex-row">
           <div className="flex w-full flex-row items-end gap-32">
@@ -159,12 +158,7 @@ export default function OrganizationsClient({
                     : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
                 )}
               >
-                {listData.error ? (
-                  <ListingErrorBanner
-                    entity={tOrg("theOrganizations")}
-                    errorStatus={listData.errorStatus}
-                  />
-                ) : organizations.length > 0 ? (
+                {organizations.length > 0 ? (
                   organizations.map((org) => {
                     const timeAgo = formatDateToTimeAgo(
                       org.last_modified,
@@ -216,16 +210,16 @@ export default function OrganizationsClient({
                 )}
               </div>
 
-              <div className="mt-8 flex justify-center pb-64">
-                <Pagination
-                  currentPage={activePage}
-                  totalItems={total}
-                  pageSize={page_size}
-                  baseUrl={buildUrl()}
-                />
-              </div>
             </div>
           </div>
+        </div>
+        <div className="w-1/2 mt-8">
+          <Pagination
+            currentPage={activePage}
+            totalItems={total}
+            pageSize={page_size}
+            baseUrl={buildUrl()}
+          />
         </div>
       </div>
     </main>

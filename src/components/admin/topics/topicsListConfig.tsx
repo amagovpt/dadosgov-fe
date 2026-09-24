@@ -4,6 +4,18 @@ import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers"
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { Topic } from "@/service/types/topic";
 
+export type TopicSortField = "name" | "created_at";
+
+/**
+ * TS key -> the key `TopicApiParser.sorts` accepts. The dataset and reuse counts are
+ * deliberately absent: the API neither sorts by them nor serialises them, so those two
+ * columns render 0 for every topic and an arrow there would order nothing.
+ */
+export const topicSortFieldMap: Record<TopicSortField, string> = {
+  name: "name",
+  created_at: "created",
+};
+
 export interface TopicColumnLabels {
   name: string;
   createdAt: string;
@@ -11,15 +23,21 @@ export interface TopicColumnLabels {
   reuses: string;
 }
 
-export function createTopicColumns(labels: TopicColumnLabels): AdminListColumn<Topic>[] {
+export function createTopicColumns(
+  labels: TopicColumnLabels
+): AdminListColumn<Topic, TopicSortField>[] {
   return [
     {
       id: "name",
+      sortField: "name",
+      sortType: "string",
       header: labels.name,
       renderCell: (topic) => <TextLink href={`/themes/${topic.slug}`}>{topic.name}</TextLink>,
     },
     {
       id: "created_at",
+      sortField: "created_at",
+      sortType: "date",
       header: labels.createdAt,
       renderCell: (topic) => formatDateToDMY(topic.created_at),
     },

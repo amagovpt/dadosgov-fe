@@ -1,7 +1,16 @@
+import { installServerApiErrorInterceptor } from "@/lib/server/apiErrorInterceptor";
+
 /**
  * Server bootstrap hook (Next.js runs `register()` once at startup).
  *
- * Disables HTTP keep-alive on the outgoing connection pool that Next.js uses
+ * Two jobs:
+ *
+ * 1) Installs the server half of the global API error policy — see
+ *    `src/lib/server/apiErrorInterceptor.ts`. This is the only place every
+ *    server-side backend call passes through, so it is where a failed SSR
+ *    fetch stops being silently painted as an empty result set.
+ *
+ * 2) Disables HTTP keep-alive on the outgoing connection pool that Next.js uses
  * to proxy `rewrites()` (and server-side `fetch`) to the backend.
  *
  * Why: Next.js proxies `/api/*` to the backend through undici, which pools and
@@ -20,6 +29,8 @@
 export async function register() {
   // Only the Node.js server runtime proxies to the backend; skip Edge.
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+
+  installServerApiErrorInterceptor();
 
   const { setGlobalDispatcher, Agent } = await import("undici");
   setGlobalDispatcher(

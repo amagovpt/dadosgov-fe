@@ -5,9 +5,28 @@ export async function fetchMigrationPending(): Promise<{
   pending: boolean;
   email?: string;
   has_email?: boolean;
+  // The CMD email, offered as a pre-fill for the account-creation step, and
+  // only present when no account already holds it.
+  suggested_email?: string;
   candidate?: boolean;
+  // The identity matched no account at all, as opposed to matching several
+  // homonyms — both arrive with candidate false, and they need different
+  // first steps. Only ever true when the identity also carries a NIC.
+  no_match?: boolean;
+  // Started from the optional linking invite, as opposed to the mandatory
+  // mode. The wizard cannot tell otherwise -- both reach it through the same
+  // redirect -- and it decides which escape hatch the screen offers. Absent
+  // reads as false: the mandatory mode is the older behaviour.
+  invited?: boolean;
+  // The wizard is over, but the account it created is still waiting for its
+  // owner to follow the confirmation link.
+  awaiting_confirmation?: boolean;
   first_name?: string;
   last_name?: string;
+  // Which identity provider started the flow. Every screen names it, and
+  // nothing on this side can infer it: both ACS routes converge on the same
+  // redirect. Defaults to CMD server-side for sessions older than the field.
+  provider?: "cmd" | "eidas";
 }> {
   const res = await fetch("/saml/migration/pending", { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch migration status");
@@ -15,37 +34,45 @@ export async function fetchMigrationPending(): Promise<{
 }
 
 
-export async function searchMigrationAccount(
-  payload: { email?: string; first_name?: string; last_name?: string }
-): Promise<{ found: boolean; email?: string }> {
-  const res = await fetch("/saml/migration/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("Failed to search migration account");
-  return await res.json();
-}
-
-
-export async function sendMigrationCode(): Promise<{ sent: boolean }> {
-  const res = await fetch("/saml/migration/send-code", {
+// Mails a validation link to the address already on the candidate account.
+// Takes no argument on purpose: the recipient is never one the caller names.
+export async function sendMigrationLink(): Promise<{ sent: boolean }> {
+  const res = await fetch("/saml/migration/send-link", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to send migration code");
+    throw new Error(data.error || "Failed to send migration link");
   }
   return await res.json();
 }
 
 
+// The password says WHICH account to link; it does not complete the link.
+// The backend mails the validation link and reports that it went out — the
+// click is what binds the identity and starts a session.
+/**
+ * A refusal that carries more than a sentence. `code` is the machine-readable
+ * reason and the fields beside it are what the screen needs to explain itself
+ * -- without them a caller can only repeat the backend's English prose, or
+ * guess.
+ */
+export class MigrationConfirmError extends Error {
+  readonly code?: string;
+  readonly expectedEmail?: string | null;
+
+  constructor(message: string, code?: string, expectedEmail?: string | null) {
+    super(message);
+    this.name = "MigrationConfirmError";
+    this.code = code;
+    this.expectedEmail = expectedEmail;
+  }
+}
+
 export async function confirmMigration(
-  payload:
-    | { method: "code"; code: string }
-    | { method: "password"; email: string; password: string }
-): Promise<{ success: boolean }> {
+  payload: { method: "password"; email: string; password: string }
+): Promise<{ sent: boolean }> {
   const res = await fetch("/saml/migration/confirm", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -53,17 +80,74 @@ export async function confirmMigration(
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to confirm migration");
+    throw new MigrationConfirmError(
+      data.error || "Failed to confirm migration",
+      data.code,
+      data.expected_email
+    );
   }
   return await res.json();
 }
 
 
-export async function skipMigration(): Promise<{ success: boolean }> {
+// The backend answers this the same way whether or not the address already
+// has an account, so there is nothing here to branch on: an address that is
+// taken gets a mail of its own and this call still resolves. Anything the
+// wizard could route on would be the enumeration oracle back again, one layer
+// up.
+export async function skipMigration(email: string): Promise<{
+  success: boolean;
+  // The address the mail went to, echoed back in the normalised form the
+  // backend stores — the caller's own input either way, never a lookup result.
+  email?: string;
+}> {
   const res = await fetch("/saml/migration/skip", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
   });
-  if (!res.ok) throw new Error("Failed to skip migration");
+  if (!res.ok) {
+    // The error code carries which rejection it was (invalid_email,
+    // nic_required, ...) so the caller can say something useful; throwing a
+    // fixed string here would flatten them all into one message. None of them
+    // depends on whether the address exists.
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to skip migration");
+  }
+  return await res.json();
+}
+
+
+export async function resendMigrationConfirmation(): Promise<{
+  sent: boolean;
+  // Already confirmed: nothing was resent, and the user can just log in.
+  confirmed?: boolean;
+}> {
+  const res = await fetch("/saml/migration/resend-confirmation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to resend confirmation");
+  }
+  return await res.json();
+}
+
+
+// Records that this account is not linking right now (LEDG-2517).
+//
+// Takes no argument and sends no body: the account is read from the session on
+// the backend, never named by the caller, so a session can only ever dismiss
+// its own invite.
+//
+// Answers 200 whether or not an invite was actually being offered, so a double
+// click is not an error the caller has to explain.
+export async function dismissMigrationInvite(): Promise<{ dismissed: boolean }> {
+  const res = await fetch("/saml/migration/invite/dismiss", {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to dismiss the linking invite");
   return await res.json();
 }

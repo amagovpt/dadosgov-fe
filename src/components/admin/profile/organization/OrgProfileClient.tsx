@@ -16,7 +16,6 @@ import { type OrgBadges, type Organization } from "@/service/types/identity";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { can } from "@/utils/permissions";
-import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
@@ -73,10 +72,9 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
   const { show, hide } = usePopupContext();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
 
   const orgId = routeOrgId || activeOrg?.id;
-  const cachedOrgName = useOrganizationName(orgId, user?.organizations);
 
   const [org, setOrg] = useState<Organization | null>(null);
   const [name, setName] = useState("");
@@ -232,11 +230,6 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        {
-          label: org?.name || cachedOrgName || t("admin-profile:organization.organizationFallback"),
-          url: "#",
-        },
         { label: t("admin-profile:breadcrumbs.profile") },
       ]}
       title={pageContent.orgProfileHero?.title ?? ""}
@@ -244,8 +237,8 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
     >
       {org && <OrganizationProfileHeaderCard organization={org} logoPreview={logoPreview} />}
 
-      <div className="admin-page__body mt-32">
-        <div className="admin-page__form-area">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row mt-32">
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
           <OrganizationProfileFormSection
             name={name}
             acronym={acronym}
@@ -305,7 +298,7 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
           />
         </div>
 
-        <aside className="admin-page__auxiliar" />
+        <aside className="w-[360px] max-w-full shrink-0" />
       </div>
     </AdminLayout>
   );

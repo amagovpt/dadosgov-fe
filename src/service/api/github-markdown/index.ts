@@ -1,4 +1,5 @@
 import { githubPagesConfig } from "@/config/site";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 /**
  * Fetches markdown content from GitHub with Next.js ISR caching.
@@ -11,6 +12,7 @@ export async function fetchGitHubMarkdown(slug: string): Promise<string> {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.text();
   } catch (error) {
+    rethrowControlFlow(error);
     console.error("Failed to fetch markdown content:", error);
     return "";
   }

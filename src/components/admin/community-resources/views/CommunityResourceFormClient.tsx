@@ -106,10 +106,12 @@ export default function CommunityResourceFormClient({
     clearError: () => setApiError(null),
     onError: (error) => {
       const normalized = normalizeApiError(error, t("form.createError"));
-      if (normalized.status === 401) {
-        setApiError(t("form.sessionExpired"));
-        return;
-      }
+      // An expired session and a server fault are both handled globally now
+      // (ApiErrorProvider redirects to login / raises a toast). Repeating them
+      // in the inline StatusCard would tell the user the same thing twice.
+      // What stays here is what only this form knows: validation and the other
+      // 4xx answers, whose message names the field that was rejected.
+      if (normalized.status === 401 || (normalized.status ?? 0) >= 500) return;
       setApiError(normalized.message || t("form.createError"));
     },
   });
@@ -289,8 +291,8 @@ export default function CommunityResourceFormClient({
 
   return (
     <>
-      <div className="admin-page__body">
-        <div className="admin-page__form-area">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
           {currentStep === 1 && (
             <>
               {pageContent.introduction ? (

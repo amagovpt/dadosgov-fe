@@ -86,7 +86,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    // The reuse title is rendered as <h3> inside Agora's <CardArticle>.
+    // The reuse title is rendered as <h3> inside Agora's <CardGeneralV2>.
     const titleHeading = page
       .locator("h3", { hasText: fixtures.reuse.title })
       .first();

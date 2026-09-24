@@ -8,6 +8,18 @@ test.describe("Homepage", () => {
     await page.waitForLoadState("networkidle");
   });
 
+  test("HP-00: Public pages carry exactly one portal header and footer", async ({
+    page,
+  }) => {
+    // The mirror of the backoffice's UI-00. That test proves the chrome is absent
+    // from `(admin)`; this one proves moving it into `(pages)/layout.tsx` did not
+    // cost the portal itself — a regression UI-00 would happily report as a pass.
+    // Exactly one of each: two would mean the chrome got mounted in a second place.
+    await expect(page.locator("header")).toHaveCount(1);
+    await expect(page.locator("footer")).toHaveCount(1);
+    await expect(page.locator("footer")).toBeVisible({ timeout: 10000 });
+  });
+
   test("HP-01: Homepage loads with banner, stats, featured datasets and news sections", async ({
     page,
   }) => {
@@ -19,7 +31,7 @@ test.describe("Homepage", () => {
     await expect(heroHeading).toBeVisible({ timeout: 10000 });
 
     // Stats section
-    const stats = page.locator(".stats-icon-square").first();
+    const stats = page.getByTestId("home-stat").first();
     await expect(stats).toBeVisible({ timeout: 10000 });
 
     // Featured datasets section
@@ -84,7 +96,7 @@ test.describe("Homepage", () => {
       await expect(element).toBeVisible({ timeout: 10000 });
     }
 
-    const statsIcons = page.locator(".stats-icon-square");
+    const statsIcons = page.getByTestId("home-stat");
     await expect(statsIcons.first()).toBeVisible({ timeout: 10000 });
     const count = await statsIcons.count();
     expect(count).toBeGreaterThanOrEqual(4);

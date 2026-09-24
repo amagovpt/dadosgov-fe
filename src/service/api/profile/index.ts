@@ -89,7 +89,13 @@ export async function requestEmailChange(
     body,
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to request email change");
+  if (!res.ok) {
+    // Carry the HTTP status so callers can special-case e.g. the 429
+    // rate limit without parsing backend message strings.
+    throw Object.assign(new Error(data.message || "Failed to request email change"), {
+      status: res.status,
+    });
+  }
   return data;
 }
 

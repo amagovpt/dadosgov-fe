@@ -135,7 +135,6 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-organizations:title"), url: "/admin/system/organizations" },
         {
           label: pageTitle,
@@ -152,8 +151,8 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
         stepTitle={stepTitle}
       />
 
-      <div className="admin-page__body">
-        <div className="admin-page__form-area">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
           {currentStep === 1 && (
             <OrganizationSelectionStep
               orgSuggestions={orgSuggestions}

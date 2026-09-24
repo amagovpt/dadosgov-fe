@@ -1,33 +1,23 @@
 import type { Metadata } from "next";
-import { Noto_Sans, Noto_Sans_Mono } from "next/font/google";
+import { notoSans, notoSansMono } from "../fonts";
 import "./globals.css";
-import { HeaderWrapper } from "@/components/HeaderWrapper";
-import Footer from "@/components/Footer";
 import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
+import { ToastProviderWrapper } from "@/providers/ToastProviderWrapper";
+import { ApiErrorProvider } from "@/providers/ApiErrorProvider";
 import { AuthProvider } from "@/context/AuthContext";
+import { ActiveProfileProvider } from "@/context/ActiveProfileContext";
 import { siteConfig } from "@/config/site";
 import ScrollTop from "@/components/ScrollTop";
-import NewAccountNotice from "@/components/login/NewAccountNotice";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
-import { ReactNode, Suspense } from "react";
-import { getHeaderNavigation } from "@/service/commom/header";
-import type { HeaderNavigationData } from "@/service/types/header";
-import { Footer as FooterType } from "@/service/types/header/footer";
-import { getFooter } from "@/service/commom/footer";
+import { ReactNode } from "react";
 import { i18nConfig } from "@/config/i18nConfig";
 import initTranslations from "../i18n";
 import TranslationsProvider from "@/providers/TranslationProvider";
-
-const notoSans = Noto_Sans({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-});
-
-const notoSansMono = Noto_Sans_Mono({
-  variable: "--font-noto-sans-mono",
-  subsets: ["latin"],
-});
+import { getInitialSession } from "@/service/api/auth/server";
+import Footer from "@/components/Footer";
+import { loadShellData } from "@/service/commom/shell";
+import { ShellProvider } from "@/providers/ShellProvider";
 
 const namespaces = [
   "common",
@@ -107,47 +97,35 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: rawLocale } = await params;
+  const initialSession = getInitialSession();
   const locale = i18nConfig.locales.includes(rawLocale) ? rawLocale : i18nConfig.defaultLocale;
   const { resources } = await initTranslations({
     locale,
     namespaces,
   });
-
-  let headerNavigation: HeaderNavigationData;
-  try {
-    headerNavigation = await getHeaderNavigation(locale);
-  } catch (error) {
-    console.error("Error fetching header navigation:", error);
-    headerNavigation = {} as HeaderNavigationData;
-  }
-
-  let footerData: FooterType;
-  try {
-    footerData = await getFooter(locale);
-  } catch (error) {
-    console.error("Error fetching footer data:", error);
-    footerData = {} as FooterType;
-  }
+  const { headerNavigation, footerData } = await loadShellData(locale);
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
-        <AuthProvider>
-          <ApolloWrapper>
-            <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
-              <PopupProviderWrapper>
-                <ScrollTop />
-                <div className="flex min-h-screen w-full flex-col">
-                  <HeaderWrapper data={headerNavigation} />
-                  <Suspense fallback={null}>
-                    <NewAccountNotice />
-                  </Suspense>
-                  <div className="">{children}</div>
-                  <Footer data={footerData} />
-                </div>
-              </PopupProviderWrapper>
-            </TranslationsProvider>
-          </ApolloWrapper>
+        <AuthProvider initialSession={initialSession}>
+          <ActiveProfileProvider>
+            <ApolloWrapper>
+              <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
+                <ToastProviderWrapper>
+                  <ApiErrorProvider>
+                    <PopupProviderWrapper>
+                      <ShellProvider headerNavigation={headerNavigation}>
+                        <ScrollTop />
+                        {children}
+                        <Footer data={footerData} />
+                      </ShellProvider>
+                    </PopupProviderWrapper>
+                  </ApiErrorProvider>
+                </ToastProviderWrapper>
+              </TranslationsProvider>
+            </ApolloWrapper>
+          </ActiveProfileProvider>
         </AuthProvider>
       </body>
     </html>

@@ -149,7 +149,6 @@ export default function PostsNewClient({ pageContent }: PostsNewClientProps) {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("new.breadcrumbsHome"), url: "/admin" },
         { label: t("title"), url: "/admin/system/posts" },
         { label: pageContent.createHero?.title ?? "", url: "/admin/system/posts/new" },
       ]}
@@ -161,8 +160,8 @@ export default function PostsNewClient({ pageContent }: PostsNewClientProps) {
         stepTitle={stepTitles[currentStep]}
       />
 
-      <div className="admin-page__body">
-        <div className="admin-page__form-area">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
           {currentStep === 1 && (
             <PostsNewMetadataStep
               articleTitle={articleTitle}

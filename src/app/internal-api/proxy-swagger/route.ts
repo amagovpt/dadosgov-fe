@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { fetchRemoteJson } from "../_lib/fetch-remote-json";
+import { parseOpenApi } from "@/utils/parseOpenApi";
 
 /**
  * Swagger/OpenAPI spec proxy — fetches the JSON document at the dataservice's
@@ -20,7 +21,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  return NextResponse.json(result.data, {
+  // The detail page only renders a summary. Avoid transferring schemas and
+  // operation parameters it will discard, especially on slow connections.
+  const data = request.nextUrl.searchParams.get("format") === "summary"
+    ? parseOpenApi(result.data)
+    : result.data;
+  if (data === null) {
+    return NextResponse.json({ error: "Not a supported OpenAPI document" }, { status: 415 });
+  }
+
+  return NextResponse.json(data, {
     status: 200,
     headers: { "Cache-Control": "public, max-age=300" },
   });

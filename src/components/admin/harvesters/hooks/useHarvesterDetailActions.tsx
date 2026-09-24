@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   deleteHarvester,
   previewHarvestSource,
+  previewHarvestSourceById,
   rejectHarvestSource,
   scheduleHarvester,
   unscheduleHarvester,
@@ -24,6 +25,13 @@ import {
   validateHarvesterDetails,
 } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
+import { can } from "@/utils/permissions";
+import {
+  keepDeclaredKeys,
+  selectBackendExtraConfigs,
+  selectBackendFeatures,
+  selectBackendFilters,
+} from "@/components/admin/harvesters/form-state/harvesterBackendConfig";
 
 interface UseHarvesterDetailActionsParams {
   source: HarvestSource | null;
@@ -35,6 +43,9 @@ interface UseHarvesterDetailActionsParams {
   isEnabled: boolean;
   isAutoArchive: boolean;
   filters: { type: string; value: string; mode: string }[];
+  /** The flags and values of the features/extra configs the backend declares. */
+  featureValues: Record<string, boolean>;
+  extraConfigValues: Record<string, string>;
   harvesterSchedule: string;
   setSource: React.Dispatch<React.SetStateAction<HarvestSource | null>>;
   setFilters: React.Dispatch<
@@ -67,6 +78,8 @@ export function useHarvesterDetailActions({
   isEnabled,
   isAutoArchive,
   filters,
+  featureValues,
+  extraConfigValues,
   harvesterSchedule,
   setSource,
   setFilters,
@@ -84,7 +97,15 @@ export function useHarvesterDetailActions({
 }: UseHarvesterDetailActionsParams) {
   const { t } = useTranslation("admin-harvesters");
   const activeBackendFilters = useMemo(
-    () => backends.find((backend) => backend.id === selectedBackend)?.filters ?? [],
+    () => selectBackendFilters(backends, selectedBackend),
+    [backends, selectedBackend],
+  );
+  const activeBackendFeatures = useMemo(
+    () => selectBackendFeatures(backends, selectedBackend),
+    [backends, selectedBackend],
+  );
+  const activeBackendExtraConfigs = useMemo(
+    () => selectBackendExtraConfigs(backends, selectedBackend),
     [backends, selectedBackend],
   );
 
@@ -150,6 +171,11 @@ export function useHarvesterDetailActions({
             autoarchive: isAutoArchive,
             filters,
             activeFilterKeys: [...validKeys],
+            // What the form holds, seeded from the stored config and pruned to
+            // the keys this backend declares.
+            features: keepDeclaredKeys(featureValues, activeBackendFeatures),
+            extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
+            storedConfig: source.config ?? {},
           }),
         ),
         newSchedule && newSchedule !== oldSchedule
@@ -181,20 +207,41 @@ export function useHarvesterDetailActions({
     setPreviewJob(null);
     setPreviewError(null);
     try {
-      const job = await previewHarvestSource(
-        buildHarvesterPreviewPayload({
-          name: harvesterName,
-          fallbackName: source.name,
-          url: harvesterUrl,
-          fallbackUrl: source.url,
-          backend: selectedBackend,
-          fallbackBackend: source.backend,
-          schedule: harvesterSchedule,
-          active: isEnabled,
-          autoarchive: isAutoArchive,
-          filters,
-        }),
-      );
+      // Two preview routes, and this condition has to mirror what the
+      // config-payload route can actually authorize: harvest permission on the
+      // organization the payload names. So both halves are needed — edit rights,
+      // because without them every field in the configuration tab is disabled
+      // (`basicDisabled`/`advancedDisabled` in HarvesterConfigForm) and the
+      // config here IS the stored config; and an organization to authorize
+      // against, because with none the route requires a sysadmin.
+      //
+      // The second half is not redundant: `HarvestSourceAdminPermission` grants
+      // `edit` to the owner of a source that has no organization, so testing
+      // edit alone sent them to a route that answers 403 for a preview they are
+      // entitled to. The per-source route serves everyone else, authorizing
+      // through `source.permissions["preview"]` — owner and org editors
+      // included — and returns the same preview, since the config is the stored
+      // one in every case that lands here.
+      const job = can(source, "edit") && source.organization
+        ? await previewHarvestSource(
+            buildHarvesterPreviewPayload({
+              name: harvesterName,
+              fallbackName: source.name,
+              url: harvesterUrl,
+              fallbackUrl: source.url,
+              backend: selectedBackend,
+              fallbackBackend: source.backend,
+              schedule: harvesterSchedule,
+              organization: source.organization?.id,
+              active: isEnabled,
+              autoarchive: isAutoArchive,
+              filters,
+              features: keepDeclaredKeys(featureValues, activeBackendFeatures),
+              extraConfigs: keepDeclaredKeys(extraConfigValues, activeBackendExtraConfigs),
+              storedConfig: source.config ?? {},
+            }),
+          )
+        : await previewHarvestSourceById(source.id);
       setPreviewJob(job);
     } catch (error: unknown) {
       const err = error as { data?: { message?: string }; message?: string };
@@ -245,6 +292,8 @@ export function useHarvesterDetailActions({
 
   return {
     activeBackendFilters,
+    activeBackendFeatures,
+    activeBackendExtraConfigs,
     addFilter,
     handleApproveSource,
     handleDeleteHarvester,

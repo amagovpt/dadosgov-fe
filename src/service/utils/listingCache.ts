@@ -25,13 +25,9 @@
 const CACHE_TTL_MS = 60_000; // matches the backend @cache.cached(60)
 const MAX_ENTRIES = 100;
 
-export type ListingFetchResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; status: number; statusText: string };
-
 interface CacheEntry {
   expiresAt: number;
-  result: Promise<ListingFetchResult<unknown>>;
+  result: Promise<unknown>;
 }
 
 const cache = new Map<string, CacheEntry>();
@@ -49,32 +45,39 @@ function prune(now: number) {
 }
 
 /**
- * GET `url` relaying `forwarded` headers, caching successful responses for
- * 60s keyed by `url` alone. Network errors throw (callers keep their existing
- * catch fallbacks); HTTP errors return `{ ok: false, status, statusText }`
- * and are not cached.
+ * GET `url` relaying `forwarded` headers, caching the parsed payload for 60s
+ * keyed by `url` alone. A failure throws and is never cached, so the next
+ * request retries as soon as the backend recovers.
+ *
+ * Nothing here opts out of the global error policy: a listing that cannot be
+ * fetched has no page to render, so the failure belongs to the `error.tsx`
+ * boundary — which undoes the navigation when the visitor came from another
+ * page, and renders `ErrorState` on a cold load. A refusal (401, 403), a 5xx or
+ * a transport failure therefore throws `ApiPageError` out of `fetch` itself,
+ * without reaching the lines below. The `!res.ok` throw covers what the policy
+ * deliberately ignores — a 429 from the public search limiter above all — which
+ * would otherwise reach `res.json()` and fail as a parse error instead.
  */
 export function cachedListingFetch<T>(
   url: string,
   forwarded?: Record<string, string>
-): Promise<ListingFetchResult<T>> {
+): Promise<T> {
   const now = Date.now();
   const hit = cache.get(url);
   if (hit && hit.expiresAt > now) {
-    return hit.result as Promise<ListingFetchResult<T>>;
+    return hit.result as Promise<T>;
   }
 
   prune(now);
 
   const entry: CacheEntry = { expiresAt: now + CACHE_TTL_MS, result: undefined! };
-  entry.result = (async (): Promise<ListingFetchResult<T>> => {
+  entry.result = (async (): Promise<T> => {
     try {
       const res = await fetch(url, { cache: "no-store", headers: forwarded });
       if (!res.ok) {
-        if (cache.get(url) === entry) cache.delete(url);
-        return { ok: false, status: res.status, statusText: res.statusText };
+        throw new Error(`Listing fetch failed with ${res.status} ${res.statusText}: ${url}`);
       }
-      return { ok: true, data: (await res.json()) as T };
+      return (await res.json()) as T;
     } catch (error) {
       if (cache.get(url) === entry) cache.delete(url);
       throw error;
@@ -82,5 +85,5 @@ export function cachedListingFetch<T>(
   })();
   cache.set(url, entry);
 
-  return entry.result as Promise<ListingFetchResult<T>>;
+  return entry.result as Promise<T>;
 }

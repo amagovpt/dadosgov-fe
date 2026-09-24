@@ -1,7 +1,9 @@
 // General upload ceiling applied to every resource file. Binary files are not
 // read into memory client-side (only the first 1KB is sniffed), so this can be
 // large without risking the browser tab.
-export const MAX_UPLOAD_SIZE = 800 * 1024 * 1024;
+// Must mirror the backend `RESOURCES_FILE_MAX_SIZE` (1 GiB): this guard only
+// saves the user a doomed multi-part upload — the backend is what enforces it.
+export const MAX_UPLOAD_SIZE = 1024 * 1024 * 1024;
 
 // SVG and XML are read *fully* into memory as a string to be sanitized, so they
 // keep tighter caps to avoid blowing up the tab on a multi-hundred-MB text read.

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
+  StatusCard,
   Tabs,
   Tab,
   TabHeader,
@@ -30,22 +31,40 @@ export function LoginContent() {
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 🚩 The backend redirects every refused SAML sign-in to /login?saml_error=…
+  // and, until now, nothing here read it: the citizen landed on a clean login
+  // screen with no idea why they were not signed in. Latched on first render
+  // and shown until they try again -- it explains what just happened, so it
+  // must not survive the next attempt's own outcome.
+  const [samlError] = useState<string | null>(() => searchParams.get("saml_error"));
+  // Set only from the backend's `migration_required` answer, never from a config
+  // flag read here — see the note in EmailTab (LEDG-2432).
   const [migrationRequired, setMigrationRequired] = useState(false);
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
-  const runSamlLogin = async (base: string) => {
+  const runSamlLogin = async (base: string, citizen?: string) => {
     setIsLoading(true);
     setError(null);
-    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl), t);
+    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl, citizen), t);
     if (samlError) {
       setError(samlError);
     }
     setIsLoading(false);
   };
 
-  const handleSamlLogin = () => runSamlLogin("/saml/login");
+  // The CMD tab asks whether the citizen is national or foreign and now sends
+  // the answer, which the backend records as self-declared. eIDAS does not ask,
+  // so its start carries no such parameter.
+  const handleSamlLogin = (citizen: string) => runSamlLogin("/saml/login", citizen);
   const handleEidasLogin = () => runSamlLogin("/saml/eidas/login");
+
+  // The account-linking notice on the email tab also starts a CMD login, but
+  // that screen never asks the question -- so it declares nothing, and the
+  // backend records nothing rather than a guess. Kept as its own handler
+  // instead of making the parameter optional at the call site, so the two
+  // entry points cannot be confused for one.
+  const handleMigrationSamlLogin = () => runSamlLogin("/saml/login");
 
   const handleEmailLogin = async (email: string, password: string) => {
     if (!email || !password) {
@@ -65,8 +84,10 @@ export function LoginContent() {
       await login(payload);
       window.location.href = nextUrl;
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : t("errors.loginFailed");
+      const message = err instanceof Error ? err.message : t("errors.loginFailed");
+      // /auth/login answers 403 { message: "migration_required" } when
+      // /saml/migration/check says this account must link to CMD/eIDAS first.
+      // The notice is shown because the backend said so, for this account.
       if (message === "migration_required") {
         setMigrationRequired(true);
         setError(null);
@@ -91,7 +112,7 @@ export function LoginContent() {
   const showMainView = !cmdModalOpen && !eidasModalOpen;
 
   return (
-    <main className="relative min-h-screen flex-grow bg-white">
+    <main className="relative min-h-screen grow bg-white">
       <div className="login-page container mx-auto max-w-7xl px-16 pb-64 pt-32">
         {showMainView && (
           <div>
@@ -113,6 +134,21 @@ export function LoginContent() {
                 {t("description")}
               </Typograph>
             </div>
+            {/* Why the previous attempt ended here. Codes the portal knows get
+                their own sentence; anything else gets a generic one, because
+                silence is what this screen used to offer and it left people
+                assuming the portal was broken. */}
+            {samlError && (
+              <StatusCard
+                variant={samlError === "invite_identity_already_linked" ? "informative" : "danger"}
+                showIcon
+                description={t(
+                  `samlErrors.${samlError}`,
+                  t("samlErrors.generic") as string
+                )}
+              />
+            )}
+
             <Tabs vertically className="mt-24">
               <Tab>
                 <TabHeader>{t("tabs.cmd")}</TabHeader>
@@ -138,12 +174,13 @@ export function LoginContent() {
                 <TabHeader>{t("tabs.email")}</TabHeader>
                 <TabBody>
                   <EmailTab
+                    samlEnabled={samlEnabled}
                     prefilledEmail={prefilledEmail}
                     isLoading={isLoading}
                     error={error}
                     migrationRequired={migrationRequired}
                     onLogin={handleEmailLogin}
-                    onSaml={handleSamlLogin}
+                    onSaml={handleMigrationSamlLogin}
                     onEidas={handleEidasLogin}
                   />
                 </TabBody>

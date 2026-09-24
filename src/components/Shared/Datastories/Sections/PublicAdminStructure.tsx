@@ -46,8 +46,8 @@ function PublicAdminCard({
       </Typograph>
       {description && (
         <>
-          <div className="min-h-88 w-0 flex-1 border-l border-dashed border-l-neutral-700 lg:min-h-[170px]" />
-          <AppIcon name={"agora-line-info-mark"} className="h-22 w-22 fill-primary-600" />
+          <div className="min-h-8 w-0 flex-1" />
+          <AppIcon name={"agora-line-chevron-down"} className="h-22 w-22 fill-primary-600" />
           <Typograph tag="div" className="text-center text-m-light text-neutral-800">
             {formatHtmlParagraphs(description) as string[]}
           </Typograph>
@@ -75,11 +75,11 @@ function PublicAdminCards({
           <PublicAdminCard {...localAdmin} />
         </div>
         <div className="hidden w-[70.5%] self-center lg:block">
-          <div className="relative mt-8 h-64 border-b border-l border-r border-dashed border-neutral-700">
+          <div className="relative mt-8 h-64 border-r border-b border-l border-dashed border-neutral-700">
             <div className="absolute bottom-0 left-1/2 h-64 w-0 border-l border-dashed border-neutral-700" />
           </div>
           <div className="relative h-[193px] border-r border-dashed border-neutral-700">
-            <div className="absolute right-0 top-1/2 h-fit w-fit -translate-y-1/2 translate-x-1/2 rounded-full bg-primary-600 p-16">
+            <div className="absolute top-1/2 right-0 h-fit w-fit translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-600 p-16">
               <AppIcon name={"agora-line-arrow-down-anchor"} className="h-24 w-24 fill-white" />
             </div>
           </div>
@@ -87,8 +87,8 @@ function PublicAdminCards({
       </div>
       <div className="flex flex-col gap-64 lg:flex-row">
         <PublicAdminCard {...socialFunds} />
-        <div className="relative h-[193px] w-0 self-center border-r border-t-0 border-dashed border-neutral-700 lg:h-0 lg:w-full lg:border-r-0 lg:border-t">
-          <div className="absolute right-0 top-1/2 h-fit w-fit -translate-y-1/2 translate-x-1/2 rounded-full bg-primary-600 p-16 lg:right-1/2 lg:top-0">
+        <div className="relative h-[193px] w-0 self-center border-t-0 border-r border-dashed border-neutral-700 lg:h-0 lg:w-full lg:border-t lg:border-r-0">
+          <div className="absolute top-1/2 right-0 h-fit w-fit translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-600 p-16 lg:top-0 lg:right-1/2">
             <AppIcon
               name={"agora-line-arrow-right-anchor"}
               className="h-24 w-24 rotate-90 fill-white lg:rotate-0"

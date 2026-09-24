@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Avatar,
   Button,
@@ -26,6 +26,8 @@ import { useTranslation } from "react-i18next";
 interface DiscussionSectionProps {
   entityId: string;
   entityClass: "Reuse" | "Dataset" | "Organization" | "Dataservice";
+  onCountChange?: (count: number) => void;
+  initialData?: { data: Discussion[]; total: number };
 }
 
 interface ReplyFormProps {
@@ -127,12 +129,17 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
   );
 };
 
-export function DiscussionSection({ entityId, entityClass }: DiscussionSectionProps) {
+export function DiscussionSection({
+  entityId,
+  entityClass,
+  onCountChange,
+  initialData,
+}: DiscussionSectionProps) {
   const { t, i18n } = useTranslation("common");
   const { user } = useAuth();
   const { show } = usePopupContext();
-  const [discussions, setDiscussions] = useState<Discussion[]>([]);
-  const [discussionCount, setDiscussionCount] = useState(0);
+  const [discussions, setDiscussions] = useState<Discussion[]>(initialData?.data ?? []);
+  const [discussionCount, setDiscussionCount] = useState(initialData?.total ?? 0);
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [newDiscTitle, setNewDiscTitle] = useState("");
   const [newDiscMessage, setNewDiscMessage] = useState("");
@@ -141,21 +148,37 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [discussionSearch, setDiscussionSearch] = useState("");
 
+  const updateDiscussionCount = useCallback(
+    (count: number) => {
+      setDiscussionCount(count);
+      onCountChange?.(count);
+    },
+    [onCountChange],
+  );
+
   useEffect(() => {
+    if (initialData) {
+      onCountChange?.(initialData.total);
+      return;
+    }
+    let cancelled = false;
     async function load() {
       try {
         const response =
           entityClass === "Organization"
             ? await fetchOrgDiscussions(entityId)
             : await fetchDiscussions(entityId);
-        setDiscussions(response.data ?? []);
-        setDiscussionCount(response.total ?? 0);
+        if (!cancelled) {
+          setDiscussions(response.data ?? []);
+          updateDiscussionCount(response.total ?? 0);
+        }
       } catch (error) {
         console.error("Error loading discussions:", error);
       }
     }
     load();
-  }, [entityId, entityClass]);
+    return () => { cancelled = true; };
+  }, [entityId, entityClass, updateDiscussionCount, initialData, onCountChange]);
 
   const handleCreateDiscussion = async () => {
     if (!newDiscTitle.trim() || !newDiscMessage.trim()) return;
@@ -172,7 +195,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
       const created = await createDiscussion(payload);
       if (created) {
         setDiscussions((prev) => [created, ...prev]);
-        setDiscussionCount((prev) => prev + 1);
+        updateDiscussionCount(discussionCount + 1);
         setNewDiscTitle("");
         setNewDiscMessage("");
         setShowNewDiscussion(false);
@@ -391,7 +414,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                             commentIndex={0}
                             onDeleted={() => {
                               setDiscussions((prev) => prev.filter((d) => d.id !== disc.id));
-                              setDiscussionCount((prev) => prev - 1);
+                              updateDiscussionCount(Math.max(0, discussionCount - 1));
                             }}
                           />,
                           {

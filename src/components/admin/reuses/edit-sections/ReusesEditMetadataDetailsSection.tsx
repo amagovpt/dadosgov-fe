@@ -93,6 +93,7 @@ export default function ReusesEditMetadataDetailsSection({
           placeholder={t("form.namePlaceholder")}
           id="edit-title"
           defaultValue={title}
+          required
           onChange={onTitleChange}
           hasError={!!formErrors.title}
           hasFeedback={!!formErrors.title}
@@ -104,6 +105,7 @@ export default function ReusesEditMetadataDetailsSection({
           placeholder={t("form.linkPlaceholder")}
           id="edit-url"
           defaultValue={url}
+          required
           onChange={onUrlChange}
           hasError={!!formErrors.url}
           hasFeedback={!!formErrors.url}

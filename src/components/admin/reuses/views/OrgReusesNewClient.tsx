@@ -3,8 +3,6 @@
 import { useSearchParams, useRouter, useParams, usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -21,8 +19,6 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
   const pathname = usePathname();
   const params = useParams();
   const orgId = params?.orgId as string | undefined;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.createHero?.title ?? "";
@@ -31,8 +27,6 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-      { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
       { label: t("admin-reuses:title"), url: orgId ? `/admin/org/${orgId}/reuses` : "#" }
     ]}
       title={pageTitle}

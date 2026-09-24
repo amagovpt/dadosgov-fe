@@ -348,7 +348,6 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
         { label: source?.name || "Harvester", url: `/admin/harvesters/${slug}` },
         { label: job.id.toUpperCase() },
@@ -429,7 +428,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
           {t("admin-harvesters:jobDetail.itemsHeading", { count: filteredItems.length })}
         </h2>
         <div className="flex items-end gap-16">
-          <div className="admin-search-wrapper">
+          <div className="admin-search-wrapper xl:w-1/2 w-full ">
             <InputSearchBar
               hasVoiceActionButton={false}
               label={t("admin-harvesters:jobDetail.searchLabel")}

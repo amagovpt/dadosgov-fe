@@ -3,7 +3,6 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -18,7 +17,6 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { displayName } = useCurrentUser();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.createHero?.title ?? "";
@@ -28,8 +26,6 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
         { label: t("admin-reuses:title"), url: "/admin/me/reuses" },
       ]}
       title={pageTitle}

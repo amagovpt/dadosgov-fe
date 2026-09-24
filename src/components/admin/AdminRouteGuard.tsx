@@ -1,64 +1,110 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminSideNavigation } from "@/components/admin/AdminSideNavigation";
+import { ErrorState } from "@/components/Shared/ErrorState";
+import { PortalErrorFrame } from "@/components/Shared/PortalErrorFrame";
 import { useAuth } from "@/context/AuthContext";
+import type { AdminSideNavigationData } from "@/service/types/admin-side-navigation";
 import { stripLocale } from "@/utils/stripLocale";
 
-const ADMIN_DEFAULT_ROUTE = "/admin/me/datasets";
-const LOGIN_ROUTE = "/login";
+/** The refusal a route answers with, or `null` when it may be entered. */
+type Refusal = 401 | 403 | null;
 
-export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
+/**
+ * Who may see a backoffice route, and — because the answer decides which frame
+ * the page gets — the frame itself.
+ *
+ * Every check here answers with the page the API policy would have raised for
+ * the same refusal — 401 when there is no session, 403 when the session lacks
+ * the permission — rather than a redirect. The redirects it replaced said
+ * nothing: an anonymous visitor was bounced to `/login` without a `?next=`, so
+ * signing in dropped them on the homepage instead of the page they asked for,
+ * and a non-admin was moved to their own datasets with no indication that
+ * anything had been refused, which reads as the portal losing the click.
+ *
+ * The backoffice needs its own checks at all because its pages fetch their
+ * authenticated data client-side (the server halves read only the CMS, which is
+ * outside the policy's watched prefixes), so no 401 ever reaches a boundary
+ * here. The role and organization rules have no HTTP status behind them either
+ * — they are refused before a request is made.
+ *
+ * Owning the frame is what keeps a refusal from being furnished with the room it
+ * was refused: the backoffice topbar and side navigation. What a refusal gets
+ * instead is the portal's own frame, through `PortalErrorFrame` — an error page
+ * reads the same on both halves of the site, and the header it carries is the one
+ * way out a refused visitor still has.
+ *
+ * Nothing here has to fight the portal's header the way it used to, because a
+ * backoffice page never receives it: it belongs to `(pages)/layout.tsx`, which the
+ * `(admin)` group does not inherit, and only the refusal above asks for it back.
+ * That used to be the opposite — the root layout rendered the header for every
+ * route and a CSS rule keyed on `body:has(.admin-wrapper)` hid it after the fact,
+ * acting at a distance and, in the end, not acting at all. The footer is not part
+ * of that story: it sits in the root layout and shows on every page, backoffice
+ * included, which is also what closes the viewport under a refusal.
+ *
+ * While the session is still resolving the frame stays, with the placeholder
+ * inside it. `useAuth` is loading on every single page load, so swapping frames
+ * for that window would flash the portal header onto every backoffice visit —
+ * and `children` must stay unmounted until we know, so an admin page never
+ * fetches on behalf of someone who turns out to be refused.
+ */
+export function AdminRouteGuard({
+  navigation,
+  children,
+}: {
+  navigation: AdminSideNavigationData;
+  children: React.ReactNode;
+}) {
   const { t } = useTranslation("admin-common");
   const { user, isLoading, isAdmin, hasOrganization } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
   // usePathname() is locale-prefixed (`/pt/admin/...`); normalize before
   // matching so the guards fire regardless of the active locale.
   const localePath = useMemo(() => stripLocale(pathname), [pathname]);
 
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!user) {
-      router.replace(LOGIN_ROUTE);
-      return;
-    }
-
-    if (localePath.startsWith("/admin/system") && !isAdmin) {
-      router.replace(ADMIN_DEFAULT_ROUTE);
-      return;
-    }
-
+  const refusal: Refusal = useMemo(() => {
+    if (isLoading) return null;
+    // Not signed in at all.
+    if (!user) return 401;
+    if (localePath.startsWith("/admin/system") && !isAdmin) return 403;
     if (
       localePath.startsWith("/admin/org") &&
       !localePath.startsWith("/admin/organizations/new") &&
+      !isAdmin &&
       !hasOrganization
     ) {
-      router.replace(ADMIN_DEFAULT_ROUTE);
-      return;
+      return 403;
     }
-  }, [user, isLoading, isAdmin, hasOrganization, localePath, router]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <p className="text-neutral-600">{t("loading")}</p>
-      </div>
-    );
-  }
-
-  if (!user) return null;
-
-  if (localePath.startsWith("/admin/system") && !isAdmin) return null;
-
-  if (
-    localePath.startsWith("/admin/org") &&
-    !localePath.startsWith("/admin/organizations/new") &&
-    !hasOrganization
-  )
     return null;
+  }, [hasOrganization, isAdmin, isLoading, localePath, user]);
 
-  return <>{children}</>;
+  if (refusal)
+    return (
+      <PortalErrorFrame>
+        <ErrorState status={refusal} />
+      </PortalErrorFrame>
+    );
+
+  return (
+    <div className="admin-wrapper">
+      <AdminHeader />
+      <div className="admin-layout">
+        <AdminSideNavigation data={navigation} />
+        <div className="admin-layout__content flex items-start justify-center">
+          {isLoading ? (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <p className="text-neutral-600">{t("loading")}</p>
+            </div>
+          ) : (
+            children
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

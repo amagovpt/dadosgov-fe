@@ -6,6 +6,7 @@ import { StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
@@ -17,6 +18,7 @@ import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createSystemHarvesterColumns,
   filterHarvestersByStatus,
+  HARVESTERS_FETCH_PAGE_SIZE,
   sortHarvesters,
   type HarvesterSortField,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
@@ -52,6 +54,7 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
   } = useAdminListController<HarvesterSortField, { statusFilter: string }>({
     initialFilters: { statusFilter: "" },
   });
+  const usesLocalFallback = Boolean(filters.statusFilter) || Boolean(sortField);
 
   const applyValidationUpdate = useCallback((updated: HarvestSource) => {
     setHarvesters((prev) =>
@@ -125,59 +128,54 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     [show, hide, handleReject, t]
   );
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      setIsLoading(true);
-      setCurrentPage(page);
-    },
-    [setCurrentPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (nextPageSize: number) => {
-      setIsLoading(true);
-      setPageSize(nextPageSize);
-    },
-    [setPageSize]
-  );
+  const loadHarvesters = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchHarvesters(
+        usesLocalFallback ? 1 : currentPage,
+        usesLocalFallback ? HARVESTERS_FETCH_PAGE_SIZE : pageSize,
+        { q: searchQuery.trim() || undefined },
+      );
+      setHarvesters(response.data || []);
+      setTotalItems(response.total || 0);
+    } catch (error) {
+      console.error("Error loading harvesters:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, pageSize, searchQuery, usesLocalFallback]);
 
   useEffect(() => {
     let isActive = true;
-
-    const run = async () => {
+    const loadCurrentHarvesters = async () => {
+      if (!isActive) return;
       try {
-        const response = await fetchHarvesters(currentPage, pageSize);
+        await loadHarvesters();
+      } catch {
         if (!isActive) return;
-        setHarvesters(response.data || []);
-        setTotalItems(response.total || 0);
-      } catch (error) {
-        if (!isActive) return;
-        console.error("Error loading harvesters:", error);
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
       }
     };
-
-    void run();
+    void loadCurrentHarvesters();
 
     return () => {
       isActive = false;
     };
-  }, [currentPage, pageSize]);
+  }, [loadHarvesters]);
 
-  const filteredHarvesters = useMemo(() => {
-    let result = harvesters;
-    if (searchQuery.trim()) {
-      const query = searchQuery.trim().toLowerCase();
-      result = result.filter((harvester) => harvester.name.toLowerCase().includes(query));
-    }
-    return filterHarvestersByStatus(result, filters.statusFilter);
-  }, [harvesters, searchQuery, filters.statusFilter]);
-  const visibleHarvesters = useMemo(
+  const filteredHarvesters = useMemo(
+    () =>
+      filterHarvestersByStatus(harvesters, filters.statusFilter),
+    [harvesters, filters.statusFilter]
+  );
+
+  const sortedHarvesters = useMemo(
     () => sortHarvesters(filteredHarvesters, sortField, sortOrder),
     [filteredHarvesters, sortField, sortOrder]
+  );
+
+  const visibleHarvesters = useMemo(
+    () => (usesLocalFallback ? paginateItems(sortedHarvesters, currentPage, pageSize) : sortedHarvesters),
+    [currentPage, pageSize, sortedHarvesters, usesLocalFallback]
   );
 
   const columns = useMemo(
@@ -226,18 +224,16 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
       ]}
       title={t("admin-harvesters:title")}
       isLoading={isLoading}
-      count={totalItems}
+      count={usesLocalFallback ? filteredHarvesters.length : totalItems}
       hasItems={visibleHarvesters.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
-      setCurrentPage={handlePageChange}
-      setPageSize={handlePageSizeChange}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
       search={{
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
@@ -277,4 +273,3 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     </AdminListPage>
   );
 }
-

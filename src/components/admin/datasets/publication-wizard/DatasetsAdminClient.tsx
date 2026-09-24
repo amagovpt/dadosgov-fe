@@ -370,9 +370,9 @@ export default function DatasetsAdminClient({
         setFrequencies(frequenciesData);
         setGranularities(granularitiesData);
         setHasDatasets(myDatasetsData.data.length > 0);
-        setTags(tagsData);
-        spatialZoneSearchRef.current = zonesData;
-        setSpatialZoneSearch(zonesData);
+        setTags(tagsData ?? []);
+        spatialZoneSearchRef.current = zonesData ?? [];
+        setSpatialZoneSearch(zonesData ?? []);
         setResourceTypes(resTypes);
         setAllowedExtensions(extData);
       } catch (error) {
@@ -387,7 +387,7 @@ export default function DatasetsAdminClient({
     if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
-        const res = await suggestTags(q, 20);
+        const res = (await suggestTags(q, 20)) ?? [];
         setTagSearch(res);
       } catch {
         setTagSearch([]);
@@ -443,8 +443,8 @@ export default function DatasetsAdminClient({
     if (!q) return;
     suggestSpatialZones(q, 20)
       .then((results) => {
-        spatialZoneSearchRef.current = results;
-        setSpatialZoneSearch(results);
+        spatialZoneSearchRef.current = results ?? [];
+        setSpatialZoneSearch(results ?? []);
       })
       .catch(() => {
         spatialZoneSearchRef.current = [];
@@ -600,9 +600,9 @@ export default function DatasetsAdminClient({
   return (
     <>
       {/* Main content area: form + auxiliar sidebar */}
-    <div className="admin-page__body">
+    <div className="flex flex-col gap-32 min-[1025px]:flex-row">
       {/* Left: Form */}
-      <div className="admin-page__form-area">
+      <div className="flex min-w-0 flex-1 flex-col gap-24">
         {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
         {currentStep === 2 && (
@@ -704,8 +704,8 @@ export default function DatasetsAdminClient({
 
       {/* Right: Auxiliar sidebar */}
       {currentStep !== 4 && auxiliarItems.length > 0 && (
-        <aside className="admin-page__auxiliar">
-          <div className="admin-page__auxiliar-inner">
+        <aside className="w-[360px] max-w-full shrink-0">
+          <div className="bg-neutral-100 p-32">
             <div className="admin-page__auxiliar-header">
               <Icon name="agora-line-question-mark" className="h-24 w-24" />
               <h2 className="admin-page__auxiliar-title">{t("admin-common:auxiliary.title")}</h2>

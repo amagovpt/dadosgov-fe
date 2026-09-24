@@ -81,6 +81,8 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
 
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
+  // Which suggest groups failed their last request (LEDG-2326).
+  const [filterSuggestErrors, setFilterSuggestErrors] = useState<Record<string, boolean>>({});
   const selectedToggleFilters = useMemo<Record<ReuseFilterKey, string>>(
     () => ({
       atualizacao: detectAtualizacaoFromParams(
@@ -110,13 +112,21 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
   const handleTagSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setFilterTagOptions([]);
+      setFilterSuggestErrors((prev) => ({ ...prev, tag: false }));
       return;
     }
     try {
       const results = await suggestTags(query);
+      if (results === null) {
+        setFilterTagOptions([]);
+        setFilterSuggestErrors((prev) => ({ ...prev, tag: true }));
+        return;
+      }
       setFilterTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
+      setFilterSuggestErrors((prev) => ({ ...prev, tag: false }));
     } catch {
       setFilterTagOptions([]);
+      setFilterSuggestErrors((prev) => ({ ...prev, tag: true }));
     }
   }, []);
 
@@ -157,11 +167,11 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
   );
 
   const handleFilterSearchChange = useCallback(
-    (groupName: string, value: string) => {
-      setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-      if (groupName === t("filters.advanced.tag")) handleTagSearch(value);
+    (paramName: string, value: string) => {
+      setFilterSearchQueries((prev) => ({ ...prev, [paramName]: value }));
+      if (paramName === "tag") handleTagSearch(value);
     },
-    [handleTagSearch, t]
+    [handleTagSearch]
   );
 
   const getActiveValues = useCallback(
@@ -195,7 +205,10 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
       {
         name: t("filters.advanced.organization"),
         param: "organization",
-        data: allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
+        data: allOrganizations.map((organization) => ({
+          id: organization.id,
+          name: organization.name,
+        })),
         searchable: true,
         searchPlaceholder: t("search.label"),
         emptyMessage: t("filters.advanced.search.noResults"),
@@ -203,6 +216,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
       {
         name: t("filters.advanced.tag"),
         param: "tag",
+        hasError: filterSuggestErrors["tag"],
         data: filterTagOptions,
         searchable: true,
         suggest: true,
@@ -211,7 +225,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
         emptyMessage: t("filters.advanced.search.noResults"),
       },
     ],
-    [allOrganizations, filterTagOptions, t]
+    [allOrganizations, filterTagOptions, filterSuggestErrors, t]
   );
 
   return (
@@ -223,7 +237,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
         idPrefix="reuse-filter"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">
+      <h2 className="text-xl mb-32 mt-[36px] font-bold text-neutral-900">
         {t("filters.advanced.label")}
       </h2>
 

@@ -175,10 +175,18 @@ export interface DatasetFilters {
   tag?: string | string[];
   license?: string | string[];
   format?: string | string[];
+  // Coarse-grained companion to `format`: the family a resource format belongs
+  // to (tabular, machine_readable, geographical, documents, other). The backend
+  // owns the format lists, so the sidebar's "Formato" group sends a family name
+  // instead of expanding it into every extension.
+  format_family?: string | string[];
   frequency?: string | string[];
   schema?: string;
-  geozone?: string;
-  granularity?: string;
+  // Repeatable on the backend (`action="append"`), so these must stay arrays all
+  // the way down: flattening two selected values into one string sent
+  // `?geozone=a,b`, which matches no zone and returned an empty listing.
+  geozone?: string | string[];
+  granularity?: string | string[];
   organization?: string | string[];
   owner?: string;
   badge?: string | string[];

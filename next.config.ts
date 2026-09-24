@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
 import { readFileSync } from "fs";
-import { resolve } from "path";
+import { relative, resolve, sep } from "path";
+import { resolveAgoraActionIcons } from "./config/agora-action-icons";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:7000";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
 const urlAPI = new URL(API_URL);
+const agoraActionIcons = resolveAgoraActionIcons(__dirname);
 
 // Read udata version from backend pyproject.toml at build time
 let udataVersion = "unknown";
@@ -18,6 +20,15 @@ try {
 }
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    resolveAlias: Object.fromEntries(Object.entries(agoraActionIcons).map(([name, file]) => [
+      name, `./${relative(__dirname, file).split(sep).join("/")}`,
+    ])),
+  },
+  webpack(config) {
+    config.resolve.alias = { ...config.resolve.alias, ...agoraActionIcons };
+    return config;
+  },
   env: {
     NEXT_PUBLIC_UDATA_VERSION: udataVersion,
   },
@@ -154,6 +165,22 @@ const nextConfig: NextConfig = {
         {
           source: "/saml/migration/:path*",
           destination: `${BACKEND_URL}/saml/migration/:path*`,
+        },
+        // Starting a CMD/eIDAS link from an account that is ALREADY signed in
+        // (LEDG-2517). Separate from /saml/login and /saml/eidas/login, which
+        // are anonymous-only on the backend and therefore cannot serve this.
+        //
+        // 🚩 This list is exhaustive and has no catch-all, so a backend route
+        // that is not named here is answered by Next.js with a 404 rather than
+        // reaching Flask. That is how these two shipped dead: the components
+        // were built and tested, and every one of those tests mocks the fetch.
+        {
+          source: "/saml/link/start",
+          destination: `${BACKEND_URL}/saml/link/start`,
+        },
+        {
+          source: "/saml/eidas/link/start",
+          destination: `${BACKEND_URL}/saml/eidas/link/start`,
         },
         // eIDAS routes
         {

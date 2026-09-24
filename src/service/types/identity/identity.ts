@@ -25,8 +25,51 @@ export interface UserRef {
   uri: string;
   page: string;
   saml_login?: boolean;
+  email?: string | null;
+  // True while the account still has a minted saml-* placeholder email;
+  // optional so an older backend (without the field) simply disables the
+  // complete-registration gate.
+  pending_registration?: boolean | null;
+  /**
+   * The address the CMD assertion carried, offered as a prefill on the
+   * registration completion screen. Served only on the caller's own user and
+   * only while the account is still pending.
+   *
+   * Always emitted, so `null` is the ordinary answer, not an absence: eIDAS
+   * never supplies an email (its Minimum Data Set has no such attribute) and
+   * a CMD assertion may carry none. Test the VALUE, never the key.
+   */
+  pending_registration_email?: string | null;
+  /**
+   * True when the backend is inviting this account, optionally, to link a
+   * CMD/eIDAS identity: the invite is enabled, linking is not mandatory, the
+   * account signs in with a password and holds no identity yet, and the
+   * invite has not been dismissed recently.
+   *
+   * 🚨 The whole condition is evaluated on the server, per account, and this
+   * field is the only thing the browser is told. Deriving it here — from a
+   * NEXT_PUBLIC flag, or from the shape of the user object — is the
+   * regression LEDG-2432 was: the frontend assumed a migration flag and
+   * removed the sign-in form from production.
+   *
+   * Optional so an older backend without the field simply shows no invite.
+   * Served only on the caller's own user; `null` on anybody else's.
+   */
+  migration_invite?: boolean | null;
+  /**
+   * True while this account can still link a CMD/eIDAS identity at all.
+   *
+   * 🚩 NOT the same question as `migration_invite`, and the difference is one
+   * condition: this one ignores a dismissal. The notice hides when somebody
+   * presses "Not now"; the permanent entry point in the profile must not, or
+   * the notice would have closed the door behind itself.
+   *
+   * Optional and null on anybody else's user, like its sibling.
+   */
+  migration_link_available?: boolean | null;
   roles?: string[];
   organizations?: Organization[];
+  metrics?: UserMetrics;
   last_modified?: string;
 }
 
@@ -101,6 +144,7 @@ export interface Badge {
 export interface OrganizationMetrics {
   datasets: number;
   dataservices: number;
+  discussions?: number;
   followers: number;
   members: number;
   reuses: number;
@@ -229,4 +273,3 @@ export interface UserSuggestion {
   avatar_thumbnail: string | null;
   score: number;
 }
-

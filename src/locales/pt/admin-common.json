@@ -6,7 +6,7 @@
     "label": "Pesquisar"
   },
   "breadcrumbs": {
-    "administration": "Administração",
+    "administration": "Área de Administração",
     "system": "Sistema",
     "organization": "Organização"
   },
@@ -56,10 +56,16 @@
   "header": {
     "search": "Pesquisar",
     "adminOptions": "Barra de opções do administrador",
-    "profile": "O meu perfil",
+    "profile": "Perfil público",
     "notifications": "Notificações",
     "deleteAccount": "Eliminar conta",
-    "logout": "Terminar sessão"
+    "logout": "Terminar sessão",
+    "adminAreaLabel": "Área de Administração",
+    "portalTitle": "Dados Abertos"
+  },
+  "sidebar": {
+    "expand": "Expandir",
+    "close": "Fechar"
   },
   "deleteAccount": {
     "title": "Tem a certeza que deseja eliminar esta conta?",

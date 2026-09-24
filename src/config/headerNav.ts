@@ -7,8 +7,9 @@ export interface AreaOption {
 
 export interface LanguageOption {
   value: string;
-  label: string;
+  labelKey: string;
   abbr: string;
+  icon: string;
 }
 
 export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: boolean | null }>(
@@ -18,10 +19,18 @@ export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: b
 
 
 export const languages: LanguageOption[] = [
-  { value: "pt", label: "Português", abbr: "PT" },
-  { value: "en", label: "English", abbr: "EN" },
-  { value: "es", label: "Español", abbr: "ES" },
-  { value: "fr", label: "Français", abbr: "FR" },
+  {
+    value: "pt",
+    labelKey: "header.languages.portuguese",
+    abbr: "PT",
+    icon: "/Icons/languages/pt.svg",
+  },
+  {
+    value: "en",
+    labelKey: "header.languages.english",
+    abbr: "EN",
+    icon: "/Icons/languages/en.svg",
+  },
 ];
 
 export const areas: AreaOption[] = [

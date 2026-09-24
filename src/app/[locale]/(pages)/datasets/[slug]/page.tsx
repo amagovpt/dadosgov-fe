@@ -1,6 +1,7 @@
 import DatasetDetailClient from "@/components/datasets/DatasetDetailClient";
 import { fetchDataset } from "@/service/api/datasets";
 import { getFrontOfficeMetadata } from "@/service/queries/common";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 import { serverAuthHeaders } from "@/service/utils/serverForwardedHeaders";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 import { Metadata } from "next";
@@ -51,7 +52,12 @@ export default async function Page({
   let dataset;
   try {
     dataset = await fetchDataset(slug, forwarded);
-  } catch {
+  } catch (error) {
+    // Only a dataset that genuinely is not there is a 404. A refusal (401, 403)
+    // or a backend failure reaches the error boundary instead, which can say
+    // which of them it was — telling someone a private dataset "does not exist"
+    // sends them looking for a link that was never broken.
+    rethrowControlFlow(error);
     notFound();
   }
 

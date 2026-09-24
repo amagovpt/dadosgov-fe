@@ -1,26 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { usePopupContext } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import {
-  createDateSorter,
-  paginateItems,
-  sortItems,
-} from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
 import AdminEmptyState from "../AdminEmptyState";
 import {
   createOrgDiscussionColumns,
+  discussionSortFieldMap,
   type DiscussionSortField,
 } from "./discussionsListConfig";
 import type { BoDiscussionsPage } from "@/service/types/admin/discussions";
@@ -40,30 +35,38 @@ interface OrgDiscussionsClientProps {
 
 export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussionsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-discussions"]);
-  const { user } = useAuth();
   const { show } = usePopupContext();
-  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const {
     currentPage,
     setCurrentPage,
     pageSize,
     setPageSize,
-    sortField,
-    sortOrder,
+    searchQuery,
+    handleSearch,
+    sortParam,
     handleSort,
     getSortOrder,
-  } = useAdminListController<DiscussionSortField>({
-    initialFilters: {},
+    filters,
+    updateFilter,
+  } = useAdminListController<DiscussionSortField, { closedFilter: string }>({
+    initialFilters: { closedFilter: "" },
+    sortFieldMap: discussionSortFieldMap,
   });
 
   useEffect(() => {
     async function loadDiscussions() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgDiscussions(orgId);
+        const data = await fetchOrgDiscussions(orgId, currentPage, pageSize, {
+          q: searchQuery.trim() || undefined,
+          closed: filters.closedFilter === "" ? undefined : filters.closedFilter === "closed",
+          sort: sortParam,
+        });
         setDiscussions(data.data ?? []);
+        setTotalItems(data.total ?? 0);
       } catch (error) {
         console.error("Error loading discussions:", error);
       } finally {
@@ -72,38 +75,27 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     }
 
     void loadDiscussions();
-  }, [orgId]);
+  }, [orgId, currentPage, pageSize, searchQuery, filters.closedFilter, sortParam]);
 
-  const sortedDiscussions = useMemo(
-    () =>
-      sortItems(discussions, sortField, sortOrder, {
-        created: createDateSorter((discussion) => discussion.created),
-        closed: createDateSorter((discussion) => discussion.closed),
-      }),
-    [discussions, sortField, sortOrder],
+  const openDiscussion = useCallback(
+    (discussion: Discussion) => {
+      show(
+        <DiscussionDetailPopup
+          discussion={discussion}
+          onUpdated={(updated) =>
+            setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+          }
+          onDeleted={() => setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))}
+        />,
+        {
+          title: t("admin-discussions:popup.title"),
+          closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+          dimensions: "l",
+        },
+      );
+    },
+    [show, t]
   );
-
-  const paginatedDiscussions = useMemo(
-    () => paginateItems(sortedDiscussions, currentPage, pageSize),
-    [sortedDiscussions, currentPage, pageSize],
-  );
-
-  const openDiscussion = (discussion: Discussion) => {
-    show(
-      <DiscussionDetailPopup
-        discussion={discussion}
-        onUpdated={(updated) =>
-          setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
-        }
-        onDeleted={() => setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))}
-      />,
-      {
-        title: t("admin-discussions:popup.title"),
-        closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
-        dimensions: "l",
-      },
-    );
-  };
 
   const columns = useMemo(
     () =>
@@ -122,23 +114,40 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           closed: t("admin-discussions:status.closed"),
         },
       }),
-    [t],
+    [openDiscussion, t],
   );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-discussions:title") },
       ]}
       title={pageContent.orgHero?.title ?? ""}
       isLoading={isLoading}
-      count={discussions.length}
+      count={totalItems}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
+      search={{
+        label: t("admin-discussions:filters.search.label"),
+        placeholder: t("admin-discussions:filters.search.placeholder"),
+        ariaLabel: t("admin-discussions:filters.search.label"),
+        onChange: handleSearch,
+      }}
+      filters={
+        <StatusFilterSelect
+          id="discussion-filter-status"
+          value={filters.closedFilter}
+          onChange={(value) => updateFilter("closedFilter", value)}
+          placeholder={t("admin-discussions:filters.status.placeholder")}
+          options={[
+            { value: "", label: t("admin-discussions:filters.all") },
+            { value: "open", label: t("admin-discussions:status.open") },
+            { value: "closed", label: t("admin-discussions:status.closed") },
+          ]}
+        />
+      }
       emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
@@ -148,7 +157,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
       }
     >
       <AdminListTable
-        items={paginatedDiscussions}
+        items={discussions}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}

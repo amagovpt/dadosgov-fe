@@ -136,8 +136,6 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-datasets:list.title"), url: "/admin/system/datasets" },
       ]}
       title={t("admin-datasets:list.title")}

@@ -94,6 +94,15 @@
   },
   "list": {
     "title": "Datasets",
+    "kicker": "Open Data",
+    "heroTitle": "Manage datasets",
+    "myListTitle": "My datasets",
+    "emptyTitlePrefix": "No",
+    "emptyTitleHighlight": "datasets found",
+    "emptySubtitle": "There are no publications associated with your account yet",
+    "emptyDescription": "Use the \"Create dataset\" option to add a new publication. Datasets you create will be available for browsing and management in this area.",
+    "heroDescription": "Publish, browse and manage your datasets. Track publication status, update information whenever needed, and keep the data available on the portal up to date and accessible.",
+    "create": "Create dataset",
     "columns": {
       "title": "Dataset title",
       "titleShort": "Title",

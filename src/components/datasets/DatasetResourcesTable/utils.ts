@@ -96,6 +96,48 @@ export const buildTabularData = (
   };
 };
 
+/** Parse a cell the heuristics typed as a number, accepting the PT decimal comma. */
+const parseNumericCell = (value: string): number =>
+  Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
+
+/**
+ * Order the in-memory rows of the byte-proxy preview by one column.
+ *
+ * The api-tabular path sorts on the server; this is its counterpart for the
+ * fallback path, so both previews offer the same sortable headers. Cells the
+ * comparison cannot read as their declared type fall back to a collator, and
+ * empty cells always sort last so ordering never buries the data.
+ */
+export const sortRowsByColumn = (
+  rows: string[][],
+  columnIndex: number,
+  sortType: "string" | "numeric" | "date",
+  direction: "asc" | "desc",
+  locale: "pt" | "en" = "pt"
+): string[][] => {
+  const factor = direction === "desc" ? -1 : 1;
+  const collator = new Intl.Collator(INTL_LOCALES[locale], {
+    numeric: true,
+    sensitivity: "base",
+  });
+
+  return [...rows].sort((rowA, rowB) => {
+    const left = rowA[columnIndex] ?? "";
+    const right = rowB[columnIndex] ?? "";
+    if (!left || !right) return left ? -1 : right ? 1 : 0;
+
+    if (sortType === "numeric") {
+      const diff = parseNumericCell(left) - parseNumericCell(right);
+      if (!Number.isNaN(diff)) return diff * factor;
+    } else if (sortType === "date") {
+      const diff = Date.parse(left) - Date.parse(right);
+      if (!Number.isNaN(diff)) return diff * factor;
+    }
+
+    return collator.compare(left, right) * factor;
+  });
+};
+
 export const parseCsv = (text: string, separator = ","): TabularData => {
   const lines = text.trim().split("\n");
   if (lines.length === 0)

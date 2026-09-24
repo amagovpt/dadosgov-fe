@@ -4,6 +4,7 @@ import { fetchDataset } from "@/service/api/datasets";
 import { fetchFullProfile } from "@/service/api/profile";
 import { isFollowing } from "@/service/api/followers";
 import { Dataset } from "@/service/types/dataset";
+import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 import { serverAuthHeaders } from "@/service/utils/serverForwardedHeaders";
 import { getFrontOfficeMetadata } from "@/service/queries/common";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
@@ -60,7 +61,10 @@ export default async function Page({
   let reuse;
   try {
     reuse = await fetchReuse(rid, forwarded);
-  } catch {
+  } catch (error) {
+    // A refusal (401, 403) or a backend failure belongs to the error boundary,
+    // which can say which it was; only a missing reuse is a 404.
+    rethrowControlFlow(error);
     notFound();
   }
 

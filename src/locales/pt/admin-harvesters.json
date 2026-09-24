@@ -110,6 +110,8 @@
     "typePlaceholder": "Selecione um tipo...",
     "searchInputPlaceholder": "Escreva para pesquisar...",
     "noResults": "Nenhum resultado encontrado",
+    "typesLoading": "A carregar os tipos...",
+    "typesUnavailable": "Não foi possível carregar os tipos de harvester. Recarregue a página e tente novamente.",
     "filtersTitle": "Filtros",
     "filterModeField": "Modo",
     "filterModeInclude": "Incluir",
@@ -126,8 +128,6 @@
     "autoArchive": "Arquivamento automático",
     "autoArchiveShort": "Arquivo automático",
     "advancedTitle": "Avançado",
-    "configureRemoteUrlPrefix": "Configurar prefixo de URL remoto",
-    "remoteUrlPrefix": "Prefixo de URL remoto",
     "schedulePlaceholder": "Máscara: * * * * * (exemplo: 0 12 * * *)",
     "scheduleError": "O planeamento tem de ter exatamente 5 campos separados por espaços, cada campo sendo um número ou * (minuto hora dia-do-mês mês dia-da-semana).",
     "saveSuccess": "Guardado com sucesso.",
@@ -138,13 +138,30 @@
     "validationErrors": {
       "producer": "Selecione uma organização produtora.",
       "name": "Indique o nome do harvester.",
-      "url": "Indique o URL do harvester."
+      "url": "Indique o URL do harvester.",
+      "type": "Selecione um tipo de harvester."
     },
     "saveErrorRetry": "Tente novamente.",
     "saveError": "Erro ao guardar ({{status}}) — {{message}}",
     "filterLabels": {
       "organization": "Organização",
-      "tag": "Marcação"
+      "tags": "Marcação",
+      "publisher": "Publicador"
+    },
+    "featureLabels": {
+      "geodcatap": "GeoDCAT-AP",
+      "inspire": "Importar conjuntos de dados Inspire"
+    },
+    "extraConfigLabels": {
+      "remote_url_prefix": "Prefixo de URL remoto",
+      "geozones": "Zonas geográficas",
+      "license": "Licença por omissão"
+    },
+    "configure": "Configurar",
+    "extraConfigHelp": {
+      "remote_url_prefix": "Prefixo usado para construir o URL remoto dos itens colhidos.",
+      "geozones": "Identificadores de GeoZone separados por vírgula, por exemplo pt:concelho:1106",
+      "license": "Identificador da licença a usar quando a licença remota não é reconhecida, por exemplo cc-by"
     }
   },
   "fields": {
@@ -152,8 +169,13 @@
     "producerLabel": "Confirme a identidade que pretende utilizar na publicação. *",
     "producerPlaceholder": "Selecione o produtor...",
     "producerError": "Selecione uma organização",
+    "producerSearchPlaceholder": "Escreva para procurar...",
+    "producerMinChars": "Escreva pelo menos {{count}} caracteres para procurar...",
+    "producerSearching": "A pesquisar...",
+    "producerNoResults": "Nenhuma organização encontrada",
+    "producerNoEligibleOrg": "Um harvester só pode ser criado em nome de uma organização de que seja administrador. A sua conta não administra nenhuma organização.",
+    "producerCreateOrganization": "Criar uma organização",
     "description": "Descrição",
-    "descriptionRequired": "Descrição *",
     "name": "Nome *",
     "namePlaceholder": "Insira o nome aqui",
     "descriptionPlaceholder": "Insira a descrição aqui",
