@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@ama-pt/agora-design-system";
+import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
 import { useAuth } from "@/context/AuthContext";
-import { dismissMigrationInvite } from "@/service/api/migration";
+import { Typograph } from "../Shared/Generics/Typograph";
 import { MigrationInviteContent } from "./MigrationInviteContent";
+import { submitSamlForm } from "./loginUtils";
 
 /**
  * The optional invitation to link a CMD/eIDAS identity to an account that
@@ -57,30 +58,77 @@ const FLOW_ROUTES = [
   "reset-password",
 ];
 
+const HIDDEN_KEY = "migrationInviteHiddenForVisit";
+
+/** Every access is guarded: a browser may refuse storage outright, and the
+ *  server has none at all. Failing towards VISIBLE is the safe direction --
+ *  somebody sees a reminder they had closed, rather than never seeing one. */
+function readHiddenForThisVisit(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(HIDDEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function hideForThisVisit(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(HIDDEN_KEY, "1");
+  } catch {
+    // The banner is already hidden by local state for this render; losing the
+    // memory only means it returns on the next page, which is harmless.
+  }
+}
+
 export function MigrationInvite() {
   const { t } = useTranslation("login");
-  const { migrationInvite, migrationLinkAvailable, isLoading: authLoading, refresh } = useAuth();
+  const { migrationInvite, migrationLinkAvailable, isLoading: authLoading } = useAuth();
   const pathname = usePathname();
-  const [dismissed, setDismissed] = useState(false);
+  // Hidden for THIS visit, and nowhere else. Read through a window guard
+  // because a "use client" component is still rendered on the server, where
+  // the hooks run and sessionStorage does not exist -- without it this file
+  // takes the whole page down. Same shape HarvestersNewClient already uses.
+  //
+  // No hydration risk despite reading during render: AuthContext starts with
+  // isLoading true, so the banner never reaches its output on the server.
+  const [dismissed, setDismissed] = useState(() => readHiddenForThisVisit());
+  const [expanded, setExpanded] = useState(false);
 
   // isLoading is in the condition for hydration, not for looks: /me is fetched
   // in the browser, so the server renders nothing and a client that answered
   // before React hydrated would render the notice into HTML that never had it.
   const onFlowPage = (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
 
-  const handleDismiss = async () => {
-    // Hidden immediately, and the write is confirmed afterwards. A notice that
-    // stays on screen while a request completes reads as a broken button, and
-    // the worst case of a failed write is that it comes back on the next load
-    // -- which is what it would have done anyway.
-    setDismissed(true);
-    try {
-      await dismissMigrationInvite();
-      await refresh();
-    } catch {
-      // Deliberately silent: there is nothing the person can do about it, and
-      // nothing was lost.
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Says whether SAML is wired up at all, so whether a button can work. Never
+  // whether an ACCOUNT should link -- that is the backend's answer above.
+  const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
+
+  const startLink = async (endpoint: string) => {
+    setIsLoading(true);
+    setError(null);
+    const samlError = await submitSamlForm(endpoint, t);
+    if (samlError) {
+      setError(samlError);
+      setIsLoading(false);
     }
+    // No else: on success the page is already navigating away to the IdP.
+  };
+
+  // 🚩 NOTHING IS SENT TO THE SERVER, and that is the decision this ticket
+  // carries. The date in extras belongs to the full screen alone: it is what
+  // buys the eight days of quiet. If the banner wrote it too, closing the
+  // banner every day would push the full screen out for ever -- and the full
+  // screen is the one that carries the whole invitation.
+  //
+  // So the banner hides for the visit and the count keeps running underneath.
+  const handleDismiss = () => {
+    setDismissed(true);
+    hideForThisVisit();
   };
 
   // 🚩 The three states are disjoint, and this is the line that makes them so.
@@ -100,6 +148,8 @@ export function MigrationInvite() {
       role="status"
       className="container mx-auto mt-16 flex max-w-7xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-16"
     >
+      {error && <StatusCard variant="danger" showIcon description={error} />}
+
       <div className="flex items-start gap-16">
         <Icon
           name="agora-line-info-mark"
@@ -107,7 +157,53 @@ export function MigrationInvite() {
           aria-hidden
         />
         <div className="flex flex-grow flex-col gap-16">
-          <MigrationInviteContent variant="banner" onDismiss={handleDismiss} />
+          {/* Short by default. The full screen carries the whole invitation
+              every eight days; repeating all six sentences on every page in
+              between is how a notice stops being read. */}
+          {expanded ? (
+            <MigrationInviteContent variant="banner" onDismiss={handleDismiss} />
+          ) : (
+            <>
+              <Typograph tag="p" className="text-sm text-neutral-900">
+                {t("migrationInvite.bannerSummary")}
+              </Typograph>
+              <div className="flex flex-wrap items-center gap-8">
+                <Button
+                  variant="primary"
+                  disabled={!samlEnabled || isLoading}
+                  onClick={() => startLink("/saml/link/start")}
+                >
+                  {t("migrationInvite.linkCmd")}
+                </Button>
+                <Button
+                  variant="neutral"
+                  disabled={!samlEnabled || isLoading}
+                  onClick={() => startLink("/saml/eidas/link/start")}
+                >
+                  {t("migrationInvite.linkEidas")}
+                </Button>
+                <Button variant="neutral" appearance="outline" onClick={handleDismiss}>
+                  {t("migrationInvite.dismiss")}
+                </Button>
+              </div>
+            </>
+          )}
+          {/* 🚩 The way to the rest, and it opens IN PLACE. There is no page to
+              link to: LEDG-2547 renders the full invitation instead of the
+              page rather than navigating, precisely so nobody loses where they
+              were going. The same reasoning applies here.
+
+              What must survive the shortening is the condition that linking
+              only works on an identity no other account holds -- without it
+              somebody travels to the IdP to be refused at the end. */}
+          <Button
+            variant="primary"
+            appearance="link"
+            className="h-auto self-start p-0 text-sm"
+            onClick={() => setExpanded((open) => !open)}
+          >
+            {t(expanded ? "migrationInvite.bannerLess" : "migrationInvite.bannerMore")}
+          </Button>
         </div>
         <button
           type="button"

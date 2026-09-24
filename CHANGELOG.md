@@ -6,6 +6,26 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): the linking banner says one line, and closing it stops writing to the database**
+  - The full screen carries the whole invitation every eight days. Repeating all six sentences
+    above every page in between is how a notice stops being read at all, so the banner keeps a
+    single line, the three buttons, and a way to the rest. That way opens **in place**: there is
+    no page to link to, because the full screen renders instead of the page rather than
+    navigating — precisely so nobody loses where they were going.
+  - **What the shortening must not lose** is the condition that linking only works on an
+    identity no other account holds. Somebody who does not know that authenticates at the IdP
+    and is refused at the very end, after the whole trip. It is pinned as *one click away*, not
+    as present-in-the-file.
+  - **Closing the banner sends nothing to the server.** The date belongs to the full screen
+    alone: it is what buys the eight days of quiet. If the banner wrote it too, closing it every
+    day would push the full screen out for ever — and the full screen is the one that carries
+    the whole invitation. So the banner hides for the visit and the count keeps running
+    underneath.
+  - The visit is remembered in `sessionStorage`, read behind a window check because a
+    `"use client"` component is still rendered on the server, where the hooks run and that API
+    does not exist. Every failure path leaves the banner **visible**: somebody seeing a reminder
+    they had closed beats never seeing one at all.
+
 - **feat(login): the linking invite gets two volumes — a full screen, and a quiet banner**
   - The notice had one volume since it shipped: a banner over the portal, identical the first
     time and the tenth. It now has two. An account that has never dismissed it — or dismissed
