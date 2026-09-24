@@ -152,6 +152,30 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(container.textContent).toContain(ptLogin.migrationInvite.sessionWarning);
   });
 
+  it("keeps the condition that costs a wasted round-trip exactly one click away", async () => {
+    // 🚩 The one sentence the shortening must not lose. Linking only works on
+    // an identity no other account holds; somebody who does not know that
+    // travels to the IdP and is refused at the very end, after authenticating.
+    //
+    // Asserted as ONE CLICK, not as present-in-the-file: a sentence that needs
+    // two steps to reach is a sentence people meet after the trip, not before.
+    renderInvite();
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.onlyIfFree);
+
+    await clickButton(ptLogin.migrationInvite.bannerMore);
+
+    expect(container.textContent).toContain(ptLogin.migrationInvite.onlyIfFree);
+  });
+
+  it("closes again, so the banner does not stay long once it has been read", async () => {
+    renderInvite();
+    await expand();
+    await clickButton(ptLogin.migrationInvite.bannerLess);
+
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.onlyIfFree);
+    expect(container.textContent).toContain(ptLogin.migrationInvite.bannerSummary);
+  });
+
   it("offers the three buttons while it is still short", async () => {
     // Shortening the words must not cost the actions: somebody who already
     // knows what this is should be able to act without opening anything.
