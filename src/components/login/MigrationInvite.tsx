@@ -146,7 +146,7 @@ export function MigrationInvite() {
   return (
     <div
       role="status"
-      className="container mx-auto mt-16 flex max-w-7xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-16"
+      className="container mx-auto my-16 flex max-w-7xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-16"
     >
       {error && <StatusCard variant="danger" showIcon description={error} />}
 
