@@ -6,6 +6,9 @@ import { CommunityResource } from "@/service/types/community-resource";
 import { Resource } from "@/service/types/dataset";
 import { ResourceCard } from "./ResourceCard";
 import { DatasetResourcesTableProps } from "./types";
+import { Pagination } from "@/components/Pagination";
+
+const ITEMS_PER_PAGE = 6;
 
 export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
   resources,
@@ -13,9 +16,17 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
 }) => {
   const { t: tds } = useTranslation("datasets");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [filePage, setFilePage] = useState<number>(1);
+  const [docPage, setDocPage] = useState<number>(1);
 
   const documentationFiles = resources.filter((r) => r.type === "documentation");
   const principalFiles = resources.filter((r) => r.type !== "documentation");
+
+  const nFiles = principalFiles.length;
+  const nDocs = documentationFiles.length;
+
+  const files = principalFiles.slice(ITEMS_PER_PAGE * (filePage - 1), ITEMS_PER_PAGE * filePage);
+  const docs = documentationFiles.slice(ITEMS_PER_PAGE * (docPage - 1), ITEMS_PER_PAGE * docPage);
 
   const handleToggle = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -42,38 +53,57 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
 
   return (
     <div className="space-y-32">
-      {principalFiles.length > 0 && (
-        <div className="space-y-16">
-          <h3 className="font-medium text-neutral-900 text-base">
+      {nFiles > 0 && (
+        <div className="flex flex-col gap-32">
+          <h3 className="text-xl-bold text-neutral-900">
             {tds("resources.mainFiles", { count: principalFiles.length })}
           </h3>
-          <div className="flex flex-col">
-            {principalFiles.map((resource) => (
-              <ResourceCard
-                key={resource.id}
-                resource={resource}
-                isExpanded={expandedId === resource.id}
-                onToggle={() => handleToggle(resource.id)}
-              />
+          <div className="grid grid-cols-12 gap-32">
+            {files.map((resource) => (
+              <div key={resource.id} className="col-span-12 lg:col-span-6">
+                <ResourceCard
+                  resource={resource}
+                  isExpanded={expandedId === resource.id}
+                  onToggle={() => handleToggle(resource.id)}
+                />
+              </div>
             ))}
+          </div>
+          <div className="mt-32">
+            <Pagination
+              currentPage={filePage}
+              onPageChange={(page) => setFilePage(page)}
+              pageSize={ITEMS_PER_PAGE}
+              totalItems={nFiles}
+            />
           </div>
         </div>
       )}
 
-      {documentationFiles.length > 0 && (
-        <div className="space-y-16 mt-16 mb-16">
-          <h3 className="font-medium text-neutral-900 text-base">
+      {nDocs > 0 && (
+        <div className="flex flex-col gap-32">
+          <h3 className="text-base font-medium text-neutral-900">
             {tds("resources.documentation", { count: documentationFiles.length })}
           </h3>
-          <div className="flex flex-col">
-            {documentationFiles.map((resource) => (
-              <ResourceCard
-                key={resource.id}
-                resource={resource}
-                isExpanded={expandedId === resource.id}
-                onToggle={() => handleToggle(resource.id)}
-              />
+          <div className="grid grid-cols-12 gap-32">
+            {docs.map((resource) => (
+              <div key={resource.id} className="col-span-12 lg:col-span-6">
+                <ResourceCard
+                  key={resource.id}
+                  resource={resource}
+                  isExpanded={expandedId === resource.id}
+                  onToggle={() => handleToggle(resource.id)}
+                />
+              </div>
             ))}
+          </div>
+          <div className="mt-32">
+            <Pagination
+              currentPage={docPage}
+              onPageChange={(page) => setDocPage(page)}
+              pageSize={ITEMS_PER_PAGE}
+              totalItems={nDocs}
+            />
           </div>
         </div>
       )}

@@ -25,14 +25,20 @@ export const ResourceCard: React.FC<{
   const hasLongDescription = (resource.description?.length ?? 0) > DESCRIPTION_COLLAPSE_LIMIT;
 
   return (
-    <div className="bg-white flex flex-col mx-[136px] mt-16">
-      <div className="flex flex-col gap-16 p-32">
-        <h4 className="text-base font-bold text-neutral-900 inline-flex items-center gap-8 max-w-[592px]">
-          {resource.title}
-          <button
+    <div className="flex flex-col gap-24 bg-white p-32">
+      <div className="flex flex-col gap-16">
+        <p className="max-w-[592px] text-s-regular">
+          {tds("resources.updatedOn", {
+            date: formatDateLong(resource.last_modified ?? resource.created_at, locale),
+          })}
+        </p>
+        <div className="flex flex-col gap-8">
+          <h4 className="inline-flex max-w-[592px] items-center gap-8 text-xl-bold text-neutral-900">
+            {resource.title}
+            {/*<button
             type="button"
             onClick={() => navigator.clipboard.writeText(resource.title)}
-            className="text-primary-600 hover:text-primary-800 cursor-pointer shrink-0"
+            className="shrink-0 cursor-pointer text-primary-600 hover:text-primary-800"
             aria-label={tds("resources.copyTitle")}
           >
             <svg
@@ -51,81 +57,56 @@ export const ResourceCard: React.FC<{
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
-          </button>
-        </h4>
-        <p className="text-base text-neutral-900 max-w-[592px]">
-          {tds("resources.updatedOn", {
-            date: formatDateLong(resource.last_modified ?? resource.created_at, locale),
-          })}
-        </p>
-        {resource.description && (
-          <>
-            <p
-              className={`text-base text-neutral-900 whitespace-pre-wrap break-words max-w-[592px]${
-                hasLongDescription && !isDescriptionExpanded ? " line-clamp-3" : ""
-              }`}
-            >
-              {resource.description}
-            </p>
-            {hasLongDescription && (
-              <button
-                type="button"
-                onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
-                className="inline-flex self-start text-primary-600 hover:underline cursor-pointer max-w-[592px]"
-                aria-expanded={isDescriptionExpanded}
+          </button>*/}
+          </h4>
+          {resource.description && (
+            <>
+              <p
+                className={`text-base break-words whitespace-pre-wrap text-neutral-900 max-w-[592px]${
+                  hasLongDescription && !isDescriptionExpanded ? "line-clamp-3" : ""
+                }`}
               >
-                {isDescriptionExpanded ? tds("resources.seeLess") : tds("resources.seeMore")}
-              </button>
-            )}
-          </>
-        )}
-        {authorName && (
-          <p className="text-sm text-neutral-900 max-w-[592px]">
-            {tds("resources.by")}{" "}
-            {authorUrl ? (
-              <a href={authorUrl} className="text-primary-600 hover:underline">
-                {authorName}
-              </a>
-            ) : (
-              <span>{authorName}</span>
-            )}
+                {resource.description}
+              </p>
+              {hasLongDescription && (
+                <button
+                  type="button"
+                  onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
+                  className="inline-flex max-w-[592px] cursor-pointer self-start text-primary-600 hover:underline"
+                  aria-expanded={isDescriptionExpanded}
+                >
+                  {isDescriptionExpanded ? tds("resources.seeLess") : tds("resources.seeMore")}
+                </button>
+              )}
+            </>
+          )}
+          {authorName && (
+            <p className="text-sm max-w-[592px] text-neutral-900">
+              {tds("resources.by")}{" "}
+              {authorUrl ? (
+                <a href={authorUrl} className="text-primary-600 hover:underline">
+                  {authorName}
+                </a>
+              ) : (
+                <span>{authorName}</span>
+              )}
+            </p>
+          )}
+          <p className="text-m-bold text-neutral-700">
+            {tds("resources.format", {
+              format: resource.format || tds("resources.fileFallback"),
+            })}{" "}
+            {resource.filesize ? `(${formatBytes(resource.filesize, locale)})` : ""}
           </p>
-        )}
-        <div className="flex items-center">
-          <a
-            href={downloadUrl(resource)}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={resource.title || ""}
-            className="inline-flex items-center gap-8 text-primary-600 hover:underline w-full max-w-[592px]"
-          >
-            <Icon name="agora-line-document" className="w-6 h-6" />
-            <span>
-              {tds("resources.format", {
-                format: resource.format || tds("resources.fileFallback"),
-              })}{" "}
-              {resource.filesize ? `(${formatBytes(resource.filesize, locale)})` : ""}
-            </span>
-          </a>
-          <a
-            href={downloadUrl(resource)}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={resource.title || ""}
-            aria-label={tds("resources.download", { title: resource.title })}
-            className="ml-auto"
-          >
-            <Icon name="agora-line-arrow-down-circle" className="w-6 h-6 text-primary-600" />
-          </a>
         </div>
         <button
           type="button"
           onClick={onToggle}
-          className="inline-flex items-center gap-8 text-primary-600 hover:underline cursor-pointer py-8 max-w-[592px]"
+          className="inline-flex max-w-[592px] cursor-pointer items-center gap-8 py-8 text-primary-600 hover:underline"
         >
           <Icon
             name={isExpanded ? "agora-line-chevron-up" : "agora-line-chevron-down"}
-            className="w-6 h-6"
+            className="h-6 w-6"
           />
           <span>{isExpanded ? tds("resources.seeLess") : tds("resources.seeMore")}</span>
         </button>

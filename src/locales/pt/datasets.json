@@ -208,10 +208,10 @@
     "other": "Outro"
   },
   "resources": {
-    "mainFiles_one": "{{count}} FICHEIRO PRINCIPAL",
-    "mainFiles_other": "{{count}} FICHEIROS PRINCIPAIS",
-    "documentation_one": "{{count}} DOCUMENTAÇÃO",
-    "documentation_other": "{{count}} DOCUMENTAÇÃO",
+    "mainFiles_one": "Ficheiro principal",
+    "mainFiles_other": "Ficheiros principais",
+    "documentation_one": "Documentação",
+    "documentation_other": "Documentação",
     "copyTitle": "Copiar título",
     "copy": "Copiar {{label}}",
     "copied": "Copiado!",
