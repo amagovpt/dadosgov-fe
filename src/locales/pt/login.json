@@ -238,7 +238,11 @@
     "error": "Não foi possível iniciar a associação. Tente novamente mais tarde.",
     "sectionTitle": "Autenticação com identidade digital",
     "confirmStep": "Para concluir, vai ser pedido o email e a palavra-passe desta conta — é assim que confirmamos que é sua.",
-    "onlyIfFree": "Só é possível associar se a sua Chave Móvel Digital ou Autenticação Europeia ainda não estiver ligada a outra conta do portal."
+    "onlyIfFree": "Só é possível associar se a sua Chave Móvel Digital ou Autenticação Europeia ainda não estiver ligada a outra conta do portal.",
+    "optionalScreen": "Por agora é facultativo: pode escolher Agora não e continuar a usar o portal.",
+    "bannerSummary": "Pode associar a sua conta à Chave Móvel Digital ou à Autenticação Europeia — no dados.gov cada pessoa só pode ter uma conta.",
+    "bannerMore": "Saber mais",
+    "bannerLess": "Mostrar menos"
   },
   "samlErrors": {
     "invite_identity_already_linked": "Não foi possível associar: esta identidade digital já está associada a outra conta do portal. A sua conta ficou como estava, e pode continuar a usá-la com email e palavra-passe. Para usar a conta que tem a identidade, entre com a Chave Móvel Digital ou a Autenticação Europeia. Para juntar o conteúdo das duas, entre na conta que quer abandonar e use Transferir em cada conjunto de dados.",

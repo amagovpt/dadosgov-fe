@@ -76,6 +76,14 @@ describe("the email tab never decides migration from a frontend flag", () => {
     // profile.
     expect(GUARDED).toContain("src/components/login/MigrationInvite.tsx");
     expect(GUARDED).toContain("src/components/login/MigrationLinkSection.tsx");
+
+    // LEDG-2547. The invite now has two surfaces and a shared body, and the
+    // gate renders far from the login pages -- inside both route-group
+    // layouts. Naming them keeps the listing's lack of recursion from quietly
+    // dropping one: moving either into a subfolder, or out to where it
+    // actually renders, turns this red instead of losing the guard.
+    expect(GUARDED).toContain("src/components/login/MigrationInviteContent.tsx");
+    expect(GUARDED).toContain("src/components/login/MigrationInviteGate.tsx");
   });
 
   it.each(GUARDED)("%s reads only the configuration it is allowed to", (relative) => {
@@ -120,5 +128,14 @@ describe("the email tab never decides migration from a frontend flag", () => {
 
     expect(invite).toContain("migrationInvite");
     expect(section).toContain("migrationLinkAvailable");
+
+    // The gate decides the loud state the same way: from the backend's answer,
+    // never from configuration. A gate that read no flag AND asked nothing
+    // would pass the env check by never showing the invite at all.
+    const gate = readFileSync(
+      path.join(process.cwd(), "src/components/login/MigrationInviteGate.tsx"),
+      "utf8"
+    );
+    expect(gate).toContain("migrationInvite");
   });
 });
