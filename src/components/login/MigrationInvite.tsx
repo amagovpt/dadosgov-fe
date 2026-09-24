@@ -101,6 +101,19 @@ export function MigrationInvite() {
   // before React hydrated would render the notice into HTML that never had it.
   const onFlowPage = (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
 
+  // 🚩 The reminder stays at home. The full screen reaches the citizen every
+  // eight days wherever they are, and it is the one carrying the whole
+  // invitation; repeating a banner above every page in between is how a notice
+  // becomes wallpaper.
+  //
+  // The cost is named rather than hidden: somebody who follows a link straight
+  // to a dataset does not see it that visit. That is the trade, and the full
+  // screen is what makes it affordable.
+  //
+  // The homepage is the locale segment and nothing else -- "/pt", "/en" -- so
+  // it is counted rather than matched, and a new locale needs no change here.
+  const onHomepage = (pathname ?? "/").split("/").filter(Boolean).length <= 1;
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,7 +154,7 @@ export function MigrationInvite() {
   // would put both on screen at once.
   const inQuietState = migrationLinkAvailable && !migrationInvite;
 
-  if (authLoading || onFlowPage || !inQuietState || dismissed) return null;
+  if (authLoading || onFlowPage || !onHomepage || !inQuietState || dismissed) return null;
 
   return (
     <div

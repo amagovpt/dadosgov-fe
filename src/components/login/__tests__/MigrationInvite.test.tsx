@@ -142,6 +142,27 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(container.textContent).toBe("");
   });
 
+  it("appears on the homepage and nowhere else", () => {
+    // 🚩 The reminder stays at home. The full screen reaches the citizen every
+    // eight days wherever they are, and it carries the whole invitation;
+    // repeating a banner above every page in between is how a notice becomes
+    // wallpaper. The cost -- somebody following a link straight to a dataset
+    // does not see it that visit -- is the trade, and it is deliberate.
+    for (const home of ["/pt", "/en", "/pt/"]) {
+      pathname.mockReturnValue(home);
+      renderInvite();
+      expect(container.textContent, `expected the banner on ${home}`).toContain(
+        ptLogin.migrationInvite.bannerSummary
+      );
+    }
+
+    for (const elsewhere of ["/pt/datasets", "/en/organizations", "/pt/datasets/abc"]) {
+      pathname.mockReturnValue(elsewhere);
+      renderInvite();
+      expect(container.textContent, `expected nothing on ${elsewhere}`).toBe("");
+    }
+  });
+
   it("shows one line, not the whole invitation, until it is opened", async () => {
     // The full screen carries the whole invitation every eight days. Repeating
     // all six sentences on every page in between is how a notice stops being
