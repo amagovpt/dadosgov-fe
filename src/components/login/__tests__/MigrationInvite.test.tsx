@@ -101,7 +101,7 @@ describe("the optional CMD/eIDAS linking invite", () => {
       });
     }
 
-    useAuth.mockReturnValue({ migrationInvite: true, refresh: vi.fn() });
+    useAuth.mockReturnValue({ migrationInvite: false, migrationLinkAvailable: true, refresh: vi.fn() });
     pathname.mockReturnValue("/pt");
     dismissMigrationInvite.mockResolvedValue({ dismissed: true });
     submitSamlForm.mockResolvedValue(null);
@@ -161,8 +161,23 @@ describe("the optional CMD/eIDAS linking invite", () => {
     }
   });
 
+  it("stays hidden while the full screen is the one showing", () => {
+    // 🚩 The three states are disjoint, and this is the seam. migrationInvite
+    // true is the LOUD state -- never dismissed, or dismissed eight days ago or
+    // more -- and MigrationInviteGate owns it, replacing the page. Reading that
+    // field here, as this did before the full screen existed, would put both on
+    // screen at once.
+    useAuth.mockReturnValue({
+      migrationInvite: true,
+      migrationLinkAvailable: true,
+      refresh: vi.fn(),
+    });
+    renderInvite();
+    expect(container.textContent).toBe("");
+  });
+
   it("renders nothing when the backend is not inviting this account", () => {
-    useAuth.mockReturnValue({ migrationInvite: false, refresh: vi.fn() });
+    useAuth.mockReturnValue({ migrationInvite: false, migrationLinkAvailable: false, refresh: vi.fn() });
     renderInvite();
     expect(container.textContent).toBe("");
   });

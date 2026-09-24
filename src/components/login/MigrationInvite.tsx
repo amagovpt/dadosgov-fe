@@ -59,7 +59,7 @@ const FLOW_ROUTES = [
 
 export function MigrationInvite() {
   const { t } = useTranslation("login");
-  const { migrationInvite, isLoading: authLoading, refresh } = useAuth();
+  const { migrationInvite, migrationLinkAvailable, isLoading: authLoading, refresh } = useAuth();
   const pathname = usePathname();
   const [dismissed, setDismissed] = useState(false);
 
@@ -83,7 +83,17 @@ export function MigrationInvite() {
     }
   };
 
-  if (authLoading || onFlowPage || !migrationInvite || dismissed) return null;
+  // 🚩 The three states are disjoint, and this is the line that makes them so.
+  // `migrationInvite` is the LOUD state -- never dismissed, or dismissed eight
+  // days ago or more -- and MigrationInviteGate owns it, showing the invite in
+  // place of the page. The banner is the quiet state in between: the account
+  // can still link, and has dismissed recently.
+  //
+  // Reading `migrationInvite` here, as this did before the full screen existed,
+  // would put both on screen at once.
+  const inQuietState = migrationLinkAvailable && !migrationInvite;
+
+  if (authLoading || onFlowPage || !inQuietState || dismissed) return null;
 
   return (
     <div
