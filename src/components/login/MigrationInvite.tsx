@@ -101,6 +101,19 @@ export function MigrationInvite() {
   // before React hydrated would render the notice into HTML that never had it.
   const onFlowPage = (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
 
+  // 🚩 The reminder stays at home. The full screen reaches the citizen every
+  // eight days wherever they are, and it is the one carrying the whole
+  // invitation; repeating a banner above every page in between is how a notice
+  // becomes wallpaper.
+  //
+  // The cost is named rather than hidden: somebody who follows a link straight
+  // to a dataset does not see it that visit. That is the trade, and the full
+  // screen is what makes it affordable.
+  //
+  // The homepage is the locale segment and nothing else -- "/pt", "/en" -- so
+  // it is counted rather than matched, and a new locale needs no change here.
+  const onHomepage = (pathname ?? "/").split("/").filter(Boolean).length <= 1;
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,12 +154,12 @@ export function MigrationInvite() {
   // would put both on screen at once.
   const inQuietState = migrationLinkAvailable && !migrationInvite;
 
-  if (authLoading || onFlowPage || !inQuietState || dismissed) return null;
+  if (authLoading || onFlowPage || !onHomepage || !inQuietState || dismissed) return null;
 
   return (
     <div
       role="status"
-      className="container mx-auto mt-16 flex max-w-7xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-16"
+      className="container mx-auto my-16 flex max-w-7xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-16"
     >
       {error && <StatusCard variant="danger" showIcon description={error} />}
 
@@ -175,8 +188,12 @@ export function MigrationInvite() {
                 >
                   {t("migrationInvite.linkCmd")}
                 </Button>
+                {/* Outline, not solid. Two filled buttons in a reminder pull
+                    harder than the page's own primary action, which is what
+                    the person came to do. One highlighted, one available. */}
                 <Button
                   variant="neutral"
+                  appearance="outline"
                   disabled={!samlEnabled || isLoading}
                   onClick={() => startLink("/saml/eidas/link/start")}
                 >
@@ -205,14 +222,6 @@ export function MigrationInvite() {
             {t(expanded ? "migrationInvite.bannerLess" : "migrationInvite.bannerMore")}
           </Button>
         </div>
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label={t("migrationInvite.close")}
-          className="shrink-0 text-neutral-700"
-        >
-          <Icon name="agora-line-close" className="h-24 w-24" aria-hidden />
-        </button>
       </div>
     </div>
   );

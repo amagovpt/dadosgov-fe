@@ -21,6 +21,18 @@ This project has no version tags, so entries are grouped by month (newest first)
     day would push the full screen out for ever — and the full screen is the one that carries
     the whole invitation. So the banner hides for the visit and the count keeps running
     underneath.
+  - **It only appears on the homepage now.** The full screen reaches the citizen every eight days
+    wherever they are and carries the whole invitation; repeating a banner above every page in
+    between is how a notice becomes wallpaper. The cost is real and deliberate: somebody
+    following a link straight to a dataset does not see it that visit.
+  - Two buttons instead of five interactive elements: eIDAS becomes outline, since two filled
+    buttons in a reminder pull harder than the page's own primary action, and the close X goes
+    in favour of the explicit "Agora não". It also stopped touching the hero below it.
+  - **Five icons rendered as nothing at all.** A wrong Agora icon name is silent — the component
+    renders, nothing throws, the build passes, the button is simply empty — so `agora-line-close`
+    survived as the close control of three separate notices, which could therefore not be closed.
+    A test now reads the valid names out of the package instead of a list kept beside it, and
+    found two more on its own.
   - The visit is remembered in `sessionStorage`, read behind a window check because a
     `"use client"` component is still rendered on the server, where the hooks run and that API
     does not exist. Every failure path leaves the banner **visible**: somebody seeing a reminder
