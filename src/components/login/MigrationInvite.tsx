@@ -175,8 +175,12 @@ export function MigrationInvite() {
                 >
                   {t("migrationInvite.linkCmd")}
                 </Button>
+                {/* Outline, not solid. Two filled buttons in a reminder pull
+                    harder than the page's own primary action, which is what
+                    the person came to do. One highlighted, one available. */}
                 <Button
                   variant="neutral"
+                  appearance="outline"
                   disabled={!samlEnabled || isLoading}
                   onClick={() => startLink("/saml/eidas/link/start")}
                 >
@@ -205,14 +209,6 @@ export function MigrationInvite() {
             {t(expanded ? "migrationInvite.bannerLess" : "migrationInvite.bannerMore")}
           </Button>
         </div>
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label={t("migrationInvite.close")}
-          className="shrink-0 text-neutral-700"
-        >
-          <Icon name="agora-line-close" className="h-24 w-24" aria-hidden />
-        </button>
       </div>
     </div>
   );
