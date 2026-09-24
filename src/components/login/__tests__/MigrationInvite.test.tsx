@@ -13,6 +13,9 @@
  * rendered page distinguishes "the backend told us" from "we guessed".
  */
 
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -65,6 +68,16 @@ function findButton(label: string) {
   );
 }
 
+/**
+ * The banner is short now: the whole invitation is one click away, behind
+ * "Saber mais". These tests open it first, which is the point -- what the
+ * shortening must not do is LOSE anything, and the assertions that follow are
+ * what proves it did not.
+ */
+async function expand() {
+  await clickButton(ptLogin.migrationInvite.bannerMore);
+}
+
 function renderInvite() {
   act(() => {
     root.render(React.createElement(MigrationInvite));
@@ -101,11 +114,12 @@ describe("the optional CMD/eIDAS linking invite", () => {
       });
     }
 
-    useAuth.mockReturnValue({ migrationInvite: true, refresh: vi.fn() });
+    useAuth.mockReturnValue({ migrationInvite: false, migrationLinkAvailable: true, refresh: vi.fn() });
     pathname.mockReturnValue("/pt");
     dismissMigrationInvite.mockResolvedValue({ dismissed: true });
     submitSamlForm.mockResolvedValue(null);
     process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
+    window.sessionStorage.clear();
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -128,11 +142,81 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("says up front that linking only works on an identity nobody else holds", () => {
+  it("appears on the homepage and nowhere else", () => {
+    // 🚩 The reminder stays at home. The full screen reaches the citizen every
+    // eight days wherever they are, and it carries the whole invitation;
+    // repeating a banner above every page in between is how a notice becomes
+    // wallpaper. The cost -- somebody following a link straight to a dataset
+    // does not see it that visit -- is the trade, and it is deliberate.
+    for (const home of ["/pt", "/en", "/pt/"]) {
+      pathname.mockReturnValue(home);
+      renderInvite();
+      expect(container.textContent, `expected the banner on ${home}`).toContain(
+        ptLogin.migrationInvite.bannerSummary
+      );
+    }
+
+    for (const elsewhere of ["/pt/datasets", "/en/organizations", "/pt/datasets/abc"]) {
+      pathname.mockReturnValue(elsewhere);
+      renderInvite();
+      expect(container.textContent, `expected nothing on ${elsewhere}`).toBe("");
+    }
+  });
+
+  it("shows one line, not the whole invitation, until it is opened", async () => {
+    // The full screen carries the whole invitation every eight days. Repeating
+    // all six sentences on every page in between is how a notice stops being
+    // read at all.
+    renderInvite();
+
+    expect(container.textContent).toContain(ptLogin.migrationInvite.bannerSummary);
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.sessionWarning);
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.alreadyTwoDescription);
+
+    await expand();
+    expect(container.textContent).toContain(ptLogin.migrationInvite.sessionWarning);
+  });
+
+  it("keeps the condition that costs a wasted round-trip exactly one click away", async () => {
+    // 🚩 The one sentence the shortening must not lose. Linking only works on
+    // an identity no other account holds; somebody who does not know that
+    // travels to the IdP and is refused at the very end, after authenticating.
+    //
+    // Asserted as ONE CLICK, not as present-in-the-file: a sentence that needs
+    // two steps to reach is a sentence people meet after the trip, not before.
+    renderInvite();
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.onlyIfFree);
+
+    await clickButton(ptLogin.migrationInvite.bannerMore);
+
+    expect(container.textContent).toContain(ptLogin.migrationInvite.onlyIfFree);
+  });
+
+  it("closes again, so the banner does not stay long once it has been read", async () => {
+    renderInvite();
+    await expand();
+    await clickButton(ptLogin.migrationInvite.bannerLess);
+
+    expect(container.textContent).not.toContain(ptLogin.migrationInvite.onlyIfFree);
+    expect(container.textContent).toContain(ptLogin.migrationInvite.bannerSummary);
+  });
+
+  it("offers the three buttons while it is still short", async () => {
+    // Shortening the words must not cost the actions: somebody who already
+    // knows what this is should be able to act without opening anything.
+    renderInvite();
+
+    expect(findButton(ptLogin.migrationInvite.linkCmd)).toBeDefined();
+    expect(findButton(ptLogin.migrationInvite.linkEidas)).toBeDefined();
+    expect(findButton(ptLogin.migrationInvite.dismiss)).toBeDefined();
+  });
+
+  it("says up front that linking only works on an identity nobody else holds", async () => {
     // The condition that most invites misreading. Somebody whose CMD already
     // belongs to another account is refused at the END of the round-trip --
     // saying it here saves the trip, and saves them believing it worked.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.onlyIfFree);
   });
 
@@ -161,45 +245,65 @@ describe("the optional CMD/eIDAS linking invite", () => {
     }
   });
 
-  it("renders nothing when the backend is not inviting this account", () => {
-    useAuth.mockReturnValue({ migrationInvite: false, refresh: vi.fn() });
+  it("stays hidden while the full screen is the one showing", () => {
+    // 🚩 The three states are disjoint, and this is the seam. migrationInvite
+    // true is the LOUD state -- never dismissed, or dismissed eight days ago or
+    // more -- and MigrationInviteGate owns it, replacing the page. Reading that
+    // field here, as this did before the full screen existed, would put both on
+    // screen at once.
+    useAuth.mockReturnValue({
+      migrationInvite: true,
+      migrationLinkAvailable: true,
+      refresh: vi.fn(),
+    });
     renderInvite();
     expect(container.textContent).toBe("");
   });
 
-  it("says that the portal allows one account per person", () => {
+  it("renders nothing when the backend is not inviting this account", () => {
+    useAuth.mockReturnValue({ migrationInvite: false, migrationLinkAvailable: false, refresh: vi.fn() });
     renderInvite();
+    expect(container.textContent).toBe("");
+  });
+
+  it("says that the portal allows one account per person", async () => {
+    renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.oneAccount);
   });
 
-  it("says the invite is optional FOR NOW, not optional forever", () => {
+  it("says the invite is optional FOR NOW, not optional forever", async () => {
     // "É facultativo" read alone promises it stays that way, and it does not:
     // LEDG-1277 makes authentication mandatory. Saying so before the person
     // decides beats letting them feel misled when it changes.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.optional);
     expect(ptLogin.migrationInvite.optional).toContain("Por agora");
   });
 
-  it("says that the linked account stays the same account", () => {
+  it("says that the linked account stays the same account", async () => {
     // The invite is worthless if it reads as "start again elsewhere". What it
     // offers is one account reachable two ways.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.result);
   });
 
-  it("warns that linking costs the current session, before the click", () => {
+  it("warns that linking costs the current session, before the click", async () => {
     // The ACS issues a fresh session cookie, so the person is signed out until
     // they finish. Discovering that mid-flow reads as a bug.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.sessionWarning);
   });
 
-  it("tells somebody who already has two accounts what they can and cannot do", () => {
+  it("tells somebody who already has two accounts what they can and cannot do", async () => {
     // Linking does not merge. Today only datasets can be moved -- reuses have
     // the logic and no button, APIs have nothing (LEDG-2520) -- so the notice
     // says so instead of leaving them hunting for it.
     renderInvite();
+    await expand();
     expect(container.textContent).toContain(ptLogin.migrationInvite.alreadyTwoDescription);
     expect(container.textContent).toContain(ptLogin.migrationInvite.alreadyTwoLimitation);
   });
@@ -218,20 +322,74 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(submitSamlForm).toHaveBeenCalledWith("/saml/eidas/link/start");
   });
 
-  it("can be dismissed, and tells the backend so", async () => {
+  it("never touches sessionStorage without checking for a window first", () => {
+    // 🚩 A source check, and deliberately so. This component is "use client"
+    // and is STILL rendered on the server, where the hooks run and
+    // sessionStorage does not exist -- an unguarded read takes the whole page
+    // down. jsdom always has a window, so no behavioural test in this suite
+    // can tell the two apart; only the source can.
+    //
+    // Same reasoning as the raw-HTML-sink guard and migration-flag-guard: when
+    // the invariant is about what the code must NOT do in an environment the
+    // tests do not run in, read the source.
+    const source = readFileSync(
+      path.join(process.cwd(), "src/components/login/MigrationInvite.tsx"),
+      "utf8"
+    );
+
+    const accesses = [...source.matchAll(/sessionStorage/g)].length;
+    const guards = [...source.matchAll(/typeof window === "undefined"/g)].length;
+
+    expect(accesses).toBeGreaterThan(0);
+    expect(guards, "every sessionStorage helper needs its own window guard").toBe(2);
+  });
+
+  it("hides without sending anything to the server", async () => {
+    // 🚩 The decision this ticket carries. The date in extras belongs to the
+    // full screen alone: it is what buys the eight days of quiet. If the
+    // banner wrote it too, closing the banner every day would push the full
+    // screen out for ever -- and the full screen is the one that carries the
+    // whole invitation.
     renderInvite();
     await clickButton(ptLogin.migrationInvite.dismiss);
-    expect(dismissMigrationInvite).toHaveBeenCalled();
+
+    expect(dismissMigrationInvite).not.toHaveBeenCalled();
     expect(container.textContent).toBe("");
   });
 
-  it("stays dismissed even when the backend write fails", async () => {
-    // Nothing the person can do about it, and nothing was lost: the worst case
-    // is that the notice returns on the next load, which it would have anyway.
-    dismissMigrationInvite.mockRejectedValue(new Error("offline"));
+  it("stays hidden for the rest of the visit", async () => {
     renderInvite();
     await clickButton(ptLogin.migrationInvite.dismiss);
+
+    // A fresh mount stands in for the next page: the layout persists across
+    // client-side navigation, but a reload does not, and "this visit" has to
+    // mean both.
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    renderInvite();
+
     expect(container.textContent).toBe("");
+  });
+
+  it("comes back on the next visit", async () => {
+    renderInvite();
+    await clickButton(ptLogin.migrationInvite.dismiss);
+
+    // A new visit is a new session store, which is exactly what closing the
+    // browser gives. The reminder returning is what keeps it a door for
+    // somebody who changed their mind.
+    window.sessionStorage.clear();
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    renderInvite();
+
+    expect(container.textContent).toContain(ptLogin.migrationInvite.bannerSummary);
   });
 
   it("disables the linking buttons when SAML is not wired up", () => {
