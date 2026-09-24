@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
+import { Icon } from "@ama-pt/agora-design-system";
 
 import { useAuth } from "@/context/AuthContext";
 import { dismissMigrationInvite } from "@/service/api/migration";
-import { Typograph } from "../Shared/Generics/Typograph";
-import { submitSamlForm } from "./loginUtils";
+import { MigrationInviteContent } from "./MigrationInviteContent";
 
 /**
  * The optional invitation to link a CMD/eIDAS identity to an account that
@@ -64,36 +62,11 @@ export function MigrationInvite() {
   const { migrationInvite, isLoading: authLoading, refresh } = useAuth();
   const pathname = usePathname();
   const [dismissed, setDismissed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Shares the samlEnabled gate with every other control that starts a SAML
-  // round-trip: without it these buttons fire a request that cannot succeed.
-  // It says whether SAML is wired up at all, never whether an ACCOUNT should
-  // link -- that question belongs to the backend, per account, and is the
-  // `migrationInvite` above.
-  const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
   // isLoading is in the condition for hydration, not for looks: /me is fetched
   // in the browser, so the server renders nothing and a client that answered
   // before React hydrated would render the notice into HTML that never had it.
-  // React then reports a mismatch and throws the tree away. Waiting for the
-  // answer makes both passes agree on "nothing", and the notice appears on the
-  // render after it.
   const onFlowPage = (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
-
-  if (authLoading || onFlowPage || !migrationInvite || dismissed) return null;
-
-  const startLink = async (endpoint: string) => {
-    setIsLoading(true);
-    setError(null);
-    const samlError = await submitSamlForm(endpoint, t);
-    if (samlError) {
-      setError(samlError);
-      setIsLoading(false);
-    }
-    // No else: on success the page is already navigating away to the IdP.
-  };
 
   const handleDismiss = async () => {
     // Hidden immediately, and the write is confirmed afterwards. A notice that
@@ -110,6 +83,8 @@ export function MigrationInvite() {
     }
   };
 
+  if (authLoading || onFlowPage || !migrationInvite || dismissed) return null;
+
   return (
     <div
       role="status"
@@ -121,38 +96,8 @@ export function MigrationInvite() {
           className="h-24 w-24 shrink-0 text-informative-600"
           aria-hidden
         />
-        <div className="flex flex-grow flex-col gap-8">
-          <Typograph tag="h2" className="text-base-bold text-neutral-900">
-            {t("migrationInvite.title")}
-          </Typograph>
-          <Typograph tag="p" className="text-sm-bold text-neutral-900">
-            {t("migrationInvite.oneAccount")}
-          </Typograph>
-          <Typograph tag="p" className="text-sm text-neutral-700">
-            {t("migrationInvite.result")}
-          </Typograph>
-          <Typograph tag="p" className="text-sm text-neutral-700">
-            {t("migrationInvite.optional")}
-          </Typograph>
-          {/* Said before the click, not discovered after it: the ACS issues a
-              fresh session cookie, so linking signs the person out until they
-              finish. */}
-          <Typograph tag="p" className="text-sm text-neutral-700">
-            {t("migrationInvite.sessionWarning")}
-          </Typograph>
-          {/* Said before the click, not after the round-trip. Coming back from
-              the IdP to an unexpected password prompt is where people stop. */}
-          <Typograph tag="p" className="text-sm text-neutral-700">
-            {t("migrationInvite.confirmStep")}
-          </Typograph>
-          {/* The condition that most invites misreading, said where it is
-              read: linking stamps an identity onto an account that has none.
-              Somebody whose CMD already belongs to another account is refused
-              at the END of the round-trip, and saying it here saves the trip
-              -- and saves them believing it worked. */}
-          <Typograph tag="p" className="text-sm text-neutral-700">
-            {t("migrationInvite.onlyIfFree")}
-          </Typograph>
+        <div className="flex flex-grow flex-col gap-16">
+          <MigrationInviteContent variant="banner" onDismiss={handleDismiss} />
         </div>
         <button
           type="button"
@@ -163,61 +108,6 @@ export function MigrationInvite() {
           <Icon name="agora-line-close" className="h-24 w-24" aria-hidden />
         </button>
       </div>
-
-      {error && <StatusCard variant="danger" showIcon description={error} />}
-
-      <div className="flex flex-wrap items-center gap-8">
-        <Button
-          variant="primary"
-          disabled={!samlEnabled || isLoading}
-          onClick={() => startLink("/saml/link/start")}
-        >
-          {t("migrationInvite.linkCmd")}
-        </Button>
-        <Button
-          variant="neutral"
-          disabled={!samlEnabled || isLoading}
-          onClick={() => startLink("/saml/eidas/link/start")}
-        >
-          {t("migrationInvite.linkEidas")}
-        </Button>
-        <Button variant="neutral" appearance="outline" onClick={handleDismiss}>
-          {t("migrationInvite.dismiss")}
-        </Button>
-      </div>
-
-      {/* The people this notice is most likely to confuse: it invites them to
-          have one account while they already have two, and linking does not
-          merge anything. Telling them what they CAN do beats leaving them to
-          hunt for a button -- including the part that is not yet possible. */}
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <div className="flex flex-col gap-8">
-            <Typograph tag="p" className="text-sm font-bold">
-              {t("migrationInvite.alreadyTwoTitle")}
-            </Typograph>
-            <Typograph tag="p" className="text-sm">
-              {t("migrationInvite.alreadyTwoDescription")}
-            </Typograph>
-            <Typograph tag="p" className="text-sm">
-              {t("migrationInvite.alreadyTwoLimitation")}
-            </Typograph>
-            <Link
-              href="/ajuda-e-contactos"
-              className="flex items-center gap-8 text-sm text-informative-600"
-            >
-              {t("migrationInvite.alreadyTwoLink")}
-              <Icon
-                name="agora-line-arrow-right-circle"
-                className="h-16 w-16 text-informative-600"
-                aria-hidden
-              />
-            </Link>
-          </div>
-        }
-      />
     </div>
   );
 }
