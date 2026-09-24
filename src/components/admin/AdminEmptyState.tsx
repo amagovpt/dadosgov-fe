@@ -39,7 +39,7 @@ export default function AdminEmptyState(props: AdminEmptyStateI) {
 
   return (
     <>
-      <div className="admin-page__body">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row">
         <div className="admin-page__content">
           <CardNoResults
             className="admin-page__empty"
