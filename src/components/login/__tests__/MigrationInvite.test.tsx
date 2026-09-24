@@ -13,6 +13,9 @@
  * rendered page distinguishes "the backend told us" from "we guessed".
  */
 
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -116,6 +119,7 @@ describe("the optional CMD/eIDAS linking invite", () => {
     dismissMigrationInvite.mockResolvedValue({ dismissed: true });
     submitSamlForm.mockResolvedValue(null);
     process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
+    window.sessionStorage.clear();
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -297,20 +301,74 @@ describe("the optional CMD/eIDAS linking invite", () => {
     expect(submitSamlForm).toHaveBeenCalledWith("/saml/eidas/link/start");
   });
 
-  it("can be dismissed, and tells the backend so", async () => {
+  it("never touches sessionStorage without checking for a window first", () => {
+    // 🚩 A source check, and deliberately so. This component is "use client"
+    // and is STILL rendered on the server, where the hooks run and
+    // sessionStorage does not exist -- an unguarded read takes the whole page
+    // down. jsdom always has a window, so no behavioural test in this suite
+    // can tell the two apart; only the source can.
+    //
+    // Same reasoning as the raw-HTML-sink guard and migration-flag-guard: when
+    // the invariant is about what the code must NOT do in an environment the
+    // tests do not run in, read the source.
+    const source = readFileSync(
+      path.join(process.cwd(), "src/components/login/MigrationInvite.tsx"),
+      "utf8"
+    );
+
+    const accesses = [...source.matchAll(/sessionStorage/g)].length;
+    const guards = [...source.matchAll(/typeof window === "undefined"/g)].length;
+
+    expect(accesses).toBeGreaterThan(0);
+    expect(guards, "every sessionStorage helper needs its own window guard").toBe(2);
+  });
+
+  it("hides without sending anything to the server", async () => {
+    // 🚩 The decision this ticket carries. The date in extras belongs to the
+    // full screen alone: it is what buys the eight days of quiet. If the
+    // banner wrote it too, closing the banner every day would push the full
+    // screen out for ever -- and the full screen is the one that carries the
+    // whole invitation.
     renderInvite();
     await clickButton(ptLogin.migrationInvite.dismiss);
-    expect(dismissMigrationInvite).toHaveBeenCalled();
+
+    expect(dismissMigrationInvite).not.toHaveBeenCalled();
     expect(container.textContent).toBe("");
   });
 
-  it("stays dismissed even when the backend write fails", async () => {
-    // Nothing the person can do about it, and nothing was lost: the worst case
-    // is that the notice returns on the next load, which it would have anyway.
-    dismissMigrationInvite.mockRejectedValue(new Error("offline"));
+  it("stays hidden for the rest of the visit", async () => {
     renderInvite();
     await clickButton(ptLogin.migrationInvite.dismiss);
+
+    // A fresh mount stands in for the next page: the layout persists across
+    // client-side navigation, but a reload does not, and "this visit" has to
+    // mean both.
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    renderInvite();
+
     expect(container.textContent).toBe("");
+  });
+
+  it("comes back on the next visit", async () => {
+    renderInvite();
+    await clickButton(ptLogin.migrationInvite.dismiss);
+
+    // A new visit is a new session store, which is exactly what closing the
+    // browser gives. The reminder returning is what keeps it a door for
+    // somebody who changed their mind.
+    window.sessionStorage.clear();
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    renderInvite();
+
+    expect(container.textContent).toContain(ptLogin.migrationInvite.bannerSummary);
   });
 
   it("disables the linking buttons when SAML is not wired up", () => {

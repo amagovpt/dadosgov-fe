@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
 import { useAuth } from "@/context/AuthContext";
-import { dismissMigrationInvite } from "@/service/api/migration";
 import { Typograph } from "../Shared/Generics/Typograph";
 import { MigrationInviteContent } from "./MigrationInviteContent";
 import { submitSamlForm } from "./loginUtils";
@@ -59,11 +58,42 @@ const FLOW_ROUTES = [
   "reset-password",
 ];
 
+const HIDDEN_KEY = "migrationInviteHiddenForVisit";
+
+/** Every access is guarded: a browser may refuse storage outright, and the
+ *  server has none at all. Failing towards VISIBLE is the safe direction --
+ *  somebody sees a reminder they had closed, rather than never seeing one. */
+function readHiddenForThisVisit(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(HIDDEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function hideForThisVisit(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(HIDDEN_KEY, "1");
+  } catch {
+    // The banner is already hidden by local state for this render; losing the
+    // memory only means it returns on the next page, which is harmless.
+  }
+}
+
 export function MigrationInvite() {
   const { t } = useTranslation("login");
-  const { migrationInvite, migrationLinkAvailable, isLoading: authLoading, refresh } = useAuth();
+  const { migrationInvite, migrationLinkAvailable, isLoading: authLoading } = useAuth();
   const pathname = usePathname();
-  const [dismissed, setDismissed] = useState(false);
+  // Hidden for THIS visit, and nowhere else. Read through a window guard
+  // because a "use client" component is still rendered on the server, where
+  // the hooks run and sessionStorage does not exist -- without it this file
+  // takes the whole page down. Same shape HarvestersNewClient already uses.
+  //
+  // No hydration risk despite reading during render: AuthContext starts with
+  // isLoading true, so the banner never reaches its output on the server.
+  const [dismissed, setDismissed] = useState(() => readHiddenForThisVisit());
   const [expanded, setExpanded] = useState(false);
 
   // isLoading is in the condition for hydration, not for looks: /me is fetched
@@ -89,19 +119,16 @@ export function MigrationInvite() {
     // No else: on success the page is already navigating away to the IdP.
   };
 
-  const handleDismiss = async () => {
-    // Hidden immediately, and the write is confirmed afterwards. A notice that
-    // stays on screen while a request completes reads as a broken button, and
-    // the worst case of a failed write is that it comes back on the next load
-    // -- which is what it would have done anyway.
+  // 🚩 NOTHING IS SENT TO THE SERVER, and that is the decision this ticket
+  // carries. The date in extras belongs to the full screen alone: it is what
+  // buys the eight days of quiet. If the banner wrote it too, closing the
+  // banner every day would push the full screen out for ever -- and the full
+  // screen is the one that carries the whole invitation.
+  //
+  // So the banner hides for the visit and the count keeps running underneath.
+  const handleDismiss = () => {
     setDismissed(true);
-    try {
-      await dismissMigrationInvite();
-      await refresh();
-    } catch {
-      // Deliberately silent: there is nothing the person can do about it, and
-      // nothing was lost.
-    }
+    hideForThisVisit();
   };
 
   // 🚩 The three states are disjoint, and this is the line that makes them so.
