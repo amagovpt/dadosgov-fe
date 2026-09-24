@@ -52,7 +52,7 @@ const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
   const localize = useLocalizedHref();
 
   return (
-    <div className="flex flex-col gap-32 px-32 py-32 md:px-64 xl:px-112 xl:py-64">
+    <div className="footer-navigation flex flex-col gap-32 px-32 py-32 md:px-64 xl:py-64">
       <h3 className="text-l-bold text-white">{title}</h3>
       <div className="grid grid-cols-1 gap-32 md:grid-cols-2 xl:grid-cols-3">
         {groups
