@@ -42,6 +42,7 @@ export interface HeaderEcosystem {
 }
 
 export interface HeaderNavigationData {
+  institutional:string;
   authMenuItems: HeaderNavItem[];
   topLevelLinks: HeaderNavItem[];
   dropdowns: HeaderDropdown[];

@@ -26,7 +26,7 @@ export default function AdminLayout({
 }: AdminLayoutProps) {
     const { t } = useTranslation('admin-common')
     return (
-        <div className="container flex flex-col gap-64 pt-64 pb-96">
+        <div className="container flex flex-col gap-32 pt-64 pb-96">
             <div className="w-full flex flex-col gap-32">
                 <div className="w-full">
                     <Breadcrumb

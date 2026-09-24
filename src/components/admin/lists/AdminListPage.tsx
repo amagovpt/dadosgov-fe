@@ -7,6 +7,7 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import type { AdminLayoutProps } from "@/components/Layout/AdminLayout";
 import ResultsCount from "@/components/admin/ResultsCount";
 import type { CreatePaginationPropsOptions } from "@/utils/createPaginationProps";
+import { useHasListData } from "@/hooks/admin-lists/useHasListData";
 import AdminPaginatedTable from "./AdminPaginatedTable";
 
 type SearchConfig = {
@@ -27,6 +28,8 @@ interface AdminListPageProps {
   isLoading: boolean;
   count: number;
   hasItems?: boolean;
+  /** Keeps search/filters visible when a pre-set filter (e.g. from the URL) matches nothing. */
+  hasActiveFilters?: boolean;
   currentPage: number;
   pageSize: number;
   setCurrentPage: (page: number) => void;
@@ -52,6 +55,7 @@ export default function AdminListPage({
   isLoading,
   count,
   hasItems,
+  hasActiveFilters = false,
   currentPage,
   pageSize,
   setCurrentPage,
@@ -67,8 +71,15 @@ export default function AdminListPage({
   paginationOptions,
 }: AdminListPageProps) {
   const { t } = useTranslation("admin-common");
-  const shouldRenderToolbar = Boolean(search || filters || toolbarActions);
   const shouldRenderTable = hasItems ?? count > 0;
+  const showListControls = useHasListData(
+    isLoading,
+    count > 0 || shouldRenderTable,
+    hasActiveFilters
+  );
+  const visibleSearch = showListControls ? search : undefined;
+  const visibleFilters = showListControls ? filters : undefined;
+  const shouldRenderToolbar = Boolean(visibleSearch || visibleFilters || toolbarActions);
   const defaultLoadingContent = <p className="text-sm text-neutral-700">{t("loading")}</p>;
   const isInitialLoading = isLoading && !shouldRenderTable;
   const isRefreshing = isLoading && shouldRenderTable;
@@ -88,18 +99,20 @@ export default function AdminListPage({
 
       {shouldRenderToolbar && (
         <div className="flex flex-col gap-32">
-          {filters}
-          {(search || toolbarActions) && (
+          {visibleFilters}
+          {(visibleSearch || toolbarActions) && (
             <div className="flex items-end gap-16">
-              {search && (
+              {visibleSearch && (
                 <div className="admin-search-wrapper xl:w-1/2 w-full">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label={search.label}
-                    placeholder={search.placeholder}
-                    aria-label={search.ariaLabel ?? search.label ?? search.placeholder}
+                    label={visibleSearch.label}
+                    placeholder={visibleSearch.placeholder}
+                    aria-label={
+                      visibleSearch.ariaLabel ?? visibleSearch.label ?? visibleSearch.placeholder
+                    }
                     onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      search.onChange?.(e.target.value);
+                      visibleSearch.onChange?.(e.target.value);
                     }}
                   />
                 </div>

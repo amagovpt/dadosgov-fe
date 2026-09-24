@@ -12,9 +12,11 @@ import {
   LinksSectionRelatedLinksCopyright,
   LinksSectionSocialLinks,
   LinksSectionSocialLinksLabel,
+  LogoSectionContainer,
+  LogoSectionMainLogo,
 } from "@ama-pt/agora-design-system";
 import Image from "next/image";
-import { LocalizedLink } from "@/components/Shared/LocalizedLink";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { getAssets } from "@/utils/getAssets";
@@ -41,7 +43,14 @@ export type FooterBottomI = {
 
 // -------------------------------------------------------------------------------------------------------------------
 
+const isExternal = (href: string) => href.startsWith("http");
+
+// The DS Footer v2 has no navigation slot (it renders only its Logo, Financing and Links
+// sections), so the link groups sit above it. Outside <FooterADS> the FooterContext
+// defaults to a light background, hence the explicit `darkMode` on each FooterLink.
 const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
+  const localize = useLocalizedHref();
+
   return (
     <div className="flex flex-col gap-32 px-32 py-32 md:px-64 xl:px-112 xl:py-64">
       <h3 className="text-l-bold text-white">{title}</h3>
@@ -51,21 +60,22 @@ const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
           ?.map((group, idx) => (
             <div key={idx} className="flex flex-col gap-16">
               <h4 className="text-m-semibold text-white">{group.label}</h4>
-              <ul className="flex flex-col gap-16">
+              <ul className="flex flex-col">
                 {group.cards
                   ?.filter((l) => l.enabled === true)
                   ?.map((link, linkIdx) => (
-                    <li key={linkIdx}>
-                      <LocalizedLink
-                        href={link.href}
-                        className="text-sm text-white transition-colors hover:underline"
-                        {...(link.href.startsWith("http")
-                          ? { target: "_blank", rel: "noopener noreferrer" }
-                          : {})}
-                      >
-                        {link.title}
-                      </LocalizedLink>
-                    </li>
+                    <FooterLink
+                      key={linkIdx}
+                      appearance="link"
+                      variant="neutral"
+                      darkMode
+                      href={isExternal(link.href) ? link.href : localize(link.href)}
+                      {...(isExternal(link.href)
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                    >
+                      {link.title}
+                    </FooterLink>
                   ))}
               </ul>
             </div>
@@ -77,9 +87,11 @@ const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
 
 // -------------------------------------------------------------------------------------------------------------------
 
-const FooterBrands = () => {
-  return (
-    <div className="flex flex-wrap items-center gap-32 px-32 py-32 md:gap-48 md:px-64 md:py-64 xl:px-112">
+const FooterBottom = ({ description, logos, social, related, copyright }: FooterBottomI) => {
+  const { t } = useTranslation("footer");
+
+  const logoSectionContent = [
+    <LogoSectionMainLogo key="footer-main-logo">
       <Image
         src={"/Logos/pt-republic-color.svg"}
         alt="Agora"
@@ -87,6 +99,8 @@ const FooterBrands = () => {
         width={160}
         className="h-40 w-auto object-contain md:h-48"
       />
+    </LogoSectionMainLogo>,
+    <FooterGenericLogo key="footer-arte-logo">
       <Image
         src={"/Logos/Logotipo_ARTE__Horizontal_branco_pt.svg"}
         alt="Agora"
@@ -94,12 +108,8 @@ const FooterBrands = () => {
         width={160}
         className="h-40 w-auto object-contain md:h-48"
       />
-    </div>
-  );
-};
-
-const FooterBottom = ({ description, logos, social, related, copyright }: FooterBottomI) => {
-  const { t } = useTranslation("footer");
+    </FooterGenericLogo>,
+  ];
 
   const financingSectionContent = [
     <FooterDisclaimer key="footer-description">{description}</FooterDisclaimer>,
@@ -172,6 +182,7 @@ const FooterBottom = ({ description, logos, social, related, copyright }: Footer
 
   return (
     <FooterADS variant="primary-900">
+      <LogoSectionContainer>{logoSectionContent}</LogoSectionContainer>
       <FinancingSectionContainer financingSectionAriaLabel={t("partners")}>
         {financingSectionContent}
       </FinancingSectionContainer>
@@ -186,7 +197,6 @@ export default function Footer({ data }: FooterI) {
   return (
     <footer className="bg-primary-900 text-white" aria-label={t("footer")}>
       <FooterNavigation title={data.title} groups={data.groups} />
-      <FooterBrands />
       <FooterBottom
         description={data.description}
         logos={data.logos}
