@@ -394,8 +394,8 @@ export default function CommunityResourceEditClient({
       title={t("admin-community-resources:edit.title")}
       headerAction={null}
     >
-      <div className="admin-page__body">
-        <div className="admin-page__form-area">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
           <FormStatusMessages successMessage={successMessage} errorMessage={apiError} />
 
           <form

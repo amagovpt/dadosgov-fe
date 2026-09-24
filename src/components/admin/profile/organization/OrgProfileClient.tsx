@@ -237,8 +237,8 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
     >
       {org && <OrganizationProfileHeaderCard organization={org} logoPreview={logoPreview} />}
 
-      <div className="admin-page__body mt-32">
-        <div className="admin-page__form-area">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row mt-32">
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
           <OrganizationProfileFormSection
             name={name}
             acronym={acronym}
@@ -298,7 +298,7 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
           />
         </div>
 
-        <aside className="admin-page__auxiliar" />
+        <aside className="w-[360px] max-w-full shrink-0" />
       </div>
     </AdminLayout>
   );

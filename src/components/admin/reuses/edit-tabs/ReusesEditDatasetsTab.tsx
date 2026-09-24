@@ -79,7 +79,7 @@ export default function ReusesEditDatasetsTab({
         onRemoveAllAssociatedDatasets={onRemoveAllAssociatedDatasets}
       />
 
-      <div className="admin-page__form-area">
+      <div className="flex min-w-0 flex-1 flex-col gap-24">
         <form
           className="admin-page__form"
           noValidate

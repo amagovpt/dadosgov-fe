@@ -1568,11 +1568,6 @@ li.section-name:empty {
 }
 
 /* Admin page - empty state (no results) */
-.admin-page__body {
-  display: flex;
-  gap: 32px;
-}
-
 .admin-page__content {
   flex: 1;
   display: flex;
@@ -1603,11 +1598,6 @@ li.section-name:empty {
   border-color: var(--color-primary-900);
 }
 
-.admin-page {
-  --admin-auxiliar-width: 360px;
-  --admin-auxiliar-gap: 70px;
-}
-
 @media (min-width: 1280px) {
   .admin-page {
     transform: translateX(-56px);
@@ -1620,20 +1610,6 @@ li.section-name:empty {
 
 .admin-page td [class*="agora-pill"] .children-wrapper {
   font-weight: 400 !important;
-}
-
-.admin-page__body {
-  display: flex;
-  gap: var(--admin-auxiliar-gap);
-}
-
-.admin-page__form-area {
-  flex: 1;
-  min-width: 0;
-  max-width: calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap));
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
 
 .admin-page__form {
@@ -1724,20 +1700,6 @@ li.section-name:empty {
 }
 
 /* Auxiliar sidebar */
-.admin-page__auxiliar {
-  flex: 0 0 var(--admin-auxiliar-width);
-  max-width: var(--admin-auxiliar-width);
-  min-width: 0;
-  margin-left: auto;
-}
-
-.admin-page__auxiliar-inner {
-  background-color: var(--color-neutral-100);
-  padding: 32px;
-  position: sticky;
-  top: 80px;
-}
-
 .admin-page__auxiliar-header {
   display: flex;
   align-items: center;
@@ -2066,15 +2028,6 @@ li.section-name:empty {
 
   .admin-page {
     padding: 32px 24px;
-  }
-
-  .admin-page__body {
-    flex-direction: column;
-  }
-
-  .admin-page__form-area {
-    flex: 1;
-    max-width: 100%;
   }
 }
 
