@@ -6,6 +6,29 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(login): the linking invite gets two volumes — a full screen, and a quiet banner**
+  - The notice had one volume since it shipped: a banner over the portal, identical the first
+    time and the tenth. It now has two. An account that has never dismissed it — or dismissed
+    it eight days ago or more — gets the invitation **in place of the page**; in between, the
+    banner above it. The dismissal on the full screen records the date and starts the eight
+    days; the one on the banner does not, because the date is a decision and the banner is a
+    reminder.
+  - **It does not navigate, and that is the design.** A page of its own was the obvious shape
+    and carried five ways to trap somebody: the gate firing again on the page it sent them to;
+    a failed dismissal leaving the backend's answer true so the redirect repeats for ever; the
+    back button landing somewhere it bounces again; sessionStorage — which the first three
+    would be fixed with — not being available at all; and the one that is not even a bug,
+    somebody who followed a link to a dataset being thrown elsewhere and losing the link.
+    Rendering in place has none of them, and dismissing leaves them where they were going.
+  - The release is local and the write is confirmed afterwards, so a failed write still gives
+    the portal back. The worst case is the screen returning next visit, which it would have
+    done anyway.
+  - **No backend change.** The two fields `/me` already returns say all three states, because
+    the asymmetry between them was built so the profile entry would not vanish with the notice.
+  - Mounted in both route groups, which is what reaches the publishers: accounts that predate
+    CMD and hold content belong to people who sign in and go straight to the backoffice, and
+    may never load a public page while authenticated.
+
 - **fix(login): the linking invite no longer appears on the pages about signing in**
   - After a refused link it sat directly above the refusal: "Associe a sua conta à Chave
     Móvel Digital" on top of "Não foi possível associar", with buttons that would repeat
