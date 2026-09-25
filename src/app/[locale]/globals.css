@@ -719,6 +719,11 @@ li.section-name:empty {
   background-color: var(--color-primary-100);
 }
 
+.dataset .agora-tabs.desktop .tab-panel.current-neutral,
+.dataset .agora-tabs.desktop .tab-list.desktop .tab-list-item.active.current-neutral {
+  background-color: var(--color-neutral-100);
+}
+
 .tab-panel-content {
   position: relative;
   padding: 4rem;

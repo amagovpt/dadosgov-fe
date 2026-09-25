@@ -66,6 +66,30 @@
       "missing": "{{label}} of the data not filled in"
     }
   },
+  "labels": {
+    "title": "Title",
+    "id": "Identifier",
+    "description": "Description",
+    "format": "Format",
+    "url": "URL",
+    "latest": "Stable URL",
+    "filetype": "File type",
+    "type": "Type",
+    "mime": "MIME type",
+    "filesize": "Size",
+    "checksum": "Checksum",
+    "created_at": "Created on",
+    "last_modified": "Last modified",
+    "schema": "Schema",
+    "metrics": "Metrics",
+    "extras": "Extras",
+    "preview_url": "Preview URL",
+    "fileTypes": {
+      "main": "Main file",
+      "doc": "Documentation file",
+      "community": "Community file"
+    }
+  },
   "contactRoles": {
     "contact": "Contact",
     "creator": "Creator",
@@ -219,13 +243,14 @@
     "by": "By",
     "format": "{{format}} format",
     "fileFallback": "File",
-    "download": "Download {{title}}",
+    "details": "File details",
+    "download": "Download file",
     "seeMore": "See more",
     "seeLess": "See less",
     "tabs": {
-      "preview": "Preview",
+      "preview": "Preview data",
       "structure": "Data structure",
-      "metadata": "Metadata",
+      "metadata": "File metadata",
       "downloads": "Downloads"
     },
     "preview": {
@@ -283,5 +308,6 @@
       "false": "false",
       "empty": "—"
     }
-  }
+  },
+  "goToDataset": "Go back to dataset"
 }

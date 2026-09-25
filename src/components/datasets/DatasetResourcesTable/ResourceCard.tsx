@@ -1,122 +1,117 @@
 "use client";
 
-import React from "react";
+import { FC } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@ama-pt/agora-design-system";
 import { Resource } from "@/service/types/dataset";
 import { formatDateLong } from "@/utils/formatDate";
-import { ResourceExpandedContent } from "./ResourceExpandedContent";
 import { downloadUrl, formatBytes } from "./utils";
+import Button from "@/components/Primitives/Button";
+import Link from "next/link";
+import { ModalConfiguration, useModalContext } from "@ama-pt/agora-design-system";
+import { ResourceExpandedContent } from "./ResourceExpandedContent";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
+import { twMerge } from "tailwind-merge";
 
 const DESCRIPTION_COLLAPSE_LIMIT = 280;
 
-export const ResourceCard: React.FC<{
+export const ResourceCard: FC<{
   resource: Resource;
-  isExpanded: boolean;
-  onToggle: () => void;
   authorName?: string;
   authorUrl?: string;
   isOrganization?: boolean;
-}> = ({ resource, isExpanded, onToggle, authorName, authorUrl, isOrganization }) => {
-  const { i18n } = useTranslation("common");
+  className?: string;
+}> = ({ resource, className }) => {
+  const { t, i18n } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
+  const { show, hide } = useModalContext();
+
   const locale = i18n.language as "pt" | "en";
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = React.useState(false);
   const hasLongDescription = (resource.description?.length ?? 0) > DESCRIPTION_COLLAPSE_LIMIT;
 
+  const openModal = () => {
+    show(
+      <div className="flex flex-col gap-64">
+        <Typograph tag="h2" className="text-2xl-bold text-neutral-900">
+          {tds("resources.details")}
+        </Typograph>
+        <ResourceExpandedContent resource={resource} />
+        <div className="w-fit self-end">
+          <Button
+            appearance="outline"
+            hasIcon
+            leadingIcon="agora-line-arrow-left-circle"
+            leadingIconHover="agora-line-arrow-left-circle"
+            onClick={() => hide()}
+          >
+            {tds("goToDataset")}
+          </Button>
+        </div>
+      </div>,
+      {
+        title: tds("resources.details"),
+        closeButtonLabel: t("close"),
+        darkMode: false,
+      } as ModalConfiguration
+    );
+  };
+
   return (
-    <div className="flex flex-col gap-24 bg-white p-32">
+    <div className={twMerge("flex flex-col gap-24 bg-white p-32", className)}>
       <div className="flex flex-col gap-16">
         <p className="max-w-[592px] text-s-regular">
           {tds("resources.updatedOn", {
             date: formatDateLong(resource.last_modified ?? resource.created_at, locale),
           })}
         </p>
+
         <div className="flex flex-col gap-8">
           <h4 className="inline-flex max-w-[592px] items-center gap-8 text-xl-bold text-neutral-900">
             {resource.title}
-            {/*<button
-            type="button"
-            onClick={() => navigator.clipboard.writeText(resource.title)}
-            className="shrink-0 cursor-pointer text-primary-600 hover:text-primary-800"
-            aria-label={tds("resources.copyTitle")}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ width: "20px", height: "20px", minWidth: "20px" }}
-              aria-hidden="true"
-            >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-          </button>*/}
           </h4>
-          {resource.description && (
-            <>
-              <p
-                className={`text-base break-words whitespace-pre-wrap text-neutral-900 max-w-[592px]${
-                  hasLongDescription && !isDescriptionExpanded ? "line-clamp-3" : ""
-                }`}
-              >
-                {resource.description}
-              </p>
-              {hasLongDescription && (
-                <button
-                  type="button"
-                  onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
-                  className="inline-flex max-w-[592px] cursor-pointer self-start text-primary-600 hover:underline"
-                  aria-expanded={isDescriptionExpanded}
-                >
-                  {isDescriptionExpanded ? tds("resources.seeLess") : tds("resources.seeMore")}
-                </button>
-              )}
-            </>
-          )}
-          {authorName && (
-            <p className="text-sm max-w-[592px] text-neutral-900">
-              {tds("resources.by")}{" "}
-              {authorUrl ? (
-                <a href={authorUrl} className="text-primary-600 hover:underline">
-                  {authorName}
-                </a>
-              ) : (
-                <span>{authorName}</span>
-              )}
-            </p>
-          )}
+
           <p className="text-m-bold text-neutral-700">
             {tds("resources.format", {
               format: resource.format || tds("resources.fileFallback"),
             })}{" "}
             {resource.filesize ? `(${formatBytes(resource.filesize, locale)})` : ""}
           </p>
+
+          {resource.description && (
+            <p
+              className={`max-w-[592px] text-base wrap-break-word whitespace-pre-wrap text-neutral-900 ${
+                hasLongDescription ? "line-clamp-3" : ""
+              }`}
+            >
+              {resource.description}
+            </p>
+          )}
         </div>
-        <button
-          type="button"
-          onClick={onToggle}
-          className="inline-flex max-w-[592px] cursor-pointer items-center gap-8 py-8 text-primary-600 hover:underline"
-        >
-          <Icon
-            name={isExpanded ? "agora-line-chevron-up" : "agora-line-chevron-down"}
-            className="h-6 w-6"
-          />
-          <span>{isExpanded ? tds("resources.seeLess") : tds("resources.seeMore")}</span>
-        </button>
+
+        <div className="flex flex-wrap gap-32">
+          <Button
+            appearance="link"
+            hasIcon
+            trailingIcon="agora-line-eye"
+            trailingIconHover="agora-line-eye"
+            className="p-0"
+            onClick={openModal}
+          >
+            {tds("resources.details")}
+          </Button>
+
+          <Link href={downloadUrl(resource)} target="_blank" className="text-neutral-600!">
+            <Button
+              appearance="link"
+              hasIcon
+              trailingIcon="agora-line-download"
+              trailingIconHover="agora-line-download"
+              className="p-0"
+            >
+              {tds("resources.download")}
+            </Button>
+          </Link>
+        </div>
       </div>
-      {isExpanded && (
-        <div className="px-32 pb-32">
-          <ResourceExpandedContent resource={resource} />
-        </div>
-      )}
-      <div className="h-px w-full bg-neutral-200" />
     </div>
   );
 };

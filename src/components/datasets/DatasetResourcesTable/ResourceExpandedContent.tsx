@@ -1,11 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  ComponentProps,
+  FC,
+  ReactNode,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
   Accordion,
   AccordionGroup,
-  Icon,
   LoaderDialog,
   Table,
   TableHeader,
@@ -25,8 +33,19 @@ import { TabularPage, TabularProfile, TabularSortDir } from "@/service/types/tab
 import { formatDateLong } from "@/utils/formatDate";
 import { CopyField } from "./CopyField";
 import { PREVIEW_PAGE_SIZE, SPREADSHEET_FORMATS, TABULAR_FORMATS } from "./constants";
-import { buildTabularData, downloadUrl, formatBytes, parseCsv, sortRowsByColumn, translateExtrasKey, translateExtrasValue } from "./utils";
+import {
+  buildTabularData,
+  formatBytes,
+  parseCsv,
+  sortRowsByColumn,
+  translateExtrasKey,
+  translateExtrasValue,
+} from "./utils";
 import { SpreadsheetPreview, TabularData } from "./types";
+import DataFieldWrapper from "./DataFieldWrapper";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
+import UrlWrapper from "./UrlWrapper";
 
 type SortOrder = "none" | "ascending" | "descending";
 
@@ -49,7 +68,7 @@ const heuristicSortType = (type?: string): AgoraSortType => {
 const formatCell = (value: unknown): string =>
   value === null || value === undefined ? "" : String(value);
 
-export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource }) => {
+export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }) => {
   const { i18n } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
   const locale = i18n.language as "pt" | "en";
@@ -80,7 +99,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
   const [tabularData, setTabularData] = useState<TabularData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const tableRef = useRef<HTMLDivElement>(null);
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -95,7 +114,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
       setSortBy(header);
       setSortDir(order === "ascending" ? "asc" : "desc");
     }
-    setPage(1);
+    setPage(0);
   }, []);
 
   // Tabular path — csv-detective profile (column names + types), fetched once.
@@ -119,7 +138,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
       setIsLoading(true);
       setPageError(false);
       const result = await fetchTabularPage(resource.id, {
-        page,
+        page: page + 1,
         pageSize: PREVIEW_PAGE_SIZE,
         sortBy: sortBy ?? undefined,
         sortDir,
@@ -156,7 +175,7 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
     async function fetchData() {
       setIsLoading(true);
       setError(null);
-      setPage(1);
+      setPage(0);
       try {
         const rid = encodeURIComponent(resource.id);
         const endpoint = isSpreadsheet ? "proxy-spreadsheet" : "proxy-csv";
@@ -227,304 +246,261 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
       sortBy && sortIndex >= 0
         ? sortRowsByColumn(tabularData.rows, sortIndex, sortTypeFor(sortBy), sortDir, locale)
         : tabularData.rows;
-    const start = (page - 1) * PREVIEW_PAGE_SIZE;
+    const start = page * PREVIEW_PAGE_SIZE;
     return ordered.slice(start, start + PREVIEW_PAGE_SIZE);
   }, [source, tabularPage, headers, tabularData, page, sortBy, sortDir, sortTypeFor, locale]);
 
   const hasData = source === "tabular" ? tabularPage !== null : tabularData !== null;
-  const totalRows = source === "tabular" ? (tabularPage?.meta.total ?? 0) : (tabularData?.totalRows ?? 0);
+  const totalRows =
+    source === "tabular" ? (tabularPage?.meta.total ?? 0) : (tabularData?.totalRows ?? 0);
   const totalCols = source === "tabular" ? headers.length : (tabularData?.totalCols ?? 0);
   const footerDate =
     source === "tabular"
       ? analysisFinishedAt || resource.last_modified || resource.created_at
       : tabularData?.lastModified || resource.last_modified || resource.created_at;
 
-  const FlexTabs = Tabs as React.FC<Omit<React.ComponentProps<typeof Tabs>, "children"> & { children: React.ReactNode }>;
+  const FlexTabs = Tabs as FC<
+    Omit<ComponentProps<typeof Tabs>, "children"> & { children: ReactNode }
+  >;
+
+  const formatFileType = (type?: string) => {
+    if (type === "main") return tds("labels.fileTypes.main");
+    if (type === "doc") return tds("labels.fileTypes.doc");
+    return tds("labels.fileTypes.community");
+  };
 
   return (
-    <div className="flex gap-16 overflow-hidden">
-      <div className="w-[2px] bg-primary-600 shrink-0" />
-      <div className="flex-1 min-w-0">
-        <FlexTabs>
-          {isTabular && (
+    <div className="dataset flex gap-16 overflow-hidden">
+      <div className="min-w-0 flex-1">
+        <FlexTabs fullWidth>
           <Tab>
-            <TabHeader>{tds("resources.tabs.preview")}</TabHeader>
+            <TabHeader>{tds("resources.tabs.metadata")}</TabHeader>
             <TabBody>
-              <div className="py-16">
-                {isLoading && !hasData ? (
-                  <div className="flex items-center justify-center py-16">
-                    <LoaderDialog title={tds("resources.preview.loading")} />
-                  </div>
-                ) : error || !hasData ? (
-                  <p className="text-neutral-900 text-sm">
-                    {error || tds("resources.preview.unavailable")}
-                  </p>
-                ) : (
-                  <div className="space-y-16">
-                    {pageError && (
-                      <p className="text-neutral-900 text-sm">
-                        {tds("resources.preview.pageLoadError")}
-                      </p>
-                    )}
-                    <div className="overflow-x-auto" ref={tableRef}>
-                      <Table desktopLayout="table">
-                        <TableHeader>
-                          <TableRow>
-                            {headers.map((header, i) => (
-                              <TableHeaderCell
-                                key={i}
-                                sortType={sortTypeFor(header)}
-                                sortOrder={
-                                  sortBy === header
-                                    ? sortDir === "asc"
-                                      ? "ascending"
-                                      : "descending"
-                                    : "none"
-                                }
-                                onSortChange={(order) => handleSortChange(header, order)}
-                              >
-                                {header}
-                              </TableHeaderCell>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {rows.map((row, i) => (
-                            <TableRow key={i}>
-                              {row.map((cell, j) => (
-                                <TableCell
-                                  key={j}
-                                  headerLabel={headers[j] || ""}
-                                >
-                                  {cell}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    <Pagination
-                      currentPage={page}
-                      totalItems={source === "tabular" ? totalRows : (tabularData?.rows.length ?? 0)}
-                      pageSize={PREVIEW_PAGE_SIZE}
-                      onPageChange={handlePageChange}
+              <div className="flex w-full flex-col">
+                <div className="flex w-full max-w-[800px] flex-col gap-32 self-center">
+                  <DataFieldWrapper label={tds("labels.title")} value={resource.title} />
+
+                  {resource.type && (
+                    <DataFieldWrapper
+                      label={tds("labels.type")}
+                      value={formatFileType(resource.type)}
                     />
-                    <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
-                      {tds("resources.preview.footer", {
-                        date: formatDateLong(footerDate, locale),
-                        cols: totalCols,
-                        rows: totalRows,
-                      })}
-                      {source === "fallback" &&
-                        tabularData &&
-                        tabularData.rows.length < tabularData.totalRows &&
-                        tds("resources.preview.limited", { count: tabularData.rows.length })}
-                    </p>
+                  )}
+
+                  {resource.description && (
+                    <DataFieldWrapper
+                      label={tds("labels.description")}
+                      value={
+                        <Typograph
+                          tag="p"
+                          className="max-w-[592px] wrap-break-word whitespace-pre-wrap"
+                        >
+                          {formatHtmlParagraphs(resource.description)}
+                        </Typograph>
+                      }
+                    />
+                  )}
+
+                  <div className="flex flex-col gap-32 lg:flex-row">
+                    <DataFieldWrapper label={tds("labels.format")} value={resource.format} />
+
+                    {resource.mime && (
+                      <DataFieldWrapper label={tds("labels.mime")} value={resource.mime} />
+                    )}
                   </div>
-                )}
+
+                  {resource.filesize && (
+                    <DataFieldWrapper
+                      label={tds("labels.filesize")}
+                      value={formatBytes(resource.filesize, locale)}
+                    />
+                  )}
+
+                  <UrlWrapper url={resource.url} />
+
+                  <div className="flex flex-col gap-32 lg:flex-row">
+                    <DataFieldWrapper
+                      label={tds("labels.created_at")}
+                      value={formatDateLong(resource.created_at, locale)}
+                    />
+
+                    {resource.last_modified && (
+                      <DataFieldWrapper
+                        label={tds("labels.last_modified")}
+                        value={formatDateLong(resource.last_modified, locale)}
+                      />
+                    )}
+                  </div>
+
+                  {resource.extras && Object.keys(resource.extras).length > 0 && (
+                    <div className="pt-16">
+                      <AccordionGroup>
+                        <Accordion
+                          headingTitle={
+                            <span className="text-sm font-bold text-neutral-900">
+                              {tds("resources.metadata.extras")}
+                            </span>
+                          }
+                          headingLevel="h5"
+                        >
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: "32px 64px",
+                              padding: "16px",
+                            }}
+                          >
+                            {Object.entries(resource.extras).map(([key, value]) => (
+                              <div key={key}>
+                                <h6 className="text-sm mb-8 font-bold text-neutral-900">
+                                  {translateExtrasKey(tds, key)}
+                                </h6>
+                                <p className="text-sm break-all text-neutral-900">
+                                  {translateExtrasValue(tds, value)}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </Accordion>
+                      </AccordionGroup>
+                    </div>
+                  )}
+                </div>
               </div>
             </TabBody>
           </Tab>
-          )}
+
           {isTabular && (
-          <Tab>
-            <TabHeader>{tds("resources.tabs.structure")}</TabHeader>
-            <TabBody>
-              <div className="py-16">
-                {isLoading && !hasData ? (
-                  <div className="flex items-center justify-center py-16">
-                    <LoaderDialog title={tds("resources.preview.loadingStructure")} />
-                  </div>
-                ) : source === "tabular" ? (
-                  profile ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-24">
-                      {Object.entries(profile.columns).map(([name, col]) => (
-                        <div key={name} className="min-w-0">
-                          <p className="text-sm font-bold text-neutral-900 mb-4 break-words">
-                            {name}
+            <Tab>
+              <TabHeader>{tds("resources.tabs.preview")}</TabHeader>
+              <TabBody>
+                <div className="p-16">
+                  {isLoading && !hasData ? (
+                    <div className="flex items-center justify-center py-16">
+                      <LoaderDialog title={tds("resources.preview.loading")} />
+                    </div>
+                  ) : error || !hasData ? (
+                    <p className="text-sm text-neutral-900">
+                      {error || tds("resources.preview.unavailable")}
+                    </p>
+                  ) : (
+                    <div className="space-y-16">
+                      {pageError && (
+                        <p className="text-m-regular text-neutral-900">
+                          {tds("resources.preview.pageLoadError")}
+                        </p>
+                      )}
+                      {!pageError && (
+                        <div
+                          ref={tableRef}
+                          className="overflow-x-auto [&_.agora-table-pagination]:flex! [&_.agora-table-pagination]:justify-end! [&_.section-items]:hidden!"
+                        >
+                          <Table
+                            desktopLayout="table"
+                            paginationProps={{
+                              totalItems:
+                                source === "tabular" ? totalRows : (tabularData?.rows.length ?? 0),
+                              itemsPerPage: PREVIEW_PAGE_SIZE,
+                              availablePageSizes: [PREVIEW_PAGE_SIZE],
+                              currentPage: page,
+                              onPageChange: handlePageChange,
+                              buttonDropdownAriaLabel: "",
+                              dropdownListAriaLabel: "",
+                              itemsPerPageLabel: "",
+                            }}
+                          >
+                            <TableHeader>
+                              <TableRow>
+                                {headers.map((header, i) => (
+                                  <TableHeaderCell
+                                    key={i}
+                                    sortType={sortTypeFor(header)}
+                                    sortOrder={
+                                      sortBy === header
+                                        ? sortDir === "asc"
+                                          ? "ascending"
+                                          : "descending"
+                                        : "none"
+                                    }
+                                    onSortChange={(order) => handleSortChange(header, order)}
+                                  >
+                                    {header}
+                                  </TableHeaderCell>
+                                ))}
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {rows.map((row, i) => (
+                                <TableRow key={i}>
+                                  {row.map((cell, j) => (
+                                    <TableCell key={j} headerLabel={headers[j] || ""}>
+                                      {cell}
+                                    </TableCell>
+                                  ))}
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </TabBody>
+            </Tab>
+          )}
+
+          {isTabular && (
+            <Tab>
+              <TabHeader>{tds("resources.tabs.structure")}</TabHeader>
+              <TabBody>
+                <div className="py-16">
+                  {isLoading && !hasData ? (
+                    <div className="flex items-center justify-center py-16">
+                      <LoaderDialog title={tds("resources.preview.loadingStructure")} />
+                    </div>
+                  ) : source === "tabular" ? (
+                    profile ? (
+                      <div className="grid grid-cols-2 gap-24 md:grid-cols-4">
+                        {Object.entries(profile.columns).map(([name, col]) => (
+                          <div key={name} className="min-w-0">
+                            <p className="text-sm mb-4 font-bold break-words text-neutral-900">
+                              {name}
+                            </p>
+                            <span className="text-xs rounded inline-block bg-neutral-100 px-8 py-4 text-neutral-900">
+                              {col.format || col.python_type}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-neutral-900">
+                        {tds("resources.preview.structureUnavailable")}
+                      </p>
+                    )
+                  ) : error || !tabularData ? (
+                    <p className="text-sm text-neutral-900">
+                      {error || tds("resources.preview.structureUnavailable")}
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-24 md:grid-cols-4">
+                      {tabularData.columns.map((col, i) => (
+                        <div key={i} className="min-w-0">
+                          <p className="text-sm mb-4 font-bold break-words text-neutral-900">
+                            {col.name}
                           </p>
-                          <span className="inline-block bg-neutral-100 text-neutral-900 text-xs px-8 py-4 rounded">
-                            {col.format || col.python_type}
+                          <span className="text-xs rounded inline-block bg-neutral-100 px-8 py-4 text-neutral-900">
+                            {col.type}
                           </span>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-neutral-900 text-sm">
-                      {tds("resources.preview.structureUnavailable")}
-                    </p>
-                  )
-                ) : error || !tabularData ? (
-                  <p className="text-neutral-900 text-sm">
-                    {error || tds("resources.preview.structureUnavailable")}
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-24">
-                    {tabularData.columns.map((col, i) => (
-                      <div key={i} className="min-w-0">
-                        <p className="text-sm font-bold text-neutral-900 mb-4 break-words">
-                          {col.name}
-                        </p>
-                        <span className="inline-block bg-neutral-100 text-neutral-900 text-xs px-8 py-4 rounded">
-                          {col.type}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabBody>
-          </Tab>
+                  )}
+                </div>
+              </TabBody>
+            </Tab>
           )}
-          <Tab>
-            <TabHeader>{tds("resources.tabs.metadata")}</TabHeader>
-            <TabBody>
-              <div className="py-16 space-y-32">
-                <CopyField label={tds("resources.metadata.url")} value={resource.url} />
-                {resource.latest && (
-                  <CopyField label={tds("resources.metadata.stableUrl")} value={resource.latest} />
-                )}
-                <CopyField label={tds("resources.metadata.identifier")} value={resource.id} />
-                {resource.checksum && (
-                  <CopyField
-                    label={resource.checksum.type}
-                    value={resource.checksum.value}
-                  />
-                )}
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px 64px", paddingTop: "32px" }}>
-                  <div>
-                    <h5 className="font-bold text-sm text-neutral-900 mb-4">
-                      {tds("resources.metadata.createdAt")}
-                    </h5>
-                    <p className="text-neutral-900 text-sm">
-                      {formatDateLong(resource.created_at, locale)}
-                    </p>
-                  </div>
-                  {resource.filesize !== undefined && resource.filesize > 0 && (
-                    <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
-                        {tds("resources.metadata.size")}
-                      </h5>
-                      <p className="text-neutral-900 text-sm">
-                        {formatBytes(resource.filesize, locale)}
-                      </p>
-                    </div>
-                  )}
-                  {resource.last_modified && (
-                    <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
-                        {tds("resources.metadata.modifiedAt")}
-                      </h5>
-                      <p className="text-neutral-900 text-sm">
-                        {formatDateLong(resource.last_modified, locale)}
-                      </p>
-                    </div>
-                  )}
-                  {resource.type && (
-                    <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
-                        {tds("resources.metadata.type")}
-                      </h5>
-                      <p className="text-neutral-900 text-sm">
-                        {tds(`resources.types.${resource.type}`, { defaultValue: resource.type })}
-                      </p>
-                    </div>
-                  )}
-                  {resource.mime && (
-                    <div>
-                      <h5 className="font-bold text-sm text-neutral-900 mb-4">
-                        {tds("resources.metadata.mime")}
-                      </h5>
-                      <code className="bg-neutral-100 px-8 py-4 rounded text-sm text-neutral-900">
-                        {resource.mime}
-                      </code>
-                    </div>
-                  )}
-                </div>
-
-                {resource.extras && Object.keys(resource.extras).length > 0 && (
-                  <div className="pt-16">
-                    <AccordionGroup>
-                      <Accordion
-                        headingTitle={
-                          <span className="font-bold text-sm text-neutral-900">
-                            {tds("resources.metadata.extras")}
-                          </span>
-                        }
-                        headingLevel="h5"
-                      >
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px 64px", padding: "16px" }}>
-                          {Object.entries(resource.extras).map(([key, value]) => (
-                            <div key={key}>
-                              <h6 className="font-bold text-sm text-neutral-900 mb-8">
-                                {translateExtrasKey(tds, key)}
-                              </h6>
-                              <p className="text-neutral-900 text-sm break-all">
-                                {translateExtrasValue(tds, value)}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </Accordion>
-                    </AccordionGroup>
-                  </div>
-                )}
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>{tds("resources.tabs.downloads")}</TabHeader>
-            <TabBody>
-              <div style={{ padding: "16px 0", display: "flex", flexDirection: "column", gap: "24px" }}>
-                <div>
-                  <p className="text-sm text-neutral-900 font-bold" style={{ marginBottom: "12px" }}>
-                    {tds("resources.downloads.originalFormat")}
-                  </p>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <a
-                      href={downloadUrl(resource)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download={resource.title || ""}
-                      className="text-primary-600 text-sm hover:underline flex items-center"
-                      style={{ gap: "8px" }}
-                    >
-                      <Icon name="agora-line-download" aria-hidden="true" />
-                      {tds("resources.format", {
-                        format: (resource.format || "").toUpperCase(),
-                      })}
-                      {resource.filesize !== undefined && resource.filesize > 0
-                        ? ` - ${formatBytes(resource.filesize, locale)}`
-                        : ""}
-                    </a>
-                    <button
-                      type="button"
-                      className="text-primary-600 hover:text-primary-800 cursor-pointer shrink-0"
-                      title={tds("resources.downloads.copyUrl")}
-                      onClick={() => navigator.clipboard.writeText(resource.url)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        style={{ width: "16px", height: "16px", minWidth: "16px" }}
-                        aria-hidden="true"
-                      >
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </TabBody>
-          </Tab>
         </FlexTabs>
       </div>
     </div>

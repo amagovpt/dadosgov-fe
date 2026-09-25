@@ -14,6 +14,7 @@ interface PaginationProps {
   // of pushing a `?page=` URL change (used for paginating embedded content
   // such as the resource preview, where the route must not change).
   onPageChange?: (page: number) => void;
+  isOnUrl?: boolean;
 }
 
 function buildPageUrl(page: number): string {
@@ -33,6 +34,7 @@ export const Pagination = ({
   totalItems,
   pageSize,
   onPageChange,
+  isOnUrl = true,
 }: PaginationProps) => {
   const { t } = useTranslation("common");
 
@@ -45,9 +47,11 @@ export const Pagination = ({
         onPageChange(page);
         return;
       }
-      router.push(buildPageUrl(page));
+      if (isOnUrl) {
+        router.push(buildPageUrl(page));
+      }
     },
-    [router, onPageChange]
+    [isOnUrl, router, onPageChange]
   );
 
   if (totalPages <= 1) return null;
