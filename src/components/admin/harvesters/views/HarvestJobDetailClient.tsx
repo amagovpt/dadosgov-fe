@@ -434,12 +434,12 @@ export default function HarvestJobDetailClient({
       </div>
 
       {/* Items table */}
-      <div className="mb-16 flex items-center justify-between">
+      <div className="mb-16 flex flex-col-reverse  justify-between gap-32">
         <h2 className="text-lg font-bold text-neutral-900">
           {t("admin-harvesters:jobDetail.itemsHeading", { count: filteredItems.length })}
         </h2>
         {items.length > 0 && (
-          <div className="flex items-end gap-16">
+          <div className="flex items-end gap-16 w-full">
             <div className="admin-search-wrapper xl:w-1/2 w-full ">
               <InputSearchBar
                 hasVoiceActionButton={false}
