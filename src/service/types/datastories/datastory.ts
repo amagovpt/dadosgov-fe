@@ -1,4 +1,4 @@
-﻿import { BreadcrumbItem, Image } from "../shared";
+﻿import { BreadcrumbItem } from "../shared";
 
 type Anchor = {
   children: string;
@@ -47,6 +47,7 @@ type Bignumbers = {
 export type BigNumbersSection = {
   schemaName: "section-datastory-bignumbers";
   id: string;
+  active?: boolean;
   title: string;
   bignumbers: Bignumbers[];
   dataReference: DateReference;
@@ -57,6 +58,7 @@ export type BigNumbersSection = {
 export type BigNumbersIframeSection = {
   schemaName: "section-datastory-bignumbers-iframe";
   id: string;
+  active?: boolean;
   iframe: Iframe[];
 };
 
@@ -78,6 +80,7 @@ type Timeline = {
 export type TimelineSection = {
   schemaName: "section-datastory-timeline";
   id: string;
+  active?: boolean;
   title: string;
   description: string;
   cards: Card[];
@@ -99,6 +102,7 @@ type PublicAdminStructure = {
 export type PublicAdminStructureSection = {
   schemaName: "section-datastory-public-admin-structure";
   id: string;
+  active?: boolean;
   title: string;
   parts: PublicAdminStructure;
 };
@@ -114,6 +118,7 @@ type Iframe = {
 export type IframeSection = {
   schemaName: "section-datastory-iframe";
   id: string;
+  active?: boolean;
   title?: string;
   description?: string;
   links?: Anchor[];
@@ -132,6 +137,7 @@ type RelatedDatastory = {
 export type RelatedSection = {
   schemaName: "section-datastory-related-datastory";
   id: string;
+  active?: boolean;
   title: string;
   description: string;
   datastories: RelatedDatastory[];
@@ -151,6 +157,7 @@ type Metadata = {
 export type SourceSection = {
   schemaName: "section-datastory-datasets";
   id: string;
+  active?: boolean;
   title: string;
   datasets: Metadata[];
 };
@@ -167,6 +174,7 @@ type Resource = {
 export type OtherSection = {
   schemaName: "section-datastory-other-resources";
   id: string;
+  active?: boolean;
   title: string;
   resources: Resource[];
 };
@@ -176,6 +184,7 @@ export type OtherSection = {
 export type SummarySection = {
   schemaName: "section-datastory-summary";
   id: string;
+  active?: boolean;
   title: string;
   description: string;
   anchors: Anchor[];

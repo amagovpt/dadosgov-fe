@@ -87,6 +87,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastoryBignumbersComponent {
                   schemaName
                   id
+                  active
                   title
                   bignumbers {
                     icon
@@ -102,6 +103,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryBignumbersIframeComponent {
                   id
+                  active
                   schemaName
                   iframe {
                     source
@@ -112,6 +114,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastoryIframeComponent {
                   schemaName
                   id
+                  active
                   description
                   title
                   links {
@@ -128,6 +131,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastoryOtherResourcesComponent {
                   schemaName
                   id
+                  active
                   title
                   resources {
                     icon
@@ -142,6 +146,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastoryRelatedDatastoryComponent {
                   schemaName
                   id
+                  active
                   title
                   description
                   datastories {
@@ -160,6 +165,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastoryTimelineComponent {
                   schemaName
                   id
+                  active
                   title
                   description
                   cards {
@@ -185,6 +191,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastoryPublicAdminStructureComponent {
                   schemaName
                   id
+                  active
                   title
                   parts {
                     centralAdmin {
@@ -222,6 +229,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastorySummaryComponent {
                   schemaName
                   id
+                  active
                   title
                   description
                   anchors {
@@ -233,6 +241,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 ... on SectionDatastoryDatasetsComponent {
                   schemaName
                   id
+                  active
                   title
                   datasets {
                     image {
