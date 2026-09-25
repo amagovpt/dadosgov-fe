@@ -247,5 +247,19 @@
   "samlErrors": {
     "invite_identity_already_linked": "Não foi possível associar: esta identidade digital já está associada a outra conta do portal. A sua conta ficou como estava, e pode continuar a usá-la com email e palavra-passe. Para usar a conta que tem a identidade, entre com a Chave Móvel Digital ou a Autenticação Europeia. Para juntar o conteúdo das duas, entre na conta que quer abandonar e use Transferir em cada conjunto de dados.",
     "generic": "Não foi possível concluir a autenticação. Tente novamente."
+  },
+  "MigrationInviteSection": {
+    "title": "Associar conta",
+    "intro": "Associe esta conta à sua <b>Chave Móvel Digital</b> ou <b>Autenticação Europeia</b>.",
+    "sameAccount": "Continuará a utilizar a mesma conta e os mesmos dados, podendo também iniciar sessão através da sua identidade digital. <b>Esta associação é facultativa.</b> Pode selecionar <b>\"Continuar sem associar conta\"</b> e continuar a utilizar o portal normalmente.",
+    "confirm": "Para concluir o processo, terá de confirmar o email e a palavra-passe da conta atual. A associação só é possível se a sua identidade digital ainda não estiver ligada a outra conta no portal.",
+    "linkCmd": "Associar Chave Móvel Digital",
+    "linkEidas": "Associar Autenticação Europeia",
+    "skip": "Continuar sem associar conta",
+    "otherAccount": {
+      "title": "Tem outra conta?",
+      "description": "Este processo não junta contas. Se pretende concentrar os seus conteúdos numa única conta, utilize a opção Transferir nos conjuntos de dados da conta secundária. A transferência é irreversível e requer aceitação pela conta de destino.",
+      "help": "Ajuda e contactos"
+    }
   }
 }

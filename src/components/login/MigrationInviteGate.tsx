@@ -4,7 +4,8 @@ import { useState, type ReactNode } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 import { dismissMigrationInvite } from "@/service/api/migration";
-import { MigrationInviteContent } from "./MigrationInviteContent";
+import { MigrationInviteSection } from "./MigrationInviteSection";
+import { useRouter } from "next/navigation";
 
 /**
  * The loud half of the invitation (LEDG-2547): while an account has never
@@ -35,9 +36,11 @@ import { MigrationInviteContent } from "./MigrationInviteContent";
  */
 export function MigrationInviteGate({ children }: { children: ReactNode }) {
   const { migrationInvite, isLoading, refresh } = useAuth();
+  const routerNav = useRouter();
+
   const [dismissed, setDismissed] = useState(false);
 
-  const handleDismiss = async () => {
+  const handleDismiss = async (goTo?: string) => {
     // Released first, confirmed after. A screen that holds the portal hostage
     // while a request completes reads as a broken button -- and if the write
     // fails there is nothing the citizen can do about it, so making them wait
@@ -49,6 +52,8 @@ export function MigrationInviteGate({ children }: { children: ReactNode }) {
       await refresh();
     } catch {
       // Deliberately silent: nothing was lost, and nothing they can act on.
+    } finally {
+      if (goTo) routerNav.push(goTo);
     }
   };
 
@@ -59,8 +64,10 @@ export function MigrationInviteGate({ children }: { children: ReactNode }) {
   if (isLoading || !migrationInvite || dismissed) return <>{children}</>;
 
   return (
-    <div className="container mx-auto my-32 flex max-w-4xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-24">
-      <MigrationInviteContent variant="screen" onDismiss={handleDismiss} />
+    <div className="container mx-auto pt-64 pb-96">
+      <div className="max-w-[696px]">
+        <MigrationInviteSection onDismiss={handleDismiss} />
+      </div>
     </div>
   );
 }
