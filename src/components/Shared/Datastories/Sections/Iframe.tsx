@@ -18,7 +18,7 @@ export default function Iframe({ id, title, description, links, iframe, classNam
         className
       )}
     >
-      {(title || description) && (
+      {(title && description) && (
         <InfoBlock.Root className={"gap-64 pt-64"}>
           <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
             <InfoBlock.Title
