@@ -16,6 +16,11 @@ This project has no version tags, so entries are grouped by month (newest first)
     states and their order — deleted over archived over private — live in one place instead of
     being decided again per screen. Dataservices had two pills that could disagree on screen;
     it has one.
+  - The public pages had the same defect in a different shape: two independent conditions, so a
+    resource that was private **and** archived showed both pills at once, and none of the three
+    pages knew about deleted — a deleted dataset's page said nothing at all. They now share the
+    badge too, and keep flagging only what is worth flagging: an ordinary public resource still
+    shows no pill.
   - The warning that a resource is archived or deleted existed only on reuses, where the rule
     for a resource that is both was written by hand. It moves into a shared component, so
     datasets and dataservices gain it without a third and fourth copy of the same guard. Both
