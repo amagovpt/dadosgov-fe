@@ -250,9 +250,7 @@
   },
   "MigrationInviteSection": {
     "title": "Link account",
-    "intro": "Link this account to your <b>Digital Mobile Key</b> or <b>European Authentication</b>.",
-    "sameAccount": "You will keep using the same account and the same data, and you will also be able to sign in with your digital identity. <b>Linking is optional.</b> You can select <b>\"Continue without linking account\"</b> and keep using the portal as usual.",
-    "confirm": "To complete the process, you will have to confirm the email and password of the current account. Linking is only possible if your digital identity is not yet linked to another account on the portal.",
+    "description": "Link this account to your <b>Digital Mobile Key</b> or <b>European Authentication</b>.\n\nYou will keep using the same account and the same data, and you will also be able to sign in with your digital identity. <b>Linking is optional.</b> You can select <b>\"Continue without linking account\"</b> and keep using the portal as usual.\n\nTo complete the process, you will have to confirm the email and password of the current account. Linking is only possible if your digital identity is not yet linked to another account on the portal.",
     "linkCmd": "Link Digital Mobile Key",
     "linkEidas": "Link European Authentication",
     "skip": "Continue without linking account",

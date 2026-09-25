@@ -38,14 +38,11 @@ export function MigrationInviteSection({ onDismiss }: MigrationInviteSectionI) {
         <Typograph tag="h1" className="text-2xl-bold text-primary-900">
           {t("MigrationInviteSection.title")}
         </Typograph>
-        <Typograph tag="p" className="max-w-[592px] text-m-regular text-primary-900">
-          <Trans t={t} i18nKey="MigrationInviteSection.intro" components={{ b: <b /> }} />
-          <br />
-          <br />
-          <Trans t={t} i18nKey="MigrationInviteSection.sameAccount" components={{ b: <b /> }} />
-          <br />
-          <br />
-          {t("MigrationInviteSection.confirm")}
+        <Typograph
+          tag="p"
+          className="max-w-[592px] text-m-regular whitespace-pre-line text-primary-900"
+        >
+          <Trans t={t} i18nKey="MigrationInviteSection.description" components={{ b: <b /> }} />
         </Typograph>
       </div>
 
