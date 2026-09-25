@@ -11,7 +11,6 @@ import {
   InputSelect,
   DropdownSection,
   DropdownOption,
-  Pill,
   Tag,
   Tabs,
   Tab,
@@ -23,6 +22,8 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import DataservicesEditDeletePopup from "@/components/admin/dataservices/DataservicesEditDeletePopup";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { ResourceStatusBanner } from "@/components/admin/ResourceStatusBanner";
 import DataservicesEditDiscussionsTab from "@/components/admin/dataservices/DataservicesEditDiscussionsTab";
 import DataservicesEditActivitiesTab from "@/components/admin/dataservices/DataservicesEditActivitiesTab";
 import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
@@ -492,6 +493,13 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
         <p className="text-neutral-500">{t("admin-dataservices:edit.notFound")}</p>
       ) : (
         <>
+          <ResourceStatusBanner
+            item={dataservice}
+            messages={{
+              deleted: t("admin-dataservices:edit.deletedBanner"),
+              archived: t("admin-dataservices:edit.archivedBanner"),
+            }}
+          />
           {apiError && (
             <div className="mb-16">
               <StatusCard variant="danger" showIcon description={apiError} />
@@ -505,14 +513,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
 
           <div className="admin-edit-info">
             <div className="admin-edit-info__badges">
-              <Pill variant={dataservice.private ? "warning" : "success"}>
-                {dataservice.private
-                  ? t("admin-dataservices:edit.draftStatus")
-                  : t("admin-dataservices:edit.publicStatus")}
-              </Pill>
-              {dataservice.archived_at && (
-                <Pill variant="neutral">{t("admin-dataservices:edit.archivedStatus")}</Pill>
-              )}
+              <ResourceStatusBadge item={dataservice} display="pill" />
               <span className="admin-edit-info__stat">
                 <Icon name="agora-line-eye" className="admin-edit-info__stat-icon" />
                 {t("admin-dataservices:edit.views", {

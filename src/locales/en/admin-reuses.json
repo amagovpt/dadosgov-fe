@@ -103,8 +103,6 @@
     "viewPublicPage": "View public page",
     "deletedBanner": "This reuse was deleted and its public page is not available.",
     "archivedBanner": "This reuse is archived and its public page is not available.",
-    "statusDraft": "DRAFT",
-    "statusPublic": "PUBLIC",
     "statusFeatured": "FEATURED",
     "viewsCount": "{{count}} views",
     "favoritesCount": "{{count}} favorites",

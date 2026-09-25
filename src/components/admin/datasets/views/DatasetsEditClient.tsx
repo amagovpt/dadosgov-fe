@@ -31,6 +31,8 @@ import { fetchDiscussions } from "@/service/api/discussions-topics";
 import { suggestSpatialZones } from "@/service/api/search";
 import { requestTransfer } from "@/service/api/transfers";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { ResourceStatusBanner } from "@/components/admin/ResourceStatusBanner";
 import type { License, Frequency, Granularity, SpatialZone, Activity, ResourceType } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
@@ -473,6 +475,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         <Button
           variant="primary"
           appearance="outline"
+          disabled={!!(dataset.archived || dataset.deleted)}
           onClick={() => window.open(`/datasets/${dataset.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
@@ -482,6 +485,13 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         </Button>
       }
     >
+      <ResourceStatusBanner
+        item={dataset}
+        messages={{
+          deleted: t("edit.deletedBanner"),
+          archived: t("edit.archivedBanner"),
+        }}
+      />
       {apiError && (
         <div className="my-24">
           <StatusCard variant="danger" showIcon description={apiError} />
@@ -495,9 +505,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
-          <Pill variant={dataset.private ? "warning" : "success"}>
-            {dataset.private ? t("edit.statusDraft") : t("edit.statusPublic")}
-          </Pill>
+          <ResourceStatusBadge item={dataset} display="pill" />
           {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
           <DatasetBadges badges={dataset.badges} />
           <span className="admin-edit-info__stat">

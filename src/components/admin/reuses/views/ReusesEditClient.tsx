@@ -37,6 +37,8 @@ import type { Discussion } from "@/service/types/discussion";
 import type { Reuse, ReuseType, ReuseTopic } from "@/service/types/reuse";
 import { normalizeRemoteDatasets, type RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { ResourceStatusBanner } from "@/components/admin/ResourceStatusBanner";
 import ReusesEditMetadataTab from "@/components/admin/reuses/edit-tabs/ReusesEditMetadataTab";
 import ReusesEditDatasetsTab from "@/components/admin/reuses/edit-tabs/ReusesEditDatasetsTab";
 import ReusesEditApiTab from "@/components/admin/reuses/edit-tabs/ReusesEditApiTab";
@@ -484,16 +486,13 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
         </Button>
       }
     >
-      {reuse.deleted && (
-        <div className="mb-16">
-          <StatusCard variant="warning" showIcon description={t("edit.deletedBanner")} />
-        </div>
-      )}
-      {!reuse.deleted && reuse.archived && (
-        <div className="mb-16">
-          <StatusCard variant="warning" showIcon description={t("edit.archivedBanner")} />
-        </div>
-      )}
+      <ResourceStatusBanner
+        item={reuse}
+        messages={{
+          deleted: t("edit.deletedBanner"),
+          archived: t("edit.archivedBanner"),
+        }}
+      />
       {apiError && (
         <div className="mb-16">
           <StatusCard variant="danger" showIcon description={apiError} />
@@ -507,9 +506,7 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
-          <Pill variant={reuse.private ? "warning" : "success"}>
-            {reuse.private ? t("edit.statusDraft") : t("edit.statusPublic")}
-          </Pill>
+          <ResourceStatusBadge item={reuse} display="pill" />
           {reuse.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
           <span className="admin-edit-info__stat">
             <Icon name="agora-line-eye" className="admin-edit-info__stat-icon" />
