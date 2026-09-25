@@ -174,6 +174,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       isLoading={isLoading}
       count={totalItems}
       hasItems={visibleDatasets.length > 0}
+      hasActiveFilters={statusFilter !== ""}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}

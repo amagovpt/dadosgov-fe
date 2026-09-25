@@ -15,6 +15,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -61,6 +62,7 @@ interface DatasetsEditClientProps {
 
 export default function DatasetsEditClient({ pageContent }: DatasetsEditClientProps) {
   const { t } = useTranslation("admin-datasets");
+  const { activeProfile } = useActiveProfile();
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
@@ -465,7 +467,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("title"), url: "/admin/me/datasets" },
+        { label: t("title"), url: `${adminProfileBasePath(activeProfile)}/datasets` },
         { label: dataset.title },
       ]}
       title={dataset.title}
