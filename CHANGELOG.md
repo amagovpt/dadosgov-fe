@@ -6,6 +6,22 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(admin): archived and deleted resources say so on the edit screen**
+  - The status label on every edit screen read `private` alone, so a dataset, reuse or
+    dataservice that had been archived or deleted went on showing RASCUNHO or PÚBLICO. The
+    backend had stored and served both fields all along — only the screens ignored them, and on
+    datasets the label contradicted the button beside it, which offered "Desarquivar" on
+    something the label called a draft.
+  - The three screens now share the badge the four listings were already using, so the four
+    states and their order — deleted over archived over private — live in one place instead of
+    being decided again per screen. Dataservices had two pills that could disagree on screen;
+    it has one.
+  - The warning that a resource is archived or deleted existed only on reuses, where the rule
+    for a resource that is both was written by hand. It moves into a shared component, so
+    datasets and dataservices gain it without a third and fourth copy of the same guard. Both
+    it and the badge get the tests neither had — which is how a wrong status on three screens
+    went unnoticed for months.
+
 - **feat(login): the linking banner says one line, and closing it stops writing to the database**
   - The full screen carries the whole invitation every eight days. Repeating all six sentences
     above every page in between is how a notice stops being read at all, so the banner keeps a
