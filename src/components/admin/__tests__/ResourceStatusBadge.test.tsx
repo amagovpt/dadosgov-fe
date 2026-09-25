@@ -126,6 +126,41 @@ describe("ResourceStatusBadge", () => {
     expect(container.querySelector(".uppercase")).not.toBeNull();
   });
 
+  /**
+   * 🚩 What the public pages need and the admin screens must never have. A
+   * public page flags exceptions; stamping "Público" on a page anyone can
+   * already read says nothing, and today those pages show no pill at all for
+   * an ordinary resource. The admin screens keep reporting every state.
+   */
+  describe("hidePublic", () => {
+    it("says nothing about an ordinary public resource", () => {
+      act(() => {
+        root.render(<ResourceStatusBadge item={{ private: false }} display="pill" hidePublic />);
+      });
+      expect(container.textContent?.trim()).toBe("");
+    });
+
+    it("still speaks for every state that is not public", () => {
+      for (const item of [
+        { private: true },
+        { archived: "2026-07-24T10:37:47" },
+        { deleted: "2026-09-25T10:55:14" },
+      ]) {
+        act(() => {
+          root.render(<ResourceStatusBadge item={item} display="pill" hidePublic />);
+        });
+        expect(container.textContent?.trim()).not.toBe("");
+      }
+    });
+
+    it("is off by default, so the admin screens keep saying Público", () => {
+      act(() => {
+        root.render(<ResourceStatusBadge item={{ private: false }} display="pill" />);
+      });
+      expect(container.textContent?.trim()).toBe(ptAdminCommon.status.public);
+    });
+  });
+
   it("draws a dot by default, so the listings are untouched", () => {
     render({ private: true });
     expect(container.querySelector("span > span")).not.toBeNull();

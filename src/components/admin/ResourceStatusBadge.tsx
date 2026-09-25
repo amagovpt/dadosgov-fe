@@ -34,11 +34,26 @@ export interface ResourceStatusBadgeI {
    * component stays out of it.
    */
   className?: string;
+  /**
+   * Render nothing when the resource is simply public.
+   *
+   * 🚩 The public pages need this and the admin screens must not have it. A
+   * public page flags EXCEPTIONS -- this is not published, this is archived,
+   * this is gone -- and stamping "Público" on a page anyone can already read
+   * says nothing. The admin screens are the opposite: they report the current
+   * state whatever it is, which is what they have always done.
+   */
+  hidePublic?: boolean;
 }
 
 type ResourceStatusVariant = "danger" | "neutral" | "warning" | "success";
 
-export function ResourceStatusBadge({ item, display = "dot", className }: ResourceStatusBadgeI) {
+export function ResourceStatusBadge({
+  item,
+  display = "dot",
+  className,
+  hidePublic = false,
+}: ResourceStatusBadgeI) {
   const { t } = useTranslation("admin-common");
   const isDeleted = item.deleted || item.deleted_at;
   const isArchived = item.archived || item.archived_at;
@@ -49,6 +64,8 @@ export function ResourceStatusBadge({ item, display = "dot", className }: Resour
     if (item.private) return "warning";
     return "success";
   };
+
+  if (hidePublic && !isDeleted && !isArchived && !item.private) return null;
 
   const getStatusLabel = (): string => {
     if (isDeleted) return t("status.deleted");
