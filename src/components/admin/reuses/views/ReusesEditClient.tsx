@@ -15,6 +15,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -69,6 +70,7 @@ interface ReusesEditClientProps {
 
 export default function ReusesEditClient({ pageContent }: ReusesEditClientProps) {
   const { t } = useTranslation("admin-reuses");
+  const { activeProfile } = useActiveProfile();
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
@@ -466,7 +468,7 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("title"), url: "/admin/me/reuses" },
+        { label: t("title"), url: `${adminProfileBasePath(activeProfile)}/reuses` },
         { label: reuse.title },
       ]}
       title={reuse.title}

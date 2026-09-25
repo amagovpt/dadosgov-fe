@@ -24,6 +24,7 @@ import { fetchAdminDatasets } from "@/service/api/datasets";
 import { fetchReuses } from "@/service/api/reuses";
 import { fetchOrgMetrics, fetchOrganization } from "@/service/api/organizations";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { useHasListData } from "@/hooks/admin-lists/useHasListData";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
 import type { Organization, OrganizationMetrics } from "@/service/types/identity";
@@ -178,6 +179,10 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
     setReusesPage(1);
   });
 
+  const showDatasetsSearch = useHasListData(isDatasetsLoading, datasetsTotal > 0);
+  const showDataservicesSearch = useHasListData(isDataservicesLoading, dataservicesTotal > 0);
+  const showReusesSearch = useHasListData(isReusesLoading, reusesTotal > 0);
+
   const orgSummaryCardValues = [
     { isLoading: isDatasetsLoading, value: datasetsTotal },
     { isLoading: isDataservicesLoading, value: dataservicesTotal },
@@ -242,35 +247,37 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                 {t("admin-statistics:states.results", { count: datasetsTotal })}
               </p>
 
-              <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper xl:w-1/2 w-full">
-                  <InputSearchBar
-                    hasVoiceActionButton={false}
-                    label={pageContent.datasetsSearch?.label ?? ""}
-                    placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
-                    aria-label={pageContent.datasetsSearch?.label ?? ""}
-                    onChange={(event) => handleDatasetsSearch(event.target.value)}
-                  />
+              {showDatasetsSearch && (
+                <div className="mb-24 flex items-end gap-16">
+                  <div className="admin-search-wrapper xl:w-1/2 w-full">
+                    <InputSearchBar
+                      hasVoiceActionButton={false}
+                      label={pageContent.datasetsSearch?.label ?? ""}
+                      placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
+                      aria-label={pageContent.datasetsSearch?.label ?? ""}
+                      onChange={(event) => handleDatasetsSearch(event.target.value)}
+                    />
+                  </div>
+                  <Button
+                    variant="primary"
+                    appearance="outline"
+                    hasIcon={true}
+                    leadingIcon="agora-line-download"
+                    leadingIconHover="agora-solid-download"
+                  >
+                    {t("admin-statistics:actions.report")}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    appearance="outline"
+                    hasIcon={true}
+                    leadingIcon="agora-line-download"
+                    leadingIconHover="agora-solid-download"
+                  >
+                    {t("admin-statistics:actions.catalog")}
+                  </Button>
                 </div>
-                <Button
-                  variant="primary"
-                  appearance="outline"
-                  hasIcon={true}
-                  leadingIcon="agora-line-download"
-                  leadingIconHover="agora-solid-download"
-                >
-                  {t("admin-statistics:actions.report")}
-                </Button>
-                <Button
-                  variant="primary"
-                  appearance="outline"
-                  hasIcon={true}
-                  leadingIcon="agora-line-download"
-                  leadingIconHover="agora-solid-download"
-                >
-                  {t("admin-statistics:actions.catalog")}
-                </Button>
-              </div>
+              )}
 
               {isDatasetsLoading && datasets.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
@@ -317,26 +324,28 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                 {t("admin-statistics:states.results", { count: dataservicesTotal })}
               </p>
 
-              <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper xl:w-1/2 w-full">
-                  <InputSearchBar
-                    hasVoiceActionButton={false}
-                    label={pageContent.dataservicesSearch?.label ?? ""}
-                    placeholder={pageContent.dataservicesSearch?.placeholder ?? ""}
-                    aria-label={pageContent.dataservicesSearch?.label ?? ""}
-                    onChange={(event) => handleDataservicesSearch(event.target.value)}
-                  />
+              {showDataservicesSearch && (
+                <div className="mb-24 flex items-end gap-16">
+                  <div className="admin-search-wrapper xl:w-1/2 w-full">
+                    <InputSearchBar
+                      hasVoiceActionButton={false}
+                      label={pageContent.dataservicesSearch?.label ?? ""}
+                      placeholder={pageContent.dataservicesSearch?.placeholder ?? ""}
+                      aria-label={pageContent.dataservicesSearch?.label ?? ""}
+                      onChange={(event) => handleDataservicesSearch(event.target.value)}
+                    />
+                  </div>
+                  <Button
+                    variant="primary"
+                    appearance="outline"
+                    hasIcon={true}
+                    leadingIcon="agora-line-download"
+                    leadingIconHover="agora-solid-download"
+                  >
+                    {t("admin-statistics:actions.catalog")}
+                  </Button>
                 </div>
-                <Button
-                  variant="primary"
-                  appearance="outline"
-                  hasIcon={true}
-                  leadingIcon="agora-line-download"
-                  leadingIconHover="agora-solid-download"
-                >
-                  {t("admin-statistics:actions.catalog")}
-                </Button>
-              </div>
+              )}
 
               {isDataservicesLoading && dataservices.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
@@ -424,17 +433,19 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                 {t("admin-statistics:states.results", { count: reusesTotal })}
               </p>
 
-              <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper xl:w-1/2 w-full">
-                  <InputSearchBar
-                    hasVoiceActionButton={false}
-                    label={pageContent.reusesSearch?.label ?? ""}
-                    placeholder={pageContent.reusesSearch?.placeholder ?? ""}
-                    aria-label={pageContent.reusesSearch?.label ?? ""}
-                    onChange={(event) => handleReusesSearch(event.target.value)}
-                  />
+              {showReusesSearch && (
+                <div className="mb-24 flex items-end gap-16">
+                  <div className="admin-search-wrapper xl:w-1/2 w-full">
+                    <InputSearchBar
+                      hasVoiceActionButton={false}
+                      label={pageContent.reusesSearch?.label ?? ""}
+                      placeholder={pageContent.reusesSearch?.placeholder ?? ""}
+                      aria-label={pageContent.reusesSearch?.label ?? ""}
+                      onChange={(event) => handleReusesSearch(event.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {isReusesLoading && reuses.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>

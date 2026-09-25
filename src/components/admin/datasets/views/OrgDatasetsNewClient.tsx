@@ -46,6 +46,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
           label: t("admin-datasets:form.breadcrumbs.datasets"),
           url: resolvedOrgId ? `/admin/org/${resolvedOrgId}/datasets` : "#",
         },
+        { label: pageTitle || t("admin-common:breadcrumbs.new") },
       ]}
       title={pageTitle}
     >

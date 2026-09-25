@@ -27,6 +27,7 @@ import TextLink from "@/components/Primitives/TextLink";
 interface HarvestJobDetailClientProps {
   slug: string;
   jobId: string;
+  orgId?: string;
 }
 
 const ITEM_STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "informative"> = {
@@ -246,7 +247,11 @@ function ItemsTable({
   );
 }
 
-export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetailClientProps) {
+export default function HarvestJobDetailClient({
+  slug,
+  jobId,
+  orgId,
+}: HarvestJobDetailClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [job, setJob] = useState<HarvestJob | null>(null);
   const [source, setSource] = useState<HarvestSource | null>(null);
@@ -348,8 +353,14 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
-        { label: source?.name || "Harvester", url: `/admin/harvesters/${slug}` },
+        {
+          label: t("admin-harvesters:title"),
+          url: orgId ? `/admin/org/${orgId}/harvesters` : "/admin/system/harvesters",
+        },
+        {
+          label: source?.name || "Harvester",
+          url: orgId ? `/admin/org/${orgId}/harvesters/${slug}` : `/admin/harvesters/${slug}`,
+        },
         { label: job.id.toUpperCase() },
       ]}
       title={job.id.toUpperCase()}
@@ -427,50 +438,52 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         <h2 className="text-lg font-bold text-neutral-900">
           {t("admin-harvesters:jobDetail.itemsHeading", { count: filteredItems.length })}
         </h2>
-        <div className="flex items-end gap-16">
-          <div className="admin-search-wrapper xl:w-1/2 w-full ">
-            <InputSearchBar
-              hasVoiceActionButton={false}
-              label={t("admin-harvesters:jobDetail.searchLabel")}
-              placeholder={t("admin-harvesters:jobDetail.searchPlaceholder")}
-              aria-label={t("admin-harvesters:jobDetail.searchAriaLabel")}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleSearch(e.target.value);
+        {items.length > 0 && (
+          <div className="flex items-end gap-16">
+            <div className="admin-search-wrapper xl:w-1/2 w-full ">
+              <InputSearchBar
+                hasVoiceActionButton={false}
+                label={t("admin-harvesters:jobDetail.searchLabel")}
+                placeholder={t("admin-harvesters:jobDetail.searchPlaceholder")}
+                aria-label={t("admin-harvesters:jobDetail.searchAriaLabel")}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleSearch(e.target.value);
+                }}
+              />
+            </div>
+            <InputSelect
+              label=""
+              hideLabel
+              placeholder={t("admin-harvesters:jobDetail.statusFilterPlaceholder")}
+              id="filter-item-status"
+              onChange={(options) => {
+                setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+                setCurrentPage(1);
               }}
-            />
+            >
+              <DropdownSection name="status">
+                <DropdownOption value="" selected={statusFilter === ""}>
+                  {t("admin-harvesters:jobDetail.itemStatus.all")}
+                </DropdownOption>
+                <DropdownOption value="done" selected={statusFilter === "done"}>
+                  {t("admin-harvesters:jobDetail.itemStatus.done")}
+                </DropdownOption>
+                <DropdownOption value="failed" selected={statusFilter === "failed"}>
+                  {t("admin-harvesters:jobDetail.itemStatus.failed")}
+                </DropdownOption>
+                <DropdownOption value="skipped" selected={statusFilter === "skipped"}>
+                  {t("admin-harvesters:jobDetail.itemStatus.skipped")}
+                </DropdownOption>
+                <DropdownOption value="archived" selected={statusFilter === "archived"}>
+                  {t("admin-harvesters:jobDetail.itemStatus.archived")}
+                </DropdownOption>
+                <DropdownOption value="pending" selected={statusFilter === "pending"}>
+                  {t("admin-harvesters:jobDetail.itemStatus.pending")}
+                </DropdownOption>
+              </DropdownSection>
+            </InputSelect>
           </div>
-          <InputSelect
-            label=""
-            hideLabel
-            placeholder={t("admin-harvesters:jobDetail.statusFilterPlaceholder")}
-            id="filter-item-status"
-            onChange={(options) => {
-              setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
-              setCurrentPage(1);
-            }}
-          >
-            <DropdownSection name="status">
-              <DropdownOption value="" selected={statusFilter === ""}>
-                {t("admin-harvesters:jobDetail.itemStatus.all")}
-              </DropdownOption>
-              <DropdownOption value="done" selected={statusFilter === "done"}>
-                {t("admin-harvesters:jobDetail.itemStatus.done")}
-              </DropdownOption>
-              <DropdownOption value="failed" selected={statusFilter === "failed"}>
-                {t("admin-harvesters:jobDetail.itemStatus.failed")}
-              </DropdownOption>
-              <DropdownOption value="skipped" selected={statusFilter === "skipped"}>
-                {t("admin-harvesters:jobDetail.itemStatus.skipped")}
-              </DropdownOption>
-              <DropdownOption value="archived" selected={statusFilter === "archived"}>
-                {t("admin-harvesters:jobDetail.itemStatus.archived")}
-              </DropdownOption>
-              <DropdownOption value="pending" selected={statusFilter === "pending"}>
-                {t("admin-harvesters:jobDetail.itemStatus.pending")}
-              </DropdownOption>
-            </DropdownSection>
-          </InputSelect>
-        </div>
+        )}
       </div>
 
       {paginatedItems.length > 0 ? (

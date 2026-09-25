@@ -255,11 +255,6 @@ body {
   color: rgb(255 255 255);
 }
 
-.admin-breadcrumb-static a {
-  cursor: default;
-  pointer-events: none;
-}
-
 /* 3.1 Main Header */
 
 .agora-header .navigation-bar {
@@ -644,6 +639,27 @@ header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="tr
   .icon-wrapper
   svg {
   fill: currentColor;
+}
+
+/* ==========================================================================
+   [04] FOOTER
+   ========================================================================== */
+
+@media (min-width: 1280px) {
+  .footer-navigation,
+  .agora-footer-logo-section-container .agora-footer-logo-section-container-main,
+  .agora-footer-financing-section-container,
+  .agora-footer-links-section-container {
+    padding-inline: max(32px, calc((100% - 1216px) / 2));
+  }
+
+  .agora-footer-links-section-social-links {
+    padding-left: 0;
+  }
+
+  .agora-footer-links-section-related-links {
+    padding-right: 0;
+  }
 }
 
 /* ==========================================================================

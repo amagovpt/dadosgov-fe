@@ -6,7 +6,7 @@ import { Hero } from '@/components/Shared/Hero';
 
 export default function ThemesPage() {
   return (
-    <main className="flex-grow bg-white">
+    <main className="grow bg-white">
       <Hero.Root>
         <Hero.Breadcrumb />
         <Hero.Content>

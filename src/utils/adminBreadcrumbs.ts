@@ -10,12 +10,10 @@ export function buildAdminBreadcrumbItems({
   t: (key: string) => string;
   items: AdminBreadcrumbItem[];
 }): Required<AdminBreadcrumbItem>[] {
-  const trail = [
-    { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-    ...items,
-  ];
+  const trail = [{ label: t("admin-common:breadcrumbs.administration") }, ...items];
+
   return trail.map((item, index) => ({
     ...item,
-    url: index === trail.length - 1 ? "" : item.url || "#",
+    url: index === 0 || index === trail.length - 1 ? "" : item.url || "#",
   }));
 }

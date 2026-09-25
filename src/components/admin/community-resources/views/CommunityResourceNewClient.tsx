@@ -34,6 +34,7 @@ export default function CommunityResourceNewClient({
           label: t("admin-community-resources:title"),
           url: "/admin/me/community-resources",
         },
+        { label: pageTitle || t("admin-common:breadcrumbs.new") },
       ]}
       title={pageTitle}
     >

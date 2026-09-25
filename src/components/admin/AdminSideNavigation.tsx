@@ -6,17 +6,11 @@ import { usePathname } from "next/navigation";
 import { Sidebar, SidebarItem, Icon } from "@ama-pt/agora-design-system";
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
-import type { AdminNavLink, AdminSideNavigationData } from "@/service/types/admin-side-navigation";
+import type { AdminSideNavigationData } from "@/service/types/admin-side-navigation";
 import { stripLocale } from "@/utils/stripLocale";
+import { getAdminNavItems } from "@/utils/adminNavItems";
 import { useActiveProfile } from "@/context/ActiveProfileContext";
 import { twJoin } from "tailwind-merge";
-
-interface NavChild {
-  label: string;
-  href: string;
-  icon?: string;
-  customIcon?: string;
-}
 
 const PANEL_CLASSES =
   "relative z-30 flex flex-1 flex-col bg-primary-900 " +
@@ -29,15 +23,6 @@ const TOGGLE_CLASSES =
 
 const BADGE_CLASSES = "flex size-56 shrink-0 items-center justify-center rounded-8 bg-primary-400";
 
-function toNavChild(link: AdminNavLink): NavChild {
-  return {
-    label: link.label,
-    href: link.href,
-    icon: link.icon ?? undefined,
-    customIcon: link.logo ?? undefined,
-  };
-}
-
 export function AdminSideNavigation({ data }: { data: AdminSideNavigationData }) {
   const { t } = useTranslation("admin-common");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -45,32 +30,7 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
   const localePath = useMemo(() => stripLocale(pathname), [pathname]);
   const { activeProfile } = useActiveProfile();
 
-  const items = useMemo<NavChild[]>(() => {
-    if (activeProfile.type === "organization") {
-      const orgBase = `/admin/org/${activeProfile.orgId}`;
-      return (data?.orgChildren ?? [])
-        .filter((child) => child.enabled !== false)
-        .map((child) =>
-          toNavChild({ ...child, href: `${orgBase}/${child.href.replace(/^\/+/, "")}` })
-        );
-    }
-
-    if (activeProfile.type === "system") {
-      const systemGroup = (data?.groups ?? []).find(
-        (group) => group.enabled !== false && group.key === "system"
-      );
-      return (systemGroup?.children ?? [])
-        .filter((child) => child.enabled !== false)
-        .map(toNavChild);
-    }
-
-    const profileGroup = (data?.groups ?? []).find(
-      (group) => group.enabled !== false && group.key !== "organization" && group.key !== "system"
-    );
-    return (profileGroup?.children ?? [])
-      .filter((child) => child.enabled !== false)
-      .map(toNavChild);
-  }, [data, activeProfile]);
+  const items = useMemo(() => getAdminNavItems(data, activeProfile), [data, activeProfile]);
 
   const homeLink = data?.homeLink;
   const showHomeLink = Boolean(homeLink?.label) && homeLink?.enabled !== false;
