@@ -2,6 +2,7 @@ import { DataStoryMetadata } from "@/service/types/datastories";
 import apolloClient from "@/service/utils/apollo-client";
 import { Datastory } from "@/service/types/datastories/datastory";
 import { flattenData } from "@/utils/flattenObject";
+import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
 import { notFound } from "next/navigation";
 
@@ -66,13 +67,6 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
               description
               index {
                 title
-                anchors {
-                  anchor {
-                    children
-                    href
-                    icon
-                  }
-                }
               }
               breadcrumbs {
                 label
@@ -105,6 +99,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                   id
                   active
                   schemaName
+                  title
                   iframe {
                     source
                     classNames
@@ -284,5 +279,17 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
     return notFound();
   }
 
-  return flattenData(datastory) as Datastory;
+  const { hero, sections } = flattenData(datastory) as Datastory;
+  // `index` only asks for `title`, and flattenData unwraps single-key objects, so it
+  // arrives as the title string itself.
+  const index = hero?.index as unknown as string | { title?: string } | undefined;
+  const indexTitle = typeof index === "string" ? index : (index?.title ?? "");
+
+  return {
+    hero: {
+      ...hero,
+      index: { title: indexTitle, anchors: buildDatastoryIndex(sections?.sections) },
+    },
+    sections,
+  };
 }

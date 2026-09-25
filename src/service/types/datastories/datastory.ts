@@ -22,9 +22,16 @@ type Card = {
 // ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
 
+// Built from the sections by buildDatastoryIndex; sections carry no icon of their own.
+export type IndexAnchor = {
+  children: string;
+  href: string;
+  icon?: string;
+};
+
 type Index = {
   title: string;
-  anchors: Anchor[];
+  anchors: IndexAnchor[];
 };
 
 export type DatastoryHero = {
@@ -59,6 +66,7 @@ export type BigNumbersIframeSection = {
   schemaName: "section-datastory-bignumbers-iframe";
   id: string;
   active?: boolean;
+  title: string;
   iframe: Iframe[];
 };
 
