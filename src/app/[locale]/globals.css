@@ -255,11 +255,6 @@ body {
   color: rgb(255 255 255);
 }
 
-.admin-breadcrumb-static a {
-  cursor: default;
-  pointer-events: none;
-}
-
 /* 3.1 Main Header */
 
 .agora-header .navigation-bar {

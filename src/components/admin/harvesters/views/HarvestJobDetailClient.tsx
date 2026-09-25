@@ -27,6 +27,7 @@ import TextLink from "@/components/Primitives/TextLink";
 interface HarvestJobDetailClientProps {
   slug: string;
   jobId: string;
+  orgId?: string;
 }
 
 const ITEM_STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "informative"> = {
@@ -246,7 +247,11 @@ function ItemsTable({
   );
 }
 
-export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetailClientProps) {
+export default function HarvestJobDetailClient({
+  slug,
+  jobId,
+  orgId,
+}: HarvestJobDetailClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [job, setJob] = useState<HarvestJob | null>(null);
   const [source, setSource] = useState<HarvestSource | null>(null);
@@ -348,8 +353,14 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
-        { label: source?.name || "Harvester", url: `/admin/harvesters/${slug}` },
+        {
+          label: t("admin-harvesters:title"),
+          url: orgId ? `/admin/org/${orgId}/harvesters` : "/admin/system/harvesters",
+        },
+        {
+          label: source?.name || "Harvester",
+          url: orgId ? `/admin/org/${orgId}/harvesters/${slug}` : `/admin/harvesters/${slug}`,
+        },
         { label: job.id.toUpperCase() },
       ]}
       title={job.id.toUpperCase()}
