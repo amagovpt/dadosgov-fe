@@ -27,11 +27,18 @@ export interface ResourceStatusBadgeI {
    * would read as the design system's and mean something else.
    */
   display?: "dot" | "pill";
+  /**
+   * Passed through to the Pill. The admin screens shout their states
+   * (ARQUIVADO) and the public pages say them plainly (Arquivado) -- that is a
+   * choice of the surface, not of the state, so the caller makes it and this
+   * component stays out of it.
+   */
+  className?: string;
 }
 
 type ResourceStatusVariant = "danger" | "neutral" | "warning" | "success";
 
-export function ResourceStatusBadge({ item, display = "dot" }: ResourceStatusBadgeI) {
+export function ResourceStatusBadge({ item, display = "dot", className }: ResourceStatusBadgeI) {
   const { t } = useTranslation("admin-common");
   const isDeleted = item.deleted || item.deleted_at;
   const isArchived = item.archived || item.archived_at;
@@ -51,11 +58,10 @@ export function ResourceStatusBadge({ item, display = "dot" }: ResourceStatusBad
   };
 
   if (display === "pill") {
-    // Uppercased in CSS rather than in the translations: the words come from
-    // admin-common, which the listings render in sentence case, and the edit
-    // screens have always shown them shouted. One vocabulary, two looks.
+    // One vocabulary, two looks: the words always come from admin-common, and
+    // whether they are shouted is left to the caller's className.
     return (
-      <Pill variant={getStatusVariant()} className="uppercase">
+      <Pill variant={getStatusVariant()} className={className}>
         {getStatusLabel()}
       </Pill>
     );

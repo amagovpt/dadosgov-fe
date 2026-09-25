@@ -513,7 +513,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
 
           <div className="admin-edit-info">
             <div className="admin-edit-info__badges">
-              <ResourceStatusBadge item={dataservice} display="pill" />
+              <ResourceStatusBadge item={dataservice} display="pill" className="uppercase" />
               <span className="admin-edit-info__stat">
                 <Icon name="agora-line-eye" className="admin-edit-info__stat-icon" />
                 {t("admin-dataservices:edit.views", {

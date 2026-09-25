@@ -105,6 +105,27 @@ describe("ResourceStatusBadge", () => {
     });
   });
 
+  /**
+   * The admin screens shout their states and the public pages say them
+   * plainly. Same word either way -- only the caller's class differs, which is
+   * what lets one component serve both surfaces.
+   */
+  it("passes the caller's className through without touching the label", () => {
+    act(() => {
+      root.render(<ResourceStatusBadge item={{ private: true }} display="pill" />);
+    });
+    const plain = container.textContent?.trim();
+    expect(container.querySelector(".uppercase")).toBeNull();
+
+    act(() => {
+      root.render(
+        <ResourceStatusBadge item={{ private: true }} display="pill" className="uppercase" />
+      );
+    });
+    expect(container.textContent?.trim()).toBe(plain);
+    expect(container.querySelector(".uppercase")).not.toBeNull();
+  });
+
   it("draws a dot by default, so the listings are untouched", () => {
     render({ private: true });
     expect(container.querySelector("span > span")).not.toBeNull();

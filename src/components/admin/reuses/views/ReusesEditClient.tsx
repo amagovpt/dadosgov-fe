@@ -506,7 +506,7 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
-          <ResourceStatusBadge item={reuse} display="pill" />
+          <ResourceStatusBadge item={reuse} display="pill" className="uppercase" />
           {reuse.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
           <span className="admin-edit-info__stat">
             <Icon name="agora-line-eye" className="admin-edit-info__stat-icon" />

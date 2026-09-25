@@ -505,7 +505,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
-          <ResourceStatusBadge item={dataset} display="pill" />
+          <ResourceStatusBadge item={dataset} display="pill" className="uppercase" />
           {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
           <DatasetBadges badges={dataset.badges} />
           <span className="admin-edit-info__stat">
