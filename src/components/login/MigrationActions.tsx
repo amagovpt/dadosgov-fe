@@ -85,7 +85,7 @@ export default function MigrationActions({ onDismiss, isInsideCard = false }: Mi
             variant={isInsideCard ? "outline-informative" : "informative"}
             showIcon
             description={
-              <div className="flex flex-col gap-8">
+              <div className="flex max-w-[592px] flex-col gap-8">
                 <Typograph tag="p" className="text-sm font-bold">
                   {t("MigrationInviteSection.otherAccount.title")}
                 </Typograph>
