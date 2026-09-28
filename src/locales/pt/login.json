@@ -250,7 +250,8 @@
   },
   "MigrationInviteSection": {
     "title": "Associar conta",
-    "description": "Associe esta conta à sua <b>Chave Móvel Digital</b> ou <b>Autenticação Europeia</b>.\n\nContinuará a utilizar a mesma conta e os mesmos dados, podendo também iniciar sessão através da sua identidade digital. <b>Esta associação é facultativa.</b> Pode selecionar <b>\"Continuar sem associar conta\"</b> e continuar a utilizar o portal normalmente.\n\nPara concluir o processo, terá de confirmar o email e a palavra-passe da conta atual. A associação só é possível se a sua identidade digital ainda não estiver ligada a outra conta no portal.",
+    "shortDescription": "Associe esta conta à sua <b>Chave Móvel Digital</b> ou <b>Autenticação Europeia</b>.",
+    "longDescription": "Continuará a utilizar a mesma conta e os mesmos dados, podendo também iniciar sessão através da sua identidade digital. <b>Esta associação é facultativa.</b> Pode selecionar <b>\"Continuar sem associar conta\"</b> e continuar a utilizar o portal normalmente.\n\nPara concluir o processo, terá de confirmar o email e a palavra-passe da conta atual. A associação só é possível se a sua identidade digital ainda não estiver ligada a outra conta no portal.",
     "linkCmd": "Associar Chave Móvel Digital",
     "linkEidas": "Associar Autenticação Europeia",
     "skip": "Continuar sem associar conta",
