@@ -27,7 +27,6 @@ export default async function PagesLayout({
       <HeaderWrapper data={headerNavigation} />
       <Suspense fallback={null}>
         <NewAccountNotice />
-        <MigrationInvite />
       </Suspense>
       <Suspense fallback={null}>
         <ConfirmEmailNotice />
