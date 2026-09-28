@@ -122,7 +122,7 @@ export function MigrationInvite() {
   // screen is the one that carries the whole invitation.
   //
   // So the banner hides for the visit and the count keeps running underneath.
-  const handleDismiss = (goTo: string) => {
+  const handleDismiss = (goTo?: string) => {
     setDismissed(true);
     hideForThisVisit();
     if (goTo) routerNav.push(goTo);
