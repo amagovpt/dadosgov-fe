@@ -455,48 +455,43 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
             <Tab>
               <TabHeader>{tds("resources.tabs.structure")}</TabHeader>
               <TabBody>
-                <div className="py-16">
-                  {isLoading && !hasData ? (
-                    <div className="flex items-center justify-center py-16">
-                      <LoaderDialog title={tds("resources.preview.loadingStructure")} />
-                    </div>
-                  ) : source === "tabular" ? (
-                    profile ? (
-                      <div className="grid grid-cols-2 gap-24 md:grid-cols-4">
-                        {Object.entries(profile.columns).map(([name, col]) => (
-                          <div key={name} className="min-w-0">
-                            <p className="text-sm mb-4 font-bold break-words text-neutral-900">
-                              {name}
-                            </p>
-                            <span className="text-xs rounded inline-block bg-neutral-100 px-8 py-4 text-neutral-900">
-                              {col.format || col.python_type}
-                            </span>
+                <div className="flex w-full flex-col py-64">
+                  <div className="w-full max-w-[800px] self-center">
+                    {isLoading && !hasData ? (
+                      <div className="flex items-center justify-center py-16">
+                        <LoaderDialog title={tds("resources.preview.loadingStructure")} />
+                      </div>
+                    ) : source === "tabular" ? (
+                      profile ? (
+                        <div className="grid grid-cols-12 gap-32">
+                          {Object.entries(profile.columns).map(([name, col]) => (
+                            <div key={name} className="col-span-12 lg:col-span-6">
+                              <DataFieldWrapper
+                                label={name}
+                                value={col.format || col.python_type}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-neutral-900">
+                          {tds("resources.preview.structureUnavailable")}
+                        </p>
+                      )
+                    ) : error || !tabularData ? (
+                      <p className="text-sm text-neutral-900">
+                        {error || tds("resources.preview.structureUnavailable")}
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-12 gap-32">
+                        {tabularData.columns.map((col, i) => (
+                          <div key={i} className="col-span-12 lg:col-span-6">
+                            <DataFieldWrapper label={col.name} value={col.type} />
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <p className="text-sm text-neutral-900">
-                        {tds("resources.preview.structureUnavailable")}
-                      </p>
-                    )
-                  ) : error || !tabularData ? (
-                    <p className="text-sm text-neutral-900">
-                      {error || tds("resources.preview.structureUnavailable")}
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-24 md:grid-cols-4">
-                      {tabularData.columns.map((col, i) => (
-                        <div key={i} className="min-w-0">
-                          <p className="text-sm mb-4 font-bold break-words text-neutral-900">
-                            {col.name}
-                          </p>
-                          <span className="text-xs rounded inline-block bg-neutral-100 px-8 py-4 text-neutral-900">
-                            {col.type}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </TabBody>
             </Tab>

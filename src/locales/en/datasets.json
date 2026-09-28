@@ -254,6 +254,7 @@
       "downloads": "Downloads"
     },
     "preview": {
+      "explorer": "Data explorer",
       "loading": "Loading preview...",
       "loadingStructure": "Loading structure...",
       "unavailableRemote": "Preview not available for external files.",
