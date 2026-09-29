@@ -117,3 +117,39 @@ export async function submitSamlForm(endpoint: string, t: TFunction): Promise<st
     return t("errors.samlConnection");
   }
 }
+
+/**
+ * The pages that ARE the linking flow, rather than pages the invitation may
+ * cover.
+ *
+ * 🚩 THIS LIST LIVES HERE AND NOWHERE ELSE, and LEDG-2571 is why. It was
+ * written inside the banner, so the gate -- which covers whole pages and
+ * therefore needs it far more urgently -- simply never got it, and covered
+ * /migrate-account: the page that CONCLUDES the very linking it had just
+ * started. Somebody could not finish associating an identity at all.
+ *
+ * Two readers of one rule diverge the moment the rule is written twice.
+ *
+ * The reasons a flow page must be left alone:
+ *  - on the flow's own pages it invites somebody to start what they are in the
+ *    middle of, which reads as "the first step did not work" -- and its buttons
+ *    restart the flow, throwing away what they have already done;
+ *  - on /login after a refusal it contradicts the refusal outright, with
+ *    buttons that would repeat the same doomed round-trip.
+ */
+export const FLOW_ROUTES = [
+  "migrate-account",
+  "complete-registration",
+  "login",
+  "loginregister",
+  "register",
+  "reset-password",
+];
+
+/**
+ * Matched by path segment so neither a locale prefix nor a sub-route slips
+ * past: "/pt/migrate-account" and "/migrate-account?x=1" both count.
+ */
+export function isOnFlowRoute(pathname: string | null | undefined): boolean {
+  return (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
+}

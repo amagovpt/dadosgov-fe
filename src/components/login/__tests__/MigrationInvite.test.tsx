@@ -35,11 +35,19 @@ const translate = (key: string): string => {
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: translate }),
+  // LEDG-2564 also reached for <Trans>. The real one interpolates components
+  // into the translated string; the tests assert on text, and the <b> tags it
+  // injects do not change textContent -- so resolving the key is faithful
+  // enough and keeps the assertions about copy, not markup.
+  Trans: ({ i18nKey }: { i18nKey: string }) => translate(i18nKey),
 }));
 
 const pathname = vi.fn(() => "/pt");
 vi.mock("next/navigation", () => ({
   usePathname: () => pathname(),
+  // LEDG-2564 gave the component a router; without it here every render in
+  // this file throws before the component is even mounted.
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 const useAuth = vi.fn();
@@ -53,7 +61,10 @@ vi.mock("@/service/api/migration", () => ({
 }));
 
 const submitSamlForm = vi.fn();
-vi.mock("../loginUtils", () => ({
+// Spread the real module: isOnFlowRoute now lives there too, and the banner
+// imports it.
+vi.mock("../loginUtils", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../loginUtils")>()),
   submitSamlForm: (endpoint: string) => submitSamlForm(endpoint),
 }));
 

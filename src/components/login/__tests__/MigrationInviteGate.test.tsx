@@ -26,7 +26,14 @@ const translate = (key: string): string => {
   return typeof raw === "string" ? raw : key;
 };
 
-vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: translate }) }));
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: translate }),
+  // LEDG-2564 also reached for <Trans>. The real one interpolates components
+  // into the translated string; the tests assert on text, and the <b> tags it
+  // injects do not change textContent -- so resolving the key is faithful
+  // enough and keeps the assertions about copy, not markup.
+  Trans: ({ i18nKey }: { i18nKey: string }) => translate(i18nKey),
+}));
 
 const useAuth = vi.fn();
 vi.mock("@/context/AuthContext", () => ({ useAuth: () => useAuth() }));
@@ -36,7 +43,25 @@ vi.mock("@/service/api/migration", () => ({
   dismissMigrationInvite: () => dismissMigrationInvite(),
 }));
 
-vi.mock("../loginUtils", () => ({ submitSamlForm: vi.fn() }));
+// Spread the real module rather than replacing it: isOnFlowRoute lives there
+// too, and a mock that lists exports by hand goes stale the moment one is
+// added -- which is the defect this ticket is fixing, in miniature.
+vi.mock("../loginUtils", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../loginUtils")>()),
+  submitSamlForm: vi.fn(),
+}));
+
+// LEDG-2564 gave the gate a router, and this file never mocked next/navigation
+// at all -- the real useRouter throws "invariant expected app router to be
+// mounted" outside an app router, so every test here died on mount.
+// The default is deliberately NOT a flow route: every test written before
+// LEDG-2571 assumed an ordinary page, and a flow route here would make them
+// pass for the wrong reason.
+let pathname = "/pt/datasets";
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => pathname,
+}));
 
 import { MigrationInviteGate } from "../MigrationInviteGate";
 
@@ -72,6 +97,7 @@ function render() {
 
 describe("the invite shown in place of the page", () => {
   beforeEach(() => {
+  pathname = "/pt/datasets";
     if (!window.matchMedia) {
       Object.defineProperty(window, "matchMedia", {
         writable: true,
@@ -104,13 +130,13 @@ describe("the invite shown in place of the page", () => {
   it("replaces the page while the invite has not been dismissed", () => {
     const text = render();
 
-    expect(text).toContain(ptLogin.migrationInvite.oneAccount);
+    expect(text).toContain(ptLogin.MigrationInviteSection.title);
     expect(text).not.toContain(PAGINA);
   });
 
   it("gives the page back once it is dismissed, and records the date", async () => {
     render();
-    await clickButton(ptLogin.migrationInvite.dismiss);
+    await clickButton(ptLogin.MigrationInviteSection.skip);
 
     expect(dismissMigrationInvite).toHaveBeenCalled();
     expect(container.textContent).toContain(PAGINA);
@@ -123,10 +149,10 @@ describe("the invite shown in place of the page", () => {
     // local, so it holds regardless.
     dismissMigrationInvite.mockRejectedValue(new Error("offline"));
     render();
-    await clickButton(ptLogin.migrationInvite.dismiss);
+    await clickButton(ptLogin.MigrationInviteSection.skip);
 
     expect(container.textContent).toContain(PAGINA);
-    expect(container.textContent).not.toContain(ptLogin.migrationInvite.oneAccount);
+    expect(container.textContent).not.toContain(ptLogin.MigrationInviteSection.title);
   });
 
   it("shows the page untouched when the backend is not inviting", () => {
@@ -144,11 +170,66 @@ describe("the invite shown in place of the page", () => {
     expect(render()).toBe(PAGINA);
   });
 
-  it("says the optional line written for a full screen, not the one about closing a notice", () => {
-    // A screen has no notice to close. The banner keeps its own wording.
+  it("says the linking is optional, and names the way out by its button", () => {
+    // A screen has no notice to close, so it points at the button it actually
+    // shows. LEDG-2564 rewrote this copy and renamed that button; the rule
+    // survives the rewording -- somebody reading the screen must be told the
+    // linking is optional and how to decline.
     const text = render();
 
-    expect(text).toContain(ptLogin.migrationInvite.optionalScreen);
-    expect(text).not.toContain(ptLogin.migrationInvite.optional);
+    expect(text).toContain("facultativa");
+    expect(text).toContain(ptLogin.MigrationInviteSection.skip);
+  });
+
+  /**
+   * 🚩 LEDG-2571, and the check that was missing from the day this gate was
+   * written. Somebody on the invite screen pressed "Associar", authenticated
+   * with the identity provider, and came back to /migrate-account -- where
+   * this gate drew the invite over the page, so they saw the screen they had
+   * just left and could never reach the confirmation step. The flow was
+   * unreachable while the invite was on.
+   *
+   * Asserted on the PAGE being there rather than on the invite's copy: the
+   * wording belongs to whoever writes the invite, the rule does not.
+   */
+  describe("the pages that ARE the linking flow", () => {
+    const FLOW_PATHS = [
+      "/pt/migrate-account",
+      "/pt/complete-registration",
+      "/pt/login",
+      "/pt/loginregister",
+      "/pt/register",
+      "/pt/reset-password",
+    ];
+
+    it.each(FLOW_PATHS)("hands %s straight through, invite or not", (path) => {
+      pathname = path;
+      useAuth.mockReturnValue({ migrationInvite: true, isLoading: false, refresh: vi.fn() });
+
+      act(() => {
+        root.render(
+          <MigrationInviteGate>
+            <p data-testid="the-page">a página</p>
+          </MigrationInviteGate>
+        );
+      });
+
+      expect(container.querySelector('[data-testid="the-page"]')).not.toBeNull();
+    });
+
+    it("still covers an ordinary page, which is what it is for", () => {
+      pathname = "/pt/datasets/algum-conjunto";
+      useAuth.mockReturnValue({ migrationInvite: true, isLoading: false, refresh: vi.fn() });
+
+      act(() => {
+        root.render(
+          <MigrationInviteGate>
+            <p data-testid="the-page">a página</p>
+          </MigrationInviteGate>
+        );
+      });
+
+      expect(container.querySelector('[data-testid="the-page"]')).toBeNull();
+    });
   });
 });
