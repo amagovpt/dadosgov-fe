@@ -1,10 +1,12 @@
 "use client";
 import { Anchor, AnchorProps } from '@ama-pt/agora-design-system';
 import { useEffect, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 
 export type SimpleSiteMap = {
     title?: string;
-    anchor: AnchorProps[]
+    anchor: AnchorProps[];
+    className?: string;
 }
 
 const normalizeId = (href?: string) => (href ?? "").replace(/^#/, "");
@@ -52,7 +54,7 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
     }, [activeId]);
 
     return (
-        <div className="w-full h-fit flex flex-col gap-16 sticky top-[180px] self-start">
+        <div className={twMerge("w-full h-fit flex flex-col gap-16 sticky top-120 self-start [&_.children-wrapper]:text-m-bold!", props.className)}>
             {props.title && (
                 <span className="text-l-bold">{props.title}</span>
             )}
@@ -64,7 +66,7 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
                             key={index}
                             {...anchor}
                             aria-current={isActive ? "page" : undefined}
-                            className={`!justify-start !px-16 !py-16 [&_.children-wrapper]:!text-m-bold ${isActive ? " [&_.children-wrapper]:!text-primary-600 bg-primary-100 border-l-4 border-l-primary-600" : ""}`}
+                            className={`justify-start! px-16! py-16!  ${isActive ? " [&_.children-wrapper]:text-primary-600! bg-primary-100 border-l-4 border-l-primary-600" : ""}`}
                             variant='neutral'
                             appearance='link'
                         />
