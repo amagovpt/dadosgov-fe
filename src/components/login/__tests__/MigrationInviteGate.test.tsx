@@ -60,6 +60,7 @@ vi.mock("../loginUtils", async (importOriginal) => ({
 let pathname = "/pt/datasets";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
+  useParams: () => ({ locale: "pt" }),
   usePathname: () => pathname,
 }));
 
