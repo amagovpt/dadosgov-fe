@@ -14,6 +14,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import TextLink from "@/components/Primitives/TextLink";
 import type { HarvestJob, HarvestItem, HarvestError } from "@/service/types/harvester";
 
 const TOTAL_COLUMNS = 11;
@@ -144,6 +145,7 @@ interface HarvesterJobsTableProps {
   setJobsPage: (page: number) => void;
   setJobsPageSize: (size: number) => void;
   slug: string;
+  orgId?: string;
 }
 
 export function HarvesterJobsTable({
@@ -154,8 +156,12 @@ export function HarvesterJobsTable({
   setJobsPage,
   setJobsPageSize,
   slug,
+  orgId,
 }: HarvesterJobsTableProps) {
   const { t } = useTranslation("admin-harvesters");
+  const jobsBasePath = orgId
+    ? `/admin/org/${orgId}/harvesters/${slug}/jobs`
+    : `/admin/harvesters/${slug}/jobs`;
   const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
   const jobStatusLabels: Record<string, string> = {
     pending: t("jobDetail.jobStatus.pending"),
@@ -245,12 +251,9 @@ export function HarvesterJobsTable({
             <React.Fragment key={job.id}>
               <TableRow>
                 <TableCell headerLabel={t("jobDetail.table.taskId")}>
-                  <a
-                    href={`/admin/harvesters/${slug}/jobs/${job.id}`}
-                    className="text-primary-600 underline uppercase text-xs"
-                  >
+                  <TextLink href={`${jobsBasePath}/${job.id}`} className="uppercase text-xs">
                     {job.id}
-                  </a>
+                  </TextLink>
                 </TableCell>
                 <TableCell headerLabel={t("jobDetail.table.status")}>
                   <StatusDot

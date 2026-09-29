@@ -7,12 +7,12 @@ import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
-  Pill,
   ProgressBar,
   CardExpandable,
   ModalProvider,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { Dataset } from "@/service/types/dataset";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
@@ -103,26 +103,25 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
           <BreadcrumbDynamic darkMode={false} overrides={{ [dataset.slug]: dataset.title }} />
         </div>
 
-        {/* Actions */}
-        <div className="container flex items-center justify-end gap-16">
-          {dataset.private && <Pill variant="warning">{tds("detail.draft")}</Pill>}
-          {dataset.archived && <Pill variant="neutral">{tds("detail.archived")}</Pill>}
-          <Button
-            variant="neutral"
-            appearance="link"
-            hasIcon={true}
-            leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
-            leadingIconHover="agora-solid-star"
-            className="flex-shrink-0"
-            onClick={handleToggleFavorite}
-            disabled={isTogglingFavorite}
-          >
-            {isFavorite ? tds("detail.removeFavorite") : tds("detail.addFavorite")}
-          </Button>
-          {(isAdmin ||
-            (user && dataset.owner?.id === user.id) ||
-            (dataset.organization &&
-              organizations.some((org) => org.id === dataset.organization?.id))) && (
+      {/* Actions */}
+      <div className="container flex items-center justify-end gap-16">
+        <ResourceStatusBadge item={dataset} display="pill" hidePublic />
+        <Button
+          variant="neutral"
+          appearance="link"
+          hasIcon={true}
+          leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
+          leadingIconHover="agora-solid-star"
+          className="flex-shrink-0"
+          onClick={handleToggleFavorite}
+          disabled={isTogglingFavorite}
+        >
+          {isFavorite ? tds("detail.removeFavorite") : tds("detail.addFavorite")}
+        </Button>
+        {(isAdmin ||
+          (user && dataset.owner?.id === user.id) ||
+          (dataset.organization &&
+            organizations.some((org) => org.id === dataset.organization?.id))) && (
             <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
               <Button
                 variant="primary"
@@ -152,34 +151,34 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
             />
           </div>
 
-          {/* Sidebar */}
-          <div className="xl:col-span-6">
-            <div className="flex h-fit flex-col" ref={sidebarRef}>
-              <div className="mb-16 flex flex-col gap-16 rounded-4 bg-[#F2F6FF] p-32">
-                {dataset.organization?.logo ? (
-                  <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
-                    <img
-                      src={dataset.organization.logo}
-                      alt={dataset.organization.name}
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  </div>
-                ) : dataset.owner?.avatar_thumbnail ? (
-                  <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
-                    <img
-                      src={dataset.owner.avatar_thumbnail}
-                      alt={ownerFullName ?? tds("detail.authorAlt")}
-                      className="max-h-full max-w-full rounded-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-12 text-neutral-400">
-                    <Icon
-                      name={dataset.owner ? "agora-line-user" : "agora-line-buildings"}
-                      className="h-6 w-6"
-                    />
-                  </div>
-                )}
+        {/* Sidebar */}
+        <div className="xl:col-span-6">
+          <div className="flex h-fit flex-col" ref={sidebarRef}>
+            <div className="mb-16 flex flex-col gap-16 rounded-4 bg-primary-100 p-32">
+              {dataset.organization?.logo ? (
+                <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                  <img
+                    src={dataset.organization.logo}
+                    alt={dataset.organization.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ) : dataset.owner?.avatar_thumbnail ? (
+                <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                  <img
+                    src={dataset.owner.avatar_thumbnail}
+                    alt={ownerFullName ?? tds("detail.authorAlt")}
+                    className="max-h-full max-w-full rounded-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-12 text-neutral-400">
+                  <Icon
+                    name={dataset.owner ? "agora-line-user" : "agora-line-buildings"}
+                    className="h-6 w-6"
+                  />
+                </div>
+              )}
 
                 <div className="space-y-16">
                   <div className="mb-8 text-m-light text-neutral-900">
@@ -194,68 +193,74 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
                       /* LEDG-1861: user-authored datasets link to the public
                        profile instead of the broken "Organização Desconhecida"
                        fallback. */
-                      <Link href={`/users/${dataset.owner.slug}`} className="hover:underline">
-                        {ownerFullName}
-                      </Link>
-                    ) : (
-                      tds("detail.noAuthor")
-                    )}
-                  </div>
-                  <div className="text-sm mb-16 text-neutral-900">
-                    <span className="text-m-semibold">{tds("detail.lastUpdate")}</span>{" "}
-                    {formatDateLong(dataset.last_modified, i18n.language as "pt" | "en")}
-                  </div>
-                  {dataset.license && (
-                    <div className="text-sm">
-                      <TextLink
-                        href={dataset.license_url || `/licenses/${dataset.license}/`}
-                        target="_blank"
-                      >
-                        <span className="text-m-semibold">{tds("detail.license")}</span>{" "}
-                        {dataset.license_title || dataset.license}
-                      </TextLink>
-                    </div>
+                    <Link
+                      href={`/users/${dataset.owner.slug}`}
+                      className="hover:underline"
+                    >
+                      {ownerFullName}
+                    </Link>
+                  ) : (
+                    tds("detail.noAuthor")
                   )}
-                  {dataset.contact_points && dataset.contact_points.length > 0 && (
-                    <div className="flex flex-col gap-12 border-t border-neutral-200 pt-16">
-                      {dataset.contact_points.map((cp) => (
-                        <div key={cp.id} className="text-sm">
-                          <div className="mb-4 text-m-semibold">
-                            {tds(`contactRoles.${cp.role}`, { defaultValue: cp.role })}
-                          </div>
-                          <div className="mb-4 text-neutral-900">{cp.name}</div>
-                          {cp.email && (
-                            <TextLink href={`mailto:${cp.email}`} className="block break-all">
-                              {cp.email}
-                            </TextLink>
-                          )}
-                          {cp.contact_form && (
-                            <TextLink href={cp.contact_form} target="_blank" className="block">
-                              {tds("detail.contactForm")}
-                            </TextLink>
-                          )}
+                </div>
+                <div className="text-sm mb-16 text-neutral-900">
+                  <span className="text-m-semibold">{tds("detail.lastUpdate")}</span>{" "}
+                  {formatDateLong(dataset.last_modified, i18n.language as "pt" | "en")}
+                </div>
+                {dataset.license && (
+                  <div className="text-sm">
+                    <TextLink
+                      href={
+                        dataset.license_url ||
+                        `/recursos/como-usar-o-portal/licencas#${dataset.license}`
+                      }
+                      target="_blank"
+                    >
+                      <span className="text-m-semibold">{tds("detail.license")}</span>{" "}
+                      {dataset.license_title || dataset.license}
+                    </TextLink>
+                  </div>
+                )}
+                {dataset.contact_points && dataset.contact_points.length > 0 && (
+                  <div className="flex flex-col gap-12 border-t border-neutral-200 pt-16">
+                    {dataset.contact_points.map((cp) => (
+                      <div key={cp.id} className="text-sm">
+                        <div className="mb-4 text-m-semibold">
+                          {tds(`contactRoles.${cp.role}`, { defaultValue: cp.role })}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        <div className="mb-4 text-neutral-900">{cp.name}</div>
+                        {cp.email && (
+                          <TextLink href={`mailto:${cp.email}`} className="block break-all">
+                            {cp.email}
+                          </TextLink>
+                        )}
+                        {cp.contact_form && (
+                          <TextLink href={cp.contact_form} target="_blank" className="block">
+                            {tds("detail.contactForm")}
+                          </TextLink>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+            </div>
 
-              {/* Metrics */}
-              <div className="mb-16 grid grid-cols-2 gap-16">
-                <div className="rounded-4 bg-[#F2F6FF] p-32">
-                  <div className="text-sm mb-8">{tds("detail.views")}</div>
-                  <div className="mb-8 text-l-semibold font-bold text-neutral-900">
-                    {formatMetricValue(dataset.metrics?.views)}
-                  </div>
-                </div>
-                <div className="rounded-4 bg-[#F2F6FF] p-32">
-                  <div className="text-sm mb-8">{tds("detail.downloads")}</div>
-                  <div className="mb-8 text-l-semibold font-bold text-neutral-900">
-                    {formatMetricValue(dataset.metrics?.resources_downloads)}
-                  </div>
+            {/* Metrics */}
+            <div className="mb-16 grid grid-cols-2 gap-16">
+              <div className="rounded-4 bg-primary-100 p-32">
+                <div className="text-sm mb-8">{tds("detail.views")}</div>
+                <div className="mb-8 text-l-semibold font-bold text-neutral-900">
+                  {formatMetricValue(dataset.metrics?.views)}
                 </div>
               </div>
+              <div className="rounded-4 bg-primary-100 p-32">
+                <div className="text-sm mb-8">{tds("detail.downloads")}</div>
+                <div className="mb-8 text-l-semibold font-bold text-neutral-900">
+                  {formatMetricValue(dataset.metrics?.resources_downloads)}
+                </div>
+              </div>
+            </div>
 
               {/* Quality */}
               <CardExpandable

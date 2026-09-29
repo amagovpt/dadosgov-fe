@@ -8,6 +8,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { useHasListData } from "@/hooks/admin-lists/useHasListData";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import {
@@ -140,6 +141,9 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
     [t]
   );
 
+  const hasActiveFilters = Object.values(filters).some((value) => value !== "");
+  const showListControls = useHasListData(isLoading, totalItems > 0, hasActiveFilters);
+
   return (
     <AdminListPage
       breadcrumbItems={[
@@ -159,19 +163,22 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
         ariaLabel: t("admin-topics:filters.search.label"),
         onChange: handleSearch,
       }}
+      hasActiveFilters={hasActiveFilters}
       toolbarActions={
-        <Button
-          variant="primary"
-          appearance="outline"
-          onClick={() => setShowFilters((visible) => !visible)}
-          aria-expanded={showFilters}
-          aria-controls="topic-filters"
-        >
-          {t("admin-topics:filters.button")}
-        </Button>
+        showListControls && (
+          <Button
+            variant="primary"
+            appearance="outline"
+            onClick={() => setShowFilters((visible) => !visible)}
+            aria-expanded={showFilters}
+            aria-controls="topic-filters"
+          >
+            {t("admin-topics:filters.button")}
+          </Button>
+        )
       }
       feedback={
-        showFilters ? (
+        showListControls && showFilters ? (
           <section
             id="topic-filters"
             aria-label={t("admin-topics:filters.button")}

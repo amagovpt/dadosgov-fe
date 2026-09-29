@@ -44,12 +44,12 @@ const STYLES: Record<Outcome, { wrapper: string; icon: string; iconClass: string
   },
   already: {
     wrapper: "border-blue-300 bg-blue-50",
-    icon: "agora-line-information-circle",
+    icon: "agora-line-info-mark",
     iconClass: "text-brand-blue-dark",
   },
   error: {
     wrapper: "border-red-300 bg-red-50",
-    icon: "agora-line-error-warning",
+    icon: "agora-line-alert-triangle",
     iconClass: "text-red-600",
   },
 };
@@ -100,7 +100,7 @@ export default function ConfirmEmailNotice() {
         aria-label={t("confirmEmailNotice.close")}
         className="shrink-0 rounded-4 p-4 text-neutral-700 hover:bg-neutral-100"
       >
-        <Icon name="agora-line-close" className="h-20 w-20" aria-hidden />
+        <Icon name="agora-line-cross" className="h-20 w-20" aria-hidden />
       </button>
     </div>
   );

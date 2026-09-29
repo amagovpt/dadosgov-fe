@@ -285,6 +285,8 @@
     "transferCommentLabel": "Comment",
     "transferCommentPlaceholder": "Optional message for the recipient...",
     "transferring": "Transferring...",
-    "transferAction": "Transfer the dataset"
+    "transferAction": "Transfer the dataset",
+    "deletedBanner": "This dataset was deleted and its public page is not available.",
+    "archivedBanner": "This dataset is archived and its public page is not available."
   }
 }

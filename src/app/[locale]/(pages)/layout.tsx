@@ -1,7 +1,7 @@
 import { ReactNode, Suspense } from "react";
 import { HeaderWrapper } from "@/components/HeaderWrapper";
 import NewAccountNotice from "@/components/login/NewAccountNotice";
-import { MigrationInvite } from "@/components/login/MigrationInvite";
+import { MigrationInviteGate } from "@/components/login/MigrationInviteGate";
 import ConfirmEmailNotice from "@/components/login/ConfirmEmailNotice";
 import CompleteRegistrationGate from "@/components/login/CompleteRegistrationGate";
 import { loadShellData } from "@/service/commom/shell";
@@ -26,7 +26,6 @@ export default async function PagesLayout({
       <HeaderWrapper data={headerNavigation} />
       <Suspense fallback={null}>
         <NewAccountNotice />
-        <MigrationInvite />
       </Suspense>
       <Suspense fallback={null}>
         <ConfirmEmailNotice />
@@ -34,7 +33,12 @@ export default async function PagesLayout({
       <Suspense fallback={null}>
         <CompleteRegistrationGate />
       </Suspense>
-      <div className="">{children}</div>
+      {/* Wraps the page rather than redirecting: see the component for the five
+          ways a redirect traps somebody. Inside the Suspense boundaries above
+          it would not cover the page itself, which is the whole point. */}
+      <MigrationInviteGate>
+        <div className="">{children}</div>
+      </MigrationInviteGate>
     </div>
   );
 }

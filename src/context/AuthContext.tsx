@@ -8,9 +8,13 @@ import {
   useMemo,
   useState,
   ReactNode,
+  Suspense,
+  use,
+  useRef,
 } from "react";
 import { UserRef } from "@/service/types/identity";
 import { fetchCurrentUser } from "@/service/api/auth";
+import type { InitialSession } from "@/service/types/identity/session";
 
 interface AuthContextProps {
   user: UserRef | null;
@@ -45,29 +49,57 @@ const AuthContext = createContext<AuthContextProps>({
   refresh: async () => {},
 });
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+function SessionHydrator({ session, onResolve }: {
+  session: Promise<InitialSession>;
+  onResolve: (session: InitialSession) => void;
+}) {
+  const resolved = use(session);
+  useEffect(() => { onResolve(resolved); }, [resolved, onResolve]);
+  return null;
+}
+
+export function AuthProvider({ children, initialSession }: {
+  children: ReactNode;
+  initialSession?: Promise<InitialSession>;
+}) {
   const [user, setUser] = useState<UserRef | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [samlLogin, setSamlLogin] = useState(false);
+  const initialized = useRef(false);
+  const refreshVersion = useRef(0);
 
   const refresh = useCallback(async () => {
+    initialized.current = true;
+    const version = ++refreshVersion.current;
     try {
       const currentUser = await fetchCurrentUser();
+      if (version !== refreshVersion.current) return;
       setUser(currentUser);
       setSamlLogin(currentUser?.saml_login ?? false);
     } catch (error) {
       console.error("[AuthContext] Error fetching current user:", error);
     } finally {
-      setIsLoading(false);
+      if (version === refreshVersion.current) setIsLoading(false);
     }
   }, []);
+
+  const resolveSession = useCallback((session: InitialSession) => {
+    // Explicit refresh (e.g. after editing an account) wins over a late initial
+    // response. Also prevents Strict Mode from repeating cookie renewal.
+    if (initialized.current) return;
+    initialized.current = true;
+    setUser(session.user);
+    setSamlLogin(session.user?.saml_login ?? false);
+    setIsLoading(false);
+    if (session.renewCookie) void refresh();
+  }, [refresh]);
 
   useEffect(() => {
     // refresh() only sets state after an awaited fetch, so it cannot trigger a
     // synchronous cascading render.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    refresh();
-  }, [refresh]);
+    if (!initialSession) void refresh();
+  }, [initialSession, refresh]);
 
   const isAdmin = useMemo(
     () => user?.roles?.includes("admin") ?? false,
@@ -105,6 +137,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refresh,
       }}
     >
+      {initialSession && (
+        <Suspense fallback={null}>
+          <SessionHydrator session={initialSession} onResolve={resolveSession} />
+        </Suspense>
+      )}
       {children}
     </AuthContext.Provider>
   );

@@ -41,6 +41,7 @@ import {
   Button,
   Icon,
   HeaderElement,
+  NavigationArea,
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { AdminProfileSwitcher } from "@/components/admin/AdminProfileSwitcher";
@@ -243,7 +244,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     <>
       <header
         ref={wrapperRef}
-        className="profile-menu-header [&_.custom-search-layout]:m-0! [&_.custom-search-layout]:mx-auto! [&_.ecosystem-panel-title]:text-m-bold!"
+        className="profile-menu-header [&_.custom-search-layout]:m-0! [&_.custom-search-layout]:mx-auto! [&_.ecosystem-panel-title]:text-m-bold! [&_.navigation-container]:relative!"
         data-submenu={submenu ?? undefined}
         data-auth-page={isAuthPage || undefined}
         data-no-user={!user || undefined}
@@ -416,6 +417,11 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             modalCloseLabel={t("header.close")}
           >
             <NavigationSection>
+              <NavigationArea
+                className="absolute hover:cursor-text hover:no-underline [&.navigation-area.selected]:border-t-0! [&.navigation-area.selected]:bg-transparent! left-0! top-[-68px]!"
+              >
+                {data.institutional}
+              </NavigationArea>
               {[
                 ...topLevelLinks
                   .filter((link) => isEnabled(link, !!user))

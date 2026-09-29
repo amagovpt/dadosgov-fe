@@ -5,25 +5,28 @@ import type {
 } from "@/service/types/dataservice";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL, authFetch } from "@/service/utils/API";
-import { parseOpenApi, type ParsedSwagger } from "@/utils/parseOpenApi";
+import type { ParsedSwagger } from "@/utils/parseOpenApi";
 import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
 /**
- * Fetch and parse a dataservice's OpenAPI/Swagger spec through the SSRF-guarded
+ * Fetch a dataservice's OpenAPI/Swagger summary through the SSRF-guarded
  * same-origin proxy. Returns null when the URL is missing/unreachable or the
  * document is not recognisable JSON spec (e.g. a YAML spec).
  */
 export async function fetchSwaggerSpec(
-  machineDocumentationUrl: string
+  machineDocumentationUrl: string,
+  signal?: AbortSignal,
 ): Promise<ParsedSwagger | null> {
   try {
     const res = await fetch(
-      `/internal-api/proxy-swagger?url=${encodeURIComponent(machineDocumentationUrl)}`
+      `/internal-api/proxy-swagger?url=${encodeURIComponent(machineDocumentationUrl)}&format=summary`,
+      { signal },
     );
     if (!res.ok) return null;
-    return parseOpenApi(await res.json());
+    return await res.json();
   } catch (error) {
     rethrowControlFlow(error);
+    if (signal?.aborted) return null;
     console.error("Error fetching Swagger spec:", error);
     return null;
   }

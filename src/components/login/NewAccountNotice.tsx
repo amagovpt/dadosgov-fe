@@ -52,7 +52,7 @@ export default function NewAccountNotice() {
         aria-label={t("newAccountNotice.close")}
         className="shrink-0 rounded-4 p-4 text-neutral-700 hover:bg-neutral-100"
       >
-        <Icon name="agora-line-close" className="h-20 w-20" aria-hidden />
+        <Icon name="agora-line-cross" className="h-20 w-20" aria-hidden />
       </button>
     </div>
   );

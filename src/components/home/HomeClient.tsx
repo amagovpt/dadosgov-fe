@@ -2,7 +2,7 @@
 
 // `MouseEvent` is aliased: the click-outside listener below relies on the DOM
 // global of the same name, which a bare React import would shadow.
-import { useEffect, useState, useRef, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useState, useRef, type MouseEvent as ReactMouseEvent, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -37,6 +37,7 @@ import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import Anchor from "../Shared/Anchor";
 import { StatusCard as StatusCardType } from "@/service/types/home/home";
 import StatusCard from "@/components/Shared/StatusCard";
+import { MigrationInvite } from "../login/MigrationInvite";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -113,8 +114,8 @@ export default function HomeClient({
   const stats = siteMetrics;
 
   return (
-    <main className="w-full h-full">
-      <div className="w-full ">
+    <main className="h-full w-full">
+      <div className="w-full">
         <div className="w-full">
           {/* The homepage is the root — no breadcrumb slot. */}
           <Hero.Root>
@@ -133,19 +134,19 @@ export default function HomeClient({
           </Hero.Root>
 
           {/* Stats Section */}
-          <div className="py-64 bg-primary-900 text-white flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center bg-primary-900 py-64 text-white">
             <div className="container">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-24">
+              <div className="grid grid-cols-2 gap-24 lg:grid-cols-4">
                 {/* Reutilizações */}
                 <div className="flex items-center gap-16" data-testid="home-stat">
-                  <div className="px-24 py-24 rounded-8 border-2 border-focus text-focus">
+                  <div className="rounded-8 border-2 border-focus px-24 py-24 text-focus">
                     <svg
                       width="24"
                       height="24"
                       viewBox="0 0 15 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-24 h-24"
+                      className="h-24 w-24"
                     >
                       <path
                         d="M0 22.9091V15.2727C0 14.6702 0.479695 14.1818 1.07143 14.1818C1.66316 14.1818 2.14286 14.6702 2.14286 15.2727V22.9091C2.14286 23.5116 1.66316 24 1.07143 24C0.479695 24 0 23.5116 0 22.9091ZM6.42857 22.9091V1.09091C6.42857 0.488417 6.90827 0 7.5 0C8.09173 0 8.57143 0.488417 8.57143 1.09091V22.9091C8.57143 23.5116 8.09173 24 7.5 24C6.90827 24 6.42857 23.5116 6.42857 22.9091ZM12.8571 22.9091V9.81818C12.8571 9.21569 13.3368 8.72727 13.9286 8.72727C14.5203 8.72727 15 9.21569 15 9.81818V22.9091C15 23.5116 14.5203 24 13.9286 24C13.3368 24 12.8571 23.5116 12.8571 22.9091Z"
@@ -162,7 +163,6 @@ export default function HomeClient({
                         <span className="text-m-bold">
                           {formatStatNumber(stats?.reuses ?? 0).suffix}
                         </span>
-
                       )}
                     </div>
                     <span className="text-m-regular">{t("reuses")}</span>
@@ -170,11 +170,11 @@ export default function HomeClient({
                 </div>
                 {/* Utilizadores */}
                 <div className="flex items-center gap-16" data-testid="home-stat">
-                  <div className="px-24 py-24 rounded-8 border-2 border-[#FFD700] text-[#FFD700]">
+                  <div className="rounded-8 border-2 border-[#FFD700] px-24 py-24 text-[#FFD700]">
                     <AppIcon
                       name="agora-line-user-group"
                       aria-hidden="true"
-                      className="w-24 h-24 fill-[#FFD700]"
+                      className="h-24 w-24 fill-[#FFD700]"
                     />
                   </div>
                   <div className="flex flex-col">
@@ -193,11 +193,11 @@ export default function HomeClient({
                 </div>
                 {/* Conjuntos de dados */}
                 <div className="flex items-center gap-16" data-testid="home-stat">
-                  <div className="px-24 py-24 rounded-8 border-2 border-[#A6D5FF] text-[#A6D5FF]">
+                  <div className="rounded-8 border-2 border-[#A6D5FF] px-24 py-24 text-[#A6D5FF]">
                     <AppIcon
                       name="agora-line-layers-menu"
                       aria-hidden="true"
-                      className="w-24 h-24 fill-[#A6D5FF]"
+                      className="h-24 w-24 fill-[#A6D5FF]"
                     />
                   </div>
                   <div className="flex flex-col">
@@ -216,11 +216,11 @@ export default function HomeClient({
                 </div>
                 {/* Organizações */}
                 <div className="flex items-center gap-16" data-testid="home-stat">
-                  <div className="px-24 py-24 rounded-8 border-2 border-[#CBFF3F] !text-[#CBFF3F]">
+                  <div className="rounded-8 border-2 border-[#CBFF3F] px-24 py-24 !text-[#CBFF3F]">
                     <AppIcon
                       name="agora-line-buildings"
                       aria-hidden="true"
-                      className="w-24 h-24 fill-[#CBFF3F]"
+                      className="h-24 w-24 fill-[#CBFF3F]"
                     />
                   </div>
                   <div className="flex flex-col">
@@ -242,27 +242,35 @@ export default function HomeClient({
           </div>
         </div>
 
+        <Suspense fallback={null}>
+          <section className="container mx-auto mt-64 w-full">
+            <MigrationInvite />
+          </section>
+        </Suspense>
+
         {/* Featured Datasets */}
-        <section className="w-full flex flex-col items-center justify-center py-64 gap-32">
+        <section className="flex w-full flex-col items-center justify-center gap-32 py-64">
           {statusCard && (
             <div className="container flex flex-col gap-32 [&_.description]:max-w-[632px]!">
-              <StatusCard {...{
-                variant: statusCard.variant,
-                showIcon: statusCard.showIcon,
-                pillText: statusCard.pillText,
-                title: statusCard.title,
-                description: statusCard.description,
-                anchor: statusCard.anchor && {
-                  href: statusCard.anchor?.href || "",
-                  children: statusCard.anchor?.children || "",
-                },
-                anchorOnRightSide: statusCard.anchorOnRightSide,
-              }} />
+              <StatusCard
+                {...{
+                  variant: statusCard.variant,
+                  showIcon: statusCard.showIcon,
+                  pillText: statusCard.pillText,
+                  title: statusCard.title,
+                  description: statusCard.description,
+                  anchor: statusCard.anchor && {
+                    href: statusCard.anchor?.href || "",
+                    children: statusCard.anchor?.children || "",
+                  },
+                  anchorOnRightSide: statusCard.anchorOnRightSide,
+                }}
+              />
             </div>
           )}
           <div className="container flex flex-col gap-32">
             <h2 className="text-xl-bold text-primary-900">{t("datasets")}</h2>
-            <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-32 lg:grid-cols-2 xl:grid-cols-3">
               {latestDatasets.length > 0 ? (
                 latestDatasets.map((dataset, index) => {
                   const timeAgo = formatDateToTimeAgo(dataset.last_modified);
@@ -287,7 +295,7 @@ export default function HomeClient({
                 hasIcon={true}
                 trailingIcon="agora-line-arrow-right-circle"
                 trailingIconHover="agora-solid-arrow-right-circle"
-                className="p-0! h-auto"
+                className="h-auto p-0!"
               >
                 <span>{t("seeAllDatasets")}</span>
               </Button>
@@ -296,15 +304,15 @@ export default function HomeClient({
         </section>
 
         {/* Data Stories */}
-        <section className="w-full flex flex-col items-center justify-center bg-primary-900 py-64">
+        <section className="flex w-full flex-col items-center justify-center bg-primary-900 py-64">
           <div className="container flex flex-col gap-32">
             <h2 className="text-xl-bold text-white">{t("datastories")}</h2>
-            <p className="mb-32 mt-16 max-w-3xl text-white">
+            <p className="mt-16 mb-32 max-w-3xl text-white">
               {parseHtmlToParagraphs(datastories.description)}
             </p>
             {datastories && datastories.datastories.length > 0 ? (
               <>
-                <div className="storytellings grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                <div className="storytellings grid grid-cols-1 gap-32 lg:grid-cols-2 xl:grid-cols-3">
                   {datastories.datastories.map((story) => {
                     const storyHref = localizeHref(`/datastories/${story.slug}`);
                     return (
@@ -325,12 +333,16 @@ export default function HomeClient({
                         <HeaderSectionContainer>
                           <CardSubtitle>
                             {story.createdAt
-                              ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
+                              ? t("publishedAt", {
+                                  date: format(new Date(story.createdAt), "dd MMM yyyy", {
+                                    locale: i18n.language === "en" ? enGB : pt,
+                                  }),
+                                })
                               : ""}
                           </CardSubtitle>
                           <CardTitle>{story.title}</CardTitle>
                         </HeaderSectionContainer>
-                        <FooterSectionContainer className="hidden" >
+                        <FooterSectionContainer className="hidden">
                           <CardAnchor
                             href={storyHref}
                             onClick={pushTo(storyHref)}
@@ -352,7 +364,7 @@ export default function HomeClient({
                     hasIcon={true}
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
-                    className="p-0! h-auto [&_.icon]:fill-white! hover:[&_.icon]:fill-white!"
+                    className="h-auto p-0! [&_.icon]:fill-white! hover:[&_.icon]:fill-white!"
                     darkMode={false}
                   >
                     <span className="text-white">{t("seeAllDataStories")}</span>
@@ -368,21 +380,29 @@ export default function HomeClient({
         </section>
 
         {/* Latest News */}
-        <section className="w-full flex flex-col items-center justify-center py-64">
+        <section className="flex w-full flex-col items-center justify-center py-64">
           <div className="container flex flex-col gap-32">
             <h2 className="text-xl-bold text-primary-900">{t("latestNews")}</h2>
-            <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-32 lg:grid-cols-2 xl:grid-cols-3">
               {posts.length > 0 ? (
                 posts.map((post) => {
                   const postHref = localizeHref(`/noticias/${post.slug}`);
                   return (
                     <div key={post.id} className="latest-news-card-wrapper h-full">
-                      <CardGeneralV2 layout="image" variant="white" className="[&_.agora-card-general-image-section]:h-[208px] [&_.agora-card-general-image-section]:w-full [&_.agora-card-general-image-section]:overflow-hidden [&_.agora-card-general-image-section]:bg-transparent!">
+                      <CardGeneralV2
+                        layout="image"
+                        variant="white"
+                        className="[&_.agora-card-general-image-section]:h-[208px] [&_.agora-card-general-image-section]:w-full [&_.agora-card-general-image-section]:overflow-hidden [&_.agora-card-general-image-section]:bg-transparent!"
+                      >
                         <ImageSectionContainer src={post.image || undefined} alt={post.name} />
                         <HeaderSectionContainer>
                           <CardSubtitle>
                             {post.created_at
-                              ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: i18n.language === "en" ? enGB : pt }) })
+                              ? t("publishedAt", {
+                                  date: format(new Date(post.created_at), "d MM yyyy", {
+                                    locale: i18n.language === "en" ? enGB : pt,
+                                  }),
+                                })
                               : ""}
                           </CardSubtitle>
                           <CardTitle>{post.name}</CardTitle>
@@ -415,7 +435,7 @@ export default function HomeClient({
                 hasIcon={true}
                 trailingIcon="agora-line-arrow-right-circle"
                 trailingIconHover="agora-solid-arrow-right-circle"
-                className="p-0! h-auto"
+                className="h-auto p-0!"
               >
                 <span>{t("seeAllNews")}</span>
               </Button>
@@ -424,16 +444,22 @@ export default function HomeClient({
         </section>
 
         {/* Utilizado diariamente por */}
-        <section className="w-full flex flex-col items-center justify-center pb-64">
-          <div className="container flex flex-col gap-32 ">
-            <div className="w-full flex flex-col gap-32">
+        <section className="flex w-full flex-col items-center justify-center pb-64">
+          <div className="container flex flex-col gap-32">
+            <div className="flex w-full flex-col gap-32">
               <h2 className="text-xl-bold text-primary-900">{t("usedDiaryBy")}</h2>
-              <div className="grid grid-cols-4 xl:grid-cols-10 gap-32 ">
+              <div className="grid grid-cols-4 gap-32 xl:grid-cols-10">
                 {usedDailyBy && usedDailyBy.length > 0 ? (
                   usedDailyBy.map((entry, index) => (
                     <div key={index} className="col-span-2 flex items-center justify-center">
                       <Anchor href={entry.anchor?.href}>
-                        <Image src={getAssets(entry.logo[0].id)} alt={entry.alt} width={160} height={75} className="object-contain" />
+                        <Image
+                          src={getAssets(entry.logo[0].id)}
+                          alt={entry.alt}
+                          width={160}
+                          height={75}
+                          className="object-contain"
+                        />
                       </Anchor>
                     </div>
                   ))
@@ -451,7 +477,7 @@ export default function HomeClient({
                 hasIcon={true}
                 trailingIcon="agora-line-arrow-right-circle"
                 trailingIconHover="agora-solid-arrow-right-circle"
-                className="p-0! h-auto"
+                className="h-auto p-0!"
               >
                 <span>{t("seeAllOrganizations")}</span>
               </Button>

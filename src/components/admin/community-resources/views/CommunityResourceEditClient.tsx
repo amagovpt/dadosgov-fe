@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 import {
   fetchCommunityResource,
   updateCommunityResource,
@@ -58,6 +59,7 @@ export default function CommunityResourceEditClient({
   pageContent,
 }: CommunityResourceEditClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+  const { activeProfile } = useActiveProfile();
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
@@ -387,15 +389,15 @@ export default function CommunityResourceEditClient({
       breadcrumbItems={[
         {
           label: t("admin-community-resources:title"),
-          url: "/admin/system/community-resources",
+          url: `${adminProfileBasePath(activeProfile)}/community-resources`,
         },
         { label: t("admin-community-resources:edit.breadcrumb") },
       ]}
       title={t("admin-community-resources:edit.title")}
       headerAction={null}
     >
-      <div className="admin-page__body">
-        <div className="admin-page__form-area">
+      <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
           <FormStatusMessages successMessage={successMessage} errorMessage={apiError} />
 
           <form

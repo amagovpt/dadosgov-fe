@@ -33,8 +33,8 @@ export default function PostsEditContentTab({
   const { t } = useTranslation(["admin-common", "admin-posts"]);
 
   return (
-    <div className="admin-page__body">
-      <div className="admin-page__form-area">
+    <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+      <div className="flex min-w-0 flex-1 flex-col gap-24">
         <form
           className="admin-page__form mt-24"
           noValidate

@@ -11,7 +11,6 @@ import {
   InputSelect,
   DropdownSection,
   DropdownOption,
-  Pill,
   Tag,
   Tabs,
   Tab,
@@ -23,6 +22,8 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import DataservicesEditDeletePopup from "@/components/admin/dataservices/DataservicesEditDeletePopup";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { ResourceStatusBanner } from "@/components/admin/ResourceStatusBanner";
 import DataservicesEditDiscussionsTab from "@/components/admin/dataservices/DataservicesEditDiscussionsTab";
 import DataservicesEditActivitiesTab from "@/components/admin/dataservices/DataservicesEditActivitiesTab";
 import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
@@ -492,6 +493,13 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
         <p className="text-neutral-500">{t("admin-dataservices:edit.notFound")}</p>
       ) : (
         <>
+          <ResourceStatusBanner
+            item={dataservice}
+            messages={{
+              deleted: t("admin-dataservices:edit.deletedBanner"),
+              archived: t("admin-dataservices:edit.archivedBanner"),
+            }}
+          />
           {apiError && (
             <div className="mb-16">
               <StatusCard variant="danger" showIcon description={apiError} />
@@ -505,14 +513,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
 
           <div className="admin-edit-info">
             <div className="admin-edit-info__badges">
-              <Pill variant={dataservice.private ? "warning" : "success"}>
-                {dataservice.private
-                  ? t("admin-dataservices:edit.draftStatus")
-                  : t("admin-dataservices:edit.publicStatus")}
-              </Pill>
-              {dataservice.archived_at && (
-                <Pill variant="neutral">{t("admin-dataservices:edit.archivedStatus")}</Pill>
-              )}
+              <ResourceStatusBadge item={dataservice} display="pill" className="uppercase" />
               <span className="admin-edit-info__stat">
                 <Icon name="agora-line-eye" className="admin-edit-info__stat-icon" />
                 {t("admin-dataservices:edit.views", {
@@ -552,8 +553,8 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
             <Tab>
               <TabHeader>{t("admin-dataservices:edit.metadataTab")}</TabHeader>
               <TabBody>
-                <div className="admin-page__body">
-                  <div className="admin-page__form-area">
+                <div className="flex flex-col gap-32 min-[1025px]:flex-row">
+                  <div className="flex min-w-0 flex-1 flex-col gap-24">
                     {dataservice.private && pageContent.draftVisibilityCard && (
                       <div className="dataset-edit-visibility-banner">
                         <StatusCard
@@ -737,8 +738,8 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                   </div>
 
                   {auxiliarItems.length > 0 ? (
-                    <aside className="admin-page__auxiliar">
-                      <div className="admin-page__auxiliar-inner">
+                    <aside className="w-[360px] max-w-full shrink-0">
+                      <div className="bg-neutral-100 p-32">
                         <div className="admin-page__auxiliar-header">
                           <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
                           <h2 className="admin-page__auxiliar-title">
@@ -761,7 +762,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                 })}
               </TabHeader>
               <TabBody>
-                <div className="mt-24 admin-page__form-area">
+                <div className="mt-24 flex min-w-0 flex-1 flex-col gap-24">
                   {pageContent.datasetLinksInfo ? (
                     <StatusCard
                       variant="informative"

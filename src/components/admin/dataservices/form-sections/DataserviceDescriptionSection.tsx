@@ -95,18 +95,18 @@ export default function DataserviceDescriptionSection({
           onChange={onBaseApiUrlChange}
         />
         <InputText
-          label={t("admin-dataservices:fields.machineDocUrl")}
-          placeholder={t("admin-dataservices:fields.urlPlaceholder")}
-          id={`${idPrefix}-doc-openapi`}
-          value={machineDocUrl}
-          onChange={onMachineDocUrlChange}
-        />
-        <InputText
           label={t("admin-dataservices:fields.technicalDocUrl")}
           placeholder={t("admin-dataservices:fields.urlPlaceholder")}
           id={`${idPrefix}-doc-technical`}
           value={technicalDocUrl}
           onChange={onTechnicalDocUrlChange}
+        />
+        <InputText
+          label={t("admin-dataservices:fields.machineDocUrl")}
+          placeholder={t("admin-dataservices:fields.urlPlaceholder")}
+          id={`${idPrefix}-doc-openapi`}
+          value={machineDocUrl}
+          onChange={onMachineDocUrlChange}
         />
         {showRateLimiting && (
           <InputText
