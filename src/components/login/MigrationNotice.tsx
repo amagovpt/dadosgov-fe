@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
-import Link from "next/link";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import { useTranslation } from "react-i18next";
 import { PRIMARY_BUTTON_CLASS } from "./constants";
 import { Typograph } from "../Shared/Generics/Typograph";
@@ -107,8 +107,8 @@ export function MigrationNotice({
             <Typograph tag="p" className="text-sm">
               {t("migration.entityDescription")}
             </Typograph>
-            <Link
-              href="/ajuda-e-contactos"
+            <LocalizedLink
+              href="/ajuda-e-contactos#ajuda"
               className="text-sm flex items-center gap-8 text-informative-600"
             >
               {t("migration.entityLink")}
@@ -116,7 +116,7 @@ export function MigrationNotice({
                 name="agora-line-arrow-right-circle"
                 className="h-16 w-16 text-informative-600"
               />
-            </Link>
+            </LocalizedLink>
           </div>
         }
       />

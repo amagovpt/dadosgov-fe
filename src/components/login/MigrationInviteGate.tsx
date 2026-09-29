@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { dismissMigrationInvite } from "@/service/api/migration";
 import { isOnFlowRoute } from "./loginUtils";
 import { MigrationInviteSection } from "./MigrationInviteSection";
@@ -38,6 +39,7 @@ import { usePathname, useRouter } from "next/navigation";
 export function MigrationInviteGate({ children }: { children: ReactNode }) {
   const { migrationInvite, isLoading, refresh } = useAuth();
   const routerNav = useRouter();
+  const localize = useLocalizedHref();
   const pathname = usePathname();
 
   const [dismissed, setDismissed] = useState(false);
@@ -55,7 +57,9 @@ export function MigrationInviteGate({ children }: { children: ReactNode }) {
     } catch {
       // Deliberately silent: nothing was lost, and nothing they can act on.
     } finally {
-      if (goTo) routerNav.push(goTo);
+      // Localized up front: an unprefixed path takes a 307 from the i18n proxy,
+      // and the router lands on the redirected URL without the `#anchor`.
+      if (goTo) routerNav.push(localize(goTo));
     }
   };
 

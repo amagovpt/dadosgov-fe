@@ -109,7 +109,7 @@ describe("MigrationNotice", () => {
     const hrefs = Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
     expect(hrefs).toContain("https://www.autenticacao.gov.pt/cmd-pedido-chave");
     expect(hrefs).toContain("https://www.autenticacao.gov.pt/eidas");
-    expect(hrefs).toContain("/ajuda-e-contactos");
+    expect(hrefs).toContain("/pt/ajuda-e-contactos#ajuda");
   });
 
   it("starts the matching SAML login for each action", async () => {

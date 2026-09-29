@@ -6,6 +6,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Button, CardExpandable, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
 import { useAuth } from "@/context/AuthContext";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { Typograph } from "../Shared/Generics/Typograph";
 import { MigrationInviteContent } from "./MigrationInviteContent";
 import { isOnFlowRoute, submitSamlForm } from "./loginUtils";
@@ -58,6 +59,7 @@ function hideForThisVisit(): void {
 export function MigrationInvite() {
   const { t } = useTranslation("login");
   const routerNav = useRouter();
+  const localize = useLocalizedHref();
   const { migrationInvite, migrationLinkAvailable, isLoading: authLoading } = useAuth();
   const pathname = usePathname();
   // Hidden for THIS visit, and nowhere else. Read through a window guard
@@ -97,7 +99,8 @@ export function MigrationInvite() {
   const handleDismiss = (goTo?: string) => {
     setDismissed(true);
     hideForThisVisit();
-    if (goTo) routerNav.push(goTo);
+    // Localized so the i18n proxy's 307 does not drop the `#anchor` (see MigrationInviteGate).
+    if (goTo) routerNav.push(localize(goTo));
   };
 
   // 🚩 The three states are disjoint, and this is the line that makes them so.

@@ -48,6 +48,7 @@ vi.mock("next/navigation", () => ({
   // LEDG-2564 gave the component a router; without it here every render in
   // this file throws before the component is even mounted.
   useRouter: () => ({ push: vi.fn() }),
+  useParams: () => ({ locale: "pt" }),
 }));
 
 const useAuth = vi.fn();
