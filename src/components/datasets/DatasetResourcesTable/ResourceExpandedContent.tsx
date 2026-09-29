@@ -46,6 +46,7 @@ import DataFieldWrapper from "./DataFieldWrapper";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 import UrlWrapper from "./UrlWrapper";
+import ExploreData from "./ExploreData";
 
 type SortOrder = "none" | "ascending" | "descending";
 
@@ -392,57 +393,62 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                         </p>
                       )}
                       {!pageError && (
-                        <div
-                          ref={tableRef}
-                          className="overflow-x-auto [&_.agora-table-pagination]:flex! [&_.agora-table-pagination]:justify-end! [&_.section-items]:hidden!"
-                        >
-                          <Table
-                            desktopLayout="table"
-                            paginationProps={{
-                              totalItems:
-                                source === "tabular" ? totalRows : (tabularData?.rows.length ?? 0),
-                              itemsPerPage: PREVIEW_PAGE_SIZE,
-                              availablePageSizes: [PREVIEW_PAGE_SIZE],
-                              currentPage: page,
-                              onPageChange: handlePageChange,
-                              buttonDropdownAriaLabel: "",
-                              dropdownListAriaLabel: "",
-                              itemsPerPageLabel: "",
-                            }}
+                        <>
+                          <ExploreData id={resource.id} />
+                          <div
+                            ref={tableRef}
+                            className="overflow-x-auto [&_.agora-table-pagination]:flex! [&_.agora-table-pagination]:justify-end! [&_.section-items]:hidden!"
                           >
-                            <TableHeader>
-                              <TableRow>
-                                {headers.map((header, i) => (
-                                  <TableHeaderCell
-                                    key={i}
-                                    sortType={sortTypeFor(header)}
-                                    sortOrder={
-                                      sortBy === header
-                                        ? sortDir === "asc"
-                                          ? "ascending"
-                                          : "descending"
-                                        : "none"
-                                    }
-                                    onSortChange={(order) => handleSortChange(header, order)}
-                                  >
-                                    {header}
-                                  </TableHeaderCell>
-                                ))}
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {rows.map((row, i) => (
-                                <TableRow key={i}>
-                                  {row.map((cell, j) => (
-                                    <TableCell key={j} headerLabel={headers[j] || ""}>
-                                      {cell}
-                                    </TableCell>
+                            <Table
+                              desktopLayout="table"
+                              paginationProps={{
+                                totalItems:
+                                  source === "tabular"
+                                    ? totalRows
+                                    : (tabularData?.rows.length ?? 0),
+                                itemsPerPage: PREVIEW_PAGE_SIZE,
+                                availablePageSizes: [PREVIEW_PAGE_SIZE],
+                                currentPage: page,
+                                onPageChange: handlePageChange,
+                                buttonDropdownAriaLabel: "",
+                                dropdownListAriaLabel: "",
+                                itemsPerPageLabel: "",
+                              }}
+                            >
+                              <TableHeader>
+                                <TableRow>
+                                  {headers.map((header, i) => (
+                                    <TableHeaderCell
+                                      key={i}
+                                      sortType={sortTypeFor(header)}
+                                      sortOrder={
+                                        sortBy === header
+                                          ? sortDir === "asc"
+                                            ? "ascending"
+                                            : "descending"
+                                          : "none"
+                                      }
+                                      onSortChange={(order) => handleSortChange(header, order)}
+                                    >
+                                      {header}
+                                    </TableHeaderCell>
                                   ))}
                                 </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
+                              </TableHeader>
+                              <TableBody>
+                                {rows.map((row, i) => (
+                                  <TableRow key={i}>
+                                    {row.map((cell, j) => (
+                                      <TableCell key={j} headerLabel={headers[j] || ""}>
+                                        {cell}
+                                      </TableCell>
+                                    ))}
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
