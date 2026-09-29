@@ -110,7 +110,7 @@
     }
   },
   "status": {
-    "deleted": "Excluído",
+    "deleted": "Eliminado",
     "archived": "Arquivado",
     "draft": "Rascunho",
     "public": "Público"

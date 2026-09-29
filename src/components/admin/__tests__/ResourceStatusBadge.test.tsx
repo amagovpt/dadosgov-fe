@@ -15,6 +15,9 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ptAdminCommon from "@/locales/pt/admin-common.json";
+import ptDatasets from "@/locales/pt/admin-datasets.json";
+import ptReuses from "@/locales/pt/admin-reuses.json";
+import ptDataservices from "@/locales/pt/admin-dataservices.json";
 
 const translate = (key: string): string => {
   const raw = key
@@ -158,6 +161,39 @@ describe("ResourceStatusBadge", () => {
         root.render(<ResourceStatusBadge item={{ private: false }} display="pill" />);
       });
       expect(container.textContent?.trim()).toBe(ptAdminCommon.status.public);
+    });
+  });
+
+  /**
+   * 🚩 Found on screen, not by a test: the pill said EXCLUÍDO while the banner
+   * two centimetres above it said "foi eliminado" -- two words for one state,
+   * on one screen. The banners were written with the verb the rest of the
+   * interface uses ("Eliminar"), and the pill came from a key that said
+   * something else.
+   *
+   * This pins the agreement rather than the words: whatever the status is
+   * called, the banners that describe it must use the same stem.
+   */
+  describe("the badge's words agree with the banners", () => {
+    const BANNERS = [
+      ["admin-datasets", ptDatasets],
+      ["admin-reuses", ptReuses],
+      ["admin-dataservices", ptDataservices],
+    ] as const;
+
+    // "Eliminado" -> "eliminad", which both "eliminado" and "eliminada" contain.
+    const stem = (word: string) => word.toLowerCase().slice(0, -1);
+
+    it.each(BANNERS)("%s says deleted the same way the pill does", (_ns, bundle) => {
+      expect(bundle.edit.deletedBanner.toLowerCase()).toContain(
+        stem(ptAdminCommon.status.deleted)
+      );
+    });
+
+    it.each(BANNERS)("%s says archived the same way the pill does", (_ns, bundle) => {
+      expect(bundle.edit.archivedBanner.toLowerCase()).toContain(
+        stem(ptAdminCommon.status.archived)
+      );
     });
   });
 
