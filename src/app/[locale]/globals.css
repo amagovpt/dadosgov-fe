@@ -653,6 +653,10 @@ header[data-auth-page][data-no-user]:has(.ecosystem-panel-menu[aria-expanded="tr
   fill: currentColor;
 }
 
+.agora-header:has(.general-bar-portal.expanded) .header-institutional {
+  visibility: hidden;
+}
+
 /* ==========================================================================
    [04] FOOTER
    ========================================================================== */
