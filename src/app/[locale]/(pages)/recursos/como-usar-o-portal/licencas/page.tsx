@@ -4,6 +4,13 @@ import { getFaqs } from "@/service/queries/faqs/faqs";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import Anchor from "@/components/Shared/Anchor";
 import { Metadata } from "next";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { Hero } from "@/components/Shared/Hero";
+import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
+import SimpleSiteMap from "@/components/Shared/SiteMap/SimpleSiteMap";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
 
 export const dynamic = "force-dynamic";
 
@@ -24,56 +31,59 @@ export async function generateMetadata(
 
 export default async function page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const { title, actionTitle, body, actions } = await getFaqs("licenses", locale);
+  const remarkPlugins = [remarkGfm]
+  const rehypePlugins = [rehypeRaw, rehypeSanitize]
+  const { hero, sitemap, paragraph } = await getFaqs("licenses", locale);
 
   return (
-    <main className="flex h-full w-full flex-col items-center justify-center">
-      <div className="container flex flex-col py-32">
-        <BreadcrumbDynamic darkMode={false} currentLabel={title} />
-      </div>
-      <div className="container flex flex-col gap-16 py-32 font-sans text-primary-900">
-        <ReactMarkdown
-          components={{
-            h1: ({ children }) => <h1 className="text-2xl-bold">{children}</h1>,
-            h2: ({ children }) => <h2 className="text-xl-bold">{children}</h2>,
-            a: ({ href, children }) => (
-              <Anchor href={href} appearance="link" className="!min-h-[12px] !min-w-[12px] !py-0">
-                {children}
-              </Anchor>
-            ),
-            code: ({ children }) => <code className="text-wrap bg-neutral-100">{children}</code>,
-            pre: ({ children }) => <pre className="bg-neutral-100 leading-6">{children}</pre>,
-            ol: ({ children }) => (
-              <ol className="list-decimal pl-6 [&_li::marker]:font-bold">{children}</ol>
-            ),
-            ul: ({ children }) => <ul className="list-disc pl-6">{children}</ul>,
-            li: ({ children }) => <li className="ml-32">{children}</li>,
-          }}
-        >
-          {body}
-        </ReactMarkdown>
-      </div>
-      {actions && actions.length > 0 && (
-        <div className="container flex flex-col gap-16 pb-32">
-          <div className="flex w-full flex-col gap-16 text-primary-900">
-            <h2 className="text-2xl-bold">{actionTitle}</h2>
-          </div>
-          <ul className="pl-6">
-            {actions.map((action, index) => (
-              <li key={index} className="ml-32">
-                <Anchor
-                  href={action.href || "#"}
-                  hasIcon={true}
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                >
-                  {action.children}
-                </Anchor>
-              </li>
-            ))}
-          </ul>
+    <main className="w-full h-full flex flex-col items-center justify-center ">
+      <Hero.Root>
+        <Hero.Breadcrumb />
+        <Hero.Content>
+          <Hero.Title>{hero.title}</Hero.Title>
+          <Hero.Description description={parseHtmlToParagraphs(hero.description)} />
+        </Hero.Content>
+      </Hero.Root>
+      <div className="container grid grid-cols-12 gap-32 pt-64 pb-96 roadmap-page">
+        <div className="md:col-span-3 hidden md:block">
+          <SimpleSiteMap
+            title={sitemap.title}
+            anchor={sitemap.links.map(anchor => ({
+              children: anchor.children,
+              href: anchor.href,
+            }))}
+          />
         </div>
-      )}
-    </main>
+        <div className="col-span-12 md:col-span-9 flex flex-col gap-64 pl-64 h-full ">
+          {paragraph.map((item, index) => (
+            <div className='w-full flex flex-col gap-24' id={item.id} key={index}>
+              <Typograph tag='h2' className='text-xl-bold text-neutral-900'>
+                {item.title}
+              </Typograph>
+              <div className='roadmap-block gap-16 flex flex-col'>
+                <ReactMarkdown
+                  remarkPlugins={remarkPlugins}
+                  rehypePlugins={rehypePlugins}
+                  components={{
+                    h2: ({ children }) => <h2 className="text-xl-bold text-primary-900">{children}</h2>,
+                    a: ({ href, children }) => (
+                      <Anchor href={href} appearance='link' className="py-0! min-h-12! min-w-12!" >
+                        {children}
+                      </Anchor>
+                    ),
+                    strong: ({ children }) => <strong className='text-m-semibold'>{children}</strong>,
+                    ol: ({ children }) => <ol className="list-decimal pl-6 [&_li::marker]:font-bold">{children}</ol>,
+                    ul: ({ children }) => <ul className="list-disc pl-6">{children}</ul>,
+                    li: ({ children }) => <li className="ml-32">{children}</li>,
+                  }}
+                >
+                  {item.description}
+                </ReactMarkdown>
+              </div>
+            </div>
+          ))}
+        </div >
+      </div >
+    </main >
   );
 }

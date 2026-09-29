@@ -34,6 +34,7 @@ export async function getFaqs(slug: string, locale: string = "pt") {
                   ${locale} {
                     title
                     description
+                    updatedAt
                   }
                 }
                 paragraph {

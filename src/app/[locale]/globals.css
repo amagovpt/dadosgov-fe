@@ -462,6 +462,18 @@ body {
 }
 
 /* 3.3 Header Navigation Panels */
+@media (min-width: 1280px) {
+  .agora-header .navigation-links-layout {
+    left: 50%;
+    width: 100vw;
+    translate: -50% 0;
+  }
+
+  .agora-header .navigation-bar-portal {
+    overflow-x: clip;
+  }
+}
+
 .agora-header .navigation-links-layout > .title {
   display: none;
 }

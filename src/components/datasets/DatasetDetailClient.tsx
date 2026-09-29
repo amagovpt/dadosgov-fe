@@ -7,11 +7,11 @@ import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
-  Pill,
   ProgressBar,
   CardExpandable,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { Dataset } from "@/service/types/dataset";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
@@ -106,8 +106,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
 
       {/* Actions */}
       <div className="container flex items-center justify-end gap-16">
-        {dataset.private && <Pill variant="warning">{tds("detail.draft")}</Pill>}
-        {dataset.archived && <Pill variant="neutral">{tds("detail.archived")}</Pill>}
+        <ResourceStatusBadge item={dataset} display="pill" hidePublic />
         <Button
           variant="neutral"
           appearance="link"
