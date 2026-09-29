@@ -1,27 +1,48 @@
 "use client";
 
 import React from "react";
-import type { FaqCategory } from "@/service/types/support";
+import type { AnchoredFaqCategory } from "@/service/types/support";
 import { FaqAccordionItem } from "./FaqAccordionItem";
 
 interface FaqSectionProps {
   title: string;
   updatedDate: string;
-  categories: FaqCategory[];
+  /** Enabled categories, each with only its enabled items. */
+  categories: AnchoredFaqCategory[];
+  /** Current URL hash, without the leading `#`. */
+  hash: string;
 }
 
-export function FaqSection({ title, updatedDate, categories }: FaqSectionProps) {
-  const enabledCategories = React.useMemo(
-    () =>
-      categories
-        .filter((category) => category.enabled !== false)
-        .map((category) => ({
-          ...category,
-          items: category.items.filter((item) => item.enabled !== false),
-        })),
-    [categories]
-  );
+export function FaqSection({ title, updatedDate, categories, hash }: FaqSectionProps) {
+  const anchorToId = React.useMemo(() => {
+    const map = new Map<string, string>();
+    categories.forEach((category, idx) =>
+      category.items.forEach((item, itemIdx) => map.set(item.anchor, `${idx}-${itemIdx}`))
+    );
+    return map;
+  }, [categories]);
+
   const [expandedId, setExpandedId] = React.useState<string | null>(null);
+
+  // A hash naming a question opens its accordion. Adjusted during render (not in an effect) so
+  // the accordion is already open in the commit that scrolls to it. Starts at "" because the
+  // hash is only known after hydration.
+  const [handledHash, setHandledHash] = React.useState("");
+  if (hash !== handledHash) {
+    setHandledHash(hash);
+    const targetId = anchorToId.get(hash);
+    if (targetId) setExpandedId(targetId);
+  }
+
+  // The browser scrolls to the anchor on load, but before hydration and before the accordion
+  // opens; on in-page hash changes the accordion remounts. Scroll again once it is open.
+  React.useEffect(() => {
+    if (!anchorToId.has(hash)) return;
+    const frame = requestAnimationFrame(() =>
+      document.getElementById(hash)?.scrollIntoView({ block: "start" })
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [hash, anchorToId]);
 
   const handleExpanded = (id: string) => setExpandedId(id);
   const handleCollapsed = (id: string) => {
@@ -34,7 +55,7 @@ export function FaqSection({ title, updatedDate, categories }: FaqSectionProps) 
       <h2 className="mb-32 text-xl-semibold text-primary-900">{title}</h2>
 
       <div className="space-y-48">
-        {enabledCategories.map((category, idx) => (
+        {categories.map((category, idx) => (
           <section
             key={category.id}
             id={category.id}
@@ -48,6 +69,7 @@ export function FaqSection({ title, updatedDate, categories }: FaqSectionProps) 
                   <FaqAccordionItem
                     key={currentId}
                     item={item}
+                    anchorId={item.anchor}
                     currentId={currentId}
                     expandedId={expandedId}
                     onExpanded={handleExpanded}

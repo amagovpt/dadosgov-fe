@@ -72,6 +72,14 @@ export async function getSupportPage(locale: string = "pt"): Promise<SupportPage
               }
             }
           }
+          faqAnchorSources: faqSections {
+            pt {
+              id
+              items {
+                title
+              }
+            }
+          }
           helpCard {
             ${locale} {
               id

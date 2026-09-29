@@ -6,6 +6,8 @@ import type { FaqItem } from "@/service/types/support";
 
 interface FaqAccordionItemProps {
   item: FaqItem;
+  // URL-hash anchor (`#<anchorId>`) that scrolls to and opens this item
+  anchorId?: string;
   currentId: string;
   expandedId: string | null;
   onExpanded: (id: string) => void;
@@ -14,6 +16,7 @@ interface FaqAccordionItemProps {
 
 export function FaqAccordionItem({
   item,
+  anchorId,
   currentId,
   expandedId,
   onExpanded,
@@ -22,6 +25,8 @@ export function FaqAccordionItem({
   return (
     <Accordion
       key={`${currentId}-${expandedId === currentId}`}
+      id={anchorId}
+      className="scroll-mt-[200px]!"
       headingTitle={
         <span className="mr-16 font-bold text-[#2B363C]">{item.title}</span>
       }
