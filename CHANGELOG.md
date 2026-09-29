@@ -16,6 +16,13 @@ This project has no version tags, so entries are grouped by month (newest first)
     states and their order — deleted over archived over private — live in one place instead of
     being decided again per screen. Dataservices had two pills that could disagree on screen;
     it has one.
+  - A deleted resource is now called **eliminado** everywhere. The pill read EXCLUÍDO while the
+    new banner above it said "foi eliminado" — two words for one state on one screen, which
+    nobody could see before because the datasets screen had no banner. Every action in the
+    interface already says *Eliminar*, and admin-community-resources had been saying *Eliminado*
+    all along, so this makes the namespaces agree rather than adding a third word. A test pins
+    the agreement itself: whatever a status is called, the banners describing it must share its
+    stem.
   - The public pages had the same defect in a different shape: two independent conditions, so a
     resource that was private **and** archived showed both pills at once, and none of the three
     pages knew about deleted — a deleted dataset's page said nothing at all. They now share the
