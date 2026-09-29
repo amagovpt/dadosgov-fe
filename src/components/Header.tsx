@@ -418,7 +418,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
           >
             <NavigationSection>
               <NavigationArea
-                className="absolute hover:cursor-text hover:no-underline [&.navigation-area.selected]:border-t-0! [&.navigation-area.selected]:bg-transparent! left-0! top-[-68px]!"
+                className="header-institutional absolute hover:cursor-text hover:no-underline [&.navigation-area.selected]:border-t-0! [&.navigation-area.selected]:bg-transparent! left-0! top-[-68px]!"
               >
                 {data.institutional}
               </NavigationArea>
