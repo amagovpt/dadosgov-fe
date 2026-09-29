@@ -21,7 +21,7 @@ export function LegaisAnswer() {
         <p className="font-bold">{t("legalAnswers.removalRequestTitle")}</p>
         <p>
           {t("legalAnswers.supportPrefix")}{" "}
-          <FaqLink href="/ajuda-e-contactos#help">
+          <FaqLink href="/ajuda-e-contactos#ajuda">
             {t("legalAnswers.supportLink")}
           </FaqLink>
         </p>

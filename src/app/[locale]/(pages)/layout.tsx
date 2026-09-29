@@ -1,7 +1,6 @@
 import { ReactNode, Suspense } from "react";
 import { HeaderWrapper } from "@/components/HeaderWrapper";
 import NewAccountNotice from "@/components/login/NewAccountNotice";
-import { MigrationInvite } from "@/components/login/MigrationInvite";
 import { MigrationInviteGate } from "@/components/login/MigrationInviteGate";
 import ConfirmEmailNotice from "@/components/login/ConfirmEmailNotice";
 import CompleteRegistrationGate from "@/components/login/CompleteRegistrationGate";
@@ -27,7 +26,6 @@ export default async function PagesLayout({
       <HeaderWrapper data={headerNavigation} />
       <Suspense fallback={null}>
         <NewAccountNotice />
-        <MigrationInvite />
       </Suspense>
       <Suspense fallback={null}>
         <ConfirmEmailNotice />

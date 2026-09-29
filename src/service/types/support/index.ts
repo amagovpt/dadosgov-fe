@@ -11,6 +11,15 @@ export interface FaqCategory {
   items: FaqItem[];
 }
 
+export interface FaqAnchorSource {
+  id: string;
+  items: string[];
+}
+
+export interface AnchoredFaqCategory extends FaqCategory {
+  items: (FaqItem & { anchor: string })[];
+}
+
 export interface SupportAnchor {
   children: string;
   href: string;
@@ -42,6 +51,7 @@ export interface SupportPageContent {
   hero: SupportHeroContent;
   faqUpdatedDate: string;
   faqSections: FaqCategory[];
+  faqAnchorSources?: FaqAnchorSource[];
   helpCard: SupportCardContent;
   questionInfoCard: SupportCardContent;
   feedbackInfoCard: SupportCardContent;

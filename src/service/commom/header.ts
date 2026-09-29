@@ -8,6 +8,9 @@ export async function getHeaderNavigation(locale: string = "pt"): Promise<Header
         query GetHeaderNavigation {
          findHeaderNavigationSingleton {
             data {
+                institutional{
+                    ${locale}
+                }
                 authMenuItems {
                     ${locale}{
                     bgColor

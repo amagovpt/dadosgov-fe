@@ -103,8 +103,6 @@
     "viewPublicPage": "Ver página pública",
     "deletedBanner": "Esta reutilização foi eliminada e a sua página pública não está disponível.",
     "archivedBanner": "Esta reutilização está arquivada e a sua página pública não está disponível.",
-    "statusDraft": "RASCUNHO",
-    "statusPublic": "PÚBLICO",
     "statusFeatured": "DESTAQUE",
     "viewsCount": "{{count}} visualizações",
     "favoritesCount": "{{count}} favoritos",

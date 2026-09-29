@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { useTranslation } from "react-i18next";
-import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
+import { usePathname, useRouter } from "next/navigation";
+import { Trans, useTranslation } from "react-i18next";
+import { Button, CardExpandable, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
 import { useAuth } from "@/context/AuthContext";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import { Typograph } from "../Shared/Generics/Typograph";
 import { MigrationInviteContent } from "./MigrationInviteContent";
-import { submitSamlForm } from "./loginUtils";
+import { isOnFlowRoute, submitSamlForm } from "./loginUtils";
+import MigrationActions from "./MigrationActions";
 
 /**
  * The optional invitation to link a CMD/eIDAS identity to an account that
@@ -30,34 +32,6 @@ import { submitSamlForm } from "./loginUtils";
  * returns after a month, and the way back stays open to somebody who
  * dismissed it and changed their mind.
  */
-/**
- * Every page about signing in, and none of them is a place to be invited to
- * link an account.
- *
- * 🚩 Two different ways it reads wrong, and both were seen on screen:
- *
- *  - on the flow's own pages (migrate-account, complete-registration) it
- *    invites somebody to start what they are in the middle of, which reads as
- *    "the first step did not work" -- and its buttons restart the flow from
- *    scratch, throwing away what they have already done;
- *  - on /login after a refusal it contradicts the refusal outright: "Associe a
- *    sua conta" directly above "Não foi possível associar", with buttons that
- *    would repeat the same doomed round-trip. The notice appears there at all
- *    because the remember-me cookie keeps /me answering after the refusal
- *    logged the session out.
- *
- * Matched by path segment so neither a locale prefix nor a sub-route slips
- * past.
- */
-const FLOW_ROUTES = [
-  "migrate-account",
-  "complete-registration",
-  "login",
-  "loginregister",
-  "register",
-  "reset-password",
-];
-
 const HIDDEN_KEY = "migrationInviteHiddenForVisit";
 
 /** Every access is guarded: a browser may refuse storage outright, and the
@@ -84,6 +58,8 @@ function hideForThisVisit(): void {
 
 export function MigrationInvite() {
   const { t } = useTranslation("login");
+  const routerNav = useRouter();
+  const localize = useLocalizedHref();
   const { migrationInvite, migrationLinkAvailable, isLoading: authLoading } = useAuth();
   const pathname = usePathname();
   // Hidden for THIS visit, and nowhere else. Read through a window guard
@@ -94,12 +70,11 @@ export function MigrationInvite() {
   // No hydration risk despite reading during render: AuthContext starts with
   // isLoading true, so the banner never reaches its output on the server.
   const [dismissed, setDismissed] = useState(() => readHiddenForThisVisit());
-  const [expanded, setExpanded] = useState(false);
 
   // isLoading is in the condition for hydration, not for looks: /me is fetched
   // in the browser, so the server renders nothing and a client that answered
   // before React hydrated would render the notice into HTML that never had it.
-  const onFlowPage = (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
+  const onFlowPage = isOnFlowRoute(pathname);
 
   // 🚩 The reminder stays at home. The full screen reaches the citizen every
   // eight days wherever they are, and it is the one carrying the whole
@@ -114,24 +89,6 @@ export function MigrationInvite() {
   // it is counted rather than matched, and a new locale needs no change here.
   const onHomepage = (pathname ?? "/").split("/").filter(Boolean).length <= 1;
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Says whether SAML is wired up at all, so whether a button can work. Never
-  // whether an ACCOUNT should link -- that is the backend's answer above.
-  const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
-
-  const startLink = async (endpoint: string) => {
-    setIsLoading(true);
-    setError(null);
-    const samlError = await submitSamlForm(endpoint, t);
-    if (samlError) {
-      setError(samlError);
-      setIsLoading(false);
-    }
-    // No else: on success the page is already navigating away to the IdP.
-  };
-
   // 🚩 NOTHING IS SENT TO THE SERVER, and that is the decision this ticket
   // carries. The date in extras belongs to the full screen alone: it is what
   // buys the eight days of quiet. If the banner wrote it too, closing the
@@ -139,9 +96,11 @@ export function MigrationInvite() {
   // screen is the one that carries the whole invitation.
   //
   // So the banner hides for the visit and the count keeps running underneath.
-  const handleDismiss = () => {
+  const handleDismiss = (goTo?: string) => {
     setDismissed(true);
     hideForThisVisit();
+    // Localized so the i18n proxy's 307 does not drop the `#anchor` (see MigrationInviteGate).
+    if (goTo) routerNav.push(localize(goTo));
   };
 
   // 🚩 The three states are disjoint, and this is the line that makes them so.
@@ -157,72 +116,29 @@ export function MigrationInvite() {
   if (authLoading || onFlowPage || !onHomepage || !inQuietState || dismissed) return null;
 
   return (
-    <div
-      role="status"
-      className="container mx-auto my-16 flex max-w-7xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-16"
+    <CardExpandable
+      variant={"secondary-100"}
+      showBookmarkIcon={false}
+      hasIcon
+      leadingIcon="agora-line-social-security"
+      leadingIconHover="agora-line-social-security"
+      cardHeadingLevel={"h3"}
+      cardTitle={t("MigrationInviteSection.title")}
+      cardSubtitle={
+        <Trans t={t} i18nKey="MigrationInviteSection.shortDescription" components={{ b: <b /> }} />
+      }
+      accordionHeadingTitle={t("migrationInvite.bannerMore")}
     >
-      {error && <StatusCard variant="danger" showIcon description={error} />}
+      <div className="flex flex-col gap-32">
+        <Typograph
+          tag="p"
+          className="max-w-[592px] text-m-regular whitespace-pre-line text-primary-900"
+        >
+          <Trans t={t} i18nKey="MigrationInviteSection.longDescription" components={{ b: <b /> }} />
+        </Typograph>
 
-      <div className="flex items-start gap-16">
-        <Icon
-          name="agora-line-info-mark"
-          className="h-24 w-24 shrink-0 text-informative-600"
-          aria-hidden
-        />
-        <div className="flex flex-grow flex-col gap-16">
-          {/* Short by default. The full screen carries the whole invitation
-              every eight days; repeating all six sentences on every page in
-              between is how a notice stops being read. */}
-          {expanded ? (
-            <MigrationInviteContent variant="banner" onDismiss={handleDismiss} />
-          ) : (
-            <>
-              <Typograph tag="p" className="text-sm text-neutral-900">
-                {t("migrationInvite.bannerSummary")}
-              </Typograph>
-              <div className="flex flex-wrap items-center gap-8">
-                <Button
-                  variant="primary"
-                  disabled={!samlEnabled || isLoading}
-                  onClick={() => startLink("/saml/link/start")}
-                >
-                  {t("migrationInvite.linkCmd")}
-                </Button>
-                {/* Outline, not solid. Two filled buttons in a reminder pull
-                    harder than the page's own primary action, which is what
-                    the person came to do. One highlighted, one available. */}
-                <Button
-                  variant="neutral"
-                  appearance="outline"
-                  disabled={!samlEnabled || isLoading}
-                  onClick={() => startLink("/saml/eidas/link/start")}
-                >
-                  {t("migrationInvite.linkEidas")}
-                </Button>
-                <Button variant="neutral" appearance="outline" onClick={handleDismiss}>
-                  {t("migrationInvite.dismiss")}
-                </Button>
-              </div>
-            </>
-          )}
-          {/* 🚩 The way to the rest, and it opens IN PLACE. There is no page to
-              link to: LEDG-2547 renders the full invitation instead of the
-              page rather than navigating, precisely so nobody loses where they
-              were going. The same reasoning applies here.
-
-              What must survive the shortening is the condition that linking
-              only works on an identity no other account holds -- without it
-              somebody travels to the IdP to be refused at the end. */}
-          <Button
-            variant="primary"
-            appearance="link"
-            className="h-auto self-start p-0 text-sm"
-            onClick={() => setExpanded((open) => !open)}
-          >
-            {t(expanded ? "migrationInvite.bannerLess" : "migrationInvite.bannerMore")}
-          </Button>
-        </div>
+        <MigrationActions onDismiss={handleDismiss} isInsideCard />
       </div>
-    </div>
+    </CardExpandable>
   );
 }

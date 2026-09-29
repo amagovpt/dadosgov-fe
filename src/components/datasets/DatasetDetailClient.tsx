@@ -7,11 +7,11 @@ import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
-  Pill,
   ProgressBar,
   CardExpandable,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { Dataset } from "@/service/types/dataset";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
@@ -106,8 +106,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
 
       {/* Actions */}
       <div className="container flex items-center justify-end gap-16">
-        {dataset.private && <Pill variant="warning">{tds("detail.draft")}</Pill>}
-        {dataset.archived && <Pill variant="neutral">{tds("detail.archived")}</Pill>}
+        <ResourceStatusBadge item={dataset} display="pill" hidePublic />
         <Button
           variant="neutral"
           appearance="link"
@@ -156,7 +155,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
         {/* Sidebar */}
         <div className="xl:col-span-6">
           <div className="flex h-fit flex-col" ref={sidebarRef}>
-            <div className="mb-16 flex flex-col gap-16 rounded-4 bg-[#F2F6FF] p-32">
+            <div className="mb-16 flex flex-col gap-16 rounded-4 bg-primary-100 p-32">
               {dataset.organization?.logo ? (
                 <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
                   <img
@@ -214,7 +213,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
                     <TextLink
                       href={
                         dataset.license_url ||
-                        `/licenses/${dataset.license}/`
+                        `/recursos/como-usar-o-portal/licencas#${dataset.license}`
                       }
                       target="_blank"
                     >
@@ -250,13 +249,13 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
 
             {/* Metrics */}
             <div className="mb-16 grid grid-cols-2 gap-16">
-              <div className="rounded-4 bg-[#F2F6FF] p-32">
+              <div className="rounded-4 bg-primary-100 p-32">
                 <div className="text-sm mb-8">{tds("detail.views")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataset.metrics?.views)}
                 </div>
               </div>
-              <div className="rounded-4 bg-[#F2F6FF] p-32">
+              <div className="rounded-4 bg-primary-100 p-32">
                 <div className="text-sm mb-8">{tds("detail.downloads")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataset.metrics?.resources_downloads)}

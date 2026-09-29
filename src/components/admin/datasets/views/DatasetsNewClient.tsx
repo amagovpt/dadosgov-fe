@@ -40,6 +40,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
     <AdminLayout
       breadcrumbItems={[
         { label: t("admin-datasets:form.breadcrumbs.datasets"), url: "/admin/me/datasets" },
+        { label: pageTitle || t("admin-common:breadcrumbs.new") },
       ]}
       title={pageTitle}
     >

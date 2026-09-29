@@ -36,7 +36,7 @@ export default function DatastoryIndex({ title, anchors, darkMode = true }: Data
                 href={anchor.href}
                 appearance={"link"}
                 variant={"neutral"}
-                className="[&>*]:w-full"
+                className="*:w-full"
               >
                 <div className="flex w-full flex-row gap-8">
                   {anchor?.icon && (

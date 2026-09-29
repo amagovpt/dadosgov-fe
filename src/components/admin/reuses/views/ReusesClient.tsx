@@ -157,6 +157,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
       isLoading={isLoading}
       count={usesLocalFallback ? filteredReuses.length : totalItems}
       hasItems={paginatedReuses.length > 0}
+      hasActiveFilters={statusFilter !== ""}
       currentPage={currentPage}
       pageSize={itemsPerPage}
       setCurrentPage={setCurrentPage}

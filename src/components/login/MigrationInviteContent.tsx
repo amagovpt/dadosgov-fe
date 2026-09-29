@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { LocalizedLink } from "@/components/Shared/LocalizedLink";
 import { useTranslation } from "react-i18next";
 import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
@@ -132,8 +132,8 @@ export function MigrationInviteContent({
             <Typograph tag="p" className="text-sm">
               {t("migrationInvite.alreadyTwoLimitation")}
             </Typograph>
-            <Link
-              href="/ajuda-e-contactos"
+            <LocalizedLink
+              href="/ajuda-e-contactos#ajuda"
               className="flex items-center gap-8 text-sm text-informative-600"
             >
               {t("migrationInvite.alreadyTwoLink")}
@@ -142,7 +142,7 @@ export function MigrationInviteContent({
                 className="h-16 w-16 text-informative-600"
                 aria-hidden
               />
-            </Link>
+            </LocalizedLink>
           </div>
         }
       />

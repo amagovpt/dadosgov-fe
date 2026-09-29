@@ -28,6 +28,8 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
   };
 
   return sections?.map((section, index) => {
+    if (section?.active === false) return null;
+
     switch (section.schemaName) {
       case "section-datastory-timeline":
         return (
@@ -55,11 +57,7 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
         );
       case "section-datastory-bignumbers-iframe":
         return (
-          <Iframe
-            key={`section-${index}`}
-            {...section}
-            className={"bg-primary-700 -mb-104"}
-          />
+          <Iframe key={`section-${index}`} {...section} className={"-mb-104 bg-primary-700"} />
         );
       case "section-datastory-related-datastory":
         return <RelatedDatastories key={`section-${index}`} {...section} />;

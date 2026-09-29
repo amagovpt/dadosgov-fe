@@ -26,6 +26,7 @@ export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
     <AdminLayout
       breadcrumbItems={[
         { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
+        { label: pageTitle || t("admin-common:breadcrumbs.new") },
       ]}
       title={pageTitle}
     >

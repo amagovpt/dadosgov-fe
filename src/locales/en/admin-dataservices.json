@@ -43,9 +43,6 @@
     "breadcrumb": "Edit",
     "notFound": "API not found.",
     "viewPublicPage": "View public page",
-    "draftStatus": "DRAFT",
-    "publicStatus": "PUBLIC",
-    "archivedStatus": "ARCHIVED",
     "views_one": "{{count}} view",
     "views_other": "{{count}} views",
     "favorites_one": "{{count}} favorite",
@@ -86,7 +83,9 @@
     "activitiesEmptyTitle": "No activities",
     "activitiesEmptyDescription": "There are no activities registered on this API yet.",
     "activitiesCount_one": "{{count}} ACTIVITY",
-    "activitiesCount_other": "{{count}} ACTIVITIES"
+    "activitiesCount_other": "{{count}} ACTIVITIES",
+    "deletedBanner": "This API was deleted and its public page is not available.",
+    "archivedBanner": "This API is archived and its public page is not available."
   },
   "fields": {
     "description": "Description",
