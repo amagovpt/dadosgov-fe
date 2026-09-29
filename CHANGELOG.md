@@ -6,6 +6,49 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the linking invite no longer covers the page that completes it**
+  - Pressing "Associar" on the invite screen, authenticating with the identity provider and
+    coming back landed on the invite screen again, so nobody could finish linking an identity
+    at all. The backend redirects correctly to the confirmation step; that page sits under the
+    layout that wraps everything in the invite gate, and the gate decided without looking at
+    the path. The invite stays true across the whole round trip — the linking is not finished,
+    the confirmation is exactly what is missing — so it drew itself over the page that
+    concludes it.
+  - The gate renders in place precisely to avoid the five ways a redirect traps somebody. It
+    found a sixth: a screen that covers every page also covers the destination of its own flow.
+    The banner had been standing down on these pages since the start; the gate, which covers
+    far more, never was — because the list of those pages was written inside the banner. It now
+    lives in one place both import, with the test that mounts the gate over the confirmation
+    page and was missing from the day the gate was written.
+
+- **fix(admin): archived and deleted resources say so on the edit screen**
+  - The status label on every edit screen read `private` alone, so a dataset, reuse or
+    dataservice that had been archived or deleted went on showing RASCUNHO or PÚBLICO. The
+    backend had stored and served both fields all along — only the screens ignored them, and on
+    datasets the label contradicted the button beside it, which offered "Desarquivar" on
+    something the label called a draft.
+  - The three screens now share the badge the four listings were already using, so the four
+    states and their order — deleted over archived over private — live in one place instead of
+    being decided again per screen. Dataservices had two pills that could disagree on screen;
+    it has one.
+  - A deleted resource is now called **eliminado** everywhere. The pill read EXCLUÍDO while the
+    new banner above it said "foi eliminado" — two words for one state on one screen, which
+    nobody could see before because the datasets screen had no banner. Every action in the
+    interface already says *Eliminar*, and admin-community-resources had been saying *Eliminado*
+    all along, so this makes the namespaces agree rather than adding a third word. A test pins
+    the agreement itself: whatever a status is called, the banners describing it must share its
+    stem.
+  - The public pages had the same defect in a different shape: two independent conditions, so a
+    resource that was private **and** archived showed both pills at once, and none of the three
+    pages knew about deleted — a deleted dataset's page said nothing at all. They now share the
+    badge too, and keep flagging only what is worth flagging: an ordinary public resource still
+    shows no pill.
+  - The warning that a resource is archived or deleted existed only on reuses, where the rule
+    for a resource that is both was written by hand. It moves into a shared component, so
+    datasets and dataservices gain it without a third and fourth copy of the same guard. Both
+    it and the badge get the tests neither had — which is how a wrong status on three screens
+    went unnoticed for months.
+
 - **feat(login): the linking banner says one line, and closing it stops writing to the database**
   - The full screen carries the whole invitation every eight days. Repeating all six sentences
     above every page in between is how a notice stops being read at all, so the banner keeps a

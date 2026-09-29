@@ -4,7 +4,9 @@ import { useState, type ReactNode } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 import { dismissMigrationInvite } from "@/service/api/migration";
-import { MigrationInviteContent } from "./MigrationInviteContent";
+import { isOnFlowRoute } from "./loginUtils";
+import { MigrationInviteSection } from "./MigrationInviteSection";
+import { usePathname, useRouter } from "next/navigation";
 
 /**
  * The loud half of the invitation (LEDG-2547): while an account has never
@@ -35,9 +37,12 @@ import { MigrationInviteContent } from "./MigrationInviteContent";
  */
 export function MigrationInviteGate({ children }: { children: ReactNode }) {
   const { migrationInvite, isLoading, refresh } = useAuth();
+  const routerNav = useRouter();
+  const pathname = usePathname();
+
   const [dismissed, setDismissed] = useState(false);
 
-  const handleDismiss = async () => {
+  const handleDismiss = async (goTo?: string) => {
     // Released first, confirmed after. A screen that holds the portal hostage
     // while a request completes reads as a broken button -- and if the write
     // fails there is nothing the citizen can do about it, so making them wait
@@ -49,6 +54,8 @@ export function MigrationInviteGate({ children }: { children: ReactNode }) {
       await refresh();
     } catch {
       // Deliberately silent: nothing was lost, and nothing they can act on.
+    } finally {
+      if (goTo) routerNav.push(goTo);
     }
   };
 
@@ -56,11 +63,25 @@ export function MigrationInviteGate({ children }: { children: ReactNode }) {
   // in the browser, so the server renders the page and a client that answered
   // before React hydrated would swap it for the invite in HTML that never had
   // it. Waiting makes both passes agree on the page.
-  if (isLoading || !migrationInvite || dismissed) return <>{children}</>;
+  // isOnFlowRoute is the sixth trap, and it cost somebody the whole flow
+  // (LEDG-2571): rendering in place avoids the five a redirect brings, but a
+  // screen that covers every page also covers /migrate-account -- the page
+  // that CONCLUDES the linking its own button just started. The invite stays
+  // true throughout that round trip, because the linking is not finished, so
+  // whoever came back from the identity provider landed on this screen again
+  // and could never reach the confirmation step.
+  //
+  // The banner had been standing down on these pages since the start. The
+  // gate, which covers far more, never was.
+  if (isLoading || !migrationInvite || dismissed || isOnFlowRoute(pathname)) {
+    return <>{children}</>;
+  }
 
   return (
-    <div className="container mx-auto my-32 flex max-w-4xl flex-col gap-16 rounded-8 border border-informative-300 bg-informative-50 p-24">
-      <MigrationInviteContent variant="screen" onDismiss={handleDismiss} />
+    <div className="container mx-auto pt-64 pb-96">
+      <div className="max-w-[696px]">
+        <MigrationInviteSection onDismiss={handleDismiss} />
+      </div>
     </div>
   );
 }

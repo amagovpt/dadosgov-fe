@@ -18,6 +18,13 @@ export function isSameProfile(a: ActiveProfile, b: ActiveProfile): boolean {
   return true;
 }
 
+/** The route prefix a profile's admin pages live under. */
+export function adminProfileBasePath(profile: ActiveProfile): string {
+  if (profile.type === "organization") return `/admin/org/${profile.orgId}`;
+  if (profile.type === "system") return "/admin/system";
+  return "/admin/me";
+}
+
 interface ActiveProfileContextProps {
   activeProfile: ActiveProfile;
   isLoading: boolean;
@@ -25,6 +32,42 @@ interface ActiveProfileContextProps {
 }
 
 const PERSONAL_PROFILE: ActiveProfile = { type: "personal" };
+
+type ProfilePreference = { userId: string; profile: ActiveProfile };
+
+// Per tab, so two tabs can work in different profiles; it ends with the tab.
+const ACTIVE_PROFILE_STORAGE_KEY = "admin-active-profile";
+
+function readStoredPreference(): ProfilePreference | null {
+  try {
+    const raw = sessionStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<ProfilePreference>;
+    const profile = parsed?.profile as Partial<Record<string, unknown>> | undefined;
+    if (typeof parsed?.userId !== "string" || !profile) return null;
+    if (profile.type === "personal" || profile.type === "system") {
+      return { userId: parsed.userId, profile: { type: profile.type } };
+    }
+    if (profile.type === "organization" && typeof profile.orgId === "string") {
+      return { userId: parsed.userId, profile: { type: "organization", orgId: profile.orgId } };
+    }
+  } catch {
+    // Storage unavailable or corrupt: start from the default profile.
+  }
+  return null;
+}
+
+function writeStoredPreference(preference: ProfilePreference | null) {
+  try {
+    if (preference) {
+      sessionStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, JSON.stringify(preference));
+    } else {
+      sessionStorage.removeItem(ACTIVE_PROFILE_STORAGE_KEY);
+    }
+  } catch {
+    // Storage unavailable: the preference still lives in memory for this page.
+  }
+}
 
 const ActiveProfileContext = createContext<ActiveProfileContextProps>({
   activeProfile: PERSONAL_PROFILE,
@@ -42,10 +85,16 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     userId: string;
     organizations: Record<string, Organization | null>;
   } | null>(null);
-  const [preference, setPreference] = useState<{
-    userId: string;
-    profile: ActiveProfile;
-  } | null>(null);
+  const [preference, setPreference] = useState<ProfilePreference | null>(null);
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    // Read after mount, not in the initializer: the server has no sessionStorage and
+    // a different first render would not hydrate.
+    const stored = readStoredPreference();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (stored) setPreference(stored);
+    setRestored(true);
+  }, []);
   useEffect(() => {
     // Visited profiles belong only to the current account and admin session.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -108,7 +157,8 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
     visited !== null &&
     visited.userId === userId &&
     Object.hasOwn(visited.organizations, externalOrgId);
-  const isLoading = isAuthLoading || (externalOrgId !== null && !hasResolvedOrganization);
+  const isLoading =
+    !restored || isAuthLoading || (externalOrgId !== null && !hasResolvedOrganization);
 
   useEffect(() => {
     if (!externalOrgId || !userId || isAuthLoading || hasResolvedOrganization) return;
@@ -132,17 +182,24 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
   }, [externalOrgId, userId, isAuthLoading, hasResolvedOrganization]);
 
   useEffect(() => {
+    if (!restored) return;
     if (!userId) {
+      // Only a settled "no user" is a logout; while auth resolves, keep what was restored.
+      if (isAuthLoading) return;
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreference(null);
+      writeStoredPreference(null);
     } else if (
       !isLoading &&
       (preference?.userId !== userId || !isSameProfile(preference.profile, activeProfile))
     ) {
-      // Remember the resolved route in memory for visits to an unscoped route.
-      setPreference({ userId, profile: activeProfile });
+      // Remember the resolved route per tab (sessionStorage) for visits to an unscoped
+      // route, so a reload there keeps the profile. `validate()` still vets it on read.
+      const next = { userId, profile: activeProfile };
+      setPreference(next);
+      writeStoredPreference(next);
     }
-  }, [activeProfile, isLoading, preference, userId]);
+  }, [activeProfile, isAuthLoading, isLoading, preference, restored, userId]);
 
   const value = useMemo(
     () => ({ activeProfile, isLoading, organizations }),

@@ -18,6 +18,7 @@ import { fetchAdminDataservices } from "@/service/api/dataservices";
 import { fetchAdminDatasets } from "@/service/api/datasets";
 import { fetchReuses } from "@/service/api/reuses";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { useHasListData } from "@/hooks/admin-lists/useHasListData";
 import type { Dataset } from "@/service/types/dataset";
 import type { Reuse } from "@/service/types/reuse";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
@@ -150,6 +151,9 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
     void loadDataservicesTotal();
   }, [isUserLoading, user]);
 
+  const showDatasetsSearch = useHasListData(isDatasetsLoading, datasetsTotal > 0);
+  const showReusesSearch = useHasListData(isReusesLoading, reusesTotal > 0);
+
   const handleDatasetsSearch = useDebouncedSearch((value: string) => {
     setDatasetsSearch(value);
     setDatasetsPage(1);
@@ -189,17 +193,19 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
                 {t("admin-statistics:states.results", { count: datasetsTotal })}
               </p>
 
-              <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper xl:w-1/2 w-full">
-                  <InputSearchBar
-                    hasVoiceActionButton={false}
-                    label={pageContent.datasetsSearch?.label ?? ""}
-                    placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
-                    aria-label={pageContent.datasetsSearch?.label ?? ""}
-                    onChange={(event) => handleDatasetsSearch(event.target.value)}
-                  />
+              {showDatasetsSearch && (
+                <div className="mb-24 flex items-end gap-16">
+                  <div className="admin-search-wrapper xl:w-1/2 w-full">
+                    <InputSearchBar
+                      hasVoiceActionButton={false}
+                      label={pageContent.datasetsSearch?.label ?? ""}
+                      placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
+                      aria-label={pageContent.datasetsSearch?.label ?? ""}
+                      onChange={(event) => handleDatasetsSearch(event.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {isDatasetsLoading && datasets.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
@@ -246,17 +252,19 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
                 {t("admin-statistics:states.results", { count: reusesTotal })}
               </p>
 
-              <div className="mb-24 flex items-end gap-16">
-                <div className="admin-search-wrapper">
-                  <InputSearchBar
-                    hasVoiceActionButton={false}
-                    label={pageContent.reusesSearch?.label ?? ""}
-                    placeholder={pageContent.reusesSearch?.placeholder ?? ""}
-                    aria-label={pageContent.reusesSearch?.label ?? ""}
-                    onChange={(event) => handleReusesSearch(event.target.value)}
-                  />
+              {showReusesSearch && (
+                <div className="mb-24 flex items-end gap-16">
+                  <div className="admin-search-wrapper">
+                    <InputSearchBar
+                      hasVoiceActionButton={false}
+                      label={pageContent.reusesSearch?.label ?? ""}
+                      placeholder={pageContent.reusesSearch?.placeholder ?? ""}
+                      aria-label={pageContent.reusesSearch?.label ?? ""}
+                      onChange={(event) => handleReusesSearch(event.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {isReusesLoading && reuses.length === 0 ? (
                 <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>

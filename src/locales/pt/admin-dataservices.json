@@ -43,9 +43,6 @@
     "breadcrumb": "Editar",
     "notFound": "API não encontrada.",
     "viewPublicPage": "Ver página pública",
-    "draftStatus": "RASCUNHO",
-    "publicStatus": "PÚBLICO",
-    "archivedStatus": "ARQUIVADO",
     "views_one": "{{count}} visualização",
     "views_other": "{{count}} visualizações",
     "favorites_one": "{{count}} favorito",
@@ -86,7 +83,9 @@
     "activitiesEmptyTitle": "Sem atividades",
     "activitiesEmptyDescription": "Ainda não existem atividades registadas nesta API.",
     "activitiesCount_one": "{{count}} ATIVIDADE",
-    "activitiesCount_other": "{{count}} ATIVIDADES"
+    "activitiesCount_other": "{{count}} ATIVIDADES",
+    "deletedBanner": "Esta API foi eliminada e a sua página pública não está disponível.",
+    "archivedBanner": "Esta API está arquivada e a sua página pública não está disponível."
   },
   "fields": {
     "description": "Descrição",

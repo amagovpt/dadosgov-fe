@@ -436,6 +436,7 @@ export default function HarvesterDetailClient({
               setJobsPage={setJobsPage}
               setJobsPageSize={setJobsPageSize}
               slug={slug}
+              orgId={orgId}
             />
           </TabBody>
         </Tab>

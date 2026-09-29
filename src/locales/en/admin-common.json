@@ -8,7 +8,8 @@
   "breadcrumbs": {
     "administration": "Administration Area",
     "system": "System",
-    "organization": "Organization"
+    "organization": "Organization",
+    "new": "New"
   },
   "filters": {
     "all": "All",

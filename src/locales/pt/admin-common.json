@@ -8,7 +8,8 @@
   "breadcrumbs": {
     "administration": "Área de Administração",
     "system": "Sistema",
-    "organization": "Organização"
+    "organization": "Organização",
+    "new": "Novo"
   },
   "filters": {
     "all": "Todos",
@@ -110,7 +111,7 @@
     }
   },
   "status": {
-    "deleted": "Excluído",
+    "deleted": "Eliminado",
     "archived": "Arquivado",
     "draft": "Rascunho",
     "public": "Público"

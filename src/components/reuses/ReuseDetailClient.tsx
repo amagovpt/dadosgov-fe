@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Button,
   Icon,
-  Pill,
   Tabs,
   Tab,
   TabHeader,
@@ -19,6 +18,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
@@ -152,14 +152,8 @@ export default function ReuseDetailClient({
             </div>
           </div>
 
-          {/* Draft indicator (visible to the producer / org members) */}
-          {reuse.private && (
-            <div className="mt-16">
-              <Pill variant="warning" appearance="solid">
-                {tr("detail.draft")}
-              </Pill>
-            </div>
-          )}
+          {/* Status, shown only when it is not the ordinary public one */}
+          <ResourceStatusBadge item={reuse} display="pill" className="mt-16" hidePublic />
 
           {/* Owner line */}
           {reuse.owner && (

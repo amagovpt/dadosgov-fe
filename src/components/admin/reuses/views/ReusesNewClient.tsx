@@ -6,6 +6,7 @@ import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
 
 interface ReusesNewClientProps {
@@ -14,6 +15,7 @@ interface ReusesNewClientProps {
 
 export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
+  const { activeProfile } = useActiveProfile();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -26,7 +28,8 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: t("admin-reuses:title"), url: "/admin/me/reuses" },
+        { label: t("admin-reuses:title"), url: `${adminProfileBasePath(activeProfile)}/reuses` },
+        { label: pageTitle || t("admin-common:breadcrumbs.new") },
       ]}
       title={pageTitle}
     >
