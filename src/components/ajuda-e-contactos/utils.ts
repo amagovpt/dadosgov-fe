@@ -1,3 +1,39 @@
+import type {
+  AnchoredFaqCategory,
+  FaqAnchorSource,
+  FaqCategory,
+} from "@/service/types/support";
+import { slugify as slugifyAnchor } from "@/utils/slugify";
+
+export const SUPPORT_ANCHORS = {
+  currentPage: "nesta-pagina",
+  help: "ajuda",
+} as const;
+
+/**
+ * Set of IDs in PT for FAQs in /ajuda-e-contactos
+ */
+export function anchorFaqSections(
+  sections: FaqCategory[],
+  ptSources: FaqAnchorSource[] = []
+): AnchoredFaqCategory[] {
+  const ids = sections.map((section, idx) => ptSources[idx]?.id || section.id);
+  const used = new Set(ids);
+  return sections.map((section, idx) => ({
+    ...section,
+    id: ids[idx],
+    items: section.items.map((item, itemIdx) => {
+      const ptTitle = ptSources[idx]?.items?.[itemIdx];
+      const title = (typeof ptTitle === "string" && ptTitle) || item.title;
+      const base = slugifyAnchor(title) || "faq";
+      let anchor = base;
+      for (let n = 2; used.has(anchor); n++) anchor = `${base}-${n}`;
+      used.add(anchor);
+      return { ...item, anchor };
+    }),
+  }));
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

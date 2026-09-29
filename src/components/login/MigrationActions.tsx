@@ -100,7 +100,7 @@ export default function MigrationActions({ onDismiss, isInsideCard = false }: Mi
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-line-arrow-right-circle"
                     className="px-0"
-                    onClick={() => onDismiss("/ajuda-e-contactos")}
+                    onClick={() => onDismiss("/ajuda-e-contactos#ajuda")}
                   >
                     {t("MigrationInviteSection.otherAccount.help")}
                   </Button>

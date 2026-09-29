@@ -37,6 +37,7 @@ vi.mock("react-i18next", () => ({
 let searchParamsMock = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useParams: () => ({ locale: "pt" }),
   usePathname: () => "/login",
   useSearchParams: () => searchParamsMock,
 }));

@@ -6,13 +6,16 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { useSupportForm } from "./hooks/useSupportForm";
-import { shouldPreselectFeedbackFromUrl } from "./utils";
+import { anchorFaqSections, shouldPreselectFeedbackFromUrl, SUPPORT_ANCHORS } from "./utils";
 import { DatasetInfoCard } from "./components/DatasetInfoCard";
 import { FaqSection } from "./components/FaqSection";
 import { SupportForm } from "./components/SupportForm";
 import { SupportHero } from "./components/SupportHero";
 import { SupportSidebar } from "./components/SupportSidebar";
-import type { SupportPageContent as SupportPageContentType } from "@/service/types/support";
+import type {
+  AnchoredFaqCategory,
+  SupportPageContent as SupportPageContentType,
+} from "@/service/types/support";
 
 interface SupportPageContentProps {
   pageContent: SupportPageContentType;
@@ -20,15 +23,16 @@ interface SupportPageContentProps {
 
 function getActiveItemFromHash(
   hash: string,
-  faqSections: SupportPageContentType["faqSections"],
+  faqSections: AnchoredFaqCategory[],
   currentAnchorId: string,
   helpAnchorId: string
 ) {
   if (!hash) return null;
   if (hash === currentAnchorId || hash === helpAnchorId) return hash;
 
-  const section = (faqSections ?? []).find(
-    (section) => section.enabled !== false && section.id === hash
+  // A hash can name a category or one of its questions; either way the category is active.
+  const section = faqSections.find(
+    (section) => section.id === hash || section.items.some((item) => item.anchor === hash)
   );
   return section?.id ?? null;
 }
@@ -49,11 +53,17 @@ function subscribeToHashChange(onStoreChange: () => void) {
 export function SupportPageContent({ pageContent }: SupportPageContentProps) {
   const { t } = useTranslation("support");
   const { executeRecaptcha } = useGoogleReCaptcha();
-  const currentAnchorId = t("anchors.currentPage");
-  const helpAnchorId = t("anchors.help");
+  const currentAnchorId = SUPPORT_ANCHORS.currentPage;
+  const helpAnchorId = SUPPORT_ANCHORS.help;
   const faqSections = React.useMemo(
-    () => (pageContent.faqSections ?? []).filter((section) => section.enabled !== false),
-    [pageContent.faqSections]
+    () =>
+      anchorFaqSections(pageContent.faqSections ?? [], pageContent.faqAnchorSources)
+        .filter((section) => section.enabled !== false)
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => item.enabled !== false),
+        })),
+    [pageContent.faqSections, pageContent.faqAnchorSources]
   );
 
   const hash = React.useSyncExternalStore(
@@ -62,7 +72,7 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
     getServerHashSnapshot
   );
   const activeItem =
-    getActiveItemFromHash(hash, pageContent.faqSections, currentAnchorId, helpAnchorId) ??
+    getActiveItemFromHash(hash, faqSections, currentAnchorId, helpAnchorId) ??
     (shouldPreselectFeedbackFromUrl() ? helpAnchorId : currentAnchorId);
   const form = useSupportForm({ executeRecaptcha });
 
@@ -91,6 +101,7 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
               title={t("faq.title")}
               updatedDate={pageContent.faqUpdatedDate}
               categories={faqSections}
+              hash={hash}
             />
           </div>
 
@@ -106,8 +117,11 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
           </div>
         </div>
 
-        <div id={helpAnchorId} className="mt-80 border-neutral-200 pt-64">
-          <h2 className="mb-24 text-24 font-bold text-[#021C51]">
+        <div className="mt-80 border-neutral-200 pt-64">
+          <h2
+            id={helpAnchorId}
+            className="mb-24 text-24 font-bold text-[#021C51] !scroll-mt-[200px]"
+          >
             {pageContent.helpCard.title}
           </h2>
           <h3 className="mb-16 text-[20px] font-[500] text-[#021C51]">
