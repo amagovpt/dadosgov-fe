@@ -285,6 +285,8 @@
     "transferCommentLabel": "Comentário",
     "transferCommentPlaceholder": "Mensagem opcional para o destinatário...",
     "transferring": "A transferir...",
-    "transferAction": "Transferir o conjunto de dados"
+    "transferAction": "Transferir o conjunto de dados",
+    "deletedBanner": "Este conjunto de dados foi eliminado e a sua página pública não está disponível.",
+    "archivedBanner": "Este conjunto de dados está arquivado e a sua página pública não está disponível."
   }
 }

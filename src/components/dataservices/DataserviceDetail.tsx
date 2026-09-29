@@ -8,6 +8,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import initTranslations from "@/app/i18n";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import TextLink from "@/components/Primitives/TextLink";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { RelatedDatasetsResult, DataserviceDiscussionsResult, DataserviceActionsState } from "@/service/types/dataservice/detail";
@@ -99,8 +100,7 @@ export default async function DataserviceDetail({ dataservice, datasets, swagger
           <BreadcrumbDynamic darkMode={false} currentLabel={dataservice.title} />
         </div>
         <div className="container flex items-center justify-end gap-16" data-testid="dataservice-actions">
-          {dataservice.private && <Pill variant="warning">{tDs("detail.draft")}</Pill>}
-          {dataservice.archived_at && <Pill variant="neutral">{tDs("detail.archived")}</Pill>}
+          <ResourceStatusBadge item={dataservice} display="pill" hidePublic />
           <DataserviceActions id={dataservice.id} slug={dataservice.slug} locale={locale} state={actionState}
             labels={{ add: tDs("detail.addFavorite"), remove: tDs("detail.removeFavorite"), error: tDs("detail.favoriteError"), edit: tDs("detail.edit") }} />
         </div>
