@@ -1,25 +1,14 @@
 "use server";
 
-import { TABULAR_API_URL } from "../../../../../../next.config";
+import { fetchTabularApi } from "@/app/internal-api/_lib/fetch-tabular-api";
 
-export async function getStructure(resourceId: string): Promise<boolean> {
-  try {
-    const apiUrl = `http://${TABULAR_API_URL}/api/resources/${resourceId}/profile/`;
+const EXPLORER_URL = process.env.EXPLORER_URL || "http://127.0.0.1:3030";
 
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        Accept: "application/json",
-      },
-    });
-
-    if (response.status === 404 || !response.ok) {
-      return false;
-    }
-
-    return true;
-  } catch {
-    return false;
-  }
+/**
+ * returns the data explorer URL for a resource when tabular API has a
+ * profile for it, otherwise null.
+ */
+export async function getExplorerUrl(resourceId: string): Promise<string | null> {
+  const result = await fetchTabularApi(resourceId, "profile", "", "explorer-structure");
+  return result.ok ? `${EXPLORER_URL}/explorer/${resourceId}/` : null;
 }

@@ -5,9 +5,6 @@ import { resolve } from "path";
 const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:7000";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
-export const TABULAR_API_URL = process.env.TABULAR_API_URL || "127.0.0.1:8005";
-export const EXPLORER_URL = process.env.EXPLORER_URL || "127.0.0.1:3030";
-
 const urlAPI = new URL(API_URL);
 
 // Read udata version from backend pyproject.toml at build time

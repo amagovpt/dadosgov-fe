@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import Button from "@/components/Primitives/Button";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { getStructure } from "@/app/[locale]/(pages)/datasets/[slug]/actions";
-import { EXPLORER_URL } from "../../../../next.config";
+import { getExplorerUrl } from "@/app/[locale]/(pages)/datasets/[slug]/actions";
 
 export type ExploreDataI = {
   id: string;
@@ -14,7 +13,7 @@ export type ExploreDataI = {
 export default function ExploreData({ id }: ExploreDataI) {
   const { t: tds } = useTranslation("datasets");
   const routerNav = useRouter();
-  const [hasStructure, setHasStructure] = useState(false);
+  const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -23,10 +22,10 @@ export default function ExploreData({ id }: ExploreDataI) {
 
     async function checkStructure() {
       try {
-        const result = await getStructure(id);
-        if (!cancelled) setHasStructure(result);
+        const url = await getExplorerUrl(id);
+        if (!cancelled) setExplorerUrl(url);
       } catch (error) {
-        console.error("Error checking resource structure:", error);
+        console.error(tds("preview.explorerStructureError"), error);
       }
     }
 
@@ -35,13 +34,13 @@ export default function ExploreData({ id }: ExploreDataI) {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, tds]);
 
   const handleClick = () => {
-    routerNav.push(`http://${EXPLORER_URL}/explorer/${id}/`);
+    if (explorerUrl) routerNav.push(explorerUrl);
   };
 
-  if (!id || !hasStructure) return null;
+  if (!id || !explorerUrl) return null;
 
   return (
     <Button
@@ -50,8 +49,9 @@ export default function ExploreData({ id }: ExploreDataI) {
       trailingIcon="agora-line-external-link"
       trailingIconHover="agora-line-external-link"
       onClick={() => handleClick()}
+      className="px-56"
     >
-      {tds("preview.explorer")}
+      {tds("resources.preview.explorer")}
     </Button>
   );
 }

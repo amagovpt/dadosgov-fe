@@ -257,6 +257,7 @@
     },
     "preview": {
       "explorer": "Explorador de dados",
+      "explorerStructureError": "Erro ao verificar a estrutura do recurso:",
       "loading": "A carregar pré-visualização...",
       "loadingStructure": "A carregar estrutura...",
       "unavailableRemote": "Pré-visualização não disponível para ficheiros externos.",

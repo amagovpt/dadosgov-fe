@@ -255,6 +255,7 @@
     },
     "preview": {
       "explorer": "Data explorer",
+      "explorerStructureError": "Error checking resource structure:",
       "loading": "Loading preview...",
       "loadingStructure": "Loading structure...",
       "unavailableRemote": "Preview not available for external files.",

@@ -386,7 +386,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                       {error || tds("resources.preview.unavailable")}
                     </p>
                   ) : (
-                    <div className="space-y-16">
+                    <div className="space-y-32">
                       {pageError && (
                         <p className="text-m-regular text-neutral-900">
                           {tds("resources.preview.pageLoadError")}
