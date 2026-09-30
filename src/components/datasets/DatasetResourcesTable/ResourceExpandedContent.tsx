@@ -277,8 +277,8 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
           <Tab>
             <TabHeader>{tds("resources.tabs.metadata")}</TabHeader>
             <TabBody>
-              <div className="flex w-full flex-col">
-                <div className="flex w-full max-w-[800px] flex-col gap-32 self-center">
+              <div className="flex w-full flex-col p-16">
+                <div className="flex w-full flex-col gap-32 self-center">
                   <Typograph tag="h3" className="text-xl-bold text-neutral-900">
                     Informação principal
                   </Typograph>
@@ -341,7 +341,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
 
                   {resource.extras && Object.keys(resource.extras).length > 0 && (
                     <>
-                      <Typograph tag="h3" className="text-xl-bold text-neutral-900 mt-32">
+                      <Typograph tag="h3" className="mt-32 text-xl-bold text-neutral-900">
                         Metadados adicionais
                       </Typograph>
 
@@ -451,8 +451,8 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
             <Tab>
               <TabHeader>{tds("resources.tabs.structure")}</TabHeader>
               <TabBody>
-                <div className="flex w-full flex-col py-64">
-                  <div className="w-full max-w-[800px] self-center">
+                <div className="flex w-full flex-col p-16 py-64">
+                  <div className="w-full self-center">
                     {isLoading && !hasData ? (
                       <div className="flex items-center justify-center py-16">
                         <LoaderDialog title={tds("resources.preview.loadingStructure")} />
@@ -461,7 +461,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                       profile ? (
                         <div className="grid grid-cols-12 gap-32">
                           {Object.entries(profile.columns).map(([name, col]) => (
-                            <div key={name} className="col-span-12 lg:col-span-6">
+                            <div key={name} className="col-span-12 lg:col-span-4">
                               <DataFieldWrapper
                                 label={name}
                                 value={col.format || col.python_type}
@@ -481,7 +481,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                     ) : (
                       <div className="grid grid-cols-12 gap-32">
                         {tabularData.columns.map((col, i) => (
-                          <div key={i} className="col-span-12 lg:col-span-6">
+                          <div key={i} className="col-span-12 lg:col-span-4">
                             <DataFieldWrapper label={col.name} value={col.type} />
                           </div>
                         ))}
