@@ -1,12 +1,14 @@
 import Icon from "@/components/Primitives/Icon";
 import { InputText } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
+import { twMerge } from "tailwind-merge";
 
 export type UrlWrapperI = {
   url: string;
+  className?: string;
 };
 
-export default function UrlWrapper({ url }: UrlWrapperI) {
+export default function UrlWrapper({ url, className }: UrlWrapperI) {
   const { t: tds } = useTranslation("datasets");
 
   const handleCopy = () => {
@@ -14,7 +16,7 @@ export default function UrlWrapper({ url }: UrlWrapperI) {
   };
 
   return (
-    <div className="flex w-full flex-col gap-16">
+    <div className={twMerge("flex w-full flex-col gap-16", className)}>
       <p className="flex flex-row gap-8">
         <span className="text-m-medium text-neutral-900">{tds("labels.url")}</span>
         <Icon name="agora-line-copy" className="cursor-pointer" onClick={() => handleCopy()} />

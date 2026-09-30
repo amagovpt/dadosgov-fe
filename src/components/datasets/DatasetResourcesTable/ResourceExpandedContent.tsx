@@ -278,20 +278,21 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
             <TabHeader>{tds("resources.tabs.metadata")}</TabHeader>
             <TabBody>
               <div className="flex w-full flex-col">
-                <div className="grid w-full max-w-[800px] grid-cols-12 gap-32 self-center">
-                  <DataFieldWrapper
-                    label={tds("labels.title")}
-                    value={resource.title}
-                    className="col-span-12 lg:col-span-6"
-                  />
+                <div className="flex w-full max-w-[800px] flex-col gap-32 self-center">
+                  <Typograph tag="h3" className="text-xl-bold text-neutral-900">
+                    Informação principal
+                  </Typograph>
 
-                  {resource.type && (
-                    <DataFieldWrapper
-                      label={tds("labels.type")}
-                      value={formatFileType(resource.type)}
-                      className="col-span-12 lg:col-span-6"
-                    />
-                  )}
+                  <div className="flex flex-col gap-32 lg:flex-row">
+                    <DataFieldWrapper label={tds("labels.title")} value={resource.title} />
+
+                    {resource.type && (
+                      <DataFieldWrapper
+                        label={tds("labels.type")}
+                        value={formatFileType(resource.type)}
+                      />
+                    )}
+                  </div>
 
                   {resource.description && (
                     <DataFieldWrapper
@@ -304,11 +305,10 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                           {formatHtmlParagraphs(resource.description)}
                         </Typograph>
                       }
-                      className="col-span-12"
                     />
                   )}
 
-                  <div className="col-span-12 flex flex-col gap-32 lg:flex-row">
+                  <div className="flex w-full flex-col gap-32 lg:flex-row">
                     <DataFieldWrapper label={tds("labels.format")} value={resource.format} />
 
                     {resource.mime && (
@@ -325,7 +325,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
 
                   <UrlWrapper url={resource.url} />
 
-                  <div className="flex flex-col gap-32 lg:flex-row">
+                  <div className="flex w-full flex-col gap-32 lg:flex-row">
                     <DataFieldWrapper
                       label={tds("labels.created_at")}
                       value={formatDateLong(resource.created_at, locale)}
@@ -340,38 +340,22 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                   </div>
 
                   {resource.extras && Object.keys(resource.extras).length > 0 && (
-                    <div className="pt-16">
-                      <AccordionGroup>
-                        <Accordion
-                          headingTitle={
-                            <span className="text-sm font-bold text-neutral-900">
-                              {tds("resources.metadata.extras")}
-                            </span>
-                          }
-                          headingLevel="h5"
-                        >
-                          <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr 1fr",
-                              gap: "32px 64px",
-                              padding: "16px",
-                            }}
-                          >
-                            {Object.entries(resource.extras).map(([key, value]) => (
-                              <div key={key}>
-                                <h6 className="text-sm mb-8 font-bold text-neutral-900">
-                                  {translateExtrasKey(tds, key)}
-                                </h6>
-                                <p className="text-sm break-all text-neutral-900">
-                                  {translateExtrasValue(tds, value)}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </Accordion>
-                      </AccordionGroup>
-                    </div>
+                    <>
+                      <Typograph tag="h3" className="text-xl-bold text-neutral-900 mt-32">
+                        Metadados adicionais
+                      </Typograph>
+
+                      <div className="grid grid-cols-12 gap-32">
+                        {Object.entries(resource.extras).map(([key, value]) => (
+                          <DataFieldWrapper
+                            key={key}
+                            label={translateExtrasKey(tds, key)}
+                            value={translateExtrasValue(tds, value)}
+                            className="col-span-12 lg:col-span-4"
+                          />
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
