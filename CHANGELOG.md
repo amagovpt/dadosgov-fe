@@ -6,6 +6,21 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(login): the linking invite no longer covers the page that completes it**
+  - Pressing "Associar" on the invite screen, authenticating with the identity provider and
+    coming back landed on the invite screen again, so nobody could finish linking an identity
+    at all. The backend redirects correctly to the confirmation step; that page sits under the
+    layout that wraps everything in the invite gate, and the gate decided without looking at
+    the path. The invite stays true across the whole round trip — the linking is not finished,
+    the confirmation is exactly what is missing — so it drew itself over the page that
+    concludes it.
+  - The gate renders in place precisely to avoid the five ways a redirect traps somebody. It
+    found a sixth: a screen that covers every page also covers the destination of its own flow.
+    The banner had been standing down on these pages since the start; the gate, which covers
+    far more, never was — because the list of those pages was written inside the banner. It now
+    lives in one place both import, with the test that mounts the gate over the confirmation
+    page and was missing from the day the gate was written.
+
 - **fix(admin): archived and deleted resources say so on the edit screen**
   - The status label on every edit screen read `private` alone, so a dataset, reuse or
     dataservice that had been archived or deleted went on showing RASCUNHO or PÚBLICO. The
