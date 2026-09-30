@@ -277,7 +277,9 @@
       "modifiedAt": "Modificado em",
       "type": "Tipo",
       "mime": "Tipo MIME",
-      "extras": "Recursos extras"
+      "extras": "Recursos extras",
+      "mainInfo": "Informação principal",
+      "additional": "Metadados adicionais"
     },
     "downloads": {
       "originalFormat": "Formato original",

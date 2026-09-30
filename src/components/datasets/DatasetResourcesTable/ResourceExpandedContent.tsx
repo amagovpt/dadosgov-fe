@@ -280,7 +280,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
               <div className="flex w-full flex-col p-16">
                 <div className="flex w-full flex-col gap-32 self-center">
                   <Typograph tag="h3" className="text-xl-bold text-neutral-900">
-                    Informação principal
+                    {tds("resources.metadata.mainInfo")}
                   </Typograph>
 
                   <div className="flex flex-col gap-32 lg:flex-row">
@@ -342,7 +342,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                   {resource.extras && Object.keys(resource.extras).length > 0 && (
                     <>
                       <Typograph tag="h3" className="mt-32 text-xl-bold text-neutral-900">
-                        Metadados adicionais
+                        {tds("resources.metadata.additional")}
                       </Typograph>
 
                       <div className="grid grid-cols-12 gap-32">
@@ -372,15 +372,15 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                       <LoaderDialog title={tds("resources.preview.loading")} />
                     </div>
                   ) : error || !hasData ? (
-                    <p className="text-sm text-neutral-900">
+                    <Typograph tag="p" className="text-sm text-neutral-900">
                       {error || tds("resources.preview.unavailable")}
-                    </p>
+                    </Typograph>
                   ) : (
                     <div className="space-y-32">
                       {pageError && (
-                        <p className="text-m-regular text-neutral-900">
+                        <Typograph tag="p" className="text-m-regular text-neutral-900">
                           {tds("resources.preview.pageLoadError")}
-                        </p>
+                        </Typograph>
                       )}
                       {!pageError && (
                         <>
@@ -451,10 +451,10 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
             <Tab>
               <TabHeader>{tds("resources.tabs.structure")}</TabHeader>
               <TabBody>
-                <div className="flex w-full flex-col p-16 py-64">
+                <div className="flex w-full flex-col gap-32 px-16">
                   <div className="w-full self-center">
                     {isLoading && !hasData ? (
-                      <div className="flex items-center justify-center py-16">
+                      <div className="flex items-center justify-center">
                         <LoaderDialog title={tds("resources.preview.loadingStructure")} />
                       </div>
                     ) : source === "tabular" ? (
@@ -470,14 +470,14 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-neutral-900">
+                        <Typograph tag="p" className="text-sm text-neutral-900">
                           {tds("resources.preview.structureUnavailable")}
-                        </p>
+                        </Typograph>
                       )
                     ) : error || !tabularData ? (
-                      <p className="text-sm text-neutral-900">
+                      <Typograph tag="p" className="text-sm text-neutral-900">
                         {error || tds("resources.preview.structureUnavailable")}
-                      </p>
+                      </Typograph>
                     ) : (
                       <div className="grid grid-cols-12 gap-32">
                         {tabularData.columns.map((col, i) => (

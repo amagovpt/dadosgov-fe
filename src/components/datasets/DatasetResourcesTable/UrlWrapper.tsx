@@ -1,4 +1,5 @@
 import Icon from "@/components/Primitives/Icon";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { InputText } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
 import { twMerge } from "tailwind-merge";
@@ -17,10 +18,10 @@ export default function UrlWrapper({ url, className }: UrlWrapperI) {
 
   return (
     <div className={twMerge("flex w-full flex-col gap-16", className)}>
-      <p className="flex flex-row gap-8">
+      <Typograph tag="p" className="flex flex-row gap-8">
         <span className="text-m-medium text-neutral-900">{tds("labels.url")}</span>
         <Icon name="agora-line-copy" className="cursor-pointer" onClick={() => handleCopy()} />
-      </p>
+      </Typograph>
       <InputText
         label={tds("labels.url")}
         hideLabel
