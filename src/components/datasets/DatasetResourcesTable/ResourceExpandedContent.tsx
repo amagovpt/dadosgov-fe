@@ -278,13 +278,18 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
             <TabHeader>{tds("resources.tabs.metadata")}</TabHeader>
             <TabBody>
               <div className="flex w-full flex-col">
-                <div className="flex w-full max-w-[800px] flex-col gap-32 self-center">
-                  <DataFieldWrapper label={tds("labels.title")} value={resource.title} />
+                <div className="grid w-full max-w-[800px] grid-cols-12 gap-32 self-center">
+                  <DataFieldWrapper
+                    label={tds("labels.title")}
+                    value={resource.title}
+                    className="col-span-12 lg:col-span-6"
+                  />
 
                   {resource.type && (
                     <DataFieldWrapper
                       label={tds("labels.type")}
                       value={formatFileType(resource.type)}
+                      className="col-span-12 lg:col-span-6"
                     />
                   )}
 
@@ -299,23 +304,24 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                           {formatHtmlParagraphs(resource.description)}
                         </Typograph>
                       }
+                      className="col-span-12"
                     />
                   )}
 
-                  <div className="flex flex-col gap-32 lg:flex-row">
+                  <div className="col-span-12 flex flex-col gap-32 lg:flex-row">
                     <DataFieldWrapper label={tds("labels.format")} value={resource.format} />
 
                     {resource.mime && (
                       <DataFieldWrapper label={tds("labels.mime")} value={resource.mime} />
                     )}
-                  </div>
 
-                  {resource.filesize && (
-                    <DataFieldWrapper
-                      label={tds("labels.filesize")}
-                      value={formatBytes(resource.filesize, locale)}
-                    />
-                  )}
+                    {resource.filesize && (
+                      <DataFieldWrapper
+                        label={tds("labels.filesize")}
+                        value={formatBytes(resource.filesize, locale)}
+                      />
+                    )}
+                  </div>
 
                   <UrlWrapper url={resource.url} />
 
