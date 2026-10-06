@@ -4,7 +4,11 @@ import TextLink from "@/components/Primitives/TextLink";
 import TableActionsCell from "@/components/admin/TableActionsCell";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
-import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
+import {
+  getResourceStatusKey,
+  getResourceStatusSortValue,
+} from "@/utils/admin-lists/listHelpers";
+import type { ResourceStatusKey } from "@/utils/admin-lists/listHelpers";
 import type { CommunityResource } from "@/service/types/community-resource";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
@@ -57,6 +61,8 @@ interface CommunityResourceColumnsOptions {
   useSystemStatusDot?: boolean;
   showOwnerOnLastModified?: boolean;
   labels: CommunityResourceColumnLabels;
+  /** Status names for the CSV export. */
+  statusLabels?: Record<ResourceStatusKey, string>;
   editHref: (resource: CommunityResource) => string;
 }
 
@@ -91,6 +97,7 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
   useSystemStatusDot = false,
   showOwnerOnLastModified = false,
   labels,
+  statusLabels,
   editHref,
 }: CommunityResourceColumnsOptionsByFormat<TIncludeFormat>): AdminListColumn<
   CommunityResource,
@@ -122,6 +129,7 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
           )}
         </div>
       ),
+      exportValue: (resource) => resource.title,
     },
     {
       id: "status",
@@ -142,6 +150,17 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
         ) : (
           <ResourceStatusBadge item={resource} />
         ),
+      exportValue: (resource) => {
+        if (useSystemStatusDot) {
+          return resource.deleted
+            ? labels.deleted
+            : resource.archived
+              ? labels.archived
+              : labels.published;
+        }
+        const statusKey = getResourceStatusKey(resource);
+        return statusLabels?.[statusKey] ?? statusKey;
+      },
     },
   ];
 
@@ -154,6 +173,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
       sortType: "date",
       renderCell: (resource) =>
         useSystemStatusDot ? resource.format?.toUpperCase() || "—" : resource.format || "—",
+      exportValue: (resource) =>
+        useSystemStatusDot ? resource.format?.toUpperCase() : resource.format,
     });
   }
 
@@ -165,6 +186,7 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
       sortField: "created_at" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) => formatDateToDMY(resource.created_at),
+      exportValue: (resource) => formatDateToDMY(resource.created_at),
     },
     {
       id: "last_modified",
@@ -188,6 +210,7 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
         ) : (
           formatDateToDMY(resource.last_modified)
         ),
+      exportValue: (resource) => formatDateToDMY(resource.last_modified),
     },
     {
       id: "actions",

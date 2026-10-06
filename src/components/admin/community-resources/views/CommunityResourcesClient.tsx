@@ -7,6 +7,11 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchMyCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
@@ -99,10 +104,24 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
           archived: t("admin-community-resources:status.archived"),
           published: t("admin-community-resources:status.published"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
         editHref: (resource) => `/admin/me/community-resources/edit?id=${resource.id}`,
       }),
     [t]
   );
+
+  // The list is already fully loaded (sorted and filtered), so no extra request.
+  const handleDownloadCsv = useCallback(async () => {
+    downloadCsv(
+      buildCsvFilename(t("admin-community-resources:title")),
+      buildCsvFromColumns(sortedResources, columns)
+    );
+  }, [columns, sortedResources, t]);
 
   return (
     <AdminListPage
@@ -127,6 +146,7 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
           createUrl="/admin/community-resources/new"
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={resources}
