@@ -35,6 +35,12 @@ export function getLastJobTimestamp(harvester: HarvestSource): number {
   return value ? Date.parse(value) : 0;
 }
 
+function getLastJobDate(harvester: HarvestSource): string | undefined {
+  const job = harvester.last_job;
+  if (!job) return undefined;
+  return formatDateToDMY(job.started ?? job.ended ?? job.created ?? "");
+}
+
 function getHarvesterStatusSortValue(harvester: HarvestSource): string {
   const validationState = harvester.validation?.state ?? "pending";
   const lastJobStatus = harvester.last_job?.status ?? "no_job";
@@ -123,6 +129,7 @@ export function createOrgHarvesterColumns({
       sortField: "name",
       sortType: "string",
       renderCell: (harvester) => <TextLink href={editHref(harvester)}>{harvester.name}</TextLink>,
+      exportValue: (harvester) => harvester.name,
     },
     {
       id: "status",
@@ -133,6 +140,7 @@ export function createOrgHarvesterColumns({
         const status = getHarvesterStatus(harvester, statusLabels);
         return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
       },
+      exportValue: (harvester) => getHarvesterStatus(harvester, statusLabels).label,
     },
     {
       id: "implementation",
@@ -140,6 +148,7 @@ export function createOrgHarvesterColumns({
       sortType: "string",
       header: labels.implementation,
       renderCell: (harvester) => harvester.backend,
+      exportValue: (harvester) => harvester.backend,
     },
     {
       id: "created_at",
@@ -147,6 +156,7 @@ export function createOrgHarvesterColumns({
       sortField: "created_at",
       sortType: "date",
       renderCell: (harvester) => formatDateToDMY(harvester.created_at),
+      exportValue: (harvester) => formatDateToDMY(harvester.created_at),
     },
     {
       id: "last_job",
@@ -162,6 +172,7 @@ export function createOrgHarvesterColumns({
                 ""
             )
           : labels.notYet,
+      exportValue: (harvester) => getLastJobDate(harvester) ?? labels.notYet,
     },
     {
       id: "datasets",
@@ -169,11 +180,13 @@ export function createOrgHarvesterColumns({
       sortType: "numeric",
       header: labels.datasets,
       renderCell: (harvester) => harvester.datasets_count ?? 0,
+      exportValue: (harvester) => harvester.datasets_count ?? 0,
     },
     {
       id: "api",
       header: labels.api,
       renderCell: (harvester) => harvester.backend,
+      exportValue: (harvester) => harvester.backend,
     },
     {
       id: "actions",
@@ -209,6 +222,7 @@ export function createSystemHarvesterColumns({
       renderCell: (harvester) => (
         <TextLink href={`/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
       ),
+      exportValue: (harvester) => harvester.name,
     },
     {
       id: "status",
@@ -219,6 +233,7 @@ export function createSystemHarvesterColumns({
         const status = getHarvesterStatus(harvester, statusLabels);
         return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
       },
+      exportValue: (harvester) => getHarvesterStatus(harvester, statusLabels).label,
     },
     {
       id: "implementation",
@@ -226,6 +241,7 @@ export function createSystemHarvesterColumns({
       sortType: "string",
       header: labels.implementation,
       renderCell: (harvester) => harvester.backend,
+      exportValue: (harvester) => harvester.backend,
     },
     {
       id: "created_at",
@@ -233,6 +249,7 @@ export function createSystemHarvesterColumns({
       sortType: "date",
       header: labels.createdAt,
       renderCell: (harvester) => formatDateToDMY(harvester.created_at),
+      exportValue: (harvester) => formatDateToDMY(harvester.created_at),
     },
     {
       id: "last_job",
@@ -248,6 +265,7 @@ export function createSystemHarvesterColumns({
                 ""
             )
           : labels.notYet,
+      exportValue: (harvester) => getLastJobDate(harvester) ?? labels.notYet,
     },
     {
       id: "datasets",
@@ -255,11 +273,13 @@ export function createSystemHarvesterColumns({
       sortType: "numeric",
       header: labels.datasets,
       renderCell: (harvester) => harvester.datasets_count ?? 0,
+      exportValue: (harvester) => harvester.datasets_count ?? 0,
     },
     {
       id: "api",
       header: labels.api,
       renderCell: () => "0",
+      exportValue: () => "0",
     },
     {
       id: "actions",

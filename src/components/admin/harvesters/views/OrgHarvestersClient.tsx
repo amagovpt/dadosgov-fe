@@ -9,6 +9,11 @@ import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgHarvesters } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
@@ -140,6 +145,26 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
     [orgId, t]
   );
 
+  // With the status filter or local sort the list is already fully loaded;
+  // otherwise one request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedHarvesters;
+    if (!usesLocalFallback && orgId) {
+      const response = await fetchOrgHarvesters(orgId, 1, totalItems, {
+        q: searchQuery.trim() || undefined,
+      });
+      rows = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && rows.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+    }
+    downloadCsv(
+      buildCsvFilename(t("admin-harvesters:title")),
+      buildCsvFromColumns(rows, columns)
+    );
+  }, [columns, orgId, searchQuery, sortedHarvesters, t, totalItems, usesLocalFallback]);
+
   if (!isOrgLoading && !orgId) {
     return (
       <AdminEmptyState
@@ -177,6 +202,7 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
       emptyState={
         <AdminEmptyState noResults={pageContent.orgNoResults} />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={paginatedHarvesters}

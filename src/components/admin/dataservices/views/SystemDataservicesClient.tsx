@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -54,6 +59,12 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
           by: t("admin-dataservices:columns.by"),
           about: t("admin-dataservices:columns.about"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t]
   );
@@ -100,6 +111,35 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
     setCurrentPage(1);
   });
 
+  // One request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    const response = await fetchDataservices(1, totalItems, {
+      q: searchQuery.trim() || undefined,
+      sort: sortParam,
+    });
+    const allApis = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allApis.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    const filtered = filterByStatus(allApis, statusFilter);
+    const rows = usesLocalSort ? sortDataservices(filtered, sortField, sortOrder) : filtered;
+    downloadCsv(
+      buildCsvFilename(t("admin-dataservices:title")),
+      buildCsvFromColumns(rows, columns)
+    );
+  }, [
+    columns,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    statusFilter,
+    t,
+    totalItems,
+    usesLocalSort,
+  ]);
+
   const filteredApis = useMemo(() => filterByStatus(apis, statusFilter), [apis, statusFilter]);
   const visibleApis = useMemo(
     () => (usesLocalSort ? sortDataservices(filteredApis, sortField, sortOrder) : filteredApis),
@@ -135,6 +175,7 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
         />
       }
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleApis}

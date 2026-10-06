@@ -12,6 +12,11 @@ import { useAdminListController } from "@/hooks/admin-lists/useAdminListControll
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import AdminEmptyState from "../AdminEmptyState";
 import {
   createOrgDiscussionColumns,
@@ -117,12 +122,32 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     [openDiscussion, t],
   );
 
+  const pageTitle = pageContent.orgHero?.title ?? "";
+
+  // One request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    const response = await fetchOrgDiscussions(orgId, 1, totalItems, {
+      q: searchQuery.trim() || undefined,
+      closed: filters.closedFilter === "" ? undefined : filters.closedFilter === "closed",
+      sort: sortParam,
+    });
+    const allDiscussions = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allDiscussions.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    downloadCsv(
+      buildCsvFilename(pageTitle || t("admin-discussions:title")),
+      buildCsvFromColumns(allDiscussions, columns)
+    );
+  }, [columns, filters.closedFilter, orgId, pageTitle, searchQuery, sortParam, t, totalItems]);
+
   return (
     <AdminListPage
       breadcrumbItems={[
         { label: t("admin-discussions:title") },
       ]}
-      title={pageContent.orgHero?.title ?? ""}
+      title={pageTitle}
       isLoading={isLoading}
       count={totalItems}
       currentPage={currentPage}
@@ -155,6 +180,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           description={pageContent.orgNoResults?.description ?? ""}
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={discussions}
