@@ -11,6 +11,11 @@ import { useAdminListController } from "@/hooks/admin-lists/useAdminListControll
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
 import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
+import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/form-ui/HarvesterValidationPopups";
@@ -221,6 +226,26 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     [openApprovePopup, openRejectPopup, t]
   );
 
+  // With the status filter or local sort the list is already fully loaded;
+  // otherwise one request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedHarvesters;
+    if (!usesLocalFallback) {
+      const response = await fetchHarvesters(1, totalItems, {
+        q: searchQuery.trim() || undefined,
+      });
+      rows = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && rows.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+    }
+    downloadCsv(
+      buildCsvFilename(t("admin-harvesters:title")),
+      buildCsvFromColumns(rows, columns)
+    );
+  }, [columns, searchQuery, sortedHarvesters, t, totalItems, usesLocalFallback]);
+
   return (
     <AdminListPage
       breadcrumbItems={[
@@ -262,6 +287,7 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
         ) : undefined
       }
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleHarvesters}
