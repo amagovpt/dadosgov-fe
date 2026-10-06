@@ -17,7 +17,6 @@ import {
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import type { DatasetFilters } from "@/service/types/dataset";
-import { fetchAllPages } from "@/service/utils/fetchAllPages";
 import {
   buildCsvFilename,
   buildCsvFromColumns,
@@ -126,12 +125,17 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
     }
   }, [currentPage, fetchDatasetsPage, pageSize]);
 
-  // Exports every page of the filtered list.
+  // One request with page_size = the total the table already received.
   const handleDownloadCsv = useCallback(async () => {
-    const allDatasets = await fetchAllPages(fetchDatasetsPage);
+    const response = await fetchDatasetsPage(1, totalItems);
+    const allDatasets = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allDatasets.length === 0) {
+      throw new Error("Could not fetch the datasets for the CSV export");
+    }
     const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
     downloadCsv(buildCsvFilename("conjuntos-de-dados"), buildCsvFromColumns(rows, columns));
-  }, [columns, fetchDatasetsPage, sortField, sortOrder, usesLocalSort]);
+  }, [columns, fetchDatasetsPage, sortField, sortOrder, totalItems, usesLocalSort]);
 
   useEffect(() => {
     let isCancelled = false;

@@ -92,12 +92,13 @@ export default function AdminListPage({
     visibleSearch || visibleFilters || toolbarActions || canDownloadCsv
   );
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false);
+  const isDownloadCsvDisabled = isDownloadingCsv || !shouldRenderTable;
   const defaultLoadingContent = <p className="text-sm text-neutral-700">{t("loading")}</p>;
   const isInitialLoading = isLoading && !shouldRenderTable;
   const isRefreshing = isLoading && shouldRenderTable;
 
   const handleDownloadCsv = async () => {
-    if (!onDownloadCsv || isDownloadingCsv) return;
+    if (!onDownloadCsv || isDownloadCsvDisabled) return;
     setIsDownloadingCsv(true);
     try {
       await onDownloadCsv();
@@ -160,7 +161,7 @@ export default function AdminListPage({
                     hasIcon
                     leadingIcon="agora-line-download"
                     leadingIconHover="agora-solid-download"
-                    disabled={isDownloadingCsv}
+                    disabled={isDownloadCsvDisabled}
                     aria-busy={isDownloadingCsv}
                     onClick={handleDownloadCsv}
                   >
