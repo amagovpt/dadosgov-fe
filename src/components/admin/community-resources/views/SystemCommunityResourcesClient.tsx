@@ -9,6 +9,11 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAllCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import {
   CommunityResourceSortField,
@@ -83,6 +88,34 @@ export default function SystemCommunityResourcesClient({
     [t]
   );
 
+  // With local sort the list is already fully loaded; otherwise one request
+  // with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedResources;
+    if (!usesLocalFallback) {
+      const response = await fetchAllCommunityResources(1, totalItems, { sort: sortParam });
+      const allResources = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && allResources.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+      rows = sortCommunityResources(allResources, sortField, sortOrder);
+    }
+    downloadCsv(
+      buildCsvFilename(t("admin-community-resources:title")),
+      buildCsvFromColumns(rows, columns)
+    );
+  }, [
+    columns,
+    sortField,
+    sortOrder,
+    sortParam,
+    sortedResources,
+    t,
+    totalItems,
+    usesLocalFallback,
+  ]);
+
   const loadResources = useCallback(async () => {
     if (resourceId) {
       return;
@@ -136,6 +169,7 @@ export default function SystemCommunityResourcesClient({
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={paginatedResources}

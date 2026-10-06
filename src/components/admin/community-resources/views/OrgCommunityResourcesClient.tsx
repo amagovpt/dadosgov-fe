@@ -8,6 +8,11 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchOrgCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
@@ -115,10 +120,47 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
           archived: t("admin-community-resources:status.archived"),
           published: t("admin-community-resources:status.published"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
         editHref: (resource) => `/admin/community-resources/edit?resource_id=${resource.id}`,
       }),
     [t]
   );
+
+  // With local sort the list is already fully loaded; otherwise one request
+  // with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedResources;
+    if (!usesLocalFallback && resolvedOrgId) {
+      const response = await fetchOrgCommunityResources(resolvedOrgId, 1, totalItems, {
+        sort: sortParam,
+      });
+      const allResources = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && allResources.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+      rows = sortCommunityResources(allResources, sortField, sortOrder);
+    }
+    downloadCsv(
+      buildCsvFilename(t("admin-community-resources:title")),
+      buildCsvFromColumns(rows, columns)
+    );
+  }, [
+    columns,
+    resolvedOrgId,
+    sortField,
+    sortOrder,
+    sortParam,
+    sortedResources,
+    t,
+    totalItems,
+    usesLocalFallback,
+  ]);
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
@@ -150,6 +192,7 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
       emptyState={
         <AdminEmptyState noResults={pageContent.orgNoResults} />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={paginatedResources}
