@@ -8,6 +8,11 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { Dataset } from "@/service/types/dataset";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -26,6 +31,31 @@ const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string | null> = {
   last_update: "last_update",
   quality: null,
 };
+
+type OrgDatasetFilters = NonNullable<Parameters<typeof fetchOrgDatasets>[3]>;
+
+function buildOrgDatasetFilters(q: string, status: string, sort?: string): OrgDatasetFilters {
+  const filters: OrgDatasetFilters = {};
+
+  if (sort) filters.sort = sort;
+  if (q.trim()) filters.q = q.trim();
+  if (status === "public") {
+    filters.private = false;
+    filters.archived = false;
+    filters.deleted = false;
+  } else if (status === "draft") {
+    filters.private = true;
+    filters.archived = false;
+    filters.deleted = false;
+  } else if (status === "archived") {
+    filters.archived = true;
+    filters.deleted = false;
+  } else if (status === "deleted") {
+    filters.deleted = true;
+  }
+
+  return filters;
+}
 
 interface OrgDatasetsClientProps {
   orgId: string;
@@ -66,9 +96,42 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
           quality: t("admin-datasets:list.columns.quality"),
           actions: t("admin-datasets:list.columns.actions"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [orgId, t],
   );
+
+  // One request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    const filters = buildOrgDatasetFilters(searchQuery, statusFilter, sortParam);
+    const response = await fetchOrgDatasets(orgId, 1, total, filters);
+    const allDatasets = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (total > 0 && allDatasets.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
+    downloadCsv(
+      buildCsvFilename(t("admin-datasets:list.title")),
+      buildCsvFromColumns(rows, columns),
+    );
+  }, [
+    columns,
+    orgId,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    statusFilter,
+    t,
+    total,
+    usesLocalSort,
+  ]);
 
   const loadDatasets = useCallback(
     async (
@@ -80,31 +143,7 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
     ) => {
       setIsLoading(true);
       try {
-        const filters: {
-          q?: string;
-          sort?: string;
-          private?: boolean;
-          archived?: boolean;
-          deleted?: boolean;
-        } = {};
-
-        if (sort) filters.sort = sort;
-        if (q.trim()) filters.q = q.trim();
-        if (status === "public") {
-          filters.private = false;
-          filters.archived = false;
-          filters.deleted = false;
-        } else if (status === "draft") {
-          filters.private = true;
-          filters.archived = false;
-          filters.deleted = false;
-        } else if (status === "archived") {
-          filters.archived = true;
-          filters.deleted = false;
-        } else if (status === "deleted") {
-          filters.deleted = true;
-        }
-
+        const filters = buildOrgDatasetFilters(q, status, sort);
         const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
         setDatasets(response.data || []);
         setTotal(response.total || 0);
@@ -205,6 +244,7 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
           createUrl="/admin/datasets/new"
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleDatasets}
