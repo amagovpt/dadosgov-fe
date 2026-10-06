@@ -4,7 +4,11 @@ import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
-import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
+import {
+  getResourceStatusKey,
+  getResourceStatusSortValue,
+} from "@/utils/admin-lists/listHelpers";
+import type { ResourceStatusKey } from "@/utils/admin-lists/listHelpers";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
@@ -47,6 +51,8 @@ export function sortDataservices(
 interface DataserviceColumnsOptions {
   ownerMetaStyle?: "dot" | "by";
   labels: DataserviceColumnLabels;
+  /** Status names for the CSV export. */
+  statusLabels?: Record<ResourceStatusKey, string>;
 }
 
 interface DataserviceColumnLabels {
@@ -62,6 +68,7 @@ interface DataserviceColumnLabels {
 export function createDataserviceColumns({
   ownerMetaStyle = "dot",
   labels,
+  statusLabels,
 }: DataserviceColumnsOptions): AdminListColumn<Dataservice, DataserviceSortField>[] {
   return [
     {
@@ -71,6 +78,7 @@ export function createDataserviceColumns({
       sortField: "title",
       sortType: "numeric",
       renderCell: (api) => <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>,
+      exportValue: (api) => api.title,
     },
     {
       id: "status",
@@ -78,6 +86,10 @@ export function createDataserviceColumns({
       sortField: "status",
       sortType: "string",
       renderCell: (api) => <ResourceStatusBadge item={api} />,
+      exportValue: (api) => {
+        const statusKey = getResourceStatusKey(api);
+        return statusLabels?.[statusKey] ?? statusKey;
+      },
     },
     {
       id: "created_at",
@@ -85,6 +97,7 @@ export function createDataserviceColumns({
       sortField: "created_at",
       sortType: "date",
       renderCell: (api) => formatDateToDMY(api.created_at),
+      exportValue: (api) => formatDateToDMY(api.created_at),
     },
     {
       id: "last_modified",
@@ -110,6 +123,7 @@ export function createDataserviceColumns({
           )}
         </>
       ),
+      exportValue: (api) => formatDateToDMY(getDataserviceModifiedAt(api)),
     },
     createTableActionsColumn<Dataservice>({
       viewAction: (api) => ({

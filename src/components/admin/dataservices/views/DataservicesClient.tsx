@@ -7,6 +7,11 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchAdminDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
@@ -28,6 +33,7 @@ interface DataservicesClientProps {
 export default function DataservicesClient({ pageContent }: DataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const { user, isLoading: isUserLoading } = useAuth();
+  const userId = user?.id;
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -77,6 +83,12 @@ export default function DataservicesClient({ pageContent }: DataservicesClientPr
           by: t("admin-dataservices:columns.by"),
           about: t("admin-dataservices:columns.about"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t]
   );
@@ -122,6 +134,40 @@ export default function DataservicesClient({ pageContent }: DataservicesClientPr
     };
   }, [loadDataservices]);
 
+  // With the status filter or local sort the list is already fully loaded;
+  // otherwise one request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedApis;
+    if (!usesLocalFallback && userId) {
+      const response = await fetchAdminDataservices(1, totalItems, {
+        owner: userId,
+        q: searchQuery.trim() || undefined,
+        sort: sortParam,
+      });
+      const allApis = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && allApis.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+      rows = sortDataservices(allApis, sortField, sortOrder);
+    }
+    downloadCsv(
+      buildCsvFilename(t("admin-dataservices:title")),
+      buildCsvFromColumns(rows, columns)
+    );
+  }, [
+    columns,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    sortedApis,
+    t,
+    totalItems,
+    userId,
+    usesLocalFallback,
+  ]);
+
   const handleSearch = useDebouncedSearch((value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
@@ -159,6 +205,7 @@ export default function DataservicesClient({ pageContent }: DataservicesClientPr
           createUrl="/admin/dataservices/new"
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleApis}
