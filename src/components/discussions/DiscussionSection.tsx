@@ -14,7 +14,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import type { Discussion, DiscussionCreatePayload } from "@/service/types/discussion";
-import { createDiscussion, fetchDiscussions, fetchOrgDiscussions, replyToDiscussion } from "@/service/api/discussions-topics";
+import { createDiscussion, fetchDiscussions, replyToDiscussion } from "@/service/api/discussions-topics";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";
@@ -164,10 +164,11 @@ export function DiscussionSection({
     let cancelled = false;
     async function load() {
       try {
-        const response =
-          entityClass === "Organization"
-            ? await fetchOrgDiscussions(entityId)
-            : await fetchDiscussions(entityId);
+        // Every entity class, organizations included, lists the discussions whose subject
+        // IS this entity. `fetchOrgDiscussions` answers a different question -- every
+        // discussion on everything the organization published -- which is what the admin
+        // dashboard wants and the organization's own tab never did.
+        const response = await fetchDiscussions(entityId);
         if (!cancelled) {
           setDiscussions(response.data ?? []);
           updateDiscussionCount(response.total ?? 0);

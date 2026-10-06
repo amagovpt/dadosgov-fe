@@ -6,6 +6,22 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(organizations): the discussions tab shows discussions about the organization itself**
+  - The tab asked the API for every discussion on everything the organization published, so on
+    the INE it listed threads opened on datasets and APIs — "ANO", "Utilização da API dados.gov"
+    — and never the ones opened on the organization page, which is the only thing that tab is
+    for. Those existed in the database all along; nothing ever displayed them. The tab now asks
+    for the discussions whose subject is the organization, the same way the dataset, reuse and
+    dataservice tabs already did.
+  - The admin dashboard keeps asking for the aggregate across the organization's content: there
+    the fan-out is the point, not the bug.
+  - The counter in the tab title reports every discussion, open and closed alike, matching the
+    list under it.
+  - The page also opens straight on the discussions tab when the URL carries `?tab=discussions`.
+    Discussion mails have always linked that way and the organization page ignored it, dropping
+    the reader on the description with no sign of the thread — and the backend now sends those
+    mails to an organization's members for the first time.
+
 - **fix(login): the linking invite no longer covers the page that completes it**
   - Pressing "Associar" on the invite screen, authenticating with the identity provider and
     coming back landed on the invite screen again, so nobody could finish linking an identity
