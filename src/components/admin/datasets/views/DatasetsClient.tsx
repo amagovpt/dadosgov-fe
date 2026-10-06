@@ -10,6 +10,12 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAdminDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
+import type { DatasetFilters } from "@/service/types/dataset";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { useAuth } from "@/context/AuthContext";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -49,6 +55,31 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
     [sortField, sortOrder, usesLocalSort],
   );
 
+  const filters = useMemo<DatasetFilters>(() => {
+    const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
+    if (statusFilter === "public") {
+      statusFilters.private = false;
+      statusFilters.archived = false;
+      statusFilters.deleted = false;
+    } else if (statusFilter === "draft") {
+      statusFilters.private = true;
+      statusFilters.archived = false;
+      statusFilters.deleted = false;
+    } else if (statusFilter === "archived") {
+      statusFilters.archived = true;
+      statusFilters.deleted = false;
+    } else if (statusFilter === "deleted") {
+      statusFilters.deleted = true;
+    }
+
+    return {
+      owner: user?.id,
+      q: searchQuery.trim() || undefined,
+      sort: sortParam,
+      ...statusFilters,
+    };
+  }, [searchQuery, sortParam, statusFilter, user?.id]);
+
   const loadDatasets = useCallback(async () => {
     if (isUserLoading) return;
     if (!user?.id) {
@@ -60,33 +91,12 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
 
     setIsLoading(true);
     try {
-      const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
-      if (statusFilter === "public") {
-        statusFilters.private = false;
-        statusFilters.archived = false;
-        statusFilters.deleted = false;
-      } else if (statusFilter === "draft") {
-        statusFilters.private = true;
-        statusFilters.archived = false;
-        statusFilters.deleted = false;
-      } else if (statusFilter === "archived") {
-        statusFilters.archived = true;
-        statusFilters.deleted = false;
-      } else if (statusFilter === "deleted") {
-        statusFilters.deleted = true;
-      }
-
       // File count, status, and quality have no backend sort parameter.
       // Sort them locally and fetch all items to ensure we have the full dataset for sorting.
       const response = await fetchAdminDatasets(
         usesLocalSort ? 1 : currentPage,
         usesLocalSort ? 9999 : pageSize,
-        {
-          owner: user.id,
-          q: searchQuery.trim() || undefined,
-          sort: sortParam,
-          ...statusFilters,
-        },
+        filters,
       );
       setDatasets(response.data || []);
       setTotalItems(response.total || 0);
@@ -95,7 +105,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, isUserLoading, pageSize, searchQuery, sortParam, statusFilter, user, usesLocalSort]);
+  }, [currentPage, filters, isUserLoading, pageSize, user?.id, usesLocalSort]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -140,9 +150,30 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
           quality: t("admin-datasets:list.columns.quality"),
           actions: t("admin-datasets:list.columns.actions"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t],
   );
+
+  // One request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    const response = await fetchAdminDatasets(1, totalItems, filters);
+    const allDatasets = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allDatasets.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
+    downloadCsv(
+      buildCsvFilename(t("admin-datasets:list.myListTitle")),
+      buildCsvFromColumns(rows, columns),
+    );
+  }, [columns, filters, sortField, sortOrder, t, totalItems, usesLocalSort]);
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -208,6 +239,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
           description={t("admin-datasets:list.emptyDescription")}
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleDatasets}
