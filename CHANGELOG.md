@@ -17,6 +17,12 @@ This project has no version tags, so entries are grouped by month (newest first)
     the fan-out is the point, not the bug.
   - The counter in the tab title reports every discussion, open and closed alike, matching the
     list under it.
+  - Picked up along the way, because it shows on the same tab: the "publish as" dropdown printed
+    the author as `Gonça, ,Pinho, ,(utilizador)`. The option was built from three JSX children and
+    the dropdown renders its options through `children.toString()`, which stringifies an array
+    with commas between the parts. It is one string now. This was never specific to
+    organizations — the same component serves the dataset, reuse and dataservice tabs, so the
+    name was mangled on all of them.
   - The page also opens straight on the discussions tab when the URL carries `?tab=discussions`.
     Discussion mails have always linked that way and the organization page ignored it, dropping
     the reader on the description with no sign of the thread — and the backend now sends those

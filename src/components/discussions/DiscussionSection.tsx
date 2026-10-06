@@ -45,8 +45,11 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
   const identityOptions = useMemo(
     () => (
       <DropdownSection name="identity">
+        {/* One child, not three: the dropdown renders its option through
+            `children.toString()`, and an array of children stringifies with commas
+            between them -- "Gonça, ,Pinho, ,(utilizador)". */}
         <DropdownOption value="user">
-          {user.first_name} {user.last_name} {t("discussions.userIdentitySuffix")}
+          {`${user.first_name} ${user.last_name} ${t("discussions.userIdentitySuffix")}`}
         </DropdownOption>
         <>
           {(user.organizations ?? []).map((org) => (
@@ -285,8 +288,9 @@ export function DiscussionSection({
                 searchNoResultsText={t("discussions.noResults")}
               >
                 <DropdownSection name="identity">
+                  {/* Single child -- see the note in ReplyForm. */}
                   <DropdownOption value="user">
-                    {user?.first_name} {user?.last_name} {t("discussions.userIdentitySuffix")}
+                    {`${user?.first_name} ${user?.last_name} ${t("discussions.userIdentitySuffix")}`}
                   </DropdownOption>
                   <>
                     {(user?.organizations ?? []).map((org) => (
