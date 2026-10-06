@@ -44,6 +44,7 @@ export function createOrganizationColumns({
           {organization.name}
         </TextLink>
       ),
+      exportValue: (organization) => organization.name,
     },
     {
       id: "created_at",
@@ -51,6 +52,7 @@ export function createOrganizationColumns({
       sortField: "created_at",
       sortType: "date",
       renderCell: (organization) => formatDateToDMY(organization.created_at),
+      exportValue: (organization) => formatDateToDMY(organization.created_at),
     },
     {
       id: "datasets",
@@ -58,6 +60,7 @@ export function createOrganizationColumns({
       sortField: "datasets",
       sortType: "numeric",
       renderCell: (organization) => organization.metrics?.datasets ?? 0,
+      exportValue: (organization) => organization.metrics?.datasets ?? 0,
     },
     {
       id: "reuses",
@@ -65,11 +68,13 @@ export function createOrganizationColumns({
       sortField: "reuses",
       sortType: "numeric",
       renderCell: (organization) => organization.metrics?.reuses ?? 0,
+      exportValue: (organization) => organization.metrics?.reuses ?? 0,
     },
     {
       id: "members",
       header: labels.members,
       renderCell: (organization) => organization.members?.length ?? 0,
+      exportValue: (organization) => organization.members?.length ?? 0,
     },
     createTableActionsColumn<Organization>({
       viewAction: (organization) => ({

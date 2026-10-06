@@ -14,6 +14,11 @@ import {
 } from "./organizationsListConfig";
 import { fetchOrganizations, deleteOrganization } from "@/service/api/organizations";
 import { Organization } from "@/service/types/identity";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import type { BoOrganizationsPage } from "@/service/types/admin/organizations";
 
 function DeleteOrgPopupContent({
@@ -145,6 +150,23 @@ export default function SystemOrganizationsClient({ pageContent }: SystemOrganiz
     [deletingOrgId, handleDeleteOrg, t]
   );
 
+  // One request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    const response = await fetchOrganizations(1, totalItems, {
+      q: searchQuery.trim() || undefined,
+      sort: sortParam,
+    });
+    const allOrganizations = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allOrganizations.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    downloadCsv(
+      buildCsvFilename(t("admin-organizations:title")),
+      buildCsvFromColumns(allOrganizations, columns)
+    );
+  }, [columns, searchQuery, sortParam, t, totalItems]);
+
   useEffect(() => {
     let isActive = true;
 
@@ -194,6 +216,7 @@ export default function SystemOrganizationsClient({ pageContent }: SystemOrganiz
         onChange: handleSearch,
       }}
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={organizations}
