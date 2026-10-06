@@ -1,5 +1,10 @@
 {
   "loading": "A carregar...",
+  "csvExport": {
+    "errorTitle": "Não foi possível descarregar o CSV",
+    "errorDescription": "Ocorreu um erro ao obter os dados. Tente novamente.",
+    "close": "Fechar"
+  },
   "results_one": "{{formattedCount}} resultado",
   "results_other": "{{formattedCount}} resultados",
   "search": {
@@ -23,7 +28,9 @@
     "delete": "Eliminar",
     "cancel": "Cancelar",
     "save": "Guardar",
-    "saving": "A guardar..."
+    "saving": "A guardar...",
+    "downloadCsv": "Descarregar CSV",
+    "downloadingCsv": "A preparar CSV..."
   },
   "activity": {
     "createdDataset": "criou um conjunto de dados",

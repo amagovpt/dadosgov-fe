@@ -1,5 +1,10 @@
 {
   "loading": "Loading...",
+  "csvExport": {
+    "errorTitle": "Could not download the CSV",
+    "errorDescription": "An error occurred while fetching the data. Please try again.",
+    "close": "Close"
+  },
   "results_one": "{{formattedCount}} result",
   "results_other": "{{formattedCount}} results",
   "search": {
@@ -23,7 +28,9 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "save": "Save",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "downloadCsv": "Download CSV",
+    "downloadingCsv": "Preparing CSV..."
   },
   "activity": {
     "createdDataset": "created a dataset",

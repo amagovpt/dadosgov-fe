@@ -5,7 +5,11 @@ import TableActionsCell from "@/components/admin/TableActionsCell";
 import { can } from "@/utils/permissions";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
-import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
+import {
+  getResourceStatusKey,
+  getResourceStatusSortValue,
+} from "@/utils/admin-lists/listHelpers";
+import type { ResourceStatusKey } from "@/utils/admin-lists/listHelpers";
 import type { Dataset } from "@/service/types/dataset";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
@@ -99,6 +103,8 @@ interface DatasetColumnsOptions<TVariant extends DatasetSortVariant = "system"> 
   showQualityScore?: boolean;
   sortVariant?: TVariant;
   labels: DatasetColumnLabels;
+  /** Status names for the CSV export. */
+  statusLabels?: Record<ResourceStatusKey, string>;
 }
 
 export function createDatasetColumns<TVariant extends DatasetSortVariant = "system">({
@@ -109,6 +115,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
   showQualityScore = false,
   sortVariant = "system" as TVariant,
   labels,
+  statusLabels,
 }: DatasetColumnsOptions<TVariant>): AdminListColumn<Dataset, DatasetColumnField<TVariant>>[] {
   const createdSortField = (
     sortVariant === "org" ? "created" : "created_at"
@@ -127,6 +134,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       renderCell: (dataset) => (
         <TextLink href={`/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
       ),
+      exportValue: (dataset) => dataset.title,
     },
     {
       id: "status",
@@ -134,6 +142,10 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortField: "status" as DatasetColumnField<TVariant>,
       sortType: "string",
       renderCell: (dataset) => <ResourceStatusBadge item={dataset} />,
+      exportValue: (dataset) => {
+        const statusKey = getResourceStatusKey(dataset);
+        return statusLabels?.[statusKey] ?? statusKey;
+      },
     },
     {
       id: "created_at",
@@ -141,6 +153,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortField: createdSortField,
       sortType: "date",
       renderCell: (dataset) => formatDatasetDate(dataset.created_at),
+      exportValue: (dataset) => formatDatasetDate(dataset.created_at),
     },
     {
       id: "last_modified",
@@ -162,6 +175,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
           )}
         </div>
       ),
+      exportValue: (dataset) => formatDatasetDate(dataset.last_modified),
     },
   ];
 
@@ -173,6 +187,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortField: "resources" as DatasetColumnField<TVariant>,
       sortType: "date",
       renderCell: (dataset) => dataset.resources?.length || 0,
+      exportValue: (dataset) => dataset.resources?.length || 0,
     });
   }
 
@@ -202,6 +217,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
           </>
         );
       },
+      exportValue: (dataset) => `${calculateQualityScore(QUALITY_CRITERIA, dataset.quality)}%`,
     });
   }
 

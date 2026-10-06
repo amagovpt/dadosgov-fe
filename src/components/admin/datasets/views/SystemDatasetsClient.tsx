@@ -16,6 +16,13 @@ import {
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
+import type { DatasetFilters } from "@/service/types/dataset";
+import { fetchAllPages } from "@/service/utils/fetchAllPages";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
@@ -56,42 +63,60 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
           quality: t("admin-datasets:list.columns.quality"),
           actions: t("admin-datasets:list.columns.actions"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t],
+  );
+
+  const filters = useMemo<DatasetFilters>(() => {
+    const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
+    if (statusFilter === "public") {
+      statusFilters.private = false;
+      statusFilters.archived = false;
+      statusFilters.deleted = false;
+    }
+    if (statusFilter === "draft") {
+      statusFilters.private = true;
+      statusFilters.archived = false;
+      statusFilters.deleted = false;
+    }
+    if (statusFilter === "archived") {
+      statusFilters.archived = true;
+      statusFilters.deleted = false;
+    }
+    if (statusFilter === "deleted") {
+      statusFilters.deleted = true;
+    }
+
+    return {
+      q: searchQuery.trim() || undefined,
+      sort: sortParam,
+      ...statusFilters,
+    };
+  }, [searchQuery, sortParam, statusFilter]);
+  const hasFilters = Boolean(searchQuery.trim() || statusFilter);
+
+  // Falls back to the public endpoint when the admin one is empty. Used by the table and the CSV.
+  const fetchDatasetsPage = useCallback(
+    async (page: number, size: number) => {
+      const response = await fetchAdminDatasets(page, size, filters);
+      if (response.total === 0 && !hasFilters) {
+        return fetchDatasets(page, size, filters);
+      }
+      return response;
+    },
+    [filters, hasFilters],
   );
 
   const loadDatasets = useCallback(async () => {
     setIsLoading(true);
     try {
-      const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
-      if (statusFilter === "public") {
-        statusFilters.private = false;
-        statusFilters.archived = false;
-        statusFilters.deleted = false;
-      }
-      if (statusFilter === "draft") {
-        statusFilters.private = true;
-        statusFilters.archived = false;
-        statusFilters.deleted = false;
-      }
-      if (statusFilter === "archived") {
-        statusFilters.archived = true;
-        statusFilters.deleted = false;
-      }
-      if (statusFilter === "deleted") {
-        statusFilters.deleted = true;
-      }
-
-      const filters = {
-        q: searchQuery.trim() || undefined,
-        sort: sortParam,
-        ...statusFilters,
-      };
-
-      let response = await fetchAdminDatasets(currentPage, pageSize, filters);
-      if (response.total === 0 && !searchQuery.trim() && !statusFilter) {
-        response = await fetchDatasets(currentPage, pageSize, filters);
-      }
+      const response = await fetchDatasetsPage(currentPage, pageSize);
       setDatasets(response.data || []);
       setTotalItems(response.total || 0);
     } catch (error) {
@@ -99,7 +124,14 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery, sortParam, statusFilter]);
+  }, [currentPage, fetchDatasetsPage, pageSize]);
+
+  // Exports every page of the filtered list.
+  const handleDownloadCsv = useCallback(async () => {
+    const allDatasets = await fetchAllPages(fetchDatasetsPage);
+    const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
+    downloadCsv(buildCsvFilename("conjuntos-de-dados"), buildCsvFromColumns(rows, columns));
+  }, [columns, fetchDatasetsPage, sortField, sortOrder, usesLocalSort]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -162,6 +194,7 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
         />
       }
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleDatasets}

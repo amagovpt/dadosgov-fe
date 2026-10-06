@@ -53,6 +53,14 @@ export function getResourceStatusSortValue(item: ResourceStatusSortItem): number
   return 0;
 }
 
+export type ResourceStatusKey = "public" | "draft" | "archived" | "deleted";
+
+const RESOURCE_STATUS_KEYS: ResourceStatusKey[] = ["public", "draft", "archived", "deleted"];
+
+export function getResourceStatusKey(item: ResourceStatusSortItem): ResourceStatusKey {
+  return RESOURCE_STATUS_KEYS[getResourceStatusSortValue(item)];
+}
+
 export function buildApiSortParam<TField extends string>(
   sortField: TField | null,
   sortOrder: SortOrder,

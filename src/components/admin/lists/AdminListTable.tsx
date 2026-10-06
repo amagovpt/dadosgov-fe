@@ -15,6 +15,8 @@ export interface AdminListColumn<T, F extends string = never> {
   sortField?: F;
   sortType?: "numeric" | "date" | "string";
   renderCell: (item: T) => ReactNode;
+  /** Value for the CSV export; without it the column is not exported. */
+  exportValue?: (item: T) => string | number | boolean | null | undefined;
 }
 
 interface AdminListTableProps<T, F extends string = never> {
