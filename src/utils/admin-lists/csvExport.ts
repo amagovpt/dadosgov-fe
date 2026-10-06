@@ -42,7 +42,14 @@ export function downloadCsv(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export function buildCsvFilename(prefix: string, date: Date = new Date()) {
+// Characters not allowed in file names.
+const INVALID_FILENAME_CHARS = /[\\/:*?"<>|]/g;
+
+/** e.g. "<title> 2026-10-06 14h35m12s.csv", in local time. */
+export function buildCsvFilename(title: string, date: Date = new Date()) {
   const pad = (value: number) => String(value).padStart(2, "0");
-  return `${prefix}-${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}.csv`;
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const time = `${pad(date.getHours())}h${pad(date.getMinutes())}m${pad(date.getSeconds())}s`;
+  const safeTitle = title.replace(INVALID_FILENAME_CHARS, "-").trim();
+  return `${safeTitle} ${day} ${time}.csv`;
 }

@@ -131,11 +131,14 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
     const allDatasets = response.data ?? [];
     // The fetchers return an empty page on error.
     if (totalItems > 0 && allDatasets.length === 0) {
-      throw new Error("Could not fetch the datasets for the CSV export");
+      throw new Error(t("admin-common:csvExport.fetchError"));
     }
     const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
-    downloadCsv(buildCsvFilename("conjuntos-de-dados"), buildCsvFromColumns(rows, columns));
-  }, [columns, fetchDatasetsPage, sortField, sortOrder, totalItems, usesLocalSort]);
+    downloadCsv(
+      buildCsvFilename(t("admin-datasets:list.title")),
+      buildCsvFromColumns(rows, columns),
+    );
+  }, [columns, fetchDatasetsPage, sortField, sortOrder, t, totalItems, usesLocalSort]);
 
   useEffect(() => {
     let isCancelled = false;

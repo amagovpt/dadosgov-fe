@@ -3,6 +3,7 @@
   "csvExport": {
     "errorTitle": "Could not download the CSV",
     "errorDescription": "An error occurred while fetching the data. Please try again.",
+    "fetchError": "Could not fetch the data for the CSV.",
     "close": "Close"
   },
   "results_one": "{{formattedCount}} result",
