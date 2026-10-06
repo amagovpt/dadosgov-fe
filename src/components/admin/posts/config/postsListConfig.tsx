@@ -87,6 +87,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
       sortField: "name",
       sortType: "string",
       renderCell: (post) => <TextLink href={`/noticias/${post.slug}`}>{post.name}</TextLink>,
+      exportValue: (post) => post.name,
     },
     {
       id: "type",
@@ -94,6 +95,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
       sortField: "type",
       sortType: "string",
       renderCell: (post) => (post.kind === "page" ? labels.page : labels.news),
+      exportValue: (post) => (post.kind === "page" ? labels.page : labels.news),
     },
     {
       id: "status",
@@ -105,6 +107,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
           {post.published ? labels.published : labels.unpublished}
         </StatusDot>
       ),
+      exportValue: (post) => (post.published ? labels.published : labels.unpublished),
     },
     {
       id: "created_at",
@@ -112,6 +115,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
       sortField: "created_at",
       sortType: "date",
       renderCell: (post) => formatDateToDMY(post.created_at),
+      exportValue: (post) => formatDateToDMY(post.created_at),
     },
     {
       id: "last_modified",
@@ -119,6 +123,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
       sortField: "last_modified",
       sortType: "date",
       renderCell: (post) => formatDateToDMY(post.last_modified),
+      exportValue: (post) => formatDateToDMY(post.last_modified),
     },
     createTableActionsColumn<Post>({
       header: labels.action,
