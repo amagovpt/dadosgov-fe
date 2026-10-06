@@ -4,7 +4,11 @@ import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
-import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
+import {
+  getResourceStatusKey,
+  getResourceStatusSortValue,
+} from "@/utils/admin-lists/listHelpers";
+import type { ResourceStatusKey } from "@/utils/admin-lists/listHelpers";
 import type { Reuse } from "@/service/types/reuse";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
@@ -61,6 +65,8 @@ interface ReuseColumnsOptions<TSortableDatasets extends boolean = true> {
   editHref: (reuse: Reuse) => string;
   sortableDatasets?: TSortableDatasets;
   labels: ReuseColumnLabels;
+  /** Status names for the CSV export. */
+  statusLabels?: Record<ResourceStatusKey, string>;
 }
 
 interface ReuseColumnLabels {
@@ -78,6 +84,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
   editHref,
   sortableDatasets = true as TSortableDatasets,
   labels,
+  statusLabels,
 }: ReuseColumnsOptions<TSortableDatasets>): AdminListColumn<
   Reuse,
   ReuseSortFieldByDatasets<TSortableDatasets>
@@ -97,6 +104,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
             {reuse.title}
           </a>
         ),
+      exportValue: (reuse) => reuse.title,
     },
     {
       id: "status",
@@ -104,6 +112,10 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
       sortField: "status" as ReuseSortFieldByDatasets<TSortableDatasets>,
       sortType: "string",
       renderCell: (reuse) => <ResourceStatusBadge item={reuse} />,
+      exportValue: (reuse) => {
+        const statusKey = getResourceStatusKey(reuse);
+        return statusLabels?.[statusKey] ?? statusKey;
+      },
     },
     {
       id: "created_at",
@@ -129,6 +141,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
           )}
         </>
       ),
+      exportValue: (reuse) => formatDateToDMY(reuse.created_at),
     },
     {
       id: "datasets",
@@ -139,6 +152,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
         : undefined,
       sortType: sortableDatasets ? "numeric" : undefined,
       renderCell: (reuse) => reuse.datasets?.length ?? 0,
+      exportValue: (reuse) => reuse.datasets?.length ?? 0,
     },
     createTableActionsColumn<Reuse>({
       header: labels.actions,

@@ -7,6 +7,11 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
+import {
+  buildCsvFilename,
+  buildCsvFromColumns,
+  downloadCsv,
+} from "@/utils/admin-lists/csvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -125,9 +130,51 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
           datasets: t("admin-reuses:columns.datasets"),
           actions: t("admin-reuses:columns.actions"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t]
   );
+
+  // With local sort the list is already fully loaded; otherwise one request
+  // with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedReuses;
+    if (!usesLocalSort && resolvedOrgId) {
+      const response = await fetchReuses(1, totalItems, {
+        organization: resolvedOrgId,
+        q: searchQuery.trim() || undefined,
+        status: statusFilter || undefined,
+        sort: sortParam,
+      });
+      const allReuses = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && allReuses.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+      rows = sortReuses(allReuses, sortField, sortOrder);
+    }
+    downloadCsv(
+      buildCsvFilename(t("admin-reuses:title")),
+      buildCsvFromColumns(rows, columns)
+    );
+  }, [
+    columns,
+    resolvedOrgId,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    sortedReuses,
+    statusFilter,
+    t,
+    totalItems,
+    usesLocalSort,
+  ]);
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
@@ -171,6 +218,7 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
           createUrl="/admin/reuses/new"
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={paginatedReuses}
