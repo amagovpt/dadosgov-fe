@@ -12,6 +12,7 @@ import { useAdminListController } from "@/hooks/admin-lists/useAdminListControll
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import AdminEmptyState from "../AdminEmptyState";
 import {
   createOrgDiscussionColumns,
@@ -35,6 +36,7 @@ interface OrgDiscussionsClientProps {
 
 export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussionsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-discussions"]);
+  const downloadListCsv = useCsvExport();
   const { show } = usePopupContext();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -117,12 +119,29 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     [openDiscussion, t],
   );
 
+  const pageTitle = pageContent.orgHero?.title ?? "";
+
+  // One request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    const response = await fetchOrgDiscussions(orgId, 1, totalItems, {
+      q: searchQuery.trim() || undefined,
+      closed: filters.closedFilter === "" ? undefined : filters.closedFilter === "closed",
+      sort: sortParam,
+    });
+    const allDiscussions = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allDiscussions.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    downloadListCsv(pageTitle || t("admin-discussions:title"), allDiscussions, columns);
+  }, [downloadListCsv, columns, filters.closedFilter, orgId, pageTitle, searchQuery, sortParam, t, totalItems]);
+
   return (
     <AdminListPage
       breadcrumbItems={[
         { label: t("admin-discussions:title") },
       ]}
-      title={pageContent.orgHero?.title ?? ""}
+      title={pageTitle}
       isLoading={isLoading}
       count={totalItems}
       currentPage={currentPage}
@@ -155,6 +174,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           description={pageContent.orgNoResults?.description ?? ""}
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={discussions}
