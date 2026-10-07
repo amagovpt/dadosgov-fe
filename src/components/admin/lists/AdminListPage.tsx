@@ -11,6 +11,7 @@ import type { CreatePaginationPropsOptions } from "@/utils/createPaginationProps
 import { useHasListData } from "@/hooks/admin-lists/useHasListData";
 import AdminPaginatedTable from "./AdminPaginatedTable";
 import Button from "@/components/Primitives/Button";
+import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 
 const TOAST_DURATION_MS = 10000;
 
@@ -79,6 +80,7 @@ export default function AdminListPage({
 }: AdminListPageProps) {
   const { t } = useTranslation("admin-common");
   const { showToast } = useToastContext();
+  const { hasNotifiedSince } = useApiErrorHandler();
   const shouldRenderTable = hasItems ?? count > 0;
   const showListControls = useHasListData(
     isLoading,
@@ -100,10 +102,13 @@ export default function AdminListPage({
   const handleDownloadCsv = async () => {
     if (!onDownloadCsv || isDownloadCsvDisabled) return;
     setIsDownloadingCsv(true);
+    const startedAt = Date.now();
     try {
       await onDownloadCsv();
     } catch (error) {
       console.error("Error downloading CSV:", error);
+      // The global API error handler already told the user about this failure.
+      if (hasNotifiedSince(startedAt)) return;
       showToast(
         {
           id: crypto.randomUUID(),

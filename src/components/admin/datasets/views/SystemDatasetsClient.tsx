@@ -30,6 +30,7 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
   const downloadListCsv = useCsvExport();
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
+  const [usesPublicEndpoint, setUsesPublicEndpoint] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -97,22 +98,16 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
   }, [searchQuery, sortParam, statusFilter]);
   const hasFilters = Boolean(searchQuery.trim() || statusFilter);
 
-  // Falls back to the public endpoint when the admin one is empty. Used by the table and the CSV.
-  const fetchDatasetsPage = useCallback(
-    async (page: number, size: number) => {
-      const response = await fetchAdminDatasets(page, size, filters);
-      if (response.total === 0 && !hasFilters) {
-        return fetchDatasets(page, size, filters);
-      }
-      return response;
-    },
-    [filters, hasFilters],
-  );
-
   const loadDatasets = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetchDatasetsPage(currentPage, pageSize);
+      // Falls back to the public endpoint when the admin one is empty.
+      let response = await fetchAdminDatasets(currentPage, pageSize, filters);
+      const usesPublic = response.total === 0 && !hasFilters;
+      if (usesPublic) {
+        response = await fetchDatasets(currentPage, pageSize, filters);
+      }
+      setUsesPublicEndpoint(usesPublic);
       setDatasets(response.data || []);
       setTotalItems(response.total || 0);
     } catch (error) {
@@ -120,11 +115,12 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, fetchDatasetsPage, pageSize]);
+  }, [currentPage, filters, hasFilters, pageSize]);
 
-  // One request with page_size = the total the table already received.
+  // One request, to the endpoint the table used, with page_size = its total.
   const handleDownloadCsv = useCallback(async () => {
-    const response = await fetchDatasetsPage(1, totalItems);
+    const fetchPage = usesPublicEndpoint ? fetchDatasets : fetchAdminDatasets;
+    const response = await fetchPage(1, totalItems, filters);
     const allDatasets = response.data ?? [];
     // The fetchers return an empty page on error.
     if (totalItems > 0 && allDatasets.length === 0) {
@@ -132,7 +128,17 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
     }
     const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
     downloadListCsv(t("admin-datasets:list.title"), rows, columns);
-  }, [downloadListCsv, columns, fetchDatasetsPage, sortField, sortOrder, t, totalItems, usesLocalSort]);
+  }, [
+    downloadListCsv,
+    columns,
+    filters,
+    sortField,
+    sortOrder,
+    t,
+    totalItems,
+    usesLocalSort,
+    usesPublicEndpoint,
+  ]);
 
   useEffect(() => {
     let isCancelled = false;
