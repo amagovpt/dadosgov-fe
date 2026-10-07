@@ -1,3 +1,5 @@
+"use client";
+
 import { twMerge } from "tailwind-merge";
 import Section from "../../Section";
 import { InfoBlock } from "../../InfoBlock";

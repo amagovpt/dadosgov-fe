@@ -357,5 +357,90 @@
     "deleteMessageConfirm": "Are you sure you want to delete this message?",
     "noDiscussionsTitle": "No discussions",
     "noDiscussionsDescription": "There are no discussions yet."
-  }
+  },
+  "searchBenProj": {
+    "beneficiary": "beneficiary",
+    "beneficiaries": "beneficiaries",
+    "project": "project",
+    "projects": "projects",
+    "hero": {
+      "subtitle": "There are a total of <strong>{{total}} {{subject}}</strong>",
+      "subtitleProjects": "There are a total of <strong>{{total}} {{subject}}</strong> funded",
+      "searchByName": "Search by name",
+      "searchByNif": "Search by tax identification number",
+      "searchByOperationCode": "Search by operation code",
+      "searchPlaceholder": "Enter the {{searchBy}} of the {{subject}} to search"
+    },
+    "filterSearch": "Filter search",
+    "applyFilters": "Apply filters",
+    "appliedFilters": "Applied filters",
+    "reset": "Clear applied filters",
+    "mainBeneficiaries": "Main beneficiaries",
+    "otherBeneficiaries": "Other beneficiaries",
+    "suppliers": "Suppliers",
+    "filters": {
+      "amounts": {
+        "from": "From {{min}}€",
+        "to": "To {{max}}€",
+        "fromTo": "From {{min}}€ to {{max}}€"
+      },
+      "projectsAmount": {
+        "from": "From {{min}} projects",
+        "to": "Up to {{max}} projects",
+        "fromTo": "From {{min}} to {{max}} projects"
+      }
+    },
+    "fields": {
+      "valor_financiamento_tooltip": "Funding amount with European funds.",
+      "entityNif": "Entity Tax Identification Number",
+      "entityName": "Entity Name",
+      "operationCode": "Operation Code",
+      "entityRole": "Entity Role",
+      "approvedValue": "Approved Amount",
+      "executedValue": "Executed Amount",
+      "fundCode": "Fund Code",
+      "fundName": "Fund Name",
+      "policyObjectiveCode": "Policy Objective Code",
+      "policyObjectiveName": "Policy Objective Name",
+      "specificObjectiveCode": "Specific Objective Code",
+      "specificObjectiveShortName": "Specific Objective Short Name",
+      "programmeCode": "Programme Code",
+      "programmeName": "Programme Name",
+      "thematicAreaCode": "Thematic Area Code",
+      "thematicAreaName": "Thematic Area Name",
+      "effectiveConclusionDate": "Effective Conclusion Date",
+      "plannedConclusionDate": "Expected Conclusion Date",
+      "nutsiiOperationCode": "NUTS II Operation Code",
+      "nutsiiOperationName": "NUTS II Operation Name",
+      "nutsiiiOperationCode": "NUTS III Operation Code",
+      "nutsiiiOperationName": "NUTS III Operation Name",
+      "municipalityOperationCode": "Municipality Operation Code",
+      "municipalityOperationName": "Municipality Operation Name",
+      "projectsAmount": "Number of Projects"
+    },
+    "exportResults": "Results of the search for {{subject}}"
+  },
+  "aboutPt2030": {
+    "specificObjectivesCapitalized": "Specific Objectives"
+  },
+  "download": "Download",
+  "listing": "Listing",
+  "errorRangeNumber": "The minimum value cannot be greater than the maximum value",
+  "invalidRangeNumber": "Enter a new value between {{min}} and {{max}}",
+  "executedAmount": "Executed amount",
+  "financingValue": "Financing value",
+  "fundingAmount": "Funding amount",
+  "paidValue": "Paid value",
+  "indicators": "Indicators",
+  "maximum": "Maximum",
+  "minimum": "Minimum",
+  "next": "Next",
+  "previous": "Previous",
+  "nif": "tax identification number",
+  "noResults": "No results",
+  "operationCode": "operation code",
+  "pesquisar": "Search",
+  "results": "results",
+  "source": "Source",
+  "update": "Update"
 }

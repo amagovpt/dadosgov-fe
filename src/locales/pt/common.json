@@ -357,5 +357,90 @@
     "deleteMessageConfirm": "Tem certeza de que deseja apagar esta mensagem?",
     "noDiscussionsTitle": "Sem discussões",
     "noDiscussionsDescription": "Ainda não existem discussões."
-  }
+  },
+  "searchBenProj": {
+    "beneficiary": "beneficiário",
+    "project": "projeto",
+    "beneficiaries": "beneficiários",
+    "projects": "projetos",
+    "hero": {
+      "subtitle": "Existe um total de <strong>{{total}} {{subject}}</strong> de financiamentos",
+      "subtitleProjects": "Existe um total de <strong>{{total}} {{subject}}</strong> financiados",
+      "searchByName": "Pesquisar por nome",
+      "searchByNif": "Pesquisar por número de identificação fiscal",
+      "searchByOperationCode": "Pesquisar por código de operação",
+      "searchPlaceholder": "Insira o {{searchBy}} do {{subject}} a pesquisar"
+    },
+    "filterSearch": "Filtrar pesquisa",
+    "applyFilters": "Aplicar filtros",
+    "appliedFilters": "Filtros aplicados",
+    "reset": "Limpar filtros aplicados",
+    "mainBeneficiaries": "Beneficiários principais",
+    "otherBeneficiaries": "Outros beneficiários",
+    "suppliers": "Fornecedores",
+    "filters": {
+      "amounts": {
+        "from": "Desde {{min}}€",
+        "to": "Até {{max}}€",
+        "fromTo": "De {{min}}€ a {{max}}€"
+      },
+      "projectsAmount": {
+        "from": "Desde {{min}} projetos",
+        "to": "Até {{max}} projetos",
+        "fromTo": "De {{min}} a {{max}} projetos"
+      }
+    },
+    "fields": {
+      "entityNif": "NIF da Entidade",
+      "entityName": "Nome da Entidade",
+      "operationCode": "Código da Operação",
+      "entityRole": "Papel da Entidade",
+      "approvedValue": "Valor Aprovado",
+      "executedValue": "Valor Executado",
+      "paidValue": "Valor Pago",
+      "fundCode": "Código do Fundo",
+      "fundName": "Nome do Fundo",
+      "policyObjectiveCode": "Código do Objetivo da Política",
+      "policyObjectiveName": "Nome do Objetivo da Política",
+      "specificObjectiveCode": "Código do Objetivo Específico",
+      "specificObjectiveShortName": "Designação Curta do Objetivo Específico",
+      "programmeCode": "Código do Programa",
+      "programmeName": "Nome do Programa",
+      "thematicAreaCode": "Código da Área Temática",
+      "thematicAreaName": "Nome da Área Temática",
+      "effectiveConclusionDate": "Data de Conclusão Efetiva",
+      "plannedConclusionDate": "Data de Conclusão Prevista",
+      "nutsiiOperationCode": "Código NUTS II da Operação",
+      "nutsiiOperationName": "Nome da NUTS II da Operação",
+      "nutsiiiOperationCode": "Código NUTS III da Operação",
+      "nutsiiiOperationName": "Nome da NUTS III da Operação",
+      "municipalityOperationCode": "Código do Município da Operação",
+      "municipalityOperationName": "Nome do Município da Operação",
+      "projectsAmount": "Número de Projetos"
+    },
+    "exportResults": "Resultados da pesquisa de {{subject}}"
+  },
+  "aboutPt2030": {
+    "specificObjectivesCapitalized": "Objetivos Específicos"
+  },
+  "download": "Descarregar",
+  "listing": "Listagem",
+  "errorRangeNumber": "O valor mínimo não pode ser superior ao valor máximo",
+  "invalidRangeNumber": "Inserir novo valor, entre {{min}} e {{max}}",
+  "executedAmount": "Valor executado",
+  "financingValue": "Valor financiado",
+  "fundingAmount": "Valor de financiamento",
+  "paidValue": "Valor pago",
+  "indicators": "Indicadores",
+  "maximum": "Máximo",
+  "minimum": "Mínimo",
+  "next": "Seguinte",
+  "previous": "Anterior",
+  "nif": "número de identificação fiscal",
+  "noResults": "Sem resultados",
+  "operationCode": "código de operação",
+  "pesquisar": "Pesquisar",
+  "results": "resultados",
+  "source": "Fonte",
+  "update": "Atualização"
 }

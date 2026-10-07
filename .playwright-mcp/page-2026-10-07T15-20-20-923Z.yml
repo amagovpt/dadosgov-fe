@@ -1,0 +1,211 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - banner [aria-hidden] [ref=f1e4]
+    - main [ref=f1e6]:
+      - generic [ref=f1e8]:
+        - navigation "Breadcrumb" [ref=f1e10]:
+          - list [ref=f1e11]:
+            - listitem [ref=f1e12]:
+              - link "Início" [ref=f1e13] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=f1e15]:
+              - link "Data stories" [ref=f1e18] [cursor=pointer]:
+                - /url: /datastories
+            - listitem [ref=f1e20]:
+              - generic [ref=f1e23]: Projetos do Portugal 2030
+        - generic [ref=f1e24]:
+          - generic [ref=f1e25]:
+            - heading "Projetos do Portugal 2030" [level=1] [ref=f1e26]
+            - paragraph [ref=f1e29]: Os projetos são as operações selecionadas pelas autoridades de gestão dos programas operacionais, que contribuem para a concretização das prioridades estratégicas definidas no Portugal 2030.
+          - generic [ref=f1e31]:
+            - heading "Nesta página" [level=2] [ref=f1e32]
+            - list [ref=f1e33]:
+              - listitem [ref=f1e34]:
+                - link "Projetos do Portugal 2030 em números" [ref=f1e35] [cursor=pointer]:
+                  - /url: "#projetos-do-portugal-2030-em-numeros"
+              - listitem [ref=f1e39]:
+                - link "Pesquisar projetos do Portugal 2030" [ref=f1e40] [cursor=pointer]:
+                  - /url: "#pesquisar-projetos-do-portugal-2030"
+              - listitem [ref=f1e44]:
+                - link "Data stories relacionadas" [ref=f1e45] [cursor=pointer]:
+                  - /url: "#data-stories-relacionadas"
+              - listitem [ref=f1e49]:
+                - link "Conjuntos de dados associados" [ref=f1e50] [cursor=pointer]:
+                  - /url: "#conjuntos-de-dados-associados"
+      - generic [ref=f1e55]:
+        - heading "Projetos do Portugal 2030 em números" [level=2] [ref=f1e57]
+        - generic [ref=f1e58]:
+          - generic [ref=f1e59]:
+            - generic [ref=f1e60]: "28.192"
+            - text: Projetos
+          - generic [ref=f1e62]:
+            - generic [ref=f1e63]:
+              - generic [ref=f1e64]: 20,5
+              - generic [ref=f1e65]: mil milhões €
+            - text: Financiamento previsto
+          - generic [ref=f1e66]:
+            - generic [ref=f1e67]:
+              - generic [ref=f1e68]: 12,5
+              - generic [ref=f1e69]: mil milhões €
+            - text: Financiamento executado
+      - generic [ref=f1e71]:
+        - heading "Pesquisar projetos do Portugal 2030" [level=2] [ref=f1e73]
+        - generic [ref=f1e74]:
+          - generic [ref=f1e75]: Conheça os projetos do Portugal 2030, filtrando por Fundo Europeu, Objetivo Estratégico, Programa ou área temática a que se relaciona, ou por regiões ou concelhos em que se desenvolvem. Pode também filtrar por valor de financiamento, para procurar projetos de diferentes dimensões.
+          - generic [ref=f1e77]:
+            - generic [ref=f1e78]:
+              - generic [ref=f1e79]:
+                - radio "Pesquisar por nome" [checked] [ref=f1e80]
+                - generic [ref=f1e81]: Pesquisar por nome
+              - generic [ref=f1e85]:
+                - radio "Pesquisar por código de operação" [ref=f1e86]
+                - generic [ref=f1e87]: Pesquisar por código de operação
+            - generic [ref=f1e92]:
+              - generic [ref=f1e93]: Pesquisar projeto
+              - generic [ref=f1e95]:
+                - textbox "Pesquisar projeto" [disabled] [ref=f1e96]:
+                  - /placeholder: Insira o nome do projeto a pesquisar
+                - generic [ref=f1e97]:
+                  - button [ref=f1e98] [cursor=pointer]
+                  - button [disabled] [ref=f1e104]
+      - generic [ref=f1e111]:
+        - generic [ref=f1e112]:
+          - generic [ref=f1e113]:
+            - generic [ref=f1e114]:
+              - heading "Indicadores" [level=2] [ref=f1e115]
+              - generic [ref=f1e116]:
+                - generic [ref=f1e117]:
+                  - radio "Valor financiado" [checked] [ref=f1e118]
+                  - generic [ref=f1e119]: Valor financiado
+                - generic [ref=f1e123]:
+                  - radio "Valor executado" [ref=f1e124]
+                  - generic [ref=f1e125]: Valor executado
+                - generic [ref=f1e129]:
+                  - radio "Valor pago" [ref=f1e130]
+                  - generic [ref=f1e131]: Valor pago
+            - generic [ref=f1e135]:
+              - heading "Filtrar pesquisa" [level=2] [ref=f1e136]
+              - generic [ref=f1e137]:
+                - list "Filtrar pesquisa" [ref=f1e138]:
+                  - listitem [ref=f1e139]:
+                    - button "Fundos Europeus" [ref=f1e141] [cursor=pointer]
+                  - listitem [ref=f1e148]:
+                    - button "Objetivos Estratégicos" [ref=f1e150] [cursor=pointer]
+                - list [ref=f1e157]:
+                  - listitem [ref=f1e158]:
+                    - button "Programas" [ref=f1e160] [cursor=pointer]
+                  - listitem [ref=f1e167]:
+                    - button "Áreas temáticas" [ref=f1e169] [cursor=pointer]
+                  - listitem [ref=f1e176]:
+                    - button "Regiões" [ref=f1e178] [cursor=pointer]
+                  - listitem [ref=f1e185]:
+                    - button "Concelhos" [ref=f1e187] [cursor=pointer]
+                  - listitem [ref=f1e194]:
+                    - button "Valores" [ref=f1e196] [cursor=pointer]
+          - generic [ref=f1e205]:
+            - paragraph [ref=f1e206]: Descarregar
+            - generic [ref=f1e207] [cursor=pointer]: Listagem
+        - generic [ref=f1e216]:
+          - paragraph [ref=f1e217]: "Ordenar por :"
+          - combobox "Ordenar por :" [ref=f1e220] [cursor=pointer]
+  - contentinfo "Rodapé do portal" [ref=f1e226]:
+    - generic [ref=f1e227]:
+      - heading "Mais para descobrir no portal" [level=3] [ref=f1e228]
+      - generic [ref=f1e229]:
+        - generic [ref=f1e230]:
+          - heading "Dados abertos" [level=4] [ref=f1e231]
+          - list [ref=f1e232]:
+            - listitem [ref=f1e233]:
+              - link "Catálogo de dados" [ref=f1e234] [cursor=pointer]:
+                - /url: /pt/datasets/catalogo-de-dados-dos-dados-gov-pt
+            - listitem [ref=f1e236]:
+              - link "Portal de dados europeu" [ref=f1e237] [cursor=pointer]:
+                - /url: https://data.europa.eu/pt
+        - generic [ref=f1e239]:
+          - heading "Plataforma" [level=4] [ref=f1e240]
+          - list [ref=f1e241]:
+            - listitem [ref=f1e242]:
+              - link "Sobre nós" [ref=f1e243] [cursor=pointer]:
+                - /url: /pt/recursos/como-usar-o-portal/o-que-e-dados-gov-pt
+            - listitem [ref=f1e245]:
+              - link "Roadmap" [ref=f1e246] [cursor=pointer]:
+                - /url: /pt/roadmap
+        - generic [ref=f1e248]:
+          - heading "Desenvolvimento" [level=4] [ref=f1e249]
+          - list [ref=f1e250]:
+            - listitem [ref=f1e251]:
+              - link "API dos dados.gov" [ref=f1e252] [cursor=pointer]:
+                - /url: /pt/recursos/desenvolvimento/referencia-api
+            - listitem [ref=f1e254]:
+              - 'link "Motor de código aberto : udata (15.0.0)" [ref=f1e255] [cursor=pointer]':
+                - /url: https://github.com/amagovpt/udata-pt
+            - listitem [ref=f1e257]:
+              - link "Interface de usuário de data.gov.pt frontend" [ref=f1e258] [cursor=pointer]:
+                - /url: https://github.com/amagovpt/dadosgov-fe
+    - generic [ref=f1e260]:
+      - list [ref=f1e263]:
+        - listitem [ref=f1e264]:
+          - img "Agora" [ref=f1e265]
+        - listitem [ref=f1e266]:
+          - img "Agora" [ref=f1e267]
+      - generic [ref=f1e268]:
+        - generic [ref=f1e269]: Portal aberto de dados públicos portugueses
+        - navigation "Parceiros do portal" [ref=f1e270]:
+          - list [ref=f1e271]:
+            - listitem [ref=f1e272]:
+              - link [ref=f1e273] [cursor=pointer]:
+                - /url: https://recuperarportugal.gov.pt/
+                - img "PRR" [ref=f1e275]
+            - listitem [ref=f1e276]:
+              - link [ref=f1e277] [cursor=pointer]:
+                - /url: https://www.portugal.gov.pt/pt/gc25
+                - img "Republica de portugal" [ref=f1e279]
+            - listitem [ref=f1e280]:
+              - link [ref=f1e281] [cursor=pointer]:
+                - /url: https://eur-lex.europa.eu/legal-content/PT/LSU/?uri=CELEX:32019L1024
+                - img "NextGeneration" [ref=f1e283]
+            - listitem [ref=f1e284]:
+              - link [ref=f1e285] [cursor=pointer]:
+                - /url: https://www.compete2020.gov.pt/
+                - img "Compete 2020" [ref=f1e287]
+            - listitem [ref=f1e288]:
+              - link [ref=f1e289] [cursor=pointer]:
+                - /url: https://portugal2020.pt/
+                - img "Portugal 2020" [ref=f1e291]
+      - generic [ref=f1e292]:
+        - generic [ref=f1e293]:
+          - generic [ref=f1e294]: "Redes sociais ARTE:"
+          - navigation "Redes sociais" [ref=f1e295]:
+            - list [ref=f1e296]:
+              - listitem [ref=f1e297]:
+                - link "LinkedIn" [ref=f1e298] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/company/arte-gov-pt/
+              - listitem [ref=f1e304]:
+                - link "Instagram" [ref=f1e305] [cursor=pointer]:
+                  - /url: https://www.instagram.com/arte.gov.pt/
+              - listitem [ref=f1e311]:
+                - link "Facebook" [ref=f1e312] [cursor=pointer]:
+                  - /url: https://www.facebook.com/arte.gov.pt/
+              - listitem [ref=f1e316]:
+                - link "X" [ref=f1e317] [cursor=pointer]:
+                  - /url: https://x.com/arte_gov_pt
+              - listitem [ref=f1e322]:
+                - link "Youtube" [ref=f1e323] [cursor=pointer]:
+                  - /url: https://www.youtube.com/channel/UC_lavOMR0h7ZJdAqYW0273g
+              - listitem [ref=f1e328]:
+                - link "Github" [ref=f1e329] [cursor=pointer]:
+                  - /url: https://github.com/amagovpt/
+        - generic [ref=f1e333]:
+          - navigation "Links externos" [ref=f1e334]:
+            - list [ref=f1e335]:
+              - listitem [ref=f1e336]:
+                - link "Termos e condições" [ref=f1e337] [cursor=pointer]:
+                  - /url: /termos-de-utilizacao
+              - listitem [ref=f1e339]:
+                - link "Ajuda e contactos" [ref=f1e340] [cursor=pointer]:
+                  - /url: /ajuda-e-contactos
+              - listitem [ref=f1e342]:
+                - link "Mapa do site" [ref=f1e343] [cursor=pointer]:
+                  - /url: /sitemap
+          - generic [ref=f1e345]: © 2026 - AGÊNCIA PARA A REFORMA TECNOLÓGICA DO ESTADO, I.P. Todos os direitos reservados
+  - button "Open Next.js Dev Tools" [ref=f1e352] [cursor=pointer]

@@ -227,4 +227,62 @@ export type Datastory = {
   sections: DatastorySections;
 };
 
+export type Filter = {
+  name: string;
+  label: string;
+};
+
+export type SortParam = {
+  name: string;
+  label: string;
+};
+
+export type NoResults = {
+  image: { url: string }[];
+  title: string;
+  description: string;
+};
+
+export type QueryProjectsFiltersPt2030 = {
+  funds: string[];
+  policyObjectives: string[];
+  programmes: string[];
+  thematicAreas: string[];
+  regions: string[];
+  municipalities: string[];
+};
+
+export type SourceInfo = {
+  format: string;
+  modificationDate: string;
+  publicationDate: string;
+  source: string;
+  referenceDate: string;
+  sourceLink: string;
+  title: string;
+  updateDate: string;
+  url: string;
+};
+
+export type DatastorySearchPage = {
+  hero: DatastoryHero;
+  bigNumberTitle: string;
+  bigNumbers: string[];
+  block: {
+    title: string;
+    description: string;
+  };
+  inputSearch: {
+    label: string;
+    placeholder: string;
+    searchActionAltText: string;
+    voiceActionAltText: string;
+  };
+  filters: Filter[];
+  sortBy: SortParam[];
+  noResults: NoResults[];
+  relatedDatasets: SourceSection;
+  relatedDatastories: RelatedSection;
+};
+
 // ----------------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { DataStoryMetadata } from "@/service/types/datastories";
 import apolloClient from "@/service/utils/apollo-client";
-import { Datastory } from "@/service/types/datastories/datastory";
+import { Datastory, DatastorySearchPage } from "@/service/types/datastories/datastory";
 import { flattenData } from "@/utils/flattenObject";
 import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
@@ -292,4 +292,262 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
     },
     sections,
   };
+}
+
+export async function getDatastorySearchPage(
+  slug: string,
+  locale: string = "pt"
+): Promise<DatastorySearchPage> {
+  const query = gql(/* GraphQL */ `
+    query QueryGetDataStoriesSearchPageData($slug: String!) {
+      querySearchPagesEuropeanFundsContents(filter: $slug) {
+        data {
+          id {
+            iv
+          }
+          hero {
+            ${locale} {
+              title
+              description
+              index {
+                title
+                anchors {
+                  anchor {
+                    href
+                    children
+                    icon
+                  }
+                }
+              }
+              breadcrumbs {
+                url
+                label
+              }
+            }
+          }
+          bigNumberTitle{
+            ${locale}
+          }
+          bigNumbers {
+            ${locale} {
+              description
+            }
+          }
+          block {
+            ${locale} {
+              title
+              description
+            }
+          }
+          inputSearch {
+            ${locale} {
+              label
+              placeholder
+              searchActionAltText
+              voiceActionAltText
+            }
+          }
+          filters {
+            ${locale} {
+              name
+              label
+            }
+          }
+          sortBy {
+            ${locale} {
+              name
+              label
+            }
+          }
+          noResults {
+            ${locale} {
+              image {
+                url
+              }
+              title
+              description
+            }
+          }
+          relatedDatasets {
+            ${locale} {
+                  schemaName
+                  id
+                  active
+                  title
+                  datasets {
+                    image {
+                      url
+                    }
+                    createdAt
+                    organizationName
+                    title
+                    description
+                    slug
+                  }
+                }
+          }
+          relatedDatastories {
+            ${locale} {
+                 schemaName
+                 id
+                 active
+                 title
+                 description
+                 datastories {
+                   data {
+                     metadata {
+                       ${locale} {
+                         createdAt
+                         description
+                         slug
+                         title
+                       }
+                     }
+                   }
+                 }
+              }
+            }
+        }
+      }
+    }
+  `);
+
+  const { data, error } = await apolloClient.query<{
+    querySearchPagesEuropeanFundsContents: Array<{
+      data: Record<string, unknown>;
+    }>;
+  }>({
+    query: query,
+    variables: {
+      slug: `data/id/iv eq '${slug}'`,
+    },
+  });
+
+  if (!data || error) {
+    console.error("Error fetching datastory information:", error);
+    throw new Error("Failed to fetch datastory information");
+  }
+
+  const datastory = data.querySearchPagesEuropeanFundsContents[0]?.data;
+
+  if (!datastory) {
+    return notFound();
+  }
+
+  const dataFlatten = flattenData(datastory) as DatastorySearchPage;
+
+  return dataFlatten;
+}
+
+
+export function getSearchProjectsPT2030() {
+  return gql(/* GraphQL */ `
+    query getSearchProjects {
+      queryBeneficiariesAndProjectsFiltersOfPortugal2030 {
+        funds
+        policyObjectives
+        programmes
+        thematicAreas
+        regions
+        municipalities
+      }
+      queryProjectsOfPortugal2030SourceInfo {
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          source
+          referenceDate
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+
+export function getSpecificObjectivesByPolicyObjective() {
+  return gql(/* GraphQL */ `
+    query QuerySpecificObjectivesByPolicyObjectiveOfPortugal2030($policyObjective: String!) {
+      querySpecificObjectivesByPolicyObjectiveOfPortugal2030(policyObjective: $policyObjective) {
+        data {
+          code
+          shortName
+        }
+      }
+    }
+  `);
+}
+
+export function getProjectsOfPortugal2030() {
+  return gql(/* GraphQL */ `
+    query SearchPT2030Projects(
+      $limit: Int
+      $page: Int
+      $sortBy: ProjectSortBy
+      $sortOrder: SortOrder
+      $operationCode: String
+      $operationName: String
+      $funds: String
+      $policyObjectives: String
+      $specificObjectiveShortName: String
+      $programmes: String
+      $thematicAreas: String
+      $regions: String
+      $municipalities: String
+      $approvedValueMin: Float
+      $approvedValueMax: Float
+      $executedValueMin: Float
+      $executedValueMax: Float
+      $paidValueMin: Float
+      $paidValueMax: Float
+    ) {
+      searchProjectsOfPortugal2030(
+        limit: $limit
+        page: $page
+        sortBy: $sortBy
+        sortOrder: $sortOrder
+        operationCode: $operationCode
+        operationName: $operationName
+        fund: $funds
+        policyObjective: $policyObjectives
+        specificObjectiveShortName: $specificObjectiveShortName
+        programme: $programmes
+        thematicArea: $thematicAreas
+        region: $regions
+        municipality: $municipalities
+        approvedValueMin: $approvedValueMin
+        approvedValueMax: $approvedValueMax
+        executedValueMin: $executedValueMin
+        executedValueMax: $executedValueMax
+        paidValueMin: $paidValueMin
+        paidValueMax: $paidValueMax
+      ) {
+        limit
+        page
+        total
+        totalFiltered
+        filters {
+          approvedValueMin
+          approvedValueMax
+          executedValueMin
+          executedValueMax
+          paidValueMax
+          paidValueMin
+        }
+        data {
+          operationCode
+          operationName
+          approvedValue
+          executedValue
+          paidValue
+          effectiveConclusionDate
+          plannedConclusionDate
+        }
+      }
+    }
+  `);
 }

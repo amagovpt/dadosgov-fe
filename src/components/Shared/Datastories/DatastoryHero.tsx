@@ -5,20 +5,22 @@ import { DatastoryHero as DatastoryHeroType } from "@/service/types/datastories/
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import DatastoryIndex from "./DatastoryIndex";
 import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";
+import { twJoin } from "tailwind-merge";
 
 export type DatastoryHeroI = DatastoryHeroType & {
   breadcrumbs: BreadcrumbItem[];
+  className?: string;
 };
 
-export default function DatastoryHero({ breadcrumbs, title, description, index }: DatastoryHeroI) {
+export default function DatastoryHero({ breadcrumbs, title, description, index, className }: DatastoryHeroI) {
   return (
-    <Section className="flex items-center justify-center bg-primary-900">
+    <Section className={twJoin("flex items-center justify-center bg-primary-900", className)}>
       <InfoBlock.Root className="pb-96 pt-64">
         <InfoBlock.Header>
           <Breadcrumb items={breadcrumbs} darkMode />
         </InfoBlock.Header>
         <InfoBlock.Content className="flex w-full flex-col justify-between gap-32 lg:flex-row lg:gap-[136px]">
-          <div className="flex w-full flex-col gap-32 lg:w-1/2">
+          <div className="info-datastory flex w-full flex-col gap-32 lg:w-1/2 ">
             <InfoBlock.Title titleLevel="h1" title={title} className="text-3xl-bold text-white" />
             <InfoBlock.Description
               className="whitespace-pre-wrap text-m-regular text-white"
@@ -26,7 +28,7 @@ export default function DatastoryHero({ breadcrumbs, title, description, index }
               description={formatHtmlParagraphs(description) as string[]}
             />
           </div>
-          <div className="flex-1 self-center">
+          <div className="datastory-index flex-1 xl:self-center">
             <DatastoryIndex {...index} />
           </div>
         </InfoBlock.Content>
