@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, Icon, InputSelect } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -11,13 +11,10 @@ import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { useHasListData } from "@/hooks/admin-lists/useHasListData";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
-import {
-  createTopicColumns,
-  topicSortFieldMap,
-  type TopicSortField,
-} from "./topicsListConfig";
+import { createTopicColumns, topicSortFieldMap, type TopicSortField } from "./topicsListConfig";
 import { fetchTopics } from "@/service/api/discussions-topics";
 import { Topic } from "@/service/types/topic";
+import { buildCsvFilename, buildCsvFromColumns, downloadCsv } from "@/utils/admin-lists/csvExport";
 import type { BoTopicsPage } from "@/service/types/admin/topics";
 
 interface SystemTopicsClientProps {
@@ -79,25 +76,40 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
   );
   const handleOwnerFilter = useDebouncedSearch((value) => updateFilter("owner", value), 400);
 
+  const topicFilters = useMemo(
+    () => ({
+      q: searchQuery.trim() || undefined,
+      private: filters.private === "" ? undefined : filters.private === "true",
+      tag: filters.tag
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      geozone: filters.geozone.trim() || undefined,
+      granularity: filters.granularity.trim() || undefined,
+      organization: filters.organization.trim() || undefined,
+      owner: filters.owner.trim() || undefined,
+      featured: filters.featured === "" ? undefined : filters.featured === "true",
+      sort: sortParam,
+    }),
+    [
+      filters.featured,
+      filters.geozone,
+      filters.granularity,
+      filters.organization,
+      filters.owner,
+      filters.private,
+      filters.tag,
+      searchQuery,
+      sortParam,
+    ]
+  );
+
   useEffect(() => {
     let isActive = true;
 
     const run = async () => {
       try {
-        const response = await fetchTopics(currentPage, pageSize, {
-          q: searchQuery.trim() || undefined,
-          private: filters.private === "" ? undefined : filters.private === "true",
-          tag: filters.tag
-            .split(",")
-            .map((tag) => tag.trim())
-            .filter(Boolean),
-          geozone: filters.geozone.trim() || undefined,
-          granularity: filters.granularity.trim() || undefined,
-          organization: filters.organization.trim() || undefined,
-          owner: filters.owner.trim() || undefined,
-          featured: filters.featured === "" ? undefined : filters.featured === "true",
-          sort: sortParam,
-        });
+        const response = await fetchTopics(currentPage, pageSize, topicFilters);
         if (!isActive) return;
         setTopics(response.data || []);
         setTotalItems(response.total || 0);
@@ -116,19 +128,7 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
     return () => {
       isActive = false;
     };
-  }, [
-    currentPage,
-    filters.featured,
-    filters.geozone,
-    filters.granularity,
-    filters.organization,
-    filters.owner,
-    filters.private,
-    filters.tag,
-    pageSize,
-    searchQuery,
-    sortParam,
-  ]);
+  }, [currentPage, pageSize, topicFilters]);
 
   const columns = useMemo(
     () =>
@@ -141,15 +141,29 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
     [t]
   );
 
+  const pageTitle = pageContent.systemHero?.title ?? "";
+
+  // One request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    const response = await fetchTopics(1, totalItems, topicFilters);
+    const allTopics = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allTopics.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    downloadCsv(
+      buildCsvFilename(pageTitle || t("admin-topics:title")),
+      buildCsvFromColumns(allTopics, columns)
+    );
+  }, [columns, pageTitle, t, topicFilters, totalItems]);
+
   const hasActiveFilters = Object.values(filters).some((value) => value !== "");
   const showListControls = useHasListData(isLoading, totalItems > 0, hasActiveFilters);
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-topics:title"), url: "/admin/system/topics" },
-      ]}
-      title={pageContent.systemHero?.title ?? ""}
+      breadcrumbItems={[{ label: t("admin-topics:title"), url: "/admin/system/topics" }]}
+      title={pageTitle}
       isLoading={isLoading}
       count={totalItems}
       hasItems={topics.length > 0}
@@ -290,6 +304,7 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
           hasAnchor={false}
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={topics}
