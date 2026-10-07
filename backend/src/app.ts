@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import * as dotenv from 'dotenv';
 import http from 'http';
 import logger from 'morgan';
@@ -8,8 +8,7 @@ import path from 'path';
 import type { GraphQLSchema } from 'graphql';
 import { createYoga } from 'graphql-yoga';
 import { stitchSchemas } from '@graphql-tools/stitch';
-
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyServer } from 'httpxy';
 import routes from './interfaces/routes';
 import cors from './lib/plugins/cors';
 import errorHandler from '@/middleware/errorHandler';
@@ -17,6 +16,9 @@ import { getRemoteSchema } from '@infrastructure/cms/remote-schema';
 import { loggingMiddleware } from '@lib/plugins/logger';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { envParser } from '@lib/envParser';
+import { getAllSchemas } from './presentation/schemas/schema';
+import { bdAnalyticalClient } from '@infrastructure/db/bd-client';
+import { responseCache } from '@lib/plugins/response-cache';
 
 const { CMS_URL } = envParser;
 
@@ -29,6 +31,35 @@ const server = http.createServer(app);
 // Logger to file
 const logDir = envParser.LOG_DIR;
 fs.mkdirSync(logDir, { recursive: true });
+
+//Connect to PostgreSQL database
+(async () => {
+  try {
+    await bdAnalyticalClient.query('SELECT 1');
+  } catch (error) {
+    console.error('Error connecting to the PostgreSQL database:', error);
+  }
+})();
+
+const proxy = createProxyServer({
+  target: CMS_URL,
+  changeOrigin: true,
+  xfwd: true, // adiciona os headers X-Forwarded-*
+  secure: false,
+});
+
+proxy.on('error', (err, _req, res) => {
+  console.error('[proxy]', err.message);
+  if (res && 'headersSent' in res && !res.headersSent) {
+    res.statusCode = 502;
+    res.end('Bad gateway');
+  }
+});
+
+export const cmsProxyAssets: RequestHandler = (req, res, next) => {
+  req.url = `/api/assets/dados-gov${req.url}`; 
+  proxy.web(req, res).catch(next);
+};
 
 app.use(
   logger('common', {
@@ -64,7 +95,7 @@ app.use('/api', routes);
 
 async function makeGatewayShema() {
   return stitchSchemas({
-    subschemas: [await getRemoteSchema()],
+    subschemas: [await getRemoteSchema(), await getAllSchemas()],
     typeDefs: 'type Query { heartbeat: String! }',
     resolvers: {
       Query: {
@@ -92,15 +123,7 @@ schemaReady.then(() => {
   }, intervalMs);
 });
 
-app.use(
-  '/api/assets',
-  createProxyMiddleware({
-    target: CMS_URL,
-    changeOrigin: true,
-    secure: false,
-    pathRewrite: (path) => `/api/assets/dados-gov${path}`,
-  }),
-);
+app.use('/api/assets', cmsProxyAssets);
 
 // GraphQL Yoga server
 
@@ -122,6 +145,7 @@ const yoga = createYoga({
       // Set production env to allow introspection for local development, and disable in prod
       isDisabled: () => process.env.NODE_ENV === 'production',
     }),
+    responseCache,
   ],
   context: ({ request }) => ({ request }),
 });

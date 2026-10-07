@@ -18,6 +18,8 @@ interface TokenCache {
 
 let tokenCache: TokenCache | null = null;
 
+let cmsRootQueryFieldNames: readonly string[] = [];
+
 function isTokenExpired(cache: TokenCache): boolean {
   const BUFFER_MS = 30_000;
   return Date.now() >= cache.expiresAt - BUFFER_MS;
@@ -29,19 +31,16 @@ export async function getToken(): Promise<string> {
   }
 
   try {
-    const res = await fetch(
-      CMS_URL + '/identity-server/connect/token',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'client_credentials',
-          client_id: CLIENT_ID || '',
-          client_secret: CLIENT_SECRET || '',
-          scope: 'squidex-api',
-        }),
-      },
-    );
+    const res = await fetch(CMS_URL + '/identity-server/connect/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: CLIENT_ID || '',
+        client_secret: CLIENT_SECRET || '',
+        scope: 'squidex-api',
+      }),
+    });
 
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -79,8 +78,13 @@ export async function getRemoteSchema() {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
 
+      const schema = await schemaFromExecutor(remoteExecutor);
+      cmsRootQueryFieldNames = Object.keys(
+        schema.getQueryType()?.getFields() ?? {},
+      );
+
       return {
-        schema: await schemaFromExecutor(remoteExecutor),
+        schema,
         executor: remoteExecutor,
       };
     } catch (error) {
@@ -98,6 +102,13 @@ export async function getRemoteSchema() {
     }
   }
 
-  console.error('Error getting remote schema: all retries exhausted', lastError);
+  console.error(
+    'Error getting remote schema: all retries exhausted',
+    lastError,
+  );
   throw new Error('Failed to get remote schema');
+}
+
+export function getCmsRootQueryFieldNames(): readonly string[] {
+  return cmsRootQueryFieldNames;
 }

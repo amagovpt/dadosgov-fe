@@ -18,9 +18,10 @@
     "dev": "tsx watch src/server.ts"
   },
   "dependencies": {
-    "@graphql-tools/executor-http": "^2.0.3",
-    "@graphql-tools/stitch": "^9.4.26",
-    "@graphql-yoga/plugin-disable-introspection": "^2.17.1",
+    "@graphql-tools/executor-http": "^3.4.1",
+    "@graphql-tools/stitch": "^10.3.1",
+    "@graphql-yoga/plugin-disable-introspection": "^2.25.2",
+    "@graphql-yoga/plugin-response-cache": "^3.26.2",
     "axios": "^1.10.0",
     "chalk": "^5.4.1",
     "cors": "^2.8.5",
@@ -28,9 +29,11 @@
     "express": "^5.1.0",
     "graphql": "^16.11.0",
     "graphql-http": "^1.22.4",
-    "graphql-yoga": "^5.15.1",
-    "http-proxy-middleware": "^3.0.5",
+    "graphql-yoga": "^5.24.2",
+    "httpxy": "^0.5.5",
+    "lru-cache": "^10.4.3",
     "morgan": "^1.10.0",
+    "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "ts-node": "^10.9.2",
     "type-graphql": "^2.0.0-rc.2",
@@ -43,6 +46,7 @@
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/ua-parser-js": "^0.7.39",
+    "audit-ci": "^7.1.0",
     "eslint": "^9.30.1",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.1",
@@ -57,5 +61,11 @@
   },
   "engines": {
     "node": ">=20.0"
+  },
+  "overrides": {
+    "@graphql-tools/utils": "^12.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
