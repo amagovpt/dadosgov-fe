@@ -1,5 +1,12 @@
 {
   "loading": "Loading...",
+  "csvExport": {
+    "errorTitle": "Could not download the CSV",
+    "errorDescription": "An error occurred while fetching the data. Please try again.",
+    "fetchError": "Could not fetch the data for the CSV.",
+    "close": "Close",
+    "url": "URL"
+  },
   "results_one": "{{formattedCount}} result",
   "results_other": "{{formattedCount}} results",
   "search": {
@@ -23,7 +30,9 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "save": "Save",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "downloadCsv": "Download CSV",
+    "downloadingCsv": "Preparing CSV..."
   },
   "activity": {
     "createdDataset": "created a dataset",
@@ -66,7 +75,8 @@
   },
   "sidebar": {
     "expand": "Expand",
-    "close": "Close"
+    "close": "Close",
+    "url": "URL"
   },
   "deleteAccount": {
     "title": "Are you sure you want to delete this account?",

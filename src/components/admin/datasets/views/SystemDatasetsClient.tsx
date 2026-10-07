@@ -16,6 +16,8 @@ import {
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
+import type { DatasetFilters } from "@/service/types/dataset";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
@@ -25,8 +27,10 @@ interface SystemDatasetsClientProps {
 
 export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
+  const downloadListCsv = useCsvExport();
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
+  const [usesPublicEndpoint, setUsesPublicEndpoint] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -56,42 +60,54 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
           quality: t("admin-datasets:list.columns.quality"),
           actions: t("admin-datasets:list.columns.actions"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t],
   );
 
+  const filters = useMemo<DatasetFilters>(() => {
+    const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
+    if (statusFilter === "public") {
+      statusFilters.private = false;
+      statusFilters.archived = false;
+      statusFilters.deleted = false;
+    }
+    if (statusFilter === "draft") {
+      statusFilters.private = true;
+      statusFilters.archived = false;
+      statusFilters.deleted = false;
+    }
+    if (statusFilter === "archived") {
+      statusFilters.archived = true;
+      statusFilters.deleted = false;
+    }
+    if (statusFilter === "deleted") {
+      statusFilters.deleted = true;
+    }
+
+    return {
+      q: searchQuery.trim() || undefined,
+      sort: sortParam,
+      ...statusFilters,
+    };
+  }, [searchQuery, sortParam, statusFilter]);
+  const hasFilters = Boolean(searchQuery.trim() || statusFilter);
+
   const loadDatasets = useCallback(async () => {
     setIsLoading(true);
     try {
-      const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
-      if (statusFilter === "public") {
-        statusFilters.private = false;
-        statusFilters.archived = false;
-        statusFilters.deleted = false;
-      }
-      if (statusFilter === "draft") {
-        statusFilters.private = true;
-        statusFilters.archived = false;
-        statusFilters.deleted = false;
-      }
-      if (statusFilter === "archived") {
-        statusFilters.archived = true;
-        statusFilters.deleted = false;
-      }
-      if (statusFilter === "deleted") {
-        statusFilters.deleted = true;
-      }
-
-      const filters = {
-        q: searchQuery.trim() || undefined,
-        sort: sortParam,
-        ...statusFilters,
-      };
-
+      // Falls back to the public endpoint when the admin one is empty.
       let response = await fetchAdminDatasets(currentPage, pageSize, filters);
-      if (response.total === 0 && !searchQuery.trim() && !statusFilter) {
+      const usesPublic = response.total === 0 && !hasFilters;
+      if (usesPublic) {
         response = await fetchDatasets(currentPage, pageSize, filters);
       }
+      setUsesPublicEndpoint(usesPublic);
       setDatasets(response.data || []);
       setTotalItems(response.total || 0);
     } catch (error) {
@@ -99,7 +115,30 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery, sortParam, statusFilter]);
+  }, [currentPage, filters, hasFilters, pageSize]);
+
+  // One request, to the endpoint the table used, with page_size = its total.
+  const handleDownloadCsv = useCallback(async () => {
+    const fetchPage = usesPublicEndpoint ? fetchDatasets : fetchAdminDatasets;
+    const response = await fetchPage(1, totalItems, filters);
+    const allDatasets = response.data ?? [];
+    // The fetchers return an empty page on error.
+    if (totalItems > 0 && allDatasets.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
+    downloadListCsv(t("admin-datasets:list.title"), rows, columns);
+  }, [
+    downloadListCsv,
+    columns,
+    filters,
+    sortField,
+    sortOrder,
+    t,
+    totalItems,
+    usesLocalSort,
+    usesPublicEndpoint,
+  ]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -162,6 +201,7 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
         />
       }
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleDatasets}
