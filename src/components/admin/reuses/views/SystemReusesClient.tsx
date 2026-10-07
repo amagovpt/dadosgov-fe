@@ -7,7 +7,7 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
-import { buildCsvFilename, buildCsvFromColumns, downloadCsv } from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -26,6 +26,7 @@ interface SystemReusesClientProps {
 
 export default function SystemReusesClient({ pageContent }: SystemReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
+  const downloadListCsv = useCsvExport();
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,8 +129,9 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
         throw new Error(t("admin-common:csvExport.fetchError"));
       }
     }
-    downloadCsv(buildCsvFilename(t("admin-reuses:title")), buildCsvFromColumns(rows, columns));
+    downloadListCsv(t("admin-reuses:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     reuses,
     searchQuery,

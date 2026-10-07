@@ -16,18 +16,35 @@ function escapeCsvCell(value: CsvCellValue): string {
   return /[";\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-/** Builds the CSV from the table columns that have an `exportValue`. */
+export interface CsvUrlOptions {
+  header: string;
+  /** Turns an internal path into the full URL written in the CSV. */
+  resolve: (path: string) => string;
+}
+
+/**
+ * Builds the CSV from the table columns that have an `exportValue`.
+ * With `url`, the first column's `exportUrl` is added as the last column.
+ */
 export function buildCsvFromColumns<T, F extends string = never>(
   items: T[],
-  columns: AdminListColumn<T, F>[]
+  columns: AdminListColumn<T, F>[],
+  url?: CsvUrlOptions
 ): string {
   const exportable = columns.filter((column) => column.exportValue);
+  const urlColumn = url ? columns.find((column) => column.exportUrl) : undefined;
   const header = exportable.map((column) =>
     escapeCsvCell(column.headerLabel ?? String(column.header))
   );
-  const rows = items.map((item) =>
-    exportable.map((column) => escapeCsvCell(column.exportValue?.(item)))
-  );
+  if (url && urlColumn) header.push(escapeCsvCell(url.header));
+  const rows = items.map((item) => {
+    const row = exportable.map((column) => escapeCsvCell(column.exportValue?.(item)));
+    if (url && urlColumn) {
+      const path = urlColumn.exportUrl?.(item);
+      row.push(escapeCsvCell(path ? url.resolve(path) : ""));
+    }
+    return row;
+  });
 
   return [header, ...rows].map((row) => row.join(CSV_DELIMITER)).join("\r\n");
 }

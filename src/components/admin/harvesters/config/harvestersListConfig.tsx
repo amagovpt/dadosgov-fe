@@ -130,6 +130,7 @@ export function createOrgHarvesterColumns({
       sortType: "string",
       renderCell: (harvester) => <TextLink href={editHref(harvester)}>{harvester.name}</TextLink>,
       exportValue: (harvester) => harvester.name,
+      exportUrl: (harvester) => editHref(harvester),
     },
     {
       id: "status",
@@ -223,6 +224,7 @@ export function createSystemHarvesterColumns({
         <TextLink href={`/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
       ),
       exportValue: (harvester) => harvester.name,
+      exportUrl: (harvester) => `/admin/harvesters/${harvester.id}`,
     },
     {
       id: "status",

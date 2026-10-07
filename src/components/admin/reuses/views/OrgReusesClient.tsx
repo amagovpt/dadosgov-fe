@@ -7,11 +7,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -33,6 +29,7 @@ interface OrgReusesClientProps {
 
 export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
+  const downloadListCsv = useCsvExport();
   const params = useParams();
   const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -158,11 +155,9 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
       }
       rows = sortReuses(allReuses, sortField, sortOrder);
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-reuses:title")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(t("admin-reuses:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     resolvedOrgId,
     searchQuery,

@@ -7,11 +7,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
@@ -34,6 +30,7 @@ interface OrgDataservicesClientProps {
 
 export default function OrgDataservicesClient({ pageContent }: OrgDataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+  const downloadListCsv = useCsvExport();
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
@@ -153,11 +150,9 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
       }
       rows = sortDataservices(allApis, sortField, sortOrder);
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-dataservices:title")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(t("admin-dataservices:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     resolvedOrgId,
     searchQuery,

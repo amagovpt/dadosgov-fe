@@ -7,11 +7,7 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchMyCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
@@ -28,6 +24,7 @@ interface CommunityResourcesClientProps {
 
 export default function CommunityResourcesClient({ pageContent }: CommunityResourcesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+  const downloadListCsv = useCsvExport();
 
   const [allResources, setAllResources] = useState<CommunityResource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,11 +114,8 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
 
   // The list is already fully loaded (sorted and filtered), so no extra request.
   const handleDownloadCsv = useCallback(async () => {
-    downloadCsv(
-      buildCsvFilename(t("admin-community-resources:title")),
-      buildCsvFromColumns(sortedResources, columns)
-    );
-  }, [columns, sortedResources, t]);
+    downloadListCsv(t("admin-community-resources:title"), sortedResources, columns);
+  }, [downloadListCsv, columns, sortedResources, t]);
 
   return (
     <AdminListPage

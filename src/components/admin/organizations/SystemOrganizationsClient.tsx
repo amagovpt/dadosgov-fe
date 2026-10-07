@@ -14,11 +14,7 @@ import {
 } from "./organizationsListConfig";
 import { fetchOrganizations, deleteOrganization } from "@/service/api/organizations";
 import { Organization } from "@/service/types/identity";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import type { BoOrganizationsPage } from "@/service/types/admin/organizations";
 
 function DeleteOrgPopupContent({
@@ -61,6 +57,7 @@ interface SystemOrganizationsClientProps {
 
 export default function SystemOrganizationsClient({ pageContent }: SystemOrganizationsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-organizations"]);
+  const downloadListCsv = useCsvExport();
   const { show, hide } = usePopupContext();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -161,11 +158,8 @@ export default function SystemOrganizationsClient({ pageContent }: SystemOrganiz
     if (totalItems > 0 && allOrganizations.length === 0) {
       throw new Error(t("admin-common:csvExport.fetchError"));
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-organizations:title")),
-      buildCsvFromColumns(allOrganizations, columns)
-    );
-  }, [columns, searchQuery, sortParam, t, totalItems]);
+    downloadListCsv(t("admin-organizations:title"), allOrganizations, columns);
+  }, [downloadListCsv, columns, searchQuery, sortParam, t, totalItems]);
 
   useEffect(() => {
     let isActive = true;

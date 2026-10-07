@@ -7,11 +7,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchAdminDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
@@ -32,6 +28,7 @@ interface DataservicesClientProps {
 
 export default function DataservicesClient({ pageContent }: DataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+  const downloadListCsv = useCsvExport();
   const { user, isLoading: isUserLoading } = useAuth();
   const userId = user?.id;
 
@@ -151,11 +148,9 @@ export default function DataservicesClient({ pageContent }: DataservicesClientPr
       }
       rows = sortDataservices(allApis, sortField, sortOrder);
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-dataservices:title")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(t("admin-dataservices:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     searchQuery,
     sortField,

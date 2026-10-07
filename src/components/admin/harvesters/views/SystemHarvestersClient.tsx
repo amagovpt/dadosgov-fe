@@ -10,11 +10,7 @@ import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
@@ -35,6 +31,7 @@ interface SystemHarvestersClientProps {
 
 export default function SystemHarvestersClient({ pageContent }: SystemHarvestersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
+  const downloadListCsv = useCsvExport();
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -240,11 +237,8 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
         throw new Error(t("admin-common:csvExport.fetchError"));
       }
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-harvesters:title")),
-      buildCsvFromColumns(rows, columns)
-    );
-  }, [columns, searchQuery, sortedHarvesters, t, totalItems, usesLocalFallback]);
+    downloadListCsv(t("admin-harvesters:title"), rows, columns);
+  }, [downloadListCsv, columns, searchQuery, sortedHarvesters, t, totalItems, usesLocalFallback]);
 
   return (
     <AdminListPage

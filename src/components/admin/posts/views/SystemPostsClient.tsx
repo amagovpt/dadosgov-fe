@@ -12,11 +12,7 @@ import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelper
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchAdminPosts } from "@/service/api/posts";
 import type { Post } from "@/service/types/posts";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import {
@@ -33,6 +29,7 @@ interface SystemPostsClientProps {
 
 export default function SystemPostsClient({ pageContent }: SystemPostsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-posts"]);
+  const downloadListCsv = useCsvExport();
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -150,11 +147,9 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
       }
       rows = sortPosts(allPosts, sortField, sortOrder);
     }
-    downloadCsv(
-      buildCsvFilename(pageTitle || t("admin-posts:title")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(pageTitle || t("admin-posts:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     filters.typeFilter,
     pageTitle,

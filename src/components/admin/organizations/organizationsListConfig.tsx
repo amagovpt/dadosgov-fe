@@ -45,6 +45,7 @@ export function createOrganizationColumns({
         </TextLink>
       ),
       exportValue: (organization) => organization.name,
+      exportUrl: (organization) => `/admin/org/${organization.id}/datasets`,
     },
     {
       id: "created_at",

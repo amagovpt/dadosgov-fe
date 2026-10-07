@@ -34,6 +34,7 @@ export function createTopicColumns(
       header: labels.name,
       renderCell: (topic) => <TextLink href={`/themes/${topic.slug}`}>{topic.name}</TextLink>,
       exportValue: (topic) => topic.name,
+      exportUrl: (topic) => `/themes/${topic.slug}`,
     },
     {
       id: "created_at",

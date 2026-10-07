@@ -6,11 +6,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -31,6 +27,7 @@ interface SystemDataservicesClientProps {
 
 export default function SystemDataservicesClient({ pageContent }: SystemDataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+  const downloadListCsv = useCsvExport();
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,11 +121,9 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
     }
     const filtered = filterByStatus(allApis, statusFilter);
     const rows = usesLocalSort ? sortDataservices(filtered, sortField, sortOrder) : filtered;
-    downloadCsv(
-      buildCsvFilename(t("admin-dataservices:title")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(t("admin-dataservices:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     searchQuery,
     sortField,

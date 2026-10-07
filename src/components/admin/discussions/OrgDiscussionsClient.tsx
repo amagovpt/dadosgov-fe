@@ -12,11 +12,7 @@ import { useAdminListController } from "@/hooks/admin-lists/useAdminListControll
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import AdminEmptyState from "../AdminEmptyState";
 import {
   createOrgDiscussionColumns,
@@ -40,6 +36,7 @@ interface OrgDiscussionsClientProps {
 
 export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussionsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-discussions"]);
+  const downloadListCsv = useCsvExport();
   const { show } = usePopupContext();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -136,11 +133,8 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     if (totalItems > 0 && allDiscussions.length === 0) {
       throw new Error(t("admin-common:csvExport.fetchError"));
     }
-    downloadCsv(
-      buildCsvFilename(pageTitle || t("admin-discussions:title")),
-      buildCsvFromColumns(allDiscussions, columns)
-    );
-  }, [columns, filters.closedFilter, orgId, pageTitle, searchQuery, sortParam, t, totalItems]);
+    downloadListCsv(pageTitle || t("admin-discussions:title"), allDiscussions, columns);
+  }, [downloadListCsv, columns, filters.closedFilter, orgId, pageTitle, searchQuery, sortParam, t, totalItems]);
 
   return (
     <AdminListPage

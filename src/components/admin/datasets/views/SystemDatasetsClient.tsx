@@ -17,11 +17,7 @@ import {
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import type { DatasetFilters } from "@/service/types/dataset";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
@@ -31,6 +27,7 @@ interface SystemDatasetsClientProps {
 
 export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
+  const downloadListCsv = useCsvExport();
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,11 +131,8 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
       throw new Error(t("admin-common:csvExport.fetchError"));
     }
     const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
-    downloadCsv(
-      buildCsvFilename(t("admin-datasets:list.title")),
-      buildCsvFromColumns(rows, columns),
-    );
-  }, [columns, fetchDatasetsPage, sortField, sortOrder, t, totalItems, usesLocalSort]);
+    downloadListCsv(t("admin-datasets:list.title"), rows, columns);
+  }, [downloadListCsv, columns, fetchDatasetsPage, sortField, sortOrder, t, totalItems, usesLocalSort]);
 
   useEffect(() => {
     let isCancelled = false;

@@ -105,6 +105,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
           </a>
         ),
       exportValue: (reuse) => reuse.title,
+      exportUrl: (reuse) => `/reuses/${reuse.slug}`,
     },
     {
       id: "status",

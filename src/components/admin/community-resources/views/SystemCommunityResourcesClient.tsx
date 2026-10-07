@@ -9,11 +9,7 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAllCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import {
   CommunityResourceSortField,
@@ -31,6 +27,7 @@ export default function SystemCommunityResourcesClient({
   pageContent,
 }: SystemCommunityResourcesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+  const downloadListCsv = useCsvExport();
   const searchParams = useSearchParams();
   const resourceId = searchParams.get("resource_id");
 
@@ -101,11 +98,9 @@ export default function SystemCommunityResourcesClient({
       }
       rows = sortCommunityResources(allResources, sortField, sortOrder);
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-community-resources:title")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(t("admin-community-resources:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     sortField,
     sortOrder,

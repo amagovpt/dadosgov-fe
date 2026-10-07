@@ -8,7 +8,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
-import { buildCsvFilename, buildCsvFromColumns, downloadCsv } from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
@@ -30,6 +30,7 @@ interface ReusesClientProps {
 
 export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
+  const downloadListCsv = useCsvExport();
   const { user, isLoading: isUserLoading } = useAuth();
   const userId = user?.id;
   const router = useRouter();
@@ -170,11 +171,9 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
       const filtered = statusFilter ? filterByStatus(allReuses, statusFilter) : allReuses;
       rows = sortReuses(filtered, sortField, sortOrder);
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-reuses:myListTitle")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(t("admin-reuses:myListTitle"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     searchQuery,
     sortField,

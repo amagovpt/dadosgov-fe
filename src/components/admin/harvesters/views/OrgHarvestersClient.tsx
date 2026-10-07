@@ -9,11 +9,7 @@ import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgHarvesters } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
@@ -33,6 +29,7 @@ interface OrgHarvestersClientProps {
 
 export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
+  const downloadListCsv = useCsvExport();
   const params = useParams();
   const orgIdFromUrl = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -159,11 +156,8 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
         throw new Error(t("admin-common:csvExport.fetchError"));
       }
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-harvesters:title")),
-      buildCsvFromColumns(rows, columns)
-    );
-  }, [columns, orgId, searchQuery, sortedHarvesters, t, totalItems, usesLocalFallback]);
+    downloadListCsv(t("admin-harvesters:title"), rows, columns);
+  }, [downloadListCsv, columns, orgId, searchQuery, sortedHarvesters, t, totalItems, usesLocalFallback]);
 
   if (!isOrgLoading && !orgId) {
     return (

@@ -8,11 +8,7 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchOrgCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
@@ -30,6 +26,7 @@ interface OrgCommunityResourcesClientProps {
 
 export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunityResourcesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+  const downloadListCsv = useCsvExport();
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -146,11 +143,9 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
       }
       rows = sortCommunityResources(allResources, sortField, sortOrder);
     }
-    downloadCsv(
-      buildCsvFilename(t("admin-community-resources:title")),
-      buildCsvFromColumns(rows, columns)
-    );
+    downloadListCsv(t("admin-community-resources:title"), rows, columns);
   }, [
+    downloadListCsv,
     columns,
     resolvedOrgId,
     sortField,

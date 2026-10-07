@@ -4,7 +4,8 @@
     "errorTitle": "Não foi possível descarregar o CSV",
     "errorDescription": "Ocorreu um erro ao obter os dados. Tente novamente.",
     "fetchError": "Não foi possível obter os dados para o CSV.",
-    "close": "Fechar"
+    "close": "Fechar",
+    "url": "URL"
   },
   "results_one": "{{formattedCount}} resultado",
   "results_other": "{{formattedCount}} resultados",
@@ -74,7 +75,8 @@
   },
   "sidebar": {
     "expand": "Expandir",
-    "close": "Fechar"
+    "close": "Fechar",
+    "url": "URL"
   },
   "deleteAccount": {
     "title": "Tem a certeza que deseja eliminar esta conta?",

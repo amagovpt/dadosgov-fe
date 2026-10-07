@@ -130,6 +130,9 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
         </div>
       ),
       exportValue: (resource) => resource.title,
+      exportUrl: showDatasetLink
+        ? (resource) => (resource.dataset ? `/datasets/${resource.dataset.id}` : undefined)
+        : undefined,
     },
     {
       id: "status",

@@ -11,11 +11,7 @@ import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelper
 import { fetchAdminDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import type { DatasetFilters } from "@/service/types/dataset";
-import {
-  buildCsvFilename,
-  buildCsvFromColumns,
-  downloadCsv,
-} from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useAuth } from "@/context/AuthContext";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -35,6 +31,7 @@ interface DatasetsClientProps {
 
 export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
+  const downloadListCsv = useCsvExport();
   const { user, isLoading: isUserLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -169,11 +166,8 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       throw new Error(t("admin-common:csvExport.fetchError"));
     }
     const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
-    downloadCsv(
-      buildCsvFilename(t("admin-datasets:list.myListTitle")),
-      buildCsvFromColumns(rows, columns),
-    );
-  }, [columns, filters, sortField, sortOrder, t, totalItems, usesLocalSort]);
+    downloadListCsv(t("admin-datasets:list.myListTitle"), rows, columns);
+  }, [downloadListCsv, columns, filters, sortField, sortOrder, t, totalItems, usesLocalSort]);
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,

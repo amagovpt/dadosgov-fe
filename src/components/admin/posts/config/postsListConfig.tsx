@@ -88,6 +88,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
       sortType: "string",
       renderCell: (post) => <TextLink href={`/noticias/${post.slug}`}>{post.name}</TextLink>,
       exportValue: (post) => post.name,
+      exportUrl: (post) => `/noticias/${post.slug}`,
     },
     {
       id: "type",

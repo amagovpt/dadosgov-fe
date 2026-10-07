@@ -14,7 +14,7 @@ import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import { createTopicColumns, topicSortFieldMap, type TopicSortField } from "./topicsListConfig";
 import { fetchTopics } from "@/service/api/discussions-topics";
 import { Topic } from "@/service/types/topic";
-import { buildCsvFilename, buildCsvFromColumns, downloadCsv } from "@/utils/admin-lists/csvExport";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import type { BoTopicsPage } from "@/service/types/admin/topics";
 
 interface SystemTopicsClientProps {
@@ -23,6 +23,7 @@ interface SystemTopicsClientProps {
 
 export default function SystemTopicsClient({ pageContent }: SystemTopicsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-topics"]);
+  const downloadListCsv = useCsvExport();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,11 +152,8 @@ export default function SystemTopicsClient({ pageContent }: SystemTopicsClientPr
     if (totalItems > 0 && allTopics.length === 0) {
       throw new Error(t("admin-common:csvExport.fetchError"));
     }
-    downloadCsv(
-      buildCsvFilename(pageTitle || t("admin-topics:title")),
-      buildCsvFromColumns(allTopics, columns)
-    );
-  }, [columns, pageTitle, t, topicFilters, totalItems]);
+    downloadListCsv(pageTitle || t("admin-topics:title"), allTopics, columns);
+  }, [downloadListCsv, columns, pageTitle, t, topicFilters, totalItems]);
 
   const hasActiveFilters = Object.values(filters).some((value) => value !== "");
   const showListControls = useHasListData(isLoading, totalItems > 0, hasActiveFilters);

@@ -135,6 +135,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
         <TextLink href={`/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
       ),
       exportValue: (dataset) => dataset.title,
+      exportUrl: (dataset) => `/datasets/${dataset.slug}`,
     },
     {
       id: "status",
