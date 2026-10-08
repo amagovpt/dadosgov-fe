@@ -18,7 +18,10 @@ function formatCompactEUR(value: number, maximumFractionDigits: number = 1): str
 
 function formatCurrency(value: number, t: (suffix: string) => string): string {
   const [formatted, suffix] = formatCompactEUR(value);
-  return `${formatted} ${t(suffix)} €`;
+  if (!suffix) return `${formatted} €`;
+  // "1 milhão" vs "1,5 milhões": only an exact 1 takes the singular form
+  const isOne = Number(formatted.replace(",", ".")) === 1;
+  return `${formatted} ${t(isOne ? `${suffix}_one` : suffix)} €`;
 }
 
 const formatValueAsCurrency = (

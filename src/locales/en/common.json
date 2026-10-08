@@ -442,5 +442,11 @@
   "pesquisar": "Search",
   "results": "results",
   "source": "Source",
-  "update": "Update"
+  "update": "Update",
+  "thousand": "thousand",
+  "thousand_one": "thousand",
+  "million": "million",
+  "million_one": "million",
+  "billion": "billion",
+  "billion_one": "billion"
 }
