@@ -7,6 +7,7 @@ import { Dataset } from "@/service/types/dataset";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { formatDateLong } from "@/utils/formatDate";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 
 interface DatasetInfoProps {
@@ -71,7 +72,9 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
   const contactPoints = dataset.contact_points ?? [];
 
   const hasInfo = Boolean(tags.length > 0 || dataset.id || dataset.license);
-  const hasTemporal = Boolean(dataset.created_at || dataset.frequency || dataset.last_modified);
+  const hasTemporal = Boolean(
+    dataset.created_at || dataset.frequency || getDatasetLastUpdate(dataset)
+  );
   const hasSpatial = Boolean(dataset.spatial?.zones?.length || dataset.spatial?.granularity);
   const hasExtras = Boolean(dataset.page || contactPoints.length > 0);
   const harvestData: Record<string, unknown> | null = dataset.extras?.["harvest:domain"]
@@ -206,13 +209,13 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
                 </span>
               </div>
             )}
-            {dataset.last_modified && (
+            {getDatasetLastUpdate(dataset) && (
               <div>
                 <p className="font-bold text-neutral-900 text-sm mb-8">
                   {tds("info.lastUpdate")}
                 </p>
                 <span className="text-neutral-900 text-sm">
-                  {formatDateLong(dataset.last_modified, i18n.language as "pt" | "en")}
+                  {formatDateLong(getDatasetLastUpdate(dataset), i18n.language as "pt" | "en")}
                 </span>
               </div>
             )}

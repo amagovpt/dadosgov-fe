@@ -59,7 +59,14 @@ export function isWithinDateLimit(dateStr: string | null | undefined): boolean {
 /** BCP-47 tag for each supported UI locale, for `Intl` / `toLocaleString`. */
 export const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
 
-export function formatDateLong(dateStr: string, locale: "pt" | "en" = "pt") {
+export function formatDateLong(
+  dateStr: string | undefined | null,
+  locale: "pt" | "en" = "pt"
+) {
+  // Accepts an absent date for the same reason `formatDateToTimeAgo` does: callers
+  // pick a date out of a chain of optional fields, and an empty string is a better
+  // answer than a type assertion at every call site.
+  if (!dateStr) return "";
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return dateStr;
   return date.toLocaleDateString(INTL_LOCALES[locale], {
