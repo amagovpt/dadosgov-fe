@@ -2,7 +2,10 @@ import type { Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
 
 // Only send the fields used by the related-dataset cards to the browser.
-export type RelatedDataset = Pick<Dataset, "id" | "slug" | "title" | "description" | "last_modified" | "metrics"> & {
+export type RelatedDataset = Pick<
+  Dataset,
+  "id" | "slug" | "title" | "description" | "last_update" | "last_modified" | "metrics"
+> & {
   organization: { name: string; logo?: string } | null;
   owner: { slug: string; first_name: string; last_name: string; avatar_thumbnail?: string | null } | null;
   quality?: { score: number };

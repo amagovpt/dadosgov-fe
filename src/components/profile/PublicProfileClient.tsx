@@ -34,6 +34,7 @@ import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { useTranslation } from "react-i18next";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 export default function PublicProfileClient() {
   const { i18n } = useTranslation("common");
@@ -172,7 +173,8 @@ export default function PublicProfileClient() {
     setCurrentPage(1);
   };
 
-  const formatShortDate = (dateStr: string) => {
+  const formatShortDate = (dateStr: string | undefined) => {
+    if (!dateStr) return "";
     try {
       return new Intl.DateTimeFormat(i18n.language === "en" ? "en-GB" : "pt-PT").format(
         new Date(dateStr)
@@ -594,7 +596,7 @@ export default function PublicProfileClient() {
                     {formatShortDate(dataset.created_at)}
                   </TableCell>
                   <TableCell headerLabel={t("updatedAt")}>
-                    {formatShortDate(dataset.last_modified || dataset.created_at)}
+                    {formatShortDate(getDatasetLastUpdate(dataset))}
                   </TableCell>
                   <TableCell headerLabel="">
                     <a href={`/datasets/${dataset.slug}`}>

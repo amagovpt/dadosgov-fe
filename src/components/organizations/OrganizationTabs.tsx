@@ -30,6 +30,7 @@ import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
 import { DataserviceCardLinks } from "@/components/Shared/DataserviceCardLinks";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 interface OrganizationTabsProps {
   organization: Organization;
@@ -204,10 +205,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                           }
                           date={
                             <span className="font-[300]">
-                              {dataset.last_modified &&
-                              !isNaN(new Date(dataset.last_modified).getTime())
+                              {getDatasetLastUpdate(dataset) &&
+                              !isNaN(new Date(getDatasetLastUpdate(dataset) as string).getTime())
                                 ? t("card.updatedAgo", {
-                                    date: formatDateToTimeAgo(dataset.last_modified, language),
+                                    date: formatDateToTimeAgo(getDatasetLastUpdate(dataset), language),
                                   })
                                 : t("card.dateUnavailable")}
                             </span>
