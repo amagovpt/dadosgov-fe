@@ -6,6 +6,27 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(datasets): every date on the portal now says when the data actually changed**
+  - A dataset page contradicted itself: the header said 12 January while the four resources
+    listed below it said 29 September. The header was reading `last_modified`, which freezes
+    at the value the document held when it was last written -- for a harvested dataset,
+    usually its creation. The date the label promises is `last_update`, recomputed from the
+    dataset's own resources every time it is saved.
+  - It was never two places. Sixteen read the frozen field: the detail header and info tab,
+    the listing cards, the homepage, search results, the organization's datasets tab, the
+    public profile, the cards that cross-link from reuses and APIs, and six backoffice
+    screens. Fixing only the page that was reported would have left the portal disagreeing
+    with itself, which is harder to explain than being consistently wrong.
+  - One of those backoffice screens was already sorting by the right field while displaying
+    the wrong one, so its column ordered by a date it never showed.
+  - The date is picked through a single helper that falls back to the old field, because the
+    dataset type is shared with the homepage's lighter payload, where the field is newer than
+    some deployed backends. A promotion window or a cached response can still arrive without
+    it, and falling back reproduces the old behaviour instead of rendering an invalid date.
+  - Three date formatters took an absent date badly, and one of them threw outright: a
+    non-empty string that is not a date reached date-fns and raised, taking the render with
+    it. They all degrade now.
+
 - **fix(organizations): the discussions tab shows discussions about the organization itself**
   - The tab asked the API for every discussion on everything the organization published, so on
     the INE it listed threads opened on datasets and APIs — "ANO", "Utilização da API dados.gov"
