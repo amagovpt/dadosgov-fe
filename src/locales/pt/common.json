@@ -46,6 +46,11 @@
   "articleNotFoundDescription": "O artigo que procura não existe ou foi removido.",
   "backToArticles": "Voltar aos artigos",
   "loading": "A carregar...",
+  "pageLoader": {
+    "title": "Carregar dados leva o seu tempo...",
+    "description": "Por favor aguarde {{seconds}} segundos",
+    "descriptionWithoutSeconds": "Por favor aguarde"
+  },
   "notFound": {
     "error": "Erro 404",
     "title": "Página não encontrada",
@@ -442,7 +447,7 @@
   "pesquisar": "Pesquisar",
   "results": "resultados",
   "source": "Fonte",
-  "update": "Atualização",
+  "update": "Atualização",
   "thousand": "mil",
   "thousand_one": "mil",
   "million": "milhões",

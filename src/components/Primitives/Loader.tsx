@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLoaderDialogContext } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
 
@@ -9,11 +9,16 @@ interface LoaderProps {
 }
 
 export default function Loader({ isVisible }: LoaderProps) {
-  const { showLoader: showLoaderContext, hideLoader: hideLoaderContext } =
-    useLoaderDialogContext();
-  const { t } = useTranslation();
+  const { showLoader: showLoaderContext, hideLoader: hideLoaderContext } = useLoaderDialogContext();
+  const { t } = useTranslation("common");
   const [seconds, setSeconds] = useState(5);
-  const [wasVisible, setWasVisible] = useState(false);
+  const [previousVisible, setPreviousVisible] = useState(isVisible);
+  const wasVisible = useRef(false);
+
+  if (isVisible !== previousVisible) {
+    setPreviousVisible(isVisible);
+    setSeconds(5);
+  }
 
   useEffect(() => {
     if (isVisible && seconds > 0) {
@@ -26,25 +31,24 @@ export default function Loader({ isVisible }: LoaderProps) {
   }, [seconds, isVisible]);
 
   useEffect(() => {
-    if (isVisible && !wasVisible) {
-      setSeconds(5);
-      setWasVisible(true);
-    } else if (!isVisible && wasVisible) {
-      setSeconds(5);
-      setWasVisible(false);
+    if (!isVisible && wasVisible.current) {
       hideLoaderContext();
     }
-  }, [isVisible, wasVisible, hideLoaderContext]);
+    wasVisible.current = isVisible;
+  }, [isVisible, hideLoaderContext]);
 
   useEffect(() => {
-    if (isVisible && wasVisible) {
+    if (isVisible) {
       showLoaderContext({
         id: `loader-${+new Date()}`,
-        title: t("loading.title"),
-        subtitle: seconds > 0 ? t("loading.description", { seconds }) : t("loading.descriptionWithoutSeconds"),
+        title: t("pageLoader.title"),
+        subtitle:
+          seconds > 0
+            ? t("pageLoader.description", { seconds })
+            : t("pageLoader.descriptionWithoutSeconds"),
       });
     }
-  }, [isVisible, wasVisible, seconds, showLoaderContext, t]);
+  }, [isVisible, seconds, showLoaderContext, t]);
 
   return null;
 }
