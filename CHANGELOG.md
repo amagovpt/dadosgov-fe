@@ -18,11 +18,17 @@ This project has no version tags, so entries are grouped by month (newest first)
     screens. Fixing only the page that was reported would have left the portal disagreeing
     with itself, which is harder to explain than being consistently wrong.
   - One of those backoffice screens was already sorting by the right field while displaying
-    the wrong one, so its column ordered by a date it never showed.
-  - The date is picked through a single helper that falls back to the old field, because the
-    dataset type is shared with the homepage's lighter payload, where the field is newer than
-    some deployed backends. A promotion window or a cached response can still arrive without
-    it, and falling back reproduces the old behaviour instead of rendering an invalid date.
+    the wrong one, so its column ordered by a date it never showed, and its CSV export would
+    have disagreed with the table it was exported from.
+  - Neither field answers the question on its own, and each is stale in the opposite direction.
+    `last_modified` freezes at the value the document carried when it was last written, so a
+    harvest that brings no modification date of its own never moves it. `last_update` is
+    recomputed from the resources only on a full save, and the three resource mutators write
+    through an atomic update that skips it -- so a dataset can gain a file today and still
+    carry a year-old `last_update`. A single helper now takes the most recent of the two,
+    which is right in both directions and reads the way the label does: the newest signal we
+    have that something changed. The creation date closes the chain so there is always an
+    answer, and a response that predates the field still renders.
   - Three date formatters took an absent date badly, and one of them threw outright: a
     non-empty string that is not a date reached date-fns and raised, taking the render with
     it. They all degrade now.

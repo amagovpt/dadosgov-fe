@@ -182,7 +182,9 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
           )}
         </div>
       ),
-      exportValue: (dataset) => formatDatasetDate(dataset.last_modified),
+      // Same date the cell above shows, or the downloaded CSV contradicts the
+      // table the user exported it from.
+      exportValue: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
     },
   ];
 
