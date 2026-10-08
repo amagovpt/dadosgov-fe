@@ -439,7 +439,6 @@ export async function getDatastorySearchPage(
   return dataFlatten;
 }
 
-
 export function getSearchProjectsPT2030() {
   return gql(/* GraphQL */ `
     query getSearchProjects {
@@ -467,7 +466,6 @@ export function getSearchProjectsPT2030() {
     }
   `);
 }
-
 
 export function getSpecificObjectivesByPolicyObjective() {
   return gql(/* GraphQL */ `

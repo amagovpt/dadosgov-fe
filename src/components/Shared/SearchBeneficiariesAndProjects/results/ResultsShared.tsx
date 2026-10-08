@@ -39,17 +39,11 @@ type ProjectResultOptions = {
   paidLabel: string;
 };
 
-function NoResults({
-  image,
-  imageWidth = 176,
-  imageHeight = 168,
-  title,
-  description,
-}: INoResults) {
+function NoResults({ image, imageWidth = 176, imageHeight = 168, title, description }: INoResults) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-32 items-center xl:pt-32">
+    <div className="flex flex-col items-center gap-32 xl:pt-32">
       {image && (
         <Image
           src={getAssets(image)}
@@ -99,8 +93,8 @@ export function ResultsLayout({
   }
 
   return (
-    <div className="flex flex-col gap-32 results-list">
-      {!isMobile && <ResultsNumber />}
+    <div className="results-list flex flex-col gap-32">
+      {/*!isMobile && <ResultsNumber />*/}
       {!isMobile && showFilters.length > 0 && <ResultsLine />}
       {children}
     </div>
@@ -116,7 +110,7 @@ export function ResultCard({
 }: ResultCardProps) {
   const formattedDescription = formatHtmlParagraphs(
     description,
-    "text-m-regular !text-neutral-900 first-letter:uppercase",
+    "text-m-regular !text-neutral-900 first-letter:uppercase"
   );
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (!linkEnabled) event.preventDefault();
@@ -124,7 +118,7 @@ export function ResultCard({
 
   return (
     <>
-      <div className="relative">
+      <div className="result-card relative">
         <a
           href={href}
           className="absolute inset-0 z-10"
@@ -140,6 +134,10 @@ export function ResultCard({
             children: "",
             href,
             hasIcon: true,
+            appearance: "link",
+            trailingIcon: "agora-line-arrow-right-circle",
+            trailingIconHover: "agora-solid-arrow-right-circle",
+            trailingIconActive: "agora-solid-arrow-right-circle",
             onClick: handleClick,
           }}
         />
@@ -159,11 +157,8 @@ export function buildProjectResult({
 }: ProjectResultOptions) {
   const title = String(item.operationName ?? "");
   const operationCode = String(item.operationCode ?? "");
-  const conclusionDate =
-    item.effectiveConclusionDate ?? item.plannedConclusionDate ?? "";
-  const conclusionLabel = item.effectiveConclusionDate
-    ? "conclusionDate"
-    : "plannedConclusionDate";
+  const conclusionDate = item.effectiveConclusionDate ?? item.plannedConclusionDate ?? "";
+  const conclusionLabel = item.effectiveConclusionDate ? "conclusionDate" : "plannedConclusionDate";
   const valueKey =
     indicator === "financed"
       ? "approvedValue"
@@ -180,7 +175,7 @@ export function buildProjectResult({
   const description = [
     "<p>",
     `<strong>${t("operationCode")}</strong>   ${operationCode}`,
-    `<br><strong>${t(conclusionLabel)}</strong>   ${String(conclusionDate)}`,
+    `<br><strong>${t(`searchBenProj.fields.${conclusionLabel}`)}</strong>   ${String(conclusionDate)}`,
     `<br><br><strong>${t(valueLabel)}</strong>   ${formatCurrency(Number(item[valueKey] ?? 0), t)}`,
     "</p>",
   ].join("");

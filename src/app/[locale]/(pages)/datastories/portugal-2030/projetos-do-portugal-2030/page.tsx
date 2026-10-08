@@ -113,7 +113,7 @@ export default async function DataStoryProjectsPT2030({
   };
 
   return (
-    <main className="flex flex-col datastory-page">
+    <main className="datastory-page  flex flex-col">
       {/* hero section with index */}
       <Datastory.Hero
         breadcrumbs={hero.breadcrumbs}
@@ -125,13 +125,13 @@ export default async function DataStoryProjectsPT2030({
       {/* ids are the slug of the section title, which is what the CMS index anchors point to */}
       <Section
         id={slugify(bigNumberTitle)}
-        className="bg-primary-700 flex flex-col items-center pt-32 pb-64"
+        className="flex flex-col items-center bg-primary-700 pt-32 pb-64"
       >
         <InfoBlock.Root className="gap-32">
           <InfoBlock.Header>
             <InfoBlock.Title
               title={bigNumberTitle}
-              className="text-white text-2xl-bold! max-w-[620px]"
+              className="max-w-[620px] text-2xl-bold! text-white"
             />
           </InfoBlock.Header>
           <InfoBlock.Content className="xl:grid-cols-3">
@@ -154,11 +154,11 @@ export default async function DataStoryProjectsPT2030({
         <Section id={slugify(block.title)} className="flex flex-col items-center py-64">
           <InfoBlock.Root className="gap-16">
             <InfoBlock.Header>
-              <InfoBlock.Title title={block.title} className="text-2xl-bold!" />
+              <InfoBlock.Title title={block.title} className="max-w-[592px] text-2xl-bold!" />
             </InfoBlock.Header>
             <InfoBlock.Content className="flex flex-col gap-32">
               <InfoBlock.Description
-                className="xl:max-w-[596px]"
+                className="max-w-[592px]"
                 description={parseHtmlToParagraphs(block.description)}
               />
               <HeroContentSearchBenProj
@@ -172,7 +172,7 @@ export default async function DataStoryProjectsPT2030({
             </InfoBlock.Content>
           </InfoBlock.Root>
         </Section>
-        <Section className="w-full flex flex-col items-center">
+        <Section className="flex w-full flex-col items-center">
           <InfoBlock.Root>
             <InfoBlock.Content className="flex flex-col">
               <SeachContainer.Root>
@@ -183,7 +183,7 @@ export default async function DataStoryProjectsPT2030({
                   <Filters.Advanced filters={advFilters} locale={locale} showSpecificObjective />
                 </SeachContainer.FiltersAvailable>
                 <SeachContainer.Content>
-                  <Results.Number className="block xl:hidden text-left" />
+                  {/* <Results.Number className="block text-left xl:hidden" /> */}
                   <Filters.Mobile locale={locale}>
                     <Filters.Indicators />
                     <Filters.Advanced filters={advFilters} locale={locale} showSpecificObjective />

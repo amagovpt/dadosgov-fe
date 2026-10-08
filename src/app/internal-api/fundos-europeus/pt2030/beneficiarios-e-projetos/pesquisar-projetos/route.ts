@@ -3,8 +3,7 @@ import apolloClient from "@/service/utils/apollo-client";
 import { FilterValue } from "@/store/searchBenProj-store";
 
 export async function POST(request: Request) {
-  const { limit, page, sortBy, sortOrder, name, operationCode, ...filters } =
-    await request.json();
+  const { limit, page, sortBy, sortOrder, name, operationCode, ...filters } = await request.json();
 
   // prepare variables for the query
 

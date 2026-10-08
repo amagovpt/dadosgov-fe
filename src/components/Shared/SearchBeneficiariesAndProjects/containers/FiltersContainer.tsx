@@ -19,8 +19,8 @@ export default function SearchBenProjFiltersContainer({
   }
 
   return (
-    <div className="col-span-12 xl:col-span-4 hidden xl:flex flex-col pb-128">
-      <div className="row-span-1 bg-neutral-50 xl:-ml-[112px] xl:pl-[112px] py-64 pr-64 flex flex-col gap-32">
+    <div className="col-span-12 xl:col-span-4 hidden xl:flex flex-col pb-128 gap-64">
+      <div className="row-span-1 bg-neutral-50 xl:-ml-112 xl:pl-112 py-64 pr-64 flex flex-col gap-32">
         {children}
       </div>
       {download && <div className="pr-64">{download}</div>}

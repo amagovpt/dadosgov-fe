@@ -1256,6 +1256,22 @@ li.section-name:empty {
   display: block !important;
 }
 
+.datastory-page .result-card .card-general,
+.datastory-page .result-card .card-general .content,
+.datastory-page .result-card .card-general .content div:first-child {
+  width: 100% !important;
+}
+
+.datastory-page .result-card .card-general svg,
+.datastory-page .advanced-filters .agora-sidebar svg {
+  fill: var(--color-neutral-900) !important;
+}
+
+.datastory-page .result-card:hover svg,
+.datastory-page .advanced-filters .agora-sidebar .agora-sidebar-item:hover svg {
+  fill: var(--color-primary-600) !important;
+}
+
 /* ==========================================================================
    [07] ADMIN LAYOUT
    ========================================================================== */

@@ -5,20 +5,11 @@ import { formatByThree } from "@/utils/formatByThree";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import {
-  buildProjectResult,
-  type INoResults,
-  ResultCard,
-  ResultsLayout,
-} from "./ResultsShared";
+import { buildProjectResult, type INoResults, ResultCard, ResultsLayout } from "./ResultsShared";
 
 export type { INoResults } from "./ResultsShared";
 
-export default function ResultsPT2030({
-  noResults,
-}: {
-  noResults?: INoResults;
-}) {
+export default function ResultsPT2030({ noResults }: { noResults?: INoResults }) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const subject = useSearchBenProjStore((state) => state.subject);
@@ -51,9 +42,7 @@ export default function ResultsPT2030({
 
         const title = String(item.entityName ?? "");
         const projectLabel =
-          item.projectsAmount === 1
-            ? t("searchBenProj.project")
-            : t("searchBenProj.projects");
+          item.projectsAmount === 1 ? t("searchBenProj.project") : t("searchBenProj.projects");
         const valueLabel =
           indicator === "financed"
             ? t(isPrr ? "fundingAmount" : "financingValue")

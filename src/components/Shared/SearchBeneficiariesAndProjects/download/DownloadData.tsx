@@ -26,7 +26,7 @@ export default function DownloadData({
     .filter((segment) => segment !== i18n.language);
 
   const downloadList = useSearchBenProjStore((state) =>
-    "downloadList" in state ? state.downloadList : undefined,
+    "downloadList" in state ? state.downloadList : undefined
   );
   const subject = useSearchBenProjStore((state) => state.subject);
 
@@ -34,22 +34,23 @@ export default function DownloadData({
     (filename: string, source: string, update: string) => {
       downloadList?.(filename, pathnameArray, source, update, t);
     },
-    [downloadList, pathnameArray, t],
+    [downloadList, pathnameArray, t]
   );
 
   if (!showListing || !downloadList) return null;
 
   return (
-    <div className={twMerge("flex flex-col gap-32", className)}>
+    <div className={twMerge("download-data flex flex-col gap-32", className)}>
       <div className="flex flex-row items-center gap-8">
         <Typograph tag="p" className="text-m-regular text-neutral-700">
           {t("download")}
         </Typograph>
         <Anchor
+          appearance="text"
+          variant="neutral"
           hasIcon
           trailingIcon="agora-line-download"
           trailingIconHover="agora-line-download"
-          className="text-neutral-900! [&_svg]:text-neutral-900!"
           onClick={() =>
             handleDownloadListing(
               t("searchBenProj.exportResults", {
@@ -59,7 +60,7 @@ export default function DownloadData({
               sourceInfo[0]?.updateDate ||
                 sourceInfo[0]?.modificationDate ||
                 sourceInfo[0]?.referenceDate ||
-                "",
+                ""
             )
           }
         >
