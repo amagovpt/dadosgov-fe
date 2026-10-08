@@ -8,6 +8,7 @@ import type { Dataset } from "@/service/types/dataset";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import type { AdminCard } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 export interface DatasetWizardStep4Props {
   publishStepCard?: AdminCard;
@@ -40,7 +41,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
     if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
     return String(value);
   };
-  const timeAgo = formatDateToTimeAgo(createdDataset?.last_modified || createdDataset?.created_at);
+  const timeAgo = formatDateToTimeAgo(createdDataset ? getDatasetLastUpdate(createdDataset) : undefined);
   const href = createdDataset
     ? `/datasets/${createdDataset.slug}`
     : `/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;

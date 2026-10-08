@@ -57,6 +57,7 @@ import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/use
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 interface DatasetsEditClientProps {
   pageContent: BoDatasetsPage;
@@ -563,7 +564,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               )}
               {` — ${t("edit.latestActivityFallback")} — `}
               <span>
-                {format(new Date(dataset.last_modified), "d 'de' MMMM 'de' yyyy", {
+                {format(new Date(getDatasetLastUpdate(dataset) as string), "d 'de' MMMM 'de' yyyy", {
                   locale: pt,
                 })}
               </span>

@@ -13,6 +13,7 @@ import type { ResourceStatusKey } from "@/utils/admin-lists/listHelpers";
 import type { Dataset } from "@/service/types/dataset";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 export type DatasetSortField =
   | "title"
@@ -63,7 +64,11 @@ export function sortDatasets(
         comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         break;
       case "last_modified":
-        comparison = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
+        // Display and sort read the same field: the column already sorted by
+        // `last_update` on the server while showing `last_modified` (LEDG-2599).
+        comparison =
+          new Date(getDatasetLastUpdate(a) as string).getTime() -
+          new Date(getDatasetLastUpdate(b) as string).getTime();
         break;
       case "resources":
         comparison = (a.resources?.length || 0) - (b.resources?.length || 0);
@@ -80,7 +85,8 @@ export function sortDatasets(
   });
 }
 
-export function formatDatasetDate(dateStr: string) {
+export function formatDatasetDate(dateStr: string | undefined) {
+  if (!dateStr) return "";
   try {
     const date = new Date(dateStr);
     return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
@@ -163,7 +169,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortType: "date",
       renderCell: (dataset) => (
         <div>
-          <div>{formatDatasetDate(dataset.last_modified)}</div>
+          <div>{formatDatasetDate(getDatasetLastUpdate(dataset))}</div>
           {showOwner && dataset.owner && (
             <TextLink href={`/users/${dataset.owner.slug}`} className="text-xs">
               {dataset.owner.first_name} {dataset.owner.last_name}
