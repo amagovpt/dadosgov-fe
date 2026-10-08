@@ -23,8 +23,14 @@ export function formatDateToTimeAgo(
   // PT default is an intentional fallback; migrated callers pass a translated string.
   locale: "pt" | "en" = "pt"
 ) {
-  if (!date) return locale === "pt" ? "Desconhecido" : "Unknown";
-  const distance = formatDistanceToNow(new Date(date), { locale: DATE_FNS_LOCALES[locale] });
+  const unknown = locale === "pt" ? "Desconhecido" : "Unknown";
+  if (!date) return unknown;
+  const parsed = new Date(date);
+  // A non-empty string that is not a date reaches date-fns and throws
+  // `RangeError: Invalid time value`, taking the whole render down. Guarding
+  // only the empty case was never enough.
+  if (Number.isNaN(parsed.getTime())) return unknown;
+  const distance = formatDistanceToNow(parsed, { locale: DATE_FNS_LOCALES[locale] });
   return FUZZY_PREFIXES.reduce((acc, prefix) => acc.replace(prefix, ""), distance);
 }
 
