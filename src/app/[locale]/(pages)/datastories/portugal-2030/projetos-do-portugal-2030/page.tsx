@@ -142,7 +142,7 @@ export default async function DataStoryProjectsPT2030({
   };
 
   return (
-    <main className="datastory-page  flex flex-col">
+    <main className="datastory-page flex flex-col">
       {/* hero section with index */}
       <Datastory.Hero
         breadcrumbs={hero.breadcrumbs}

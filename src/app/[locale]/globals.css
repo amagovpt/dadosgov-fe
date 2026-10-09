@@ -790,10 +790,6 @@ li.section-name:empty {
   height: 100%;
 }
 
-.related-datastories .card-general .content {
-  height: 100%;
-}
-
 /* 5.5 Cards (Illustrative) - Mini-courses */
 .mini-courses-cards .agora-card-illustrative.horizontal {
   align-items: center;
@@ -1270,6 +1266,12 @@ li.section-name:empty {
 .datastory-page .result-card:hover svg,
 .datastory-page .advanced-filters .agora-sidebar .agora-sidebar-item:hover svg {
   fill: var(--color-primary-600) !important;
+}
+
+.related-datastories .card-general,
+.related-datastories .card-general .content {
+  height: 100% !important;
+  width: 100% !important;
 }
 
 /* ==========================================================================
