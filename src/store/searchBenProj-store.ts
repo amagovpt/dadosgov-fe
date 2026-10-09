@@ -67,10 +67,7 @@ export type SearchBenProjStoreStates = {
 };
 
 export type SearchBenProjStoreActions = {
-  initFromURL: (
-    t: ReturnType<typeof useTranslation>["t"],
-    locale: string,
-  ) => void;
+  initFromURL: (t: ReturnType<typeof useTranslation>["t"], locale: string) => void;
   setSearchBy: (searchBy: string) => void;
   setIndicator: (indicator: string) => void;
   addFilter: (
@@ -78,22 +75,11 @@ export type SearchBenProjStoreActions = {
     value: FilterValue,
     t: ReturnType<typeof useTranslation>["t"],
     locale: string,
-    isMobile?: boolean,
+    isMobile?: boolean
   ) => void;
-  applyFilter: (
-    filter: string,
-    t: ReturnType<typeof useTranslation>["t"],
-    locale: string,
-  ) => void;
-  applyFilters: (
-    t: ReturnType<typeof useTranslation>["t"],
-    locale: string,
-  ) => void;
-  removeFilter: (
-    filter: string,
-    t: ReturnType<typeof useTranslation>["t"],
-    locale: string,
-  ) => void;
+  applyFilter: (filter: string, t: ReturnType<typeof useTranslation>["t"], locale: string) => void;
+  applyFilters: (t: ReturnType<typeof useTranslation>["t"], locale: string) => void;
+  removeFilter: (filter: string, t: ReturnType<typeof useTranslation>["t"], locale: string) => void;
   reset: (t: ReturnType<typeof useTranslation>["t"], locale: string) => void;
   setSortBy: (sortBy: string) => void;
   setPage: (page: number) => void;
@@ -103,12 +89,11 @@ export type SearchBenProjStoreActions = {
     pathnameArray: string[],
     source: string,
     update: string,
-    t: ReturnType<typeof useTranslation>["t"],
+    t: ReturnType<typeof useTranslation>["t"]
   ) => Promise<void>;
 };
 
-export type SearchBenProjStore = SearchBenProjStoreStates &
-  SearchBenProjStoreActions;
+export type SearchBenProjStore = SearchBenProjStoreStates & SearchBenProjStoreActions;
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -125,7 +110,7 @@ const getDefaultFilters = (subject: "beneficiaries" | "projects"): Filters => {
 
 const createInitialState = (
   subject: "beneficiaries" | "projects",
-  apiRoute: string,
+  apiRoute: string
 ): SearchBenProjStoreStates => {
   const filters = getDefaultFilters(subject);
 
@@ -161,7 +146,7 @@ const createInitialState = (
 
 export const createSearchBenProjStore = (
   subject: "beneficiaries" | "projects" = "beneficiaries",
-  apiRoute: string,
+  apiRoute: string
 ) => {
   const initialState = createInitialState(subject, apiRoute);
 
@@ -169,7 +154,7 @@ export const createSearchBenProjStore = (
     filters: Filters,
     subject: "beneficiaries" | "projects",
     t: ReturnType<typeof useTranslation>["t"],
-    locale: string,
+    locale: string
   ) => {
     const defaultFilters = getDefaultFilters(subject);
 
@@ -178,19 +163,8 @@ export const createSearchBenProjStore = (
     // most filters
     Object.entries(filters).forEach(([key, value]) => {
       if (key in defaultFilters) return;
-      if (
-        RangedNumberFilter.some(
-          (rf) => key === `${rf}Min` || key === `${rf}Max`,
-        )
-      )
-        return;
-      if (
-        value === undefined ||
-        value === "" ||
-        value === null ||
-        value === false
-      )
-        return;
+      if (RangedNumberFilter.some((rf) => key === `${rf}Min` || key === `${rf}Max`)) return;
+      if (value === undefined || value === "" || value === null || value === false) return;
       res.push([key, value]);
     });
 
@@ -256,11 +230,7 @@ export const createSearchBenProjStore = (
       const filters: Filters = { ...initialState.filters };
       params.forEach((value, key) => {
         if (!["searchBy", "indicator", "sortBy", "page"].includes(key)) {
-          if (
-            ["mainBeneficiaries", "otherBeneficiaries", "supliers"].includes(
-              key,
-            )
-          ) {
+          if (["mainBeneficiaries", "otherBeneficiaries", "supliers"].includes(key)) {
             filters[key] = value === "true";
           } else {
             filters[key] = value;
@@ -301,12 +271,7 @@ export const createSearchBenProjStore = (
           const { [filter]: filterToRemove, ...filters } = state.filters;
           return {
             filters,
-            showFilters: prepareShowFilters(
-              state.appliedFilters,
-              subject,
-              t,
-              locale,
-            ),
+            showFilters: prepareShowFilters(state.appliedFilters, subject, t, locale),
           };
         }
       });
@@ -342,11 +307,7 @@ export const createSearchBenProjStore = (
 
     removeFilter: (filter, t, locale) => {
       set((state) => {
-        if (
-          RangedNumberFilter.includes(
-            filter as (typeof RangedNumberFilter)[number],
-          )
-        ) {
+        if (RangedNumberFilter.includes(filter as (typeof RangedNumberFilter)[number])) {
           const minKey = `${filter}Min`;
           const maxKey = `${filter}Max`;
           const {
@@ -374,8 +335,7 @@ export const createSearchBenProjStore = (
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [filter]: filterToRemove, ...filters } = state.filters;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [filter]: appliedFilterToRemove, ...appliedFilters } =
-          state.appliedFilters;
+        const { [filter]: appliedFilterToRemove, ...appliedFilters } = state.appliedFilters;
         return {
           filters,
           appliedFilters,
@@ -558,7 +518,7 @@ export const createSearchBenProjStore = (
       pathnameArray: string[],
       source: string,
       update: string,
-      t: ReturnType<typeof useTranslation>["t"],
+      t: ReturnType<typeof useTranslation>["t"]
     ) => {
       // search data with current filters, but without pagination
 
@@ -687,6 +647,12 @@ export const createSearchBenProjStore = (
           body: JSON.stringify(bodyData),
         });
 
+        console.log("\n\n");
+        console.log("state.apiRoute", state.apiRoute);
+        console.log("bodyData", bodyData);
+        console.log("res", res);
+        console.log("\n\n");
+
         if (!res.ok) {
           throw new Error("Search request failed");
         }
@@ -717,9 +683,7 @@ export const createSearchBenProjStore = (
       worksheet.addRows(headerData);
 
       const headers: string[] = Object.keys(data[0]);
-      const headersTranslated: string[] = headers.map((key) =>
-        t(`searchBenProj.fields.${key}`),
-      );
+      const headersTranslated: string[] = headers.map((key) => t(`searchBenProj.fields.${key}`));
       worksheet.addRow(headersTranslated);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -746,10 +710,7 @@ export const createSearchBenProjStore = (
       const link = document.createElement("a");
 
       link.setAttribute("href", url);
-      link.setAttribute(
-        "download",
-        `${filename || "table-data"}_${new Date().toISOString()}.csv`,
-      );
+      link.setAttribute("download", `${filename || "table-data"}_${new Date().toISOString()}.csv`);
       link.style.visibility = "hidden";
 
       document.body.appendChild(link);

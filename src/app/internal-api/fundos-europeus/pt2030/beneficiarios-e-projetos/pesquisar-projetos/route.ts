@@ -12,8 +12,8 @@ export async function POST(request: Request) {
     page,
     sortBy,
     sortOrder,
-    operationName: name,
-    operationCode,
+    //operationName: name,
+    //operationCode,
   };
 
   // handle optional filters
@@ -84,6 +84,12 @@ export async function POST(request: Request) {
     query: getProjectsOfPortugal2030(),
     variables: variables,
   });
+
+  console.log("\n\n");
+  console.log("variables", variables);
+  console.log("data", data);
+  console.log("error", error);
+  console.log("\n\n");
 
   // handle error
 
