@@ -38,6 +38,28 @@ This project has no version tags, so entries are grouped by month (newest first)
   - The `searchBenProj.*` labels and the other strings these components use were missing from
     `common.json`, so the page showed raw translation keys.
 
+- **fix(organizations): the discussions tab shows discussions about the organization itself**
+  - The tab asked the API for every discussion on everything the organization published, so on
+    the INE it listed threads opened on datasets and APIs — "ANO", "Utilização da API dados.gov"
+    — and never the ones opened on the organization page, which is the only thing that tab is
+    for. Those existed in the database all along; nothing ever displayed them. The tab now asks
+    for the discussions whose subject is the organization, the same way the dataset, reuse and
+    dataservice tabs already did.
+  - The admin dashboard keeps asking for the aggregate across the organization's content: there
+    the fan-out is the point, not the bug.
+  - The counter in the tab title reports every discussion, open and closed alike, matching the
+    list under it.
+  - Picked up along the way, because it shows on the same tab: the "publish as" dropdown printed
+    the author as `Gonça, ,Pinho, ,(utilizador)`. The option was built from three JSX children and
+    the dropdown renders its options through `children.toString()`, which stringifies an array
+    with commas between the parts. It is one string now. This was never specific to
+    organizations — the same component serves the dataset, reuse and dataservice tabs, so the
+    name was mangled on all of them.
+  - The page also opens straight on the discussions tab when the URL carries `?tab=discussions`.
+    Discussion mails have always linked that way and the organization page ignored it, dropping
+    the reader on the description with no sign of the thread — and the backend now sends those
+    mails to an organization's members for the first time.
+
 - **fix(login): the linking invite no longer covers the page that completes it**
   - Pressing "Associar" on the invite screen, authenticating with the identity provider and
     coming back landed on the invite screen again, so nobody could finish linking an identity
@@ -1189,7 +1211,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     `ReuseDetailClient`, `PublicProfileClient`) — all now consume the shared
     `formatDateLong(dateStr, i18n.language)`, so the long date follows the
     active locale instead of being hardcoded to Portuguese.
-    
+
 - **fix(routing): retire the legacy `/pages` URL segment for good** [#483](https://github.com/amagovpt/dadosgov-fe/pull/483)
   - Public routes moved from `src/app/pages/...` to the `[locale]/(pages)`
     route group a while ago, so URLs no longer carry `/pages` — but old links

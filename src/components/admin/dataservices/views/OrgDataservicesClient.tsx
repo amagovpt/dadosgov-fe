@@ -7,6 +7,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
@@ -29,6 +30,7 @@ interface OrgDataservicesClientProps {
 
 export default function OrgDataservicesClient({ pageContent }: OrgDataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+  const downloadListCsv = useCsvExport();
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
@@ -82,6 +84,12 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
           by: t("admin-dataservices:columns.by"),
           about: t("admin-dataservices:columns.about"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t]
   );
@@ -126,6 +134,37 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
     };
   }, [loadDataservices]);
 
+  // With the status filter or local sort the list is already fully loaded;
+  // otherwise one request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedApis;
+    if (!usesLocalFallback && resolvedOrgId) {
+      const response = await fetchOrgDataservices(resolvedOrgId, 1, totalItems, {
+        q: searchQuery.trim() || undefined,
+        sort: sortParam,
+      });
+      const allApis = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && allApis.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+      rows = sortDataservices(allApis, sortField, sortOrder);
+    }
+    downloadListCsv(t("admin-dataservices:title"), rows, columns);
+  }, [
+    downloadListCsv,
+    columns,
+    resolvedOrgId,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    sortedApis,
+    t,
+    totalItems,
+    usesLocalFallback,
+  ]);
+
   const handleSearch = useDebouncedSearch((value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
@@ -165,6 +204,7 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
           createUrl="/admin/dataservices/new"
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleApis}

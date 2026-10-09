@@ -110,6 +110,7 @@ export function createOrgDiscussionColumns({
           {discussion.title}
         </button>
       ),
+      exportValue: (discussion) => discussion.title,
     },
     {
       id: "created",
@@ -117,6 +118,7 @@ export function createOrgDiscussionColumns({
       sortField: "created",
       sortType: "date",
       renderCell: (discussion) => formatDate(discussion.created),
+      exportValue: (discussion) => formatDate(discussion.created),
     },
     {
       id: "closed",
@@ -124,6 +126,7 @@ export function createOrgDiscussionColumns({
       sortField: "closed",
       sortType: "date",
       renderCell: (discussion) => (discussion.closed ? formatDate(discussion.closed) : "-"),
+      exportValue: (discussion) => (discussion.closed ? formatDate(discussion.closed) : ""),
     },
   ];
 }
