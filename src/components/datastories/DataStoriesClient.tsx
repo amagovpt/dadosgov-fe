@@ -148,12 +148,12 @@ export default function DataStoriesClient({
                           <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                             {formatHtmlParagraphs(story.description)}
                           </p>
-                        }*/
+                        }
                         date={
                           <span className="font-[300]">
                             {t("publishedTimeAgo", { timeAgo: timeAgo })}
                           </span>
-                        }
+                        }*/
                         mainLink={
                           <Link href={`/datastories/${story.slug}`}>
                             <span className="underline">{story.title}</span>
