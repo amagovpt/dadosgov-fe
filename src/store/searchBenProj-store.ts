@@ -647,12 +647,6 @@ export const createSearchBenProjStore = (
           body: JSON.stringify(bodyData),
         });
 
-        console.log("\n\n");
-        console.log("state.apiRoute", state.apiRoute);
-        console.log("bodyData", bodyData);
-        console.log("res", res);
-        console.log("\n\n");
-
         if (!res.ok) {
           throw new Error("Search request failed");
         }
@@ -666,7 +660,10 @@ export const createSearchBenProjStore = (
       } catch (error) {
         console.error(error);
         set({ loading: false });
+        return;
       }
+
+      if (data.length === 0) return;
 
       // prepare the file to download
 

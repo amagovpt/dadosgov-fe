@@ -1,6 +1,14 @@
+import { print } from "graphql";
 import { getProjectsOfPortugal2030 } from "@/service/queries/datastories/datastory";
-import apolloClient from "@/service/utils/apollo-client";
+import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
 import { FilterValue } from "@/store/searchBenProj-store";
+
+// The shared apolloClient is tuned for CMS page content: it aborts server-side
+// requests after CMS_FETCH_TIMEOUT_MS (5s) and keeps every result in an
+// in-memory SWR cache. Neither fits this search: the unpaginated download
+// (~21k projects, ~5MB) takes longer than 5s, and caching arbitrary filter
+// combinations would pin megabytes per entry. So the query goes out directly.
+const SEARCH_TIMEOUT_MS = 60_000;
 
 export async function POST(request: Request) {
   const { limit, page, sortBy, sortOrder, name, operationCode, ...filters } = await request.json();
@@ -12,8 +20,8 @@ export async function POST(request: Request) {
     page,
     sortBy,
     sortOrder,
-    //operationName: name,
-    //operationCode,
+    operationName: name,
+    operationCode,
   };
 
   // handle optional filters
@@ -78,25 +86,30 @@ export async function POST(request: Request) {
 
   // make the query request
 
-  const { data, error } = await apolloClient.query<{
-    searchProjectsOfPortugal2030: unknown;
-  }>({
-    query: getProjectsOfPortugal2030(),
-    variables: variables,
-  });
+  let data: { searchProjectsOfPortugal2030: unknown } | undefined;
+  let error: unknown;
 
-  console.log("\n\n");
-  console.log("variables", variables);
-  console.log("data", data);
-  console.log("error", error);
-  console.log("\n\n");
+  try {
+    const res = await fetch(`${getCmsBaseUrl()}/graphql`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: print(getProjectsOfPortugal2030()), variables }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
+    });
+    const json = await res.json();
+    data = json.data;
+    error = json.errors ?? (res.ok ? undefined : res.statusText);
+  } catch (err) {
+    error = err instanceof Error ? err.message : String(err);
+  }
 
   // handle error
 
-  if (!data || error) {
+  if (!data?.searchProjectsOfPortugal2030 || error) {
     console.error("GraphQL error:", error);
     return new Response(JSON.stringify({ error }), {
-      status: 400,
+      status: 502,
       headers: { "Content-Type": "application/json" },
     });
   }

@@ -421,7 +421,8 @@
       "nutsiiiOperationName": "Nome da NUTS III da Operação",
       "municipalityOperationCode": "Código do Município da Operação",
       "municipalityOperationName": "Nome do Município da Operação",
-      "projectsAmount": "Número de Projetos"
+      "projectsAmount": "Número de Projetos",
+      "operationName": "Nome"
     },
     "exportResults": "Resultados da pesquisa de {{subject}}"
   },
@@ -453,5 +454,8 @@
   "million": "milhões",
   "million_one": "milhão",
   "billion": "mil milhões",
-  "billion_one": "mil milhões"
+  "billion_one": "mil milhões",
+  "portugal-2030": "Portugal 2030",
+  "projetos-do-portugal-2030": "Projetos do Portugal 2030",
+  "beneficiarios-do-portugal-2030": "Beneficiários do Portugal 2030"
 }

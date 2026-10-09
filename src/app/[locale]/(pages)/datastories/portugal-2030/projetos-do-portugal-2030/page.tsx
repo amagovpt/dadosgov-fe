@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import {
   getDatastorySearchPage,
+  getProjectsOfPortugal2030,
   getSearchProjectsPT2030,
 } from "@/service/queries/datastories/datastory";
 import { Datastory } from "@/components/Shared/Datastories";
@@ -24,12 +25,37 @@ import { INoResults } from "@/components/Shared/SearchBeneficiariesAndProjects/r
 import { slugify } from "@/utils/slugify";
 import { CardBigNumberProps } from "@/components/Shared/CardCompound/CardBigNumber";
 
-// TODO: replace with backend totals query when available (the CMS only sends the labels)
-const BIG_NUMBER_VALUES: Pick<CardBigNumberProps, "number" | "type" | "unit">[] = [
-  { number: 28192, type: "qtd" },
-  { number: 20_500_000_000, type: "value", unit: "€" },
-  { number: 12_500_000_000, type: "value", unit: "€" },
-];
+type BigNumberValue = Pick<CardBigNumberProps, "number" | "type" | "unit">;
+
+interface ProjectsTotalsPt2030 {
+  total: number;
+  filters: { approvedValueMax: number | null; executedValueMax: number | null } | null;
+}
+
+// The CMS only sends the big-number labels; the values come from the unfiltered
+// projects search (total count plus the approved/executed amounts). On failure
+// the section shows only the labels instead of breaking the page.
+async function getBigNumberValues(): Promise<BigNumberValue[]> {
+  try {
+    const { data, error } = await apolloClient.query<{
+      searchProjectsOfPortugal2030: ProjectsTotalsPt2030;
+    }>({
+      query: getProjectsOfPortugal2030(),
+      variables: { limit: 1, page: 1 },
+    });
+    const totals = data?.searchProjectsOfPortugal2030;
+    if (!totals || error) throw error ?? new Error("Missing PT2030 projects totals");
+
+    return [
+      { number: totals.total, type: "qtd" },
+      { number: totals.filters?.approvedValueMax ?? 0, type: "value", unit: "€" },
+      { number: totals.filters?.executedValueMax ?? 0, type: "value", unit: "€" },
+    ];
+  } catch (err) {
+    console.error("Error fetching PT2030 projects totals:", err);
+    return [];
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -55,18 +81,21 @@ export default async function DataStoryProjectsPT2030({
   const { locale } = await params;
   const datastorySlug = "portugal-2030/projetos-do-portugal-2030";
 
-  const {
-    hero,
-    bigNumberTitle,
-    bigNumbers,
-    block,
-    inputSearch,
-    filters,
-    sortBy,
-    noResults,
-    relatedDatasets,
-    relatedDatastories,
-  } = await getDatastorySearchPage(datastorySlug, locale);
+  const [
+    {
+      hero,
+      bigNumberTitle,
+      bigNumbers,
+      block,
+      inputSearch,
+      filters,
+      sortBy,
+      noResults,
+      relatedDatasets,
+      relatedDatastories,
+    },
+    bigNumberValues,
+  ] = await Promise.all([getDatastorySearchPage(datastorySlug, locale), getBigNumberValues()]);
 
   const { data, error } = await apolloClient.query<{
     queryBeneficiariesAndProjectsFiltersOfPortugal2030: QueryProjectsFiltersPt2030;
@@ -136,7 +165,7 @@ export default async function DataStoryProjectsPT2030({
           </InfoBlock.Header>
           <InfoBlock.Content className="xl:grid-cols-3">
             {bigNumbers.map((item, index) => {
-              const bigNumber = BIG_NUMBER_VALUES[index];
+              const bigNumber = bigNumberValues[index];
               return (
                 <div className="text-white" key={index}>
                   {bigNumber && <CardBigNumber {...bigNumber} locale={locale} />}

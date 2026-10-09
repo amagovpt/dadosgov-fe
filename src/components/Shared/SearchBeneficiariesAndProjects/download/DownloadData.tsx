@@ -20,7 +20,7 @@ export default function DownloadData({
   sourceInfo = [],
   showListing = true,
 }: IDownloadData) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation("common");
   const pathnameArray = usePathname()
     .split("/")
     .filter((segment) => segment !== i18n.language);
