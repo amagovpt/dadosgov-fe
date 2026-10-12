@@ -1274,6 +1274,14 @@ li.section-name:empty {
   width: 100% !important;
 }
 
+.datastory-page .ranged-number-filter span.feedback-icon-wrapper {
+  display: none !important;
+}
+
+.datastory-page .ranged-number-filter .feedback-right .agora-input-text-wrapper div.feedback {
+  flex-direction: row-reverse;
+}
+
 /* ==========================================================================
    [07] ADMIN LAYOUT
    ========================================================================== */

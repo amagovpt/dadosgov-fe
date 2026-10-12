@@ -18,7 +18,7 @@ import HeroContentSearchBenProj from "@/components/Shared/SearchBeneficiariesAnd
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { AdvancedFilter } from "@/components/Shared/SearchBeneficiariesAndProjects/filters/AdvancedFilters";
-import { QueryProjectsFiltersPt2030, SourceInfo } from "@/service/types/datastories/datastory";
+import { QueryFiltersPt2030, SourceInfo } from "@/service/types/datastories/datastory";
 import { RelatedDatastories } from "@/components/Shared/Datastories/Sections/RelatedDatastories";
 import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { INoResults } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsPT2030";
@@ -98,7 +98,7 @@ export default async function DataStoryProjectsPT2030({
   ] = await Promise.all([getDatastorySearchPage(datastorySlug, locale), getBigNumberValues()]);
 
   const { data, error } = await apolloClient.query<{
-    queryBeneficiariesAndProjectsFiltersOfPortugal2030: QueryProjectsFiltersPt2030;
+    queryBeneficiariesAndProjectsFiltersOfPortugal2030: QueryFiltersPt2030;
     queryProjectsOfPortugal2030SourceInfo: { sourceInfo: SourceInfo[] };
   }>({
     query: getSearchProjectsPT2030(),
@@ -111,7 +111,7 @@ export default async function DataStoryProjectsPT2030({
 
   const filtersOptions = flattenData(
     data.queryBeneficiariesAndProjectsFiltersOfPortugal2030 as Record<string, unknown>
-  ) as QueryProjectsFiltersPt2030;
+  ) as QueryFiltersPt2030;
 
   const advFilters: AdvancedFilter[] = filters.map((filter) => {
     let res: AdvancedFilter = {
@@ -122,7 +122,7 @@ export default async function DataStoryProjectsPT2030({
       res = {
         ...res,
         options:
-          filtersOptions[filter.name as keyof QueryProjectsFiltersPt2030].map((option) => ({
+          filtersOptions[filter.name as keyof QueryFiltersPt2030].map((option) => ({
             label: option,
             value: option,
             key: option,

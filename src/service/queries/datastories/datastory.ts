@@ -347,6 +347,16 @@ export async function getDatastorySearchPage(
               voiceActionAltText
             }
           }
+          typesOfBeneficiariesTitle {
+            ${locale}
+          }
+          typesOfBeneficiaries {
+            ${locale} {
+              name
+              title
+              description
+            }
+          }
           filters {
             ${locale} {
               name
@@ -544,6 +554,112 @@ export function getProjectsOfPortugal2030() {
           paidValue
           effectiveConclusionDate
           plannedConclusionDate
+        }
+      }
+    }
+  `);
+}
+
+export function getSearchBeneficiariesPT2030() {
+  return gql(/* GraphQL */ `
+    query getSearchProjects {
+      queryBeneficiariesAndProjectsFiltersOfPortugal2030 {
+        funds
+        policyObjectives
+        programmes
+        thematicAreas
+        regions
+        municipalities
+      }
+      queryBeneficiariesOfPortugal2030SourceInfo {
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          source
+          referenceDate
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+export function getBeneficiariesOfPortugal2030() {
+  return gql(/* GraphQL */ `
+    query SearchPT2030Beneficiaries(
+      $limit: Int
+      $page: Int
+      $sortBy: BeneficiarySortBy
+      $sortOrder: SortOrder
+      $nif: String
+      $name: String
+      $entityRoles: [EntityRole!]
+      $funds: String
+      $policyObjectives: String
+      $specificObjective: String
+      $programmes: String
+      $thematicAreas: String
+      $regions: String
+      $municipalities: String
+      $approvedValueMin: Float
+      $approvedValueMax: Float
+      $executedValueMin: Float
+      $executedValueMax: Float
+      $paidValueMin: Float
+      $paidValueMax: Float
+      $projectsAmountMin: Int
+      $projectsAmountMax: Int
+    ) {
+      searchBeneficiariesOfPortugal2030(
+        limit: $limit
+        page: $page
+        sortBy: $sortBy
+        sortOrder: $sortOrder
+        nif: $nif
+        name: $name
+        entityRoles: $entityRoles
+        fund: $funds
+        policyObjective: $policyObjectives
+        specificObjective: $specificObjective
+        programme: $programmes
+        thematicArea: $thematicAreas
+        region: $regions
+        municipality: $municipalities
+        approvedValueMin: $approvedValueMin
+        approvedValueMax: $approvedValueMax
+        executedValueMin: $executedValueMin
+        executedValueMax: $executedValueMax
+        paidValueMin: $paidValueMin
+        paidValueMax: $paidValueMax
+        projectsAmountMin: $projectsAmountMin
+        projectsAmountMax: $projectsAmountMax
+      ) {
+        limit
+        page
+        total
+        totalFiltered
+        filters {
+          approvedValueMin
+          approvedValueMax
+          executedValueMin
+          executedValueMax
+          paidValueMin
+          paidValueMax
+          projectsAmountMin
+          projectsAmountMax
+        }
+        data {
+          entityName
+          entityNif
+          entityRole
+          approvedValue
+          executedValue
+          paidValue
+          projectsAmount
         }
       }
     }

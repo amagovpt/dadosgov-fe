@@ -257,7 +257,7 @@ export default function AdvancedFilters({
               });
 
               return (
-                <div className="flex flex-col gap-32">
+                <div className="ranged-number-filter flex flex-col gap-32">
                   <div className="flex flex-col gap-32 pt-32 xl:flex-row">
                     <div className="w-full xl:w-1/2">
                       <InputText
