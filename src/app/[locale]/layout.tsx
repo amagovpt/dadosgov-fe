@@ -18,6 +18,7 @@ import { getInitialSession } from "@/service/api/auth/server";
 import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
+import KarmaAnalytics from "@/Scripts/Karma";
 
 const namespaces = [
   "common",
@@ -119,6 +120,7 @@ export default async function RootLayout({
                         <ScrollTop />
                         {children}
                         <Footer data={footerData} />
+                        <KarmaAnalytics />
                       </ShellProvider>
                     </PopupProviderWrapper>
                   </ApiErrorProvider>
