@@ -31,6 +31,8 @@ const TOAST_DURATION_MS = 10000;
 
 interface ApiErrorContextValue {
   notifyApiError: (error: unknown, fallbackMessage?: string) => void;
+  /** Whether an API failure was reported to the user (toast or login redirect) since `timestamp`. */
+  hasNotifiedSince: (timestamp: number) => boolean;
   /**
    * Whether the error boundary should undo the navigation that reached it
    * rather than render the error page. Read-only, so the boundary can decide
@@ -48,6 +50,7 @@ interface ApiErrorContextValue {
 
 const ApiErrorContext = createContext<ApiErrorContextValue>({
   notifyApiError: () => {},
+  hasNotifiedSince: () => false,
   canRollbackNavigation: () => false,
   rollbackFailedNavigation: () => {},
 });
@@ -118,6 +121,11 @@ export function ApiErrorProvider({ children }: { children: ReactNode }) {
     lastFailure.current = { key, at: now };
     return false;
   }, []);
+
+  const hasNotifiedSince = useCallback(
+    (timestamp: number) => (lastFailure.current?.at ?? 0) >= timestamp,
+    []
+  );
 
   /** Apply the policy to a raw status, de-duplicating repeat reports. */
   const handleFailure = useCallback(
@@ -203,8 +211,8 @@ export function ApiErrorProvider({ children }: { children: ReactNode }) {
   }, [canRollbackNavigation, notifyNavigationError, router]);
 
   const value = useMemo(
-    () => ({ notifyApiError, canRollbackNavigation, rollbackFailedNavigation }),
-    [notifyApiError, canRollbackNavigation, rollbackFailedNavigation]
+    () => ({ notifyApiError, hasNotifiedSince, canRollbackNavigation, rollbackFailedNavigation }),
+    [notifyApiError, hasNotifiedSince, canRollbackNavigation, rollbackFailedNavigation]
   );
 
   return <ApiErrorContext.Provider value={value}>{children}</ApiErrorContext.Provider>;

@@ -8,6 +8,7 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
@@ -29,7 +30,9 @@ interface ReusesClientProps {
 
 export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
+  const downloadListCsv = useCsvExport();
   const { user, isLoading: isUserLoading } = useAuth();
+  const userId = user?.id;
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -45,11 +48,8 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const usesLocalSort = sortField === "status";
   const usesLocalFallback = usesLocalSort;
   const sortParam = useMemo(
-    () =>
-      usesLocalSort
-        ? undefined
-        : buildApiSortParam(sortField, sortOrder, reuseSortFieldMap),
-    [sortField, sortOrder, usesLocalSort],
+    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, reuseSortFieldMap)),
+    [sortField, sortOrder, usesLocalSort]
   );
 
   const { handleSort, getSortOrder } = useSortControls(
@@ -79,7 +79,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
           q: searchQuery.trim() || undefined,
           status: statusFilter || undefined,
           sort: sortParam,
-        },
+        }
       );
       setReuses(response.data || []);
       setTotalItems(response.total || 0);
@@ -88,7 +88,16 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, isUserLoading, itemsPerPage, searchQuery, sortParam, statusFilter, user, usesLocalFallback]);
+  }, [
+    currentPage,
+    isUserLoading,
+    itemsPerPage,
+    searchQuery,
+    sortParam,
+    statusFilter,
+    user,
+    usesLocalFallback,
+  ]);
 
   useEffect(() => {
     let isActive = true;
@@ -108,14 +117,15 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
 
   const filteredReuses = useMemo(
     () => (statusFilter ? filterByStatus(reuses, statusFilter) : reuses),
-    [reuses, statusFilter],
+    [reuses, statusFilter]
   );
   const sortedReuses = useMemo(
     () => sortReuses(filteredReuses, sortField, sortOrder),
     [filteredReuses, sortField, sortOrder]
   );
   const paginatedReuses = useMemo(
-    () => (usesLocalFallback ? paginateItems(sortedReuses, currentPage, itemsPerPage) : sortedReuses),
+    () =>
+      usesLocalFallback ? paginateItems(sortedReuses, currentPage, itemsPerPage) : sortedReuses,
     [currentPage, itemsPerPage, sortedReuses, usesLocalFallback]
   );
   const columns = useMemo(
@@ -132,9 +142,50 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
           datasets: t("admin-reuses:columns.datasets"),
           actions: t("admin-reuses:columns.actions"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
       }),
     [t]
   );
+
+  // With local sort the list is already fully loaded; otherwise one request
+  // with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedReuses;
+    if (!usesLocalFallback && userId) {
+      const response = await fetchReuses(1, totalItems, {
+        owner: userId,
+        q: searchQuery.trim() || undefined,
+        status: statusFilter || undefined,
+        sort: sortParam,
+      });
+      const allReuses = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && allReuses.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+      const filtered = statusFilter ? filterByStatus(allReuses, statusFilter) : allReuses;
+      rows = sortReuses(filtered, sortField, sortOrder);
+    }
+    downloadListCsv(t("admin-reuses:myListTitle"), rows, columns);
+  }, [
+    downloadListCsv,
+    columns,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    sortedReuses,
+    statusFilter,
+    t,
+    totalItems,
+    userId,
+    usesLocalFallback,
+  ]);
 
   return (
     <AdminListPage
@@ -191,6 +242,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
           description={t("admin-reuses:emptyDescription")}
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={paginatedReuses}
