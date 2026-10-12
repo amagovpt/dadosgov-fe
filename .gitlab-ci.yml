@@ -18,13 +18,26 @@ include:
       accessibility-enabled: "false"
       docker-image-name: "dadosgov-frontend"
       dockerfile-dev: ".gitlab/docker/Dockerfile"
-      dockerfile-tst: ".gitlab/docker/Dockerfile-tst"
-      dockerfile-ppr: ".gitlab/docker/Dockerfile-ppr"
-      dockerfile-prd: ".gitlab/docker/Dockerfile-prd"
+      dockerfile-tst: ".gitlab/docker/Dockerfile"
+      dockerfile-ppr: ".gitlab/docker/Dockerfile"
+      dockerfile-prd: ".gitlab/docker/Dockerfile"
 
-# Deploy is disabled until the k8s manifests repository exists. To enable it, delete
-# these overrides and set deploy-repository, deploy-manifest, deploy-token and
-# deploy-url-* in the inputs above.
+build-code-dev:
+  variables:
+    BACKEND_URL: "http://REPLACE-ME-dev-backend.invalid"
+
+build-code-tst:
+  variables:
+    BACKEND_URL: "http://REPLACE-ME-tst-backend.invalid"
+
+build-code-ppr:
+  variables:
+    BACKEND_URL: "http://REPLACE-ME-ppr-backend.invalid"
+
+build-code-prd:
+  variables:
+    BACKEND_URL: "http://REPLACE-ME-prd-backend.invalid"
+
 promote-to-dev-environment:
   rules:
     - when: never
