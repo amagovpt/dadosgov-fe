@@ -46,6 +46,7 @@ services:
       BACKEND_HOST: localhost:7000
       API_URL_INTERNAL: ${API_URL_INTERNAL}
       TABULAR_API_URL: ${TABULAR_API_URL:-http://host.docker.internal:8005}
+      EXPLORER_URL: ${EXPLORER_URL:-http://host.docker.internal:3030}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
