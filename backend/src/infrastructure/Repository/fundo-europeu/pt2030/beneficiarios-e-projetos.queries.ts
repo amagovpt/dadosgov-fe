@@ -659,15 +659,33 @@ FROM (
     'municipalityOperationName', opr.ds_concelho_operacao
   ) AS data_row
   FROM pt2030.operacoes_pt2030 o
-    LEFT JOIN pt2030.operacoes_regionalizadas_pt2030 opr ON o.cd_operacao = opr.cd_operacao
+    -- One row per operation: an operation spans several regions/municipalities,
+    -- so joining the regional table directly repeats it once per municipality.
+    LEFT JOIN LATERAL (
+      SELECT
+        string_agg(DISTINCT r.cd_nutsii_operacao::text, ', ') AS cd_nutsii_operacao,
+        string_agg(DISTINCT r.ds_nutsii_operacao::text, ', ') AS ds_nutsii_operacao,
+        string_agg(DISTINCT r.cd_nutsiii_operacao::text, ', ') AS cd_nutsiii_operacao,
+        string_agg(DISTINCT r.ds_nutsiii_operacao::text, ', ') AS ds_nutsiii_operacao,
+        string_agg(DISTINCT r.cd_concelho_operacao::text, ', ') AS cd_concelho_operacao,
+        string_agg(DISTINCT r.ds_concelho_operacao::text, ', ') AS ds_concelho_operacao
+      FROM pt2030.operacoes_regionalizadas_pt2030 r
+      WHERE r.cd_operacao = o.cd_operacao
+    ) opr ON true
   WHERE ($1::text IS NULL OR LOWER(o.nome_operacao) LIKE LOWER('%' || $1::text || '%'))
     AND ($2::text IS NULL OR LOWER(o.cd_operacao) LIKE LOWER('%' || $2::text || '%'))
     AND ($3::text IS NULL OR o.ds_fundo = $3::text)
     AND ($4::text IS NULL OR o.ds_objetivo_estrategico = $4::text)
     AND ($5::text IS NULL OR o.ds_programa = $5::text)
     AND ($6::text IS NULL OR o.ds_area_tematica = $6::text)
-    AND ($7::text IS NULL OR opr.ds_nutsii_operacao = $7::text)
-    AND ($8::text IS NULL OR opr.ds_concelho_operacao = $8::text)
+    AND ($7::text IS NULL OR EXISTS (
+      SELECT 1 FROM pt2030.operacoes_regionalizadas_pt2030 r
+      WHERE r.cd_operacao = o.cd_operacao AND r.ds_nutsii_operacao = $7::text
+    ))
+    AND ($8::text IS NULL OR EXISTS (
+      SELECT 1 FROM pt2030.operacoes_regionalizadas_pt2030 r
+      WHERE r.cd_operacao = o.cd_operacao AND r.ds_concelho_operacao = $8::text
+    ))
     AND ($9::text IS NULL OR LOWER(o.sg_objetivo_especifico) = LOWER($9::text))
     AND ($10::numeric IS NULL OR o.fundo_aprovado >= $10::numeric)
     AND ($11::numeric IS NULL OR o.fundo_aprovado <= $11::numeric)
@@ -677,7 +695,7 @@ FROM (
     AND ($15::numeric IS NULL OR o.fundo_pago <= $15::numeric)
     AND ($16::date IS NULL OR o.dt_conclusao_prevista >= $16::date)
     AND ($17::date IS NULL OR o.dt_conclusao_prevista <= $17::date)
-  ORDER BY 
+  ORDER BY
     CASE WHEN $19 = 'asc' THEN
       CASE 
         WHEN $18 = 'approvedValue' THEN o.fundo_aprovado
@@ -693,7 +711,8 @@ FROM (
         WHEN $18 = 'paidValue' THEN o.fundo_pago
         WHEN $18 = 'plannedConclusionDate' THEN EXTRACT(EPOCH FROM o.dt_conclusao_prevista)
       END
-    END DESC
+    END DESC,
+    o.cd_operacao
   LIMIT $20
   OFFSET $21
 ) AS subquery;
