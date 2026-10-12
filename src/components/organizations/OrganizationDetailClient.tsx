@@ -228,34 +228,11 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             sidebarRef={sidebarRef}
             titleRef={titleRef}
             className="[&_.content-wrapper]:markdown-container [&_.content-wrapper]:max-w-[592px] [&_.content-wrapper]:text-m-light [&_.content-wrapper]:text-neutral-900"
-            extraContent={
-              <>
-                <div className="mt-8">
-                  <h3 className="text-xl mb-16 font-bold text-primary-900">
-                    {tOrg("detail.preliminaryNotes")}
-                  </h3>
-                  <p className="mb-16 max-w-[592px] text-neutral-900">
-                    {tOrg("detail.preliminaryNotesText")}
-                  </p>
-                </div>
-                <div className="mt-8">
-                  <h3 className="text-xl mb-16 font-bold text-primary-900">
-                    {tOrg("detail.about")}
-                  </h3>
-                  <p className="max-w-[592px] text-neutral-900">
-                    {tOrg("detail.aboutText", { name: organization.name })}
-                  </p>
-                </div>
-              </>
-            }
           />
         </div>
 
         <div className="w-full">
-          <div
-            className="card-article-3_2 flex h-fit flex-col"
-            ref={sidebarRef}
-          >
+          <div className="card-article-3_2 flex h-fit flex-col" ref={sidebarRef}>
             <CardGeneralV2 variant="primary-100" className="card-detail-info mb-16">
               <HeaderSectionContainer>
                 <CardSubtitle>
@@ -289,7 +266,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 </div>
                 <div className="gap-1 mb-8 flex items-center">
                   <Pill appearance="outline" variant="success" className="h-auto">
-                    +{formatMetricValue(organization.metrics?.views, 2)} {tOrg("detail.totalSuffix")}
+                    +{formatMetricValue(organization.metrics?.views, 2)}{" "}
+                    {tOrg("detail.totalSuffix")}
                   </Pill>
                 </div>
                 <div className="text-xs mt-1 text-neutral-900">

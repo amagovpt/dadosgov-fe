@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
   Tabs,
@@ -40,6 +40,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
   const { t: tOrg } = useTranslation("organizations");
   const language = i18n.language as "pt" | "en";
   const router = useRouter();
+  // The discussion mails link to /organizations/<slug>?tab=discussions, the same way the
+  // dataset page is linked from its own discussion mails.
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
 
   const [datasetsResponse, setDatasetsResponse] = useState<APIResponse<Dataset> | null>(null);
   const [datasetsPage, setDatasetsPage] = useState(1);
@@ -293,7 +297,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
 
         {/* Tab 5: Discussões */}
-        <Tab>
+        <Tab active={tabParam === "discussions" || undefined}>
           <TabHeader>{tOrg("tabs.discussions", { count: discussionCount })}</TabHeader>
           <TabBodyWrapper>
             <DiscussionSection

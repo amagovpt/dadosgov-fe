@@ -33,6 +33,8 @@ export function createTopicColumns(
       sortType: "string",
       header: labels.name,
       renderCell: (topic) => <TextLink href={`/themes/${topic.slug}`}>{topic.name}</TextLink>,
+      exportValue: (topic) => topic.name,
+      exportUrl: (topic) => `/themes/${topic.slug}`,
     },
     {
       id: "created_at",
@@ -40,16 +42,19 @@ export function createTopicColumns(
       sortType: "date",
       header: labels.createdAt,
       renderCell: (topic) => formatDateToDMY(topic.created_at),
+      exportValue: (topic) => formatDateToDMY(topic.created_at),
     },
     {
       id: "datasets",
       header: labels.datasets,
       renderCell: (topic) => topic.datasets_count ?? 0,
+      exportValue: (topic) => topic.datasets_count ?? 0,
     },
     {
       id: "reuses",
       header: labels.reuses,
       renderCell: (topic) => topic.reuses_count ?? 0,
+      exportValue: (topic) => topic.reuses_count ?? 0,
     },
     createTableActionsColumn<Topic>({
       viewAction: (topic) => ({
