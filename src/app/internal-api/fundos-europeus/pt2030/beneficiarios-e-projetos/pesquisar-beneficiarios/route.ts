@@ -1,5 +1,5 @@
 import { print } from "graphql";
-import { getProjectsOfPortugal2030 } from "@/service/queries/datastories/datastory";
+import { getBeneficiariesOfPortugal2030 } from "@/service/queries/datastories/datastory";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
 import { FilterValue } from "@/store/searchBenProj-store";
 
@@ -111,14 +111,14 @@ export async function POST(request: Request) {
 
   // make the query request
 
-  let data: { searchProjectsOfPortugal2030: unknown } | undefined;
+  let data: { searchBeneficiariesOfPortugal2030: unknown } | undefined;
   let error: unknown;
 
   try {
     const res = await fetch(`${getCmsBaseUrl()}/graphql`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: print(getProjectsOfPortugal2030()), variables }),
+      body: JSON.stringify({ query: print(getBeneficiariesOfPortugal2030()), variables }),
       cache: "no-store",
       signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
     });
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
 
   // handle error
 
-  if (!data?.searchProjectsOfPortugal2030 || error) {
+  if (!data?.searchBeneficiariesOfPortugal2030 || error) {
     console.error("GraphQL error:", error);
     return new Response(JSON.stringify({ error }), {
       status: 502,
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
 
   // handle response
 
-  return new Response(JSON.stringify(data.searchProjectsOfPortugal2030), {
+  return new Response(JSON.stringify(data.searchBeneficiariesOfPortugal2030), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });

@@ -58,3 +58,6 @@ playwright-report/
 !/logs/.gitkeep
 public/Icons/reduce_icon.svg:Zone.Identifier
 *.Identifier
+
+# vscode
+.vscode/

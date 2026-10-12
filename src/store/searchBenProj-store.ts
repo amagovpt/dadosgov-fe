@@ -675,7 +675,7 @@ export const createSearchBenProjStore = (
       const worksheet = workbook.addWorksheet("Data");
 
       const headerData = [
-        ["Mais Transparência"],
+        ["dados.gov"],
         [t(pathnameArray[1])],
         [t(pathnameArray[2])],
         [t(pathnameArray[3]) + " - " + filename],
