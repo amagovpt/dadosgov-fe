@@ -288,6 +288,7 @@ export const createSearchBenProjStore = (
         };
         return {
           appliedFilters,
+          page: 1,
           showFilters: prepareShowFilters(appliedFilters, subject, t, locale),
         };
       });
@@ -299,6 +300,7 @@ export const createSearchBenProjStore = (
         const appliedFilters = { ...state.filters };
         return {
           appliedFilters,
+          page: 1,
           showFilters: prepareShowFilters(appliedFilters, subject, t, locale),
         };
       });
@@ -328,6 +330,7 @@ export const createSearchBenProjStore = (
           return {
             filters,
             appliedFilters,
+            page: 1,
             showFilters: prepareShowFilters(appliedFilters, subject, t, locale),
           };
         }
@@ -339,6 +342,7 @@ export const createSearchBenProjStore = (
         return {
           filters,
           appliedFilters,
+          page: 1,
           showFilters: prepareShowFilters(appliedFilters, subject, t, locale),
         };
       });
