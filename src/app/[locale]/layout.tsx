@@ -20,6 +20,7 @@ import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
 import { RuntimeConfigProvider } from "@/providers/RuntimeConfigProvider";
 import { getRuntimeConfig } from "@/config/runtimeConfig";
+import KarmaAnalytics from "@/Scripts/Karma";
 
 const namespaces = [
   "common",
@@ -123,6 +124,7 @@ export default async function RootLayout({
                           <ScrollTop />
                           {children}
                           <Footer data={footerData} />
+                          <KarmaAnalytics />
                         </ShellProvider>
                       </PopupProviderWrapper>
                     </ApiErrorProvider>
