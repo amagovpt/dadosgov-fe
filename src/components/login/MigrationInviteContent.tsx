@@ -7,6 +7,7 @@ import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
 import { Typograph } from "../Shared/Generics/Typograph";
 import { submitSamlForm } from "./loginUtils";
+import { useRuntimeConfig } from "@/providers/RuntimeConfigProvider";
 
 /**
  * The invitation itself: the words, the three buttons, and the note for
@@ -43,7 +44,7 @@ export function MigrationInviteContent({
   // Says whether SAML is wired up at all, so whether a button can work. Never
   // whether an ACCOUNT should link -- that is the backend's answer, and it is
   // read by the caller.
-  const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
+  const { samlEnabled } = useRuntimeConfig();
 
   const startLink = async (endpoint: string) => {
     setIsLoading(true);

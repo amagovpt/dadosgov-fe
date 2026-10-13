@@ -29,6 +29,10 @@ const translate = (key: string): string => {
   return typeof raw === "string" ? raw : key;
 };
 
+// SAML/reCAPTCHA come from the container environment via RuntimeConfigProvider.
+const runtimeConfig = vi.hoisted(() => ({ samlEnabled: false, recaptchaSiteKey: "" }));
+vi.mock("@/providers/RuntimeConfigProvider", () => ({ useRuntimeConfig: () => runtimeConfig }));
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: translate }),
 }));
@@ -91,7 +95,7 @@ describe("the permanent way back into linking", () => {
 
     useAuth.mockReturnValue({ migrationLinkAvailable: true, migrationInvite: true });
     submitSamlForm.mockResolvedValue(null);
-    process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
+    runtimeConfig.samlEnabled = true;
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);

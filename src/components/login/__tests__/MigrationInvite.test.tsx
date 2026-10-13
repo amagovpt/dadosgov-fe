@@ -33,6 +33,10 @@ const translate = (key: string): string => {
   return typeof raw === "string" ? raw : key;
 };
 
+// SAML/reCAPTCHA come from the container environment via RuntimeConfigProvider.
+const runtimeConfig = vi.hoisted(() => ({ samlEnabled: false, recaptchaSiteKey: "" }));
+vi.mock("@/providers/RuntimeConfigProvider", () => ({ useRuntimeConfig: () => runtimeConfig }));
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: translate }),
   // LEDG-2564 also reached for <Trans>. The real one interpolates components
@@ -130,7 +134,7 @@ describe("the optional CMD/eIDAS linking invite", () => {
     pathname.mockReturnValue("/pt");
     dismissMigrationInvite.mockResolvedValue({ dismissed: true });
     submitSamlForm.mockResolvedValue(null);
-    process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
+    runtimeConfig.samlEnabled = true;
     window.sessionStorage.clear();
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -407,7 +411,7 @@ describe("the optional CMD/eIDAS linking invite", () => {
   it("disables the linking buttons when SAML is not wired up", () => {
     // The one piece of configuration this tree may read: whether SAML exists
     // at all. Never whether an ACCOUNT should link.
-    process.env.NEXT_PUBLIC_SAML_ENABLED = "false";
+    runtimeConfig.samlEnabled = false;
     renderInvite();
     expect(findButton(ptLogin.migrationInvite.linkCmd)?.disabled).toBe(true);
     expect(findButton(ptLogin.migrationInvite.linkEidas)?.disabled).toBe(true);
