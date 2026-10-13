@@ -1,6 +1,7 @@
 import { DataStoryMetadata } from "@/service/types/datastories";
 import apolloClient from "@/service/utils/apollo-client";
-import { Datastory, DatastorySearchPage } from "@/service/types/datastories/datastory";
+import { Datastory } from "@/service/types/datastories/datastory";
+import { DatastorySearchPage } from "@/service/types/datastories/pt2030/pt2030";
 import { flattenData } from "@/utils/flattenObject";
 import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";

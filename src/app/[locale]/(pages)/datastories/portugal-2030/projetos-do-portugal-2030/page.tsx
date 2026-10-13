@@ -18,7 +18,7 @@ import HeroContentSearchBenProj from "@/components/Shared/SearchBeneficiariesAnd
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { AdvancedFilter } from "@/components/Shared/SearchBeneficiariesAndProjects/filters/AdvancedFilters";
-import { QueryFiltersPt2030, SourceInfo } from "@/service/types/datastories/datastory";
+import { QueryFiltersPt2030, SourceInfo } from "@/service/types/datastories/pt2030/pt2030";
 import { RelatedDatastories } from "@/components/Shared/Datastories/Sections/RelatedDatastories";
 import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { INoResults } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsPT2030";

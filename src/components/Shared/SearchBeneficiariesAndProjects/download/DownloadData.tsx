@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { useSearchBenProjStore } from "@/hooks/useSearchBenProj";
-import { SourceInfo } from "@/service/types/datastories/datastory";
+import { SourceInfo } from "@/service/types/datastories/pt2030/pt2030";
 
 export interface IDownloadData {
   className?: string;
