@@ -130,6 +130,8 @@
     "irreversible": "Atenção esta ação é irreversível."
   },
   "pagination": {
+    "range_one": "{{start}} a {{end}} de {{count}} item",
+    "range_other": "{{start}} a {{end}} de {{count}} itens",
     "itemsPerPage": "Linhas por página",
     "selectItemsPerPage": "Selecionar linhas por página",
     "itemsPerPageOptions": "Opções de linhas por página",

@@ -3,53 +3,83 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Button } from "@ama-pt/agora-design-system";
-import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
-import { fetchAdminDatasets } from "@/service/api/datasets";
+import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
+import { fetchOrgDatasets } from "@/service/api/organizations";
 import { Dataset } from "@/service/types/dataset";
 import type { DatasetFilters } from "@/service/types/dataset";
-import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { useAuth } from "@/context/AuthContext";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
-  createDatasetColumns,
-  DatasetSortField,
-  sortDatasets,
-  systemDatasetSortFieldMap,
-} from "@/components/admin/datasets/config/datasetsListConfig";
+  createAdminDatasetColumns,
+  type AdminDatasetSortField,
+  sortAdminDatasets,
+  adminDatasetSortFieldMap,
+} from "@/components/admin/datasets/config/adminDatasetsListConfig";
+import { localizeHref } from "@/utils/localizeHref";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import Image from "next/image";
+import { can } from "@/utils/permissions";
+import styles from "./datasetsList.module.css";
 
-interface DatasetsClientProps {
+type DatasetsClientProps = {
   pageContent: BoDatasetsPage;
-}
+} & (
+  | { scope?: "personal"; orgId?: never }
+  | { scope: "organization"; orgId: string }
+  | { scope: "system"; orgId?: never }
+);
 
-export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
-  const { t } = useTranslation(["admin-common", "admin-datasets"]);
-  const downloadListCsv = useCsvExport();
-  const { user, isLoading: isUserLoading } = useAuth();
-  const router = useRouter();
+export default function DatasetsClient({
+  pageContent,
+  scope = "personal",
+  orgId,
+}: DatasetsClientProps) {
+  const { t, i18n } = useTranslation(["admin-common", "admin-datasets"]);
+  const { user, hasOrganization, isLoading: isUserLoading } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const createHref =
+    scope === "organization"
+      ? `/admin/org/${orgId}/datasets/new`
+      : scope === "system"
+        ? "/admin/datasets/new"
+        : "/admin/me/datasets/new";
+  const listTitleKey =
+    scope === "organization"
+      ? "orgListTitle"
+      : scope === "system"
+        ? "systemListTitle"
+        : "myListTitle";
+  const emptySubtitleKey =
+    scope === "organization"
+      ? "orgEmptySubtitle"
+      : scope === "system"
+        ? "systemEmptySubtitle"
+        : "emptySubtitle";
 
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<DatasetSortField | null>(null);
+  const [sortField, setSortField] = useState<AdminDatasetSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
-  const usesLocalSort = sortField === "status" || sortField === "resources" || sortField === "quality";
+  const usesLocalSort = sortField === "producer" || sortField === "quality";
+  const sortsAllPersonalDatasets = scope === "personal" && usesLocalSort;
 
   const sortParam = useMemo(
-    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, systemDatasetSortFieldMap)),
-    [sortField, sortOrder, usesLocalSort],
+    () =>
+      usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, adminDatasetSortFieldMap),
+    [sortField, sortOrder, usesLocalSort]
   );
 
   const filters = useMemo<DatasetFilters>(() => {
@@ -70,49 +100,67 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
     }
 
     return {
-      owner: user?.id,
+      ...(scope === "personal" ? { owner: user?.id } : {}),
       q: searchQuery.trim() || undefined,
       sort: sortParam,
       ...statusFilters,
     };
-  }, [searchQuery, sortParam, statusFilter, user?.id]);
+  }, [scope, searchQuery, sortParam, statusFilter, user?.id]);
 
-  const loadDatasets = useCallback(async () => {
-    if (isUserLoading) return;
-    if (!user?.id) {
-      setDatasets([]);
-      setTotalItems(0);
-      setIsLoading(false);
-      return;
-    }
+  const loadDatasets = useCallback(
+    async (isCancelled: () => boolean) => {
+      if (isUserLoading) return;
+      if (!user?.id) {
+        setDatasets([]);
+        setTotalItems(0);
+        setIsLoading(false);
+        return;
+      }
 
-    setIsLoading(true);
-    try {
-      // File count, status, and quality have no backend sort parameter.
-      // Sort them locally and fetch all items to ensure we have the full dataset for sorting.
-      const response = await fetchAdminDatasets(
-        usesLocalSort ? 1 : currentPage,
-        usesLocalSort ? 9999 : pageSize,
-        filters,
-      );
-      setDatasets(response.data || []);
-      setTotalItems(response.total || 0);
-    } catch (error) {
-      console.error("Error loading datasets:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, filters, isUserLoading, pageSize, user?.id, usesLocalSort]);
+      setIsLoading(true);
+      try {
+        // Preserve each scope's pagination: personal local sorting fetches its
+        // records together; organization and system lists fetch one page.
+        const requestedPage = sortsAllPersonalDatasets ? 1 : currentPage;
+        const requestedPageSize = sortsAllPersonalDatasets ? 9999 : pageSize;
+        const response =
+          scope === "organization"
+            ? await fetchOrgDatasets(orgId!, requestedPage, requestedPageSize, filters)
+            : await fetchAdminDatasets(requestedPage, requestedPageSize, filters);
+        const result =
+          scope === "system" && response.total === 0 && !searchQuery.trim() && !statusFilter
+            ? await fetchDatasets(requestedPage, requestedPageSize, filters)
+            : response;
+        if (!isCancelled()) {
+          setDatasets(result.data || []);
+          setTotalItems(result.total || 0);
+        }
+      } catch (error) {
+        console.error("Error loading datasets:", error);
+      } finally {
+        if (!isCancelled()) setIsLoading(false);
+      }
+    },
+    [
+      currentPage,
+      filters,
+      isUserLoading,
+      pageSize,
+      user?.id,
+      sortsAllPersonalDatasets,
+      scope,
+      orgId,
+      searchQuery,
+      statusFilter,
+    ]
+  );
 
   useEffect(() => {
     let isCancelled = false;
 
-    const loadCurrentDatasets = async () => {
-      if (isCancelled) return;
-      await loadDatasets();
-    };
-
-    void loadCurrentDatasets();
+    queueMicrotask(() => {
+      if (!isCancelled) void loadDatasets(() => isCancelled);
+    });
 
     return () => {
       isCancelled = true;
@@ -123,75 +171,91 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
     setSearchQuery(value);
     setCurrentPage(1);
   });
-  const visibleDatasets = useMemo(
-    () =>
-      usesLocalSort
-        ? paginateItems(sortDatasets(datasets, sortField, sortOrder), currentPage, pageSize)
-        : datasets,
-    [currentPage, datasets, pageSize, sortField, sortOrder, usesLocalSort],
-  );
+  const visibleDatasets = useMemo(() => {
+    if (!usesLocalSort) return datasets;
+    const sorted = sortAdminDatasets(datasets, sortField, sortOrder);
+    return sortsAllPersonalDatasets ? paginateItems(sorted, currentPage, pageSize) : sorted;
+  }, [
+    currentPage,
+    datasets,
+    pageSize,
+    sortField,
+    sortOrder,
+    usesLocalSort,
+    sortsAllPersonalDatasets,
+  ]);
   const columns = useMemo(
     () =>
-      createDatasetColumns({
-        editHref: (dataset) => `/admin/me/datasets/edit?id=${dataset.id}`,
-        showOwner: true,
-        showResourceCount: true,
-        showQualityScore: true,
+      createAdminDatasetColumns({
+        editHref: (dataset) => {
+          if (scope === "personal") return `/admin/me/datasets/edit?id=${dataset.id}`;
+          if (!can(dataset, "edit")) return `/datasets/${dataset.slug}`;
+          return scope === "organization"
+            ? `/admin/org/${orgId}/datasets/edit?slug=${dataset.slug}`
+            : `/admin/datasets/${dataset.id}`;
+        },
         labels: {
-          title: t("admin-datasets:list.columns.title"),
-          titleShort: t("admin-datasets:list.columns.titleShort"),
+          title: t("admin-datasets:list.columns.titleShort"),
           status: t("admin-datasets:list.columns.status"),
-          createdAt: t("admin-datasets:list.columns.createdAt"),
-          lastModified: t("admin-datasets:list.columns.lastModified"),
-          resources: t("admin-datasets:list.columns.resources"),
-          quality: t("admin-datasets:list.columns.quality"),
-          actions: t("admin-datasets:list.columns.actions"),
+          producer: t("admin-datasets:list.columns.producer"),
+          lastModified: t("admin-datasets:list.columns.lastChanged"),
+          quality: t("admin-datasets:list.columns.metadataQuality"),
         },
         statusLabels: {
-          public: t("admin-common:status.public"),
+          public: t("admin-datasets:list.published"),
           draft: t("admin-common:status.draft"),
           archived: t("admin-common:status.archived"),
           deleted: t("admin-common:status.deleted"),
         },
       }),
-    [t],
+    [orgId, scope, t]
   );
-
-  // One request with page_size = the total the table already received.
-  const handleDownloadCsv = useCallback(async () => {
-    const response = await fetchAdminDatasets(1, totalItems, filters);
-    const allDatasets = response.data ?? [];
-    // The fetchers return an empty page on error.
-    if (totalItems > 0 && allDatasets.length === 0) {
-      throw new Error(t("admin-common:csvExport.fetchError"));
-    }
-    const rows = usesLocalSort ? sortDatasets(allDatasets, sortField, sortOrder) : allDatasets;
-    downloadListCsv(t("admin-datasets:list.myListTitle"), rows, columns);
-  }, [downloadListCsv, columns, filters, sortField, sortOrder, t, totalItems, usesLocalSort]);
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
     sortOrder,
     setSortField,
     setSortOrder,
-    setCurrentPage,
+    setCurrentPage
   );
 
   return (
     <AdminListPage
-      breadcrumbItems={[{ label: t("admin-datasets:list.title") }]}
-      title={t("admin-datasets:list.heroTitle")}
+      className={styles.page}
+      title={t("admin-datasets:list.title")}
       kicker={t("admin-datasets:list.kicker")}
       description={t("admin-datasets:list.heroDescription")}
-      listTitle={t("admin-datasets:list.myListTitle")}
+      headerClassName="xl:items-center"
+      headerInfoClassName="w-full max-w-[592px]"
+      breadcrumbItems={[{ label: t("admin-datasets:list.title") }]}
+      listTitle={t(`admin-datasets:list.${listTitleKey}`)}
       resultsCount={null}
+      beforeList={
+        scope === "personal" && !isUserLoading && user && !hasOrganization ? (
+          <StatusCard
+            variant="outline-informative"
+            showIcon
+            title={t("admin-datasets:list.noOrganizationTitle")}
+            description={t("admin-datasets:list.noOrganizationDescription")}
+            anchorOnRightSide
+            anchor={{
+              href: localizeHref("/admin/organizations/new", i18n.language),
+              "aria-label": t("admin-datasets:form.organizationLink"),
+              hasIcon: true,
+              iconOnly: true,
+              trailingIcon: "agora-solid-arrow-right-circle",
+              trailingIconHover: "agora-solid-arrow-right-circle",
+            }}
+          />
+        ) : null
+      }
       headerAction={
         <Button
           variant="primary"
           hasIcon
           leadingIcon="agora-line-plus-circle"
           leadingIconHover="agora-solid-plus-circle"
-          onClick={() => router.push("/admin/datasets/new")}
+          onClick={() => router.push(localizeHref(createHref, i18n.language))}
         >
           {t("admin-datasets:list.create")}
         </Button>
@@ -202,6 +266,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       hasActiveFilters={statusFilter !== ""}
       currentPage={currentPage}
       pageSize={pageSize}
+      showPaginationSummary
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
@@ -213,7 +278,13 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
       filters={
         <StatusFilterSelect
           value={statusFilter}
-          defaultValue={statusFilter || undefined}
+          options={[
+            { value: "", label: t("admin-common:filters.all") },
+            { value: "public", label: t("admin-datasets:list.filters.published") },
+            { value: "draft", label: t("admin-datasets:list.filters.drafts") },
+            { value: "archived", label: t("admin-datasets:list.filters.archived") },
+            { value: "deleted", label: t("admin-datasets:list.filters.deleted") },
+          ]}
           onChange={(value) => {
             setStatusFilter(value);
             setCurrentPage(1);
@@ -229,11 +300,10 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
               <b className="font-bold">{t("admin-datasets:list.emptyTitleHighlight")}</b>
             </div>
           }
-          subtitle={t("admin-datasets:list.emptySubtitle")}
+          subtitle={t(`admin-datasets:list.${emptySubtitleKey}`)}
           description={t("admin-datasets:list.emptyDescription")}
         />
       }
-      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleDatasets}

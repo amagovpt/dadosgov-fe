@@ -24,12 +24,16 @@ type SearchConfig = {
 };
 
 interface AdminListPageProps {
+  className?: AdminLayoutProps["className"];
   title: string;
   kicker?: string;
   description?: string;
   listTitle?: string;
   breadcrumbItems: AdminLayoutProps["breadcrumbItems"];
   headerAction?: ReactNode;
+  headerClassName?: AdminLayoutProps["headerClassName"];
+  headerInfoClassName?: AdminLayoutProps["headerInfoClassName"];
+  beforeList?: ReactNode;
   isLoading: boolean;
   count: number;
   hasItems?: boolean;
@@ -48,17 +52,22 @@ interface AdminListPageProps {
   loadingContent?: ReactNode;
   resultsCount?: ReactNode;
   paginationOptions?: CreatePaginationPropsOptions;
+  showPaginationSummary?: boolean;
   /** Shows the "Download CSV" button. */
   onDownloadCsv?: () => Promise<void>;
 }
 
 export default function AdminListPage({
+  className,
   title,
   kicker,
   description,
   listTitle,
   breadcrumbItems,
   headerAction,
+  headerClassName,
+  headerInfoClassName,
+  beforeList,
   isLoading,
   count,
   hasItems,
@@ -76,6 +85,7 @@ export default function AdminListPage({
   loadingContent,
   resultsCount,
   paginationOptions,
+  showPaginationSummary,
   onDownloadCsv,
 }: AdminListPageProps) {
   const { t } = useTranslation("admin-common");
@@ -126,12 +136,16 @@ export default function AdminListPage({
 
   return (
     <AdminLayout
+      className={className}
       title={title}
       kicker={kicker}
       description={description}
       breadcrumbItems={breadcrumbItems}
       headerAction={headerAction}
+      headerClassName={headerClassName}
+      headerInfoClassName={headerInfoClassName}
     >
+      {beforeList}
       {listTitle && <h2 className="mb-32 text-xl-bold text-brand-blue-secondary">{listTitle}</h2>}
       {/* {resultsCount ?? <ResultsCount count={count} isLoading={isInitialLoading} />} */}
 
@@ -195,6 +209,7 @@ export default function AdminListPage({
             setCurrentPage={setCurrentPage}
             setPageSize={setPageSize}
             paginationOptions={paginationOptions}
+            showPaginationSummary={showPaginationSummary}
           >
             {children}
           </AdminPaginatedTable>

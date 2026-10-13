@@ -130,6 +130,8 @@
     "irreversible": "Warning this action is irreversible."
   },
   "pagination": {
+    "range_one": "{{start}} to {{end}} of {{count}} item",
+    "range_other": "{{start}} to {{end}} of {{count}} items",
     "itemsPerPage": "Rows per page",
     "selectItemsPerPage": "Select rows per page",
     "itemsPerPageOptions": "Rows per page options",

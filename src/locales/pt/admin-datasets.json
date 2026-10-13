@@ -97,12 +97,25 @@
     "kicker": "Dados Abertos",
     "heroTitle": "Gestão de conjuntos de dados",
     "myListTitle": "Os meus conjuntos de dados",
+    "orgListTitle": "Conjuntos de dados da organização",
+    "systemListTitle": "Todos os conjuntos de dados",
     "emptyTitlePrefix": "Não foram encontrados",
     "emptyTitleHighlight": "conjuntos de dados",
     "emptySubtitle": "Ainda não existem publicações associadas à sua conta",
+    "orgEmptySubtitle": "Ainda não existem publicações associadas à sua organização",
+    "systemEmptySubtitle": "Ainda não existem publicações disponíveis no sistema",
     "emptyDescription": "Utilize a opção \"Criar conjunto de dados\" para adicionar uma nova publicação. Os conjuntos de dados criados ficarão disponíveis para consulta e gestão nesta área.",
     "heroDescription": "Publique, consulte e faça a gestão dos seus conjuntos de dados. Acompanhe o estado das publicações, atualize a informação sempre que necessário e mantenha os dados disponibilizados no portal atualizados e acessíveis.",
     "create": "Criar conjunto de dados",
+    "published": "Publicado",
+    "noOrganizationTitle": "Você não pertence a nenhuma organização. Crie ou participe de uma organização",
+    "noOrganizationDescription": "Recomendamos que publique em nome de uma organização se se tratar de uma atividade profissional.",
+    "filters": {
+      "published": "Publicados",
+      "drafts": "Rascunhos",
+      "archived": "Arquivados",
+      "deleted": "Eliminados"
+    },
     "columns": {
       "title": "Título do conjunto de dados",
       "titleShort": "Título",
@@ -111,7 +124,10 @@
       "lastModified": "Última modificação",
       "resources": "Ficheiros",
       "quality": "Pontuação",
-      "actions": "Ações"
+      "actions": "Ações",
+      "producer": "Produtor",
+      "lastChanged": "Última alteração",
+      "metadataQuality": "Qualidade dos metadados"
     },
     "catalogDownload": "Catálogo"
   },
