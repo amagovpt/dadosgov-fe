@@ -6,6 +6,38 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **style(datastories): align the Portugal 2030 projects page with the design**
+  - The "em números" block showed 28.192 in all three cards. It now shows the design's
+    project count and the planned/executed funding (20,5 / 12,5 mil milhões €). These values
+    are fixed until the backend exposes PT2030 totals, because the CMS only sends the labels.
+    `CardBigNumber` takes an optional `unit` for the € suffix.
+  - The filters panel no longer shifts up 64px over the "Existe um total…" line. Its
+    oversized 128px top/bottom padding was cut to 64px, and the results column lost the
+    matching offset, so "Ordenar por" lines up with the panel top.
+  - The search intro text wraps at half width, the same as the section title.
+
+- **fix(datastories): wire the Portugal 2030 projects page to its "Nesta página" index**
+  - The index anchors pointed at sections with no `id`. The "em números" and "Pesquisar"
+    sections now take the slug of their CMS title, which is exactly what the anchors use.
+  - The related datastories and associated datasets were fetched but never rendered; they
+    now render through the existing `RelatedDatastories` / `Sources` sections when the CMS
+    fills them in.
+  - An empty search now shows the CMS "no results" block, and that block skips the image
+    when the CMS has none instead of requesting `/assets/undefined`.
+
+- **fix(datastories): the Portugal 2030 project search actually searches**
+  - The projects datastory rendered the filters and pagination but never fired a request:
+    the store only runs its first search from the search input, and the page did not render
+    one. The search block (name / operation-code radios, input with the CMS label, total of
+    funded projects) now sits under the "Pesquisar projetos" text, as in the design, and the
+    results list is rendered between the applied filters and the pagination.
+  - The "Objetivo específico" filter called `/api/...specific-objectives`, which here goes to
+    the udata backend; it now uses a new `internal-api` route backed by Squidex.
+  - "Descarregar Listagem" exports the filtered results to CSV again, with the source and
+    update date from the dataset source info. The open-data modal is not ported yet.
+  - The `searchBenProj.*` labels and the other strings these components use were missing from
+    `common.json`, so the page showed raw translation keys.
+
 - **fix(organizations): the discussions tab shows discussions about the organization itself**
   - The tab asked the API for every discussion on everything the organization published, so on
     the INE it listed threads opened on datasets and APIs — "ANO", "Utilização da API dados.gov"
@@ -1179,7 +1211,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     `ReuseDetailClient`, `PublicProfileClient`) — all now consume the shared
     `formatDateLong(dateStr, i18n.language)`, so the long date follows the
     active locale instead of being hardcoded to Portuguese.
-    
+
 - **fix(routing): retire the legacy `/pages` URL segment for good** [#483](https://github.com/amagovpt/dadosgov-fe/pull/483)
   - Public routes moved from `src/app/pages/...` to the `[locale]/(pages)`
     route group a while ago, so URLs no longer carry `/pages` — but old links

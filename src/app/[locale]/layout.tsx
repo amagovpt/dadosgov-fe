@@ -18,6 +18,7 @@ import { getInitialSession } from "@/service/api/auth/server";
 import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
+import { LoaderProvider } from "@/providers/LoaderProvider";
 import KarmaAnalytics from "@/Scripts/Karma";
 
 const namespaces = [
@@ -49,7 +50,7 @@ const namespaces = [
   "admin-topics",
   "admin-logs",
   "admin-editorial",
-  "admin-statistics"
+  "admin-statistics",
 ];
 
 export async function generateMetadata({
@@ -114,16 +115,18 @@ export default async function RootLayout({
             <ApolloWrapper>
               <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
                 <ToastProviderWrapper>
-                  <ApiErrorProvider>
-                    <PopupProviderWrapper>
-                      <ShellProvider headerNavigation={headerNavigation}>
-                        <ScrollTop />
-                        {children}
-                        <Footer data={footerData} />
-                        <KarmaAnalytics />
-                      </ShellProvider>
-                    </PopupProviderWrapper>
-                  </ApiErrorProvider>
+                  <LoaderProvider>
+                    <ApiErrorProvider>
+                      <PopupProviderWrapper>
+                        <ShellProvider headerNavigation={headerNavigation}>
+                          <ScrollTop />
+                          {children}
+                          <Footer data={footerData} />
+                          <KarmaAnalytics />
+                        </ShellProvider>
+                      </PopupProviderWrapper>
+                    </ApiErrorProvider>
+                  </LoaderProvider>
                 </ToastProviderWrapper>
               </TranslationsProvider>
             </ApolloWrapper>
