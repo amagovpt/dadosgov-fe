@@ -120,7 +120,7 @@ export default async function ProjectPage({
           ...hero.breadcrumbs,
           {
             url: `/datastories/portugal-2030/projetos-do-portugal-2030/${id}`,
-            label: projectSheet.id,
+            label: decodedId,
           },
         ]}
         pretitle={hero.title}
