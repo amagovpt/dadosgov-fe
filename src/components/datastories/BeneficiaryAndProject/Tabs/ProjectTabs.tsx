@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode, SyntheticEvent } from "react";
 import { Tab, TabBody, TabHeader, Tabs } from "@ama-pt/agora-design-system";
 
 type ProjectTabItem = {
@@ -17,19 +17,25 @@ type ProjectTabsProps = {
 
 export default function ProjectTabs({ tabs }: ProjectTabsProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  // Bumped on every scroll request so the scroll effect also runs when the requested
+  // tab is already the active one (e.g. `#beneficiarios`, the first tab).
+  const [scrollRequest, setScrollRequest] = useState(0);
   const pendingScrollIdRef = useRef<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   const tabIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
 
+  // Selects the tab through the controlled `active` prop rather than clicking its header:
+  // on the first render the ADS has not built the header buttons yet (it fills them from
+  // state set in an effect), so a DOM click there finds nothing.
   const activateTabByHash = useCallback(
     (hash: string) => {
       const hashIndex = tabIds.indexOf(hash);
       if (hashIndex < 0) return;
 
       pendingScrollIdRef.current = hash;
-      const tabButtons = rootRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
-      tabButtons?.[hashIndex]?.click();
+      setActiveIndex(hashIndex);
+      setScrollRequest((n) => n + 1);
     },
     [tabIds]
   );
@@ -61,6 +67,9 @@ export default function ProjectTabs({ tabs }: ProjectTabsProps) {
     const hash = window.location.hash.replace("#", "");
     if (!hash) return;
 
+    // The hash only exists in the browser, so it cannot seed the initial state without
+    // a hydration mismatch; reading it once after mount is the intended sync.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     activateTabByHash(hash);
   }, [activateTabByHash]);
 
@@ -102,15 +111,38 @@ export default function ProjectTabs({ tabs }: ProjectTabsProps) {
     }, 50);
 
     return () => window.clearInterval(intervalId);
-  }, [activeIndex, tabs]);
+  }, [activeIndex, tabs, scrollRequest]);
+
+  // The ADS Tabs re-announces the `active` tab through onTabActivation on mount and
+  // whenever its children change, so an activation alone does not mean the user picked
+  // a tab. Only a recent pointer/keyboard interaction on a tab header counts; otherwise
+  // the scroll stays whatever a URL hash requested (or none, keeping the page in place).
+  const lastHeaderInteractionRef = useRef(0);
+
+  const markHeaderInteraction = (event: SyntheticEvent) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('[role="tab"], .tab-list-item')) {
+      lastHeaderInteractionRef.current = Date.now();
+    }
+  };
 
   const handleTabClick = (index: number) => {
-    pendingScrollIdRef.current = tabs[index]?.id ?? null;
+    const fromUser = Date.now() - lastHeaderInteractionRef.current < 1000;
+    lastHeaderInteractionRef.current = 0;
+
+    if (fromUser) {
+      pendingScrollIdRef.current = tabs[index]?.id ?? null;
+      setScrollRequest((n) => n + 1);
+    }
     setActiveIndex(index);
   };
 
   return (
-    <div ref={rootRef}>
+    <div
+      ref={rootRef}
+      onPointerDownCapture={markHeaderInteraction}
+      onKeyDownCapture={markHeaderInteraction}
+    >
       <Tabs onTabActivation={handleTabClick}>
         {tabs.map((tab, index) => (
           <Tab key={tab.id} active={index === activeIndex}>
