@@ -8,10 +8,13 @@ import { PendingResourceTable } from "@/components/admin/FileUploadModal/Pending
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import type { ResourceType } from "@/service/types/catalog";
 import type { AdminHelpBlock } from "@/service/types/admin/common";
+import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
+import { DatasetWizardHelp } from "./DatasetWizardHelp";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export interface DatasetWizardStep3Props {
   introduction?: AdminHelpBlock;
+  auxiliaryItems?: AuxiliarItem[];
   uploadedFiles: File[];
   setUploadedFiles: Dispatch<SetStateAction<File[]>>;
   resourceUrls: string[];
@@ -32,6 +35,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
   const {
     uploadedFiles,
     introduction,
+    auxiliaryItems,
     setUploadedFiles,
     resourceUrls,
     setResourceUrls,
@@ -84,6 +88,9 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
           }}
           allowedExtensions={allowedExtensions}
         />
+        {auxiliaryItems?.map((item, index) => (
+          <DatasetWizardHelp key={index} item={item} />
+        ))}
         {(uploadedFiles.length > 0 || resourceUrls.length > 0) && (
           <PendingResourceTable
             files={uploadedFiles}

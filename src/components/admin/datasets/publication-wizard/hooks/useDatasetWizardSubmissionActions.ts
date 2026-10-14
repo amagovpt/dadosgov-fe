@@ -25,6 +25,7 @@ import {
 
 interface UseDatasetWizardSubmissionActionsParams {
   currentStep: number;
+  optionalContacts?: boolean;
   datasetId?: string | null;
   createdDataset: Dataset | null;
   datasetTitle: string;
@@ -49,16 +50,14 @@ interface UseDatasetWizardSubmissionActionsParams {
   setSelectedSpatialZonesValue: React.Dispatch<React.SetStateAction<string | null>>;
   setDraftContacts: React.Dispatch<React.SetStateAction<DatasetWizardDraftContact[]>>;
   setResourceUrls: React.Dispatch<React.SetStateAction<string[]>>;
-  setResourceMetadata: React.Dispatch<
-    React.SetStateAction<Record<string, PendingResourceMeta>>
-  >;
+  setResourceMetadata: React.Dispatch<React.SetStateAction<Record<string, PendingResourceMeta>>>;
   setShowFileError: React.Dispatch<React.SetStateAction<boolean>>;
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
   setApiError: React.Dispatch<React.SetStateAction<string | null>>;
   setErrors: (
     next:
       | FormErrors<DatasetFormField>
-      | ((previous: FormErrors<DatasetFormField>) => FormErrors<DatasetFormField>),
+      | ((previous: FormErrors<DatasetFormField>) => FormErrors<DatasetFormField>)
   ) => void;
   resetErrors: () => void;
   focusFirstError: () => void;
@@ -92,7 +91,9 @@ function flattenApiError(errorData: Record<string, unknown>): string {
   const flattenValue = (value: unknown): string => {
     if (Array.isArray(value)) return value.map(flattenValue).join("; ");
     if (value && typeof value === "object") {
-      return Object.values(value as Record<string, unknown>).map(flattenValue).join("; ");
+      return Object.values(value as Record<string, unknown>)
+        .map(flattenValue)
+        .join("; ");
     }
     return String(value);
   };
@@ -104,6 +105,7 @@ function flattenApiError(errorData: Record<string, unknown>): string {
 
 export function useDatasetWizardSubmissionActions({
   currentStep,
+  optionalContacts = false,
   datasetId,
   createdDataset,
   datasetTitle,
@@ -143,27 +145,27 @@ export function useDatasetWizardSubmissionActions({
   validationMessages,
   restoreErrors,
 }: UseDatasetWizardSubmissionActionsParams) {
-  async function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>) {
+  async function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>, saveAsDraft = false) {
     const { errors, draftErrors } = validateDatasetDetails(
       {
         producer: selectedProducerRef.current,
         title: datasetTitle,
         description: datasetDescription,
-        frequency: selectedFrequencyRef.current,
+        frequency: selectedFrequencyRef.current || (saveAsDraft ? "unknown" : ""),
         temporalStart,
         temporalEnd,
-        selectedProducer,
+        selectedProducer: optionalContacts ? "user" : selectedProducer,
         selectedContactPointIds,
         draftContacts,
       },
-      validationMessages,
+      validationMessages
     );
 
     if (errors.contactDrafts) {
       setDraftContacts((previousDrafts) =>
         previousDrafts.map((draft) =>
-          draftErrors[draft.id] ? { ...draft, errors: draftErrors[draft.id] } : draft,
-        ),
+          draftErrors[draft.id] ? { ...draft, errors: draftErrors[draft.id] } : draft
+        )
       );
     }
 
@@ -192,7 +194,7 @@ export function useDatasetWizardSubmissionActions({
         shortDescription: datasetShortDescription,
         producer: selectedProducerRef.current,
         license: selectedLicenseRef.current,
-        frequency: selectedFrequencyRef.current,
+        frequency: selectedFrequencyRef.current || (saveAsDraft ? "unknown" : ""),
         keywords: selectedKeywordsRef.current,
         contactPointIds: selectedContactPointIds,
         temporalStart,
@@ -225,8 +227,8 @@ export function useDatasetWizardSubmissionActions({
             zoneDetails
               .filter((zone) => selectedZoneSet.has(zone.id))
               .map((zone) => (typeof zone.level === "string" ? zone.level.trim() : ""))
-              .filter(Boolean),
-          ),
+              .filter(Boolean)
+          )
         );
         if (levels.length === 1) {
           resolvedGranularity = levels[0];
@@ -253,7 +255,10 @@ export function useDatasetWizardSubmissionActions({
         : await createDataset(payload);
 
       setCreatedDataset(dataset);
-      if (onDatasetCreated) {
+      if (saveAsDraft) {
+        if (onComplete) onComplete();
+        else finishWizard();
+      } else if (onDatasetCreated) {
         onDatasetCreated(dataset.id);
       } else {
         navigateToStep(currentStep + 1, dataset.id);
@@ -275,7 +280,7 @@ export function useDatasetWizardSubmissionActions({
       const oldUrl = key.slice(4);
       if (oldUrl !== newUrl) {
         setResourceUrls((previousUrls) =>
-          previousUrls.map((url) => (url === oldUrl ? newUrl : url)),
+          previousUrls.map((url) => (url === oldUrl ? newUrl : url))
         );
         setResourceMetadata((previousMetadata) => {
           const updated = { ...previousMetadata, [`url-${newUrl}`]: meta };
@@ -356,7 +361,7 @@ export function useDatasetWizardSubmissionActions({
       if (error instanceof Error) {
         console.error("Error uploading resources:", error.message, error.stack);
         setApiError(
-          restoreErrors.saveResource.replace("{{message}}", translateUploadError(error.message)),
+          restoreErrors.saveResource.replace("{{message}}", translateUploadError(error.message))
         );
       } else {
         const err = error as { status?: number; data?: Record<string, unknown> };
@@ -364,7 +369,7 @@ export function useDatasetWizardSubmissionActions({
         if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
           const message = (err.data.message as string) || flattenApiError(err.data);
           setApiError(
-            restoreErrors.saveResource.replace("{{message}}", translateUploadError(message)),
+            restoreErrors.saveResource.replace("{{message}}", translateUploadError(message))
           );
         } else {
           const statusHint = err.status ? ` (${err.status})` : "";

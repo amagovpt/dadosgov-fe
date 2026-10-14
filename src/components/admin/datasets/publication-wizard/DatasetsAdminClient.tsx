@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Icon, StatusCard, DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
 import {
@@ -43,9 +43,17 @@ import { useDatasetWizardContactActions } from "./hooks/useDatasetWizardContactA
 import { useDatasetWizardSubmissionActions } from "./hooks/useDatasetWizardSubmissionActions";
 import { type DatasetFormField } from "./datasetFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+import { Button } from "@ama-pt/agora-design-system";
+import { AdminStepper } from "@/components/admin/AdminStepper";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { localizeHref } from "@/utils/localizeHref";
+import { splitLocale } from "@/utils/stripLocale";
+import { validateDatasetDetails } from "./datasetFormModel";
+import styles from "./datasetWizard.module.css";
 
 interface DatasetsAdminClientProps {
   pageContent: BoDatasetsPage;
+  redesigned?: boolean;
   currentStep?: number;
   datasetId?: string | null;
   onNextStep?: () => void;
@@ -56,6 +64,7 @@ interface DatasetsAdminClientProps {
 
 export default function DatasetsAdminClient({
   pageContent,
+  redesigned = false,
   currentStep: controlledCurrentStep,
   datasetId,
   onNextStep,
@@ -65,12 +74,15 @@ export default function DatasetsAdminClient({
 }: DatasetsAdminClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const router = useRouter();
+  const { locale } = splitLocale(usePathname());
   const { user } = useAuth();
-  const [internalCurrentStep, setInternalCurrentStep] = useState(0);
+  const [internalCurrentStep, setInternalCurrentStep] = useState(2);
   const currentStep = controlledCurrentStep ?? internalCurrentStep;
   const handleNextStep = onNextStep ?? (() => setInternalCurrentStep((step) => step + 1));
   const handlePreviousStep =
     onPreviousStep ?? (() => setInternalCurrentStep((step) => Math.max(0, step - 1)));
+
+  const isDetailsStep = redesigned ? currentStep <= 2 : currentStep === 2;
 
   // Form state
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -85,26 +97,32 @@ export default function DatasetsAdminClient({
   const selectedKeywordsRef = useRef("");
   const spatialCoverageRef = useRef("");
   const spatialGranularityRef = useRef("");
+  const [selectedLicenseValue, setSelectedLicenseValue] = useState<string | null>(null);
+  const [selectedFrequencyValue, setSelectedFrequencyValue] = useState<string | null>(null);
+  const [selectedGranularityValue, setSelectedGranularityValue] = useState<string | null>(null);
   const [temporalStart, setTemporalStart] = useState("");
   const [temporalEnd, setTemporalEnd] = useState("");
-  const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
-    useFormErrors<DatasetFormField>();
+  const {
+    errors: formErrors,
+    setErrors,
+    clearError,
+    resetErrors,
+    focusFirstError,
+  } = useFormErrors<DatasetFormField>();
   const [selectedProducer, setSelectedProducer] = useState("");
   const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
   const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
 
   const draftIdRef = useRef(0);
-  const [draftContacts, setDraftContacts] = useState<DatasetWizardDraftContact[]>([
-    { id: 0, name: "", email: "", link: "", saved: false, errors: {} },
-  ]);
+  const [draftContacts, setDraftContacts] = useState<DatasetWizardDraftContact[]>(
+    redesigned ? [] : [{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]
+  );
 
   // Step 3 state
   const [resourceUrls, setResourceUrls] = useState<string[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
   const [allowedExtensions, setAllowedExtensions] = useState<string[] | null>(null);
-  const [resourceMetadata, setResourceMetadata] = useState<Record<string, PendingResourceMeta>>(
-    {},
-  );
+  const [resourceMetadata, setResourceMetadata] = useState<Record<string, PendingResourceMeta>>({});
 
   // API state
   const [createdDataset, setCreatedDataset] = useState<Dataset | null>(null);
@@ -127,16 +145,17 @@ export default function DatasetsAdminClient({
   const producerDefaultValue =
     selectedProducer || createdDataset?.organization?.id || (createdDataset ? "user" : "");
   const licenseDefaultValue =
-    createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
-  const frequencyDefaultValue = createdDataset?.frequency || "";
+    selectedLicenseValue ?? createdDataset?.license ?? (licenses.length > 0 ? "notspecified" : "");
+  const frequencyDefaultValue = selectedFrequencyValue ?? createdDataset?.frequency ?? "";
   const keywordsDefaultValue = selectedKeywordsValue || (createdDataset?.tags?.join(",") ?? "");
   const selectedKeywords = keywordsDefaultValue
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
   const spatialCoverageDefaultValue =
-    selectedSpatialZonesValue ?? (createdDataset?.spatial?.zones?.join(",") ?? "");
-  const spatialGranularityDefaultValue = createdDataset?.spatial?.granularity ?? "";
+    selectedSpatialZonesValue ?? createdDataset?.spatial?.zones?.join(",") ?? "";
+  const spatialGranularityDefaultValue =
+    selectedGranularityValue ?? createdDataset?.spatial?.granularity ?? "";
 
   const handleSpatialCoverageChange = useCallback((value: string) => {
     const normalized = value
@@ -150,7 +169,9 @@ export default function DatasetsAdminClient({
     setSpatialZones((prev) => {
       // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
-      const additions = spatialZoneSearchRef.current.filter((z) => ids.has(z.id) && !seen.has(z.id));
+      const additions = spatialZoneSearchRef.current.filter(
+        (z) => ids.has(z.id) && !seen.has(z.id)
+      );
       const kept = prev.filter((z) => ids.has(z.id));
       if (additions.length === 0 && kept.length === prev.length) return prev;
       return [...kept, ...additions];
@@ -169,7 +190,7 @@ export default function DatasetsAdminClient({
       )),
     ];
     return <DropdownSection name="identity">{options}</DropdownSection>;
-  }, [user, producerDefaultValue]);
+  }, [user, producerDefaultValue, t]);
 
   const licenseOptions = useMemo(() => {
     const options = licenses.map((license) => (
@@ -210,7 +231,7 @@ export default function DatasetsAdminClient({
       return true;
     });
     const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
+      (keyword) => !seen.has(keyword.toLowerCase())
     );
     const showCreate =
       trimmed.length > 0 &&
@@ -259,7 +280,7 @@ export default function DatasetsAdminClient({
       (selectedSpatialZonesValue ?? "")
         .split(",")
         .map((id) => id.trim())
-        .filter(Boolean),
+        .filter(Boolean)
     );
     const options = allSpatialZones.map((zone) => (
       <DropdownOption key={zone.id} value={zone.id} selected={selectedIds.has(zone.id)}>
@@ -270,7 +291,7 @@ export default function DatasetsAdminClient({
       options.push(
         <DropdownOption key="empty" value="">
           —
-        </DropdownOption>,
+        </DropdownOption>
       );
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
@@ -293,10 +314,8 @@ export default function DatasetsAdminClient({
         value={granularity.id}
         selected={spatialGranularityDefaultValue === granularity.id}
       >
-        {getGranularityLabel(
-          granularity.id,
-          granularity.name,
-          (key, options) => t(`datasets:${key}`, options)
+        {getGranularityLabel(granularity.id, granularity.name, (key, options) =>
+          t(`datasets:${key}`, options)
         )}
       </DropdownOption>
     ));
@@ -403,7 +422,21 @@ export default function DatasetsAdminClient({
         try {
           const dataset = await fetchDataset(datasetId as string);
           setCreatedDataset(dataset);
-          if (dataset.acronym) setDatasetAcronym(dataset.acronym);
+          setDatasetTitle(dataset.title || "");
+          setDatasetAcronym(dataset.acronym || "");
+          setDatasetDescription(dataset.description || "");
+          const producer = dataset.organization?.id || "user";
+          setSelectedProducer(producer);
+          selectedProducerRef.current = producer;
+          selectedLicenseRef.current = dataset.license || "";
+          selectedFrequencyRef.current = dataset.frequency || "";
+          const keywords = dataset.tags?.join(",") || "";
+          setSelectedKeywordsValue(keywords);
+          selectedKeywordsRef.current = keywords;
+          setTemporalStart(dataset.temporal_coverage?.start?.slice(0, 10) || "");
+          setTemporalEnd(dataset.temporal_coverage?.end?.slice(0, 10) || "");
+          setSelectedContactPointIds(dataset.contact_points?.map((contact) => contact.id) || []);
+          setDraftContacts([]);
         } catch (error) {
           console.error("Error restoring dataset:", error);
           setApiError(t("admin-datasets:form.restoreError"));
@@ -424,9 +457,12 @@ export default function DatasetsAdminClient({
 
   const handleProducerFieldChange = useCallback(
     (value: string) => {
+      if (value === selectedProducer) return;
       setOrgContactPoints([]);
       setSelectedContactPointIds([]);
-      setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
+      setDraftContacts(
+        redesigned ? [] : [{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]
+      );
       setSelectedProducer(value);
       if (value) {
         setErrors((prev) => {
@@ -436,7 +472,7 @@ export default function DatasetsAdminClient({
         });
       }
     },
-    [setErrors],
+    [setErrors, redesigned, selectedProducer]
   );
 
   const handleSpatialZonesSearchQuery = useCallback((q: string) => {
@@ -503,7 +539,7 @@ export default function DatasetsAdminClient({
         setKeywordSearch("");
       }
     },
-    [tags, tagSearch],
+    [tags, tagSearch]
   );
 
   const handleKeywordTagRemove = useCallback(
@@ -514,7 +550,7 @@ export default function DatasetsAdminClient({
       setSelectedKeywordsValue(next);
       selectedKeywordsRef.current = next;
     },
-    [selectedKeywords],
+    [selectedKeywords]
   );
 
   const {
@@ -525,6 +561,7 @@ export default function DatasetsAdminClient({
     handleStep3Next,
   } = useDatasetWizardSubmissionActions({
     currentStep,
+    optionalContacts: redesigned,
     datasetId,
     createdDataset,
     datasetTitle,
@@ -560,10 +597,12 @@ export default function DatasetsAdminClient({
     onNextStep: handleNextStep,
     onComplete,
     navigateToStep: (nextStep, nextDatasetId) => {
-      router.push(`/admin/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`);
+      router.push(
+        localizeHref(`/admin/me/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`, locale)
+      );
     },
     finishWizard: () => {
-      router.push("/admin/me/datasets");
+      router.push(localizeHref("/admin/me/datasets", locale));
     },
     validationMessages: {
       producerRequired: t("admin-datasets:form.fieldRequired"),
@@ -588,9 +627,47 @@ export default function DatasetsAdminClient({
     },
   });
 
-  const auxiliarItemsStep2 = getDatasetAuxiliarItems({
-    items: pageContent.createAuxiliaryItems,
-  });
+  const handleIdentityNext = () => {
+    const { errors } = validateDatasetDetails(
+      {
+        producer: selectedProducerRef.current,
+        title: datasetTitle,
+        description: datasetDescription,
+        frequency: "unknown",
+        temporalStart: "",
+        temporalEnd: "",
+        selectedProducer: "user",
+        selectedContactPointIds: [],
+        draftContacts: [],
+      },
+      {
+        producerRequired: t("admin-datasets:form.fieldRequired"),
+        titleRequired: t("admin-datasets:form.fieldRequired"),
+        titleTooLong: t("admin-datasets:form.titleTooLong"),
+        descriptionRequired: t("admin-datasets:form.fieldRequired"),
+        frequencyRequired: "",
+        invalidDate: "",
+        invalidRange: "",
+        contactDraftRequired: "",
+      }
+    );
+    if (Object.keys(errors).length) {
+      setErrors(errors);
+      focusFirstError();
+      return;
+    }
+    resetErrors();
+    setApiError(null);
+    handleNextStep();
+  };
+
+  const auxiliarItemsStep2 = redesigned
+    ? (pageContent.createAuxiliaryItems ?? []).map((item) => ({
+        title: item.title,
+        content: formatHtmlParagraphs(item.description),
+        hidden: item.enabled === false,
+      }))
+    : getDatasetAuxiliarItems({ items: pageContent.createAuxiliaryItems });
 
   const auxiliarItemsStep3 = getResourceDatasetAuxiliarItems(pageContent.resourceAuxiliaryItems);
 
@@ -599,122 +676,181 @@ export default function DatasetsAdminClient({
 
   return (
     <>
-      {/* Main content area: form + auxiliar sidebar */}
-    <div className="flex flex-col gap-32 min-[1025px]:flex-row">
-      {/* Left: Form */}
-      <div className="flex min-w-0 flex-1 flex-col gap-24">
-        {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
+      {redesigned && (
+        <>
+          <div className={styles.toolbar}>
+            <Button
+              type="button"
+              appearance="link"
+              variant="danger"
+              hasIcon
+              leadingIcon="agora-line-trash"
+              disabled={isSubmitting}
+              onClick={() => {
+                if (onComplete) onComplete();
+                else router.push(localizeHref("/admin/me/datasets", locale));
+              }}
+            >
+              {t("admin-datasets:form.cancelCreation")}
+            </Button>
+            <span className={styles.actionDivider} aria-hidden="true" />
+            <Button
+              type="button"
+              appearance="link"
+              variant="primary"
+              hasIcon
+              leadingIcon="agora-line-download"
+              disabled={isSubmitting}
+              onClick={() => {
+                if (isDetailsStep) void handleStep2Next(undefined, true);
+                else void handleSaveDraft();
+              }}
+            >
+              {isSubmitting
+                ? t("admin-datasets:form.savingDraft")
+                : t("admin-datasets:form.saveCreationDraft")}
+            </Button>
+          </div>
+          <div className={styles.progress}>
+            <AdminStepper
+              currentStep={currentStep}
+              totalSteps={4}
+              labelFormat="de"
+              appearance="form"
+              stepTitle={t(
+                `admin-datasets:form.${["identityStepTitle", "coverageStepTitle", "resourcesStepTitle", "publishStepTitle"][currentStep - 1]}`
+              )}
+            />
+          </div>
+        </>
+      )}
+      <div className={redesigned ? styles.body : "flex flex-col gap-32 min-[1025px]:flex-row"}>
+        {/* Left: Form */}
+        <div className="flex min-w-0 flex-1 flex-col gap-24">
+          {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
-        {currentStep === 2 && (
-          <DatasetWizardStep2
-            introduction={pageContent.publicationIntroduction}
-            router={router}
-            user={user}
-            producerDefaultValue={producerDefaultValue}
-            selectedProducerRef={selectedProducerRef}
-            onProducerChange={handleProducerFieldChange}
-            producerOptions={producerOptions}
-            formErrors={formErrors}
-            datasetTitle={datasetTitle}
-            onDatasetTitleChange={(e) => {
-              setDatasetTitle(e.target.value);
-              if (e.target.value.trim()) clearError("datasetTitle");
-              clearError("datasetTitleTooLong");
-            }}
-            datasetAcronym={datasetAcronym}
-            onDatasetAcronymChange={(e) => setDatasetAcronym(e.target.value)}
-            datasetDescription={datasetDescription}
-            onDatasetDescriptionChange={(e) => {
-              setDatasetDescription(e.target.value);
-              if (e.target.value.trim()) clearError("datasetDescription");
-            }}
-            keywordsDefaultValue={keywordsDefaultValue}
-            selectedKeywordsRef={selectedKeywordsRef}
-            onKeywordsSearch={handleKeywordsSearchInput}
-            onKeywordsValueChange={handleKeywordsSelectValueChange}
-            tagOptions={tagOptions}
-            selectedKeywords={selectedKeywords}
-            onKeywordTagRemove={handleKeywordTagRemove}
-            licenseDefaultValue={licenseDefaultValue}
-            selectedLicenseRef={selectedLicenseRef}
-            licenseOptions={licenseOptions}
-            selectedProducer={selectedProducer}
-            orgContactPoints={orgContactPoints}
-            selectedContactPointIds={selectedContactPointIds}
-            onToggleExistingContact={toggleExistingContact}
-            draftContacts={draftContacts}
-            onDraftFieldChange={updateDraftContactField}
-            onSaveContactDraft={handleSaveContactDraft}
-            onAddDraftContactRow={handleAddDraftContactRow}
-            frequencyDefaultValue={frequencyDefaultValue}
-            selectedFrequencyRef={selectedFrequencyRef}
-            frequencyOptions={frequencyOptions}
-            temporalStart={temporalStart}
-            temporalEnd={temporalEnd}
-            onTemporalStartChange={(e) => setTemporalStart(e.target.value)}
-            onTemporalEndChange={(e) => setTemporalEnd(e.target.value)}
-            clearTemporalCoverageErrors={clearTemporalCoverageErrors}
-            spatialCoverageDefaultValue={spatialCoverageDefaultValue}
-            spatialCoverageRef={spatialCoverageRef}
-            onSpatialCoverageChange={handleSpatialCoverageChange}
-            onSpatialZoneSearch={handleSpatialZonesSearchQuery}
-            spatialCoverageOptions={spatialCoverageOptions}
-            selectedZoneObjects={selectedZoneObjects}
-            onRemoveSpatialZoneTag={handleRemoveSpatialZoneTag}
-            spatialGranularityDefaultValue={spatialGranularityDefaultValue}
-            spatialGranularityRef={spatialGranularityRef}
-            granularityOptions={granularityOptions}
-            onPreviousStep={handlePreviousStep}
-            onStep2Next={handleStep2Next}
-            isSubmitting={isSubmitting}
-          />
-        )}
+          {isDetailsStep && (
+            <DatasetWizardStep2
+              redesigned={redesigned}
+              detailsSection={
+                redesigned ? (currentStep === 1 ? "identity" : "coverage") : undefined
+              }
+              auxiliaryItems={auxiliarItemsStep2}
+              introduction={pageContent.publicationIntroduction}
+              router={router}
+              user={user}
+              producerDefaultValue={producerDefaultValue}
+              selectedProducerRef={selectedProducerRef}
+              onProducerChange={handleProducerFieldChange}
+              producerOptions={producerOptions}
+              formErrors={formErrors}
+              datasetTitle={datasetTitle}
+              onDatasetTitleChange={(e) => {
+                setDatasetTitle(e.target.value);
+                if (e.target.value.trim()) clearError("datasetTitle");
+                clearError("datasetTitleTooLong");
+              }}
+              datasetAcronym={datasetAcronym}
+              onDatasetAcronymChange={(e) => setDatasetAcronym(e.target.value)}
+              datasetDescription={datasetDescription}
+              onDatasetDescriptionChange={(e) => {
+                setDatasetDescription(e.target.value);
+                if (e.target.value.trim()) clearError("datasetDescription");
+              }}
+              keywordsDefaultValue={keywordsDefaultValue}
+              selectedKeywordsRef={selectedKeywordsRef}
+              onKeywordsSearch={handleKeywordsSearchInput}
+              onKeywordsValueChange={handleKeywordsSelectValueChange}
+              tagOptions={tagOptions}
+              selectedKeywords={selectedKeywords}
+              onKeywordTagRemove={handleKeywordTagRemove}
+              licenseDefaultValue={licenseDefaultValue}
+              selectedLicenseRef={selectedLicenseRef}
+              onLicenseChange={setSelectedLicenseValue}
+              licenseOptions={licenseOptions}
+              selectedProducer={selectedProducer}
+              orgContactPoints={orgContactPoints}
+              selectedContactPointIds={selectedContactPointIds}
+              onToggleExistingContact={toggleExistingContact}
+              draftContacts={draftContacts}
+              onDraftFieldChange={updateDraftContactField}
+              onSaveContactDraft={handleSaveContactDraft}
+              onAddDraftContactRow={handleAddDraftContactRow}
+              frequencyDefaultValue={frequencyDefaultValue}
+              selectedFrequencyRef={selectedFrequencyRef}
+              onFrequencyChange={(value) => {
+                setSelectedFrequencyValue(value);
+                if (value) clearError("datasetFrequency");
+              }}
+              frequencyOptions={frequencyOptions}
+              temporalStart={temporalStart}
+              temporalEnd={temporalEnd}
+              onTemporalStartChange={(e) => setTemporalStart(e.target.value)}
+              onTemporalEndChange={(e) => setTemporalEnd(e.target.value)}
+              clearTemporalCoverageErrors={clearTemporalCoverageErrors}
+              spatialCoverageDefaultValue={spatialCoverageDefaultValue}
+              spatialCoverageRef={spatialCoverageRef}
+              onSpatialCoverageChange={handleSpatialCoverageChange}
+              onSpatialZoneSearch={handleSpatialZonesSearchQuery}
+              spatialCoverageOptions={spatialCoverageOptions}
+              selectedZoneObjects={selectedZoneObjects}
+              onRemoveSpatialZoneTag={handleRemoveSpatialZoneTag}
+              spatialGranularityDefaultValue={spatialGranularityDefaultValue}
+              spatialGranularityRef={spatialGranularityRef}
+              onGranularityChange={setSelectedGranularityValue}
+              granularityOptions={granularityOptions}
+              onPreviousStep={handlePreviousStep}
+              onStep2Next={redesigned && currentStep === 1 ? handleIdentityNext : handleStep2Next}
+              isSubmitting={isSubmitting}
+            />
+          )}
 
-        {currentStep === 3 && (
-          <DatasetWizardStep3
-            introduction={pageContent.resourceIntroduction}
-            uploadedFiles={uploadedFiles}
-            setUploadedFiles={setUploadedFiles}
-            resourceUrls={resourceUrls}
-            setResourceUrls={setResourceUrls}
-            showFileError={showFileError}
-            setShowFileError={setShowFileError}
-            allowedExtensions={allowedExtensions}
-            resourceTypes={resourceTypes}
-            resourceMetadata={resourceMetadata}
-            onEditMeta={updateResourceMetadata}
-            onPreviousStep={handlePreviousStep}
-            onStep3Next={handleStep3Next}
-            isSubmitting={isSubmitting}
-          />
-        )}
+          {currentStep === 3 && (
+            <DatasetWizardStep3
+              introduction={pageContent.resourceIntroduction}
+              auxiliaryItems={redesigned ? auxiliarItemsStep3 : undefined}
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles}
+              resourceUrls={resourceUrls}
+              setResourceUrls={setResourceUrls}
+              showFileError={showFileError}
+              setShowFileError={setShowFileError}
+              allowedExtensions={allowedExtensions}
+              resourceTypes={resourceTypes}
+              resourceMetadata={resourceMetadata}
+              onEditMeta={updateResourceMetadata}
+              onPreviousStep={handlePreviousStep}
+              onStep3Next={handleStep3Next}
+              isSubmitting={isSubmitting}
+            />
+          )}
 
-        {currentStep === 4 && (
-          <DatasetWizardStep4
-            publishStepCard={pageContent.publishStepCard}
-            createdDataset={createdDataset}
-            datasetTitle={datasetTitle}
-            datasetDescription={datasetDescription}
-            onPublish={handlePublish}
-            onSaveDraft={handleSaveDraft}
-            isSubmitting={isSubmitting}
-          />
+          {currentStep === 4 && (
+            <DatasetWizardStep4
+              publishStepCard={pageContent.publishStepCard}
+              createdDataset={createdDataset}
+              datasetTitle={datasetTitle}
+              datasetDescription={datasetDescription}
+              onPublish={handlePublish}
+              onSaveDraft={handleSaveDraft}
+              isSubmitting={isSubmitting}
+            />
+          )}
+        </div>
+
+        {/* Right: Auxiliar sidebar */}
+        {!redesigned && currentStep !== 4 && auxiliarItems.length > 0 && (
+          <aside className="w-[360px] max-w-full shrink-0">
+            <div className="bg-neutral-100 p-32">
+              <div className="admin-page__auxiliar-header">
+                <Icon name="agora-line-question-mark" className="h-24 w-24" />
+                <h2 className="admin-page__auxiliar-title">{t("admin-common:auxiliary.title")}</h2>
+              </div>
+              <AuxiliarList items={auxiliarItems} />
+            </div>
+          </aside>
         )}
       </div>
-
-      {/* Right: Auxiliar sidebar */}
-      {currentStep !== 4 && auxiliarItems.length > 0 && (
-        <aside className="w-[360px] max-w-full shrink-0">
-          <div className="bg-neutral-100 p-32">
-            <div className="admin-page__auxiliar-header">
-              <Icon name="agora-line-question-mark" className="h-24 w-24" />
-              <h2 className="admin-page__auxiliar-title">{t("admin-common:auxiliary.title")}</h2>
-            </div>
-            <AuxiliarList items={auxiliarItems} />
-          </div>
-        </aside>
-      )}
-    </div>
     </>
   );
 }
