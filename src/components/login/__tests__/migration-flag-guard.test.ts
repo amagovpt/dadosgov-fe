@@ -32,19 +32,24 @@ const GUARDED = readdirSync(path.join(process.cwd(), LOGIN_DIR))
   .map((name) => `${LOGIN_DIR}/${name}`);
 
 /**
- * The environment variables the login tree is allowed to read. Asserting the
- * exact set, rather than banning a spelling of one name, is what makes this a
- * guard instead of a reminder: any new configuration read in this tree fails
- * here and has to be justified in review — including a migration flag under a
- * name nobody has thought of yet (NEXT_PUBLIC_FORCE_CMD_ONLY, and so on).
- *
- * Both entries are deliberate and neither decides migration:
- *  - NEXT_PUBLIC_SAML_ENABLED says whether SAML is wired up at all, so whether
- *    a button can work. Whether an *account* must migrate is a different
- *    question, and it belongs to the backend, per account.
- *  - NEXT_PUBLIC_RECAPTCHA_SITE_KEY is a public site key.
+ * The login tree reads no environment variable directly. Its configuration
+ * comes from the container environment through `useRuntimeConfig()`, and the
+ * exact set of settings that hook exposes is pinned below (RUNTIME_CONFIG_KEYS).
+ * Asserting both, rather than banning a spelling of one name, is what makes this
+ * a guard instead of a reminder: any new configuration read in this tree, by
+ * either route, fails here and has to be justified in review — including a
+ * migration flag under a name nobody has thought of yet (FORCE_CMD_ONLY, …).
  */
-const ALLOWED_ENV = ["NEXT_PUBLIC_RECAPTCHA_SITE_KEY", "NEXT_PUBLIC_SAML_ENABLED"];
+const ALLOWED_ENV: string[] = [];
+
+/**
+ * Both settings are deliberate and neither decides migration:
+ *  - samlEnabled says whether SAML is wired up at all, so whether a button can
+ *    work. Whether an *account* must migrate is a different question, and it
+ *    belongs to the backend, per account.
+ *  - recaptchaSiteKey is a public site key.
+ */
+const RUNTIME_CONFIG_KEYS = ["recaptchaSiteKey", "samlEnabled"];
 
 /** Every process.env.X read in a file, by variable name. */
 function envReads(source: string): string[] {
@@ -94,6 +99,17 @@ describe("the email tab never decides migration from a frontend flag", () => {
     // for one here.
     expect(reads.filter((name) => name.startsWith("computed:"))).toEqual([]);
     expect(reads.filter((name) => !ALLOWED_ENV.includes(name))).toEqual([]);
+  });
+
+  it("exposes only the runtime settings that cannot decide migration", () => {
+    const source = readFileSync(
+      path.join(process.cwd(), "src/providers/RuntimeConfigProvider.tsx"),
+      "utf8"
+    );
+    const body = source.match(/export interface RuntimeConfig \{([\s\S]*?)\n\}/)?.[1] ?? "";
+    const keys = [...body.matchAll(/^\s*(\w+)\??:/gm)].map((m) => m[1]).sort();
+
+    expect(keys).toEqual(RUNTIME_CONFIG_KEYS);
   });
 
   it("still reacts to the backend's answer, which is the supported mechanism", () => {

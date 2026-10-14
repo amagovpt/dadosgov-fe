@@ -12,5 +12,15 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    // Only collected with `--coverage` (`npm run test:ci`, used by the GitLab pipeline):
+    // lcov for SonarQube, cobertura for the MR coverage widget, text for the job's coverage regex.
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov", "cobertura"],
+      reportsDirectory: "coverage",
+      reportOnFailure: true,
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/**/__tests__/**"],
+    },
   },
 });

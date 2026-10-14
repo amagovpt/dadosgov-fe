@@ -8,6 +8,7 @@ import StatusCard from "../Primitives/StatusCard";
 import { Typograph } from "../Shared/Generics/Typograph";
 import { MigrationInviteSectionI } from "./MigrationInviteSection";
 import { twJoin } from "tailwind-merge";
+import { useRuntimeConfig } from "@/providers/RuntimeConfigProvider";
 
 export type MigrationActionsI = MigrationInviteSectionI & {
   isInsideCard?: boolean;
@@ -21,7 +22,7 @@ export default function MigrationActions({ onDismiss, isInsideCard = false }: Mi
   // Says whether SAML is wired up at all, so whether a button can work. Never
   // whether an ACCOUNT should link -- that is the backend's answer, and it is
   // read by the caller.
-  const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
+  const { samlEnabled } = useRuntimeConfig();
 
   const startLink = async (endpoint: string) => {
     setIsLoading(true);

@@ -43,6 +43,7 @@ export type BoReusesPage = {
   datasetAssociationInfo?: AdminHelpBlock;
   datasetAssociationWarning?: AdminHelpBlock;
   createdCard?: AdminCard;
+  transferCard?: AdminCard;
   archiveCard?: AdminCard;
   unarchiveCard?: AdminCard;
   deleteCard?: AdminCard;
