@@ -46,6 +46,7 @@ import ReusesEditApiTab from "@/components/admin/reuses/edit-tabs/ReusesEditApiT
 import ReusesEditDiscussionsTab from "@/components/admin/reuses/edit-tabs/ReusesEditDiscussionsTab";
 import ReusesEditActivitiesTab from "@/components/admin/reuses/edit-tabs/ReusesEditActivitiesTab";
 import ReusesEditDeletePopup from "@/components/admin/reuses/edit-dialogs/ReusesEditDeletePopup";
+import ReusesEditTransferPopup from "@/components/admin/reuses/edit-dialogs/ReusesEditTransferPopup";
 import { useReuseAssociationActions } from "@/components/admin/reuses/hooks/useReuseAssociationActions";
 import { useReuseLifecycleActions } from "@/components/admin/reuses/hooks/useReuseLifecycleActions";
 import { useReuseMetadataActions } from "@/components/admin/reuses/hooks/useReuseMetadataActions";
@@ -446,7 +447,18 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
     showApiSuccess(t("edit.transferSent", { recipient: recipient.label }), 15000);
   };
 
-  void handleTransferReuse;
+  const openTransferPopup = () => {
+    if (!reuse) return;
+
+    show(
+      <ReusesEditTransferPopup reuseTitle={reuse.title} onConfirm={handleTransferReuse} />,
+      {
+        title: t("edit.transferAction"),
+        closeAriaLabel: t("edit.closeAriaLabel"),
+        dimensions: "m",
+      },
+    );
+  };
 
   if (isLoading) {
     return (
@@ -551,6 +563,7 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
             <ReusesEditMetadataTab
               auxiliaryItems={pageContent.editAuxiliaryItems}
               visibilityCard={pageContent.visibilityCard}
+              transferCard={pageContent.transferCard}
               archiveCard={pageContent.archiveCard}
               unarchiveCard={pageContent.unarchiveCard}
               deleteCard={pageContent.deleteCard}
@@ -594,6 +607,7 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
               onImageUpload={handleImageUpload}
               onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
               onSaveMetadata={handleSaveMetadata}
+              onOpenTransferPopup={openTransferPopup}
               onArchiveReuse={handleArchiveReuse}
               onUnarchiveReuse={handleUnarchiveReuse}
               onOpenDeletePopup={openDeletePopup}
