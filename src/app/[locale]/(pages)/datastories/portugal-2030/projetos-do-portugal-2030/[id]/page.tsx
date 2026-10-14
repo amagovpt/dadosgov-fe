@@ -1,13 +1,24 @@
 import initTranslations from "@/app/i18n";
+import { BenProjSheet } from "@/components/datastories/BeneficiaryAndProject/Sheet";
+import { BenProjSheetTab } from "@/components/datastories/BeneficiaryAndProject/Tabs";
+import ProjectTabs from "@/components/datastories/BeneficiaryAndProject/Tabs/ProjectTabs";
+import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
-import { SourceInfoFooter } from "@/components/Shared/SourceInfoFooter";
-import { Project } from "@/service/types/datastories/pt2030/pt2030";
+import {
+  getPT2030ProjectData,
+  getPT2030ProjectMeta,
+  queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030,
+} from "@/service/queries/datastories/datastory";
+import {
+  Project,
+  PT2030Project,
+  PT2030ProjectSheetBeneficiaryResponse,
+} from "@/service/types/datastories/pt2030/pt2030";
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { Metadata } from "next";
-import { headers } from "next/headers";
 
 export async function generateMetadata({
   params,
@@ -15,31 +26,25 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const host = (await headers()).get("host") || "localhost:3000";
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-  const siteUrl = `${protocol}://${host}`;
 
   const { data, error } = await apolloClient.query<{
     findFichaDeProjetoSingleton: { data: unknown };
   }>({
-    query: getProjectMeta(locale),
+    query: getPT2030ProjectMeta(locale),
   });
 
-  if (!data || error) {
+  if (error || !data) {
     console.error("Error:", error);
     throw new Error(error?.message ?? "Failed to fetch data");
   }
 
   const { hero } = flattenData(
-    data?.findFichaDeProjetoSingleton.data as Record<string, unknown>
+    data.findFichaDeProjetoSingleton.data as Record<string, unknown>
   ) as Project;
 
   return {
-    title: `${hero?.title}`,
-    description: hero?.subtitle,
-    openGraph: {
-      images: [`${siteUrl}/images/og-images/social_media.jpg`],
-    },
+    title: hero.title,
+    description: hero.description,
   };
 }
 
@@ -60,7 +65,7 @@ export default async function ProjectPage({
     findFichaDeProjetoSingleton: { data: unknown };
     queryProjectSheetOfPortugal2030: PT2030Project;
   }>({
-    query: getProjectData(locale),
+    query: getPT2030ProjectData(locale),
     variables: {
       codigoProjeto: decodedId,
     },
@@ -71,13 +76,9 @@ export default async function ProjectPage({
     throw new Error(error?.message ?? "Failed to fetch data");
   }
 
-  const {
-    hero,
-    projectSheet,
-    beneficiaries,
-    applications,
-    geographicDistribution,
-  } = flattenData(data?.findFichaDeProjetoSingleton.data as Record<string, unknown>) as Project;
+  const { hero, projectSheet, beneficiaries, applications, geographicDistribution } = flattenData(
+    data?.findFichaDeProjetoSingleton.data as Record<string, unknown>
+  ) as Project;
 
   const projectData = flattenData(
     data?.queryProjectSheetOfPortugal2030 as Record<string, unknown>
@@ -112,36 +113,32 @@ export default async function ProjectPage({
     throw new Error(errorOtherBen?.message ?? "Failed to fetch data");
   }
 
-  const projPt2030OpenDataModal = await getPublicDataModal("pt2030-ficha-de-projeto", locale);
-
-  const pubAdminWorkersBySubsectorTechnicalSheet = await getTechnicalSheetModal(
-    "pt2030-ficha-de-projeto",
-    locale
-  );
-
   return (
     <main className="project-sheet flex flex-col gap-128 pb-128">
-      <HeroGeneral.Root>
-        <HeroGeneral.BenProjContent
-          title={hero.title}
-          titleLevel={"h1"}
-          lastBreadcrumb={t("sheetBenProj.project.pt2030")}
-          subjectName={projectData.nome}
-        />
-        <HeroGeneral.SiteMap cardTitle={hero.sitemap?.title} inThisPage={hero.sitemap?.links} />
-      </HeroGeneral.Root>
+      <Datastory.Hero
+        breadcrumbs={[
+          ...hero.breadcrumbs,
+          {
+            url: `/datastories/portugal-2030/projetos-do-portugal-2030/${id}`,
+            label: projectData.nome,
+          },
+        ]}
+        pretitle={hero.title}
+        title={projectData.nome}
+        index={hero.index}
+        className="[&_.info-datastory]:justify-center"
+      />
 
       <Section className="flex flex-col items-center gap-32" id={projectSheet.id}>
         <InfoBlock.Root>
-          <InfoBlock.Header className="flex flex-row gap-24">
-            <InfoBlock.Icon icon={projectSheet.iconName} />
-            <InfoBlock.Title title={projectSheet.title} />
+          <InfoBlock.Header>
+            <InfoBlock.Title title={projectSheet.title} className="max-w-[592px] text-2xl-bold!" />
           </InfoBlock.Header>
         </InfoBlock.Root>
 
         <BenProjSheet.Root classNameList="grid grid-cols-12">
-          <BenProjSheet.List className="col-span-12 xl:col-span-5">
-            <BenProjSheet.Wrapper className="border-t-2 border-t-neutral-200">
+          <BenProjSheet.List className="col-span-12 xl:col-span-6">
+            <BenProjSheet.Wrapper className="border-t-neutral-200">
               <BenProjSheet.Item title={t("sheetBenProj.fields.nome")} value={projectData.nome} />
             </BenProjSheet.Wrapper>
             <BenProjSheet.Wrapper>
@@ -170,36 +167,41 @@ export default async function ProjectPage({
               />
             </BenProjSheet.Wrapper>
           </BenProjSheet.List>
-          <BenProjSheet.List className="col-span-12 xl:col-span-7">
-            <BenProjSheet.Wrapper className="xl:border-t-2 xl:border-t-neutral-200">
+          <BenProjSheet.List className="col-span-12 xl:col-span-6">
+            <BenProjSheet.Wrapper>
               <BenProjSheet.Item
                 title={t("sheetBenProj.fields.valor_financiamento")}
                 value={formatCurrency(Number(projectData.valor_financiamento ?? 0), t)}
                 className="border-b-2 border-b-neutral-200 xl:w-auto xl:grow xl:border-none"
-              />{" "}
-              <BenProjSheet.Wrapper className="border-none xl:w-[432px]">
-                <BenProjSheet.Item
-                  title={t("sheetBenProj.fields.valor_executado")}
-                  value={formatCurrency(Number(projectData.valor_executado ?? 0), t)}
-                  className="border-b-2 border-b-neutral-200 xl:border-none"
-                />
-                <BenProjSheet.Item
-                  title={t("sheetBenProj.fields.valor_pago")}
-                  value={formatCurrency(Number(projectData.valor_pago ?? 0), t)}
-                />
-              </BenProjSheet.Wrapper>
-            </BenProjSheet.Wrapper>
-            <BenProjSheet.Wrapper>
+              />
+
               <BenProjSheet.Item
-                title={t("sheetBenProj.fields.dt_inicio_prevista")}
-                value={projectData.dt_inicio_prevista ?? ""}
+                title={t("sheetBenProj.fields.valor_executado")}
+                value={formatCurrency(Number(projectData.valor_executado ?? 0), t)}
                 className="border-b-2 border-b-neutral-200 xl:w-auto xl:grow xl:border-none"
               />
-              <BenProjSheet.Item
-                title={t("sheetBenProj.fields.dt_conclusao_prevista")}
-                value={projectData.dt_conclusao_prevista ?? ""}
-                className="xl:w-[432px]"
-              />
+            </BenProjSheet.Wrapper>
+            <BenProjSheet.Wrapper>
+              {projectData.dt_conclusao_efetiva ? (
+                <BenProjSheet.Item
+                  title={t("sheetBenProj.fields.dt_inicio_prevista")}
+                  value={projectData.dt_conclusao_efetiva}
+                  className="border-b-2 border-b-neutral-200 xl:w-auto xl:grow xl:border-none"
+                />
+              ) : (
+                <>
+                  <BenProjSheet.Item
+                    title={t("sheetBenProj.fields.dt_inicio_prevista")}
+                    value={projectData.dt_inicio_prevista ?? ""}
+                    className="border-b-2 border-b-neutral-200 xl:w-auto xl:grow xl:border-none"
+                  />
+                  <BenProjSheet.Item
+                    title={t("sheetBenProj.fields.dt_conclusao_prevista")}
+                    value={projectData.dt_conclusao_prevista ?? ""}
+                    className="border-b-2 border-b-neutral-200 xl:w-auto xl:grow xl:border-none"
+                  />
+                </>
+              )}
             </BenProjSheet.Wrapper>
             <BenProjSheet.Wrapper>
               <BenProjSheet.Item
@@ -242,18 +244,6 @@ export default async function ProjectPage({
                   />
                 ),
               },
-              /*
-              {
-                id: publicContracting.id,
-                title: publicContracting.title,
-                body: (
-                  <BenProjSheetTab.PublicContracting
-                    title={publicContracting.title}
-                    publicContracting={publicContracting.cards}
-                  />
-                ),
-              },
-              */
               {
                 id: geographicDistribution.id,
                 title: geographicDistribution.title,
@@ -262,27 +252,7 @@ export default async function ProjectPage({
                     title={geographicDistribution.title}
                     geographicDistribution={geographicDistribution.cards}
                     geographicDistributionData={projectData.distribuicao_geografica}
-                  >
-                    <SourceInfoFooter
-                      dataSource={projectData.info_datasets[0].source ?? ""}
-                      update={projectData.info_datasets[0].reference_date ?? ""}
-                      download={{
-                        id: { technicalSheet: "download" },
-                        header: {
-                          iconName: projPt2030OpenDataModal.header?.iconName ?? "",
-                          title: projPt2030OpenDataModal.header?.title ?? "",
-                          subtitle: projPt2030OpenDataModal.header?.subtitle ?? "",
-                        },
-                        cardDownload: projectData.info_datasets.map((source) => ({
-                          fileName: source.info[0].title,
-                          fileUrl: source.info[0].url,
-                          fileType: source.info[0].format,
-                          lastUpdated: source.info[0].modification_date ?? "",
-                        })),
-                      }}
-                      technicalSheet={pubAdminWorkersBySubsectorTechnicalSheet}
-                    />
-                  </BenProjSheetTab.GeographicDistribution>
+                  ></BenProjSheetTab.GeographicDistribution>
                 ),
               },
             ]}

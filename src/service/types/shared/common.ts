@@ -1,4 +1,3 @@
-import { BigNumberI } from "@/components/Shared/Datastories/Sections/BigNumbers";
 import { FoListPageNoResults } from "./fo-list-pages";
 
 export interface Image {
@@ -64,16 +63,6 @@ export interface FrontOfficePage {
   search: SearchBar;
   noResults: FoListPageNoResults;
 }
-
-export type HeroGeneric = {
-  title: string;
-  subtitle: string;
-  iconArea: string[];
-  sitemap: {
-    title: string;
-    links: Anchor[];
-  };
-};
 
 export type Card = {
   id: string;

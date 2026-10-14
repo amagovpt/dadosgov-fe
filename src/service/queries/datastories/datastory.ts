@@ -7,6 +7,8 @@ import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
 import { notFound } from "next/navigation";
 
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export async function getDatastoryMetadata(
   slug: string,
   locale: string = "pt"
@@ -295,6 +297,8 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
   };
 }
 
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export async function getDatastorySearchPage(
   slug: string,
   locale: string = "pt"
@@ -450,6 +454,8 @@ export async function getDatastorySearchPage(
   return dataFlatten;
 }
 
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export function getSearchProjectsPT2030() {
   return gql(/* GraphQL */ `
     query getSearchProjects {
@@ -478,6 +484,8 @@ export function getSearchProjectsPT2030() {
   `);
 }
 
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export function getSpecificObjectivesByPolicyObjective() {
   return gql(/* GraphQL */ `
     query QuerySpecificObjectivesByPolicyObjectiveOfPortugal2030($policyObjective: String!) {
@@ -490,6 +498,8 @@ export function getSpecificObjectivesByPolicyObjective() {
     }
   `);
 }
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
 
 export function getProjectsOfPortugal2030() {
   return gql(/* GraphQL */ `
@@ -560,6 +570,8 @@ export function getProjectsOfPortugal2030() {
     }
   `);
 }
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
 
 export function getSearchBeneficiariesPT2030() {
   return gql(/* GraphQL */ `
@@ -665,4 +677,177 @@ export function getBeneficiariesOfPortugal2030() {
       }
     }
   `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPT2030ProjectMeta(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getProjectMeta {
+      findFichaDeProjetoSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPT2030ProjectData(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getProject($codigoProjeto: String!) {
+      findFichaDeProjetoSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              breadcrumbs {
+                url
+                label
+              }
+              index {
+                title
+                anchors {
+                  anchor {
+                    href
+                    children
+                  }
+                }
+              }
+            }
+          }
+          projectSheet {
+            ${locale} {
+              id
+              title
+            }
+          }
+          beneficiaries {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  id
+                  title
+                  description
+                }
+              }
+            }
+          }
+          applications {
+            ${locale} {
+              id
+              title
+              description
+              cards {
+                card {
+                  title
+                }
+              }
+            }
+          }
+          geographicDistribution {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  title
+                  description
+                  icon
+                }
+              }
+            }
+          }
+        }
+      }
+      queryProjectSheetOfPortugal2030(codigoProjeto: $codigoProjeto) {
+        nome
+        sumario
+        modalidade
+        candidaturas {
+          tab_nome
+          nota_final
+          codigo_aviso
+          designacao_aviso
+        }
+        fornecedores
+        info_datasets {
+          info {
+            url
+            title
+            format
+            publication_date
+            modification_date
+          }
+          source
+          source_link
+          reference_date
+        }
+        codigo_projeto
+        valor_executado
+        valor_pago
+        dt_inicio_efetiva
+        dt_inicio_prevista
+        objetivo_especifico
+        valor_financiamento
+        dt_conclusao_efetiva
+        objetivo_estrategico
+        dt_conclusao_prevista
+        distribuicao_geografica {
+          tipo
+          order
+          distribuicao {
+            descricao
+            valor_financiamento
+            valor_pago
+          }
+          pc_valor_executado
+          distribuicao_indefinida
+          valor_financiamento_total
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export const queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030 = gql(/* GraphQL */ `
+  query loadMoreBeneficiariesInProjectSheetOfPortugal2030(
+    $projectCode: String!
+    $beneficiaryType: BeneficiaryType!
+    $limit: Int
+    $page: Int
+  ) {
+    queryBeneficiariesByProjectSheetOfPortugal2030(
+      projectCode: $projectCode
+      beneficiaryType: $beneficiaryType
+      limit: $limit
+      page: $page
+    ) {
+      limit
+      page
+      total
+      data {
+        entityNif
+        name
+        financingAmount
+      }
+    }
+  }
+`);
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function loadMoreBeneficiariesInProjectSheetOfPortugal2030() {
+  return queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030;
 }

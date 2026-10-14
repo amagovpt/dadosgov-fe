@@ -35,8 +35,9 @@ type Index = {
 };
 
 export type DatastoryHero = {
+  pretitle?: string;
   title: string;
-  description: string;
+  description?: string;
   index: Index;
   breadcrumbs: BreadcrumbItem[];
 };

@@ -457,5 +457,55 @@
   "billion_one": "mil milhões",
   "portugal-2030": "Portugal 2030",
   "projetos-do-portugal-2030": "Projetos do Portugal 2030",
-  "beneficiarios-do-portugal-2030": "Beneficiários do Portugal 2030"
+  "beneficiarios-do-portugal-2030": "Beneficiários do Portugal 2030",
+  "sheetBenProj": {
+    "project": {
+      "pt2030": "Projeto Portugal 2030"
+    },
+    "beneficiary": {
+      "pt2030": "Beneficiário Portugal 2030"
+    },
+    "fields": {
+      "nome": "Nome do projeto",
+      "objetivo_estrategico": "Objetivo estratégico",
+      "objetivo_especifico": "Objetivo específico",
+      "modalidade": "Modalidade",
+      "codigo_projeto": "Código de operação",
+      "valor_financiamento": "Valor de financiamento",
+      "valor_financiamento_tooltip": "Montante financiado com fundos europeus.",
+      "valor_executado": "Valor executado",
+      "valor_pago": "Valor pago",
+      "dt_inicio_prevista": "Data de início prevista",
+      "dt_conclusao_prevista": "Data de conclusão prevista",
+      "sumario": "Sumário",
+      "nif": "Número de identificação fiscal",
+      "ben_name": "Nome",
+      "total_projetos": "Total de projetos",
+      "total_financiado": "Total financiado"
+    },
+    "tooltips": {
+      "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus."
+    },
+    "noGrade": "Não se aplica",
+    "byArea": "Por {{area}}",
+    "financiado": "financiado",
+    "financiado_pl": "financiados",
+    "financiada": "financiada",
+    "financiada_pl": "financiadas",
+    "nationwide": "Por todo o país",
+    "nationwide_line": "Sem distribuição geográgica definida",
+    "ondeFoiAplicado": "Onde foi aplicado o dinheiro",
+    "areas": {
+      "concelho": "concelho",
+      "concelho_pl": "concelhos",
+      "distrito": "distrito",
+      "distrito_pl": "distritos",
+      "subregiao": "sub-região",
+      "subregiao_pl": "sub-regiões",
+      "regiao": "região",
+      "regiao_pl": "regiões"
+    },
+    "suppliersValues": "Valores de financiamento a fornecedores",
+    "suppliersInDetail": "Fornecedores em detalhe"
+  }
 }

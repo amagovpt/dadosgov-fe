@@ -2,7 +2,7 @@
 
 /** SEARCH PAGES **/
 
-import { HeroGeneric, Section } from "../../shared/common";
+import { Section } from "../../shared/common";
 import { DatastoryHero, RelatedSection, SourceSection } from "../datastory";
 
 export type Filter = {
@@ -81,7 +81,7 @@ export enum EntityRole {
 /** PROJECT **/
 
 export type Project = {
-  hero: HeroGeneric;
+  hero: DatastoryHero;
   projectSheet: Section;
   beneficiaries: Section;
   applications: Section;
@@ -189,5 +189,9 @@ export type PT2030ProjectSheetBeneficiaryResponse = {
   total: number;
   data: PT2030ProjectSheetBeneficiary[];
 };
+
+// ----------------------------------------------------------------------------------------------
+
+/** BENEFICIARY **/
 
 // ----------------------------------------------------------------------------------------------

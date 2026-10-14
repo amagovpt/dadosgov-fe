@@ -457,5 +457,55 @@
   "billion_one": "billion",
   "portugal-2030": "Portugal 2030",
   "projetos-do-portugal-2030": "Projects of Portugal 2030",
-  "beneficiarios-do-portugal-2030": "Beneficiaries of Portugal 2030"
+  "beneficiarios-do-portugal-2030": "Beneficiaries of Portugal 2030",
+  "sheetBenProj": {
+    "project": {
+      "pt2030": "Project Portugal 2030"
+    },
+    "beneficiary": {
+      "pt2030": "Beneficiary Portugal 2030"
+    },
+    "fields": {
+      "nome": "Project name",
+      "valor_financiamento_tooltip": "Funding amount with European funds.",
+      "objetivo_estrategico": "Strategic objective",
+      "objetivo_especifico": "Specific objective",
+      "modalidade": "Modality",
+      "codigo_projeto": "Operation code",
+      "valor_financiamento": "Funding amount",
+      "valor_executado": "Amount spent",
+      "valor_pago": "Amount paid",
+      "dt_inicio_prevista": "Planned start date",
+      "dt_conclusao_prevista": "Planned completion date",
+      "sumario": "Summary",
+      "nif": "Tax identification number",
+      "ben_name": "Name",
+      "total_projetos": "Total number of projects",
+      "total_financiado": "Total financed"
+    },
+    "tooltips": {
+      "codigo_projeto": "A code that identifies each project carried out with European funds."
+    },
+    "noGrade": "Not applicable",
+    "byArea": "By {{area}}",
+    "financiado": "funded",
+    "financiado_pl": "funded",
+    "financiada": "funded",
+    "financiada_pl": "funded",
+    "ondeFoiAplicado": "Where the money was invested",
+    "nationwide": "Nationwide",
+    "nationwide_line": "No defined geographical distribution",
+    "areas": {
+      "concelho": "municipality",
+      "concelho_pl": "municipalities",
+      "distrito": "district",
+      "distrito_pl": "districts",
+      "subregiao": "sub-region",
+      "subregiao_pl": "sub-regions",
+      "regiao": "region",
+      "regiao_pl": "regions"
+    },
+    "suppliersValues": "Financing amounts to suppliers",
+    "suppliersInDetail": "Suppliers in detail"
+  }
 }
