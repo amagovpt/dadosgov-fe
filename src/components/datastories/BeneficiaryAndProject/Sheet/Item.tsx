@@ -36,7 +36,7 @@ export default function SheetBenProjItem({
             <IconComponent
               name="agora-line-info-mark"
               dimensions="m"
-              color="primary-600"
+              className="fill-primary-600"
             />
           </Tooltip>
         )}
