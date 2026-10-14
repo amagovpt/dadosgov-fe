@@ -21,18 +21,13 @@ export default function SheetBenProjItem({
   className,
 }: ISheetBenProjItem) {
   return (
-    <div className={twMerge("w-full py-16 flex flex-col gap-16", className)}>
+    <div className={twMerge("flex w-full flex-col gap-16 py-16", className)}>
       <div className="flex items-center gap-16">
         <Typograph tag="p" className="text-m-bold text-neutral-900">
           {title}
         </Typograph>
         {tooltipText && (
-          <Tooltip
-            description={tooltipText}
-            position="top"
-            alignment="center"
-            variant="light"
-          >
+          <Tooltip description={tooltipText} position="top" alignment="center" variant="light">
             <IconComponent
               name="agora-line-info-mark"
               dimensions="m"
@@ -43,10 +38,7 @@ export default function SheetBenProjItem({
       </div>
       <Typograph
         tag="p"
-        className={twJoin(
-          "text-primary-900",
-          isSummary ? "text-m-regular" : "text-xl-light",
-        )}
+        className={twJoin("text-primary-900", isSummary ? "text-m-regular" : "text-xl-light")}
       >
         {value}
       </Typograph>
