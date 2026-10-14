@@ -1,7 +1,17 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { AgCharts } from "ag-charts-react";
-import { AgChartOptions, AgDonutSeriesOptions } from "ag-charts-community";
+import {
+  AgChartOptions,
+  AgDonutSeriesOptions,
+  DonutSeriesModule,
+  LegendModule,
+  ModuleRegistry,
+} from "ag-charts-community";
+
+// AG Charts 13+ ships no chart types by default; only what is registered is bundled.
+// DonutSeriesModule pulls in PolarChartModule; LegendModule backs the `legend` option.
+ModuleRegistry.registerModules([DonutSeriesModule, LegendModule]);
 
 interface DonutProps {
   percentual: number | undefined;
@@ -79,15 +89,9 @@ export default function Donut({
         outerRadiusRatio: 1,
         innerRadiusRatio: 0.5,
         sectorSpacing,
-        highlightStyle: {
-          item: {
-            stroke: undefined,
-            strokeWidth: 0,
-            fill: undefined,
-          },
-          series: {
-            enabled: false,
-          }
+        // Decorative chart (aria-hidden, no tooltip): hovering must not restyle sectors.
+        highlight: {
+          enabled: false,
         },
         fills,
         ...extraSeriesProps,
