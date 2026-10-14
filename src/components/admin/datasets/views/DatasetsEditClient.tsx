@@ -57,6 +57,7 @@ import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/use
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+import { can } from "@/utils/permissions";
 
 interface DatasetsEditClientProps {
   pageContent: BoDatasetsPage;
@@ -372,17 +373,22 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     },
   });
 
-  const { handleArchiveDataset, handleDeleteDataset, handlePublishDataset, handleUnarchiveDataset } =
-    useDatasetLifecycleActions({
-      dataset,
-      hide,
-      push: router.push,
-      keywordsRef,
-      setDataset,
-      setIsSubmitting,
-      setApiError,
-      showApiSuccess,
-    });
+  const {
+    handleArchiveDataset,
+    handleDeleteDataset,
+    handlePublishDataset,
+    handleMoveToDraft,
+    handleUnarchiveDataset,
+  } = useDatasetLifecycleActions({
+    dataset,
+    hide,
+    push: router.push,
+    keywordsRef,
+    setDataset,
+    setIsSubmitting,
+    setApiError,
+    showApiSuccess,
+  });
 
   const handleTransferDataset = async (recipient: RecipientSelection, comment: string) => {
     if (!dataset) throw new Error(t("edit.notFound"));
@@ -474,17 +480,22 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       ]}
       title={dataset.title}
       headerAction={
-        <Button
-          variant="primary"
-          appearance="outline"
-          disabled={!!(dataset.archived || dataset.deleted)}
-          onClick={() => window.open(`/datasets/${dataset.slug}`, "_blank")}
-        >
-          <span className="admin-edit-info__btn-content">
-            <Icon name="agora-line-eye" className="h-16 w-16" />
-            {t("edit.viewPublicPage")}
-          </span>
-        </Button>
+        can(dataset, "edit") ? (
+          <Button
+            variant="primary"
+            appearance={dataset.private ? "solid" : "outline"}
+            disabled={isSubmitting || !!(dataset.archived || dataset.deleted)}
+            onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
+          >
+            <span className="admin-edit-info__btn-content">
+              <Icon
+                name={dataset.private ? "agora-line-document" : "agora-line-arrow-left-anchor"}
+                className="h-16 w-16"
+              />
+              {t(dataset.private ? "edit.publishDataset" : "edit.moveToDraft")}
+            </span>
+          </Button>
+        ) : null
       }
     >
       <ResourceStatusBanner
@@ -570,6 +581,20 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             </>
           )}
         </p>
+      </div>
+
+      <div className="flex justify-end">
+        <Button
+          variant="primary"
+          appearance="link"
+          disabled={!!(dataset.archived || dataset.deleted)}
+          onClick={() => window.open(`/datasets/${dataset.slug}`, "_blank")}
+        >
+          <span className="admin-edit-info__btn-content">
+            <Icon name="agora-line-eye" className="h-16 w-16" />
+            {t("edit.viewPublicPage")}
+          </span>
+        </Button>
       </div>
 
       <div ref={tabsRef} tabIndex={-1} className="outline-none">
