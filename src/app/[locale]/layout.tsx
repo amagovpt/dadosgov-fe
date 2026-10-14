@@ -21,6 +21,7 @@ import { ShellProvider } from "@/providers/ShellProvider";
 import { RuntimeConfigProvider } from "@/providers/RuntimeConfigProvider";
 import { getRuntimeConfig } from "@/config/runtimeConfig";
 import KarmaAnalytics from "@/Scripts/Karma";
+import GoogleAnalytics from "@/Scripts/GoogleAnalytics";
 
 const namespaces = [
   "common",
@@ -107,10 +108,15 @@ export default async function RootLayout({
     namespaces,
   });
   const { headerNavigation, footerData } = await loadShellData(locale);
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const runtimeConfig = await getRuntimeConfig();
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
+      <head>
+        <KarmaAnalytics nonce={nonce} />
+        <GoogleAnalytics nonce={nonce} />
+      </head>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <RuntimeConfigProvider value={runtimeConfig}>
           <AuthProvider initialSession={initialSession}>
@@ -124,7 +130,6 @@ export default async function RootLayout({
                           <ScrollTop />
                           {children}
                           <Footer data={footerData} />
-                          <KarmaAnalytics />
                         </ShellProvider>
                       </PopupProviderWrapper>
                     </ApiErrorProvider>
