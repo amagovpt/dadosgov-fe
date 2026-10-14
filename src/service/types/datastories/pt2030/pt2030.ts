@@ -87,6 +87,7 @@ export type Project = {
   applications: Section;
   publicContracting: Section;
   geographicDistribution: Section;
+  datasets: SourceSection;
 };
 
 export type PT2030Project = {

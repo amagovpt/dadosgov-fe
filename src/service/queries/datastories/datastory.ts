@@ -767,6 +767,24 @@ export function getPT2030ProjectData(locale: string = "pt") {
               }
             }
           }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
         }
       }
       queryProjectSheetOfPortugal2030(codigoProjeto: $codigoProjeto) {

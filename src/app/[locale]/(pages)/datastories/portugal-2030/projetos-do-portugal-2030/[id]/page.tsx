@@ -3,6 +3,7 @@ import { BenProjSheet } from "@/components/datastories/BeneficiaryAndProject/She
 import { BenProjSheetTab } from "@/components/datastories/BeneficiaryAndProject/Tabs";
 import ProjectTabs from "@/components/datastories/BeneficiaryAndProject/Tabs/ProjectTabs";
 import { Datastory } from "@/components/Shared/Datastories";
+import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
 import {
@@ -76,7 +77,7 @@ export default async function ProjectPage({
     throw new Error(error?.message ?? "Failed to fetch data");
   }
 
-  const { hero, projectSheet, beneficiaries, applications, geographicDistribution } = flattenData(
+  const { hero, projectSheet, beneficiaries, applications, geographicDistribution, datasets } = flattenData(
     data?.findFichaDeProjetoSingleton.data as Record<string, unknown>
   ) as Project;
 
@@ -114,7 +115,7 @@ export default async function ProjectPage({
   }
 
   return (
-    <main className="datastory-page project-sheet flex flex-col gap-128 pb-128">
+    <main className="datastory-page project-sheet flex flex-col gap-64 pb-64">
       <Datastory.Hero
         breadcrumbs={[
           ...hero.breadcrumbs,
@@ -259,6 +260,8 @@ export default async function ProjectPage({
           />
         </InfoBlock.Content>
       </Section>
+
+      {datasets && datasets.active !== false && <Sources {...datasets} className="p-0" />}
     </main>
   );
 }
