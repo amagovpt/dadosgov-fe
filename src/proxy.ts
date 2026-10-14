@@ -14,25 +14,86 @@ import { isPathRestricted } from "./utils/matchRestrictedPath";
  *   2) Expose the nonce to React Server Components via the `x-nonce`
  *      request header so Next.js automatically applies it to hydration
  *      scripts (https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy).
- *   3) Inject `X-Forwarded-Host` on backend-proxied routes so Flask
- *      (ProxyFix, SERVER_NAME) sees the expected host when the frontend
- *      runs in Docker.
+ *   3) Forward the Flask routes served on this host to `BACKEND_URL`.
  *
  * The CSP is intentionally built here (not in `next.config.ts`) because
  * the nonce must be regenerated per request — static headers in
  * `next.config.ts` cannot carry runtime values.
+ *
+ * The backend forwarding lives here for the same reason. `next.config.ts` is
+ * evaluated at `next build` and serialized into the standalone `server.js`,
+ * so a `rewrites()` destination built from `BACKEND_URL` froze the backend
+ * of whichever environment the image was built for. Read per request, one
+ * image can be promoted through dev/tst/ppr/prd. An absolute
+ * `NextResponse.rewrite` goes through the same internal HTTP proxy as a
+ * config rewrite (cookies, redirects, streaming, `Range`, x-forwarded-host).
  */
 
-const BACKEND_HOST = process.env.BACKEND_HOST || "";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
-const BACKEND_PROXY_PATHS = ["/api/", "/saml/", "/logout/", "/get-csrf", "/s/", "/swaggerui/"];
+// Flask routes served on this host, forwarded to the backend unchanged.
+//
+// 🚩 The SAML list is exhaustive and has no catch-all: a backend route not
+// named here is answered by Next.js with a 404 rather than reaching Flask.
+// That is how /saml/link/start and /saml/eidas/link/start (starting a CMD/eIDAS
+// link from an account that is ALREADY signed in, LEDG-2517) once shipped
+// dead: the components were built and tested, and every test mocked the fetch.
+// /saml/login and /saml/eidas/login are anonymous-only on the backend.
+const BACKEND_EXACT_PATHS = [
+  "/get-csrf",
+  "/saml/login",
+  "/saml/sso",
+  "/saml/logout",
+  "/saml/sso_logout",
+  "/saml/link/start",
+  "/saml/eidas/link/start",
+  "/saml/eidas/login",
+  "/saml/eidas/sso",
+  "/saml/eidas/logout",
+  "/saml/eidas/sso_logout",
+];
 
-// Paths that must NOT receive a Next.js CSP. `/saml/*` is served by Flask
-// (auto-submit forms with their own CSP); double-CSP would break the SAML
-// dance. Backend-proxied paths return raw upstream responses and should
-// inherit the upstream CSP (or none).
-const NO_CSP_PATHS = ["/saml/", "/api/", "/s/", "/swaggerui/", "/confirm/", "/reset/", "/get-csrf"];
+const BACKEND_PREFIXES = [
+  // Account migration routes.
+  "/saml/migration",
+  // Flask-Security endpoints whose URLs are sent in emails
+  // (https://<host>/confirm/<token>). Each ends in a 302 to the homepage with
+  // a flash message, so no Next.js page is needed.
+  "/confirm",
+  "/reset",
+  "/confirm-change-email",
+  // Static file storage served by flask_storage at /s/<bucket>/<path>.
+  "/s",
+  // SECURITY (TICKET-60 / VULN-2079): every `/api/*` route in Next.js is
+  // shadowed by this forward to the Flask backend. Do NOT add Next.js
+  // handlers under `/api/` — they would be unreachable here, but if this ever
+  // changes they would suddenly be exposed (and likely diverged from the
+  // backend equivalent). The CSV proxy lives at `/internal-api/proxy-csv`.
+  "/api",
+  // Swagger UI static assets served by Flask-RestX at the backend root, so
+  // `/api/1/` rendered via the frontend can load its CSS/JS.
+  "/swaggerui",
+];
+
+// Prefixes excluded from page handling: anything under them that is not a
+// backend route above gets Next's plain 404, never the locale redirect.
+const NON_PAGE_PREFIXES = [...BACKEND_PREFIXES, "/saml", "/get-csrf"];
+
+const hasPrefix = (pathname: string, prefix: string) =>
+  pathname === prefix || pathname.startsWith(`${prefix}/`);
+
+// Mirrors the `rewrites()` matching this replaced: the trailing slash is
+// dropped, so `/api/1/datasets/` reaches Flask as `/api/1/datasets`.
+function backendDestination(request: NextRequest): URL | null {
+  const path = request.nextUrl.pathname.replace(/\/+$/, "") || "/";
+  const isBackend =
+    BACKEND_EXACT_PATHS.includes(path) || BACKEND_PREFIXES.some((p) => hasPrefix(path, p));
+  if (!isBackend) return null;
+  // Read per request (never at module scope) so the value comes from the
+  // container environment, not from the build.
+  const backendUrl = (process.env.BACKEND_URL || "http://127.0.0.1:7000").replace(/\/+$/, "");
+  return new URL(`${backendUrl}${path}${request.nextUrl.search}`);
+}
 
 function generateNonce(): string {
   const bytes = new Uint8Array(16);
@@ -75,7 +136,15 @@ function buildCsp(nonce: string): string {
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  const isBackendProxy = BACKEND_PROXY_PATHS.some((p) => pathname.startsWith(p));
+  // Backend routes skip CSP, the gatekeeper and i18n: they return the raw
+  // upstream response and inherit its CSP (or none). `/saml/*` in particular
+  // serves auto-submit forms with their own CSP; a second one would break the
+  // SAML dance.
+  const backend = backendDestination(request);
+  if (backend) return NextResponse.rewrite(backend);
+  if (NON_PAGE_PREFIXES.some((p) => hasPrefix(pathname.replace(/\/+$/, ""), p))) {
+    return NextResponse.next();
+  }
 
   // Route gatekeeper: only localized page requests (path already carries a
   // valid locale prefix) are eligible. Requests missing a locale are left to
@@ -83,24 +152,13 @@ export async function proxy(request: NextRequest) {
   const localeSegment = pathname.split("/")[1];
   const hasLocale = i18nConfig.locales.includes(localeSegment);
 
-  const skipCsp = NO_CSP_PATHS.some((p) => pathname.startsWith(p));
-
   const requestHeaders = new Headers(request.headers);
-
-  if (isBackendProxy && BACKEND_HOST) {
-    requestHeaders.set("X-Forwarded-Host", BACKEND_HOST);
-  }
-
-  let nonce: string | undefined;
-
-  if (!skipCsp) {
-    nonce = generateNonce();
-    requestHeaders.set("x-nonce", nonce);
-  }
+  const nonce = generateNonce();
+  requestHeaders.set("x-nonce", nonce);
 
   // Gatekeeper: 404 requests to routes disabled in the Header / Admin nav CMS.
   // Fails open — any error here lets the request proceed rather than 404ing.
-  if (!isBackendProxy && hasLocale) {
+  if (hasLocale) {
     try {
       const disabledPaths = await getRouteRestrictions(localeSegment);
       if (isPathRestricted(pathname, disabledPaths)) {
@@ -113,9 +171,7 @@ export async function proxy(request: NextRequest) {
           request: { headers: requestHeaders },
           status: 404,
         });
-        if (nonce) {
-          notFound.headers.set("Content-Security-Policy", buildCsp(nonce));
-        }
+        notFound.headers.set("Content-Security-Policy", buildCsp(nonce));
         return notFound;
       }
     } catch (error) {
@@ -128,9 +184,7 @@ export async function proxy(request: NextRequest) {
   // reaches the app on the rewrite branch below and the layout sees undefined.
   const response = i18nRouter(new NextRequest(request, { headers: requestHeaders }), i18nConfig);
 
-  if (nonce) {
-    response.headers.set("Content-Security-Policy", buildCsp(nonce));
-  }
+  response.headers.set("Content-Security-Policy", buildCsp(nonce));
 
   const rewriteUrl = response.headers.get("x-middleware-rewrite");
   if (rewriteUrl) {
@@ -146,7 +200,18 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+  // Matchers must be literals (statically analyzed at build time). The backend
+  // prefixes are listed on their own because the page matcher below skips any
+  // path ending in a file extension (`/s/images/a.png`, `/swaggerui/x.js`).
   matcher: [
+    "/get-csrf",
+    "/saml/:path*",
+    "/confirm/:path*",
+    "/reset/:path*",
+    "/confirm-change-email/:path*",
+    "/s/:path*",
+    "/api/:path*",
+    "/swaggerui/:path*",
     {
       source:
         "/((?!api/|auth/|internal-api/|confirm/|reset/|confirm-change-email/|assets/|swaggerui/|s/|saml/|get-csrf|_next/|\\.well-known/|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?|ttf|otf|eot|css|js|mjs|map)$).*)",

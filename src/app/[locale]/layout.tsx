@@ -18,6 +18,8 @@ import { getInitialSession } from "@/service/api/auth/server";
 import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
+import { RuntimeConfigProvider } from "@/providers/RuntimeConfigProvider";
+import { getRuntimeConfig } from "@/config/runtimeConfig";
 import KarmaAnalytics from "@/Scripts/Karma";
 import GoogleAnalytics from "@/Scripts/GoogleAnalytics";
 
@@ -50,7 +52,7 @@ const namespaces = [
   "admin-topics",
   "admin-logs",
   "admin-editorial",
-  "admin-statistics"
+  "admin-statistics",
 ];
 
 export async function generateMetadata({
@@ -107,6 +109,7 @@ export default async function RootLayout({
   });
   const { headerNavigation, footerData } = await loadShellData(locale);
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const runtimeConfig = await getRuntimeConfig();
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
@@ -115,25 +118,27 @@ export default async function RootLayout({
         <GoogleAnalytics nonce={nonce} />
       </head>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
-        <AuthProvider initialSession={initialSession}>
-          <ActiveProfileProvider>
-            <ApolloWrapper>
-              <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
-                <ToastProviderWrapper>
-                  <ApiErrorProvider>
-                    <PopupProviderWrapper>
-                      <ShellProvider headerNavigation={headerNavigation}>
-                        <ScrollTop />
-                        {children}
-                        <Footer data={footerData} />
-                      </ShellProvider>
-                    </PopupProviderWrapper>
-                  </ApiErrorProvider>
-                </ToastProviderWrapper>
-              </TranslationsProvider>
-            </ApolloWrapper>
-          </ActiveProfileProvider>
-        </AuthProvider>
+        <RuntimeConfigProvider value={runtimeConfig}>
+          <AuthProvider initialSession={initialSession}>
+            <ActiveProfileProvider>
+              <ApolloWrapper>
+                <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
+                  <ToastProviderWrapper>
+                    <ApiErrorProvider>
+                      <PopupProviderWrapper>
+                        <ShellProvider headerNavigation={headerNavigation}>
+                          <ScrollTop />
+                          {children}
+                          <Footer data={footerData} />
+                        </ShellProvider>
+                      </PopupProviderWrapper>
+                    </ApiErrorProvider>
+                  </ToastProviderWrapper>
+                </TranslationsProvider>
+              </ApolloWrapper>
+            </ActiveProfileProvider>
+          </AuthProvider>
+        </RuntimeConfigProvider>
       </body>
     </html>
   );
