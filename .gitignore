@@ -51,7 +51,6 @@ next-env.d.ts
 
 # gemini
 .gemini/
-google-chrome-stable_current_amd64.deb
 figma_node.json
 # testsprite (vulnerability testing - contains API keys and credentials)
 /testsprite_tests/
@@ -60,8 +59,12 @@ figma_node.json
 test-results/
 tests/__pycache__/
 playwright-report/
+.playwright-mcp/
 # Bind-mounted log directory (Next.js stdout/stderr piped here by docker-compose)
 /logs/*
 !/logs/.gitkeep
 public/Icons/reduce_icon.svg:Zone.Identifier
 *.Identifier
+
+# vscode
+.vscode/

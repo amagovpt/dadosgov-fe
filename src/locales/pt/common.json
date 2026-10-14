@@ -46,6 +46,11 @@
   "articleNotFoundDescription": "O artigo que procura não existe ou foi removido.",
   "backToArticles": "Voltar aos artigos",
   "loading": "A carregar...",
+  "pageLoader": {
+    "title": "Carregar dados leva o seu tempo...",
+    "description": "Por favor aguarde {{seconds}} segundos",
+    "descriptionWithoutSeconds": "Por favor aguarde"
+  },
   "notFound": {
     "error": "Erro 404",
     "title": "Página não encontrada",
@@ -357,5 +362,163 @@
     "deleteMessageConfirm": "Tem certeza de que deseja apagar esta mensagem?",
     "noDiscussionsTitle": "Sem discussões",
     "noDiscussionsDescription": "Ainda não existem discussões."
-  }
+  },
+  "searchBenProj": {
+    "beneficiary": "beneficiário",
+    "project": "projeto",
+    "beneficiaries": "beneficiários",
+    "projects": "projetos",
+    "hero": {
+      "subtitle": "Existe um total de <strong>{{total}} {{subject}}</strong> de financiamentos",
+      "subtitleProjects": "Existe um total de <strong>{{total}} {{subject}}</strong> financiados",
+      "searchByName": "Pesquisar por nome",
+      "searchByNif": "Pesquisar por número de identificação fiscal",
+      "searchByOperationCode": "Pesquisar por código de operação",
+      "searchPlaceholder": "Insira o {{searchBy}} do {{subject}} a pesquisar"
+    },
+    "filterSearch": "Filtrar pesquisa",
+    "applyFilters": "Aplicar filtros",
+    "appliedFilters": "Filtros aplicados",
+    "reset": "Limpar filtros aplicados",
+    "mainBeneficiaries": "Beneficiários principais",
+    "otherBeneficiaries": "Outros beneficiários",
+    "suppliers": "Fornecedores",
+    "filters": {
+      "amounts": {
+        "from": "Desde {{min}}€",
+        "to": "Até {{max}}€",
+        "fromTo": "De {{min}}€ a {{max}}€"
+      },
+      "projectsAmount": {
+        "from": "Desde {{min}} projetos",
+        "to": "Até {{max}} projetos",
+        "fromTo": "De {{min}} a {{max}} projetos"
+      }
+    },
+    "fields": {
+      "entityNif": "NIF da Entidade",
+      "entityName": "Nome da Entidade",
+      "operationCode": "Código da Operação",
+      "entityRole": "Papel da Entidade",
+      "approvedValue": "Valor Aprovado",
+      "executedValue": "Valor Executado",
+      "paidValue": "Valor Pago",
+      "fundCode": "Código do Fundo",
+      "fundName": "Nome do Fundo",
+      "policyObjectiveCode": "Código do Objetivo da Política",
+      "policyObjectiveName": "Nome do Objetivo da Política",
+      "specificObjectiveCode": "Código do Objetivo Específico",
+      "specificObjectiveShortName": "Designação Curta do Objetivo Específico",
+      "programmeCode": "Código do Programa",
+      "programmeName": "Nome do Programa",
+      "thematicAreaCode": "Código da Área Temática",
+      "thematicAreaName": "Nome da Área Temática",
+      "effectiveConclusionDate": "Data de Conclusão Efetiva",
+      "plannedConclusionDate": "Data de Conclusão Prevista",
+      "nutsiiOperationCode": "Código NUTS II da Operação",
+      "nutsiiOperationName": "Nome da NUTS II da Operação",
+      "nutsiiiOperationCode": "Código NUTS III da Operação",
+      "nutsiiiOperationName": "Nome da NUTS III da Operação",
+      "municipalityOperationCode": "Código do Município da Operação",
+      "municipalityOperationName": "Nome do Município da Operação",
+      "projectsAmount": "Número de Projetos",
+      "operationName": "Nome"
+    },
+    "exportResults": "Resultados da pesquisa de {{subject}}"
+  },
+  "aboutPt2030": {
+    "specificObjectivesCapitalized": "Objetivos Específicos"
+  },
+  "download": "Descarregar",
+  "listing": "Listagem",
+  "errorRangeNumber": "O valor mínimo não pode ser superior ao valor máximo",
+  "invalidRangeNumber": "Inserir novo valor, entre {{min}} e {{max}}",
+  "executedAmount": "Valor executado",
+  "financingValue": "Valor financiado",
+  "fundingAmount": "Valor de financiamento",
+  "paidValue": "Valor pago",
+  "indicators": "Indicadores",
+  "maximum": "Máximo",
+  "minimum": "Mínimo",
+  "next": "Seguinte",
+  "previous": "Anterior",
+  "nif": "número de identificação fiscal",
+  "noResults": "Sem resultados",
+  "operationCode": "código de operação",
+  "pesquisar": "Pesquisar",
+  "results": "resultados",
+  "source": "Fonte",
+  "update": "Atualização",
+  "thousand": "mil",
+  "thousand_one": "mil",
+  "million": "milhões",
+  "million_one": "milhão",
+  "billion": "mil milhões",
+  "billion_one": "mil milhões",
+  "portugal-2030": "Portugal 2030",
+  "projetos-do-portugal-2030": "Projetos do Portugal 2030",
+  "beneficiarios-do-portugal-2030": "Beneficiários do Portugal 2030",
+  "sheetBenProj": {
+    "project": {
+      "pt2030": "Projeto Portugal 2030"
+    },
+    "beneficiary": {
+      "pt2030": "Beneficiário Portugal 2030"
+    },
+    "fields": {
+      "nome": "Nome do projeto",
+      "objetivo_estrategico": "Objetivo estratégico",
+      "objetivo_especifico": "Objetivo específico",
+      "modalidade": "Modalidade",
+      "codigo_projeto": "Código de operação",
+      "valor_financiamento": "Valor de financiamento",
+      "valor_financiamento_tooltip": "Montante financiado com fundos europeus.",
+      "valor_executado": "Valor executado",
+      "valor_pago": "Valor pago",
+      "dt_inicio_prevista": "Data de início prevista",
+      "dt_conclusao_prevista": "Data de conclusão prevista",
+      "sumario": "Sumário",
+      "nif": "Número de identificação fiscal",
+      "ben_name": "Nome",
+      "total_projetos": "Total de projetos",
+      "total_financiado": "Total financiado"
+    },
+    "tooltips": {
+      "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus."
+    },
+    "noGrade": "Não se aplica",
+    "byArea": "Por {{area}}",
+    "financiado": "financiado",
+    "financiado_pl": "financiados",
+    "financiada": "financiada",
+    "financiada_pl": "financiadas",
+    "nationwide": "Por todo o país",
+    "nationwide_line": "Sem distribuição geográgica definida",
+    "ondeFoiAplicado": "Onde foi aplicado o dinheiro",
+    "areas": {
+      "concelho": "concelho",
+      "concelho_pl": "concelhos",
+      "distrito": "distrito",
+      "distrito_pl": "distritos",
+      "subregiao": "sub-região",
+      "subregiao_pl": "sub-regiões",
+      "regiao": "região",
+      "regiao_pl": "regiões"
+    },
+    "suppliersValues": "Valores de financiamento a fornecedores",
+    "suppliersInDetail": "Fornecedores em detalhe"
+  },
+  "approvedValue": "Valor aprovado",
+  "executedValue": "Valor executado",
+  "paidValuePrr": "Valor recebido",
+  "percentageOfApprovedValue": "{{percentage}} do valor aprovado",
+  "beneficiaries": "Beneficiários",
+  "projects": "Projetos",
+  "financing": "Financiamento",
+  "conclusionDate": "Data de conclusão",
+  "plannedConclusionDate": "Data de conclusão prevista",
+  "amountExpected": "Valor previsto",
+  "amountPaid": "Valor pago",
+  "totalAmountExpected": "Valor total previsto",
+  "totalAmountPaid": "Valor total pago"
 }

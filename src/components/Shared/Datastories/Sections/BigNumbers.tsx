@@ -18,7 +18,7 @@ function BigNumber({ icon, number, numberLabel, title, subtitle }: BigNumberI) {
   return (
     <div className="flex flex-row gap-16">
       <div className="h-fit w-fit rounded-8 bg-primary-100 p-16">
-        <AppIcon name={icon} className="h-24 w-24 !fill-primary-700" />
+        <AppIcon name={icon} className="h-24 w-24 fill-primary-700!" />
       </div>
       <div className="flex flex-col">
         <p>
