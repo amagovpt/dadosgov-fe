@@ -12,20 +12,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js needs NEXT_PUBLIC_* vars at build time — values come from docker-compose build.args
-ARG NEXT_PUBLIC_API_BASE=
-ARG NEXT_PUBLIC_API_V2_BASE=
-ARG NEXT_PUBLIC_FRONT_BASE=
-ARG NEXT_PUBLIC_BASE_URL=
-ARG NEXT_PUBLIC_STATIC_URL=
-ARG NEXT_PUBLIC_READ_ONLY_MODE=
-ARG NEXT_PUBLIC_REQUIRE_EMAIL_CONFIRMATION=
-ARG NEXT_PUBLIC_SAML_ENABLED=
-ARG NEXT_PUBLIC_SENTRY_DSN=
+# NEXT_PUBLIC_API_URL is the only variable still inlined at build time.
+# Everything else per-environment (BACKEND_URL, NEXT_PUBLIC_SAML_ENABLED,
+# NEXT_PUBLIC_RECAPTCHA_SITE_KEY, API_URL_INTERNAL, …) is read at runtime from
+# the container environment — see src/config/runtimeConfig.ts.
 ARG NEXT_PUBLIC_API_URL=
-
-# BACKEND_URL is used by next.config.ts rewrites (server-side only)
-ARG BACKEND_URL=http://host.docker.internal:7000
 
 RUN npm run build
 

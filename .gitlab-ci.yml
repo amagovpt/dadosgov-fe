@@ -1,0 +1,40 @@
+# GitLab pipeline — Next.js component from the DevOps catalog
+
+include:
+  - component: $CI_SERVER_HOST/DevOps-Templates/ci-cd-devops-catalog/devops-next-comp@~latest
+    inputs:
+      gitlab-runner: "k8s"
+      node-image: "$NEXUS_REGISTRY_PULL_URL/node:22.12.0-alpine"
+      build-command: "build"
+      build-artifact-path: ".next"
+      test-command: "test:ci"
+      junit-report-path: "reports/junit.xml"
+      coverage-report-path: "coverage/cobertura-coverage.xml"
+      unit-test-artifacts-path: "coverage/"
+      sast-enabled: "true"
+      # SonarQube off for now: set to "true" together with sonar-project-key /
+      # sonar-sources ("src/") / sonar-test-inclusions ("src/**/*.test.ts,src/**/*.test.tsx").
+      sonar-enabled: "false"
+      accessibility-enabled: "false"
+      docker-image-name: "dadosgov-frontend"
+      dockerfile-dev: ".gitlab/docker/Dockerfile"
+      dockerfile-tst: ".gitlab/docker/Dockerfile"
+      dockerfile-ppr: ".gitlab/docker/Dockerfile"
+      dockerfile-prd: ".gitlab/docker/Dockerfile"
+
+
+promote-to-dev-environment:
+  rules:
+    - when: never
+
+promote-to-tst-environment:
+  rules:
+    - when: never
+
+promote-to-ppr-environment:
+  rules:
+    - when: never
+
+promote-to-prd-environment:
+  rules:
+    - when: never
