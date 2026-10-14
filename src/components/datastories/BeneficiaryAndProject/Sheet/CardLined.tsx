@@ -22,7 +22,7 @@ export default function CardLined({
   return (
     <div
       className={twMerge(
-        "w-full h-auto p-32 bg-white border-l-4 border-fundo-europeu-500 flex flex-col gap-8",
+        "w-full h-auto p-32 bg-white border-l-4 border-primary-600 flex flex-col gap-8",
         className,
       )}
     >

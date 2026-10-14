@@ -30,7 +30,7 @@ export default function CardGraph({
         <DonutCard
           textColor={"primary-900"}
           percentual={graphValue}
-          color={"#007CF8"}
+          color={"#034AD8"}
           secondaryColor={"#FFFFFF"}
           variant={graphVariant}
           aria-hidden

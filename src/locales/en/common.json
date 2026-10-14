@@ -504,8 +504,21 @@
       "subregiao_pl": "sub-regions",
       "regiao": "region",
       "regiao_pl": "regions"
-    },
-    "suppliersValues": "Financing amounts to suppliers",
-    "suppliersInDetail": "Suppliers in detail"
-  }
+    }
+  },
+  "suppliersValues": "Financing amounts to suppliers",
+  "suppliersInDetail": "Suppliers in detail",
+  "approvedValue": "Approved value",
+  "executedValue": "Executed value",
+  "paidValuePrr": "Amount received",
+  "percentageOfApprovedValue": "{{percentage}} of approved value",
+  "beneficiaries": "Beneficiaries",
+  "projects": "Projects",
+  "financing": "Financing",
+  "conclusionDate": "Conclusion date",
+  "plannedConclusionDate": "Expected conclusion date",
+  "amountExpected": "Planned",
+  "amountPaid": "Spent",
+  "totalAmountExpected": "Total estimated amount",
+  "totalAmountPaid": "Total amount paid"
 }

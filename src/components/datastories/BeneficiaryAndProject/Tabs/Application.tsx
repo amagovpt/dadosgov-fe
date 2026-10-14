@@ -23,7 +23,7 @@ export default function BenProjSheetTabApplication({
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-full flex-col gap-32 py-64">
+    <div className="flex w-full flex-col gap-32">
       <Typograph tag="h2" className="text-xl-bold text-primary-900">
         {title}
       </Typograph>
@@ -33,7 +33,7 @@ export default function BenProjSheetTabApplication({
 
           <div className="flex flex-col gap-8">
             <Typograph tag="h3" className="text-l-bold text-primary-900">
-              {application[0].title}
+              {application[0] as unknown as string}
             </Typograph>
 
             <Typograph tag="p" className="text-s-regular text-neutral-900">
@@ -43,7 +43,7 @@ export default function BenProjSheetTabApplication({
 
           <div className="flex flex-col gap-8">
             <Typograph tag="h3" className="text-l-bold text-primary-900">
-              {application[1].title}
+              {application[1] as unknown as string}
             </Typograph>
 
             <Typograph tag="p" className="text-s-regular text-neutral-900">
@@ -55,7 +55,7 @@ export default function BenProjSheetTabApplication({
         <div className="flex w-full flex-col gap-32">
           <div className="flex flex-col gap-8">
             <Typograph tag="h3" className="text-m-bold text-primary-900">
-              {application[2].title}
+              {application[2] as unknown as string}
             </Typograph>
 
             <Typograph
@@ -73,7 +73,7 @@ export default function BenProjSheetTabApplication({
 
           <div className="flex flex-col gap-8">
             <Typograph tag="h3" className="text-m-bold text-primary-900">
-              {application[3].title}
+              {application[3] as unknown as string}
             </Typograph>
 
             <Typograph tag="p" className="text-m-regular text-neutral-900">

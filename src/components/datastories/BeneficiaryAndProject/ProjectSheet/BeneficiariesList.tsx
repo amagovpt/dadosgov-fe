@@ -6,6 +6,7 @@ import { formatCompactEUR } from "@/utils/formatCurrency";
 import { PT2030ProjectSheetBeneficiary } from "@/service/types/datastories/pt2030/pt2030";
 import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
 import { LoadMoreWrapper } from "@/components/Shared/Wrappers/LoadMoreWrapper";
+import { ResultCard } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsShared";
 
 type BeneficiaryType = "MAIN" | "MORE";
 
@@ -25,7 +26,7 @@ export default function BeneficiariesList({
   const { i18n, t } = useTranslation();
 
   const [totalItems, setTotalItems] = useState<number | undefined>(
-    data.length < limit ? data.length : undefined,
+    data.length < limit ? data.length : undefined
   );
 
   const handleLoadMore = useCallback(
@@ -38,13 +39,11 @@ export default function BeneficiariesList({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ projectCode, beneficiaryType, limit, page }),
-        },
+        }
       );
 
       if (!res.ok) {
-        throw new Error(
-          `Failed to load more Projects by Entity: ${res.status}`,
-        );
+        throw new Error(`Failed to load more Projects by Entity: ${res.status}`);
       }
 
       const resObj = await res.json();
@@ -55,7 +54,7 @@ export default function BeneficiariesList({
 
       return resObj.data;
     },
-    [projectCode, beneficiaryType, limit],
+    [projectCode, beneficiaryType, limit]
   );
 
   const formatValuesWithSuffix = (value: number | string) => {
@@ -73,29 +72,19 @@ export default function BeneficiariesList({
         const valueStr = `<strong>${t("financingValue")}</strong> ${formatValuesWithSuffix(beneficiary.financingAmount)}`;
         const descStr = `<p>${valueStr}</p>`;
 
-        const description = formatHtmlParagraphs(
-          descStr,
-          "text-m-regular !text-neutral-900 first-letter:uppercase",
-        );
-
         const href = `/${i18n.language}/fundos-europeus/portugal-2030/beneficiarios-e-projetos/pesquisar-beneficiarios/${beneficiary.entityNif}`;
 
         return (
-          <CardGeneral
+          <ResultCard
             key={`card-${beneficiaryType}-${index}`}
-            titleText={beneficiary.name}
-            descriptionText={description as unknown as string}
-            anchor={{
-              children: "",
-              href: href,
-              hasIcon: true,
-            }}
-            isCardHorizontal
-            isBlockedLink
+            title={beneficiary.name}
+            description={descStr}
+            href={href}
+            isLast={index === data.length - 1}
           />
         );
       }}
-      className="grid grid-cols-2 gap-32 load-more-list"
+      className="load-more-list grid grid-cols-2 gap-32"
     />
   );
 }

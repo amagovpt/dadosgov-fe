@@ -28,13 +28,13 @@ function TableRow({ item }: IListItem) {
 
   return (
     <tr>
-      <td className="grow text-neutral-900 pb-8 pl-32 pr-16 border-b-1 border-b-neutral-500">
+      <td className="grow text-neutral-900 pb-8 pl-32 pr-16 border-b border-b-neutral-500">
         {item.descricao}
       </td>
-      <td className="text-right text-m-bold text-primary-900 pb-8 pl-16 pr-16 border-b-1 border-b-neutral-500">
+      <td className="text-right text-m-bold text-primary-900 pb-8 pl-16 pr-16 border-b border-b-neutral-500">
         {formatCurrency(item.pc_valor_executado ?? 0, t)}
       </td>
-      <td className="text-right text-m-bold text-primary-900 pb-8 pl-16 pr-32 border-b-1 border-b-neutral-500">
+      <td className="text-right text-m-bold text-primary-900 pb-8 pl-16 pr-32 border-b border-b-neutral-500">
         {formatCurrency(item.valor_pago ?? 0, t)}
       </td>
     </tr>
@@ -137,7 +137,7 @@ export default function BenProjSheetTabGeographicDistribution({
   }, [totalFundedValue, totalFundedSuffix, t]);
 
   return (
-    <div className="w-full flex flex-col gap-64 py-64">
+    <div className="w-full flex flex-col gap-64">
       <Typograph tag="h2" className="text-xl-bold text-primary-900">
         {title}
       </Typograph>
@@ -154,7 +154,7 @@ export default function BenProjSheetTabGeographicDistribution({
           />
         </div>
         <div className="col-span-12 xl:col-span-3 hidden xl:block">
-          <div className="w-full h-1/2 border-b-1 border-dashed border-b-neutral-500" />
+          <div className="w-full h-1/2 border-b border-dashed border-b-neutral-500" />
         </div>
 
         <div className="col-span-12 xl:col-span-3 hidden xl:block">
@@ -169,13 +169,13 @@ export default function BenProjSheetTabGeographicDistribution({
         </div>
 
         <div className="col-span-12 xl:col-span-3 h-[170px]">
-          <div className="w-1/2 h-full border-r-1 border-dashed border-r-neutral-500 relative">
+          <div className="w-1/2 h-full border-r border-dashed border-r-neutral-500 relative">
             <RoundedIcon
               className="roundedIcon z-10 absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2"
               icon={{
                 name: "agora-line-arrow-down-anchor",
                 color: "white",
-                backgroundColor: "fundo-europeu-500",
+                backgroundColor: "primary-600",
               }}
             />
           </div>
@@ -236,7 +236,7 @@ export default function BenProjSheetTabGeographicDistribution({
               key={`geoArea-${index}`}
               className="col-span-12 xl:col-span-7 flex flex-col gap-32 py-32"
             >
-              <div className="flex flex-col gap-8 pl-[4.5rem]">
+              <div className="flex flex-col gap-8pl-72">
                 <Typograph tag="p" className="text-l-bold text-primary-900">
                   {areaTitle}
                 </Typograph>
@@ -256,7 +256,7 @@ export default function BenProjSheetTabGeographicDistribution({
 
         {shouldRenderFallbackArea && (
           <div className="col-span-12 xl:col-span-7 flex flex-col gap-32 py-32">
-            <div className="flex flex-col gap-8 pl-[2.5rem]">
+            <div className="flex flex-col gap-8 pl-40">
               <Typograph tag="p" className="mt-90 pb-10 text-primary-900">
                 {t(`sheetBenProj.ondeFoiAplicado`)}
               </Typograph>

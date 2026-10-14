@@ -28,11 +28,10 @@ export default function ProjectTabs({ tabs }: ProjectTabsProps) {
       if (hashIndex < 0) return;
 
       pendingScrollIdRef.current = hash;
-      const tabButtons =
-        rootRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+      const tabButtons = rootRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
       tabButtons?.[hashIndex]?.click();
     },
-    [tabIds],
+    [tabIds]
   );
 
   const scrollTargetIntoView = (targetId: string, currentId: string) => {
@@ -43,13 +42,10 @@ export default function ProjectTabs({ tabs }: ProjectTabsProps) {
       return false;
     }
 
-    const headerHeight =
-      document.querySelector("header[data-elastic-exclude]")?.getBoundingClientRect()
-        .height ?? 0;
     const tabListHeight =
-      rootRef.current?.querySelector('[role="tablist"]')?.getBoundingClientRect()
-        .height ?? 0;
-    const offset = headerHeight + tabListHeight + 8;
+      rootRef.current?.querySelector('[role="tablist"]')?.getBoundingClientRect().height ?? 0;
+    const offset = Math.ceil(tabListHeight + 64);
+
     const top = target.getBoundingClientRect().top + window.scrollY - offset;
 
     window.history.replaceState(null, "", `#${currentId}`);
@@ -120,11 +116,7 @@ export default function ProjectTabs({ tabs }: ProjectTabsProps) {
           <Tab key={tab.id} active={index === activeIndex}>
             <TabHeader>{tab.title}</TabHeader>
             <TabBody focusableContent>
-              {tab.scrollTargetId ? (
-                tab.body
-              ) : (
-                <div id={tab.id}>{tab.body}</div>
-              )}
+              {tab.scrollTargetId ? tab.body : <div id={tab.id}>{tab.body}</div>}
             </TabBody>
           </Tab>
         ))}

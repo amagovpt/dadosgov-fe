@@ -507,5 +507,18 @@
     },
     "suppliersValues": "Valores de financiamento a fornecedores",
     "suppliersInDetail": "Fornecedores em detalhe"
-  }
+  },
+  "approvedValue": "Valor aprovado",
+  "executedValue": "Valor executado",
+  "paidValuePrr": "Valor recebido",
+  "percentageOfApprovedValue": "{{percentage}} do valor aprovado",
+  "beneficiaries": "Beneficiários",
+  "projects": "Projetos",
+  "financing": "Financiamento",
+  "conclusionDate": "Data de conclusão",
+  "plannedConclusionDate": "Data de conclusão prevista",
+  "amountExpected": "Valor previsto",
+  "amountPaid": "Valor pago",
+  "totalAmountExpected": "Valor total previsto",
+  "totalAmountPaid": "Valor total pago"
 }

@@ -114,13 +114,13 @@ export default async function ProjectPage({
   }
 
   return (
-    <main className="project-sheet flex flex-col gap-128 pb-128">
+    <main className="datastory-page project-sheet flex flex-col gap-128 pb-128">
       <Datastory.Hero
         breadcrumbs={[
           ...hero.breadcrumbs,
           {
             url: `/datastories/portugal-2030/projetos-do-portugal-2030/${id}`,
-            label: projectData.nome,
+            label: projectSheet.id,
           },
         ]}
         pretitle={hero.title}

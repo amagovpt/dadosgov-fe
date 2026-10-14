@@ -26,7 +26,7 @@ export default function BenProjSheetTabBeneficiaries({
   beneficiariesData,
 }: IBenProjSheetTabBeneficiaries) {
   return (
-    <div className="flex w-full flex-col gap-64 py-64">
+    <div className="flex w-full flex-col gap-64">
       <Typograph tag="h2" className="text-xl-bold text-primary-900">
         {title}
       </Typograph>
