@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
@@ -114,58 +114,75 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
         />
       ) : (
         <ul className="flex flex-col gap-16">
-          {items.map((n) => (
-            <li
-              key={n.id}
-              className={`flex flex-col gap-12 rounded-8 border border-neutral-200 p-24 ${
-                n.handled_at ? "bg-neutral-50" : "bg-white"
-              }`}
-            >
-              {isHarvesterValidation(n.details) ? (
-                <HarvesterValidationRow createdAt={n.created_at} details={n.details} />
-              ) : isTransferRequest(n.details) ? (
-                <TransferNotificationRow
-                  createdAt={n.created_at}
-                  details={n.details}
-                  loadTransfers={loadRecipientTransfers}
-                  onRetryTransfers={retryRecipientTransfers}
-                  onResponded={(respondedAt) => {
-                    setItems((previous) =>
-                      previous.map((item) =>
-                        item.id === n.id ? { ...item, handled_at: respondedAt } : item
-                      )
-                    );
-                  }}
-                />
-              ) : (
-                <GenericRow
-                  id={n.id}
-                  createdAt={n.created_at}
-                  handledAt={n.handled_at}
-                  onMarkRead={handleMarkRead}
-                />
-              )}
-            </li>
-          ))}
+          {items.map((n) => {
+            const readAction = !n.handled_at ? (
+              <Button
+                type="button"
+                appearance="link"
+                variant="neutral"
+                onClick={() => handleMarkRead(n.id)}
+              >
+                {t("admin-notifications:markAsRead")}
+              </Button>
+            ) : null;
+
+            return (
+              <li
+                key={n.id}
+                className={`flex flex-col gap-12 rounded-8 border border-neutral-200 p-24 ${
+                  n.handled_at ? "bg-neutral-50" : "bg-white"
+                }`}
+              >
+                {isHarvesterValidation(n.details) ? (
+                  <HarvesterValidationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                  />
+                ) : isTransferRequest(n.details) ? (
+                  <TransferNotificationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                    loadTransfers={loadRecipientTransfers}
+                    onRetryTransfers={retryRecipientTransfers}
+                    onResponded={(respondedAt) => {
+                      setItems((previous) =>
+                        previous.map((item) =>
+                          item.id === n.id ? { ...item, handled_at: respondedAt } : item
+                        )
+                      );
+                    }}
+                  />
+                ) : (
+                  <GenericRow
+                    createdAt={n.created_at}
+                    handledAt={n.handled_at}
+                    readAction={readAction}
+                  />
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </AdminLayout>
   );
 }
 
-interface BaseRowProps {
-  id: string;
+interface GenericRowProps {
   createdAt: string;
   handledAt: string | null;
-  onMarkRead: (id: string) => void;
+  readAction: ReactNode;
 }
 
 interface HarvesterRowProps {
   createdAt: string;
   details: ValidateHarvesterNotificationDetails;
+  readAction: ReactNode;
 }
 
-function HarvesterValidationRow({ createdAt, details }: HarvesterRowProps) {
+function HarvesterValidationRow({ createdAt, details, readAction }: HarvesterRowProps) {
   const { t } = useTranslation("admin-notifications");
   const link = harvesterValidationLink(details);
   const validationStatus = getHarvesterValidationStatus(details);
@@ -210,11 +227,12 @@ function HarvesterValidationRow({ createdAt, details }: HarvesterRowProps) {
           </p>
         )}
       </div>
+      {readAction && <div className="shrink-0 self-end">{readAction}</div>}
     </div>
   );
 }
 
-function GenericRow({ id, createdAt, handledAt, onMarkRead }: BaseRowProps) {
+function GenericRow({ createdAt, handledAt, readAction }: GenericRowProps) {
   const { t } = useTranslation("admin-notifications");
 
   return (
@@ -229,11 +247,7 @@ function GenericRow({ id, createdAt, handledAt, onMarkRead }: BaseRowProps) {
           {handledAt && ` · ${t("read")}`}
         </p>
       </div>
-      {!handledAt && (
-        <Button appearance="link" variant="neutral" onClick={() => onMarkRead(id)}>
-          {t("markAsRead")}
-        </Button>
-      )}
+      {readAction && <div className="shrink-0 self-end">{readAction}</div>}
     </div>
   );
 }

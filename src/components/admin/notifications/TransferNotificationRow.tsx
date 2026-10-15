@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
@@ -15,6 +15,7 @@ import type { Transfer } from "@/service/types/transfer-system";
 interface TransferNotificationRowProps {
   createdAt: string;
   details: TransferRequestNotificationDetails;
+  readAction: ReactNode;
   loadTransfers: (recipient: string) => Promise<Transfer[]>;
   onRetryTransfers: (recipient: string) => void;
   onResponded: (respondedAt: string) => void;
@@ -23,6 +24,7 @@ interface TransferNotificationRowProps {
 export default function TransferNotificationRow({
   createdAt,
   details,
+  readAction,
   loadTransfers,
   onRetryTransfers,
   onResponded,
@@ -142,38 +144,41 @@ export default function TransferNotificationRow({
           </p>
         )}
       </div>
-      <div className="flex shrink-0 flex-wrap items-center gap-8">
-        {!isLoading && !loadFailed && transfer?.status === "pending" && (
-          <>
-            <Button
-              variant="primary"
-              disabled={submitting !== null}
-              onClick={() => handleRespond("accept")}
-            >
-              {submitting === "accept" ? t("transfer.accepting") : t("transfer.accept")}
-            </Button>
+      <div className="flex shrink-0 flex-col items-end justify-between gap-8 md:self-stretch">
+        <div className="flex flex-wrap items-center gap-8">
+          {!isLoading && !loadFailed && transfer?.status === "pending" && (
+            <>
+              <Button
+                variant="primary"
+                disabled={submitting !== null}
+                onClick={() => handleRespond("accept")}
+              >
+                {submitting === "accept" ? t("transfer.accepting") : t("transfer.accept")}
+              </Button>
+              <Button
+                appearance="outline"
+                variant="primary"
+                disabled={submitting !== null}
+                onClick={() => handleRespond("refuse")}
+              >
+                {submitting === "refuse" ? t("transfer.refusing") : t("transfer.refuse")}
+              </Button>
+            </>
+          )}
+          {!isLoading && loadFailed && (
             <Button
               appearance="outline"
               variant="primary"
-              disabled={submitting !== null}
-              onClick={() => handleRespond("refuse")}
+              onClick={() => {
+                if (details.transfer_recipient) onRetryTransfers(details.transfer_recipient.id);
+                setRetryCount((count) => count + 1);
+              }}
             >
-              {submitting === "refuse" ? t("transfer.refusing") : t("transfer.refuse")}
+              {t("transfer.retry")}
             </Button>
-          </>
-        )}
-        {!isLoading && loadFailed && (
-          <Button
-            appearance="outline"
-            variant="primary"
-            onClick={() => {
-              if (details.transfer_recipient) onRetryTransfers(details.transfer_recipient.id);
-              setRetryCount((count) => count + 1);
-            }}
-          >
-            {t("transfer.retry")}
-          </Button>
-        )}
+          )}
+        </div>
+        {readAction}
       </div>
     </div>
   );
