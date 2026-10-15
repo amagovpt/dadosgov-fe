@@ -20,6 +20,7 @@ import { CmdTab } from "./CmdTab";
 import { EidasTab } from "./EidasTab";
 import { EmailTab } from "./EmailTab";
 import { Typograph } from "../Shared/Generics/Typograph";
+import { useRuntimeConfig } from "@/providers/RuntimeConfigProvider";
 
 export function LoginContent() {
   const { t } = useTranslation("login");
@@ -41,7 +42,7 @@ export function LoginContent() {
   // flag read here — see the note in EmailTab (LEDG-2432).
   const [migrationRequired, setMigrationRequired] = useState(false);
 
-  const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
+  const { samlEnabled } = useRuntimeConfig();
 
   const runSamlLogin = async (base: string, citizen?: string) => {
     setIsLoading(true);

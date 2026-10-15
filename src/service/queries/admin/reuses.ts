@@ -148,6 +148,18 @@ export async function getBoReuses(locale: string = "pt"): Promise<BoReusesPage> 
               }
             }
           }
+          transferCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           archiveCard {
             ${locale} {
               icon

@@ -28,6 +28,10 @@ const translate = (key: string): string => {
   return typeof raw === "string" ? raw : key;
 };
 
+// SAML/reCAPTCHA come from the container environment via RuntimeConfigProvider.
+const runtimeConfig = vi.hoisted(() => ({ samlEnabled: false, recaptchaSiteKey: "" }));
+vi.mock("@/providers/RuntimeConfigProvider", () => ({ useRuntimeConfig: () => runtimeConfig }));
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: translate }),
 }));
@@ -195,6 +199,7 @@ afterEach(() => {
   container.remove();
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
+  runtimeConfig.samlEnabled = false;
 });
 
 describe("LoginContent email sign-in", () => {
@@ -300,7 +305,7 @@ describe("LoginContent email sign-in", () => {
 describe("LoginContent SAML start parameters", () => {
   /** Enable the SAML buttons; they are dead controls otherwise. */
   function withSamlEnabled() {
-    vi.stubEnv("NEXT_PUBLIC_SAML_ENABLED", "true");
+    runtimeConfig.samlEnabled = true;
   }
 
   async function click(el: Element | null | undefined, what: string) {

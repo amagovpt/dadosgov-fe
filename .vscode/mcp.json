@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "figma": {
-      "transport": "http",
-      "url": "https://mcp.figma.com/mcp"
-    }
-  }
-}
