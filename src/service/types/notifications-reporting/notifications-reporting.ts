@@ -1,5 +1,6 @@
 import type { Organization, UserRef } from "@/service/types/identity";
 import type { TransferRecipientClass, TransferSubjectClass } from "@/service/types/transfer-system";
+import type { HarvestSourceValidation } from "@/service/types/harvester";
 
 export interface DiscussionNotificationDetails {
   discussion: string | null;
@@ -35,6 +36,9 @@ export interface ValidateHarvesterNotificationSource {
   id: string;
   name: string;
   slug?: string;
+  validation?: Pick<HarvestSourceValidation, "state"> | null;
+  organization?: Pick<Organization, "name"> | null;
+  owner?: Pick<UserRef, "first_name" | "last_name"> | null;
 }
 
 export interface ValidateHarvesterNotificationDetails {

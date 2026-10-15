@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
@@ -14,21 +13,17 @@ import type {
   ValidateHarvesterNotificationDetails,
 } from "@/service/types/notifications-reporting";
 import {
+  getHarvesterValidationStatus,
   harvesterValidationLink,
   isHarvesterValidation,
   isTransferRequest,
 } from "@/components/admin/notifications/notification-helpers";
 import TransferNotificationRow from "@/components/admin/notifications/TransferNotificationRow";
 import AppIcon from "@/components/Primitives/AppIcon";
+import TextLink from "@/components/Primitives/TextLink";
 import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { BoNotificationsPage } from "@/service/types/admin/notifications";
-
-const statusKeyMap: Record<ValidateHarvesterNotificationDetails["status"], string> = {
-  pending: "pending",
-  accepted: "accepted",
-  refused: "refused",
-};
 
 interface NotificationsClientProps {
   pageContent: BoNotificationsPage;
@@ -127,13 +122,7 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
               }`}
             >
               {isHarvesterValidation(n.details) ? (
-                <HarvesterValidationRow
-                  id={n.id}
-                  createdAt={n.created_at}
-                  handledAt={n.handled_at}
-                  details={n.details}
-                  onMarkRead={handleMarkRead}
-                />
+                <HarvesterValidationRow createdAt={n.created_at} details={n.details} />
               ) : isTransferRequest(n.details) ? (
                 <TransferNotificationRow
                   createdAt={n.created_at}
@@ -171,28 +160,27 @@ interface BaseRowProps {
   onMarkRead: (id: string) => void;
 }
 
-interface HarvesterRowProps extends BaseRowProps {
+interface HarvesterRowProps {
+  createdAt: string;
   details: ValidateHarvesterNotificationDetails;
 }
 
-function HarvesterValidationRow({
-  id,
-  createdAt,
-  handledAt,
-  details,
-  onMarkRead,
-}: HarvesterRowProps) {
+function HarvesterValidationRow({ createdAt, details }: HarvesterRowProps) {
   const { t } = useTranslation("admin-notifications");
   const link = harvesterValidationLink(details);
-  const statusLabel = t(`statuses.${statusKeyMap[details.status] ?? "pending"}`);
+  const validationStatus = getHarvesterValidationStatus(details);
+  const owner = details.source?.owner;
+  const senderName =
+    details.source?.organization?.name ||
+    [owner?.first_name, owner?.last_name].filter(Boolean).join(" ");
 
   return (
-    <div className="flex items-start justify-between gap-16">
-      <div className="flex flex-col gap-8">
+    <div className="flex flex-col justify-between gap-16 md:flex-row md:items-start">
+      <div className="flex min-w-0 flex-col gap-8">
         <div className="flex items-center gap-8">
           <AppIcon name="agora-line-mega-phone" />
           <span className="text-base font-medium text-primary-900">
-            {t("harvesterValidation.title", { status: statusLabel })}
+            {t("harvesterValidation.title")}
           </span>
         </div>
         {details.source ? (
@@ -202,23 +190,24 @@ function HarvesterValidationRow({
             {t("harvesterValidation.sourceUnavailable")}
           </p>
         )}
+        {link && (
+          <TextLink href={link} target="_blank" className="inline-flex w-fit items-center gap-8">
+            <AppIcon name="agora-line-eye" />
+            {t("harvesterValidation.viewHarvester")}
+          </TextLink>
+        )}
+        {senderName && (
+          <p className="text-base text-neutral-700">
+            {t("harvesterValidation.from", { owner: senderName })}
+          </p>
+        )}
         <p className="text-sm text-neutral-500">
           {format(new Date(createdAt), "dd/MM/yyyy HH:mm")}
-          {handledAt && ` · ${t("read")}`}
         </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-8">
-        {link && (
-          <Link href={link}>
-            <Button appearance="outline" variant="primary">
-              {t("harvesterValidation.viewHarvester")}
-            </Button>
-          </Link>
-        )}
-        {!handledAt && (
-          <Button appearance="link" variant="neutral" onClick={() => onMarkRead(id)}>
-            {t("markAsRead")}
-          </Button>
+        {validationStatus !== "pending" && (
+          <p role="status" className="text-sm text-neutral-700">
+            {t(`harvesterValidation.statuses.${validationStatus}`)}
+          </p>
         )}
       </div>
     </div>

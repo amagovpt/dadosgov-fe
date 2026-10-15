@@ -129,13 +129,13 @@ export default function TransferNotificationRow({
           <p role="alert" className="text-sm text-danger-600">
             {t("transfer.loadError")}
           </p>
-        ) : transfer ? (
+        ) : transfer && transfer.status !== "pending" ? (
           <p role="status" className="text-sm text-neutral-700">
             {t(`transfer.statuses.${transfer.status}`)}
           </p>
-        ) : (
+        ) : !transfer ? (
           <p className="text-sm text-neutral-700">{t("transfer.unavailable")}</p>
-        )}
+        ) : null}
         {responseFailed && (
           <p role="alert" className="text-sm text-danger-600">
             {t("transfer.responseError")}

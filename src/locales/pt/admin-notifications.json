@@ -2,13 +2,13 @@
   "title": "Notificações",
   "read": "lida",
   "markAsRead": "Marcar como lida",
-  "statuses": {
-    "pending": "Pendente",
-    "accepted": "Validada",
-    "refused": "Recusada"
-  },
   "harvesterValidation": {
-    "title": "Validação de harvester — {{status}}",
+    "title": "Validação de harvester",
+    "from": "Enviado por {{owner}}",
+    "statuses": {
+      "accepted": "Harvester aceite",
+      "refused": "Harvester recusado"
+    },
     "sourceUnavailable": "Fonte indisponível (poderá ter sido eliminada).",
     "viewHarvester": "Ver harvester"
   },

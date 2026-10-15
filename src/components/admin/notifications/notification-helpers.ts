@@ -53,15 +53,25 @@ export function isHarvesterValidation(
   );
 }
 
+export function getHarvesterValidationStatus(
+  details: ValidateHarvesterNotificationDetails
+): ValidateHarvesterNotificationDetails["status"] {
+  // The notification records the original event. Its embedded source is
+  // serialized with the harvester's current validation state.
+  return details.source?.validation?.state ?? details.status;
+}
+
 /**
- * Count notifications whose backend status is still `pending` AND that have
+ * Count notifications whose current harvester state is still `pending` AND that have
  * not been marked as handled in the frontend yet (`handled_at === null`).
  * Falsy values protect against half-loaded payloads.
  */
 export function countPendingHarvesterValidations(notifications: Notification[]): number {
   return notifications.filter(
     (n) =>
-      n.handled_at === null && isHarvesterValidation(n.details) && n.details.status === "pending"
+      n.handled_at === null &&
+      isHarvesterValidation(n.details) &&
+      getHarvesterValidationStatus(n.details) === "pending"
   ).length;
 }
 
