@@ -1,0 +1,459 @@
+# -----------------------------------------------------------------------------
+# content-backend (squid-be) - GitLab CI
+#
+# Segue as convenções do DevOps-Templates/ci-cd-devops-catalog (stages, fluxo
+# de branches, buildah/Nexus, scanners GitLab, promote GitOps e release notes).
+# Não existe componente para backends Node/Express no catálogo, por isso o
+# pipeline é definido aqui. Ver docs/CI.md.
+#
+# Fluxo:
+#   MR (feat/* -> develop) .... validação: segurança, build, lint
+#   develop ................... + imagem DEV, container scanning, promote DEV
+#   release-X.Y.Z ............. + imagens TST/PPR e promotes (manuais)
+#   tag X.Y.Z ................. + imagem PRD, promote PRD (manuais), release
+# -----------------------------------------------------------------------------
+
+variables:
+  # Tem de ser a mesma base do .gitlab/docker/Dockerfile: o node_modules da
+  # imagem é instalado no job package-code com esta imagem.
+  NODE_IMAGE: '$NEXUS_REGISTRY_PULL_URL/node:24.13.0-alpine3.23'
+  GITLAB_RUNNER: 'k8s'
+  IMAGE_NAME: 'dadosgov/content-backend'
+  DOCKERFILE: '.gitlab/docker/Dockerfile'
+
+  # Feature flags (equivalentes aos inputs *-enabled do catálogo)
+  UNIT_TESTS_ENABLED: 'false'
+  SONAR_ENABLED: 'false'
+
+  # SonarQube (usado quando SONAR_ENABLED == "true")
+  SONAR_PROJECT_KEY: 'dadosgov-content-backend'
+  SONAR_PROJECT_NAME: '[DadosGov] Content Backend'
+  SONAR_SOURCES: 'src'
+
+  # GitOps: branches do repositório de manifests. DEPLOY_REPOSITORY,
+  # DEPLOY_MANIFEST e DEPLOY_TOKEN são variáveis CI/CD do projeto (masked);
+  # enquanto não existirem, os jobs de promote não são criados.
+  DEPLOYMENT_BRANCH_DEV: 'DEV'
+  DEPLOYMENT_BRANCH_TST: 'TST'
+  DEPLOYMENT_BRANCH_PPR: 'PPR'
+  DEPLOYMENT_BRANCH_PRD: 'PRD'
+
+  # Scanners GitLab também em pipelines de MR
+  AST_ENABLE_MR_PIPELINES: 'true'
+
+default:
+  tags:
+    - $GITLAB_RUNNER
+
+stages:
+  - secret-detection
+  - build
+  - test
+  - codequality
+  - buildimage
+  - container-scan
+  - deploy
+  - release
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|feat)\/.+$/ && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^release-\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_BRANCH =~ /^hotfix\/.+$/
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|feat)\/.+$/
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+    - when: never
+
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
+
+# -----------------------------------------
+# Regras e templates reutilizáveis
+# -----------------------------------------
+.rules-validate:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^release-\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_BRANCH =~ /^hotfix\/.+$/
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|feat)\/.+$/
+
+.rules-all:
+  rules:
+    - !reference [.rules-validate, rules]
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+
+.node-job:
+  image: $NODE_IMAGE
+  cache:
+    key:
+      files:
+        - package-lock.json
+      prefix: '${CI_PROJECT_ID}-npm'
+    paths:
+      - .npm/
+  before_script:
+    - npm ci --cache .npm --prefer-offline --audit=false
+
+# -----------------------------------------
+# Secret-Detection
+# -----------------------------------------
+secret_detection:
+  stage: secret-detection
+  variables:
+    SECRET_DETECTION_HISTORIC_SCAN: 'true'
+    ADDITIONAL_CA_CERT_BUNDLE: $CA_LCAMACA
+    ANALYZER_INDENT_REPORT: 'true'
+    SEARCH_MAX_DEPTH: '5'
+    SEARCH_IGNORE_HIDDEN_DIRS: 'false'
+
+# -----------------------------------------
+# Build
+# -----------------------------------------
+version:
+  stage: build
+  image: $NODE_IMAGE
+  extends: .rules-all
+  script:
+    - APP_VERSION="$(node -p "require('./package.json').version")"
+    - echo "Versão do package.json -> $APP_VERSION"
+    - |
+      # Política de versões: release-X.Y.Z e tag X.Y.Z têm de coincidir com o package.json
+      EXPECTED=""
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        EXPECTED="$CI_COMMIT_TAG"
+      elif echo "$CI_COMMIT_BRANCH" | grep -Eq '^release-[0-9]+\.[0-9]+\.[0-9]+$'; then
+        EXPECTED="${CI_COMMIT_BRANCH#release-}"
+      fi
+      if [ -n "$EXPECTED" ] && [ "$EXPECTED" != "$APP_VERSION" ]; then
+        echo "ERRO: a versão do package.json ($APP_VERSION) não corresponde a '$EXPECTED'."
+        echo "Atualize o campo version do package.json antes de criar a release/tag."
+        exit 1
+      fi
+    - echo "APP_VERSION=$APP_VERSION" > version.env
+  artifacts:
+    reports:
+      dotenv: version.env
+
+build-code:
+  stage: build
+  extends:
+    - .node-job
+    - .rules-all
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1h
+
+# Pacote de runtime para a imagem (build + dependências de produção).
+# O Dockerfile não corre npm: só copia publish/.
+package-code:
+  stage: build
+  extends: .node-job
+  before_script: []
+  needs:
+    - job: build-code
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH =~ /^release-\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+  script:
+    - test -d build
+    - rm -rf publish && mkdir -p publish
+    - cp package.json package-lock.json publish/
+    - (cd publish && npm ci --omit=dev --cache "$CI_PROJECT_DIR/.npm" --prefer-offline --audit=false)
+    - cp -r build publish/build
+  artifacts:
+    paths:
+      - publish/
+    expire_in: 1h
+
+# -----------------------------------------
+# Test
+# -----------------------------------------
+lint-code:
+  stage: test
+  extends:
+    - .node-job
+    - .rules-all
+  needs: []
+  script:
+    - npm run lint
+    - npm run format:check
+
+unit-test-code:
+  stage: test
+  extends: .node-job
+  needs: []
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  variables:
+    KUBERNETES_CPU_REQUEST: '1'
+    KUBERNETES_CPU_LIMIT: '2'
+    KUBERNETES_MEMORY_REQUEST: '2Gi'
+    KUBERNETES_MEMORY_LIMIT: '4Gi'
+  rules:
+    - if: $UNIT_TESTS_ENABLED != "true"
+      when: never
+    - !reference [.rules-validate, rules]
+  script:
+    - mkdir -p reports
+    - npm run test
+  artifacts:
+    when: always
+    expire_in: 30 days
+    paths:
+      - reports/
+      - coverage/
+    reports:
+      junit: reports/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+
+# -----------------------------------------
+# Codequality
+# -----------------------------------------
+code-quality:
+  stage: codequality
+  image:
+    name: $SONAR_CLI_IMAGE
+    entrypoint: ['']
+  needs:
+    - job: unit-test-code
+      optional: true
+  variables:
+    SONAR_USER_HOME: '${CI_PROJECT_DIR}/.sonar'
+    GIT_DEPTH: '0'
+  cache:
+    key: '${CI_JOB_NAME}'
+    paths:
+      - .sonar/cache
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop" && $SONAR_ENABLED == "true"
+  script:
+    - >
+      sonar-scanner
+      -Dsonar.projectKey="$SONAR_PROJECT_KEY"
+      -Dsonar.projectName="$SONAR_PROJECT_NAME"
+      -Dsonar.sources="$SONAR_SOURCES"
+      -Dsonar.sourceEncoding=UTF-8
+      -Dsonar.links.scm="$CI_PROJECT_URL"
+      -Dsonar.links.ci="$CI_PIPELINE_URL"
+      -Dsonar.qualitygate.wait=true
+      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+# -----------------------------------------
+# Buildimage
+# -----------------------------------------
+.build-image-env:
+  stage: buildimage
+  image: $BUILDAH_IMAGE
+  needs:
+    - job: version
+    - job: package-code
+    - job: lint-code
+      artifacts: false
+    - job: unit-test-code
+      artifacts: false
+      optional: true
+  script:
+    - test -d publish/build && test -d publish/node_modules
+    - export TAG="${APP_VERSION}-${TARGET_ENV}.${CI_PIPELINE_IID}"
+    - echo "A construir imagem ${TARGET_ENV} -> $NEXUS_REGISTRY_PUSH_URL/$IMAGE_NAME:$TAG (Dockerfile $DOCKERFILE)"
+    - >
+      devopsbuildah build --no-cache
+      --build-arg NEXUS_REGISTRY_PULL_URL="$NEXUS_REGISTRY_PULL_URL"
+      --label org.opencontainers.image.title="$CI_PROJECT_NAME"
+      --label org.opencontainers.image.version="$TAG"
+      --label org.opencontainers.image.revision="$CI_COMMIT_SHA"
+      -f "$DOCKERFILE"
+      -t "$NEXUS_REGISTRY_PUSH_URL/$IMAGE_NAME:$TAG"
+      .
+    - devopsbuildah push "$NEXUS_REGISTRY_PUSH_URL/$IMAGE_NAME:$TAG"
+    - echo "IMAGE_TAG=$TAG" > image.env
+  artifacts:
+    reports:
+      dotenv: image.env
+
+build-image-dev:
+  extends: .build-image-env
+  variables:
+    TARGET_ENV: 'dev'
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+build-image-tst:
+  extends: .build-image-env
+  variables:
+    TARGET_ENV: 'tst'
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release-\d+\.\d+\.\d+$/
+      when: manual
+
+build-image-ppr:
+  extends: .build-image-env
+  variables:
+    TARGET_ENV: 'ppr'
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release-\d+\.\d+\.\d+$/
+      when: manual
+
+build-image-prd:
+  extends: .build-image-env
+  variables:
+    TARGET_ENV: 'prd'
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+      when: manual
+
+# -----------------------------------------
+# Container Scanning
+# -----------------------------------------
+container_scanning:
+  stage: container-scan
+  variables:
+    CS_REGISTRY_USER: $NEXUS_REGISTRY_USER
+    CS_REGISTRY_PASSWORD: $NEXUS_REGISTRY_PASSWORD
+    CS_DOCKERFILE_PATH: $DOCKERFILE
+  before_script:
+    - test -n "$IMAGE_TAG"
+    - export CS_IMAGE="$NEXUS_REGISTRY_PULL_URL/$IMAGE_NAME:$IMAGE_TAG"
+    - echo "Scanning image -> $CS_IMAGE"
+  needs:
+    - job: build-image-dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# -----------------------------------------
+# Deploy (GitOps)
+# -----------------------------------------
+.promote-env:
+  stage: deploy
+  image: $TOOLBOX_IMAGE
+  script:
+    - test -n "$IMAGE_TAG"
+    - git config --global user.email "DevOps-Generic-User@ama.lan"
+    - git config --global user.name "DevOps-Generic-User"
+    - git clone "https://oauth2:${DEPLOY_TOKEN}@${CI_SERVER_HOST}/${DEPLOY_REPOSITORY}.git" deploy-repo
+    - cd deploy-repo
+    - git checkout "$BRANCH"
+    - sed -i "s,Tag_.*,Tag_${CI_COMMIT_SHORT_SHA}," "${DEPLOY_MANIFEST}.yaml"
+    - sed -i "s,${IMAGE_NAME}:.*,${IMAGE_NAME}:${IMAGE_TAG}," "${DEPLOY_MANIFEST}.yaml"
+    - git add .
+    - git commit -m "Atualizando ${CI_PROJECT_NAME} para ${IMAGE_TAG} - ${CI_COMMIT_SHORT_SHA}" || echo "Sem alterações para commit"
+    - git push
+
+promote-dev:
+  extends: .promote-env
+  variables:
+    BRANCH: $DEPLOYMENT_BRANCH_DEV
+  needs:
+    - job: build-image-dev
+    - job: container_scanning
+      artifacts: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop" && $DEPLOY_REPOSITORY && $DEPLOY_MANIFEST && $DEPLOY_TOKEN
+  environment:
+    name: Develop
+
+promote-tst:
+  extends: .promote-env
+  variables:
+    BRANCH: $DEPLOYMENT_BRANCH_TST
+  needs:
+    - job: build-image-tst
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release-\d+\.\d+\.\d+$/ && $DEPLOY_REPOSITORY && $DEPLOY_MANIFEST && $DEPLOY_TOKEN
+      when: manual
+  environment:
+    name: Test
+
+promote-ppr:
+  extends: .promote-env
+  variables:
+    BRANCH: $DEPLOYMENT_BRANCH_PPR
+  needs:
+    - job: build-image-ppr
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release-\d+\.\d+\.\d+$/ && $DEPLOY_REPOSITORY && $DEPLOY_MANIFEST && $DEPLOY_TOKEN
+      when: manual
+  environment:
+    name: Pre-Production
+
+promote-prd:
+  extends: .promote-env
+  variables:
+    BRANCH: $DEPLOYMENT_BRANCH_PRD
+  needs:
+    - job: build-image-prd
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/ && $DEPLOY_REPOSITORY && $DEPLOY_MANIFEST && $DEPLOY_TOKEN
+      when: manual
+  environment:
+    name: Production
+
+# -----------------------------------------
+# Release
+# -----------------------------------------
+release-notes:
+  stage: release
+  image: $TOOLBOX_IMAGE
+  needs: []
+  variables:
+    GIT_DEPTH: '0'
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+  script:
+    - |
+      : > release_notes.md
+      if [ -n "$RELEASE_TOKEN" ]; then
+        curl -sf --header "PRIVATE-TOKEN: ${RELEASE_TOKEN}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/changelog?version=${CI_COMMIT_TAG}" \
+          | jq -r .notes > release_notes.md || true
+      fi
+      if [ ! -s release_notes.md ] || grep -q '^null$' release_notes.md; then
+        echo "Changelog API indisponível; a gerar notas via git log."
+        PREVIOUS_TAG="$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)"
+        {
+          echo "## Release ${CI_COMMIT_TAG}"
+          echo
+          echo "### Commits"
+          if [ -n "$PREVIOUS_TAG" ]; then
+            git log "${PREVIOUS_TAG}..HEAD" --oneline --no-merges
+          else
+            git log -n 20 --oneline --no-merges
+          fi
+        } > release_notes.md
+      fi
+    - cat release_notes.md
+  artifacts:
+    paths:
+      - release_notes.md
+
+create-release:
+  stage: release
+  image: $RELEASE_CLI_IMAGE
+  variables:
+    INSECURE_HTTPS: 1
+  needs:
+    - job: release-notes
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+  script:
+    - |
+      printf "\n\n### Container Images\n" >> release_notes.md
+      printf -- "- **Nexus Registry:** \`%s/%s:%s-prd.%s\` (job manual build-image-prd)\n" \
+        "$NEXUS_REGISTRY_PULL_URL" "$IMAGE_NAME" "$CI_COMMIT_TAG" "$CI_PIPELINE_IID" >> release_notes.md
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    description: release_notes.md
+    tag_name: '$CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_TAG'

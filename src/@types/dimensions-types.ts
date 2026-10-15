@@ -1,5 +1,5 @@
-import { Field, Float, Int, ObjectType } from "type-graphql";
-import { SourceInfo } from "./shared-types";
+import { Field, Float, Int, ObjectType } from 'type-graphql';
+import { SourceInfo } from './shared-types';
 
 @ObjectType()
 export class GraphicData {

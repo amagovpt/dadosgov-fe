@@ -1,0 +1,12 @@
+node_modules
+build
+.npm
+coverage
+reports
+logs
+*.log
+.env*
+!.env.example
+.git
+.vscode
+docs

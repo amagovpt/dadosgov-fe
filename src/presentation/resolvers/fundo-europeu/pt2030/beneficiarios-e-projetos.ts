@@ -226,7 +226,11 @@ export class BeneficiariesAndProjectsResolver {
   @Query(() => BeneficiariesByProjectSheetOfPortugal2030)
   async queryBeneficiariesByProjectSheetOfPortugal2030(
     @Arg('projectCode', () => String) projectCode: string,
-    @Arg('beneficiaryType', () => BeneficiaryType, { nullable: true, defaultValue: BeneficiaryType.MAIN }) beneficiaryType?: BeneficiaryType,
+    @Arg('beneficiaryType', () => BeneficiaryType, {
+      nullable: true,
+      defaultValue: BeneficiaryType.MAIN,
+    })
+    beneficiaryType?: BeneficiaryType,
     @Arg('page', () => Int, { nullable: true, defaultValue: 1 }) page?: number,
     @Arg('limit', () => Int, { nullable: true, defaultValue: 5 })
     limit?: number,

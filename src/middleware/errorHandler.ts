@@ -1,17 +1,16 @@
-import { NextFunction, Request, Response } from "express";
-
+import { NextFunction, Request, Response } from 'express';
 
 export default function ErrorHandler(
-  err: any,
+  err: Error & { statusCode?: number },
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ) {
   const statusCode = err.statusCode ?? 500;
-  const message = err.message ?? "Internal Server Error";
+  const message = err.message ?? 'Internal Server Error';
 
   console.error(
-    `[ERROR] ${req.method} ${req.originalUrl} - ${statusCode}: ${message}`
+    `[ERROR] ${req.method} ${req.originalUrl} - ${statusCode}: ${message}`,
   );
 
   res.status(statusCode).json({

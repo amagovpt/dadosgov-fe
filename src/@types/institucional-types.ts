@@ -1,4 +1,4 @@
-import { Section } from "./component-types";
+import { Section } from './component-types';
 
 type ContentTopic = {
   title: string;

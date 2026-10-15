@@ -102,33 +102,30 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
       const effectiveLimit =
         offset < totalFiltered ? Math.min(limit, totalFiltered - offset) : 0;
 
-      const dataResult = await cachedQuery(
-        queryBeneficiaryOfPortugal2030,
-        [
-          name || null,
-          nif || null,
-          fund || null,
-          policyObjective || null,
-          specificObjective || null,
-          programme || null,
-          thematicArea || null,
-          region || null,
-          municipality || null,
-          entityRoles || null,
-          projectsAmountMin ?? null,
-          projectsAmountMax ?? null,
-          approvedValueMin ?? null,
-          approvedValueMax ?? null,
-          executedValueMin ?? null,
-          executedValueMax ?? null,
-          paidValueMin ?? null,
-          paidValueMax ?? null,
-          sortBy,
-          sortOrder,
-          effectiveLimit,
-          offset,
-        ],
-      );
+      const dataResult = await cachedQuery(queryBeneficiaryOfPortugal2030, [
+        name || null,
+        nif || null,
+        fund || null,
+        policyObjective || null,
+        specificObjective || null,
+        programme || null,
+        thematicArea || null,
+        region || null,
+        municipality || null,
+        entityRoles || null,
+        projectsAmountMin ?? null,
+        projectsAmountMax ?? null,
+        approvedValueMin ?? null,
+        approvedValueMax ?? null,
+        executedValueMin ?? null,
+        executedValueMax ?? null,
+        paidValueMin ?? null,
+        paidValueMax ?? null,
+        sortBy,
+        sortOrder,
+        effectiveLimit,
+        offset,
+      ]);
 
       const result = dataResult.rows[0]?.result || {};
       data = result.data || [];
@@ -215,10 +212,9 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
     nif: string,
   ): Promise<BeneficiarySheetOfPortugal2030> {
     try {
-      const result = await cachedQuery(
-        queryBeneficiarySheetOfPortugal2030,
-        [nif],
-      );
+      const result = await cachedQuery(queryBeneficiarySheetOfPortugal2030, [
+        nif,
+      ]);
 
       return {
         data: result.rows[0]?.data || null,
@@ -358,32 +354,29 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
       const effectiveLimit =
         offset < totalFiltered ? Math.min(limit, totalFiltered - offset) : 0;
 
-      const dataResult = await cachedQuery(
-        queryProjectsOfPortugal2030,
-        [
-          operationName || null,
-          operationCode || null,
-          fund || null,
-          policyObjective || null,
-          programme || null,
-          thematicArea || null,
-          region || null,
-          municipality || null,
-          specificObjectiveShortName || null,
-          approvedValueMin ?? null,
-          approvedValueMax ?? null,
-          executedValueMin ?? null,
-          executedValueMax ?? null,
-          paidValueMin ?? null,
-          paidValueMax ?? null,
-          plannedConclusionDateMin || null,
-          plannedConclusionDateMax || null,
-          sortBy,
-          sortOrder,
-          effectiveLimit,
-          offset,
-        ],
-      );
+      const dataResult = await cachedQuery(queryProjectsOfPortugal2030, [
+        operationName || null,
+        operationCode || null,
+        fund || null,
+        policyObjective || null,
+        programme || null,
+        thematicArea || null,
+        region || null,
+        municipality || null,
+        specificObjectiveShortName || null,
+        approvedValueMin ?? null,
+        approvedValueMax ?? null,
+        executedValueMin ?? null,
+        executedValueMax ?? null,
+        paidValueMin ?? null,
+        paidValueMax ?? null,
+        plannedConclusionDateMin || null,
+        plannedConclusionDateMax || null,
+        sortBy,
+        sortOrder,
+        effectiveLimit,
+        offset,
+      ]);
 
       const result = dataResult.rows[0]?.result || {};
       data = result.data || [];
@@ -406,9 +399,7 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
 
   async getProjectsOfPortugal2030SourceInfo(): Promise<BeneficiariesAndProjectsOfPortugal2030SourceInfo> {
     try {
-      const result = await cachedQuery(
-        queryProjectsOfPortugal2030SourceInfo,
-      );
+      const result = await cachedQuery(queryProjectsOfPortugal2030SourceInfo);
 
       return {
         sourceInfo: result.rows[0]?.result || [],
@@ -424,11 +415,10 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
     codigoProjeto?: string,
   ): Promise<ProjectSheetOfPortugal2030> {
     try {
-      const result = await cachedQuery(
-        queryProjectSheetOfPortugal2030,
-        [codigoProjeto]
-      );
-      
+      const result = await cachedQuery(queryProjectSheetOfPortugal2030, [
+        codigoProjeto,
+      ]);
+
       return result.rows[0]?.json_output || {};
     } catch (error) {
       throw new AppError(

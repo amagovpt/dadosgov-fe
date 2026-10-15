@@ -793,7 +793,7 @@ source_cte AS (
 )
 SELECT source_cte.source_info AS result
 FROM source_cte;
-`
+`;
 // Project Sheet
 const queryProjectSheetOfPortugal2030 = `WITH latest_project_reference AS (
     SELECT max(o_1.dt_referencia) AS max_dt_referencia
@@ -1032,5 +1032,5 @@ export {
   queryProjectsOfPortugal2030TotalCount,
   queryProjectsOfPortugal2030SourceInfo,
   // Project Sheet
-  queryProjectSheetOfPortugal2030
+  queryProjectSheetOfPortugal2030,
 };

@@ -57,7 +57,7 @@ proxy.on('error', (err, _req, res) => {
 });
 
 export const cmsProxyAssets: RequestHandler = (req, res, next) => {
-  req.url = `/api/assets/dados-gov${req.url}`; 
+  req.url = `/api/assets/dados-gov${req.url}`;
   proxy.web(req, res).catch(next);
 };
 

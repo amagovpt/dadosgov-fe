@@ -5,7 +5,6 @@ import { envParser } from '@lib/envParser';
 
 const { CACHE_TTL_MS } = envParser;
 
-
 export async function cachedQuery<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends QueryResultRow = any,

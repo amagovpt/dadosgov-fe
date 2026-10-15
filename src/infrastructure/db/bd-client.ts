@@ -5,4 +5,4 @@ const bdAnalyticalClient = new Pool(dbAnalyticalConfig);
 
 const bdApplicationClient = new Pool(dbApplicationConfig);
 
-export { bdAnalyticalClient,  bdApplicationClient};
+export { bdAnalyticalClient, bdApplicationClient };

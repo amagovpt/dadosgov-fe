@@ -4,13 +4,12 @@ import { cacheGet, cacheSet } from './memory-cache';
 
 const { CACHE_ENABLED } = envParser;
 
-
 const inFlight = new Map<string, Promise<unknown>>();
 
 export function buildCacheKey(namespace: string, ...parts: unknown[]): string {
   const hash = createHash('sha1');
   for (const part of parts) {
-    hash.update(typeof part === 'string' ? part : JSON.stringify(part) ?? '');
+    hash.update(typeof part === 'string' ? part : (JSON.stringify(part) ?? ''));
     // NUL delimiter: without it ('ab', 'c') and ('a', 'bc') would hash alike.
     hash.update('\u0000');
   }

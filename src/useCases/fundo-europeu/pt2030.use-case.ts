@@ -17,8 +17,6 @@ import {
 } from '@domain/fundo-europeu/pt2030/beneficiarios-e-projetos';
 import { BeneficiariesAndProjectsRepository } from '@infrastructure/Repository/fundo-europeu/pt2030/beneficiarios-e-projetos.repository';
 
-
-
 export class BeneficiariesAndProjectsUseCase {
   private readonly beneficiariesAndProjectsRepo: IBeneficiariesAndProjectsRepository;
 

@@ -553,7 +553,6 @@ export class ProjectSheetOfPortugal2030 {
   distribuicao_geografica?: DistribuicaoGeografica[];
 }
 
-
 export interface IBeneficiariesAndProjectsRepository {
   // Beneficiaries
   searchBeneficiariesOfPortugal2030(

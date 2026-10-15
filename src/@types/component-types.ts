@@ -68,17 +68,11 @@ type Section = {
   subtitle: string;
   description: string;
   cards:
-    | Card[]
-    | CardCollectionLinkProps[]
-    | CardSimple[]
-    | CardHighlightButton[];
+    Card[] | CardCollectionLinkProps[] | CardSimple[] | CardHighlightButton[];
   cardsgroup: {
     title: string;
     cards:
-      | Card[]
-      | CardCollectionLinkProps[]
-      | CardSimple[]
-      | CardHighlightButton[];
+      Card[] | CardCollectionLinkProps[] | CardSimple[] | CardHighlightButton[];
   }[];
 };
 
