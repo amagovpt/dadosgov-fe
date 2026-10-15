@@ -1,17 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchNotifications, markNotificationRead } from "@/service/api/notifications";
-import type { Notification, ValidateHarvesterNotificationDetails } from "@/service/types/notifications-reporting";
+import { fetchTransfers } from "@/service/api/transfers";
+import type { Transfer } from "@/service/types/transfer-system";
+import type {
+  Notification,
+  ValidateHarvesterNotificationDetails,
+} from "@/service/types/notifications-reporting";
 import {
   harvesterValidationLink,
   isHarvesterValidation,
+  isTransferRequest,
 } from "@/components/admin/notifications/notification-helpers";
+import TransferNotificationRow from "@/components/admin/notifications/TransferNotificationRow";
 import AppIcon from "@/components/Primitives/AppIcon";
 import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -32,6 +39,21 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
   const { notifyApiError } = useApiErrorHandler();
   const [items, setItems] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const initialNotificationRequest = useRef<ReturnType<typeof fetchNotifications> | null>(null);
+  // Share each recipient's request across all rows and Strict Mode effects.
+  // Keep rejected promises too: only an explicit retry should issue another
+  // request after a failure such as a rate limit. This cache lives on the page.
+  const recipientTransferRequests = useRef(new Map<string, Promise<Transfer[]>>());
+  const loadRecipientTransfers = useCallback((recipient: string) => {
+    const existing = recipientTransferRequests.current.get(recipient);
+    if (existing) return existing;
+    const request = fetchTransfers(recipient);
+    recipientTransferRequests.current.set(recipient, request);
+    return request;
+  }, []);
+  const retryRecipientTransfers = useCallback((recipient: string) => {
+    recipientTransferRequests.current.delete(recipient);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -39,7 +61,7 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
     const loadNotifications = async () => {
       setIsLoading(true);
       try {
-        const res = await fetchNotifications(1, 50);
+        const res = await (initialNotificationRequest.current ??= fetchNotifications(1, 50));
         if (!isCancelled) {
           setItems(res.data ?? []);
         }
@@ -79,9 +101,7 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
 
   return (
     <AdminLayout
-      breadcrumbItems={[
-        { label: t("admin-notifications:title"), url: "/admin/notificacoes" },
-      ]}
+      breadcrumbItems={[{ label: t("admin-notifications:title"), url: "/admin/notificacoes" }]}
       title={pageContent.hero?.title ?? ""}
       headerAction={null}
     >
@@ -114,10 +134,21 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
                   details={n.details}
                   onMarkRead={handleMarkRead}
                 />
+              ) : isTransferRequest(n.details) ? (
+                <TransferNotificationRow
+                  createdAt={n.created_at}
+                  details={n.details}
+                  loadTransfers={loadRecipientTransfers}
+                  onRetryTransfers={retryRecipientTransfers}
+                  onResponded={(respondedAt) => {
+                    setItems((previous) =>
+                      previous.map((item) =>
+                        item.id === n.id ? { ...item, handled_at: respondedAt } : item
+                      )
+                    );
+                  }}
+                />
               ) : (
-                // Other notification types (Discussion, Membership, Transfer)
-                // are out of scope for LEDG-1735. Fallback ensures they still
-                // render and can be dismissed.
                 <GenericRow
                   id={n.id}
                   createdAt={n.created_at}
@@ -167,7 +198,7 @@ function HarvesterValidationRow({
         {details.source ? (
           <p className="text-base text-neutral-900">{details.source.name}</p>
         ) : (
-          <p className="text-base italic text-neutral-700">
+          <p className="text-base text-neutral-700 italic">
             {t("harvesterValidation.sourceUnavailable")}
           </p>
         )}
