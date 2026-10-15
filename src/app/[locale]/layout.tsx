@@ -20,8 +20,8 @@ import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
 import { RuntimeConfigProvider } from "@/providers/RuntimeConfigProvider";
 import { getRuntimeConfig } from "@/config/runtimeConfig";
-import KarmaAnalytics from "@/Scripts/Karma";
-import GoogleAnalytics from "@/Scripts/GoogleAnalytics";
+//import KarmaAnalytics from "@/Scripts/Karma";
+//import GoogleAnalytics from "@/Scripts/GoogleAnalytics";
 
 const namespaces = [
   "common",
@@ -113,10 +113,10 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
-      <head>
+      {/* <head>
         <KarmaAnalytics nonce={nonce} />
         <GoogleAnalytics nonce={nonce} />
-      </head>
+      </head> */}
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <RuntimeConfigProvider value={runtimeConfig}>
           <AuthProvider initialSession={initialSession}>
