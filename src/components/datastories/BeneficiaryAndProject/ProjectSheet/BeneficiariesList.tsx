@@ -72,7 +72,7 @@ export default function BeneficiariesList({
         const valueStr = `<strong>${t("financingValue")}</strong> ${formatValuesWithSuffix(beneficiary.financingAmount)}`;
         const descStr = `<p>${valueStr}</p>`;
 
-        const href = `/${i18n.language}/fundos-europeus/portugal-2030/beneficiarios-e-projetos/pesquisar-beneficiarios/${beneficiary.entityNif}`;
+        const href = `/${i18n.language}/datastories/portugal-2030/beneficiarios-do-portugal-2030/${beneficiary.entityNif}`;
 
         return (
           <ResultCard

@@ -77,9 +77,8 @@ export default async function ProjectPage({
     throw new Error(error?.message ?? "Failed to fetch data");
   }
 
-  const { hero, projectSheet, beneficiaries, applications, geographicDistribution, datasets } = flattenData(
-    data?.findFichaDeProjetoSingleton.data as Record<string, unknown>
-  ) as Project;
+  const { hero, projectSheet, beneficiaries, applications, geographicDistribution, datasets } =
+    flattenData(data?.findFichaDeProjetoSingleton.data as Record<string, unknown>) as Project;
 
   const projectData = flattenData(
     data?.queryProjectSheetOfPortugal2030 as Record<string, unknown>

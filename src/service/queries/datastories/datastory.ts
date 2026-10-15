@@ -869,3 +869,166 @@ export const queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030 = gql(/* Gra
 export function loadMoreBeneficiariesInProjectSheetOfPortugal2030() {
   return queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030;
 }
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPT2030BeneficiaryMeta(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPT2030BeneficiaryMeta {
+      findFichaDeBeneficiarioSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPT2030BeneficiaryData(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPT2030Beneficiary($nif: String!) {
+      findFichaDeBeneficiarioSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+              breadcrumbs {
+                url
+                label
+              }
+              index {
+                title
+                anchors {
+                  anchor {
+                    href
+                    children
+                  }
+                }
+              }
+            }
+          }
+          beneficiarySheet {
+            ${locale} {
+              id
+              title
+            }
+          }
+          consortiums {
+            ${locale} {
+              id
+              title
+              subtitle
+            }
+          }
+          distribution {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              cards {
+                card {
+                  title
+                  icon
+                  subtitle
+                  description
+                  anchorGroup {
+                    children
+                  }
+                }
+              }
+            }
+          }
+          projects {
+            ${locale} {
+              id
+              iconName
+              title
+              cards {
+                card {
+                  title
+                  anchor {
+                    href
+                    icon
+                    children
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      queryBeneficiarySheetOfPortugal2030(nif: $nif) {
+        data {
+          approvedValue
+          entityName
+          entityNif
+          paidValue
+          beneficiarySheet {
+            approvedValue
+            entityName
+            entityNif
+            projectsAmount
+            paidValue
+          }
+          valuesByEntityRole {
+            approvedValue
+            entityRole
+            executedValue
+            percentageExecutedValue
+            paidValue
+          }
+          numberOfProjectsByEntityRole {
+            entityRole
+            projectsAmount
+          }
+        }
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          referenceDate
+          source
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export const queryLoadMorePT2030ProjectsByBeneficiary = gql(/* GraphQL */ `
+  query loadMoreProjectsByBeneficiary($nif: String!, $entityRole: EntityRole!, $page: Int) {
+    queryProjectsByBeneficiarySheetOfPortugal2030(nif: $nif, entityRole: $entityRole, page: $page) {
+      limit
+      page
+      total
+      data {
+        approvedValue
+        effectiveConclusionDate
+        operationCode
+        operationName
+      }
+    }
+  }
+`);
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function loadMorePT2030ProjectsByBeneficiary() {
+  return queryLoadMorePT2030ProjectsByBeneficiary;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
