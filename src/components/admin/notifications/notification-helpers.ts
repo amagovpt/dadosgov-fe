@@ -73,6 +73,6 @@ export function countPendingHarvesterValidations(notifications: Notification[]):
 export function harvesterValidationLink(
   details: ValidateHarvesterNotificationDetails
 ): string | null {
-  if (!details.source?.slug) return null;
-  return `/admin/system/harvesters/${details.source.slug}`;
+  if (!details.source?.id) return null;
+  return `/admin/harvesters/${encodeURIComponent(details.source.id)}`;
 }

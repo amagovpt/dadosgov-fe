@@ -34,7 +34,7 @@ interface TransferNotificationPerson {
 export interface ValidateHarvesterNotificationSource {
   id: string;
   name: string;
-  slug: string;
+  slug?: string;
 }
 
 export interface ValidateHarvesterNotificationDetails {
