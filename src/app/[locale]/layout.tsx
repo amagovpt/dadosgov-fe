@@ -18,6 +18,8 @@ import { getInitialSession } from "@/service/api/auth/server";
 import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
+import KarmaAnalytics from "@/Scripts/Karma";
+import GoogleAnalytics from "@/Scripts/GoogleAnalytics";
 
 const namespaces = [
   "common",
@@ -104,9 +106,14 @@ export default async function RootLayout({
     namespaces,
   });
   const { headerNavigation, footerData } = await loadShellData(locale);
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
+      <head>
+        <KarmaAnalytics nonce={nonce} />
+        <GoogleAnalytics nonce={nonce} />
+      </head>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <AuthProvider initialSession={initialSession}>
           <ActiveProfileProvider>

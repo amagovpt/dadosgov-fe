@@ -37,7 +37,7 @@ export default function Iframe({ id, title, description, links, iframe, classNam
                   appearance="link"
                   className="flex w-fit items-center gap-8"
                 >
-                  <Link href={link.href}>{link.children}</Link>
+                  <Link href={link.href} target="_blank">{link.children}</Link>
                   <Icon name={link.icon ?? "agora-line-external-link"} />
                 </LinkWrapper>
               );

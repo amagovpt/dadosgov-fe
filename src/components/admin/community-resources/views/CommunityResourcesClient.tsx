@@ -7,6 +7,7 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchMyCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
@@ -23,6 +24,7 @@ interface CommunityResourcesClientProps {
 
 export default function CommunityResourcesClient({ pageContent }: CommunityResourcesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+  const downloadListCsv = useCsvExport();
 
   const [allResources, setAllResources] = useState<CommunityResource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,10 +101,21 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
           archived: t("admin-community-resources:status.archived"),
           published: t("admin-community-resources:status.published"),
         },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
+        },
         editHref: (resource) => `/admin/me/community-resources/edit?id=${resource.id}`,
       }),
     [t]
   );
+
+  // The list is already fully loaded (sorted and filtered), so no extra request.
+  const handleDownloadCsv = useCallback(async () => {
+    downloadListCsv(t("admin-community-resources:title"), sortedResources, columns);
+  }, [downloadListCsv, columns, sortedResources, t]);
 
   return (
     <AdminListPage
@@ -127,6 +140,7 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
           createUrl="/admin/community-resources/new"
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={resources}

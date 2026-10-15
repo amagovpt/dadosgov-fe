@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -25,6 +26,7 @@ interface SystemReusesClientProps {
 
 export default function SystemReusesClient({ pageContent }: SystemReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
+  const downloadListCsv = useCsvExport();
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +39,8 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
   const usesLocalSort = sortField === "status";
 
   const sortParam = useMemo(
-    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, systemReuseSortFieldMap)),
+    () =>
+      usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, systemReuseSortFieldMap),
     [sortField, sortOrder, usesLocalSort]
   );
   const columns = useMemo(
@@ -52,6 +55,12 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
           createdAt: t("admin-reuses:columns.createdAt"),
           datasets: t("admin-reuses:columns.datasets"),
           actions: t("admin-reuses:columns.actions"),
+        },
+        statusLabels: {
+          public: t("admin-common:status.public"),
+          draft: t("admin-common:status.draft"),
+          archived: t("admin-common:status.archived"),
+          deleted: t("admin-common:status.deleted"),
         },
       }),
     [t]
@@ -70,11 +79,15 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
 
     const run = async () => {
       try {
-        const response = await fetchReuses(usesLocalSort ? 1 : currentPage, usesLocalSort ? 9999 : pageSize, {
-          q: searchQuery.trim() || undefined,
-          status: statusFilter || undefined,
-          sort: sortParam,
-        });
+        const response = await fetchReuses(
+          usesLocalSort ? 1 : currentPage,
+          usesLocalSort ? 9999 : pageSize,
+          {
+            q: searchQuery.trim() || undefined,
+            status: statusFilter || undefined,
+            sort: sortParam,
+          }
+        );
         if (!isActive) return;
         setReuses(response.data || []);
         setTotalItems(response.total || 0);
@@ -100,6 +113,37 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
     setCurrentPage(1);
   });
 
+  // With local sort the list is already fully loaded; otherwise one request
+  // with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = usesLocalSort ? sortReuses(reuses, sortField, sortOrder) : reuses;
+    if (!usesLocalSort) {
+      const response = await fetchReuses(1, totalItems, {
+        q: searchQuery.trim() || undefined,
+        status: statusFilter || undefined,
+        sort: sortParam,
+      });
+      rows = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && rows.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+    }
+    downloadListCsv(t("admin-reuses:title"), rows, columns);
+  }, [
+    downloadListCsv,
+    columns,
+    reuses,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    statusFilter,
+    t,
+    totalItems,
+    usesLocalSort,
+  ]);
+
   const visibleReuses = useMemo(
     () =>
       usesLocalSort
@@ -110,9 +154,7 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-reuses:title"), url: "/admin/system/reuses" },
-      ]}
+      breadcrumbItems={[{ label: t("admin-reuses:title"), url: "/admin/system/reuses" }]}
       title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={totalItems}
@@ -137,6 +179,7 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
         />
       }
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={visibleReuses}

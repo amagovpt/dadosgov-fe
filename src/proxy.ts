@@ -54,14 +54,20 @@ function buildCsp(nonce: string): string {
   // callstack reconstruction and other dev-mode debugging features, but
   // never in production builds.
   const scriptSrcExtras = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
+  // Analytics hosts: Usercentrics CMP (consent banner) and Google Analytics
+  // (gtag loader + collection endpoints), loaded from the root layout <head>.
+  const analyticsScriptSrc = "https://web.cmp.usercentrics.eu https://www.googletagmanager.com";
+  const analyticsConnectSrc =
+    "https://*.usercentrics.eu https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com";
+  const analyticsImgSrc = "https://*.google-analytics.com https://www.googletagmanager.com";
   return [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com${scriptSrcExtras}`,
+    `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com ${analyticsScriptSrc}${scriptSrcExtras}`,
     `style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com`,
-    `img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com https://www.gstatic.com`,
+    `img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com https://www.gstatic.com ${analyticsImgSrc}`,
     `frame-src 'self' https://app.powerbi.com https://www.google.com`,
     `font-src 'self' data:`,
-    `connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt`,
+    `connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt ${analyticsConnectSrc}`,
     `frame-ancestors 'none'`,
   ].join("; ");
 }
@@ -117,7 +123,10 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const response = i18nRouter(request, i18nConfig);
+  // i18nRouter builds its NextResponse.next() from the headers of the request
+  // it receives, so hand it the modified headers: otherwise `x-nonce` only
+  // reaches the app on the rewrite branch below and the layout sees undefined.
+  const response = i18nRouter(new NextRequest(request, { headers: requestHeaders }), i18nConfig);
 
   if (nonce) {
     response.headers.set("Content-Security-Policy", buildCsp(nonce));
