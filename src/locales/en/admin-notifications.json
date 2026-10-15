@@ -3,9 +3,43 @@
   "read": "read",
   "markAsRead": "Mark as read",
   "harvesterValidation": {
-    "title": "Harvester validation — {{status}}",
+    "title": "Harvester validation",
+    "from": "Sent by {{owner}}",
+    "statuses": {
+      "accepted": "Harvester accepted",
+      "refused": "Harvester refused"
+    },
     "sourceUnavailable": "Source unavailable (it may have been deleted).",
     "viewHarvester": "View harvester"
+  },
+  "transfer": {
+    "title": "{{resource}} transfer request",
+    "resources": {
+      "Dataset": "Dataset",
+      "Reuse": "Reuse",
+      "Dataservice": "API",
+      "unknown": "Resource"
+    },
+    "from": "Sent by {{owner}}",
+    "subjectUnavailable": "Resource unavailable (it may have been deleted).",
+    "unavailable": "This transfer request is no longer available.",
+    "loading": "Loading transfer request…",
+    "loadError": "Could not load the transfer request.",
+    "responseError": "Could not respond to the transfer request. Please try again.",
+    "retry": "Try again",
+    "accept": "Accept transfer",
+    "refuse": "Refuse transfer",
+    "view": {
+      "Dataset": "View dataset",
+      "Reuse": "View reuse"
+    },
+    "accepting": "Accepting…",
+    "refusing": "Refusing…",
+    "statuses": {
+      "pending": "Awaiting your response",
+      "accepted": "Transfer accepted",
+      "refused": "Transfer refused"
+    }
   },
   "generic": {
     "title": "New notification"

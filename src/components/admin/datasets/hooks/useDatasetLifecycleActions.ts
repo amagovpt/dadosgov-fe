@@ -31,6 +31,8 @@ export function useDatasetLifecycleActions({
   async function handlePublishDataset() {
     if (!dataset) return;
 
+    setIsSubmitting(true);
+    setApiError(null);
     try {
       const tagsValue = keywordsRef.current;
       const tags = tagsValue
@@ -58,6 +60,24 @@ export function useDatasetLifecycleActions({
       showApiSuccess(t("edit.publishSuccess"));
     } catch {
       setApiError(t("edit.publishError"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleMoveToDraft() {
+    if (!dataset) return;
+
+    setIsSubmitting(true);
+    setApiError(null);
+    try {
+      const updated = await updateDataset(dataset.id, { private: true });
+      setDataset(updated);
+      showApiSuccess(t("edit.moveToDraftSuccess"));
+    } catch {
+      setApiError(t("edit.moveToDraftError"));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -112,6 +132,7 @@ export function useDatasetLifecycleActions({
     handleArchiveDataset,
     handleDeleteDataset,
     handlePublishDataset,
+    handleMoveToDraft,
     handleUnarchiveDataset,
   };
 }

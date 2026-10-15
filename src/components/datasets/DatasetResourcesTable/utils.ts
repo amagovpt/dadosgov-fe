@@ -1,13 +1,16 @@
 import { Resource } from "@/service/types/dataset";
 import { INTL_LOCALES } from "@/utils/formatDate";
-import { API_BASE_URL, MAX_SAMPLE_ROWS } from "./constants";
+import { API_AUTH_URL } from "@/service/utils/API";
+import { MAX_SAMPLE_ROWS } from "./constants";
 import { ColumnInfo, TabularData } from "./types";
 
 /** `t` bound to the `datasets` namespace. */
 type Translate = (key: string, options?: { defaultValue?: string }) => string;
 
+// Relative on purpose: this href is rendered on the server too, where
+// API_BASE_URL is the internal backend address.
 export function downloadUrl(resource: Resource): string {
-  return `${API_BASE_URL}/datasets/r/${resource.id}/`;
+  return `${API_AUTH_URL}/datasets/r/${resource.id}/`;
 }
 
 export const formatBytes = (bytes?: number, locale: "pt" | "en" = "pt") => {

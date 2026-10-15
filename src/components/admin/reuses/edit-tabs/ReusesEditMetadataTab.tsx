@@ -14,6 +14,7 @@ import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 type ReusesEditMetadataTabProps = {
   auxiliaryItems?: AdminAuxiliaryItem[];
   visibilityCard?: AdminCard;
+  transferCard?: AdminCard;
   archiveCard?: AdminCard;
   unarchiveCard?: AdminCard;
   deleteCard?: AdminCard;
@@ -50,6 +51,7 @@ type ReusesEditMetadataTabProps = {
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImageSecurityError: () => void;
   onSaveMetadata: () => void | Promise<void>;
+  onOpenTransferPopup: () => void;
   onArchiveReuse: () => void | Promise<void>;
   onUnarchiveReuse: () => void | Promise<void>;
   onOpenDeletePopup: () => void;
@@ -58,6 +60,7 @@ type ReusesEditMetadataTabProps = {
 export default function ReusesEditMetadataTab({
   auxiliaryItems,
   visibilityCard,
+  transferCard,
   archiveCard,
   unarchiveCard,
   deleteCard,
@@ -92,6 +95,7 @@ export default function ReusesEditMetadataTab({
   onImageUpload,
   onImageSecurityError,
   onSaveMetadata,
+  onOpenTransferPopup,
   onArchiveReuse,
   onUnarchiveReuse,
   onOpenDeletePopup,
@@ -184,9 +188,11 @@ export default function ReusesEditMetadataTab({
             isSubmitting={isSubmitting}
             canEdit={canEdit}
             canDelete={canDelete}
+            transferCard={transferCard}
             archiveCard={archiveCard}
             unarchiveCard={unarchiveCard}
             deleteCard={deleteCard}
+            onOpenTransferPopup={onOpenTransferPopup}
             onArchiveReuse={onArchiveReuse}
             onUnarchiveReuse={onUnarchiveReuse}
             onOpenDeletePopup={onOpenDeletePopup}
