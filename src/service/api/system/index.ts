@@ -183,35 +183,6 @@ export async function fetchHomepageData(): Promise<HomepageData> {
   }
 }
 
-/**
- * The version of the backend actually running, from the `version` field the
- * `Site` document exposes on `GET /api/1/site/`.
- *
- * Read at request time rather than baked at build time: it reports the udata
- * package installed in the running container, which is the only number that is
- * true for the deployment the visitor is looking at. Cached for an hour -- it
- * only changes on a deploy.
- */
-export async function fetchBackendVersion(): Promise<string | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/site/`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch site metadata: ${res.statusText}`);
-    }
-
-    const site = await res.json();
-    return typeof site?.version === "string" ? site.version : null;
-  } catch (error) {
-    rethrowControlFlow(error);
-    console.error("Error fetching backend version:", error);
-    return null;
-  }
-}
-
-
 type SiteExportType =
   | "datasets"
   | "resources"

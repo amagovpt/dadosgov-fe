@@ -8,15 +8,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 const urlAPI = new URL(API_URL);
 const agoraActionIcons = resolveAgoraActionIcons(__dirname);
 
-// This app's own version, for the footer. Read from package.json at build time
-// because it is a property of the image, not of the environment it runs in.
-// (The backend's version is not read here: it is fetched at request time from
-// `GET /api/1/site/`, so it reports the backend actually answering. The previous
-// build-time read of ../backend/pyproject.toml always yielded "unknown" — the
-// frontend Dockerfile copies only this directory.)
-const { version: appVersion } = JSON.parse(
-  readFileSync(resolve(__dirname, "package.json"), "utf-8"),
-) as { version: string };
+// Read udata version from backend pyproject.toml at build time
+let udataVersion = "unknown";
+try {
+  const pyproject = readFileSync(resolve(__dirname, "../backend/pyproject.toml"), "utf-8");
+  const match = pyproject.match(/^version\s*=\s*"([^"]+)"/m);
+  if (match) udataVersion = match[1];
+} catch {
+  // backend dir not available (e.g. standalone frontend deploy)
+}
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   env: {
-    NEXT_PUBLIC_APP_VERSION: appVersion,
+    NEXT_PUBLIC_UDATA_VERSION: udataVersion,
   },
   // Allow `next dev` to run a 2nd instance side-by-side (the disposable
   // test stack on port 3001) without colliding on the default `.next` lock.

@@ -223,8 +223,8 @@ Cutting a release:
    environment branch.
 2. Turn the `## Unreleased` heading over that release's entries into `## 1.4.15 (YYYY-MM-DD)`, open
    a new empty `## Unreleased` above it, and set the same number in `version` in `package.json`.
-3. Run `./tag-version.sh 1.4.15` from a working branch whose HEAD matches `origin/main`. It tags, pushes the tag and publishes the GitHub release with the notes read from that changelog section. It refuses to tag when `package.json` declares a different version — that value is shown in the portal footer, so a release tagged against a stale `package.json` publishes the wrong number on the site.
-4. After the environment is deployed, confirm it serves what you tagged: `../scripts/check_deployed_version.sh https://dados.gov.pt` checks the backend half, and the footer shows this app's version straight from the built `package.json`.
+3. Run `./tag-version.sh 1.4.15` from a working branch whose HEAD matches `origin/main`. It tags, pushes the tag and publishes the GitHub release with the notes read from that changelog section. It refuses to tag when `package.json` declares a different version, so the number the repo states and the number the tag claims cannot drift apart.
+4. After the environment is deployed, confirm the backend half serves what was tagged: `../scripts/check_deployed_version.sh https://dados.gov.pt`.
 
 5. One tag per promotion to `main`.
 
