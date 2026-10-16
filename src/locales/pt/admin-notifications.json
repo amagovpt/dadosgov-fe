@@ -3,9 +3,43 @@
   "read": "lida",
   "markAsRead": "Marcar como lida",
   "harvesterValidation": {
-    "title": "Validação de harvester — {{status}}",
+    "title": "Validação de harvester",
+    "from": "Enviado por {{owner}}",
+    "statuses": {
+      "accepted": "Harvester aceite",
+      "refused": "Harvester recusado"
+    },
     "sourceUnavailable": "Fonte indisponível (poderá ter sido eliminada).",
     "viewHarvester": "Ver harvester"
+  },
+  "transfer": {
+    "title": "Pedido de transferência de {{resource}}",
+    "resources": {
+      "Dataset": "conjunto de dados",
+      "Reuse": "reutilização",
+      "Dataservice": "API",
+      "unknown": "recurso"
+    },
+    "from": "Enviado por {{owner}}",
+    "subjectUnavailable": "Recurso indisponível (poderá ter sido eliminado).",
+    "unavailable": "Este pedido de transferência já não está disponível.",
+    "loading": "A carregar o pedido de transferência…",
+    "loadError": "Não foi possível carregar o pedido de transferência.",
+    "responseError": "Não foi possível responder ao pedido de transferência. Tente novamente.",
+    "retry": "Tentar novamente",
+    "accept": "Aceitar transferência",
+    "refuse": "Recusar transferência",
+    "view": {
+      "Dataset": "Ver conjunto de dados",
+      "Reuse": "Ver reutilização"
+    },
+    "accepting": "A aceitar…",
+    "refusing": "A recusar…",
+    "statuses": {
+      "pending": "A aguardar a sua resposta",
+      "accepted": "Transferência aceite",
+      "refused": "Transferência recusada"
+    }
   },
   "generic": {
     "title": "Nova notificação"

@@ -1,27 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchNotifications, markNotificationRead } from "@/service/api/notifications";
-import type { Notification, ValidateHarvesterNotificationDetails } from "@/service/types/notifications-reporting";
+import { fetchTransfers } from "@/service/api/transfers";
+import type { Transfer } from "@/service/types/transfer-system";
+import type {
+  Notification,
+  ValidateHarvesterNotificationDetails,
+} from "@/service/types/notifications-reporting";
 import {
+  getHarvesterValidationStatus,
   harvesterValidationLink,
   isHarvesterValidation,
+  isTransferRequest,
 } from "@/components/admin/notifications/notification-helpers";
+import TransferNotificationRow from "@/components/admin/notifications/TransferNotificationRow";
 import AppIcon from "@/components/Primitives/AppIcon";
+import TextLink from "@/components/Primitives/TextLink";
 import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { BoNotificationsPage } from "@/service/types/admin/notifications";
-
-const statusKeyMap: Record<ValidateHarvesterNotificationDetails["status"], string> = {
-  pending: "pending",
-  accepted: "accepted",
-  refused: "refused",
-};
 
 interface NotificationsClientProps {
   pageContent: BoNotificationsPage;
@@ -32,6 +34,21 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
   const { notifyApiError } = useApiErrorHandler();
   const [items, setItems] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const initialNotificationRequest = useRef<ReturnType<typeof fetchNotifications> | null>(null);
+  // Share each recipient's request across all rows and Strict Mode effects.
+  // Keep rejected promises too: only an explicit retry should issue another
+  // request after a failure such as a rate limit. This cache lives on the page.
+  const recipientTransferRequests = useRef(new Map<string, Promise<Transfer[]>>());
+  const loadRecipientTransfers = useCallback((recipient: string) => {
+    const existing = recipientTransferRequests.current.get(recipient);
+    if (existing) return existing;
+    const request = fetchTransfers(recipient);
+    recipientTransferRequests.current.set(recipient, request);
+    return request;
+  }, []);
+  const retryRecipientTransfers = useCallback((recipient: string) => {
+    recipientTransferRequests.current.delete(recipient);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -39,7 +56,7 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
     const loadNotifications = async () => {
       setIsLoading(true);
       try {
-        const res = await fetchNotifications(1, 50);
+        const res = await (initialNotificationRequest.current ??= fetchNotifications(1, 50));
         if (!isCancelled) {
           setItems(res.data ?? []);
         }
@@ -79,9 +96,7 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
 
   return (
     <AdminLayout
-      breadcrumbItems={[
-        { label: t("admin-notifications:title"), url: "/admin/notificacoes" },
-      ]}
+      breadcrumbItems={[{ label: t("admin-notifications:title"), url: "/admin/notificacoes" }]}
       title={pageContent.hero?.title ?? ""}
       headerAction={null}
     >
@@ -99,102 +114,125 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
         />
       ) : (
         <ul className="flex flex-col gap-16">
-          {items.map((n) => (
-            <li
-              key={n.id}
-              className={`flex flex-col gap-12 rounded-8 border border-neutral-200 p-24 ${
-                n.handled_at ? "bg-neutral-50" : "bg-white"
-              }`}
-            >
-              {isHarvesterValidation(n.details) ? (
-                <HarvesterValidationRow
-                  id={n.id}
-                  createdAt={n.created_at}
-                  handledAt={n.handled_at}
-                  details={n.details}
-                  onMarkRead={handleMarkRead}
-                />
-              ) : (
-                // Other notification types (Discussion, Membership, Transfer)
-                // are out of scope for LEDG-1735. Fallback ensures they still
-                // render and can be dismissed.
-                <GenericRow
-                  id={n.id}
-                  createdAt={n.created_at}
-                  handledAt={n.handled_at}
-                  onMarkRead={handleMarkRead}
-                />
-              )}
-            </li>
-          ))}
+          {items.map((n) => {
+            const readAction = !n.handled_at ? (
+              <Button
+                type="button"
+                appearance="link"
+                variant="neutral"
+                onClick={() => handleMarkRead(n.id)}
+              >
+                {t("admin-notifications:markAsRead")}
+              </Button>
+            ) : null;
+
+            return (
+              <li
+                key={n.id}
+                className={`flex flex-col gap-12 rounded-8 border border-neutral-200 p-24 ${
+                  n.handled_at ? "bg-neutral-50" : "bg-white"
+                }`}
+              >
+                {isHarvesterValidation(n.details) ? (
+                  <HarvesterValidationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                  />
+                ) : isTransferRequest(n.details) ? (
+                  <TransferNotificationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                    loadTransfers={loadRecipientTransfers}
+                    onRetryTransfers={retryRecipientTransfers}
+                    onResponded={(respondedAt) => {
+                      setItems((previous) =>
+                        previous.map((item) =>
+                          item.id === n.id ? { ...item, handled_at: respondedAt } : item
+                        )
+                      );
+                    }}
+                  />
+                ) : (
+                  <GenericRow
+                    createdAt={n.created_at}
+                    handledAt={n.handled_at}
+                    readAction={readAction}
+                  />
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </AdminLayout>
   );
 }
 
-interface BaseRowProps {
-  id: string;
+interface GenericRowProps {
   createdAt: string;
   handledAt: string | null;
-  onMarkRead: (id: string) => void;
+  readAction: ReactNode;
 }
 
-interface HarvesterRowProps extends BaseRowProps {
+interface HarvesterRowProps {
+  createdAt: string;
   details: ValidateHarvesterNotificationDetails;
+  readAction: ReactNode;
 }
 
-function HarvesterValidationRow({
-  id,
-  createdAt,
-  handledAt,
-  details,
-  onMarkRead,
-}: HarvesterRowProps) {
+function HarvesterValidationRow({ createdAt, details, readAction }: HarvesterRowProps) {
   const { t } = useTranslation("admin-notifications");
   const link = harvesterValidationLink(details);
-  const statusLabel = t(`statuses.${statusKeyMap[details.status] ?? "pending"}`);
+  const validationStatus = getHarvesterValidationStatus(details);
+  const owner = details.source?.owner;
+  const senderName =
+    details.source?.organization?.name ||
+    [owner?.first_name, owner?.last_name].filter(Boolean).join(" ");
 
   return (
-    <div className="flex items-start justify-between gap-16">
-      <div className="flex flex-col gap-8">
+    <div className="flex flex-col justify-between gap-16 md:flex-row md:items-start">
+      <div className="flex min-w-0 flex-col gap-8">
         <div className="flex items-center gap-8">
           <AppIcon name="agora-line-mega-phone" />
           <span className="text-base font-medium text-primary-900">
-            {t("harvesterValidation.title", { status: statusLabel })}
+            {t("harvesterValidation.title")}
           </span>
         </div>
         {details.source ? (
           <p className="text-base text-neutral-900">{details.source.name}</p>
         ) : (
-          <p className="text-base italic text-neutral-700">
+          <p className="text-base text-neutral-700 italic">
             {t("harvesterValidation.sourceUnavailable")}
+          </p>
+        )}
+        {link && (
+          <TextLink href={link} target="_blank" className="inline-flex w-fit items-center gap-8">
+            <AppIcon name="agora-line-eye" />
+            {t("harvesterValidation.viewHarvester")}
+          </TextLink>
+        )}
+        {senderName && (
+          <p className="text-base text-neutral-700">
+            {t("harvesterValidation.from", { owner: senderName })}
           </p>
         )}
         <p className="text-sm text-neutral-500">
           {format(new Date(createdAt), "dd/MM/yyyy HH:mm")}
-          {handledAt && ` · ${t("read")}`}
         </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-8">
-        {link && (
-          <Link href={link}>
-            <Button appearance="outline" variant="primary">
-              {t("harvesterValidation.viewHarvester")}
-            </Button>
-          </Link>
-        )}
-        {!handledAt && (
-          <Button appearance="link" variant="neutral" onClick={() => onMarkRead(id)}>
-            {t("markAsRead")}
-          </Button>
+        {validationStatus !== "pending" && (
+          <p role="status" className="text-sm text-neutral-700">
+            {t(`harvesterValidation.statuses.${validationStatus}`)}
+          </p>
         )}
       </div>
+      {readAction && <div className="shrink-0 self-end">{readAction}</div>}
     </div>
   );
 }
 
-function GenericRow({ id, createdAt, handledAt, onMarkRead }: BaseRowProps) {
+function GenericRow({ createdAt, handledAt, readAction }: GenericRowProps) {
   const { t } = useTranslation("admin-notifications");
 
   return (
@@ -209,11 +247,7 @@ function GenericRow({ id, createdAt, handledAt, onMarkRead }: BaseRowProps) {
           {handledAt && ` · ${t("read")}`}
         </p>
       </div>
-      {!handledAt && (
-        <Button appearance="link" variant="neutral" onClick={() => onMarkRead(id)}>
-          {t("markAsRead")}
-        </Button>
-      )}
+      {readAction && <div className="shrink-0 self-end">{readAction}</div>}
     </div>
   );
 }

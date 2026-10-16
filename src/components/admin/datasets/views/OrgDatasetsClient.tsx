@@ -220,19 +220,6 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
           }}
         />
       }
-      toolbarActions={
-        <a href={`/api/1/organizations/${orgId}/catalog`} download>
-          <Button
-            variant="primary"
-            appearance="outline"
-            hasIcon
-            leadingIcon="agora-line-download"
-            leadingIconHover="agora-solid-download"
-          >
-            {t("admin-datasets:list.catalogDownload")}
-          </Button>
-        </a>
-      }
       emptyState={
         <AdminEmptyState
           noResults={pageContent.orgNoResults}
