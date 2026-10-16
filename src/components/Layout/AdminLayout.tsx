@@ -20,6 +20,7 @@ export type AdminLayoutProps = {
     headerAction?: React.ReactNode
     headerClassName?: string
     headerInfoClassName?: string
+    hideHeader?: boolean
     children: React.ReactNode
 }
 
@@ -32,6 +33,7 @@ export default function AdminLayout({
     headerAction = <PublishDropdown />,
     headerClassName,
     headerInfoClassName,
+    hideHeader = false,
     children,
 }: AdminLayoutProps) {
     const { t } = useTranslation('admin-common')
@@ -69,7 +71,7 @@ export default function AdminLayout({
                     />
                 </div>
 
-                <div className={twMerge("w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between", headerClassName)}>
+                {!hideHeader && <div className={twMerge("w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between", headerClassName)}>
                     <div className={twMerge("flex flex-col gap-8 max-w-[696px]", headerInfoClassName)}>
                         {kicker && <span className="text-sm text-neutral-700">{kicker}</span>}
                         <h1 className="text-2xl-bold text-brand-blue-secondary">
@@ -78,7 +80,7 @@ export default function AdminLayout({
                         {description && <p className="text-base text-neutral-700">{description}</p>}
                     </div>
                     {headerAction}
-                </div>
+                </div>}
             </div>
             <>
                 {children}

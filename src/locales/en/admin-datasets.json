@@ -96,7 +96,7 @@
     "identityStepTitle": "Producer and identification",
     "coverageStepTitle": "Licence, updates, temporal and geographic coverage",
     "resourcesStepTitle": "Add and manage resources",
-    "publishStepTitle": "Publication",
+    "publishStepTitle": "Review and publish",
     "identitySectionTitle": "Publication identity",
     "identityDescription": "Confirm the identity you want to use to publish this dataset. Contact points are available only for organization producers and are optional.",
     "identificationSectionTitle": "Dataset identification",
@@ -406,5 +406,18 @@
       "updated": "Last updated"
     },
     "refreshError": "The resource list could not be refreshed. Reload the page to see your saved changes."
+  },
+  "review": {
+    "successTitle": "Your dataset has been created successfully",
+    "successDescription": "Review the information below. You can publish now or save a draft to continue later.",
+    "previewLabel": "Dataset preview",
+    "publishAction": "Publish dataset",
+    "views_one": "{{count}} view",
+    "views_other": "{{count}} views",
+    "downloads_one": "{{count}} download",
+    "downloads_other": "{{count}} downloads",
+    "views_zero": "{{count}} views",
+    "downloads_zero": "{{count}} downloads",
+    "refreshError": "The preview could not be refreshed. Reload the page to see the latest information."
   }
 }

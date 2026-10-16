@@ -96,7 +96,7 @@
     "identityStepTitle": "Produtor e caracterização",
     "coverageStepTitle": "Licença, atualização, cobertura temporal e geográfica",
     "resourcesStepTitle": "Adicionar, e gerir recursos",
-    "publishStepTitle": "Publicação",
+    "publishStepTitle": "Rever e publicar",
     "identitySectionTitle": "Identidade de publicação",
     "identityDescription": "Confirme a identidade que pretende utilizar na publicação deste conjunto de dados. Os pontos de contacto estão disponíveis apenas para produtores do tipo organização e a sua associação é opcional.",
     "identificationSectionTitle": "Identificação do conjunto de dados",
@@ -406,5 +406,18 @@
       "updated": "Última atualização"
     },
     "refreshError": "Não foi possível atualizar a lista de recursos. Volte a carregar a página para consultar as alterações guardadas."
+  },
+  "review": {
+    "successTitle": "O seu conjunto de dados foi criado com sucesso",
+    "successDescription": "Verifique a informação abaixo. Pode publicar agora ou guardar como rascunho para continuar mais tarde.",
+    "previewLabel": "Pré-visualização do conjunto de dados",
+    "publishAction": "Publicar conjunto de dados",
+    "views_one": "{{count}} visualização",
+    "views_other": "{{count}} visualizações",
+    "downloads_one": "{{count}} transferência",
+    "downloads_other": "{{count}} transferências",
+    "views_zero": "{{count}} visualizações",
+    "downloads_zero": "{{count}} transferências",
+    "refreshError": "Não foi possível atualizar a pré-visualização. Volte a carregar a página para consultar a informação mais recente."
   }
 }

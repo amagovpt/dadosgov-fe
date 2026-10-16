@@ -465,6 +465,23 @@ export default function DatasetsAdminClient({
     }
   }, [datasetId, createdDataset, t]);
 
+  const reviewDatasetId = createdDataset?.id;
+  useEffect(() => {
+    if (!redesigned || currentStep !== 4 || !reviewDatasetId) return;
+    let cancelled = false;
+    // Resource uploads can change the quality score after the draft was first created.
+    fetchDataset(reviewDatasetId)
+      .then((dataset) => {
+        if (!cancelled) setCreatedDataset(dataset);
+      })
+      .catch(() => {
+        if (!cancelled) setApiError(t("admin-datasets:review.refreshError"));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentStep, redesigned, reviewDatasetId, t]);
+
   const clearTemporalCoverageErrors = () => {
     setErrors((prev) => {
       const next = { ...prev };
@@ -698,41 +715,50 @@ export default function DatasetsAdminClient({
     <ModalProvider>
       {redesigned && (
         <>
-          <div className="flex flex-wrap items-center justify-start gap-8 md:justify-end">
-            <Button
-              type="button"
-              appearance="link"
-              variant="danger"
-              hasIcon
-              leadingIcon="agora-line-trash"
-              disabled={isSubmitting}
-              onClick={() => {
-                if (onComplete) onComplete();
-                else router.push(localizeHref("/admin/me/datasets", locale));
-              }}
-            >
-              {t("admin-datasets:form.cancelCreation")}
-            </Button>
-            <span className="hidden h-[60px] w-px bg-neutral-700 md:block" aria-hidden="true" />
-            <Button
-              type="button"
-              appearance="link"
-              variant="primary"
-              hasIcon
-              leadingIcon="agora-line-download"
-              disabled={isSubmitting}
-              onClick={() => {
-                if (isDetailsStep) void handleStep2Next(undefined, true);
-                else void handleSaveDraft();
-              }}
-            >
-              {isSubmitting
-                ? t("admin-datasets:form.savingDraft")
-                : t("admin-datasets:form.saveCreationDraft")}
-            </Button>
-          </div>
-          <div className="[&_h2>span]:text-xl-bold!">
+          {currentStep !== 4 && (
+            <div className="flex flex-wrap items-center justify-start gap-8 md:justify-end">
+              <Button
+                type="button"
+                appearance="link"
+                variant="danger"
+                hasIcon
+                leadingIcon="agora-line-trash"
+                disabled={isSubmitting}
+                onClick={() => {
+                  if (onComplete) onComplete();
+                  else router.push(localizeHref("/admin/me/datasets", locale));
+                }}
+              >
+                {t("admin-datasets:form.cancelCreation")}
+              </Button>
+              <span className="hidden h-[60px] w-px bg-neutral-700 md:block" aria-hidden="true" />
+              <Button
+                type="button"
+                appearance="link"
+                variant="primary"
+                hasIcon
+                leadingIcon="agora-line-download"
+                disabled={isSubmitting}
+                onClick={() => {
+                  if (isDetailsStep) void handleStep2Next(undefined, true);
+                  else void handleSaveDraft();
+                }}
+              >
+                {isSubmitting
+                  ? t("admin-datasets:form.savingDraft")
+                  : t("admin-datasets:form.saveCreationDraft")}
+              </Button>
+            </div>
+          )}
+          <div
+            className={
+              currentStep === 4
+                ? "[&_h1]:text-2xl-bold! [&_h1>span]:text-2xl-bold!"
+                : "[&_h2>span]:text-xl-bold!"
+            }
+          >
             <AdminStepper
+              headingLevel={currentStep === 4 ? "h1" : "h2"}
               currentStep={currentStep}
               totalSteps={4}
               labelFormat="de"
@@ -747,7 +773,7 @@ export default function DatasetsAdminClient({
       <div
         className={
           redesigned
-            ? `flex ${currentStep === 3 ? "w-full" : "w-[800px]"} max-w-full flex-col gap-32`
+            ? `flex ${currentStep >= 3 ? "w-full" : "w-[800px]"} max-w-full flex-col gap-32`
             : "flex flex-col gap-32 min-[1025px]:flex-row"
         }
       >
@@ -861,6 +887,7 @@ export default function DatasetsAdminClient({
 
           {currentStep === 4 && (
             <DatasetWizardStep4
+              redesigned={redesigned}
               publishStepCard={pageContent.publishStepCard}
               createdDataset={createdDataset}
               datasetTitle={datasetTitle}

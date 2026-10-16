@@ -10,6 +10,7 @@ interface AdminStepperProps {
   labelWord?: string;
   labelFormat?: "slash" | "de";
   appearance?: "default" | "form";
+  headingLevel?: "h1" | "h2";
 }
 
 const TOTAL_SEGMENTS = 12;
@@ -21,6 +22,7 @@ export function AdminStepper({
   labelWord,
   labelFormat = "slash",
   appearance = "default",
+  headingLevel: Heading = "h2",
 }: AdminStepperProps) {
   const { t } = useTranslation("admin-common");
   const resolvedLabelWord = labelWord ?? t("stepper.step");
@@ -33,12 +35,12 @@ export function AdminStepper({
   if (appearance === "form") {
     return (
       <div className="flex flex-col gap-16">
-        <h2 className="text-xl-bold text-primary-900">
+        <Heading className="text-xl-bold text-primary-900">
           <span className="text-primary-600">
             {resolvedLabelWord} {currentStep} -{" "}
           </span>
           {stepTitle}
-        </h2>
+        </Heading>
         <div className="flex flex-col gap-4">
           <ProgressBar
             variant="step"

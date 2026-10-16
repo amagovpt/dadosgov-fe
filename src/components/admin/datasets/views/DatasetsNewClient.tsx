@@ -36,7 +36,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
   return (
     <AdminLayout
       className={[
-        "max-w-[1112px]! gap-64",
+        `max-w-[1112px]! ${currentStep === 4 ? "gap-32" : "gap-64"}`,
         "[&_h1]:text-primary-900 [&_h1+p]:leading-7 [&_h1+p]:text-primary-900",
         "[&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2",
         "[&_.agora-btn]:min-h-60! [&_.agora-btn]:py-[14px]",
@@ -49,6 +49,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
         { label: pageTitle },
       ]}
       title={pageTitle}
+      hideHeader={currentStep === 4}
       description={t(currentStep === 3 ? "resources.requiredFields" : "form.optionalFields")}
       headerAction={null}
       headerInfoClassName="max-w-[592px]"
