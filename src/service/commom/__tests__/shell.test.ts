@@ -6,13 +6,16 @@ import type { Footer } from "@/service/types/header/footer";
 
 vi.mock("../header", () => ({ getHeaderNavigation: vi.fn() }));
 vi.mock("../footer", () => ({ getFooter: vi.fn() }));
+vi.mock("@/service/api/system", () => ({ fetchBackendVersion: vi.fn() }));
 
+import { fetchBackendVersion } from "@/service/api/system";
 import { getFooter } from "../footer";
 import { getHeaderNavigation } from "../header";
 import { ShellUnavailableError, loadShellData } from "../shell";
 
 const header = vi.mocked(getHeaderNavigation);
 const footer = vi.mocked(getFooter);
+const backendVersion = vi.mocked(fetchBackendVersion);
 
 const HEADER = { topLevelLinks: [] } as unknown as HeaderNavigationData;
 const FOOTER = { title: "dados.gov.pt" } as unknown as Footer;
@@ -21,6 +24,8 @@ describe("loadShellData", () => {
   beforeEach(() => {
     // The layout logs both failures; keep the test output readable.
     vi.spyOn(console, "error").mockImplementation(() => {});
+    backendVersion.mockResolvedValue("16.0.0.12");
+    vi.stubEnv("NEXT_PUBLIC_APP_VERSION", "1.4.14");
   });
 
   afterEach(() => {
@@ -35,6 +40,7 @@ describe("loadShellData", () => {
     await expect(loadShellData("pt")).resolves.toEqual({
       headerNavigation: HEADER,
       footerData: FOOTER,
+      versions: { backend: "16.0.0.12", frontend: "1.4.14" },
     });
   });
 
@@ -45,6 +51,7 @@ describe("loadShellData", () => {
     await expect(loadShellData("pt")).resolves.toEqual({
       headerNavigation: {},
       footerData: FOOTER,
+      versions: { backend: "16.0.0.12", frontend: "1.4.14" },
     });
   });
 
@@ -55,6 +62,7 @@ describe("loadShellData", () => {
     await expect(loadShellData("pt")).resolves.toEqual({
       headerNavigation: HEADER,
       footerData: {},
+      versions: { backend: "16.0.0.12", frontend: "1.4.14" },
     });
   });
 
@@ -67,6 +75,18 @@ describe("loadShellData", () => {
     await expect(loadShellData("pt")).rejects.toMatchObject({ cause });
   });
 
+  it("keeps the shell when the backend version cannot be read: the footer just drops it", async () => {
+    header.mockResolvedValue(HEADER);
+    footer.mockResolvedValue(FOOTER);
+    backendVersion.mockRejectedValue(new Error("connect ECONNREFUSED"));
+
+    await expect(loadShellData("pt")).resolves.toEqual({
+      headerNavigation: HEADER,
+      footerData: FOOTER,
+      versions: { backend: null, frontend: "1.4.14" },
+    });
+  });
+
   it("still degrades during a production build, so a CMS outage cannot fail the build", async () => {
     vi.stubEnv("NEXT_PHASE", "phase-production-build");
     header.mockRejectedValue(new Error("connect ECONNREFUSED"));
@@ -75,6 +95,7 @@ describe("loadShellData", () => {
     await expect(loadShellData("pt")).resolves.toEqual({
       headerNavigation: {},
       footerData: {},
+      versions: { backend: "16.0.0.12", frontend: "1.4.14" },
     });
   });
 });

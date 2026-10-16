@@ -2,9 +2,28 @@
 
 All notable changes to the dados.gov.pt frontend (`dadosgov-fe`).
 
-This project has no version tags, so entries are grouped by month (newest first), each linking the pull request that introduced the change.
+Entries are newest first. Work sits under `## Unreleased` until it is promoted to production, where the heading becomes the released version (see **Versioning & Releases** in `CLAUDE.md`). Entries written before the first tag are grouped by month.
 
 ## Unreleased
+
+- **fix(footer): the portal now states the versions it is actually running**
+  - The "Desenvolvimento" column announced `udata (15.0.0)`. That number is typed by hand in the
+    CMS, so it was never computed and was never going to age well: the engine behind the portal
+    is udata 16.0.0, and the frontend line carried no version at all.
+  - The wording stays in the CMS, the numbers come from the code. A footer label can now contain
+    `{backendVersion}` or `{frontendVersion}` and the portal fills them in -- the backend's from
+    the `version` field of `GET /api/1/site/`, read per request so it reports the backend that
+    actually answered, and this app's from `package.json`, baked at build time because it is a
+    property of the image rather than of the environment.
+  - An unknown version takes its placeholder away, along with the punctuation wrapping it,
+    instead of printing `null` or `{backendVersion}` on screen: `udata ()` reads worse than
+    `udata`. A label with no placeholder is returned untouched, so this ships safely before the
+    CMS text is updated -- it simply has nothing to substitute.
+  - `NEXT_PUBLIC_UDATA_VERSION` is gone. It read `../backend/pyproject.toml` at build time, a
+    path the frontend Dockerfile never copies into the build context, so it had always resolved
+    to `"unknown"`, and no component ever consumed it.
+  - `package.json` moves from `0.1.0` to `1.4.14`, the last published tag, now that it is the
+    source of a number a visitor can read.
 
 - **fix(datasets): every date on the portal now says when the data actually changed**
   - A dataset page contradicted itself: the header said 12 January while the four resources

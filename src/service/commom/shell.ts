@@ -2,6 +2,8 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 import { getFooter } from "./footer";
 import { getHeaderNavigation } from "./header";
+import { fetchBackendVersion } from "@/service/api/system";
+import type { PortalVersions } from "@/utils/applyVersionTokens";
 import type { HeaderNavigationData } from "@/service/types/header";
 import type { Footer } from "@/service/types/header/footer";
 
@@ -22,6 +24,7 @@ export class ShellUnavailableError extends Error {
 export interface ShellData {
   headerNavigation: HeaderNavigationData;
   footerData: Footer;
+  versions: PortalVersions;
 }
 
 /**
@@ -39,9 +42,10 @@ export interface ShellData {
  * process against a dead CMS reaches the throw.
  */
 export async function loadShellData(locale: string): Promise<ShellData> {
-  const [header, footer] = await Promise.allSettled([
+  const [header, footer, backendVersion] = await Promise.allSettled([
     getHeaderNavigation(locale),
     getFooter(locale),
+    fetchBackendVersion(),
   ]);
 
   if (header.status === "rejected") {
@@ -63,5 +67,11 @@ export async function loadShellData(locale: string): Promise<ShellData> {
     headerNavigation:
       header.status === "fulfilled" ? header.value : ({} as HeaderNavigationData),
     footerData: footer.status === "fulfilled" ? footer.value : ({} as Footer),
+    // A version the portal cannot determine is never a reason to fail a page:
+    // the footer drops the placeholder and reads as if it never carried one.
+    versions: {
+      backend: backendVersion.status === "fulfilled" ? backendVersion.value : null,
+      frontend: process.env.NEXT_PUBLIC_APP_VERSION || null,
+    },
   };
 }
