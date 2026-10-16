@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useRef } from "react";
 import {
   createDataset,
   createResource,
@@ -11,7 +12,7 @@ import {
   uploadResource,
 } from "@/service/api/datasets";
 import type { SpatialZone } from "@/service/types/catalog";
-import type { Dataset, DatasetUpdatePayload } from "@/service/types/dataset";
+import type { Dataset, DatasetUpdatePayload, Resource } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
@@ -49,6 +50,7 @@ interface UseDatasetWizardSubmissionActionsParams {
   setCreatedDataset: React.Dispatch<React.SetStateAction<Dataset | null>>;
   setSelectedSpatialZonesValue: React.Dispatch<React.SetStateAction<string | null>>;
   setDraftContacts: React.Dispatch<React.SetStateAction<DatasetWizardDraftContact[]>>;
+  setUploadedFiles: React.Dispatch<React.SetStateAction<File[]>>;
   setResourceUrls: React.Dispatch<React.SetStateAction<string[]>>;
   setResourceMetadata: React.Dispatch<React.SetStateAction<Record<string, PendingResourceMeta>>>;
   setShowFileError: React.Dispatch<React.SetStateAction<boolean>>;
@@ -129,6 +131,7 @@ export function useDatasetWizardSubmissionActions({
   setCreatedDataset,
   setSelectedSpatialZonesValue,
   setDraftContacts,
+  setUploadedFiles,
   setResourceUrls,
   setResourceMetadata,
   setShowFileError,
@@ -145,6 +148,59 @@ export function useDatasetWizardSubmissionActions({
   validationMessages,
   restoreErrors,
 }: UseDatasetWizardSubmissionActionsParams) {
+  // Keep the upload result if updating its metadata fails, so retrying never uploads it twice.
+  const uploadedResourceIds = useRef(new Map<File, Resource>());
+
+  async function savePendingResources(dataset: Dataset) {
+    const recordSaved = (resource: Resource) => {
+      setCreatedDataset((previous) =>
+        previous
+          ? {
+              ...previous,
+              resources: [
+                ...(previous.resources ?? []).filter((item) => item.id !== resource.id),
+                resource,
+              ],
+            }
+          : previous
+      );
+    };
+    for (const file of uploadedFiles) {
+      const meta = resourceMetadata[`file-${file.name}`];
+      let resource = uploadedResourceIds.current.get(file);
+      if (!resource) {
+        resource = await uploadResource(dataset.id, file);
+        uploadedResourceIds.current.set(file, resource);
+      }
+      if (meta)
+        resource = await updateResource(dataset.id, resource.id, {
+          title: meta.title || file.name,
+          type: meta.resourceType || "main",
+          description: meta.description || undefined,
+          format: meta.format || undefined,
+          mime: meta.mime || undefined,
+          filesize: meta.filesize ? Number(meta.filesize) : undefined,
+        });
+      recordSaved(resource);
+      uploadedResourceIds.current.delete(file);
+      setUploadedFiles((previous) => previous.filter((item) => item !== file));
+    }
+    for (const url of resourceUrls) {
+      const meta = resourceMetadata[`url-${url}`];
+      const resource = await createResource(dataset.id, {
+        title: meta?.title || url,
+        type: meta?.resourceType || "main",
+        description: meta?.description || undefined,
+        url: url.trim(),
+        filetype: "remote",
+        format: meta?.format || undefined,
+        mime: meta?.mime || undefined,
+        filesize: meta?.filesize ? Number(meta.filesize) : undefined,
+      });
+      recordSaved(resource);
+      setResourceUrls((previous) => previous.filter((item) => item !== url));
+    }
+  }
   async function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>, saveAsDraft = false) {
     const { errors, draftErrors } = validateDatasetDetails(
       {
@@ -301,7 +357,7 @@ export function useDatasetWizardSubmissionActions({
     const hasFiles = uploadedFiles.length > 0;
     const hasUrls = trimmedUrls.length > 0;
 
-    if (!hasFiles && !hasUrls) {
+    if (!hasFiles && !hasUrls && !createdDataset?.resources?.length) {
       setShowFileError(true);
       return;
     }
@@ -328,36 +384,7 @@ export function useDatasetWizardSubmissionActions({
     }
 
     try {
-      if (hasFiles) {
-        for (const file of uploadedFiles) {
-          const meta = resourceMetadata[`file-${file.name}`];
-          const resource = await uploadResource(dataset.id, file);
-          if (meta) {
-            await updateResource(dataset.id, resource.id, {
-              title: meta.title || file.name,
-              type: meta.resourceType || "main",
-              description: meta.description || undefined,
-              format: meta.format || undefined,
-              mime: meta.mime || undefined,
-              filesize: meta.filesize ? Number(meta.filesize) : undefined,
-            });
-          }
-        }
-      }
-
-      for (const url of trimmedUrls) {
-        const meta = resourceMetadata[`url-${url}`];
-        await createResource(dataset.id, {
-          title: meta?.title || url,
-          type: meta?.resourceType || "main",
-          description: meta?.description || undefined,
-          url,
-          filetype: "remote",
-          format: meta?.format || undefined,
-          mime: meta?.mime || undefined,
-          filesize: meta?.filesize ? Number(meta.filesize) : undefined,
-        });
-      }
+      await savePendingResources(dataset);
 
       onNextStep();
     } catch (error) {
@@ -466,6 +493,7 @@ export function useDatasetWizardSubmissionActions({
         organization: createdDataset.organization?.id,
       };
 
+      if (currentStep === 3) await savePendingResources(createdDataset);
       await updateDataset(createdDataset.id, draftPayload);
       if (onComplete) onComplete();
       else finishWizard();

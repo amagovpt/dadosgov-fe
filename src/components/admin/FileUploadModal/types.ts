@@ -8,6 +8,7 @@ export interface PendingResourceMeta {
 }
 
 export interface FileUploadModalProps {
+  appearance?: "default" | "wizard";
   uploadedFiles: File[];
   resourceUrls: string[];
   onFilesChange: (files: File[]) => void;

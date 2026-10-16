@@ -604,6 +604,7 @@ export default function DatasetsAdminClient({
     setCreatedDataset,
     setSelectedSpatialZonesValue,
     setDraftContacts,
+    setUploadedFiles,
     setResourceUrls,
     setResourceMetadata,
     setShowFileError,
@@ -746,7 +747,7 @@ export default function DatasetsAdminClient({
       <div
         className={
           redesigned
-            ? "flex w-[800px] max-w-full flex-col gap-32"
+            ? `flex ${currentStep === 3 ? "w-full" : "w-[800px]"} max-w-full flex-col gap-32`
             : "flex flex-col gap-32 min-[1025px]:flex-row"
         }
       >
@@ -834,6 +835,12 @@ export default function DatasetsAdminClient({
 
           {currentStep === 3 && (
             <DatasetWizardStep3
+              redesigned={redesigned}
+              datasetId={createdDataset?.id}
+              savedResources={createdDataset?.resources}
+              onResourcesChange={(resources) =>
+                setCreatedDataset((previous) => (previous ? { ...previous, resources } : previous))
+              }
               introduction={pageContent.resourceIntroduction}
               auxiliaryItems={redesigned ? auxiliarItemsStep3 : undefined}
               uploadedFiles={uploadedFiles}

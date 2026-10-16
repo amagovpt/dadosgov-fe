@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, InputText } from "@ama-pt/agora-design-system";
+import { Button, InputText, StatusCard } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { validateFileExtensions } from "@/lib/files/validateFileExtensions";
@@ -15,8 +15,12 @@ export default function FileUploadModal({
   onUrlAdd,
   hasError,
   allowedExtensions = null,
+  appearance = "default",
 }: FileUploadModalProps) {
   const { t } = useTranslation("admin-common");
+  const { t: td } = useTranslation("admin-datasets");
+  const wizard = appearance === "wizard";
+  const [added, setAdded] = useState<"url" | "file" | null>(null);
   const hasSelection = uploadedFiles.length > 0 || resourceUrls.length > 0;
   const [localUrl, setLocalUrl] = useState("");
   const localUrlRef = useRef("");
@@ -57,14 +61,17 @@ export default function FileUploadModal({
     setLocalUrl("");
     localUrlRef.current = "";
     setUrlError(null);
+    setAdded("url");
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
+    <div className={wizard ? "flex flex-col gap-32" : "flex flex-col gap-8"}>
+      <div className={wizard ? "flex flex-col gap-24" : "flex flex-col gap-2"}>
         <InputText
-          label={t("fileUpload.url.label")}
-          placeholder="https://"
+          label={wizard ? td("resources.addLink") : t("fileUpload.url.label")}
+          placeholder={wizard ? td("resources.urlPlaceholder") : "https://"}
+          hasHelperText={wizard}
+          helperText={wizard ? td("resources.urlHint") : undefined}
           id="inline-resource-url"
           value={localUrl}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,14 +80,17 @@ export default function FileUploadModal({
             setUrlError(null);
           }}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === "Enter") handleAddUrl();
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleAddUrl();
+            }
           }}
           hasError={!hasSelection && (!!urlError || hasError)}
           hasFeedback={!!urlError}
           feedbackState="danger"
           feedbackText={urlError ?? ""}
         />
-        <div className="mt-12 w-fit [&_button]:mt-0">
+        <div className={wizard ? "w-fit [&_button]:mt-0" : "mt-12 w-fit [&_button]:mt-0"}>
           <Button
             variant="primary"
             appearance="outline"
@@ -92,21 +102,31 @@ export default function FileUploadModal({
             {t("fileUpload.actions.add")}
           </Button>
         </div>
+        {wizard && added === "url" && !urlError && (
+          <StatusCard variant="success" showIcon description={td("resources.linkAdded")} />
+        )}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4" aria-hidden="true">
         <div className="flex-1 border-t border-neutral-300" />
-        <span className="px-3 text-sm text-neutral-500">{t("fileUpload.or")}</span>
-        <div className="flex-1 border-t border-neutral-300" />
+        {!wizard && (
+          <>
+            <span className="px-3 text-sm text-neutral-500">{t("fileUpload.or")}</span>
+            <div className="flex-1 border-t border-neutral-300" />
+          </>
+        )}
       </div>
 
-      <div className="[&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
+      <div
+        className={`${wizard ? "[&_.drag-and-drop-area_.agora-btn]:w-full" : "[&_.drag-and-drop-area_.agora-btn]:w-fit"} [&_.instructions]:items-center [&_.instructions]:text-center`}
+      >
         <DragAndDropUploader
           key={uploaderKey}
           multiple
-          label={t("fileUpload.files.label")}
+          label={wizard ? td("resources.uploadFiles") : t("fileUpload.files.label")}
           dragAndDropLabel={t("fileUpload.files.dragAndDrop")}
-          inputLabel={t("fileUpload.files.selectOrDrag")}
+          inputLabel={wizard ? td("resources.selectFiles") : t("fileUpload.files.selectOrDrag")}
+          extensionsInstructions={wizard ? td("resources.fileHint") : undefined}
           selectedFilesLabel={t("fileUpload.files.selectedFiles")}
           removeFileButtonLabel={t("fileUpload.files.removeFile")}
           replaceFileButtonLabel={t("fileUpload.files.replaceFile")}
@@ -140,13 +160,20 @@ export default function FileUploadModal({
             setSecurityErrors([]);
             const existingNames = new Set(uploadedFiles.map((f) => f.name));
             const uniqueNew = valid.filter((f) => !existingNames.has(f.name));
-            if (uniqueNew.length > 0) onFilesChange([...uploadedFiles, ...uniqueNew]);
+            if (uniqueNew.length > 0) {
+              onFilesChange([...uploadedFiles, ...uniqueNew]);
+              setAdded("file");
+            }
             setUploaderKey((k) => k + 1);
           }}
-          onSecurityError={(rejections) =>
-            setSecurityErrors(rejections.map(() => POISONED_FILE_WARNING))
-          }
+          onSecurityError={(rejections) => {
+            setAdded(null);
+            setSecurityErrors(rejections.map(() => POISONED_FILE_WARNING));
+          }}
         />
+        {wizard && added === "file" && !securityErrors.length && !extensionErrors.length && (
+          <StatusCard variant="success" showIcon description={td("resources.filesAdded")} />
+        )}
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ interface ResourceItemProps {
   onSaveMeta: (meta: PendingResourceMeta, newUrl?: string) => void;
   onReplace?: (f: File) => void;
   onRemove: () => void;
+  appearance?: "actions" | "title";
 }
 
 export function ResourceItem({
@@ -31,6 +32,7 @@ export function ResourceItem({
   onSaveMeta,
   onReplace,
   onRemove,
+  appearance = "actions",
 }: ResourceItemProps) {
   const { t } = useTranslation("admin-common");
   const { show, hide } = usePopupContext();
@@ -88,6 +90,18 @@ export function ResourceItem({
       { title: displayName, closeAriaLabel: t("fileUpload.popup.close"), dimensions: "l" }
     );
   };
+
+  if (appearance === "title") {
+    return (
+      <button
+        type="button"
+        className="text-left break-words text-primary-600 underline hover:text-primary-700"
+        onClick={handleView}
+      >
+        {displayName}
+      </button>
+    );
+  }
 
   return (
     <>

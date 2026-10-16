@@ -49,7 +49,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
         { label: pageTitle },
       ]}
       title={pageTitle}
-      description={t("form.optionalFields")}
+      description={t(currentStep === 3 ? "resources.requiredFields" : "form.optionalFields")}
       headerAction={null}
       headerInfoClassName="max-w-[592px]"
     >
