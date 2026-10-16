@@ -6,6 +6,7 @@ import type { Dataset } from "@/service/types/dataset";
 import type { FeaturedDatasetsData } from "../editorial-blocks";
 import { DeleteBlockPopupContent } from "./DeleteBlockPopupContent";
 import { formatCompactMetric, getTimeAgoLabel } from "./utils";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 export function FeaturedDatasetsEditor({
   data,
@@ -112,7 +113,7 @@ export function FeaturedDatasetsEditor({
           const dataset = nameMap?.[id];
           const qualityScore =
             dataset?.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0;
-          const timeAgo = getTimeAgoLabel(dataset?.last_modified, i18n.resolvedLanguage);
+          const timeAgo = getTimeAgoLabel(dataset ? getDatasetLastUpdate(dataset) : undefined, i18n.resolvedLanguage);
 
           return (
             <div key={id} className="relative">
