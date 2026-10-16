@@ -108,7 +108,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
           />
         )}
 
-        <div className="admin-page__actions">
+        <div data-dataset-actions className="admin-page__actions">
           <Button
             appearance="outline"
             variant="neutral"

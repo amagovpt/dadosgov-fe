@@ -325,5 +325,26 @@
     "transferAction": "Transferir o conjunto de dados",
     "deletedBanner": "Este conjunto de dados foi eliminado e a sua página pública não está disponível.",
     "archivedBanner": "Este conjunto de dados está arquivado e a sua página pública não está disponível."
+  },
+  "contacts": {
+    "assignments": "Atribuições e pontos de contacto",
+    "active": "Contacto ativo",
+    "edit": "Editar contacto",
+    "remove": "Remover contacto",
+    "name": "Nome",
+    "role": "Função",
+    "rolePlaceholder": "Selecionar função do contacto",
+    "identificationTitle": "Identificação do contacto",
+    "allRequired": "Todos os campos são obrigatórios.",
+    "detailsTitle": "Dados do contacto",
+    "oneRequired": "Apenas um dos campos é obrigatório.",
+    "url": "URL associado",
+    "urlHint": "Indique o URL associado a este ponto de contacto, como um formulário de contacto ou uma página Web.",
+    "cancel": "Cancelar",
+    "saving": "A guardar...",
+    "oneContactRequired": "Indique um email ou um URL associado.",
+    "invalidEmail": "Introduza um endereço de email válido.",
+    "invalidUrl": "Introduza um URL válido, começando por http:// ou https://.",
+    "saveError": "Não foi possível guardar o contacto. Tente novamente."
   }
 }

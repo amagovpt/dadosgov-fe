@@ -22,8 +22,8 @@ import type { DatasetWizardDraftContact } from "./datasetWizardTypes";
 import type { AdminHelpBlock } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
+import { DatasetWizardContacts } from "./DatasetWizardContacts";
 import { DatasetWizardHelp } from "./DatasetWizardHelp";
-import styles from "./datasetWizard.module.css";
 
 type DropdownSection = ReactElement<DropdownSectionProps> | ReactElement<DropdownSectionProps>[];
 
@@ -60,6 +60,8 @@ export interface DatasetWizardStep2Props {
   orgContactPoints: ContactPoint[];
   selectedContactPointIds: string[];
   onToggleExistingContact: (id: string) => void;
+  onContactSaved: (contact: ContactPoint, isNew: boolean) => void;
+  onRemoveContact: (id: string) => void;
   draftContacts: DatasetWizardDraftContact[];
   onDraftFieldChange: (draftId: number, field: string, value: string) => void;
   onSaveContactDraft: (draftId: number) => void;
@@ -124,6 +126,8 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
     orgContactPoints,
     selectedContactPointIds,
     onToggleExistingContact,
+    onContactSaved,
+    onRemoveContact,
     draftContacts,
     onDraftFieldChange,
     onSaveContactDraft,
@@ -160,7 +164,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
     : t("form.invalidTemporalRange");
 
   const requiredHint = (
-    <span className={styles.requiredHint}>
+    <span className="flex items-center gap-8 text-s-regular text-neutral-700 [&_svg]:size-16 [&_svg]:fill-informative-500!">
       <Icon name="agora-solid-info-mark" dimensions="s" />
       {t("form.fieldRequired")}
     </span>
@@ -169,7 +173,9 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
     <>
       {selectedProducer && selectedProducer !== "user" && (
         <>
-          <h3 className={redesigned ? styles.contactLabel : "admin-page__section-title"}>
+          <h3
+            className={redesigned ? "text-m-medium text-primary-900" : "admin-page__section-title"}
+          >
             {t(redesigned ? "form.contactAssignmentsLabel" : "form.contactPointsSectionTitle")}
           </h3>
 
@@ -291,7 +297,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
         <p className="pt-32 text-base leading-7 text-neutral-900">{t("form.requiredFields")}</p>
       )}
       <form
-        className={redesigned ? styles.form : "admin-page__form"}
+        className={redesigned ? "flex flex-col gap-64" : "admin-page__form"}
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
@@ -300,14 +306,18 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
       >
         {detailsSection !== "coverage" && (
           <>
-            <section className={redesigned ? styles.section : "admin-page__fields-group"}>
-              <div className={styles.sectionInfo}>
-                <h2 className="admin-page__section-title">
+            <section className={redesigned ? "flex flex-col gap-32" : "admin-page__fields-group"}>
+              <div className="flex max-w-[592px] flex-col gap-16 text-primary-900 [&_p]:text-m-regular">
+                <h2
+                  className={
+                    redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"
+                  }
+                >
                   {t(redesigned ? "form.identitySectionTitle" : "form.producerSectionTitle")}
                 </h2>
                 <p>{t(redesigned ? "form.identityDescription" : "form.producerHelper")}</p>
               </div>
-              <div className={styles.field}>
+              <div className="flex min-w-0 flex-col gap-16">
                 <IsolatedSelect
                   label={t(redesigned ? "form.producerInputLabel" : "form.producerLabel")}
                   placeholder={t(
@@ -322,28 +332,17 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                 >
                   {producerOptions}
                 </IsolatedSelect>
-                {redesigned && requiredHint}
+                {redesigned && <div className="-mt-8">{requiredHint}</div>}
               </div>
               {redesigned && (
-                <div className={styles.contacts}>
-                  {selectedProducer && selectedProducer !== "user" ? (
-                    contactFields
-                  ) : (
-                    <>
-                      <h3 className={styles.contactLabel}>{t("form.contactAssignmentsLabel")}</h3>
-                      <Button
-                        type="button"
-                        appearance="outline"
-                        variant="primary"
-                        hasIcon
-                        trailingIcon="agora-line-plus-circle"
-                        disabled
-                      >
-                        {t("form.addContactAction")}
-                      </Button>
-                    </>
-                  )}
-                </div>
+                <DatasetWizardContacts
+                  producerId={selectedProducer}
+                  contacts={orgContactPoints}
+                  selectedIds={selectedContactPointIds}
+                  onToggle={onToggleExistingContact}
+                  onSaved={onContactSaved}
+                  onRemove={onRemoveContact}
+                />
               )}
               {!redesigned && (!user?.organizations || user.organizations.length === 0) && (
                 <div className="admin-page__org-card">
@@ -359,9 +358,13 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                 </div>
               )}
             </section>
-            <section className={redesigned ? styles.section : "admin-page__fields-group"}>
-              <div className={styles.sectionInfo}>
-                <h2 className="admin-page__section-title">
+            <section className={redesigned ? "flex flex-col gap-32" : "admin-page__fields-group"}>
+              <div className="flex max-w-[592px] flex-col gap-16 text-primary-900 [&_p]:text-m-regular">
+                <h2
+                  className={
+                    redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"
+                  }
+                >
                   {t(
                     redesigned ? "form.identificationSectionTitle" : "form.descriptionSectionTitle"
                   )}
@@ -373,7 +376,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                 {formErrors.datasetTitleTooLong && (
                   <StatusCard variant="danger" showIcon description={t("form.titleTooLong")} />
                 )}
-                <div className={styles.field}>
+                <div className="flex min-w-0 flex-col gap-16">
                   <InputText
                     label={t(redesigned ? "form.titleInputLabel" : "form.titleField")}
                     placeholder={t(
@@ -391,10 +394,10 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                         : t("form.fieldRequired")
                     }
                   />
-                  {redesigned && requiredHint}
+                  {redesigned && <div className="-mt-8">{requiredHint}</div>}
                   {redesigned && <DatasetWizardHelp item={auxiliaryItems[0]} />}
                 </div>
-                <div className={styles.field}>
+                <div className="flex min-w-0 flex-col gap-16">
                   <InputText
                     label={t("form.acronymField")}
                     placeholder={t(
@@ -407,7 +410,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                   />
                   {redesigned && <DatasetWizardHelp item={auxiliaryItems[1]} />}
                 </div>
-                <div className={styles.field}>
+                <div className="flex min-w-0 flex-col gap-16">
                   <InputTextArea
                     label={t(redesigned ? "form.descriptionInputLabel" : "form.descriptionField")}
                     placeholder={t(
@@ -433,14 +436,14 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                     errorFeedbackText={t("form.fieldRequired")}
                   />
                   {redesigned && (
-                    <div className={styles.descriptionHints}>
+                    <div className="-mt-8 flex flex-col gap-8">
                       {requiredHint}
-                      <div className={styles.descriptionRecommendation}>
-                        <span className={styles.requiredHint}>
+                      <div className="flex items-start justify-between gap-32">
+                        <span className="flex items-center gap-8 text-s-regular text-neutral-700 [&_svg]:size-16 [&_svg]:fill-informative-500!">
                           <Icon name="agora-solid-info-mark" dimensions="s" />
                           {t("form.descriptionRecommendation")}
                         </span>
-                        <span className={styles.characterCount}>
+                        <span className="shrink-0 text-s-regular text-neutral-700">
                           {datasetDescription.length} / 3000
                         </span>
                       </div>
@@ -448,7 +451,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                   )}
                   {redesigned && <DatasetWizardHelp item={auxiliaryItems[2]} />}
                 </div>
-                <div className={styles.field}>
+                <div className="flex min-w-0 flex-col gap-16">
                   <IsolatedSelect
                     label={t("form.keywordsField")}
                     placeholder={t(
@@ -488,7 +491,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
         )}
         {detailsSection !== "identity" && (
           <>
-            <h2 className="admin-page__section-title">{t("form.accessSectionTitle")}</h2>
+            <h2
+              className={redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"}
+            >
+              {t("form.accessSectionTitle")}
+            </h2>
 
             <div className="admin-page__fields-group">
               <IsolatedSelect
@@ -506,7 +513,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
 
             {!redesigned && contactFields}
 
-            <h2 className="admin-page__section-title">{t("form.timeSectionTitle")}</h2>
+            <h2
+              className={redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"}
+            >
+              {t("form.timeSectionTitle")}
+            </h2>
 
             <div className="admin-page__fields-group">
               <IsolatedSelect
@@ -577,7 +588,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             </div>
 
             {redesigned && <DatasetWizardHelp item={auxiliaryItems[6]} />}
-            <h2 className="admin-page__section-title">{t("form.spaceSectionTitle")}</h2>
+            <h2
+              className={redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"}
+            >
+              {t("form.spaceSectionTitle")}
+            </h2>
 
             <div className="admin-page__fields-group">
               <IsolatedSelect
@@ -628,7 +643,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             </div>
           </>
         )}
-        <div className="admin-page__actions flex justify-between gap-[18px]">
+        <div data-dataset-actions className="admin-page__actions flex justify-between gap-[18px]">
           <Button
             type="button"
             variant="primary"

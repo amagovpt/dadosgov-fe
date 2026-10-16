@@ -325,5 +325,26 @@
     "transferAction": "Transfer the dataset",
     "deletedBanner": "This dataset was deleted and its public page is not available.",
     "archivedBanner": "This dataset is archived and its public page is not available."
+  },
+  "contacts": {
+    "assignments": "Assignments and contact points",
+    "active": "Active contact",
+    "edit": "Edit contact",
+    "remove": "Remove contact",
+    "name": "Name",
+    "role": "Role",
+    "rolePlaceholder": "Select the contact role",
+    "identificationTitle": "Contact identification",
+    "allRequired": "All fields are required.",
+    "detailsTitle": "Contact details",
+    "oneRequired": "Only one of the fields is required.",
+    "url": "Associated URL",
+    "urlHint": "Enter the URL associated with this contact point, such as a contact form or a web page.",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "oneContactRequired": "Enter an email address or an associated URL.",
+    "invalidEmail": "Enter a valid email address.",
+    "invalidUrl": "Enter a valid URL starting with http:// or https://.",
+    "saveError": "Could not save the contact. Please try again."
   }
 }

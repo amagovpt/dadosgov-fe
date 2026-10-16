@@ -29,8 +29,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
     onPublish,
     onSaveDraft,
     isSubmitting,
-  } =
-    props;
+  } = props;
 
   const qualityScore =
     createdDataset?.quality?.score != null ? Math.round(createdDataset.quality.score * 100) : 0;
@@ -170,8 +169,13 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
 
       <PublicationFeedbackButton />
 
-      <div className="admin-page__actions flex justify-end gap-[18px]">
-        <Button appearance="outline" variant="neutral" onClick={onSaveDraft} disabled={isSubmitting}>
+      <div data-dataset-actions className="admin-page__actions flex justify-end gap-[18px]">
+        <Button
+          appearance="outline"
+          variant="neutral"
+          onClick={onSaveDraft}
+          disabled={isSubmitting}
+        >
           {isSubmitting ? t("form.savingDraft") : t("form.saveDraftAction")}
         </Button>
         <Button variant="primary" onClick={onPublish} disabled={isSubmitting}>

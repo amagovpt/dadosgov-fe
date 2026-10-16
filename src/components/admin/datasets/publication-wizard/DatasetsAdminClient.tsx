@@ -43,13 +43,12 @@ import { useDatasetWizardContactActions } from "./hooks/useDatasetWizardContactA
 import { useDatasetWizardSubmissionActions } from "./hooks/useDatasetWizardSubmissionActions";
 import { type DatasetFormField } from "./datasetFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
-import { Button } from "@ama-pt/agora-design-system";
+import { Button, ModalProvider } from "@ama-pt/agora-design-system";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
 import { validateDatasetDetails } from "./datasetFormModel";
-import styles from "./datasetWizard.module.css";
 
 interface DatasetsAdminClientProps {
   pageContent: BoDatasetsPage;
@@ -330,24 +329,44 @@ export default function DatasetsAdminClient({
     selectedKeywordsRef.current = restored;
   }, [createdDataset, selectedKeywordsValue]);
 
-  // Fetch contact points when an organization is selected as producer
+  // Ignore a previous producer's response after switching organizations.
   useEffect(() => {
-    if (selectedProducer && selectedProducer !== "user") {
-      async function loadContactPoints() {
-        try {
-          const response = await fetchOrgContactPoints(selectedProducer);
-          setOrgContactPoints(response.data);
-          if (response.data.length > 0) {
-            setDraftContacts([]);
-          }
-        } catch (error) {
-          console.error("Error loading contact points:", error);
-          setOrgContactPoints([]);
-        }
-      }
-      loadContactPoints();
+    if (!selectedProducer || selectedProducer === "user") return;
+    let cancelled = false;
+    async function loadContactPoints() {
+      const response = await fetchOrgContactPoints(selectedProducer);
+      if (cancelled) return;
+      setOrgContactPoints((previous) => {
+        const contacts = new Map(response.data.map((contact) => [contact.id, contact]));
+        // Keep contacts saved while the producer's initial request was in flight.
+        previous.forEach((contact) => contacts.set(contact.id, contact));
+        return [...contacts.values()];
+      });
+      if (response.data.length > 0) setDraftContacts([]);
     }
+    void loadContactPoints();
+    return () => {
+      cancelled = true;
+    };
   }, [selectedProducer]);
+
+  const handleContactSaved = (contact: ContactPoint, isNew: boolean) => {
+    setOrgContactPoints((previous) => {
+      const index = previous.findIndex((item) => item.id === contact.id);
+      return index < 0
+        ? [...previous, contact]
+        : previous.map((item) => (item.id === contact.id ? contact : item));
+    });
+    if (isNew)
+      setSelectedContactPointIds((previous) =>
+        previous.includes(contact.id) ? previous : [...previous, contact.id]
+      );
+  };
+
+  const handleRemoveContact = (id: string) => {
+    setOrgContactPoints((previous) => previous.filter((contact) => contact.id !== id));
+    setSelectedContactPointIds((previous) => previous.filter((contactId) => contactId !== id));
+  };
 
   const {
     handleAddDraftContactRow,
@@ -675,10 +694,10 @@ export default function DatasetsAdminClient({
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
 
   return (
-    <>
+    <ModalProvider>
       {redesigned && (
         <>
-          <div className={styles.toolbar}>
+          <div className="flex flex-wrap items-center justify-start gap-8 md:justify-end">
             <Button
               type="button"
               appearance="link"
@@ -693,7 +712,7 @@ export default function DatasetsAdminClient({
             >
               {t("admin-datasets:form.cancelCreation")}
             </Button>
-            <span className={styles.actionDivider} aria-hidden="true" />
+            <span className="h-60 hidden w-px bg-neutral-700 md:block" aria-hidden="true" />
             <Button
               type="button"
               appearance="link"
@@ -711,7 +730,7 @@ export default function DatasetsAdminClient({
                 : t("admin-datasets:form.saveCreationDraft")}
             </Button>
           </div>
-          <div className={styles.progress}>
+          <div className="[&_h2>span]:text-xl-bold!">
             <AdminStepper
               currentStep={currentStep}
               totalSteps={4}
@@ -724,7 +743,13 @@ export default function DatasetsAdminClient({
           </div>
         </>
       )}
-      <div className={redesigned ? styles.body : "flex flex-col gap-32 min-[1025px]:flex-row"}>
+      <div
+        className={
+          redesigned
+            ? "flex w-[800px] max-w-full flex-col gap-32"
+            : "flex flex-col gap-32 min-[1025px]:flex-row"
+        }
+      >
         {/* Left: Form */}
         <div className="flex min-w-0 flex-1 flex-col gap-24">
           {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
@@ -772,6 +797,8 @@ export default function DatasetsAdminClient({
               orgContactPoints={orgContactPoints}
               selectedContactPointIds={selectedContactPointIds}
               onToggleExistingContact={toggleExistingContact}
+              onContactSaved={handleContactSaved}
+              onRemoveContact={handleRemoveContact}
               draftContacts={draftContacts}
               onDraftFieldChange={updateDraftContactField}
               onSaveContactDraft={handleSaveContactDraft}
@@ -851,6 +878,6 @@ export default function DatasetsAdminClient({
           </aside>
         )}
       </div>
-    </>
+    </ModalProvider>
   );
 }

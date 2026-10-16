@@ -201,6 +201,9 @@ export function useDatasetWizardSubmissionActions({
         temporalEnd,
       });
 
+      // An empty selection must also clear associations when updating a draft.
+      if (optionalContacts) payload.contact_points = selectedContactPointIds;
+
       const spatialZoneIds = spatialCoverageRef.current
         .split(",")
         .map((id) => id.trim())
