@@ -28,7 +28,7 @@ export default function CardIcon({
   icon = {
     name: "agora-line-arrow-right-circle",
     color: "#007CF8",
-    backgroundColor: "primary-50",
+    backgroundColor: "primary-200",
   },
   hideIcon = false,
   children,

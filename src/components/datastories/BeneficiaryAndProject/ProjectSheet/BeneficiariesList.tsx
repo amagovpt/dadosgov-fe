@@ -32,7 +32,7 @@ export default function BeneficiariesList({
   const handleLoadMore = useCallback(
     async (page: number) => {
       const res = await fetch(
-        `/api/fundos-europeus/pt2030/beneficiarios-e-projetos/ficha-de-projeto`,
+        `/internal-api/fundos-europeus/pt2030/beneficiarios-e-projetos/ficha-de-projeto`,
         {
           method: "POST",
           headers: {

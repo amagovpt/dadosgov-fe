@@ -4,6 +4,7 @@ import { BenProjSheet } from "@/components/datastories/BeneficiaryAndProject/She
 import ButtonGeneral from "@/components/Primitives/Button";
 import RoundedIcon from "@/components/Primitives/RoundedIcon";
 import { Datastory } from "@/components/Shared/Datastories";
+import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
@@ -79,7 +80,7 @@ export default async function BeneficiaryPage({
     throw new Error(error?.message ?? "Failed to fetch data");
   }
 
-  const { hero, beneficiarySheet, /*consortiums,*/ distribution, projects } = flattenData(
+  const { hero, beneficiarySheet, distribution, projects, datasets } = flattenData(
     data?.findFichaDeBeneficiarioSingleton.data as Record<string, unknown>
   ) as Beneficiary;
 
@@ -233,7 +234,7 @@ export default async function BeneficiaryPage({
       >
         <InfoBlock.Root>
           <InfoBlock.Header className="flex flex-row gap-24">
-            <InfoBlock.Title title={distribution.title} />
+            <InfoBlock.Title title={distribution.title} className="max-w-[592px] text-2xl-bold!" />
           </InfoBlock.Header>
         </InfoBlock.Root>
 
@@ -255,7 +256,7 @@ export default async function BeneficiaryPage({
                     icon={{
                       name: "agora-line-arrow-right-anchor",
                       color: "white",
-                      backgroundColor: "primary-500",
+                      backgroundColor: "primary-600",
                     }}
                   />
                 </div>
@@ -268,7 +269,7 @@ export default async function BeneficiaryPage({
                       icon={{
                         name: "agora-line-arrow-right-anchor",
                         color: "white",
-                        backgroundColor: "primary-500",
+                        backgroundColor: "primary-600",
                       }}
                     />
                   </div>
@@ -278,7 +279,7 @@ export default async function BeneficiaryPage({
                       icon={{
                         name: "agora-line-arrow-right-anchor",
                         color: "white",
-                        backgroundColor: "primary-500",
+                        backgroundColor: "primary-600",
                       }}
                     />
                   </div>
@@ -293,7 +294,7 @@ export default async function BeneficiaryPage({
                       icon={{
                         name: distribution.cards[1].icon ?? "",
                         color: "#007CF8",
-                        backgroundColor: "bg-primary-50",
+                        backgroundColor: "bg-primary-200",
                       }}
                       title={"title" in distribution.cards[1] ? distribution.cards[1].title : ""}
                       description={distribution.cards[1].subtitle ?? ""}
@@ -341,7 +342,7 @@ export default async function BeneficiaryPage({
                       icon={{
                         name: "agora-line-arrow-down-anchor",
                         color: "white",
-                        backgroundColor: "primary-500",
+                        backgroundColor: "primary-600",
                       }}
                     />
                   </div>
@@ -353,7 +354,7 @@ export default async function BeneficiaryPage({
                         icon={{
                           name: distribution.cards[2].icon ?? "",
                           color: "#007CF8",
-                          backgroundColor: "bg-primary-50",
+                          backgroundColor: "bg-primary-200",
                         }}
                         title={"title" in distribution.cards[2] ? distribution.cards[2].title : ""}
                         description={distribution.cards[2].subtitle ?? ""}
@@ -399,7 +400,7 @@ export default async function BeneficiaryPage({
       <Section className="flex flex-col items-center gap-64 bg-neutral-100 pb-64" id={projects.id}>
         <InfoBlock.Root>
           <InfoBlock.Header className="flex flex-row gap-24">
-            <InfoBlock.Title title={projects.title} />
+            <InfoBlock.Title title={projects.title} className="max-w-[592px] text-2xl-bold!" />
           </InfoBlock.Header>
         </InfoBlock.Root>
 
@@ -416,7 +417,7 @@ export default async function BeneficiaryPage({
                       <BenProjSheet.CardLined
                         title={mainBenProjectjsQuantity.toString()}
                         description={t("projects")}
-                        className="items-center border-t-4 border-l-0 border-t-primary-500"
+                        className="items-center border-t-4 border-l-0 border-t-primary-600"
                       />
                       <Link href={projects.cards[1].anchor.href ?? "#"}>
                         <ButtonGeneral
@@ -487,6 +488,8 @@ export default async function BeneficiaryPage({
           </InfoBlock.Content>
         </InfoBlock.Root>
       </Section>
+
+      {datasets && datasets.active !== false && <Sources {...datasets} className="mt-64 p-0" />}
     </main>
   );
 }

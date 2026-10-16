@@ -95,7 +95,7 @@ export function ResultsLayout({
   return (
     <div className="results-list flex flex-col gap-32">
       {/*!isMobile && <ResultsNumber />*/}
-      {!isMobile && showFilters.length > 0 && <ResultsLine />}
+      {/*!isMobile && showFilters.length > 0 && <ResultsLine /> */}
       {children}
     </div>
   );
@@ -142,7 +142,7 @@ export function ResultCard({
           }}
         />
       </div>
-      {!isLast && <ResultsLine />}
+      {/*!isLast && <ResultsLine />*/}
     </>
   );
 }

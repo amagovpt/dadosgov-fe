@@ -964,6 +964,24 @@ export function getPT2030BeneficiaryData(locale: string = "pt") {
               }
             }
           }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
         }
       }
       queryBeneficiarySheetOfPortugal2030(nif: $nif) {

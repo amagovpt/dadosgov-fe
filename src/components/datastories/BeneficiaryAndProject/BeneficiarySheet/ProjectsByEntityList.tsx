@@ -29,7 +29,7 @@ export default function ProjectsByEntityList({
   const handleLoadMore = useCallback(
     async (page: number) => {
       const res = await fetch(
-        `/api/fundos-europeus/pt2030/beneficiarios-e-projetos/ficha-de-beneficiario`,
+        `/internal-api/fundos-europeus/pt2030/beneficiarios-e-projetos/ficha-de-beneficiario`,
         {
           method: "POST",
           headers: {
@@ -72,18 +72,13 @@ export default function ProjectsByEntityList({
         const valueStr = `<strong>${t("financingValue")}</strong> ${formatValuesWithSuffix(project.approvedValue)}`;
         const descStr = `<p>${dateStr}<br><br>${valueStr}</p>`;
 
-        const description = formatHtmlParagraphs(
-          descStr,
-          "text-m-regular !text-neutral-900 first-letter:uppercase"
-        );
-
         const href = `/${i18n.language}/datastories/portugal-2030/projetos-do-portugal-2030/${project.operationCode}`;
 
         return (
           <ResultCard
             key={`card-${entityRole.replaceAll(" ", "-")}-${index}`}
             title={project.operationName}
-            description={description as unknown as string}
+            description={descStr}
             href={href}
             isLast={index === data.length - 1}
           />

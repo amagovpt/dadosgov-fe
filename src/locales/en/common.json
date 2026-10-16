@@ -520,5 +520,6 @@
   "amountExpected": "Planned",
   "amountPaid": "Spent",
   "totalAmountExpected": "Total estimated amount",
-  "totalAmountPaid": "Total amount paid"
+  "totalAmountPaid": "Total amount paid",
+  "seeMore": "See more {{about}}"
 }
