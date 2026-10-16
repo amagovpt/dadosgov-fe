@@ -4,6 +4,7 @@ import { Button, Icon } from "@ama-pt/agora-design-system";
 import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import type { Dataset } from "@/service/types/dataset";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 interface ReusesEditAssociatedDatasetsSectionProps {
   associatedDatasets: Dataset[];
@@ -46,7 +47,7 @@ export default function ReusesEditAssociatedDatasetsSection({
               link={`/datasets/${dataset.slug}`}
               title={dataset.title}
               description={dataset.description || ""}
-              last_modified={formatDateToTimeAgo(dataset.last_modified)}
+              last_modified={formatDateToTimeAgo(getDatasetLastUpdate(dataset))}
               organization={
                 dataset.organization
                   ? {

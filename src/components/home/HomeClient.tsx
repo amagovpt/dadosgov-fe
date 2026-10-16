@@ -38,6 +38,7 @@ import Anchor from "../Shared/Anchor";
 import { StatusCard as StatusCardType } from "@/service/types/home/home";
 import StatusCard from "@/components/Shared/StatusCard";
 import { MigrationInvite } from "../login/MigrationInvite";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -273,7 +274,7 @@ export default function HomeClient({
             <div className="grid grid-cols-1 gap-32 lg:grid-cols-2 xl:grid-cols-3">
               {latestDatasets.length > 0 ? (
                 latestDatasets.map((dataset, index) => {
-                  const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+                  const timeAgo = formatDateToTimeAgo(getDatasetLastUpdate(dataset));
                   const cardProps = {
                     ...dataset,
                     last_modified: timeAgo,
