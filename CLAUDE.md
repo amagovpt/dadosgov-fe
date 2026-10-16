@@ -217,28 +217,20 @@ upstream udata releases it is built on. Here there is nothing to avoid colliding
 - **MINOR** — a new feature (`feat:`).
 - **PATCH** — everything else (`fix:`, `perf:`, `refactor:`, `chore:`, `style:`).
 
-One tag per promotion to `main`, cut from the `ppr -> main` merge commit — the cadence already in
-use here, and the same one the backend follows.
-
 Cutting a release:
 
 1. The content reaches `main` through the normal promotion flow — never commit directly to an
    environment branch.
 2. Turn the `## Unreleased` heading over that release's entries into `## 1.4.15 (YYYY-MM-DD)`, open
    a new empty `## Unreleased` above it, and set the same number in `version` in `package.json`.
-3. Tag the production commit and publish the release with that section as the notes:
+3. Run `./tag-version.sh 1.4.15` from a working branch whose HEAD matches `origin/main`. It tags, pushes the tag and publishes the GitHub release with the notes read from that changelog section. It refuses to tag when `package.json` declares a different version — that value is shown in the portal footer, so a release tagged against a stale `package.json` publishes the wrong number on the site.
+4. After the environment is deployed, confirm it serves what you tagged: `../scripts/check_deployed_version.sh https://dados.gov.pt` checks the backend half, and the footer shows this app's version straight from the built `package.json`.
 
-```bash
-git fetch origin main
-git tag -a v1.4.15 -m "Version 1.4.15" origin/main
-git push origin v1.4.15
-awk -v hdr="## 1.4.15 (" 'index($0, hdr) == 1 { f = 1; next } f && /^## / { exit } f' CHANGELOG.md \
-  | gh release create v1.4.15 --title v1.4.15 --notes-file -
-```
+5. One tag per promotion to `main`.
 
-> **Prefix.** The first two tags (`1.4.13`, `1.4.14`) were created without the `v`. Anything that
-> lists versions must sort with `git tag --sort=-v:refname`, which copes with both spellings.
-> `package.json` still says `0.1.0`; bring it in line at the next release.
+> **Prefix.** The first two tags (`1.4.13`, `1.4.14`) were created without the `v`; new ones carry
+> it. Anything that lists versions must sort with `git tag --sort=-v:refname`, which copes with
+> both spellings.
 
 ### Commits — Conventional Commits 1.0.0
 
