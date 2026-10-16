@@ -6,6 +6,7 @@ import { deleteDataset, updateDataset } from "@/service/api/datasets";
 import type { Dataset } from "@/service/types/dataset";
 
 interface UseDatasetLifecycleActionsParams {
+  listUrl: string;
   dataset: Dataset | null;
   hide: () => void;
   push: (href: string) => void;
@@ -17,6 +18,7 @@ interface UseDatasetLifecycleActionsParams {
 }
 
 export function useDatasetLifecycleActions({
+  listUrl,
   dataset,
   hide,
   push,
@@ -31,6 +33,8 @@ export function useDatasetLifecycleActions({
   async function handlePublishDataset() {
     if (!dataset) return;
 
+    setIsSubmitting(true);
+    setApiError(null);
     try {
       const tagsValue = keywordsRef.current;
       const tags = tagsValue
@@ -58,6 +62,8 @@ export function useDatasetLifecycleActions({
       showApiSuccess(t("edit.publishSuccess"));
     } catch {
       setApiError(t("edit.publishError"));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -67,7 +73,7 @@ export function useDatasetLifecycleActions({
     setIsSubmitting(true);
     try {
       await updateDataset(dataset.id, { archived: new Date().toISOString() });
-      push("/admin/me/datasets?status=archived");
+      push(`${listUrl}?status=archived`);
     } catch (error) {
       console.error("Error archiving dataset:", error);
       setApiError(t("edit.archiveError"));
@@ -98,7 +104,7 @@ export function useDatasetLifecycleActions({
     try {
       await deleteDataset(dataset.id);
       hide();
-      push("/admin/me/datasets");
+      push(listUrl);
     } catch (error) {
       console.error("Error deleting dataset:", error);
       setApiError(t("edit.deleteError"));

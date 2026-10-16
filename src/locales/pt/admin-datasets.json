@@ -217,7 +217,7 @@
     },
     "save": "Guardar",
     "saving": "A guardar...",
-    "metadataSaved": "Conjunto de dados atualizado com sucesso.",
+    "metadataSaved": "Alterações guardadas com sucesso.",
     "metadataSaveError": "Erro ao atualizar o conjunto de dados.",
     "publishSuccess": "Conjunto de dados publicado com sucesso.",
     "publishError": "Erro ao publicar o conjunto de dados.",
@@ -419,5 +419,18 @@
     "views_zero": "{{count}} visualizações",
     "downloads_zero": "{{count}} transferências",
     "refreshError": "Não foi possível atualizar a pré-visualização. Volte a carregar a página para consultar a informação mais recente."
+  },
+  "editPage": {
+    "identityDescription": "Escolha a entidade ou organização que pretende associar à publicação deste conjunto de dados.",
+    "producerTransferHint": "Para alterar o produtor, utilize a opção «Transferir propriedade».",
+    "overdueTitle": "Reveja a atualização do conjunto de dados.",
+    "overdueDescription": "A atualização prevista está em atraso. Confirme a frequência de atualização e mantenha os dados atualizados.",
+    "updateSchedule": "Editar a frequência de atualização",
+    "saveChanges": "Guardar alterações",
+    "archive": "Arquivar",
+    "unarchive": "Desarquivar",
+    "transferOwnership": "Transferir propriedade",
+    "resourcesTab": "Recursos",
+    "activityTab": "Atividade"
   }
 }

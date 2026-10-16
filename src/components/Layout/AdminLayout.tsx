@@ -19,6 +19,7 @@ export type AdminLayoutProps = {
     breadcrumbItems: AdminBreadcrumbItem[],
     headerAction?: React.ReactNode
     headerClassName?: string
+    headerMeta?: React.ReactNode
     headerInfoClassName?: string
     hideHeader?: boolean
     children: React.ReactNode
@@ -32,6 +33,7 @@ export default function AdminLayout({
     breadcrumbItems,
     headerAction = <PublishDropdown />,
     headerClassName,
+    headerMeta,
     headerInfoClassName,
     hideHeader = false,
     children,
@@ -77,6 +79,7 @@ export default function AdminLayout({
                         <h1 className="text-2xl-bold text-brand-blue-secondary">
                             {title}
                         </h1>
+                        {headerMeta}
                         {description && <p className="text-base text-neutral-700">{description}</p>}
                     </div>
                     {headerAction}

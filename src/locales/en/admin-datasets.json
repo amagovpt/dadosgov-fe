@@ -217,7 +217,7 @@
     },
     "save": "Save",
     "saving": "Saving...",
-    "metadataSaved": "Dataset updated successfully.",
+    "metadataSaved": "Changes saved successfully.",
     "metadataSaveError": "Error updating the dataset.",
     "publishSuccess": "Dataset published successfully.",
     "publishError": "Error publishing the dataset.",
@@ -419,5 +419,18 @@
     "views_zero": "{{count}} views",
     "downloads_zero": "{{count}} downloads",
     "refreshError": "The preview could not be refreshed. Reload the page to see the latest information."
+  },
+  "editPage": {
+    "identityDescription": "Choose the entity or organization associated with this dataset publication.",
+    "producerTransferHint": "To change the producer, use “Transfer ownership”.",
+    "overdueTitle": "Review the dataset update schedule.",
+    "overdueDescription": "The scheduled update is overdue. Check the update frequency and keep the data up to date.",
+    "updateSchedule": "Edit update frequency",
+    "saveChanges": "Save changes",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "transferOwnership": "Transfer ownership",
+    "resourcesTab": "Resources",
+    "activityTab": "Activity"
   }
 }

@@ -2,12 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams, useRouter, useParams } from "next/navigation";
+import { useSearchParams, useRouter, useParams, usePathname } from "next/navigation";
 import {
   Button,
-  Icon,
   StatusCard,
-  Pill,
   Tabs,
   Tab,
   TabHeader,
@@ -17,8 +15,6 @@ import {
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 import { Dropdown } from "@/components/Primitives/Dropdown";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
 import { fetchActivity } from "@/service/api/activity";
 import {
   fetchDataset,
@@ -34,7 +30,14 @@ import { requestTransfer } from "@/service/api/transfers";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { ResourceStatusBanner } from "@/components/admin/ResourceStatusBanner";
-import type { License, Frequency, Granularity, SpatialZone, Activity, ResourceType } from "@/service/types/catalog";
+import type {
+  License,
+  Frequency,
+  Granularity,
+  SpatialZone,
+  Activity,
+  ResourceType,
+} from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
 import DatasetsEditDeletePopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditDeletePopup";
@@ -43,11 +46,9 @@ import DatasetsEditMetadataTab from "@/components/admin/datasets/edit-tabs/Datas
 import DatasetsEditResourcesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditResourcesTab";
 import DatasetsEditDiscussionsTab from "@/components/admin/datasets/edit-tabs/DatasetsEditDiscussionsTab";
 import DatasetsEditActivitiesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditActivitiesTab";
-import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import TextLink from "@/components/Primitives/TextLink";
 import { translateActivityLabel } from "@/utils/activityLabels";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
@@ -57,6 +58,10 @@ import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/use
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+
+import { can } from "@/utils/permissions";
+import { localizeHref } from "@/utils/localizeHref";
+import { splitLocale } from "@/utils/stripLocale";
 
 interface DatasetsEditClientProps {
   pageContent: BoDatasetsPage;
@@ -68,6 +73,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
+  const { locale } = splitLocale(usePathname());
+  const listUrl = localizeHref(`${adminProfileBasePath(activeProfile)}/datasets`, locale);
   const { show, hide } = usePopupContext();
   const datasetId = (params?.datasetId as string) || searchParams.get("id") || "";
   const slug = searchParams.get("slug") || datasetId;
@@ -97,8 +104,13 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     setTemporaryMessage: showApiSuccess,
   } = useTemporaryMessage<string | null>(null);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
-  const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
-    useFormErrors<DatasetEditField>();
+  const {
+    errors: formErrors,
+    setErrors,
+    clearError,
+    resetErrors,
+    focusFirstError,
+  } = useFormErrors<DatasetEditField>();
   const [licenses, setLicenses] = useState<License[]>([]);
   const [frequencies, setFrequencies] = useState<Frequency[]>([]);
   const [granularities, setGranularities] = useState<Granularity[]>([]);
@@ -117,11 +129,9 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(false);
   const [discussionsLoaded, setDiscussionsLoaded] = useState(false);
-  const [discussionsTotal, setDiscussionsTotal] = useState<number | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
   const [activitiesLoaded, setActivitiesLoaded] = useState(false);
-  const [latestActivity, setLatestActivity] = useState<Activity | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -187,16 +197,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             spatialCoverageRef.current = currentIds.join(",");
           });
         }
-
-        fetchActivity(ds.id, 1, 1)
-          .then((res) => {
-            if (res.data.length > 0) setLatestActivity(res.data[0]);
-          })
-          .catch((err) => console.error("Error loading latest activity:", err));
-
-        fetchDiscussions(ds.id, 1, 1)
-          .then((res) => setDiscussionsTotal(res.total))
-          .catch(() => {});
       } catch (error) {
         console.error("Error loading dataset:", error);
         setApiError(t("edit.loadError"));
@@ -213,7 +213,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     fetchDiscussions(dataset.id)
       .then((res) => {
         setDiscussions(res.data);
-        setDiscussionsTotal(res.total);
         setDiscussionsLoaded(true);
       })
       .catch((err) => console.error("Error loading discussions:", err))
@@ -254,7 +253,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
 
   const selectedKeywords = useMemo(
     () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
-    [loadedKeywords],
+    [loadedKeywords]
   );
   const { keywordOptions, setKeywordSearch, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords,
@@ -286,7 +285,9 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     const ids = new Set(normalized.split(",").filter(Boolean));
     setSpatialZones((prev) => {
       const seen = new Set(prev.map((z) => z.id));
-      const additions = spatialZoneSearchRef.current.filter((z) => ids.has(z.id) && !seen.has(z.id));
+      const additions = spatialZoneSearchRef.current.filter(
+        (z) => ids.has(z.id) && !seen.has(z.id)
+      );
       const kept = prev.filter((z) => ids.has(z.id));
       if (additions.length === 0 && kept.length === prev.length) return prev;
       return [...kept, ...additions];
@@ -313,7 +314,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       options.push(
         <Dropdown.Option key="empty" value="">
           —
-        </Dropdown.Option>,
+        </Dropdown.Option>
       );
     }
     return <Dropdown.Section name="spatial-coverage">{options}</Dropdown.Section>;
@@ -338,7 +339,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       setTitle(value);
       if (value.trim()) clearError("title");
     },
-    [clearError],
+    [clearError]
   );
 
   const { handleSaveMetadata } = useDatasetMetadataActions({
@@ -372,17 +373,22 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     },
   });
 
-  const { handleArchiveDataset, handleDeleteDataset, handlePublishDataset, handleUnarchiveDataset } =
-    useDatasetLifecycleActions({
-      dataset,
-      hide,
-      push: router.push,
-      keywordsRef,
-      setDataset,
-      setIsSubmitting,
-      setApiError,
-      showApiSuccess,
-    });
+  const {
+    handleArchiveDataset,
+    handleDeleteDataset,
+    handlePublishDataset,
+    handleUnarchiveDataset,
+  } = useDatasetLifecycleActions({
+    listUrl,
+    dataset,
+    hide,
+    push: router.push,
+    keywordsRef,
+    setDataset,
+    setIsSubmitting,
+    setApiError,
+    showApiSuccess,
+  });
 
   const handleTransferDataset = async (recipient: RecipientSelection, comment: string) => {
     if (!dataset) throw new Error(t("edit.notFound"));
@@ -396,8 +402,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     hide();
     showApiSuccess(t("edit.transferRequested", { recipient: recipient.label }), 15000);
   };
-
-  void handleTransferDataset;
 
   const { handleDeleteResource, handleFileUpload, handleResourceClick, handleResourceEdit } =
     useDatasetResourceActions({
@@ -427,44 +431,44 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     return (
       <div className="admin-page">
         <StatusCard variant="danger" showIcon description={t("edit.notFound")} />
-        <Button variant="primary" onClick={() => router.push("/admin/me/datasets")}>
+        <Button variant="primary" onClick={() => router.push(listUrl)}>
           {t("edit.back")}
         </Button>
       </div>
     );
   }
 
-  const qualityCriteria: (keyof NonNullable<Dataset["quality"]>)[] = [
-    "dataset_description_quality",
-    "has_resources",
-    "license",
-    "has_open_format",
-    "all_resources_available",
-    "resources_documentation",
-    "spatial",
-    "temporal_coverage",
-    "update_frequency",
-  ];
-
-  const qualityScore = (() => {
-    const q = dataset.quality;
-    if (!q) return 0;
-    if (q.score > 0) return Math.round(q.score * 100);
-    const met = qualityCriteria.filter((key) => q[key] === true).length;
-    return Math.round((met / qualityCriteria.length) * 100);
-  })();
-
-  const metadataCount = (() => {
-    const q = dataset.quality;
-    if (!q) return 0;
-    return qualityCriteria.filter((key) => q[key] === true).length;
-  })();
-
-  const statsCount =
-    (dataset.metrics?.views ?? 0) +
-    (dataset.metrics?.resources_downloads ?? 0) +
-    (dataset.metrics?.reuses ?? 0) +
-    (dataset.metrics?.followers ?? 0);
+  const canEdit = can(dataset, "edit");
+  const canDelete = can(dataset, "delete");
+  const openTransfer = () =>
+    show(
+      <DatasetsEditTransferPopup datasetTitle={dataset.title} onConfirm={handleTransferDataset} />,
+      { title: t("edit.transferTitle"), closeAriaLabel: t("edit.closeAriaLabel"), dimensions: "m" }
+    );
+  const openDelete = () =>
+    show(<DatasetsEditDeletePopup onClose={hide} onConfirm={handleDeleteDataset} />, {
+      title: t("edit.deleteModalTitle"),
+      closeAriaLabel: t("edit.closeAriaLabel"),
+      dimensions: "m",
+    });
+  const feedback =
+    apiError || apiSuccess || dataset.archived || dataset.deleted ? (
+      <div className="flex flex-col gap-32">
+        {apiSuccess && (
+          <StatusCard
+            variant="success"
+            showIcon
+            description={apiSuccess}
+            className="bg-success-600! text-white! [&_*]:text-white! [&_svg]:fill-success-200!"
+          />
+        )}
+        {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
+        <ResourceStatusBanner
+          item={dataset}
+          messages={{ deleted: t("edit.deletedBanner"), archived: t("edit.archivedBanner") }}
+        />
+      </div>
+    ) : null;
 
   return (
     <AdminLayout
@@ -473,107 +477,100 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         { label: dataset.title },
       ]}
       title={dataset.title}
+      className="max-w-[1112px]! gap-64 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2 [&_.agora-btn]:min-h-[60px] [&_.agora-btn]:py-[14px] [&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!"
+      headerClassName="xl:items-center"
+      headerInfoClassName="w-full max-w-[592px]"
+      headerMeta={
+        <ResourceStatusBadge
+          item={dataset}
+          display="pill"
+          className="h-32! w-fit rounded-[999px]! px-16! text-s-regular"
+        />
+      }
       headerAction={
-        <Button
-          variant="primary"
-          appearance="outline"
-          disabled={!!(dataset.archived || dataset.deleted)}
-          onClick={() => window.open(`/datasets/${dataset.slug}`, "_blank")}
-        >
-          <span className="admin-edit-info__btn-content">
-            <Icon name="agora-line-eye" className="h-16 w-16" />
-            {t("edit.viewPublicPage")}
-          </span>
-        </Button>
+        dataset.private && canEdit && !dataset.archived && !dataset.deleted ? (
+          <Button
+            variant="primary"
+            hasIcon
+            leadingIcon="agora-line-document"
+            leadingIconHover="agora-solid-document"
+            disabled={isSubmitting}
+            onClick={handlePublishDataset}
+          >
+            {t("review.publishAction")}
+          </Button>
+        ) : null
       }
     >
-      <ResourceStatusBanner
-        item={dataset}
-        messages={{
-          deleted: t("edit.deletedBanner"),
-          archived: t("edit.archivedBanner"),
-        }}
-      />
-      {apiError && (
-        <div className="my-24">
-          <StatusCard variant="danger" showIcon description={apiError} />
-        </div>
-      )}
-      {apiSuccess && (
-        <div className="my-24">
-          <StatusCard variant="success" showIcon description={apiSuccess} />
-        </div>
-      )}
-
-      <div className="admin-edit-info">
-        <div className="admin-edit-info__badges">
-          <ResourceStatusBadge item={dataset} display="pill" className="uppercase" />
-          {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
-          <DatasetBadges badges={dataset.badges} />
-          <span className="admin-edit-info__stat">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="admin-edit-info__stat-icon"
+      <div className="flex flex-wrap items-center justify-start gap-8 md:justify-end">
+        {canDelete && (
+          <>
+            <Button
+              appearance="link"
+              variant="danger"
+              hasIcon
+              leadingIcon="agora-line-trash"
+              leadingIconHover="agora-solid-trash"
+              disabled={isSubmitting || !!dataset.deleted}
+              onClick={openDelete}
             >
-              <path
-                d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z"
-                fill="#64718B"
-              />
-            </svg>
-            {t("edit.statisticsCount", { count: statsCount })}
-          </span>
-          <span className="admin-edit-info__stat">
-            <Icon name="agora-line-document" className="admin-edit-info__stat-icon" />
-            {t("edit.metadataCount", { count: metadataCount })}
-          </span>
-          <span className="admin-edit-info__stat">
-            <Icon name="agora-line-star" className="admin-edit-info__stat-icon" />
-            {qualityScore > 0 ? (qualityScore / 10).toFixed(1).replace(".", ",") : "0"}
-          </span>
-        </div>
-
-        <p className="admin-edit-info__activity">
-          <Icon name="agora-line-clock" className="admin-edit-info__clock-icon" />
-          {latestActivity ? (
-            <>
-              {` ${t("edit.latestActivityPrefix")} `}
-              <TextLink href={`/users/${latestActivity.actor.slug}`}>
-                {latestActivity.actor.first_name} {latestActivity.actor.last_name}
-              </TextLink>
-              {" — "}
-              {translateActivityLabel(latestActivity.label, t)}
-              {" — "}
-              <span>
-                {format(new Date(latestActivity.created_at), "d 'de' MMMM 'de' yyyy", {
-                  locale: pt,
-                })}
-              </span>
-            </>
-          ) : (
-            <>
-              {` ${t("edit.latestActivityPrefix")} `}
-              {dataset.owner && (
-                <TextLink href={`/users/${dataset.owner.slug}`}>
-                  {dataset.owner.first_name} {dataset.owner.last_name}
-                </TextLink>
-              )}
-              {` — ${t("edit.latestActivityFallback")} — `}
-              <span>
-                {format(new Date(dataset.last_modified), "d 'de' MMMM 'de' yyyy", {
-                  locale: pt,
-                })}
-              </span>
-            </>
-          )}
-        </p>
+              {t("edit.confirmDelete")}
+            </Button>
+            <span aria-hidden="true" className="hidden h-[60px] w-px bg-neutral-700 md:block" />
+          </>
+        )}
+        {canEdit && (
+          <>
+            <Button
+              appearance="link"
+              variant="primary"
+              hasIcon
+              leadingIcon="agora-line-folder"
+              leadingIconHover="agora-solid-folder"
+              disabled={isSubmitting || !!dataset.deleted}
+              onClick={dataset.archived ? handleUnarchiveDataset : handleArchiveDataset}
+            >
+              {t(dataset.archived ? "editPage.unarchive" : "editPage.archive")}
+            </Button>
+            <span aria-hidden="true" className="hidden h-[60px] w-px bg-neutral-700 md:block" />
+            <Button
+              appearance="link"
+              variant="primary"
+              hasIcon
+              leadingIcon="agora-line-download"
+              leadingIconHover="agora-solid-download"
+              disabled={isSubmitting || !!dataset.deleted}
+              onClick={openTransfer}
+            >
+              {t("editPage.transferOwnership")}
+            </Button>
+            <span aria-hidden="true" className="hidden h-[60px] w-px bg-neutral-700 md:block" />
+          </>
+        )}
+        <Button
+          appearance="link"
+          variant="primary"
+          hasIcon
+          leadingIcon="agora-line-eye"
+          leadingIconHover="agora-solid-eye"
+          disabled={!!dataset.deleted}
+          onClick={() =>
+            window.open(
+              localizeHref(`/datasets/${dataset.slug}`, locale),
+              "_blank",
+              "noopener,noreferrer"
+            )
+          }
+        >
+          {t("edit.viewPublicPage")}
+        </Button>
       </div>
 
       <div ref={tabsRef} tabIndex={-1} className="outline-none">
         <Tabs
+          fullWidth
+          currentType="primary"
+          className="[&_.accordion-body>.children-wrapper]:w-full [&_.accordion-body>.children-wrapper]:min-w-0 [&_.tab-list]:mb-0! [&_.tab-list-item]:text-m-medium [&_.tab-list-item.active]:bg-neutral-100! [&_.tab-list.mobile_.accordion-body-block]:p-16! [&_.tab-panel]:mt-0! [&_.tab-panel]:border-0! [&_.tab-panel]:bg-neutral-100! [&_.tab-panel]:px-0! [&_.tab-panel]:py-64! min-[1440px]:[&_.tab-panel]:-mr-[112px] min-[1440px]:[&_.tab-panel]:-ml-[104px] min-[1440px]:[&_.tab-panel]:pr-[112px]! min-[1440px]:[&_.tab-panel]:pl-[104px]!"
           onTabActivation={(index: number) => {
             setApiError(null);
             setApiSuccess(null);
@@ -585,14 +582,10 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             <TabHeader>{t("edit.tabs.metadata")}</TabHeader>
             <TabBody>
               <DatasetsEditMetadataTab
+                feedback={feedback}
+                onCancel={() => router.push(listUrl)}
                 auxiliaryItems={pageContent.editAuxiliaryItems}
-                visibilityCard={pageContent.visibilityCard}
-                transferCard={pageContent.transferCard}
-                archiveCard={pageContent.archiveCard}
-                unarchiveCard={pageContent.unarchiveCard}
-                deleteCard={pageContent.deleteCard}
                 dataset={dataset}
-                featured={featured}
                 isSubmitting={isSubmitting}
                 formErrors={formErrors}
                 loadedTitle={loadedTitle}
@@ -619,8 +612,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                 selectedFrequencyRef={selectedFrequencyRef}
                 spatialCoverageRef={spatialCoverageRef}
                 spatialGranularityRef={spatialGranularityRef}
-                onPublishDataset={handlePublishDataset}
-                onFeaturedChange={(checked) => setFeatured(checked)}
                 onTitleChange={handleTitleChange}
                 onAcronymChange={setAcronym}
                 onDescriptionChange={(html) => {
@@ -667,42 +658,14 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                   setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
                 }}
                 onSaveMetadata={handleSaveMetadata}
-                onOpenTransferPopup={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  show(
-                    <DatasetsEditTransferPopup
-                      datasetTitle={dataset.title}
-                      onConfirm={handleTransferDataset}
-                    />,
-                    {
-                      title: t("edit.transferTitle"),
-                      closeAriaLabel: t("edit.closeAriaLabel"),
-                      dimensions: "m",
-                    },
-                  );
-                }}
-                onToggleArchive={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  dataset.archived ? handleUnarchiveDataset() : handleArchiveDataset();
-                }}
-                onOpenDeletePopup={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  show(<DatasetsEditDeletePopup onClose={hide} onConfirm={handleDeleteDataset} />, {
-                    title: t("edit.deleteModalTitle"),
-                    closeAriaLabel: t("edit.closeAriaLabel"),
-                    dimensions: "m",
-                  });
-                }}
               />
             </TabBody>
           </Tab>
 
           <Tab>
-            <TabHeader>{`${t("edit.tabs.resources")} (${dataset.resources.length})`}</TabHeader>
+            <TabHeader>{t("editPage.resourcesTab")}</TabHeader>
             <TabBody>
+              {feedback}
               <DatasetsEditResourcesTab
                 dataset={dataset}
                 uploaderKey={uploaderKey}
@@ -721,8 +684,9 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
           </Tab>
 
           <Tab>
-            <TabHeader>{`${t("edit.tabs.discussions")} (${discussionsTotal ?? 0})`}</TabHeader>
+            <TabHeader>{t("edit.tabs.discussions")}</TabHeader>
             <TabBody>
+              {feedback}
               <DatasetsEditDiscussionsTab
                 discussionsLoading={discussionsLoading}
                 discussionsLoaded={discussionsLoaded}
@@ -732,8 +696,9 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
           </Tab>
 
           <Tab>
-            <TabHeader>{t("edit.tabs.activities")}</TabHeader>
+            <TabHeader>{t("editPage.activityTab")}</TabHeader>
             <TabBody>
+              {feedback}
               <DatasetsEditActivitiesTab
                 activitiesLoading={activitiesLoading}
                 activitiesLoaded={activitiesLoaded}
