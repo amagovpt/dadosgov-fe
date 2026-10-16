@@ -8,7 +8,7 @@ include:
       build-command: "build"
       build-artifact-path: ".next"
       test-command: "test:ci"
-      junit-report-path: "reports/junit.xml"
+      junit-report-path: "junit.xml"
       coverage-report-path: "coverage/cobertura-coverage.xml"
       unit-test-artifacts-path: "coverage/"
       sast-enabled: "true"
