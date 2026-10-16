@@ -166,7 +166,7 @@ When fetching dynamic data in a client component (e.g., admin pages), use `useEf
 - **Do not reference the PR, and never write a `[#XXX]`/`[#NNN]` placeholder.** The PR number does not exist when the entry is written, and the merge commit already records it (`Merge pull request #536 from …`), so `git log --grep` finds it. Placeholders were the single largest source of promotion conflicts: the same entry ended up with different text on different branches once someone filled the number on one of them, which turns an auto-mergeable line into a conflict. **Reference neither PRs nor Jira ticket ids** (no `LEDG-XXXX` in the changelog).
 - **Never edit an entry that has already been promoted** to another environment branch, for the same reason — it makes the same entry diverge textually between branches.
 - Conflicts in `## Unreleased` from two branches both inserting at the top are expected and safe: **keep both entries**, newest first. Never resolve one by deleting the other side's entry.
-- The repo has no version tags: historical entries are grouped by month; new work stays under `## Unreleased` until promoted.
+- New work stays under `## Unreleased` until it is promoted to `main`; at that point the heading becomes the released version (see **Versioning & Releases**). Entries older than the first tag are grouped by month.
 
 ## Branch & Commit Conventions
 
@@ -205,6 +205,40 @@ This frontend repo (`github.com/amagovpt/dadosgov-fe`) has long-lived environmen
 5. Then a PR **into `main`** (production).
 
 > The PR base is always the **next environment up**, not always `main`. Apply this flow only when the change touches this repo. Check `gh auth status` first — the GitHub CLI is available on some team machines and not on others. When it is authenticated, open the PR with `gh pr create --repo amagovpt/dadosgov-fe --base <base> --head <branch>` and follow CI with `gh pr checks`; otherwise open it via the compare URL `https://github.com/amagovpt/dadosgov-fe/compare/<base>...<head>?expand=1`. See the monorepo `CLAUDE.md` for the cross-repo rule.
+
+### Versioning & Releases
+
+This frontend is entirely ours — it has no upstream project — so it uses plain SemVer,
+`vMAJOR.MINOR.PATCH` (e.g. `v1.4.15`). Do not copy the backend's four-segment scheme: `udata-pt`
+carries a fourth number only because it is a fork and has to stay distinguishable from the
+upstream udata releases it is built on. Here there is nothing to avoid colliding with.
+
+- **MAJOR** — a breaking change (`feat!:` / `fix!:`, or a `BREAKING CHANGE:` footer).
+- **MINOR** — a new feature (`feat:`).
+- **PATCH** — everything else (`fix:`, `perf:`, `refactor:`, `chore:`, `style:`).
+
+One tag per promotion to `main`, cut from the `ppr -> main` merge commit — the cadence already in
+use here, and the same one the backend follows.
+
+Cutting a release:
+
+1. The content reaches `main` through the normal promotion flow — never commit directly to an
+   environment branch.
+2. Turn the `## Unreleased` heading over that release's entries into `## 1.4.15 (YYYY-MM-DD)`, open
+   a new empty `## Unreleased` above it, and set the same number in `version` in `package.json`.
+3. Tag the production commit and publish the release with that section as the notes:
+
+```bash
+git fetch origin main
+git tag -a v1.4.15 -m "Version 1.4.15" origin/main
+git push origin v1.4.15
+awk -v hdr="## 1.4.15 (" 'index($0, hdr) == 1 { f = 1; next } f && /^## / { exit } f' CHANGELOG.md \
+  | gh release create v1.4.15 --title v1.4.15 --notes-file -
+```
+
+> **Prefix.** The first two tags (`1.4.13`, `1.4.14`) were created without the `v`. Anything that
+> lists versions must sort with `git tag --sort=-v:refname`, which copes with both spellings.
+> `package.json` still says `0.1.0`; bring it in line at the next release.
 
 ### Commits — Conventional Commits 1.0.0
 
