@@ -17,8 +17,14 @@ Entries are newest first. Work sits under `## Unreleased` until it is promoted t
     property of the image rather than of the environment.
   - An unknown version takes its placeholder away, along with the punctuation wrapping it,
     instead of printing `null` or `{backendVersion}` on screen: `udata ()` reads worse than
-    `udata`. A label with no placeholder is returned untouched, so this ships safely before the
-    CMS text is updated -- it simply has nothing to substitute.
+    `udata`.
+  - A label written before any of this existed still gets the right number, because the link is
+    what identifies it, not the wording: a footer card pointing at `amagovpt/udata-pt` or
+    `amagovpt/dadosgov-fe` has its bracketed version corrected in place, or one appended if it
+    carries none. That is what stops the portal announcing `udata (15.0.0)` while it waits for an
+    editor. Once the labels use placeholders this branch stops firing by itself and can go.
+  - Nothing is invented: a link that matches no repository, or a version the portal cannot
+    determine, leaves the label exactly as the CMS wrote it.
   - `NEXT_PUBLIC_UDATA_VERSION` is gone. It read `../backend/pyproject.toml` at build time, a
     path the frontend Dockerfile never copies into the build context, so it had always resolved
     to `"unknown"`, and no component ever consumed it.

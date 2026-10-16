@@ -16,6 +16,20 @@ const TOKENS: Record<string, keyof PortalVersions> = {
 const HOLE = "\u0000";
 
 /**
+ * The repositories the footer links to, and which version each one carries.
+ * Matching on the link rather than on the label is what lets a label written
+ * before this existed still get the right number: the wording changes with
+ * editorial taste, the repository does not.
+ */
+const REPO_VERSIONS: ReadonlyArray<[fragment: string, key: keyof PortalVersions]> = [
+  ["amagovpt/udata-pt", "backend"],
+  ["amagovpt/dadosgov-fe", "frontend"],
+];
+
+/** A version already written into a label by hand, e.g. `udata (15.0.0)`. */
+const HAND_WRITTEN_VERSION = /\s*\(\s*v?\d[\w.+-]*\s*\)/;
+
+/**
  * Replace the version placeholders a CMS editor wrote into a footer label with
  * the versions the portal is actually running.
  *
@@ -49,4 +63,43 @@ export function applyVersionTokens(label: string, versions?: PortalVersions): st
   }
 
   return out.replace(/[ \t]{2,}/g, " ").trim();
+}
+
+/**
+ * The label a footer link should show, with the version it refers to kept true.
+ *
+ * Two ways in, on purpose:
+ *
+ * 1. A label carrying `{backendVersion}` / `{frontendVersion}` — the form to
+ *    write in the CMS, because it says where the number goes and reads
+ *    correctly even when no version can be determined.
+ * 2. A label with no placeholder that links to one of the portal's own
+ *    repositories — the form the CMS holds today. The version in brackets is
+ *    corrected in place, or appended if the label carries none. This is what
+ *    stops the footer from announcing `udata (15.0.0)` until an editor gets
+ *    round to it; once the labels use placeholders, this branch stops firing on
+ *    its own and can be deleted.
+ *
+ * Anything else is returned untouched: this never invents a version for a link
+ * it cannot identify, and never overwrites a number it cannot replace with a
+ * better one.
+ */
+export function resolveFooterLabel(
+  label: string,
+  href: string | undefined,
+  versions?: PortalVersions,
+): string {
+  if (Object.keys(TOKENS).some((token) => label.includes(token))) {
+    return applyVersionTokens(label, versions);
+  }
+
+  const match = REPO_VERSIONS.find(([fragment]) => href?.includes(fragment));
+  const version = match && versions?.[match[1]]?.trim();
+  if (!version) return label;
+
+  const corrected = HAND_WRITTEN_VERSION.test(label)
+    ? label.replace(HAND_WRITTEN_VERSION, ` (${version})`)
+    : `${label} (${version})`;
+
+  return corrected.replace(/[ \t]{2,}/g, " ").trim();
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Footer as FooterType } from "@/service/types/header/footer";
-import { applyVersionTokens, type PortalVersions } from "@/utils/applyVersionTokens";
+import { resolveFooterLabel, type PortalVersions } from "@/utils/applyVersionTokens";
 import {
   FinancingSectionContainer,
   Footer as FooterADS,
@@ -78,7 +78,7 @@ const FooterNavigation = ({ title, groups, versions }: FooterNavigationI) => {
                         ? { target: "_blank", rel: "noopener noreferrer" }
                         : {})}
                     >
-                      {applyVersionTokens(link.title, versions)}
+                      {resolveFooterLabel(link.title, link.href, versions)}
                     </FooterLink>
                   ))}
               </ul>
