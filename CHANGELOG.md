@@ -6,6 +6,14 @@ Entries are newest first. Work sits under `## Unreleased` until it is promoted t
 
 ## Unreleased
 
+- **chore(release): give this repo a release script, with the guard the footer now depends on**
+  - Releases were cut by hand, step by step, including the `package.json` bump. That bump is no
+    longer cosmetic: the footer reads this app's version from it, so a release tagged `1.4.15`
+    against a `package.json` still saying `1.4.14` would announce the wrong number to visitors.
+  - `tag-version.sh` mirrors the backend's: it refuses to run outside production, refuses to tag
+    a version `package.json` does not declare, takes the release notes from the matching
+    `CHANGELOG.md` section, and resolves the real GitHub CLI past any pyenv shim shadowing it.
+
 - **fix(footer): the portal now states the versions it is actually running**
   - The "Desenvolvimento" column announced `udata (15.0.0)`. That number is typed by hand in the
     CMS, so it was never computed and was never going to age well: the engine behind the portal
