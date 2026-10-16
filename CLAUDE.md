@@ -232,6 +232,19 @@ Cutting a release:
 > it. Anything that lists versions must sort with `git tag --sort=-v:refname`, which copes with
 > both spellings.
 
+### Backend compatibility
+
+`package.json` carries `minBackendVersion`: the oldest backend version that can serve this frontend. `src/lib/server/checkBackendVersion.ts` compares it at server startup against the `version` the backend reports on `GET /api/1/site/`, and logs loudly when the backend is older. It logs and never throws -- a portal that refuses to start is worse than one with a field missing, and the backend being briefly unreachable during a deploy must not be fatal.
+
+**Raise `minBackendVersion` in the same PR that starts depending on something new in the API** -- a field, an endpoint, a changed shape. This is the whole discipline, and nothing enforces it; a number nobody raises is a number that lies, which is exactly how the portal footer came to advertise a version that was years stale.
+
+One number is enough because the incompatibility only runs one way:
+
+- a **newer backend with an older frontend** is almost always fine: the API grows by addition, and a field nobody reads is inert;
+- a **newer frontend with an older backend** asks for what does not exist yet, and the symptom is not an error -- it is a screen quietly showing less than it should.
+
+Set it to a version that exists. If the field you need is only on an unreleased backend, the honest sequence is to release the backend first, then raise the number here.
+
 ### Commits — Conventional Commits 1.0.0
 
 Format:

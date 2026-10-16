@@ -1,16 +1,23 @@
 import { installServerApiErrorInterceptor } from "@/lib/server/apiErrorInterceptor";
+import { checkBackendVersion } from "@/lib/server/checkBackendVersion";
 
 /**
  * Server bootstrap hook (Next.js runs `register()` once at startup).
  *
- * Two jobs:
+ * Three jobs:
  *
  * 1) Installs the server half of the global API error policy — see
  *    `src/lib/server/apiErrorInterceptor.ts`. This is the only place every
  *    server-side backend call passes through, so it is where a failed SSR
  *    fetch stops being silently painted as an empty result set.
  *
- * 2) Disables HTTP keep-alive on the outgoing connection pool that Next.js uses
+ * 2) Checks that the backend answering this environment is new enough for
+ *    this frontend -- see `src/lib/server/checkBackendVersion.ts`. Startup is
+ *    the right moment: it is the one place the mismatch can be reported to
+ *    whoever deployed, instead of surfacing later as a screen quietly showing
+ *    less than it should.
+ *
+ * 3) Disables HTTP keep-alive on the outgoing connection pool that Next.js uses
  * to proxy `rewrites()` (and server-side `fetch`) to the backend.
  *
  * Why: Next.js proxies `/api/*` to the backend through undici, which pools and
@@ -31,6 +38,10 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
   installServerApiErrorInterceptor();
+
+  // Deliberately not awaited: a slow or unreachable backend must not hold up
+  // the server coming online. It logs whatever it finds, whenever it finds it.
+  void checkBackendVersion();
 
   const { setGlobalDispatcher, Agent } = await import("undici");
   setGlobalDispatcher(
