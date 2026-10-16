@@ -107,7 +107,7 @@ export default async function RootLayout({
     locale,
     namespaces,
   });
-  const { headerNavigation, footerData, versions } = await loadShellData(locale);
+  const { headerNavigation, footerData } = await loadShellData(locale);
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const runtimeConfig = await getRuntimeConfig();
 
@@ -129,7 +129,7 @@ export default async function RootLayout({
                         <ShellProvider headerNavigation={headerNavigation}>
                           <ScrollTop />
                           {children}
-                          <Footer data={footerData} versions={versions} />
+                          <Footer data={footerData} />
                         </ShellProvider>
                       </PopupProviderWrapper>
                     </ApiErrorProvider>

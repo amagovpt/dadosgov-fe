@@ -1,7 +1,6 @@
 "use client";
 
 import { Footer as FooterType } from "@/service/types/header/footer";
-import { resolveFooterLabel, type PortalVersions } from "@/utils/applyVersionTokens";
 import {
   FinancingSectionContainer,
   Footer as FooterADS,
@@ -27,14 +26,11 @@ import Anchor from "./Shared/Anchor";
 
 export type FooterI = {
   data: FooterType;
-  /** Versions the CMS labels can interpolate; see `applyVersionTokens`. */
-  versions?: PortalVersions;
 };
 
 export type FooterNavigationI = {
   title: FooterI["data"]["title"];
   groups: FooterI["data"]["groups"];
-  versions?: FooterI["versions"];
 };
 
 export type FooterBottomI = {
@@ -52,7 +48,7 @@ const isExternal = (href: string) => href.startsWith("http");
 // The DS Footer v2 has no navigation slot (it renders only its Logo, Financing and Links
 // sections), so the link groups sit above it. Outside <FooterADS> the FooterContext
 // defaults to a light background, hence the explicit `darkMode` on each FooterLink.
-const FooterNavigation = ({ title, groups, versions }: FooterNavigationI) => {
+const FooterNavigation = ({ title, groups }: FooterNavigationI) => {
   const localize = useLocalizedHref();
 
   return (
@@ -78,7 +74,7 @@ const FooterNavigation = ({ title, groups, versions }: FooterNavigationI) => {
                         ? { target: "_blank", rel: "noopener noreferrer" }
                         : {})}
                     >
-                      {resolveFooterLabel(link.title, link.href, versions)}
+                      {link.title}
                     </FooterLink>
                   ))}
               </ul>
@@ -195,12 +191,12 @@ const FooterBottom = ({ description, logos, social, related, copyright }: Footer
   );
 };
 
-export default function Footer({ data, versions }: FooterI) {
+export default function Footer({ data }: FooterI) {
   const { t } = useTranslation("footer");
 
   return (
     <footer className="bg-primary-900 text-white" aria-label={t("footer")}>
-      <FooterNavigation title={data.title} groups={data.groups} versions={versions} />
+      <FooterNavigation title={data.title} groups={data.groups} />
       <FooterBottom
         description={data.description}
         logos={data.logos}
