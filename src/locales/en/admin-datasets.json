@@ -94,7 +94,7 @@
     "createTitle": "Create dataset",
     "optionalFields": "All fields are optional except those marked as required.",
     "identityStepTitle": "Producer and identification",
-    "coverageStepTitle": "Access and coverage",
+    "coverageStepTitle": "Licence, updates, temporal and geographic coverage",
     "resourcesStepTitle": "Dataset files",
     "publishStepTitle": "Publication",
     "identitySectionTitle": "Publication identity",
@@ -346,5 +346,25 @@
     "invalidEmail": "Enter a valid email address.",
     "invalidUrl": "Enter a valid URL starting with http:// or https://.",
     "saveError": "Could not save the contact. Please try again."
+  },
+  "coverage": {
+    "stepTitle": "Licence, updates, temporal and geographic coverage",
+    "accessDescription": "Select the licence that best represents the conditions for using the data.",
+    "licenseLabel": "Usage licence",
+    "temporalSectionTitle": "Updates and temporal coverage",
+    "temporalDescription": "Indicate how frequently the dataset is updated and the period covered by the information provided.",
+    "frequencyLabel": "Update frequency",
+    "frequencyPlaceholder": "Select the update frequency",
+    "frequencyRequired": "Required field.",
+    "frequencyHelpTitle": "Choose the frequency of use",
+    "temporalCoverageTitle": "Temporal coverage",
+    "startDateLabel": "Start date",
+    "geographicSectionTitle": "Geographic coverage and granularity",
+    "geographicDescription": "Indicate the geographic area covered by the data and the level of territorial detail available.",
+    "geographicCoverageLabel": "Geographic coverage",
+    "geographicCoveragePlaceholder": "Select the geographic coverage",
+    "geographicGranularityLabel": "Geographic granularity",
+    "geographicGranularityPlaceholder": "Select the geographic granularity",
+    "geographicHelpTitle": "Specify the geographic granularity"
   }
 }

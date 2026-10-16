@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { ProgressBar } from "@ama-pt/agora-design-system";
 
 interface AdminStepperProps {
   currentStep: number;
@@ -39,23 +40,20 @@ export function AdminStepper({
           {stepTitle}
         </h2>
         <div className="flex flex-col gap-4">
-          <div
-            role="progressbar"
-            aria-label={stepTitle}
-            aria-valuemin={0}
-            aria-valuemax={totalSteps}
-            aria-valuenow={currentStep}
-            className="flex h-12 w-full gap-2"
-          >
-            <span className="w-4 shrink-0 bg-primary-900" />
-            {Array.from({ length: totalSteps }, (_, index) => (
-              <span
-                key={index}
-                className={`flex-1 ${index < currentStep ? "bg-primary-600" : "bg-neutral-200"}`}
-              />
-            ))}
-            <span className="w-4 shrink-0 bg-primary-900" />
-          </div>
+          <ProgressBar
+            variant="step"
+            appearance="regular"
+            currentStep={currentStep}
+            totalStep={totalSteps}
+            listStepStatus={Array.from(
+              { length: Math.max(0, currentStep - 1) },
+              () => "success" as const
+            )}
+            label={stepTitle}
+            hideLabel
+            hidePercentageValue
+            className="[&_.progress-bar]:my-0! [&_.progress-bar]:h-12!"
+          />
           <span className="text-s-regular text-neutral-700">{label}</span>
         </div>
       </div>

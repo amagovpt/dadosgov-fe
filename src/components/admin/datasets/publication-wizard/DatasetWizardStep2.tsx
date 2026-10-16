@@ -22,6 +22,7 @@ import type { DatasetWizardDraftContact } from "./datasetWizardTypes";
 import type { AdminHelpBlock } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
+import { DatasetWizardCoverageFields } from "./DatasetWizardCoverageFields";
 import { DatasetWizardContacts } from "./DatasetWizardContacts";
 import { DatasetWizardHelp } from "./DatasetWizardHelp";
 
@@ -489,7 +490,8 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             </section>
           </>
         )}
-        {detailsSection !== "identity" && (
+        {redesigned && detailsSection === "coverage" && <DatasetWizardCoverageFields {...props} />}
+        {!redesigned && detailsSection !== "identity" && (
           <>
             <h2
               className={redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"}

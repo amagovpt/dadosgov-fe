@@ -94,7 +94,7 @@
     "createTitle": "Criar conjunto de dados",
     "optionalFields": "Todos os campos são opcionais exceto aqueles marcados como obrigatórios.",
     "identityStepTitle": "Produtor e caracterização",
-    "coverageStepTitle": "Acesso e cobertura",
+    "coverageStepTitle": "Licença, atualização, cobertura temporal e geográfica",
     "resourcesStepTitle": "Ficheiros do conjunto de dados",
     "publishStepTitle": "Publicação",
     "identitySectionTitle": "Identidade de publicação",
@@ -346,5 +346,25 @@
     "invalidEmail": "Introduza um endereço de email válido.",
     "invalidUrl": "Introduza um URL válido, começando por http:// ou https://.",
     "saveError": "Não foi possível guardar o contacto. Tente novamente."
+  },
+  "coverage": {
+    "stepTitle": "Licença, atualização, cobertura temporal e geográfica",
+    "accessDescription": "Selecione a licença que melhor representa as condições de utilização dos dados.",
+    "licenseLabel": "Licença de utilização",
+    "temporalSectionTitle": "Atualização e cobertura temporal",
+    "temporalDescription": "Indique a frequência de atualização do conjunto de dados e o período temporal a que a informação disponibilizada diz respeito.",
+    "frequencyLabel": "Frequência de atualização",
+    "frequencyPlaceholder": "Selecione a frequência de atualização",
+    "frequencyRequired": "Campo obrigatório.",
+    "frequencyHelpTitle": "Escolher a frequência de utilização",
+    "temporalCoverageTitle": "Cobertura temporal",
+    "startDateLabel": "Data de início",
+    "geographicSectionTitle": "Cobertura e granularidade geográfica",
+    "geographicDescription": "Indique a área geográfica a que os dados dizem respeito e o nível de detalhe territorial disponível.",
+    "geographicCoverageLabel": "Cobertura geográfica",
+    "geographicCoveragePlaceholder": "Selecione uma cobertura geográfica",
+    "geographicGranularityLabel": "Granularidade geográfica",
+    "geographicGranularityPlaceholder": "Selecione a granularidade geográfica",
+    "geographicHelpTitle": "Indicar a granularidade geográfica"
   }
 }

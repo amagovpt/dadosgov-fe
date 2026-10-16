@@ -712,7 +712,7 @@ export default function DatasetsAdminClient({
             >
               {t("admin-datasets:form.cancelCreation")}
             </Button>
-            <span className="h-60 hidden w-px bg-neutral-700 md:block" aria-hidden="true" />
+            <span className="hidden h-[60px] w-px bg-neutral-700 md:block" aria-hidden="true" />
             <Button
               type="button"
               appearance="link"
