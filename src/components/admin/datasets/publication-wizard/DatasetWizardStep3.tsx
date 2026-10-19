@@ -1,9 +1,10 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import FileUploadModal from "@/components/admin/FileUploadModal";
+import { usePendingResourceEditor } from "@/components/admin/FileUploadModal/usePendingResourceEditor";
 import { PendingResourceTable } from "@/components/admin/FileUploadModal/PendingResourceTable";
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import type { ResourceType } from "@/service/types/catalog";
@@ -56,6 +57,87 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
     isSubmitting,
   } = props;
 
+  const openEditors = usePendingResourceEditor();
+  const latestProps = useRef(props);
+  const knownFiles = useRef(uploadedFiles);
+  useEffect(() => {
+    latestProps.current = props;
+    knownFiles.current = props.uploadedFiles;
+  }, [props]);
+
+  function editResources(items: (File | string)[]) {
+    openEditors(
+      items.map((item) => {
+        const isUrl = typeof item === "string";
+        const file = isUrl ? undefined : item;
+        const name = isUrl ? item : item.name;
+        const key = `${isUrl ? "url" : "file"}-${name}`;
+        return {
+          isUrl,
+          name,
+          file,
+          resourceTypes,
+          allowedExtensions,
+          initialMeta: resourceMetadata[key] ?? {
+            title: name,
+            resourceType: "main",
+            description: "",
+          },
+          onSave: (meta: PendingResourceMeta, newUrl?: string, replacement?: File) => {
+            const current = latestProps.current;
+            if (
+              newUrl &&
+              newUrl !== name &&
+              (current.resourceUrls.includes(newUrl) ||
+                current.savedResources?.some((resource) => resource.url === newUrl))
+            )
+              throw new Error(t("resourceEditing.duplicateUrl"));
+            if (
+              replacement &&
+              current.uploadedFiles.some(
+                (other) => other !== file && other.name === replacement.name
+              )
+            )
+              throw new Error(t("resourceEditor.duplicateFile"));
+            if (replacement) {
+              current.setUploadedFiles((previous) =>
+                previous.map((other) => (other === file ? replacement : other))
+              );
+              current.onEditMeta(`file-${replacement.name}`, meta);
+            } else current.onEditMeta(key, meta, newUrl);
+          },
+        };
+      })
+    );
+  }
+
+  function addFiles(files: File[]) {
+    // Agora can replay its uploader callback in Strict Mode before React commits the new props.
+    const names = new Set(knownFiles.current.map((file) => file.name));
+    const added = files.filter((file) => {
+      if (names.has(file.name)) return false;
+      names.add(file.name);
+      return true;
+    });
+    if (!added.length) return;
+    const next = [...knownFiles.current, ...added];
+    knownFiles.current = next;
+    setUploadedFiles(next);
+    if (files.length) setShowFileError(false);
+    editResources(added);
+  }
+
+  function addUrl(url: string) {
+    if (
+      resourceUrls.includes(url) ||
+      props.savedResources?.some((resource) => resource.url === url)
+    )
+      throw new Error(t("resourceEditing.duplicateUrl"));
+    setResourceUrls((previous) => [...previous, url]);
+    setShowFileError(false);
+    editResources([url]);
+  }
+
   if (props.redesigned) {
     const formatsHelp = {
       title: t("resources.formatsHelpTitle"),
@@ -101,16 +183,8 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
               uploadedFiles={uploadedFiles}
               resourceUrls={resourceUrls}
               hasError={showFileError}
-              onFilesChange={(files) => {
-                setUploadedFiles(files);
-                if (files.length) setShowFileError(false);
-              }}
-              onUrlAdd={(url) => {
-                setResourceUrls((previous) =>
-                  previous.includes(url) ? previous : [...previous, url]
-                );
-                setShowFileError(false);
-              }}
+              onFilesChange={addFiles}
+              onUrlAdd={addUrl}
               allowedExtensions={allowedExtensions}
             />
           </fieldset>
@@ -130,6 +204,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
               setUploadedFiles,
               setResourceUrls,
               onEditMeta,
+              onEditResource: (item) => editResources([item]),
             }}
           />
           <DatasetWizardHelp item={metadataHelp} />
@@ -189,17 +264,8 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
           uploadedFiles={uploadedFiles}
           resourceUrls={resourceUrls}
           hasError={showFileError}
-          onFilesChange={(files) => {
-            setUploadedFiles(files);
-            if (files.length > 0) setShowFileError(false);
-          }}
-          onUrlAdd={(url) => {
-            setResourceUrls((prev) => {
-              if (prev.includes(url)) return prev;
-              return [...prev, url];
-            });
-            setShowFileError(false);
-          }}
+          onFilesChange={addFiles}
+          onUrlAdd={addUrl}
           allowedExtensions={allowedExtensions}
         />
         {auxiliaryItems?.map((item, index) => (

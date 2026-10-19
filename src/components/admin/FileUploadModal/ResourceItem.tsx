@@ -19,6 +19,7 @@ interface ResourceItemProps {
   onSaveMeta: (meta: PendingResourceMeta, newUrl?: string) => void;
   onReplace?: (f: File) => void;
   onRemove: () => void;
+  onEdit?: () => void;
   appearance?: "actions" | "title";
 }
 
@@ -32,6 +33,7 @@ export function ResourceItem({
   onSaveMeta,
   onReplace,
   onRemove,
+  onEdit,
   appearance = "actions",
 }: ResourceItemProps) {
   const { t } = useTranslation("admin-common");
@@ -44,6 +46,10 @@ export function ResourceItem({
       : baseDisplayName;
 
   const handleEdit = () => {
+    if (onEdit) {
+      onEdit();
+      return;
+    }
     show(
       <ResourceEditPendingPopupContent
         key={`pending-${name}`}

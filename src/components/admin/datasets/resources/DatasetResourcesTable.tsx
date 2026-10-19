@@ -37,6 +37,7 @@ interface PendingResources {
   setUploadedFiles: Dispatch<SetStateAction<File[]>>;
   setResourceUrls: Dispatch<SetStateAction<string[]>>;
   onEditMeta: (key: string, meta: PendingResourceMeta, newUrl?: string) => void;
+  onEditResource?: (item: File | string) => void;
 }
 
 interface DatasetResourcesTableProps {
@@ -362,6 +363,11 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
                       ) : (
                         <ResourceItem
                           appearance="title"
+                          onEdit={
+                            props.pending?.onEditResource
+                              ? () => props.pending!.onEditResource!(row.file || row.url!)
+                              : undefined
+                          }
                           name={row.file?.name || row.url!}
                           file={row.file}
                           size={row.file ? formatFileSize(row.file.size) : undefined}
