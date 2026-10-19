@@ -19,6 +19,7 @@ import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
 import { LoaderProvider } from "@/providers/LoaderProvider";
+import KarmaAnalytics from "@/Scripts/Karma";
 
 const namespaces = [
   "common",
@@ -49,7 +50,7 @@ const namespaces = [
   "admin-topics",
   "admin-logs",
   "admin-editorial",
-  "admin-statistics"
+  "admin-statistics",
 ];
 
 export async function generateMetadata({
@@ -121,6 +122,7 @@ export default async function RootLayout({
                           <ScrollTop />
                           {children}
                           <Footer data={footerData} />
+                          <KarmaAnalytics />
                         </ShellProvider>
                       </PopupProviderWrapper>
                     </ApiErrorProvider>

@@ -20,11 +20,7 @@ export interface ITypesOfBeneficiaries {
   locale: string;
 }
 
-export default function TypesOfBeneficiaries({
-  title,
-  options,
-  locale,
-}: ITypesOfBeneficiaries) {
+export default function TypesOfBeneficiaries({ title, options, locale }: ITypesOfBeneficiaries) {
   const { t } = useTranslation();
 
   const isMobile = useMobile();
@@ -37,15 +33,9 @@ export default function TypesOfBeneficiaries({
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      addFilter(
-        event.target.name,
-        !(filters[event.target.name] as boolean),
-        t,
-        locale,
-        isMobile,
-      );
+      addFilter(event.target.name, !(filters[event.target.name] as boolean), t, locale, isMobile);
     },
-    [addFilter, filters, t, locale, isMobile],
+    [addFilter, filters, t, locale, isMobile]
   );
 
   return (
@@ -55,24 +45,18 @@ export default function TypesOfBeneficiaries({
         const value = filterToBoolean(filters[o.name]);
 
         return (
-          <label
-            key={`benType-${i}`}
-            className="flex gap-16 items-start cursor-pointer"
-          >
-            <div className="w-full flex flex-col gap-0 text-m-regular">
+          <label key={`benType-${i}`} className="flex cursor-pointer items-center gap-16">
+            <div className="flex w-full flex-col gap-0 text-m-regular">
               <Typograph tag="p" className="text-neutral-900">
                 {o.title}
               </Typograph>
-              <Typograph tag="p" className="text-neutral-700">
-                {o.subtitle}
-              </Typograph>
+              {o.subtitle && (
+                <Typograph tag="p" className="text-neutral-700">
+                  {o.subtitle}
+                </Typograph>
+              )}
             </div>
-            <Switch
-              id={`benType-${i}`}
-              name={o.name}
-              checked={value}
-              onChange={handleChange}
-            />
+            <Switch id={`benType-${i}`} name={o.name} checked={value} onChange={handleChange} />
           </label>
         );
       })}

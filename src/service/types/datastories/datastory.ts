@@ -243,7 +243,7 @@ export type NoResults = {
   description: string;
 };
 
-export type QueryProjectsFiltersPt2030 = {
+export type QueryFiltersPt2030 = {
   funds: string[];
   policyObjectives: string[];
   programmes: string[];
@@ -264,6 +264,12 @@ export type SourceInfo = {
   url: string;
 };
 
+export type TypeOfBeneficiary = {
+  name: string;
+  title: string;
+  description: string | null;
+};
+
 export type DatastorySearchPage = {
   hero: DatastoryHero;
   bigNumberTitle: string;
@@ -278,11 +284,18 @@ export type DatastorySearchPage = {
     searchActionAltText: string;
     voiceActionAltText: string;
   };
+  typesOfBeneficiariesTitle: string;
+  typesOfBeneficiaries: TypeOfBeneficiary[];
   filters: Filter[];
   sortBy: SortParam[];
   noResults: NoResults[];
   relatedDatasets: SourceSection;
   relatedDatastories: RelatedSection;
 };
+
+export enum EntityRole {
+  BENEFICIARIO_PRINCIPAL = "BENEFICIARIO_PRINCIPAL",
+  OUTROS_BENEFICIARIOS = "OUTROS_BENEFICIARIOS",
+}
 
 // ----------------------------------------------------------------------------------------------

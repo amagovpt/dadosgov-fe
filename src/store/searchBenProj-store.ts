@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { createStore } from "zustand/vanilla";
 import ExcelJS from "exceljs";
 import { flattenData } from "@/utils/flattenObject";
-import { EntityRole } from "@/service/types/datastories/pesquisar-beneficiarios";
+import { EntityRole } from "@/service/types/datastories/datastory";
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -675,7 +675,7 @@ export const createSearchBenProjStore = (
       const worksheet = workbook.addWorksheet("Data");
 
       const headerData = [
-        ["Mais Transparência"],
+        ["dados.gov"],
         [t(pathnameArray[1])],
         [t(pathnameArray[2])],
         [t(pathnameArray[3]) + " - " + filename],
