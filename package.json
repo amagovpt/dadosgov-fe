@@ -1,6 +1,7 @@
 {
   "name": "dados-gov",
   "version": "1.4.14",
+  "minBackendVersion": "16.0.0.12",
   "private": true,
   "scripts": {
     "dev": "next dev",
