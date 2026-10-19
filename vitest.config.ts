@@ -7,6 +7,9 @@ export default defineConfig({
     alias: {
       ...resolveAgoraActionIcons(__dirname),
       "@": path.resolve(__dirname, "./src"),
+      // Next.js resolves "server-only" itself; under Vitest it does not exist,
+      // which made every module carrying the guard untestable.
+      "server-only": path.resolve(__dirname, "./config/test-stubs/server-only.ts"),
     },
   },
   test: {
