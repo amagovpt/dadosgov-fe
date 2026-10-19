@@ -14,6 +14,7 @@ import {
   getPT2030BeneficiaryMeta,
   queryLoadMorePT2030ProjectsByBeneficiary,
 } from "@/service/queries/datastories/datastory";
+import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Beneficiary,
   PT2030BeneficiariesResponse,
@@ -111,6 +112,11 @@ export default async function BeneficiaryPage({
     console.error("Error:", errorOtherBen);
     throw new Error(errorOtherBen?.message ?? "Failed to fetch data");
   }
+
+  const benPt2030TechnicalSheet = await getTechnicalSheetData(
+    "pt2030-ficha-de-beneficiario",
+    locale
+  );
 
   const mainBens = beneficiaryData.valuesByEntityRole.filter(
     (item) => item.entityRole === "Beneficiário Principal"
@@ -393,6 +399,14 @@ export default async function BeneficiaryPage({
                 </div>
               </>
             )}
+
+            <div className="col-span-12 pt-32 pb-64">
+              <SourceInfoFooter
+                dataSource={sourceInfo[0].source ?? ""}
+                update={sourceInfo[0].modificationDate ?? ""}
+                technicalSheet={benPt2030TechnicalSheet}
+              />
+            </div>
           </InfoBlock.Content>
         </InfoBlock.Root>
       </Section>
