@@ -1,5 +1,7 @@
-import { SourceInfo } from '@/@types/shared-types';
+import { SourceInfo, SortOrder } from '@/@types/shared-types';
 import { ObjectType, Field, Float, Int, registerEnumType } from 'type-graphql';
+
+export { SortOrder };
 
 // Enum for entity roles
 export enum EntityRole {
@@ -28,11 +30,6 @@ export enum ProjectSortBy {
   PLANNED_CONCLUSION_DATE = 'plannedConclusionDate',
 }
 
-export enum SortOrder {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
 export enum BeneficiaryType {
   MAIN = 'MAIN',
   OTHER = 'OTHER',
@@ -46,11 +43,6 @@ registerEnumType(BeneficiarySortBy, {
 registerEnumType(ProjectSortBy, {
   name: 'ProjectSortBy',
   description: 'Fields available for sorting projects',
-});
-
-registerEnumType(SortOrder, {
-  name: 'SortOrder',
-  description: 'Sort order direction',
 });
 
 registerEnumType(BeneficiaryType, {

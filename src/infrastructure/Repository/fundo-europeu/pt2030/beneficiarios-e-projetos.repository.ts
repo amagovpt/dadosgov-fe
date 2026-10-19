@@ -40,8 +40,8 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
   async searchBeneficiariesOfPortugal2030(
     name?: string,
     nif?: string,
-    page: number = 1,
-    limit: number = 50,
+    page?: number,
+    limit?: number,
     fund?: string,
     policyObjective?: string,
     specificObjective?: string,
@@ -58,9 +58,14 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
     executedValueMax?: number,
     paidValueMin?: number,
     paidValueMax?: number,
-    sortBy: BeneficiarySortBy = BeneficiarySortBy.APPROVED_VALUE,
-    sortOrder: SortOrder = SortOrder.DESC,
+    sortBy?: BeneficiarySortBy,
+    sortOrder?: SortOrder,
   ): Promise<BeneficiariesOfPortugal2030> {
+    page = page ?? 1;
+    limit = limit ?? 50;
+    sortBy = sortBy ?? BeneficiarySortBy.APPROVED_VALUE;
+    sortOrder = sortOrder ?? SortOrder.DESC;
+
     try {
       const [countResult, totalCountResult] = await Promise.all([
         cachedQuery(queryBeneficiaryOfPortugal2030Count, [
@@ -230,9 +235,12 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
   async getProjectsByBeneficiarySheetOfPortugal2030(
     nif: string,
     entityRole: EntityRole,
-    page: number = 1,
-    limit: number = 5,
+    page?: number,
+    limit?: number,
   ): Promise<ProjectsByBeneficiarySheetOfPortugal2030> {
+    page = page ?? 1;
+    limit = limit ?? 5;
+
     try {
       const offset = (page - 1) * limit;
 
@@ -258,10 +266,14 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
 
   async getBeneficiariesByProjectSheetOfPortugal2030(
     projectCode: string,
-    beneficiaryType: BeneficiaryType = BeneficiaryType.MAIN,
-    page: number = 1,
-    limit: number = 5,
+    beneficiaryType?: BeneficiaryType,
+    page?: number,
+    limit?: number,
   ): Promise<BeneficiariesByProjectSheetOfPortugal2030> {
+    beneficiaryType = beneficiaryType ?? BeneficiaryType.MAIN;
+    page = page ?? 1;
+    limit = limit ?? 5;
+
     try {
       const offset = (page - 1) * limit;
 
@@ -286,8 +298,8 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
   }
 
   async searchProjectsOfPortugal2030(
-    page: number = 1,
-    limit: number = 50,
+    page?: number,
+    limit?: number,
     operationName?: string,
     operationCode?: string,
     fund?: string,
@@ -305,9 +317,14 @@ export class BeneficiariesAndProjectsRepository implements IBeneficiariesAndProj
     paidValueMax?: number,
     plannedConclusionDateMin?: string,
     plannedConclusionDateMax?: string,
-    sortBy: ProjectSortBy = ProjectSortBy.APPROVED_VALUE,
-    sortOrder: SortOrder = SortOrder.DESC,
+    sortBy?: ProjectSortBy,
+    sortOrder?: SortOrder,
   ): Promise<ProjectOfPortugal2030> {
+    page = page ?? 1;
+    limit = limit ?? 50;
+    sortBy = sortBy ?? ProjectSortBy.APPROVED_VALUE;
+    sortOrder = sortOrder ?? SortOrder.DESC;
+
     try {
       const [totalCountResult, filteredCountResult] = await Promise.all([
         cachedQuery(queryProjectsOfPortugal2030TotalCount),

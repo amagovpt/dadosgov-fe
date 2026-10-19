@@ -1,16 +1,13 @@
 import { ObjectType, Field, Float, Int, registerEnumType } from 'type-graphql';
-import { SourceInfo } from '@/@types/shared-types';
+import { SourceInfo, SortOrder } from '@/@types/shared-types';
+
+export { SortOrder };
 
 // Enums for sorting
 export enum BeneficiariesSortByPRR {
   BUDGET = 'budget',
   PAID_BUDGET = 'paidBudget',
   PROJECTS_AMOUNT = 'numProjects',
-}
-
-export enum SortOrder {
-  ASC = 'ASC',
-  DESC = 'DESC',
 }
 
 export enum ProjectsSortByPRR {
@@ -35,11 +32,6 @@ export enum BeneficiaryProjectType {
 registerEnumType(BeneficiariesSortByPRR, {
   name: 'BeneficiariesSortByPRR',
   description: 'Fields available for sorting beneficiaries',
-});
-
-registerEnumType(SortOrder, {
-  name: 'SortOrder',
-  description: 'Sort order direction',
 });
 
 registerEnumType(ProjectsSortByPRR, {

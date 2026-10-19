@@ -17,8 +17,10 @@ const NEVER_CACHE = 0;
  * shared across every filter combination.
  */
 const UNCACHEABLE_QUERIES = [
-  'Query.searchBeneficiariesOfPT2030',
-  'Query.searchProjectsOfPT2030',
+  'Query.searchBeneficiariesOfPortugal2030',
+  'Query.searchProjectsOfPortugal2030',
+  'Query.searchBeneficiariesOfPRR',
+  'Query.searchProjectsOfPRR',
   // Health probe: must always reflect live state.
   'Query.heartbeat',
 ];

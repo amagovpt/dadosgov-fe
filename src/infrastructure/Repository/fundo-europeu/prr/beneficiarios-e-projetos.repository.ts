@@ -674,7 +674,8 @@ export class BeneficiariesAndProjectsPRRepository implements IBeneficiariesAndPr
   ): Promise<BeneficiaryRelatedProjectsOfPRR> {
     try {
       const safePage = Math.max(1, Math.trunc(page || 1));
-      const offset = (safePage - 1) * limit;
+      const safeLimit = Math.max(1, Math.trunc(limit || 5));
+      const offset = (safePage - 1) * safeLimit;
 
       const result = await cachedQuery(beneficiaryRelatedProjectsPRRQuery, [
         nif?.trim() || null,
@@ -696,7 +697,7 @@ export class BeneficiariesAndProjectsPRRepository implements IBeneficiariesAndPr
 
       // Apply pagination to JSONB array in application layer
       const allData = (row.data || []) as BeneficiaryRelatedProject[];
-      const paginatedData = allData.slice(offset, offset + limit);
+      const paginatedData = allData.slice(offset, offset + safeLimit);
 
       return {
         nif: row.nif,
