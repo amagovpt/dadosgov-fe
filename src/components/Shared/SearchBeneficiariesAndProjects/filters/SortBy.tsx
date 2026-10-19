@@ -1,6 +1,6 @@
 "use client";
 
-import { SortParam } from "@/service/types/datastories/datastory";
+import { SortParam } from "@/service/types/datastories/pt2030/pt2030";
 import { Typograph } from "../../Generics/Typograph";
 import {
   DropdownOption,
