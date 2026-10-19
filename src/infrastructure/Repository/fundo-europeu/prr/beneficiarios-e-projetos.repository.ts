@@ -44,9 +44,7 @@ import {
   querySpecificInvestmentsByComponentsOfPRR,
 } from './beneficiarios-e-projetos.queries';
 
-export class BeneficiariesAndProjectsPRRepository
-  implements IBeneficiariesAndProjectsPRRepository
-{
+export class BeneficiariesAndProjectsPRRepository implements IBeneficiariesAndProjectsPRRepository {
   private buildOrderByClause(
     sortBy: BeneficiariesSortByPRR,
     sortOrder: SortOrder,
@@ -378,25 +376,19 @@ export class BeneficiariesAndProjectsPRRepository
       };
 
       const projectFormRaw = row.eu_prr_project_form as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
       const projectContractsRaw = row.eu_prr_contracts as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
       const tabsRaw = row.tabs as Record<string, unknown> | undefined;
       const geoDistributionRaw =
         tabsRaw?.eu_prr_projects_geo_distribution_financing as
-          | Record<string, unknown>
-          | undefined;
+          Record<string, unknown> | undefined;
       const contestAndContractsRaw = tabsRaw?.eu_prr_contest_and_contracts as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
       const candidatureRaw = tabsRaw?.eu_prr_candidature as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
       const contractsTabRaw = tabsRaw?.eu_prr_contracts as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
 
       return {
         data: {

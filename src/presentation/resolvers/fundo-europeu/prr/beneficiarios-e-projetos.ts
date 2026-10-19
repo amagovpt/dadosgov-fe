@@ -253,5 +253,4 @@ export class BeneficiariesAndProjectsPRRResolver {
       dsComponent,
     );
   }
-
 }

@@ -20,8 +20,6 @@ import {
 } from '@domain/fundo-europeu/prr/beneficiarios-e-projetos';
 import { BeneficiariesAndProjectsPRRepository } from '@infrastructure/Repository/fundo-europeu/prr/beneficiarios-e-projetos.repository';
 
-
-
 export class BeneficiariesAndProjectsPRRUseCase {
   private readonly beneficiariesAndProjectsPRRRepo: IBeneficiariesAndProjectsPRRepository;
 

@@ -3,7 +3,5 @@ import { BeneficiariesAndProjectsPRRResolver } from '@/presentation/resolvers/fu
 
 export const PRRSchema = async () =>
   buildSchema({
-    resolvers: [
-      BeneficiariesAndProjectsPRRResolver,
-    ],
+    resolvers: [BeneficiariesAndProjectsPRRResolver],
   });
