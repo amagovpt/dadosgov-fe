@@ -1,10 +1,10 @@
-import { queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030 } from "@/service/queries/areas/fundos-europeus/portugal-2030/projeto";
-import { PT2030ProjectSheetBeneficiaryResponse } from "@/service/types/areas/fundos-europeus/pt2030/projeto";
+import { queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030 } from "@/service/queries/datastories/datastory";
+import { PT2030ProjectSheetBeneficiaryResponse } from "@/service/types/datastories/pt2030/pt2030";
 import apolloClient from "@/service/utils/apollo-client";
 
 export async function POST(request: Request) {
   try {
-    const { projectCode, beneficiaryType, limit,  page } = await request.json();
+    const { projectCode, beneficiaryType, limit, page } = await request.json();
     const { data, error } = await apolloClient.query<{
       queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030: PT2030ProjectSheetBeneficiaryResponse;
     }>({
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      },
+      }
     );
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      },
+      }
     );
   }
 }

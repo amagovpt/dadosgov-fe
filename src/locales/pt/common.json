@@ -520,5 +520,8 @@
   "amountExpected": "Valor previsto",
   "amountPaid": "Valor pago",
   "totalAmountExpected": "Valor total previsto",
-  "totalAmountPaid": "Valor total pago"
+  "totalAmountPaid": "Valor total pago",
+  "seeMore": "Ver mais {{about}}",
+  "technicalSheet": "Ficha técnica",
+  "consult": "Consultar"
 }

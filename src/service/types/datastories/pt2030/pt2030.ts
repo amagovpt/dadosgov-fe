@@ -195,4 +195,90 @@ export type PT2030ProjectSheetBeneficiaryResponse = {
 
 /** BENEFICIARY **/
 
+export type Beneficiary = {
+  hero: DatastoryHero;
+  beneficiarySheet: Section;
+  consortiums: Section;
+  distribution: Section;
+  projects: Section;
+  datasets: SourceSection;
+};
+
+/* ------------------------------------------------------------- */
+
+export type NIF = string;
+
+export type BeneficiaryEntityRole =
+  | "Beneficiário Principal"
+  | "Outros Beneficiários"
+  | "Fornecedor"
+  | string;
+
+/* ------------------------------------------------------------- */
+
+export type BeneficiarySheet = {
+  entityNif: NIF;
+  entityName: string;
+  projectsAmount: number;
+  approvedValue: number;
+};
+
+/* ------------------------------------------------------------- */
+
+export type ValuesByEntityRole = {
+  entityRole: BeneficiaryEntityRole;
+  approvedValue: number;
+  executedValue: number;
+  paidValue: number;
+  percentageExecutedValue: number;
+};
+
+/* ------------------------------------------------------------- */
+
+export type NumberOfProjectsByEntityRole = {
+  entityRole: BeneficiaryEntityRole;
+  projectsAmount: number;
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2030Beneficiary = {
+  data: {
+    entityNif: NIF;
+    entityName: string;
+    approvedValue: number;
+    beneficiarySheet: BeneficiarySheet[];
+    valuesByEntityRole: ValuesByEntityRole[];
+    //projectsByBeneficiary: ProjectsByBeneficiary[];
+    numberOfProjectsByEntityRole: NumberOfProjectsByEntityRole[];
+  };
+  sourceInfo: SourceInfo[];
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2030BeneficiariesResponse = {
+  data: Beneficiary[];
+  total: number;
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2030ProjectsByBeneficiary = {
+  operationCode: string;
+  operationName: string;
+  approvedValue: number;
+  effectiveConclusionDate: string | null;
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2030ProjectsByBeneficiaryResponse = {
+  limit: number;
+  page: number;
+  total: number;
+  data: PT2030ProjectsByBeneficiary[];
+};
+
+
 // ----------------------------------------------------------------------------------------------

@@ -6,11 +6,13 @@ import { Datastory } from "@/components/Shared/Datastories";
 import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
+import { SourceInfoFooter } from "@/components/Shared/SourceInfoFooter";
 import {
   getPT2030ProjectData,
   getPT2030ProjectMeta,
   queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030,
 } from "@/service/queries/datastories/datastory";
+import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Project,
   PT2030Project,
@@ -77,9 +79,8 @@ export default async function ProjectPage({
     throw new Error(error?.message ?? "Failed to fetch data");
   }
 
-  const { hero, projectSheet, beneficiaries, applications, geographicDistribution, datasets } = flattenData(
-    data?.findFichaDeProjetoSingleton.data as Record<string, unknown>
-  ) as Project;
+  const { hero, projectSheet, beneficiaries, applications, geographicDistribution, datasets } =
+    flattenData(data?.findFichaDeProjetoSingleton.data as Record<string, unknown>) as Project;
 
   const projectData = flattenData(
     data?.queryProjectSheetOfPortugal2030 as Record<string, unknown>
@@ -113,6 +114,11 @@ export default async function ProjectPage({
     console.error("Error:", errorOtherBen);
     throw new Error(errorOtherBen?.message ?? "Failed to fetch data");
   }
+
+  const pubAdminWorkersBySubsectorTechnicalSheet = await getTechnicalSheetData(
+    "pt2030-ficha-de-projeto",
+    locale
+  );
 
   return (
     <main className="datastory-page project-sheet flex flex-col gap-64 pb-64">
@@ -253,7 +259,13 @@ export default async function ProjectPage({
                     title={geographicDistribution.title}
                     geographicDistribution={geographicDistribution.cards}
                     geographicDistributionData={projectData.distribuicao_geografica}
-                  ></BenProjSheetTab.GeographicDistribution>
+                  >
+                    <SourceInfoFooter
+                      dataSource={projectData.info_datasets[0].source ?? ""}
+                      update={projectData.info_datasets[0].reference_date ?? ""}
+                      technicalSheet={pubAdminWorkersBySubsectorTechnicalSheet}
+                    />
+                  </BenProjSheetTab.GeographicDistribution>
                 ),
               },
             ]}
