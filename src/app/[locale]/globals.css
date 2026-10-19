@@ -1965,6 +1965,15 @@ li.section-name:empty {
   display: inline-flex !important;
 }
 
+.admin-edit-info__draft-icon {
+  display: inline-block;
+  width: 18px;
+  height: 13px;
+  flex-shrink: 0;
+  background-color: currentColor;
+  mask: url("/Icons/arrow-return-left.svg") center / contain no-repeat;
+}
+
 .admin-edit-info__activity {
   display: flex;
   align-items: center;

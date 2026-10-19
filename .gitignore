@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/reports
 
 # next.js
 /.next/
@@ -24,6 +25,12 @@
 # misc
 .DS_Store
 *.pem
+/.claude/
+/.agent/
+/.playwright-mcp/
+/.vscode/
+/.github/
+/mcp/
 
 # debug
 npm-debug.log*
