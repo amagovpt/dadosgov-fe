@@ -405,7 +405,11 @@
       "format": "Format",
       "updated": "Last updated"
     },
-    "refreshError": "The resource list could not be refreshed. Reload the page to see your saved changes."
+    "refreshError": "The resource list could not be refreshed. Reload the page to see your saved changes.",
+    "linkSaveError": "The link could not be saved. Try again.",
+    "linkSaved": "Link added successfully.",
+    "filesSaved": "Files uploaded successfully.",
+    "immediateFileHint": "Selected files are uploaded to this dataset."
   },
   "review": {
     "successTitle": "Your dataset has been created successfully",
@@ -432,5 +436,16 @@
     "transferOwnership": "Transfer ownership",
     "resourcesTab": "Resources",
     "activityTab": "Activity"
+  },
+  "resourceEditing": {
+    "published": "Published",
+    "moveToDraft": "Move to draft",
+    "movedToDraft": "Dataset moved to draft.",
+    "moveToDraftError": "The dataset could not be moved to draft. Try again.",
+    "notAllowed": "You do not have permission to manage this dataset’s resources.",
+    "uploadBusy": "Wait for the current upload to finish.",
+    "duplicateUrl": "This link has already been added to the dataset.",
+    "fileSaveError": "Could not upload {{name}}. {{message}}",
+    "deleteError": "The resource could not be deleted. Try again."
   }
 }

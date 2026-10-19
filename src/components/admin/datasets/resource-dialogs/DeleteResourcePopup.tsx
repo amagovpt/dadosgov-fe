@@ -20,15 +20,18 @@ export default function DeleteResourcePopup({
   const { t } = useTranslation("admin-datasets");
   const { hide } = usePopupContext();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setHasError(false);
     try {
       await deleteResource(datasetId, resource.id);
       onDeleted();
       hide();
     } catch (error) {
       console.error("Error deleting resource:", error);
+      setHasError(true);
     } finally {
       setIsDeleting(false);
     }
@@ -36,6 +39,9 @@ export default function DeleteResourcePopup({
 
   return (
     <div className="flex flex-col gap-24">
+      {hasError && (
+        <StatusCard variant="danger" showIcon description={t("resourceEditing.deleteError")} />
+      )}
       <p className="text-sm text-neutral-700">
         {t("edit.resourceDeleteConfirm", { title: resource.title })}
       </p>

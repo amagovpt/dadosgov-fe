@@ -8,8 +8,8 @@ import TextLink from "@/components/Primitives/TextLink";
 
 type DatasetsEditResourceDetailPopupProps = {
   resource: Resource;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   onClose: () => void;
 };
 
@@ -39,44 +39,46 @@ export default function DatasetsEditResourceDetailPopup({
     <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
       {resource.description && <p className="text-sm text-neutral-700">{resource.description}</p>}
       <div className="flex-1 overflow-y-auto">
-        <table className="w-full text-sm">
+        <table className="text-sm w-full">
           <tbody>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+              <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                 {t("edit.resourcesTable.type")}
               </td>
               <td className="py-4">{typeLabel}</td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+              <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                 {t("edit.resourceLocation")}
               </td>
               <td className="py-4">{location}</td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+              <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                 {t("edit.resourceUrlLabel")}
               </td>
-              <td className="break-all py-4">
-                <TextLink href={resource.url} target="_blank">{resource.url}</TextLink>
+              <td className="py-4 break-all">
+                <TextLink href={resource.url} target="_blank">
+                  {resource.url}
+                </TextLink>
               </td>
             </tr>
             {resource.filetype !== "remote" && (
               <>
                 <tr>
-                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                  <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                     {t("edit.resourcesTable.format")}
                   </td>
                   <td className="py-4">{resource.format || "-"}</td>
                 </tr>
                 <tr>
-                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                  <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                     {t("edit.resourceMimeField")}
                   </td>
                   <td className="py-4">{resource.mime || "-"}</td>
                 </tr>
                 <tr>
-                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                  <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                     {t("edit.resourceSizeLabel")}
                   </td>
                   <td className="py-4">{formatSize(resource.filesize)}</td>
@@ -85,14 +87,14 @@ export default function DatasetsEditResourceDetailPopup({
             )}
             {resource.checksum && (
               <tr>
-                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                   {resource.checksum.type}
                 </td>
-                <td className="break-all py-4 font-mono text-xs">{resource.checksum.value}</td>
+                <td className="font-mono text-xs py-4 break-all">{resource.checksum.value}</td>
               </tr>
             )}
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+              <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                 {t("edit.resourcesTable.createdAt")}
               </td>
               <td className="py-4">
@@ -102,13 +104,17 @@ export default function DatasetsEditResourceDetailPopup({
               </td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+              <td className="py-4 pr-16 align-top font-semibold whitespace-nowrap">
                 {t("edit.resourceModifiedAt")}
               </td>
               <td className="py-4">
-                {format(new Date(resource.last_modified || resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
-                  locale: pt,
-                })}
+                {format(
+                  new Date(resource.last_modified || resource.created_at),
+                  "d 'de' MMMM 'de' yyyy HH:mm",
+                  {
+                    locale: pt,
+                  }
+                )}
               </td>
             </tr>
           </tbody>
@@ -119,24 +125,28 @@ export default function DatasetsEditResourceDetailPopup({
           {t("edit.cancel")}
         </Button>
         <div className="flex gap-8">
-          <Button
-            variant="danger"
-            hasIcon
-            leadingIcon="agora-line-trash"
-            leadingIconHover="agora-solid-trash"
-            onClick={onDelete}
-          >
-            {t("edit.confirmDelete")}
-          </Button>
-          <Button
-            variant="primary"
-            hasIcon
-            leadingIcon="agora-line-edit"
-            leadingIconHover="agora-solid-edit"
-            onClick={onEdit}
-          >
-            {t("edit.resourceEditAction")}
-          </Button>
+          {onDelete && (
+            <Button
+              variant="danger"
+              hasIcon
+              leadingIcon="agora-line-trash"
+              leadingIconHover="agora-solid-trash"
+              onClick={onDelete}
+            >
+              {t("edit.confirmDelete")}
+            </Button>
+          )}
+          {onEdit && (
+            <Button
+              variant="primary"
+              hasIcon
+              leadingIcon="agora-line-edit"
+              leadingIconHover="agora-solid-edit"
+              onClick={onEdit}
+            >
+              {t("edit.resourceEditAction")}
+            </Button>
+          )}
         </div>
       </div>
     </div>

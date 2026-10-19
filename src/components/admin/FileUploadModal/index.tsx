@@ -16,6 +16,9 @@ export default function FileUploadModal({
   hasError,
   allowedExtensions = null,
   appearance = "default",
+  saveMode = "pending",
+  inputId = "inline-resource-url",
+  disabled = false,
 }: FileUploadModalProps) {
   const { t } = useTranslation("admin-common");
   const { t: td } = useTranslation("admin-datasets");
@@ -38,10 +41,14 @@ export default function FileUploadModal({
   const [extensionErrors, setExtensionErrors] = useState<string[]>([]);
   const [securityErrors, setSecurityErrors] = useState<string[]>([]);
   const [uploaderKey, setUploaderKey] = useState(0);
+  const addingUrl = useRef(false);
+  const processingFiles = useRef(false);
+  const [fileSaveError, setFileSaveError] = useState<string | null>(null);
 
   const invalidUrlMessage = t("fileUpload.url.invalid");
 
-  const handleAddUrl = () => {
+  const handleAddUrl = async () => {
+    if (addingUrl.current || disabled) return;
     const trimmedUrl = (localUrl || localUrlRef.current).trim();
     if (!trimmedUrl) {
       setUrlError(invalidUrlMessage);
@@ -57,7 +64,16 @@ export default function FileUploadModal({
       setUrlError(invalidUrlMessage);
       return;
     }
-    onUrlAdd(trimmedUrl);
+    addingUrl.current = true;
+    setAdded(null);
+    try {
+      await onUrlAdd(trimmedUrl);
+    } catch (error) {
+      setUrlError(error instanceof Error ? error.message : td("resources.linkSaveError"));
+      return;
+    } finally {
+      addingUrl.current = false;
+    }
     setLocalUrl("");
     localUrlRef.current = "";
     setUrlError(null);
@@ -72,7 +88,8 @@ export default function FileUploadModal({
           placeholder={wizard ? td("resources.urlPlaceholder") : "https://"}
           hasHelperText={wizard}
           helperText={wizard ? td("resources.urlHint") : undefined}
-          id="inline-resource-url"
+          id={inputId}
+          disabled={disabled}
           value={localUrl}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setLocalUrl(e.target.value);
@@ -85,7 +102,7 @@ export default function FileUploadModal({
               handleAddUrl();
             }
           }}
-          hasError={!hasSelection && (!!urlError || hasError)}
+          hasError={!!urlError || (!hasSelection && hasError)}
           hasFeedback={!!urlError}
           feedbackState="danger"
           feedbackText={urlError ?? ""}
@@ -98,12 +115,19 @@ export default function FileUploadModal({
             leadingIcon="agora-line-plus-circle"
             leadingIconHover="agora-solid-plus-circle"
             onClick={handleAddUrl}
+            disabled={disabled}
           >
             {t("fileUpload.actions.add")}
           </Button>
         </div>
         {wizard && added === "url" && !urlError && (
-          <StatusCard variant="success" showIcon description={td("resources.linkAdded")} />
+          <StatusCard
+            variant="success"
+            showIcon
+            description={td(
+              saveMode === "immediate" ? "resources.linkSaved" : "resources.linkAdded"
+            )}
+          />
         )}
       </div>
 
@@ -123,24 +147,36 @@ export default function FileUploadModal({
         <DragAndDropUploader
           key={uploaderKey}
           multiple
+          disabled={disabled}
           label={wizard ? td("resources.uploadFiles") : t("fileUpload.files.label")}
           dragAndDropLabel={t("fileUpload.files.dragAndDrop")}
           inputLabel={wizard ? td("resources.selectFiles") : t("fileUpload.files.selectOrDrag")}
-          extensionsInstructions={wizard ? td("resources.fileHint") : undefined}
+          extensionsInstructions={
+            wizard
+              ? td(saveMode === "immediate" ? "resources.immediateFileHint" : "resources.fileHint")
+              : undefined
+          }
           selectedFilesLabel={t("fileUpload.files.selectedFiles")}
           removeFileButtonLabel={t("fileUpload.files.removeFile")}
           replaceFileButtonLabel={t("fileUpload.files.replaceFile")}
           maxSizeExceededErrorLabel={t("fileUpload.files.maxSizeExceeded")}
           forbiddenExtensionErrorLabel={t("fileUpload.files.forbiddenExtension")}
           hasError={
-            securityErrors.length > 0 || extensionErrors.length > 0 || (hasError && !hasSelection)
+            !!fileSaveError ||
+            securityErrors.length > 0 ||
+            extensionErrors.length > 0 ||
+            (hasError && !hasSelection)
           }
           hasFeedback={
-            securityErrors.length > 0 || extensionErrors.length > 0 || (hasError && !hasSelection)
+            !!fileSaveError ||
+            securityErrors.length > 0 ||
+            extensionErrors.length > 0 ||
+            (hasError && !hasSelection)
           }
           feedbackState="danger"
           feedbackText={
-            securityErrors.length > 0
+            fileSaveError ||
+            (securityErrors.length > 0
               ? t("fileUpload.files.securityError")
               : extensionErrors.length > 0
                 ? extensionErrors.length === 1
@@ -150,30 +186,53 @@ export default function FileUploadModal({
                     })
                 : hasError && !hasSelection
                   ? t("forms.requiredField")
-                  : undefined
+                  : undefined)
           }
-          onChange={(e) => {
+          onChange={async (e) => {
+            if (disabled || processingFiles.current) return;
             const picked = Array.from((e.target as HTMLInputElement).files || []);
             if (picked.length === 0) return;
+            processingFiles.current = true;
             const { valid, invalid } = validateFileExtensions(picked, allowedExtensions);
             setExtensionErrors(invalid);
             setSecurityErrors([]);
+            setFileSaveError(null);
+            setAdded(null);
             const existingNames = new Set(uploadedFiles.map((f) => f.name));
             const uniqueNew = valid.filter((f) => !existingNames.has(f.name));
             if (uniqueNew.length > 0) {
-              onFilesChange([...uploadedFiles, ...uniqueNew]);
-              setAdded("file");
+              try {
+                await onFilesChange([...uploadedFiles, ...uniqueNew]);
+                setAdded("file");
+              } catch (error) {
+                setAdded(null);
+                setFileSaveError(
+                  error instanceof Error ? error.message : td("edit.resourceUploadError")
+                );
+              }
             }
+            processingFiles.current = false;
             setUploaderKey((k) => k + 1);
           }}
           onSecurityError={(rejections) => {
             setAdded(null);
+            setFileSaveError(null);
             setSecurityErrors(rejections.map(() => POISONED_FILE_WARNING));
           }}
         />
-        {wizard && added === "file" && !securityErrors.length && !extensionErrors.length && (
-          <StatusCard variant="success" showIcon description={td("resources.filesAdded")} />
-        )}
+        {wizard &&
+          added === "file" &&
+          !fileSaveError &&
+          !securityErrors.length &&
+          !extensionErrors.length && (
+            <StatusCard
+              variant="success"
+              showIcon
+              description={td(
+                saveMode === "immediate" ? "resources.filesSaved" : "resources.filesAdded"
+              )}
+            />
+          )}
       </div>
     </div>
   );

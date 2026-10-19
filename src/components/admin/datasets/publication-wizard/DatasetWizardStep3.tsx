@@ -12,7 +12,7 @@ import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
 import { DatasetWizardHelp } from "./DatasetWizardHelp";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { Resource } from "@/service/types/dataset";
-import { DatasetWizardResourcesTable } from "./DatasetWizardResourcesTable";
+import { DatasetResourcesTable } from "../resources/DatasetResourcesTable";
 
 export interface DatasetWizardStep3Props {
   redesigned?: boolean;
@@ -118,7 +118,20 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
         </section>
         <fieldset disabled={isSubmitting} className="flex min-w-0 flex-col gap-32">
           <legend className="sr-only">{t("resources.addedTitle")}</legend>
-          <DatasetWizardResourcesTable {...props} />
+          <DatasetResourcesTable
+            savedResources={props.savedResources}
+            resourceTypes={resourceTypes}
+            datasetId={props.datasetId}
+            onResourcesChange={props.onResourcesChange}
+            pending={{
+              uploadedFiles,
+              resourceUrls,
+              resourceMetadata,
+              setUploadedFiles,
+              setResourceUrls,
+              onEditMeta,
+            }}
+          />
           <DatasetWizardHelp item={metadataHelp} />
           {auxiliaryItems?.slice(2).map((item, index) => (
             <DatasetWizardHelp key={index} item={item} />

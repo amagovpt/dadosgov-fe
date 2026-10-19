@@ -8,11 +8,14 @@ export interface PendingResourceMeta {
 }
 
 export interface FileUploadModalProps {
+  saveMode?: "pending" | "immediate";
+  inputId?: string;
+  disabled?: boolean;
   appearance?: "default" | "wizard";
   uploadedFiles: File[];
   resourceUrls: string[];
-  onFilesChange: (files: File[]) => void;
-  onUrlAdd: (url: string) => void;
+  onFilesChange: (files: File[]) => void | Promise<void>;
+  onUrlAdd: (url: string) => void | Promise<void>;
   hasError?: boolean;
   allowedExtensions?: string[] | null;
 }

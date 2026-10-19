@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -26,21 +26,28 @@ import DatasetsEditResourceEditPopup from "@/components/admin/datasets/resource-
 import DeleteResourcePopup from "@/components/admin/datasets/resource-dialogs/DeleteResourcePopup";
 import { fetchDataset } from "@/service/api/datasets";
 import type { Resource } from "@/service/types/dataset";
-import type { DatasetWizardStep3Props } from "./DatasetWizardStep3";
+import type { Dispatch, SetStateAction } from "react";
+import type { ResourceType } from "@/service/types/catalog";
+import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 
-type Props = Pick<
-  DatasetWizardStep3Props,
-  | "uploadedFiles"
-  | "resourceUrls"
-  | "resourceTypes"
-  | "resourceMetadata"
-  | "setUploadedFiles"
-  | "setResourceUrls"
-  | "onEditMeta"
-  | "savedResources"
-  | "datasetId"
-  | "onResourcesChange"
->;
+interface PendingResources {
+  uploadedFiles: File[];
+  resourceUrls: string[];
+  resourceMetadata: Record<string, PendingResourceMeta>;
+  setUploadedFiles: Dispatch<SetStateAction<File[]>>;
+  setResourceUrls: Dispatch<SetStateAction<string[]>>;
+  onEditMeta: (key: string, meta: PendingResourceMeta, newUrl?: string) => void;
+}
+
+interface DatasetResourcesTableProps {
+  savedResources?: Resource[];
+  resourceTypes: ResourceType[];
+  datasetId?: string;
+  onResourcesChange?: (resources: Resource[]) => void;
+  onResourceClick?: (resource: Resource) => void;
+  selectable?: boolean;
+  pending?: PendingResources;
+}
 
 type Availability = "available" | "unavailable" | "unknown" | "unsaved";
 type Row = {
@@ -56,7 +63,9 @@ type Row = {
   index?: number;
 };
 
-export function DatasetWizardResourcesTable(props: Props) {
+export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
+  const tableId = useId();
+  const selectable = props.selectable !== false;
   const { t, i18n } = useTranslation("admin-datasets");
   const { show, hide } = usePopupContext();
   const [query, setQuery] = useState("");
@@ -83,9 +92,9 @@ export function DatasetWizardResourcesTable(props: Props) {
           ? "unavailable"
           : "unknown",
   }));
-  props.uploadedFiles.forEach((file, index) => {
+  props.pending?.uploadedFiles.forEach((file, index) => {
     const key = `file-${file.name}`,
-      meta = props.resourceMetadata[key];
+      meta = props.pending!.resourceMetadata[key];
     rows.push({
       key,
       title: meta?.title || file.name,
@@ -96,9 +105,9 @@ export function DatasetWizardResourcesTable(props: Props) {
       index,
     });
   });
-  props.resourceUrls.forEach((url) => {
+  props.pending?.resourceUrls.forEach((url) => {
     const key = `url-${url}`,
-      meta = props.resourceMetadata[key];
+      meta = props.pending!.resourceMetadata[key];
     rows.push({
       key,
       title: meta?.title || url,
@@ -196,9 +205,9 @@ export function DatasetWizardResourcesTable(props: Props) {
     { value: "unavailable", icon: "agora-line-x-circle" },
   ];
   return (
-    <section className="flex min-w-0 flex-col gap-32" aria-labelledby="added-resources-title">
+    <section className="flex min-w-0 flex-col gap-32" aria-labelledby={`${tableId}-title`}>
       <div className="flex flex-col gap-8">
-        <h3 id="added-resources-title" className="text-xl-bold text-primary-900">
+        <h3 id={`${tableId}-title`} className="text-xl-bold text-primary-900">
           {t("resources.addedTitle")}
         </h3>
         <p className="text-m-regular text-primary-900">{t("resources.addedDescription")}</p>
@@ -207,7 +216,7 @@ export function DatasetWizardResourcesTable(props: Props) {
         <InputSearchBar
           hasVoiceActionButton={false}
           searchActionAltText={t("resources.search")}
-          id="wizard-resource-search"
+          id={`${tableId}-search`}
           label={t("resources.search")}
           placeholder={t("resources.searchPlaceholder")}
           value={query}
@@ -219,7 +228,7 @@ export function DatasetWizardResourcesTable(props: Props) {
       </div>
       <div className="flex flex-col gap-8">
         <ToggleGroup
-          id="wizard-resource-filter"
+          id={`${tableId}-filter`}
           value={filter}
           appearance="button"
           variant="primary"
@@ -240,14 +249,14 @@ export function DatasetWizardResourcesTable(props: Props) {
               leadingIconHover={item.icon.replace("agora-line-", "agora-solid-")}
               disabled={item.value === "validating"}
               aria-describedby={
-                item.value === "validating" ? "resource-validation-hint" : undefined
+                item.value === "validating" ? `${tableId}-validation-hint` : undefined
               }
             >
               {t(`resources.${item.value}`)}
             </Toggle>
           ))}
         </ToggleGroup>
-        <p id="resource-validation-hint" className="text-s-regular text-neutral-700">
+        <p id={`${tableId}-validation-hint`} className="text-s-regular text-neutral-700">
           {t("resources.validationUnavailable")}
         </p>
       </div>
@@ -255,13 +264,13 @@ export function DatasetWizardResourcesTable(props: Props) {
         {refreshError && (
           <StatusCard variant="danger" showIcon description={t("resources.refreshError")} />
         )}
-        {selectedKeys.length > 0 && (
+        {selectable && selectedKeys.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-16 bg-warning-50 p-16 text-warning-900">
             <p className="text-m-bold" role="status">
               {t("resources.selected", { count: selectedKeys.length })}
             </p>
             <div className="flex flex-wrap items-center gap-16">
-              <span id="bulk-delete-hint" className="text-s-regular">
+              <span id={`${tableId}-bulk-delete-hint`} className="text-s-regular">
                 {t("resources.bulkUnavailable")}
               </span>
               <Button
@@ -270,7 +279,7 @@ export function DatasetWizardResourcesTable(props: Props) {
                 hasIcon
                 leadingIcon="agora-line-trash"
                 disabled
-                aria-describedby="bulk-delete-hint"
+                aria-describedby={`${tableId}-bulk-delete-hint`}
               >
                 {t("edit.confirmDelete")}
               </Button>
@@ -288,21 +297,23 @@ export function DatasetWizardResourcesTable(props: Props) {
           >
             <TableHeader>
               <TableRow>
-                <TableSelectionHeaderCell
-                  selectionState={
-                    !selectedVisible
-                      ? "none"
-                      : selectedVisible === visible.length
-                        ? "all"
-                        : "indeterminate"
-                  }
-                  onSelectionChange={(checked) =>
-                    toggle(
-                      visible.map((row) => row.key),
-                      checked
-                    )
-                  }
-                />
+                {selectable && (
+                  <TableSelectionHeaderCell
+                    selectionState={
+                      !selectedVisible
+                        ? "none"
+                        : selectedVisible === visible.length
+                          ? "all"
+                          : "indeterminate"
+                    }
+                    onSelectionChange={(checked) =>
+                      toggle(
+                        visible.map((row) => row.key),
+                        checked
+                      )
+                    }
+                  />
+                )}
                 {headings.map((heading) => (
                   <TableHeaderCell
                     key={heading}
@@ -329,20 +340,22 @@ export function DatasetWizardResourcesTable(props: Props) {
               {visible.length ? (
                 visible.map((row, index) => (
                   <TableRow key={row.key}>
-                    <TableSelectionCell
-                      checked={selectedKeys.includes(row.key)}
-                      onChange={(checked) => toggle([row.key], checked)}
-                      checkboxAriaLabelledBy={`wizard-resource-title-${index}`}
-                    />
+                    {selectable && (
+                      <TableSelectionCell
+                        checked={selectedKeys.includes(row.key)}
+                        onChange={(checked) => toggle([row.key], checked)}
+                        checkboxAriaLabelledBy={`${tableId}-resource-${index}`}
+                      />
+                    )}
                     <TableCell
-                      id={`wizard-resource-title-${index}`}
+                      id={`${tableId}-resource-${index}`}
                       headerLabel={t("resources.columns.title")}
                     >
                       {row.resource ? (
                         <button
                           type="button"
                           className="text-left break-words text-primary-600 underline"
-                          onClick={() => openSaved(row.resource!)}
+                          onClick={() => (props.onResourceClick ?? openSaved)(row.resource!)}
                         >
                           {row.title}
                         </button>
@@ -355,19 +368,21 @@ export function DatasetWizardResourcesTable(props: Props) {
                           isUrl={!!row.url}
                           resourceTypes={props.resourceTypes}
                           currentMeta={
-                            props.resourceMetadata[row.key] ?? {
+                            props.pending!.resourceMetadata[row.key] ?? {
                               title: row.title,
                               resourceType: row.type,
                               description: "",
                             }
                           }
-                          onSaveMeta={(meta, newUrl) => props.onEditMeta(row.key, meta, newUrl)}
+                          onSaveMeta={(meta, newUrl) =>
+                            props.pending!.onEditMeta(row.key, meta, newUrl)
+                          }
                           onRemove={() =>
                             row.file
-                              ? props.setUploadedFiles((previous) =>
+                              ? props.pending!.setUploadedFiles((previous) =>
                                   previous.filter((file) => file !== row.file)
                                 )
-                              : props.setResourceUrls((previous) =>
+                              : props.pending!.setResourceUrls((previous) =>
                                   previous.filter((url) => url !== row.url)
                                 )
                           }
@@ -383,7 +398,7 @@ export function DatasetWizardResourcesTable(props: Props) {
                               ? "danger"
                               : "neutral"
                         }
-                        className="h-32! rounded-full! px-8! text-s-regular whitespace-nowrap"
+                        className="h-32! rounded-[999px]! px-8! text-s-regular whitespace-nowrap"
                       >
                         {t(`resources.${row.availability}`)}
                       </Pill>
@@ -409,7 +424,10 @@ export function DatasetWizardResourcesTable(props: Props) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell headerLabel={t("resources.columns.title")} colSpan={6}>
+                  <TableCell
+                    headerLabel={t("resources.columns.title")}
+                    colSpan={selectable ? 6 : 5}
+                  >
                     {t(rows.length ? "resources.noMatches" : "resources.empty")}
                   </TableCell>
                 </TableRow>

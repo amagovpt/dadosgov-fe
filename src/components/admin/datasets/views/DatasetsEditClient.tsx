@@ -48,7 +48,6 @@ import DatasetsEditDiscussionsTab from "@/components/admin/datasets/edit-tabs/Da
 import DatasetsEditActivitiesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditActivitiesTab";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
-import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { translateActivityLabel } from "@/utils/activityLabels";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
@@ -96,14 +95,12 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isUploadingRef = useRef(false);
   const tabsRef = useRef<HTMLDivElement>(null);
-  const [uploaderKey, setUploaderKey] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
   const {
     message: apiSuccess,
     setMessage: setApiSuccess,
     setTemporaryMessage: showApiSuccess,
   } = useTemporaryMessage<string | null>(null);
-  const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const {
     errors: formErrors,
     setErrors,
@@ -377,6 +374,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     handleArchiveDataset,
     handleDeleteDataset,
     handlePublishDataset,
+    handleMoveToDraft,
     handleUnarchiveDataset,
   } = useDatasetLifecycleActions({
     listUrl,
@@ -403,21 +401,18 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     showApiSuccess(t("edit.transferRequested", { recipient: recipient.label }), 15000);
   };
 
-  const { handleDeleteResource, handleFileUpload, handleResourceClick, handleResourceEdit } =
-    useDatasetResourceActions({
-      dataset,
-      slug,
-      resourceTypes,
-      show,
-      hide,
-      setDataset,
-      setIsSubmitting,
-      setApiError,
-      setFileUploadError,
-      setUploaderKey,
-      showApiSuccess,
-      isUploadingRef,
-    });
+  const { handleFilesUpload, handleUrlAdd, handleResourceClick } = useDatasetResourceActions({
+    dataset,
+    slug,
+    resourceTypes,
+    show,
+    hide,
+    setDataset,
+    setIsSubmitting,
+    setApiError,
+    showApiSuccess,
+    isUploadingRef,
+  });
 
   if (isLoading) {
     return (
@@ -483,21 +478,23 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       headerMeta={
         <ResourceStatusBadge
           item={dataset}
+          labels={{ public: t("resourceEditing.published") }}
           display="pill"
           className="h-32! w-fit rounded-[999px]! px-16! text-s-regular"
         />
       }
       headerAction={
-        dataset.private && canEdit && !dataset.archived && !dataset.deleted ? (
+        canEdit && !dataset.archived && !dataset.deleted ? (
           <Button
             variant="primary"
             hasIcon
-            leadingIcon="agora-line-document"
-            leadingIconHover="agora-solid-document"
+            appearance={dataset.private ? "solid" : "outline"}
+            leadingIcon={dataset.private ? "agora-line-document" : "/Icons/dataset-move-to-draft.svg"}
+            leadingIconHover={dataset.private ? "agora-solid-document" : "/Icons/dataset-move-to-draft.svg"}
             disabled={isSubmitting}
-            onClick={handlePublishDataset}
+            onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
           >
-            {t("review.publishAction")}
+            {t(dataset.private ? "review.publishAction" : "resourceEditing.moveToDraft")}
           </Button>
         ) : null
       }
@@ -668,17 +665,13 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               {feedback}
               <DatasetsEditResourcesTab
                 dataset={dataset}
-                uploaderKey={uploaderKey}
-                fileUploadError={fileUploadError}
+                resourceTypes={resourceTypes}
+                auxiliaryItems={pageContent.resourceAuxiliaryItems}
+                introduction={pageContent.resourceIntroduction}
                 isSubmitting={isSubmitting}
-                onFileUpload={handleFileUpload}
-                onSecurityError={(rejections) => {
-                  const tooLarge = rejections.find((r) => r.reason.includes("demasiado grande"));
-                  setFileUploadError(tooLarge ? tooLarge.reason : POISONED_FILE_WARNING);
-                }}
+                onFilesUpload={handleFilesUpload}
+                onUrlAdd={handleUrlAdd}
                 onResourceClick={handleResourceClick}
-                onResourceEdit={handleResourceEdit}
-                onDeleteResource={handleDeleteResource}
               />
             </TabBody>
           </Tab>

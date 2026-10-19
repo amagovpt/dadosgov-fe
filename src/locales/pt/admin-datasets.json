@@ -405,7 +405,11 @@
       "format": "Formato",
       "updated": "Última atualização"
     },
-    "refreshError": "Não foi possível atualizar a lista de recursos. Volte a carregar a página para consultar as alterações guardadas."
+    "refreshError": "Não foi possível atualizar a lista de recursos. Volte a carregar a página para consultar as alterações guardadas.",
+    "linkSaveError": "Não foi possível guardar a ligação. Tente novamente.",
+    "linkSaved": "Ligação adicionada com sucesso.",
+    "filesSaved": "Ficheiros carregados com sucesso.",
+    "immediateFileHint": "Os ficheiros selecionados são carregados para este conjunto de dados."
   },
   "review": {
     "successTitle": "O seu conjunto de dados foi criado com sucesso",
@@ -432,5 +436,16 @@
     "transferOwnership": "Transferir propriedade",
     "resourcesTab": "Recursos",
     "activityTab": "Atividade"
+  },
+  "resourceEditing": {
+    "published": "Publicado",
+    "moveToDraft": "Mover para rascunho",
+    "movedToDraft": "Conjunto de dados movido para rascunho.",
+    "moveToDraftError": "Não foi possível mover o conjunto de dados para rascunho. Tente novamente.",
+    "notAllowed": "Não tem permissão para gerir os recursos deste conjunto de dados.",
+    "uploadBusy": "Aguarde até terminar o carregamento em curso.",
+    "duplicateUrl": "Esta ligação já foi adicionada ao conjunto de dados.",
+    "fileSaveError": "Não foi possível carregar {{name}}. {{message}}",
+    "deleteError": "Não foi possível eliminar o recurso. Tente novamente."
   }
 }

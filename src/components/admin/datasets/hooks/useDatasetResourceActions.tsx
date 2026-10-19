@@ -4,10 +4,11 @@ import type React from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { usePopupContext } from "@ama-pt/agora-design-system";
-import { fetchDataset, uploadResource } from "@/service/api/datasets";
+import { fetchDataset, uploadResource, createResource } from "@/service/api/datasets";
 import type { ResourceType } from "@/service/types/catalog";
 import type { Dataset, Resource } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
+import { can } from "@/utils/permissions";
 import DeleteResourcePopup from "@/components/admin/datasets/resource-dialogs/DeleteResourcePopup";
 import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceDetailPopup";
 import DatasetsEditResourceEditPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceEditPopup";
@@ -21,8 +22,6 @@ interface UseDatasetResourceActionsParams {
   setDataset: React.Dispatch<React.SetStateAction<Dataset | null>>;
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
   setApiError: React.Dispatch<React.SetStateAction<string | null>>;
-  setFileUploadError: React.Dispatch<React.SetStateAction<string | null>>;
-  setUploaderKey: React.Dispatch<React.SetStateAction<number>>;
   showApiSuccess: (message: string, durationMs?: number) => void;
   isUploadingRef: React.MutableRefObject<boolean>;
 }
@@ -36,8 +35,6 @@ export function useDatasetResourceActions({
   setDataset,
   setIsSubmitting,
   setApiError,
-  setFileUploadError,
-  setUploaderKey,
   showApiSuccess,
   isUploadingRef,
 }: UseDatasetResourceActionsParams) {
@@ -47,64 +44,81 @@ export function useDatasetResourceActions({
   const editPopupSeqRef = useRef(0);
 
   async function refreshDataset() {
-    const updated = await fetchDataset(slug);
-    setDataset(updated);
+    try {
+      const updated = await fetchDataset(slug);
+      setDataset(updated);
+    } catch {
+      setApiError(t("resources.refreshError"));
+    }
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
-    if (!files || files.length === 0 || !dataset) return;
-    if (isUploadingRef.current) return;
+  function requireResourcePermission() {
+    if (!dataset || !can(dataset, "edit_resources") || dataset.deleted)
+      throw new Error(t("resourceEditing.notAllowed"));
+    return dataset;
+  }
 
+  function recordResource(resource: Resource) {
+    setDataset((previous) =>
+      previous
+        ? {
+            ...previous,
+            resources: [...previous.resources.filter((item) => item.id !== resource.id), resource],
+          }
+        : previous
+    );
+  }
+
+  async function handleFilesUpload(files: File[]) {
+    const currentDataset = requireResourcePermission();
+    if (!files.length) return;
+    if (isUploadingRef.current) throw new Error(t("resourceEditing.uploadBusy"));
     isUploadingRef.current = true;
     setIsSubmitting(true);
     setApiError(null);
-    setFileUploadError(null);
-
+    let currentFile: File | undefined;
     try {
-      try {
-        for (const file of Array.from(files)) {
-          await uploadResource(dataset.id, file);
-        }
-      } catch (error) {
-        const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
-        console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
-
-        if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
-          const flattenValue = (value: unknown): string => {
-            if (Array.isArray(value)) return value.map(flattenValue).join("; ");
-            if (value && typeof value === "object") {
-              return Object.values(value as Record<string, unknown>)
-                .map(flattenValue)
-                .join("; ");
-            }
-            return String(value);
-          };
-
-          const message =
-            (err.data.message as string) ||
-            Object.entries(err.data)
-              .map(([key, value]) => `${key}: ${flattenValue(value)}`)
-              .join(", ");
-
-          setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(message)}`);
-        } else if (err.message) {
-          setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(err.message)}`);
-        } else {
-          const statusHint = err.status ? ` (HTTP ${err.status})` : "";
-          setFileUploadError(`${t("edit.resourceUploadError")}${statusHint}. ${t("edit.resourceUploadRetry")}`);
-        }
-        return;
+      for (const file of files) {
+        currentFile = file;
+        const resource = await uploadResource(currentDataset.id, file);
+        recordResource(resource);
       }
+    } catch (error) {
+      const err = error as { data?: { message?: string }; message?: string };
+      const detail = translateUploadError(
+        err.data?.message || err.message || t("edit.resourceUploadRetry")
+      );
+      throw new Error(
+        t("resourceEditing.fileSaveError", { name: currentFile?.name || "", message: detail })
+      );
+    } finally {
+      isUploadingRef.current = false;
+      setIsSubmitting(false);
+    }
+  }
 
-      try {
-        const updated = await fetchDataset(slug);
-        setDataset(updated);
-      } catch (refreshError) {
-        console.error("Resource uploaded but dataset refresh failed:", refreshError);
-      }
-      setUploaderKey((currentKey) => currentKey + 1);
-      showApiSuccess(t("edit.resourceUploadSuccess"));
+  async function handleUrlAdd(url: string) {
+    const currentDataset = requireResourcePermission();
+    if (isUploadingRef.current) throw new Error(t("resourceEditing.uploadBusy"));
+    if (currentDataset.resources.some((resource) => resource.url === url))
+      throw new Error(t("resourceEditing.duplicateUrl"));
+    isUploadingRef.current = true;
+    setIsSubmitting(true);
+    setApiError(null);
+    try {
+      recordResource(
+        await createResource(currentDataset.id, {
+          title: url,
+          url,
+          type: "main",
+          filetype: "remote",
+        })
+      );
+    } catch (error) {
+      const err = error as { data?: { message?: string }; message?: string };
+      throw new Error(
+        translateUploadError(err.data?.message || err.message || t("resources.linkSaveError"))
+      );
     } finally {
       isUploadingRef.current = false;
       setIsSubmitting(false);
@@ -112,7 +126,7 @@ export function useDatasetResourceActions({
   }
 
   function handleDeleteResource(resource: Resource) {
-    if (!dataset) return;
+    if (!dataset || !can(dataset, "edit_resources") || dataset.deleted) return;
 
     show(
       <DeleteResourcePopup
@@ -125,7 +139,7 @@ export function useDatasetResourceActions({
                   ...previousDataset,
                   resources: previousDataset.resources.filter((item) => item.id !== resource.id),
                 }
-              : previousDataset,
+              : previousDataset
           );
           showApiSuccess(t("edit.resourceDeleted"));
         }}
@@ -134,12 +148,12 @@ export function useDatasetResourceActions({
         title: t("edit.resourceDeleteModalTitle"),
         closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "m",
-      },
+      }
     );
   }
 
   function handleResourceEdit(resource: Resource) {
-    if (!dataset) return;
+    if (!dataset || !can(dataset, "edit_resources") || dataset.deleted) return;
 
     show(
       <DatasetsEditResourceEditPopup
@@ -157,7 +171,7 @@ export function useDatasetResourceActions({
         title: resource.title,
         closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "l",
-      },
+      }
     );
   }
 
@@ -183,7 +197,7 @@ export function useDatasetResourceActions({
             title: resource.title,
             closeAriaLabel: t("edit.closeAriaLabel"),
             dimensions: "l",
-          },
+          }
         );
       }, 100);
     };
@@ -198,21 +212,22 @@ export function useDatasetResourceActions({
     show(
       <DatasetsEditResourceDetailPopup
         resource={resource}
-        onEdit={openEdit}
-        onDelete={openDelete}
+        onEdit={can(dataset, "edit_resources") && !dataset.deleted ? openEdit : undefined}
+        onDelete={can(dataset, "edit_resources") && !dataset.deleted ? openDelete : undefined}
         onClose={hide}
       />,
       {
         title: resource.title,
         closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "l",
-      },
+      }
     );
   }
 
   return {
     handleDeleteResource,
-    handleFileUpload,
+    handleFilesUpload,
+    handleUrlAdd,
     handleResourceClick,
     handleResourceEdit,
   };

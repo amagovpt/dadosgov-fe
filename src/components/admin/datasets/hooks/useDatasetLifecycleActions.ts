@@ -82,6 +82,21 @@ export function useDatasetLifecycleActions({
     }
   }
 
+  async function handleMoveToDraft() {
+    if (!dataset) return;
+    setIsSubmitting(true);
+    setApiError(null);
+    try {
+      const updated = await updateDataset(dataset.id, { private: true });
+      setDataset(updated);
+      showApiSuccess(t("resourceEditing.movedToDraft"));
+    } catch {
+      setApiError(t("resourceEditing.moveToDraftError"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   async function handleUnarchiveDataset() {
     if (!dataset) return;
 
@@ -118,6 +133,7 @@ export function useDatasetLifecycleActions({
     handleArchiveDataset,
     handleDeleteDataset,
     handlePublishDataset,
+    handleMoveToDraft,
     handleUnarchiveDataset,
   };
 }
