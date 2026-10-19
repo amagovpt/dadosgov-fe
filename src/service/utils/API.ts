@@ -4,12 +4,10 @@ import { translateUploadError } from "@/lib/security/translateUploadError";
 // Server-side (Node.js) needs absolute URLs; client-side uses relative URLs via Next.js proxy
 const isServer = typeof window === "undefined";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:7000";
-export const API_BASE_URL = isServer
-  ? `${BACKEND_URL}/api/1`
-  : process.env.NEXT_PUBLIC_API_BASE || "/api/1";
-export const API_V2_BASE_URL = isServer
-  ? `${BACKEND_URL}/api/2`
-  : process.env.NEXT_PUBLIC_API_V2_BASE || "/api/2";
+// The browser paths are fixed, not `NEXT_PUBLIC_*`: those are inlined at
+// `next build`, and these never differ between environments anyway.
+export const API_BASE_URL = isServer ? `${BACKEND_URL}/api/1` : "/api/1";
+export const API_V2_BASE_URL = isServer ? `${BACKEND_URL}/api/2` : "/api/2";
 // Relative API URL for authenticated requests (passes through Next.js proxy which forwards cookies)
 export const API_AUTH_URL = "/api/1";
 

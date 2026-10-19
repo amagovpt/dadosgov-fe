@@ -8,7 +8,7 @@ include:
       build-command: "build"
       build-artifact-path: ".next"
       test-command: "test:ci"
-      junit-report-path: "reports/junit.xml"
+      junit-report-path: "junit.xml"
       coverage-report-path: "coverage/cobertura-coverage.xml"
       unit-test-artifacts-path: "coverage/"
       sast-enabled: "true"
@@ -18,13 +18,11 @@ include:
       accessibility-enabled: "false"
       docker-image-name: "dadosgov-frontend"
       dockerfile-dev: ".gitlab/docker/Dockerfile"
-      dockerfile-tst: ".gitlab/docker/Dockerfile-tst"
-      dockerfile-ppr: ".gitlab/docker/Dockerfile-ppr"
-      dockerfile-prd: ".gitlab/docker/Dockerfile-prd"
+      dockerfile-tst: ".gitlab/docker/Dockerfile"
+      dockerfile-ppr: ".gitlab/docker/Dockerfile"
+      dockerfile-prd: ".gitlab/docker/Dockerfile"
 
-# Deploy is disabled until the k8s manifests repository exists. To enable it, delete
-# these overrides and set deploy-repository, deploy-manifest, deploy-token and
-# deploy-url-* in the inputs above.
+
 promote-to-dev-environment:
   rules:
     - when: never

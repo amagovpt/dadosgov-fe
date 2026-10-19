@@ -23,17 +23,7 @@ services:
       args:
         NEXTJS_UID: ${NEXTJS_UID:-10001}
         NEXTJS_GID: ${NEXTJS_GID:-10001}
-        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
-        NEXT_PUBLIC_API_V2_BASE: ${NEXT_PUBLIC_API_V2_BASE}
-        NEXT_PUBLIC_FRONT_BASE: ${NEXT_PUBLIC_FRONT_BASE}
-        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
-        NEXT_PUBLIC_STATIC_URL: ${NEXT_PUBLIC_STATIC_URL}
-        NEXT_PUBLIC_READ_ONLY_MODE: ${NEXT_PUBLIC_READ_ONLY_MODE}
-        NEXT_PUBLIC_REQUIRE_EMAIL_CONFIRMATION: ${NEXT_PUBLIC_REQUIRE_EMAIL_CONFIRMATION}
-        NEXT_PUBLIC_SAML_ENABLED: ${NEXT_PUBLIC_SAML_ENABLED}
-        NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-        NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
     # Pipe stdout/stderr to a bind-mounted log file while keeping `docker logs` working
     command: sh -c "node server.js 2>&1 | tee -a /logs/app.log"
     init: true
@@ -46,6 +36,8 @@ services:
       BACKEND_HOST: localhost:7000
       API_URL_INTERNAL: ${API_URL_INTERNAL}
       TABULAR_API_URL: ${TABULAR_API_URL:-http://host.docker.internal:8005}
+      NEXT_PUBLIC_SAML_ENABLED: ${NEXT_PUBLIC_SAML_ENABLED:-false}
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped

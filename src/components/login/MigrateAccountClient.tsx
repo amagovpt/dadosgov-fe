@@ -8,7 +8,7 @@ import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchMigrationPending, sendMigrationLink, confirmMigration, skipMigration, resendMigrationConfirmation, MigrationConfirmError } from "@/service/api/migration";
 import { useTranslation } from "react-i18next";
 import { PasswordRecoveryView } from "./PasswordRecoveryView";
-import { RECAPTCHA_KEY } from "./constants";
+import { useRuntimeConfig } from "@/providers/RuntimeConfigProvider";
 
 // Same shape check and cooldown as CompleteRegistrationClient, the portal's
 // other "submit an email, then check your inbox" screen.
@@ -47,9 +47,10 @@ type Step =
  * and it is conditional on the key exactly as LoginClient does it.
  */
 export default function MigrateAccountClient() {
-  if (RECAPTCHA_KEY) {
+  const { recaptchaSiteKey } = useRuntimeConfig();
+  if (recaptchaSiteKey) {
     return (
-      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY} language="pt">
+      <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey} language="pt">
         <MigrateAccountWizard />
       </GoogleReCaptchaProvider>
     );

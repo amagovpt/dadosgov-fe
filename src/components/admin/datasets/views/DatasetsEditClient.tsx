@@ -57,6 +57,8 @@ import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/use
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
+import { can } from "@/utils/permissions";
 
 interface DatasetsEditClientProps {
   pageContent: BoDatasetsPage;
@@ -372,17 +374,22 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     },
   });
 
-  const { handleArchiveDataset, handleDeleteDataset, handlePublishDataset, handleUnarchiveDataset } =
-    useDatasetLifecycleActions({
-      dataset,
-      hide,
-      push: router.push,
-      keywordsRef,
-      setDataset,
-      setIsSubmitting,
-      setApiError,
-      showApiSuccess,
-    });
+  const {
+    handleArchiveDataset,
+    handleDeleteDataset,
+    handlePublishDataset,
+    handleMoveToDraft,
+    handleUnarchiveDataset,
+  } = useDatasetLifecycleActions({
+    dataset,
+    hide,
+    push: router.push,
+    keywordsRef,
+    setDataset,
+    setIsSubmitting,
+    setApiError,
+    showApiSuccess,
+  });
 
   const handleTransferDataset = async (recipient: RecipientSelection, comment: string) => {
     if (!dataset) throw new Error(t("edit.notFound"));
@@ -474,17 +481,24 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       ]}
       title={dataset.title}
       headerAction={
-        <Button
-          variant="primary"
-          appearance="outline"
-          disabled={!!(dataset.archived || dataset.deleted)}
-          onClick={() => window.open(`/datasets/${dataset.slug}`, "_blank")}
-        >
-          <span className="admin-edit-info__btn-content">
-            <Icon name="agora-line-eye" className="h-16 w-16" />
-            {t("edit.viewPublicPage")}
-          </span>
-        </Button>
+        can(dataset, "edit") ? (
+          <Button
+            className="relative h-[60px] top-24"
+            variant="primary"
+            appearance={dataset.private ? "solid" : "outline"}
+            disabled={isSubmitting || !!(dataset.archived || dataset.deleted)}
+            onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
+          >
+            <span className="admin-edit-info__btn-content">
+              {dataset.private ? (
+                <Icon name="agora-line-document" className="h-16 w-16" />
+              ) : (
+                <span className="admin-edit-info__draft-icon" aria-hidden="true" />
+              )}
+              {t(dataset.private ? "edit.publishDataset" : "edit.moveToDraft")}
+            </span>
+          </Button>
+        ) : null
       }
     >
       <ResourceStatusBanner
@@ -505,7 +519,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         </div>
       )}
 
-      <div className="admin-edit-info">
+      <div className="admin-edit-info mb-0!">
         <div className="admin-edit-info__badges">
           <ResourceStatusBadge item={dataset} display="pill" className="uppercase" />
           {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
@@ -563,13 +577,28 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               )}
               {` — ${t("edit.latestActivityFallback")} — `}
               <span>
-                {format(new Date(dataset.last_modified), "d 'de' MMMM 'de' yyyy", {
+                {format(new Date(getDatasetLastUpdate(dataset) as string), "d 'de' MMMM 'de' yyyy", {
                   locale: pt,
                 })}
               </span>
             </>
           )}
         </p>
+      </div>
+
+      <div className="flex justify-end">
+        <Button
+          className="-my-32"
+          variant="primary"
+          appearance="link"
+          disabled={!!(dataset.archived || dataset.deleted)}
+          onClick={() => window.open(`/datasets/${dataset.slug}`, "_blank")}
+        >
+          <span className="admin-edit-info__btn-content">
+            <Icon name="agora-line-eye" className="h-16 w-16" />
+            {t("edit.viewPublicPage")}
+          </span>
+        </Button>
       </div>
 
       <div ref={tabsRef} tabIndex={-1} className="outline-none">

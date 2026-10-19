@@ -6,6 +6,7 @@ import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
 import type { RelatedDatasetsResult } from "@/service/types/dataservice/detail";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 export function RelatedDatasetsLoading() {
   const { t } = useTranslation("dataservices");
@@ -36,7 +37,7 @@ export function DataserviceRelatedDatasets({ datasets }: { datasets: Promise<Rel
             <CardMetrics
               key={dataset.id}
               {...dataset}
-              last_modified={formatDateToTimeAgo(dataset.last_modified, i18n.language as "pt" | "en")}
+              last_modified={formatDateToTimeAgo(getDatasetLastUpdate(dataset), i18n.language as "pt" | "en")}
               link={`/datasets/${dataset.slug}`}
             />
           ))}
