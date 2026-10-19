@@ -23,8 +23,14 @@ export function formatDateToTimeAgo(
   // PT default is an intentional fallback; migrated callers pass a translated string.
   locale: "pt" | "en" = "pt"
 ) {
-  if (!date) return locale === "pt" ? "Desconhecido" : "Unknown";
-  const distance = formatDistanceToNow(new Date(date), { locale: DATE_FNS_LOCALES[locale] });
+  const unknown = locale === "pt" ? "Desconhecido" : "Unknown";
+  if (!date) return unknown;
+  const parsed = new Date(date);
+  // A non-empty string that is not a date reaches date-fns and throws
+  // `RangeError: Invalid time value`, taking the whole render down. Guarding
+  // only the empty case was never enough.
+  if (Number.isNaN(parsed.getTime())) return unknown;
+  const distance = formatDistanceToNow(parsed, { locale: DATE_FNS_LOCALES[locale] });
   return FUZZY_PREFIXES.reduce((acc, prefix) => acc.replace(prefix, ""), distance);
 }
 
@@ -53,7 +59,14 @@ export function isWithinDateLimit(dateStr: string | null | undefined): boolean {
 /** BCP-47 tag for each supported UI locale, for `Intl` / `toLocaleString`. */
 export const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
 
-export function formatDateLong(dateStr: string, locale: "pt" | "en" = "pt") {
+export function formatDateLong(
+  dateStr: string | undefined | null,
+  locale: "pt" | "en" = "pt"
+) {
+  // Accepts an absent date for the same reason `formatDateToTimeAgo` does: callers
+  // pick a date out of a chain of optional fields, and an empty string is a better
+  // answer than a type assertion at every call site.
+  if (!dateStr) return "";
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return dateStr;
   return date.toLocaleDateString(INTL_LOCALES[locale], {

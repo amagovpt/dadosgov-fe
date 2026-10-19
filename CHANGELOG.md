@@ -2,41 +2,44 @@
 
 All notable changes to the dados.gov.pt frontend (`dadosgov-fe`).
 
-This project has no version tags, so entries are grouped by month (newest first), each linking the pull request that introduced the change.
+Entries are newest first. Work sits under `## Unreleased` until it is promoted to production, where the heading becomes the released version (see **Versioning & Releases** in `CLAUDE.md`). Entries written before the first tag are grouped by month.
 
 ## Unreleased
 
-- **style(datastories): align the Portugal 2030 projects page with the design**
-  - The "em números" block showed 28.192 in all three cards. It now shows the design's
-    project count and the planned/executed funding (20,5 / 12,5 mil milhões €). These values
-    are fixed until the backend exposes PT2030 totals, because the CMS only sends the labels.
-    `CardBigNumber` takes an optional `unit` for the € suffix.
-  - The filters panel no longer shifts up 64px over the "Existe um total…" line. Its
-    oversized 128px top/bottom padding was cut to 64px, and the results column lost the
-    matching offset, so "Ordenar por" lines up with the panel top.
-  - The search intro text wraps at half width, the same as the section title.
+- **chore(release): give this repo a release script, with the guard the footer now depends on**
+  - Releases were cut by hand, step by step, including the `package.json` bump -- the one step
+    with nothing to catch it if forgotten, leaving the version the repo states and the version
+    the tag claims free to drift apart.
+  - `tag-version.sh` mirrors the backend's: it refuses to run outside production, refuses to tag
+    a version `package.json` does not declare, takes the release notes from the matching
+    `CHANGELOG.md` section, and resolves the real GitHub CLI past any pyenv shim shadowing it.
 
-- **fix(datastories): wire the Portugal 2030 projects page to its "Nesta página" index**
-  - The index anchors pointed at sections with no `id`. The "em números" and "Pesquisar"
-    sections now take the slug of their CMS title, which is exactly what the anchors use.
-  - The related datastories and associated datasets were fetched but never rendered; they
-    now render through the existing `RelatedDatastories` / `Sources` sections when the CMS
-    fills them in.
-  - An empty search now shows the CMS "no results" block, and that block skips the image
-    when the CMS has none instead of requesting `/assets/undefined`.
-
-- **fix(datastories): the Portugal 2030 project search actually searches**
-  - The projects datastory rendered the filters and pagination but never fired a request:
-    the store only runs its first search from the search input, and the page did not render
-    one. The search block (name / operation-code radios, input with the CMS label, total of
-    funded projects) now sits under the "Pesquisar projetos" text, as in the design, and the
-    results list is rendered between the applied filters and the pagination.
-  - The "Objetivo específico" filter called `/api/...specific-objectives`, which here goes to
-    the udata backend; it now uses a new `internal-api` route backed by Squidex.
-  - "Descarregar Listagem" exports the filtered results to CSV again, with the source and
-    update date from the dataset source info. The open-data modal is not ported yet.
-  - The `searchBenProj.*` labels and the other strings these components use were missing from
-    `common.json`, so the page showed raw translation keys.
+- **fix(datasets): every date on the portal now says when the data actually changed**
+  - A dataset page contradicted itself: the header said 12 January while the four resources
+    listed below it said 29 September. The header was reading `last_modified`, which freezes
+    at the value the document held when it was last written -- for a harvested dataset,
+    usually its creation. The date the label promises is `last_update`, recomputed from the
+    dataset's own resources every time it is saved.
+  - It was never two places. Sixteen read the frozen field: the detail header and info tab,
+    the listing cards, the homepage, search results, the organization's datasets tab, the
+    public profile, the cards that cross-link from reuses and APIs, and six backoffice
+    screens. Fixing only the page that was reported would have left the portal disagreeing
+    with itself, which is harder to explain than being consistently wrong.
+  - One of those backoffice screens was already sorting by the right field while displaying
+    the wrong one, so its column ordered by a date it never showed, and its CSV export would
+    have disagreed with the table it was exported from.
+  - Neither field answers the question on its own, and each is stale in the opposite direction.
+    `last_modified` freezes at the value the document carried when it was last written, so a
+    harvest that brings no modification date of its own never moves it. `last_update` is
+    recomputed from the resources only on a full save, and the three resource mutators write
+    through an atomic update that skips it -- so a dataset can gain a file today and still
+    carry a year-old `last_update`. A single helper now takes the most recent of the two,
+    which is right in both directions and reads the way the label does: the newest signal we
+    have that something changed. The creation date closes the chain so there is always an
+    answer, and a response that predates the field still renders.
+  - Three date formatters took an absent date badly, and one of them threw outright: a
+    non-empty string that is not a date reached date-fns and raised, taking the render with
+    it. They all degrade now.
 
 - **fix(organizations): the discussions tab shows discussions about the organization itself**
   - The tab asked the API for every discussion on everything the organization published, so on

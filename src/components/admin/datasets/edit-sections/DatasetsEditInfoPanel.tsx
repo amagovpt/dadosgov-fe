@@ -8,6 +8,7 @@ import { pt } from "date-fns/locale";
 import type { Activity } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
 import TextLink from "@/components/Primitives/TextLink";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 type DatasetsEditInfoPanelProps = {
   dataset: Dataset;
@@ -96,7 +97,7 @@ export default function DatasetsEditInfoPanel({
             {t("edit.latestActivityFallback")}
             {" - "}
             <span>
-              {format(new Date(dataset.last_modified), "d 'de' MMMM 'de' yyyy", {
+              {format(new Date(getDatasetLastUpdate(dataset) as string), "d 'de' MMMM 'de' yyyy", {
                 locale: pt,
               })}
             </span>
