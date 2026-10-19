@@ -6,23 +6,6 @@ Entries are newest first. Work sits under `## Unreleased` until it is promoted t
 
 ## Unreleased
 
-- **feat(compat): o portal diz quando o backend que o serve é demasiado antigo**
-  - Os dois repositórios são versionados e promovidos de forma independente, e nada dizia se uma
-    versão de frontend funciona com uma de backend. A pergunta não tinha resposta em lado nenhum.
-  - O `package.json` passa a declarar `minBackendVersion`, e o arranque do servidor compara-o com
-    a versão que o backend reporta em `GET /api/1/site/`. Fica registado no log, nunca rebenta: um
-    portal que se recusa a arrancar é pior do que um com um campo em falta, e o backend estar em
-    baixo durante um deploy não pode ser fatal.
-  - Um único número chega porque a incompatibilidade é assimétrica. Backend novo com frontend
-    antigo costuma funcionar, porque a API cresce por adição e um campo que ninguém lê é inerte;
-    frontend novo com backend antigo pede o que ainda não existe, e o sintoma não é um erro — é um
-    ecrã a mostrar menos do que devia, em silêncio.
-  - A comparação é numérica por segmento, senão `16.0.0.9` ficava à frente de `16.0.0.12`, e
-    alinha comprimentos para que `16.1.0` conte como `16.1.0.0` ao lado da revisão portuguesa.
-  - De caminho, o `vitest` passa a resolver `server-only` para um stub. Não é um pacote instalado
-    — o Next resolve-o no seu próprio build — e por isso qualquer módulo com essa guarda era
-    impossível de testar: o import falhava antes da primeira asserção.
-
 - **chore(release): give this repo a release script, with the guard the footer now depends on**
   - Releases were cut by hand, step by step, including the `package.json` bump -- the one step
     with nothing to catch it if forgotten, leaving the version the repo states and the version
