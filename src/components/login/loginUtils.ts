@@ -153,3 +153,55 @@ export const FLOW_ROUTES = [
 export function isOnFlowRoute(pathname: string | null | undefined): boolean {
   return (pathname ?? "").split("/").some((segment) => FLOW_ROUTES.includes(segment));
 }
+
+/**
+ * A one-shot mark that silences the migration invite for the entry that
+ * follows a password reset (LEDG-2642).
+ *
+ * 🚩 IT CANNOT BE A ROUTE, which is why it exists at all. The reset screen and
+ * the login page are both in FLOW_ROUTES already; what the invite covers is
+ * the page the person lands on AFTER signing in, and that is the homepage --
+ * which must keep showing the invite to everybody else.
+ *
+ * Somebody who has just recovered access is in the middle of getting back into
+ * their account, and meeting a full-screen invitation at that exact moment
+ * reads as another obstacle rather than an offer.
+ *
+ * Its own key, deliberately: the banner's HIDDEN_KEY silences a different
+ * thing for a different reason, and sharing one key would let either erase the
+ * other.
+ *
+ * Every access is guarded twice -- the server has no sessionStorage at all,
+ * and a browser may refuse it (private mode, blocked cookies). Like the
+ * banner's, these fail towards VISIBLE: the worst case is seeing the invite
+ * when it could have been skipped, never being silently trapped.
+ */
+const SKIP_NEXT_ENTRY_KEY = "migrationInviteSkipNextEntry";
+
+export function skipMigrationInviteOnNextEntry(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(SKIP_NEXT_ENTRY_KEY, "1");
+  } catch {
+    // Nothing to do and nothing lost: the invite simply shows as it does today.
+  }
+}
+
+/** Reads without consuming, so it is safe to call during render. */
+export function readMigrationInviteSkip(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(SKIP_NEXT_ENTRY_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function clearMigrationInviteSkip(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(SKIP_NEXT_ENTRY_KEY);
+  } catch {
+    // Same as above: a storage that refuses to forget shows the invite again.
+  }
+}
