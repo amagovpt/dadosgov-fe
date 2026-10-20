@@ -422,7 +422,11 @@
       "municipalityOperationCode": "Municipality Operation Code",
       "municipalityOperationName": "Municipality Operation Name",
       "projectsAmount": "Number of Projects",
-      "operationName": "Name"
+      "operationName": "Name",
+      "paidValue": "Paid Amount",
+      "dimension": "Dimension",
+      "region": "Region",
+      "municipality": "Municipality"
     },
     "exportResults": "Results of the search for {{subject}}"
   },

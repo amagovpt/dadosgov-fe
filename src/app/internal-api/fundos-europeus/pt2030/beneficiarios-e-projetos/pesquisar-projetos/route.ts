@@ -4,9 +4,9 @@ import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
 import { FilterValue } from "@/store/searchBenProj-store";
 
 // The shared apolloClient is tuned for CMS page content: it aborts server-side
-// requests after CMS_FETCH_TIMEOUT_MS (5s) and keeps every result in an
+// requests after CMS_FETCH_TIMEOUT_MS (10s) and keeps every result in an
 // in-memory SWR cache. Neither fits this search: the unpaginated download
-// (~21k projects, ~5MB) takes longer than 5s, and caching arbitrary filter
+// (~21k projects, ~5MB) can take longer than that, and caching arbitrary filter
 // combinations would pin megabytes per entry. So the query goes out directly.
 const SEARCH_TIMEOUT_MS = 60_000;
 

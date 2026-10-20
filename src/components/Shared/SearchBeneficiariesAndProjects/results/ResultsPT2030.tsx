@@ -16,7 +16,7 @@ export default function ResultsPT2030({ noResults }: { noResults?: INoResults })
   const apiRoute = useSearchBenProjStore((state) => state.apiRoute);
   const indicator = useSearchBenProjStore((state) => state.indicator);
   const data = useSearchBenProjStore((state) => state.data);
-  const isPrr = apiRoute.includes("/plano-de-recuperacao-e-resiliencia/");
+  const isPrr = apiRoute.includes("/prr/");
 
   return (
     <ResultsLayout noResults={noResults}>

@@ -118,7 +118,7 @@ export function ResultCard({
 
   return (
     <>
-      <div className="result-card relative">
+      <div className={"result-card relative" + (isLast ? " " : " border-b")}>
         <a
           href={href}
           className="absolute inset-0 z-10"
