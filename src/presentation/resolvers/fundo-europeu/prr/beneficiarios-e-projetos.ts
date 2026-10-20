@@ -3,6 +3,7 @@ import {
   BeneficiariesSortByPRR,
   ProjectsSearchOfPRR,
   ProjectsOfPRRSourceInfo,
+  ProjectsTotalsOfPRR,
   SortOrder,
   BeneficiarySheetOfPRR,
   ProjectSheetOfPRR,
@@ -161,6 +162,11 @@ export class BeneficiariesAndProjectsPRRResolver {
   @Query(() => ProjectsOfPRRSourceInfo)
   async queryProjectsOfPRRSourceInfo(): Promise<ProjectsOfPRRSourceInfo> {
     return new BeneficiariesAndProjectsPRRUseCase().getProjectsOfPRRSourceInfoUseCase();
+  }
+
+  @Query(() => ProjectsTotalsOfPRR)
+  async queryProjectsTotalsOfPRR(): Promise<ProjectsTotalsOfPRR> {
+    return new BeneficiariesAndProjectsPRRUseCase().getProjectsTotalsOfPRRUseCase();
   }
 
   @Query(() => BeneficiarySheetOfPRR)

@@ -320,6 +320,24 @@ export class ProjectsSearchOfPRR {
 }
 
 @ObjectType()
+export class ProjectsTotalsOfPRR {
+  @Field(() => Int)
+  projects: number;
+
+  @Field(() => Float)
+  approvedValue: number;
+
+  @Field(() => Float)
+  executedValue: number;
+
+  @Field(() => String, { nullable: true })
+  endDateMin?: string;
+
+  @Field(() => String, { nullable: true })
+  endDateMax?: string;
+}
+
+@ObjectType()
 export class ProjectsOfPRRSourceInfo {
   @Field(() => [SourceInfo])
   sourceInfo: SourceInfo[];
@@ -824,6 +842,7 @@ export interface IBeneficiariesAndProjectsPRRepository {
     sortOrder?: SortOrder,
   ): Promise<ProjectsSearchOfPRR>;
   getProjectsOfPRRSourceInfo(): Promise<ProjectsOfPRRSourceInfo>;
+  getProjectsTotalsOfPRR(): Promise<ProjectsTotalsOfPRR>;
   getBeneficiarySheetOfPRR(nif: string): Promise<BeneficiarySheetOfPRR>;
   getBeneficiaryRelatedProjectsOfPRR(
     nif: string,

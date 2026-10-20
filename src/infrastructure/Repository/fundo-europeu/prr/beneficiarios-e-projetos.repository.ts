@@ -8,6 +8,7 @@ import {
   SortOrder,
   ProjectsSearchOfPRR,
   ProjectsOfPRRSourceInfo,
+  ProjectsTotalsOfPRR,
   BeneficiarySheetOfPRR,
   ProjectSheetOfPRR,
   ProjectSheetBeneficiaryFinancingOfPRR,
@@ -33,6 +34,7 @@ import {
   searchProjectsOfPRRCountQuery,
   searchProjectsOfPRRSourceInfoQuery,
   searchProjectsOfPRRTotalQuery,
+  searchProjectsOfPRRTotalsQuery,
   beneficiarySheetPRRQuery,
   projectSheetPRRQuery,
   projectSheetPRRBeneficiaryFinancingQuery,
@@ -662,6 +664,25 @@ export class BeneficiariesAndProjectsPRRepository implements IBeneficiariesAndPr
     } catch (error) {
       throw new AppError(
         `Error fetching projects source info of PRR: ${error}`,
+      ).toGraphQLError();
+    }
+  }
+
+  async getProjectsTotalsOfPRR(): Promise<ProjectsTotalsOfPRR> {
+    try {
+      const result = await cachedQuery(searchProjectsOfPRRTotalsQuery);
+      const row = result?.rows[0] ?? {};
+
+      return {
+        projects: Number(row.projects ?? 0),
+        approvedValue: Number(row.approved_value ?? 0),
+        executedValue: Number(row.executed_value ?? 0),
+        endDateMin: row.end_date_min ?? undefined,
+        endDateMax: row.end_date_max ?? undefined,
+      };
+    } catch (error) {
+      throw new AppError(
+        `Error fetching projects totals of PRR: ${error}`,
       ).toGraphQLError();
     }
   }

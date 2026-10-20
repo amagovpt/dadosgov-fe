@@ -1875,6 +1875,18 @@ FROM (
 ) AS unique_entities;
 `;
 
+// Headline numbers for the projects page, taken from the latest snapshot
+export const searchProjectsOfPRRTotalsQuery = `
+SELECT
+  COUNT(DISTINCT p.cd_projeto)::int AS projects,
+  COALESCE(SUM(p.valor_aprovado), 0)::float8 AS approved_value,
+  COALESCE(SUM(p.valor_executado), 0)::float8 AS executed_value,
+  MIN(COALESCE(p.dt_efetiva_conclusao, p.dt_prevista_conclusao))::text AS end_date_min,
+  MAX(COALESCE(p.dt_efetiva_conclusao, p.dt_prevista_conclusao))::text AS end_date_max
+FROM prr.projetos p
+WHERE p.dt_referencia = (SELECT MAX(dt_referencia) FROM prr.projetos);
+`;
+
 export const searchProjectsOfPRRSourceInfoQuery = `WITH ref AS (
     SELECT MAX(dt_referencia) AS reference_date
     FROM prr.projetos

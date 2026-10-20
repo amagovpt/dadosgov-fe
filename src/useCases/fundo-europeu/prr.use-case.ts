@@ -7,6 +7,7 @@ import {
   ProjectSheetOfPRR,
   ProjectsSearchOfPRR,
   ProjectsOfPRRSourceInfo,
+  ProjectsTotalsOfPRR,
   ProjectSheetBeneficiaryFinancingOfPRR,
   ProjectSheetBeneficiaryTypeOfPRR,
   BeneficiaryProjectType,
@@ -144,6 +145,10 @@ export class BeneficiariesAndProjectsPRRUseCase {
 
   async getProjectsOfPRRSourceInfoUseCase(): Promise<ProjectsOfPRRSourceInfo> {
     return this.beneficiariesAndProjectsPRRRepo.getProjectsOfPRRSourceInfo();
+  }
+
+  async getProjectsTotalsOfPRRUseCase(): Promise<ProjectsTotalsOfPRR> {
+    return this.beneficiariesAndProjectsPRRRepo.getProjectsTotalsOfPRR();
   }
 
   async getBeneficiarySourceInfoOfPRR(): Promise<SourceInfoOfPRR> {
