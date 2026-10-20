@@ -168,10 +168,10 @@
     "submit": "Reset password",
     "submitting": "Saving...",
     "successTitle": "Password reset",
-    "successDescription": "Your password has been changed. You can now use it to link your account to your Chave Móvel Digital or to European Authentication.",
+    "successDescription": "Your password has been changed. You can now sign in.",
     "errorRequest": "Error resetting password. Please try again.",
     "errorConnection": "Connection error. Please try again.",
-    "continueAction": "Link account"
+    "continueAction": "Sign in"
   },
   "completeRegistration": {
     "metadata": {

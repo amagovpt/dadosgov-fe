@@ -168,10 +168,10 @@
     "submit": "Redefinir palavra-passe",
     "submitting": "A guardar...",
     "successTitle": "Palavra-passe redefinida",
-    "successDescription": "A sua palavra-passe foi alterada com sucesso. Já pode usá-la para associar a conta à sua Chave Móvel Digital ou à Autenticação Europeia.",
+    "successDescription": "A sua palavra-passe foi alterada com sucesso. Já pode iniciar sessão.",
     "errorRequest": "Erro ao redefinir a palavra-passe. Tente novamente.",
     "errorConnection": "Erro de ligação. Tente novamente.",
-    "continueAction": "Associar conta"
+    "continueAction": "Iniciar sessão"
   },
   "completeRegistration": {
     "metadata": {
