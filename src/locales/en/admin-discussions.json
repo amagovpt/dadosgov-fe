@@ -1,5 +1,9 @@
 {
   "title": "Discussions",
+  "tabs": {
+    "content": "Content",
+    "organization": "Organization"
+  },
   "popup": {
     "title": "Discussion"
   },
