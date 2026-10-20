@@ -224,7 +224,7 @@ export default function AdminListPage({
       headerAction={headerAction}
     >
       {tabs ? (
-        <Tabs onTabActivation={tabs.onTabActivation}>
+        <Tabs className="[&_.tab-panel-content]:pt-32 [&_.tab-panel-content]:pb-0" onTabActivation={tabs.onTabActivation}>
           {tabs.labels.map((label, index) => (
             <Tab key={label} active={tabs.activeTab === index}>
               <TabHeader>{label}</TabHeader>
