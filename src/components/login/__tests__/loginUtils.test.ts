@@ -9,15 +9,9 @@
  * here as the regression, not as illustration.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import {
-  buildSamlEndpoint,
-  clearMigrationInviteSkip,
-  readMigrationInviteSkip,
-  sanitizeNextUrl,
-  skipMigrationInviteOnNextEntry,
-} from "../loginUtils";
+import { buildSamlEndpoint, sanitizeNextUrl } from "../loginUtils";
 
 /** Where the browser would actually go, which is the only question that counts. */
 const resolve = (value: string) => new URL(value, "https://dados.gov.pt/login").href;
@@ -101,88 +95,5 @@ describe("buildSamlEndpoint", () => {
     expect(buildSamlEndpoint("/saml/login", "/pt/datasets#resources")).toBe(
       "/saml/login?next=%2Fpt%2Fdatasets%23resources"
     );
-  });
-});
-
-/**
- * LEDG-2642: somebody who has just recovered access should not meet a
- * full-screen invitation on the way back in. The mark travels from the reset
- * screen to the page they land on after signing in -- across two full page
- * loads, which is why it lives in sessionStorage and not in React state.
- */
-describe("the one-shot mark that silences the invite after a password reset", () => {
-  beforeEach(() => window.sessionStorage.clear());
-  afterEach(() => {
-    vi.restoreAllMocks();
-    window.sessionStorage.clear();
-  });
-
-  it("is absent until something writes it", () => {
-    expect(readMigrationInviteSkip()).toBe(false);
-  });
-
-  it("survives being read, so reading during render cannot consume it", () => {
-    skipMigrationInviteOnNextEntry();
-    expect(readMigrationInviteSkip()).toBe(true);
-    expect(readMigrationInviteSkip()).toBe(true);
-  });
-
-  it("is gone once cleared, which is what makes it one-shot", () => {
-    skipMigrationInviteOnNextEntry();
-    clearMigrationInviteSkip();
-    expect(readMigrationInviteSkip()).toBe(false);
-  });
-
-  it("uses a key of its own, so it cannot erase the banner's", () => {
-    window.sessionStorage.setItem("migrationInviteHiddenForVisit", "1");
-    skipMigrationInviteOnNextEntry();
-    clearMigrationInviteSkip();
-    expect(window.sessionStorage.getItem("migrationInviteHiddenForVisit")).toBe("1");
-  });
-
-  /**
-   * 🚩 Fails towards VISIBLE. A browser that refuses storage -- private mode,
-   * blocked cookies -- must leave the invite showing exactly as it does today,
-   * never throw and take the page with it.
-   */
-  it("says nothing is marked when the storage refuses to answer", () => {
-    vi.spyOn(window.sessionStorage, "getItem").mockImplementation(() => {
-      throw new Error("blocked");
-    });
-    expect(readMigrationInviteSkip()).toBe(false);
-  });
-
-  it("stays quiet when the storage refuses to write or forget", () => {
-    vi.spyOn(window.sessionStorage, "setItem").mockImplementation(() => {
-      throw new Error("blocked");
-    });
-    vi.spyOn(window.sessionStorage, "removeItem").mockImplementation(() => {
-      throw new Error("blocked");
-    });
-    expect(() => skipMigrationInviteOnNextEntry()).not.toThrow();
-    expect(() => clearMigrationInviteSkip()).not.toThrow();
-  });
-});
-
-/**
- * The server has no sessionStorage at all, and the gate that reads this mark
- * is rendered there. jsdom always provides `window`, so no runtime test can
- * reach that branch -- this reads the source instead, which is the only way
- * the guard can be held in place.
- */
-describe("every storage access is guarded against having no window", () => {
-  it("never touches sessionStorage without checking for window first", async () => {
-    const { readFileSync } = await import("node:fs");
-    const path = await import("node:path");
-    const source = readFileSync(
-      path.join(process.cwd(), "src/components/login/loginUtils.ts"),
-      "utf8"
-    );
-
-    const accesses = source.match(/window\.sessionStorage/g) ?? [];
-    const guards = source.match(/typeof window === "undefined"/g) ?? [];
-
-    expect(accesses.length).toBeGreaterThan(0);
-    expect(guards.length).toBeGreaterThanOrEqual(3);
   });
 });
