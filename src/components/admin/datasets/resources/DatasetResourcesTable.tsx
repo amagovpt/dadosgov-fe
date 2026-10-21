@@ -203,7 +203,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
     { value: "all", icon: "agora-line-layers-menu" },
     { value: "available", icon: "agora-line-check-circle" },
     { value: "unavailable", icon: "agora-line-x-circle" },
-    { value: "unknown", icon: "agora-line-info-mark" },
+    { value: "unknown", icon: "agora-line-clock" },
   ];
   return (
     <section className="flex min-w-0 flex-col gap-32" aria-labelledby={`${tableId}-title`}>
@@ -395,7 +395,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
                             ? "success"
                             : row.availability === "unavailable"
                               ? "danger"
-                              : "neutral"
+                              : "warning"
                         }
                         className="h-32! rounded-[999px]! px-8! text-s-regular whitespace-nowrap"
                       >
