@@ -270,6 +270,7 @@ export default function SystemMigrationsClient() {
         getSortOrder={getSortOrder}
         handleSort={handleSort}
         getRowKey={(entry) => entry.filename}
+        expandedRowLabel={t("detail.errorsTitle")}
         renderExpandedRow={(entry) => {
           if (!expanded.has(entry.filename)) return null;
 
@@ -278,7 +279,7 @@ export default function SystemMigrationsClient() {
               {entry.messages.length > 0 && (
                 <div className="flex flex-col gap-4">
                   <p className="text-sm font-medium text-neutral-900">{t("detail.errorsTitle")}</p>
-                  <ul className="flex flex-col gap-2">
+                  <ul className="flex max-h-[240px] flex-col gap-2 overflow-auto">
                     {entry.messages.map((message, index) => (
                       <li key={index} className="font-mono text-xs break-all text-danger-700">
                         {message}
@@ -303,7 +304,10 @@ export default function SystemMigrationsClient() {
                   <p className="text-sm font-medium text-neutral-900">
                     {t("detail.tracebackTitle")}
                   </p>
-                  <pre className="overflow-x-auto rounded-4 bg-neutral-100 p-8 font-mono text-xs">
+                  {/* Capped and scrollable: a traceback is tall, and one that
+                      pushes the rest of the table off the screen makes the row
+                      harder to use than the gap it filled. */}
+                  <pre className="max-h-[320px] overflow-auto rounded-4 border border-neutral-200 bg-white p-12 font-mono text-xs leading-5">
                     {entry.traceback}
                   </pre>
                 </div>

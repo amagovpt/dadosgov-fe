@@ -39,6 +39,15 @@ interface AdminListTableProps<T, F extends string = never> {
    * when to show it -- the table stays unaware of what is being expanded.
    */
   renderExpandedRow?: (item: T) => ReactNode;
+  /**
+   * The header label the expanded cell carries.
+   *
+   * 🚩 Not cosmetic: the design-system table turns rows into labelled cards on
+   * narrow widths, and a cell with an empty label breaks out of that layout
+   * instead of spanning it. The harvest job detail, where this pattern already
+   * works, passes a real one.
+   */
+  expandedRowLabel?: ReactNode;
 }
 
 export default function AdminListTable<T, F extends string = never>({
@@ -51,6 +60,7 @@ export default function AdminListTable<T, F extends string = never>({
   getRowStyle,
   onRowClick,
   renderExpandedRow,
+  expandedRowLabel,
 }: AdminListTableProps<T, F>) {
   return (
     <>
@@ -96,7 +106,11 @@ export default function AdminListTable<T, F extends string = never>({
               </TableRow>
               {expanded ? (
                 <TableRow>
-                  <TableCell headerLabel="" colSpan={columns.length}>
+                  <TableCell
+                    headerLabel={expandedRowLabel ?? ""}
+                    colSpan={columns.length}
+                    className="bg-neutral-50 px-24 py-16"
+                  >
                     {expanded}
                   </TableCell>
                 </TableRow>
