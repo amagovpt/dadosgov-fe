@@ -6,6 +6,19 @@ Entries are newest first. Work sits under `## Unreleased` until it is promoted t
 
 ## Unreleased
 
+- **fix(login): the password reset screen stops asking to link a digital identity**
+  - After resetting a password the confirmation screen said "Já pode usá-la para associar a conta
+    à sua Chave Móvel Digital ou à Autenticação Europeia", behind a single button labelled
+    "Associar conta" that in fact navigated to the login page. Somebody who had just recovered
+    their access read it as being made to link an identity before they could get back in — and
+    the copy promised one thing while the button did another.
+  - It is copy from when migration was going to be mandatory and resetting a password was a step
+    inside it. That stopped being true; the screen did not follow. It now says the password was
+    changed and offers "Iniciar sessão", which is what the button has always done.
+  - The test pins the rule rather than the sentences: no string under `resetPassword`, in either
+    language, may mention a digital identity. The wording is the part that gets rewritten, and
+    whoever rewrites it next may not know why the mention does not belong there.
+
 - **chore(release): give this repo a release script, with the guard the footer now depends on**
   - Releases were cut by hand, step by step, including the `package.json` bump -- the one step
     with nothing to catch it if forgotten, leaving the version the repo states and the version

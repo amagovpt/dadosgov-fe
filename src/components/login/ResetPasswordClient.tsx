@@ -56,6 +56,17 @@ export function ResetPasswordClient({ token }: Props) {
     }
   };
 
+  /**
+   * Signing in is what this button does, and now what it says. Until
+   * LEDG-2642 it was labelled "Associar conta" and described linking a
+   * digital identity -- copy from when migration was going to be mandatory
+   * and resetting a password was a step inside it. It stopped being that; the
+   * screen did not follow.
+   */
+  const handleContinue = () => {
+    window.location.href = localizeHref("/login");
+  };
+
   return (
     <main className="flex-grow bg-white min-h-screen relative">
       <div className="container mx-auto px-16 pt-32 pb-64 max-w-7xl">
@@ -84,7 +95,7 @@ export function ResetPasswordClient({ token }: Props) {
                   <Button
                     variant="primary"
                     className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                    onClick={() => (window.location.href = localizeHref("/login"))}
+                    onClick={handleContinue}
                   >
                     {t("resetPassword.continueAction")}
                   </Button>
