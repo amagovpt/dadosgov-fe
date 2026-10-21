@@ -482,5 +482,11 @@
     "otherMime": "Outro MIME Type",
     "duplicateFile": "Já existe um ficheiro com este nome. Escolha outro ficheiro.",
     "mainFile": "Ficheiro principal"
+  },
+  "cancelCreation": {
+    "title": "Tem a certeza de que quer cancelar criação de conjunto de dados?",
+    "description": "Ao fechar sem guardar as alterações, perde todos os dados que preencheu.",
+    "back": "Não, voltar",
+    "confirm": "Sim, cancelar"
   }
 }

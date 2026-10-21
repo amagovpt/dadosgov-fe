@@ -482,5 +482,11 @@
     "otherMime": "Other MIME Type",
     "duplicateFile": "A file with this name already exists. Choose another file.",
     "mainFile": "Main file"
+  },
+  "cancelCreation": {
+    "title": "Are you sure you want to cancel dataset creation?",
+    "description": "If you close without saving your changes, you will lose all the information you entered.",
+    "back": "No, go back",
+    "confirm": "Yes, cancel"
   }
 }

@@ -49,6 +49,7 @@ import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
 import { validateDatasetDetails } from "./datasetFormModel";
+import { DatasetWizardCancelDialog } from "./DatasetWizardCancelDialog";
 
 interface DatasetsAdminClientProps {
   pageContent: BoDatasetsPage;
@@ -76,6 +77,8 @@ export default function DatasetsAdminClient({
   const { locale } = splitLocale(usePathname());
   const { user } = useAuth();
   const [internalCurrentStep, setInternalCurrentStep] = useState(2);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const currentStep = controlledCurrentStep ?? internalCurrentStep;
   const handleNextStep = onNextStep ?? (() => setInternalCurrentStep((step) => step + 1));
   const handlePreviousStep =
@@ -713,21 +716,32 @@ export default function DatasetsAdminClient({
 
   return (
     <ModalProvider>
+      {cancelDialogOpen && (
+        <DatasetWizardCancelDialog
+          onClose={() => {
+            setCancelDialogOpen(false);
+            cancelButtonRef.current?.focus();
+          }}
+          onConfirm={() => {
+            setCancelDialogOpen(false);
+            if (onComplete) onComplete();
+            else router.push(localizeHref("/admin/me/datasets", locale));
+          }}
+        />
+      )}
       {redesigned && (
         <>
           {currentStep !== 4 && (
             <div className="flex flex-wrap items-center justify-start gap-8 md:justify-end">
               <Button
+                ref={cancelButtonRef}
                 type="button"
                 appearance="link"
                 variant="danger"
                 hasIcon
                 leadingIcon="agora-line-trash"
                 disabled={isSubmitting}
-                onClick={() => {
-                  if (onComplete) onComplete();
-                  else router.push(localizeHref("/admin/me/datasets", locale));
-                }}
+                onClick={() => setCancelDialogOpen(true)}
               >
                 {t("admin-datasets:form.cancelCreation")}
               </Button>
