@@ -40,10 +40,10 @@
     "errors_other": "{{count}} erros registados",
     "showTraceback": "Ver detalhe do erro",
     "showErrors": "Ver erros",
-    "hideErrors": "Ocultar erros",
     "errorsTitle": "Erros registados durante a migração",
     "truncated": "A mostrar os primeiros {{shown}} de {{total}} erros. Os restantes estão nos registos do servidor.",
-    "tracebackTitle": "Detalhe técnico do erro"
+    "tracebackTitle": "Detalhe técnico do erro",
+    "closeErrors": "Fechar"
   },
   "search": {
     "label": "Pesquisar",

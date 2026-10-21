@@ -40,10 +40,10 @@
     "errors_other": "{{count}} errors logged",
     "showTraceback": "Show error detail",
     "showErrors": "Show errors",
-    "hideErrors": "Hide errors",
     "errorsTitle": "Errors logged during the migration",
     "truncated": "Showing the first {{shown}} of {{total}} errors. The rest are in the server logs.",
-    "tracebackTitle": "Technical detail of the failure"
+    "tracebackTitle": "Technical detail of the failure",
+    "closeErrors": "Close"
   },
   "search": {
     "label": "Search",

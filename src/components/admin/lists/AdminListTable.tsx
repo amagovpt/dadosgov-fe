@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import {
   TableHeader,
@@ -31,23 +30,6 @@ interface AdminListTableProps<T, F extends string = never> {
   getRowClassName?: (item: T) => string | undefined;
   getRowStyle?: (item: T) => CSSProperties | undefined;
   onRowClick?: (item: T) => void;
-  /**
-   * An extra row rendered under `item`, for detail that does not fit a cell.
-   *
-   * Purely additive: a list that does not pass it renders exactly as before,
-   * because returning nothing emits nothing. The caller owns whatever decides
-   * when to show it -- the table stays unaware of what is being expanded.
-   */
-  renderExpandedRow?: (item: T) => ReactNode;
-  /**
-   * The header label the expanded cell carries.
-   *
-   * 🚩 Not cosmetic: the design-system table turns rows into labelled cards on
-   * narrow widths, and a cell with an empty label breaks out of that layout
-   * instead of spanning it. The harvest job detail, where this pattern already
-   * works, passes a real one.
-   */
-  expandedRowLabel?: ReactNode;
 }
 
 export default function AdminListTable<T, F extends string = never>({
@@ -59,8 +41,6 @@ export default function AdminListTable<T, F extends string = never>({
   getRowClassName,
   getRowStyle,
   onRowClick,
-  renderExpandedRow,
-  expandedRowLabel,
 }: AdminListTableProps<T, F>) {
   return (
     <>
@@ -85,39 +65,20 @@ export default function AdminListTable<T, F extends string = never>({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {items.map((item) => {
-          const expanded = renderExpandedRow?.(item);
-
-          return (
-            <Fragment key={getRowKey(item)}>
-              <TableRow
-                className={getRowClassName?.(item)}
-                style={getRowStyle?.(item)}
-                onClick={onRowClick ? () => onRowClick(item) : undefined}
-              >
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    headerLabel={column.headerLabel ?? String(column.header)}
-                  >
-                    {column.renderCell(item)}
-                  </TableCell>
-                ))}
-              </TableRow>
-              {expanded ? (
-                <TableRow>
-                  <TableCell
-                    headerLabel={expandedRowLabel ?? ""}
-                    colSpan={columns.length}
-                    className="bg-neutral-50 px-24 py-16"
-                  >
-                    {expanded}
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </Fragment>
-          );
-        })}
+        {items.map((item) => (
+          <TableRow
+            key={getRowKey(item)}
+            className={getRowClassName?.(item)}
+            style={getRowStyle?.(item)}
+            onClick={onRowClick ? () => onRowClick(item) : undefined}
+          >
+            {columns.map((column) => (
+              <TableCell key={column.id} headerLabel={column.headerLabel ?? String(column.header)}>
+                {column.renderCell(item)}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
       </TableBody>
     </>
   );
