@@ -22,7 +22,7 @@
     "failed": "Falhou",
     "empty_record": "Registo vazio",
     "orphan": "Registo sem ficheiro",
-    "legacy": "Registo antigo"
+    "legacy": "Registo antigo (pré-2.0)"
   },
   "summary": {
     "clean": "Sem anomalias — {{total}} migrações, todas em ordem.",

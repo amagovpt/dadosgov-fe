@@ -22,7 +22,7 @@
     "failed": "Failed",
     "empty_record": "Empty record",
     "orphan": "Record with no file",
-    "legacy": "Legacy record"
+    "legacy": "Legacy record (pre-2.0)"
   },
   "summary": {
     "clean": "No anomalies — {{total}} migrations, all in order.",
