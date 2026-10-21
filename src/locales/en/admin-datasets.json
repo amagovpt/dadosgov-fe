@@ -478,7 +478,13 @@
     "selectMime": "Select a MIME Type",
     "otherMime": "Other MIME Type",
     "duplicateFile": "A file with this name already exists. Choose another file.",
-    "mainFile": "Main file"
+    "mainFile": "Main file",
+    "cancel": {
+      "title": "Are you sure you want to close the page?",
+      "description": "If you close without saving your changes, you will lose all the information you entered and will need to upload the added files again.",
+      "back": "No, go back",
+      "confirm": "Yes, close"
+    }
   },
   "cancelCreation": {
     "title": "Are you sure you want to cancel dataset creation?",

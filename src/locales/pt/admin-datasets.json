@@ -478,7 +478,13 @@
     "selectMime": "Selecione um MIME Type",
     "otherMime": "Outro MIME Type",
     "duplicateFile": "Já existe um ficheiro com este nome. Escolha outro ficheiro.",
-    "mainFile": "Ficheiro principal"
+    "mainFile": "Ficheiro principal",
+    "cancel": {
+      "title": "Tem a certeza de que quer fechar a página?",
+      "description": "Ao fechar sem guardar as alterações, perderá todos os dados introduzidos e terá de carregar novamente os ficheiros adicionados",
+      "back": "Não, voltar",
+      "confirm": "Sim, fechar"
+    }
   },
   "cancelCreation": {
     "title": "Tem a certeza de que quer cancelar criação de conjunto de dados?",

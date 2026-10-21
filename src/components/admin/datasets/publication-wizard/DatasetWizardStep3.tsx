@@ -57,7 +57,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
     isSubmitting,
   } = props;
 
-  const openEditors = usePendingResourceEditor();
+  const { openEditors, editor } = usePendingResourceEditor();
   const latestProps = useRef(props);
   const knownFiles = useRef(uploadedFiles);
   useEffect(() => {
@@ -65,7 +65,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
     knownFiles.current = props.uploadedFiles;
   }, [props]);
 
-  function editResources(items: (File | string)[]) {
+  function editResources(items: (File | string)[], isNew = false) {
     openEditors(
       items.map((item) => {
         const isUrl = typeof item === "string";
@@ -83,6 +83,17 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
             resourceType: "main",
             description: "",
           },
+          onDiscard: isNew
+            ? () => {
+                const current = latestProps.current;
+                if (file)
+                  current.setUploadedFiles((previous) =>
+                    previous.filter((other) => other !== file)
+                  );
+                else
+                  current.setResourceUrls((previous) => previous.filter((other) => other !== name));
+              }
+            : undefined,
           onSave: (meta: PendingResourceMeta, newUrl?: string, replacement?: File) => {
             const current = latestProps.current;
             if (
@@ -124,7 +135,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
     knownFiles.current = next;
     setUploadedFiles(next);
     if (files.length) setShowFileError(false);
-    editResources(added);
+    editResources(added, true);
   }
 
   function addUrl(url: string) {
@@ -135,7 +146,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
       throw new Error(t("resourceEditing.duplicateUrl"));
     setResourceUrls((previous) => [...previous, url]);
     setShowFileError(false);
-    editResources([url]);
+    editResources([url], true);
   }
 
   if (props.redesigned) {
@@ -163,84 +174,88 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
       ),
     };
     return (
-      <div className="flex w-full min-w-0 flex-col gap-64">
-        <section
-          className="flex w-[800px] max-w-full flex-col gap-32"
-          aria-labelledby="add-resources-title"
-        >
-          <div className="flex flex-col gap-8">
-            <h3 id="add-resources-title" className="text-xl-bold text-primary-900">
-              {t("resources.addTitle")}
-            </h3>
-            <p className="max-w-[592px] text-m-regular text-primary-900">
-              {t("resources.addDescription")}
-            </p>
-          </div>
-          <fieldset disabled={isSubmitting} className="min-w-0">
-            <legend className="sr-only">{t("resources.addTitle")}</legend>
-            <FileUploadModal
-              appearance="wizard"
-              uploadedFiles={uploadedFiles}
-              resourceUrls={resourceUrls}
-              hasError={showFileError}
-              onFilesChange={addFiles}
-              onUrlAdd={addUrl}
-              allowedExtensions={allowedExtensions}
+      <>
+        {editor}
+        <div className="flex w-full min-w-0 flex-col gap-64">
+          <section
+            className="flex w-[800px] max-w-full flex-col gap-32"
+            aria-labelledby="add-resources-title"
+          >
+            <div className="flex flex-col gap-8">
+              <h3 id="add-resources-title" className="text-xl-bold text-primary-900">
+                {t("resources.addTitle")}
+              </h3>
+              <p className="max-w-[592px] text-m-regular text-primary-900">
+                {t("resources.addDescription")}
+              </p>
+            </div>
+            <fieldset disabled={isSubmitting} className="min-w-0">
+              <legend className="sr-only">{t("resources.addTitle")}</legend>
+              <FileUploadModal
+                appearance="wizard"
+                uploadedFiles={uploadedFiles}
+                resourceUrls={resourceUrls}
+                hasError={showFileError}
+                onFilesChange={addFiles}
+                onUrlAdd={addUrl}
+                allowedExtensions={allowedExtensions}
+              />
+            </fieldset>
+            <DatasetWizardHelp item={formatsHelp} />
+          </section>
+          <fieldset disabled={isSubmitting} className="flex min-w-0 flex-col gap-32">
+            <legend className="sr-only">{t("resources.addedTitle")}</legend>
+            <DatasetResourcesTable
+              savedResources={props.savedResources}
+              resourceTypes={resourceTypes}
+              datasetId={props.datasetId}
+              onResourcesChange={props.onResourcesChange}
+              pending={{
+                uploadedFiles,
+                resourceUrls,
+                resourceMetadata,
+                setUploadedFiles,
+                setResourceUrls,
+                onEditMeta,
+                onEditResource: (item) => editResources([item]),
+              }}
             />
+            <DatasetWizardHelp item={metadataHelp} />
+            {auxiliaryItems?.slice(2).map((item, index) => (
+              <DatasetWizardHelp key={index} item={item} />
+            ))}
           </fieldset>
-          <DatasetWizardHelp item={formatsHelp} />
-        </section>
-        <fieldset disabled={isSubmitting} className="flex min-w-0 flex-col gap-32">
-          <legend className="sr-only">{t("resources.addedTitle")}</legend>
-          <DatasetResourcesTable
-            savedResources={props.savedResources}
-            resourceTypes={resourceTypes}
-            datasetId={props.datasetId}
-            onResourcesChange={props.onResourcesChange}
-            pending={{
-              uploadedFiles,
-              resourceUrls,
-              resourceMetadata,
-              setUploadedFiles,
-              setResourceUrls,
-              onEditMeta,
-              onEditResource: (item) => editResources([item]),
-            }}
-          />
-          <DatasetWizardHelp item={metadataHelp} />
-          {auxiliaryItems?.slice(2).map((item, index) => (
-            <DatasetWizardHelp key={index} item={item} />
-          ))}
-        </fieldset>
-        <div data-dataset-actions className="flex w-full justify-between gap-16">
-          <Button
-            appearance="outline"
-            variant="primary"
-            hasIcon
-            leadingIcon="agora-line-arrow-left-circle"
-            leadingIconHover="agora-solid-arrow-left-circle"
-            onClick={onPreviousStep}
-            disabled={isSubmitting}
-          >
-            {t("form.previousAction")}
-          </Button>
-          <Button
-            variant="primary"
-            hasIcon
-            trailingIcon="agora-line-arrow-right-circle"
-            trailingIconHover="agora-solid-arrow-right-circle"
-            onClick={onStep3Next}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? t("form.loadingNext") : t("form.nextAction")}
-          </Button>
+          <div data-dataset-actions className="flex w-full justify-between gap-16">
+            <Button
+              appearance="outline"
+              variant="primary"
+              hasIcon
+              leadingIcon="agora-line-arrow-left-circle"
+              leadingIconHover="agora-solid-arrow-left-circle"
+              onClick={onPreviousStep}
+              disabled={isSubmitting}
+            >
+              {t("form.previousAction")}
+            </Button>
+            <Button
+              variant="primary"
+              hasIcon
+              trailingIcon="agora-line-arrow-right-circle"
+              trailingIconHover="agora-solid-arrow-right-circle"
+              onClick={onStep3Next}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t("form.loadingNext") : t("form.nextAction")}
+            </Button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
+      {editor}
       {introduction ? (
         <StatusCard
           variant="informative"

@@ -31,6 +31,7 @@ export interface ResourceEditPendingPopupContentProps {
   onSave: (meta: PendingResourceMeta, newUrl?: string, replacementFile?: File) => void;
   onReplaceFile?: (file: File) => void;
   onClose?: () => void;
+  onSaved?: () => void;
 }
 
 // The resource API accepts MIME strings; these are common choices, not a restriction.
@@ -69,6 +70,7 @@ function PendingResourceForm({
   onSave,
   onReplaceFile,
   onClose,
+  onSaved,
 }: ResourceEditPendingPopupContentProps) {
   const { t } = useTranslation("admin-common");
   const { t: td } = useTranslation("admin-datasets");
@@ -169,7 +171,7 @@ function PendingResourceForm({
       const replacement = selectedFile !== file ? selectedFile : undefined;
       onSave(meta, isUrl ? url.trim() : undefined, replacement);
       if (replacement) onReplaceFile?.(replacement);
-      close();
+      (onSaved ?? close)();
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : td("edit.resourceSaveError"));
     }
