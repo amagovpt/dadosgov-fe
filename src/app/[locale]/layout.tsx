@@ -50,6 +50,7 @@ const namespaces = [
   "admin-profile",
   "admin-posts",
   "admin-topics",
+  "admin-jobs",
   "admin-migrations",
   "admin-logs",
   "admin-editorial",

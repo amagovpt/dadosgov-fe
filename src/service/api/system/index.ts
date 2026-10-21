@@ -1,4 +1,5 @@
 import type { Dataset } from "@/service/types/dataset";
+import type { ScheduledJob } from "@/service/types/scheduled-jobs";
 import type { MigrationsAudit } from "@/service/types/migrations-audit";
 import type { HomepageData } from "@/service/types/home";
 import type { Reuse } from "@/service/types/reuse";
@@ -351,6 +352,58 @@ export async function checkUrlReachable(url: string): Promise<boolean> {
   } catch (error) {
     rethrowControlFlow(error);
     return true;
+  }
+}
+
+/**
+ * The portal's Celery Beat schedule, for the read-only jobs page (LEDG-2614).
+ *
+ * 🚩 RETURNS null ON FAILURE, never an empty array, and that is the whole
+ * point of it. Its siblings above degrade to `[]`, which leaves the caller
+ * unable to tell "the backend is down" from "nothing is scheduled" -- a
+ * distinction that matters nowhere more than on a page whose job is to say
+ * what is running. `rethrowControlFlow`'s own docstring names this confusion.
+ *
+ * An empty array is a real answer: a portal with no scheduled jobs.
+ */
+export async function fetchScheduledJobs(): Promise<ScheduledJob[] | null> {
+  try {
+    // Served at /api/1/workers/jobs/ -- the namespace is declared with
+    // path="", which is falsy, so flask-restx falls back to "/" + its name.
+    const res = await authFetch("/workers/jobs/", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch scheduled jobs: ${res.statusText}`);
+    }
+    // marshal_list_with: a bare array, not the paginated envelope.
+    return await res.json();
+  } catch (error) {
+    rethrowControlFlow(error);
+    console.error("Error fetching scheduled jobs:", error);
+    return null;
+  }
+}
+
+/**
+ * Every task name the portal has registered, scheduled or not.
+ *
+ * Subtracting the scheduled jobs' tasks from this leaves the ones that never
+ * run -- the purges, the inactive-account chores -- which is the question the
+ * jobs page exists to answer and that today needs a trip to the machine.
+ *
+ * Null on failure like its sibling, so the page can drop the section rather
+ * than claim every registered task is scheduled.
+ */
+export async function fetchSchedulableJobs(): Promise<string[] | null> {
+  try {
+    const res = await authFetch("/workers/jobs/schedulables/", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch schedulable jobs: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    rethrowControlFlow(error);
+    console.error("Error fetching schedulable jobs:", error);
+    return null;
   }
 }
 
