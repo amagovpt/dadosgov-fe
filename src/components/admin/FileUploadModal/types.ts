@@ -8,7 +8,7 @@ export interface PendingResourceMeta {
 }
 
 export interface FileUploadModalProps {
-  saveMode?: "pending" | "immediate";
+  saveMode?: "pending" | "immediate" | "editor";
   inputId?: string;
   disabled?: boolean;
   appearance?: "default" | "wizard";

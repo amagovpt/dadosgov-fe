@@ -102,7 +102,7 @@ export function ResourceItem({
       <button
         type="button"
         className="text-left break-words text-primary-600 underline hover:text-primary-700"
-        onClick={handleView}
+        onClick={handleEdit}
       >
         {displayName}
       </button>

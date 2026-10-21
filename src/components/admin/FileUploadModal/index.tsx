@@ -120,7 +120,7 @@ export default function FileUploadModal({
             {t("fileUpload.actions.add")}
           </Button>
         </div>
-        {wizard && added === "url" && !urlError && (
+        {wizard && saveMode !== "editor" && added === "url" && !urlError && (
           <StatusCard
             variant="success"
             showIcon
@@ -153,7 +153,13 @@ export default function FileUploadModal({
           inputLabel={wizard ? td("resources.selectFiles") : t("fileUpload.files.selectOrDrag")}
           extensionsInstructions={
             wizard
-              ? td(saveMode === "immediate" ? "resources.immediateFileHint" : "resources.fileHint")
+              ? td(
+                  saveMode === "editor"
+                    ? "resources.editorFileHint"
+                    : saveMode === "immediate"
+                      ? "resources.immediateFileHint"
+                      : "resources.fileHint"
+                )
               : undefined
           }
           selectedFilesLabel={t("fileUpload.files.selectedFiles")}
@@ -221,6 +227,7 @@ export default function FileUploadModal({
           }}
         />
         {wizard &&
+          saveMode !== "editor" &&
           added === "file" &&
           !fileSaveError &&
           !securityErrors.length &&

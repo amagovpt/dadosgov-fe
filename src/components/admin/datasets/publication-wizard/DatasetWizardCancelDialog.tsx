@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Dialog, type DialogElement } from "@ama-pt/agora-design-system";
 
 interface DatasetWizardCancelDialogProps {
-  variant?: "creation" | "resource";
+  variant?: "creation" | "resource" | "resourceEdit";
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -19,7 +19,8 @@ export function DatasetWizardCancelDialog({
   const { t } = useTranslation("admin-datasets");
   const id = useId();
   const dialogRef = useRef<DialogElement>(null);
-  const translationKey = variant === "resource" ? "resourceEditor.cancel" : "cancelCreation";
+  const translationKey = variant === "creation" ? "cancelCreation" : "resourceEditor.cancel";
+  const descriptionKey = variant === "resourceEdit" ? "editDescription" : "description";
 
   useEffect(() => {
     const ownDialog = dialogRef.current;
@@ -48,7 +49,7 @@ export function DatasetWizardCancelDialog({
         </h2>
         <div className="flex flex-col gap-32">
           <p id={`${id}-description`} className="text-m-regular">
-            {t(`${translationKey}.description`)}
+            {t(`${translationKey}.${descriptionKey}`)}
           </p>
           <div className="flex flex-wrap items-center justify-end gap-16 md:gap-32">
             <Button

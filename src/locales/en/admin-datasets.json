@@ -406,7 +406,8 @@
     "linkSaveError": "The link could not be saved. Try again.",
     "linkSaved": "Link added successfully.",
     "filesSaved": "Files uploaded successfully.",
-    "immediateFileHint": "Selected files are uploaded to this dataset."
+    "immediateFileHint": "Selected files are uploaded to this dataset.",
+    "editorFileHint": "Files will be saved after confirming the resource metadata."
   },
   "review": {
     "successTitle": "Your dataset has been created successfully",
@@ -448,7 +449,7 @@
   "resourceEditor": {
     "title": "Resource metadata",
     "availability": "Resource availability",
-    "pendingAvailability": "Availability will be checked after the resource is saved.",
+    "pendingAvailability": "The resource is being analysed",
     "metadata": "Resource metadata",
     "requiredFields": "All fields are required except those marked as optional.",
     "titleField": "Title",
@@ -458,12 +459,12 @@
     "format": "Format",
     "mime": "MIME Type",
     "size": "Size",
-    "sizeHint": "Enter the size in bytes. Optional field.",
     "invalidSize": "Enter a whole number of bytes equal to or greater than zero.",
     "url": "URL",
     "origin": "Resource origin",
     "external": "External link",
     "internal": "This resource will be stored on our servers after saving.",
+    "internalSaved": "This resource is stored on our servers.",
     "file": "File",
     "created": "Creation date",
     "updated": "Last updated",
@@ -482,6 +483,7 @@
     "cancel": {
       "title": "Are you sure you want to close the page?",
       "description": "If you close without saving your changes, you will lose all the information you entered and will need to upload the added files again.",
+      "editDescription": "If you close without saving, you will lose your changes. The resource will remain in the list.",
       "back": "No, go back",
       "confirm": "Yes, close"
     }

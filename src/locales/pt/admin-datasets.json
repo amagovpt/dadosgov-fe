@@ -406,7 +406,8 @@
     "linkSaveError": "Não foi possível guardar a ligação. Tente novamente.",
     "linkSaved": "Ligação adicionada com sucesso.",
     "filesSaved": "Ficheiros carregados com sucesso.",
-    "immediateFileHint": "Os ficheiros selecionados são carregados para este conjunto de dados."
+    "immediateFileHint": "Os ficheiros selecionados são carregados para este conjunto de dados.",
+    "editorFileHint": "Os ficheiros serão guardados após confirmar os metadados do recurso."
   },
   "review": {
     "successTitle": "O seu conjunto de dados foi criado com sucesso",
@@ -448,7 +449,7 @@
   "resourceEditor": {
     "title": "Metadados do recurso",
     "availability": "Disponibilidade do recurso",
-    "pendingAvailability": "A disponibilidade será verificada depois de guardar o recurso.",
+    "pendingAvailability": "O recurso está a ser analisado",
     "metadata": "Metadados do recurso",
     "requiredFields": "Todos os campos são obrigatórios, exceto aqueles marcados como opcionais.",
     "titleField": "Título",
@@ -458,12 +459,12 @@
     "format": "Formato",
     "mime": "MIME Type",
     "size": "Tamanho",
-    "sizeHint": "Indique o tamanho em bytes. Campo opcional.",
     "invalidSize": "Indique um número inteiro de bytes igual ou superior a zero.",
     "url": "URL",
     "origin": "Origem do recurso",
     "external": "Link externo",
     "internal": "Este recurso encontra-se nos nossos servidores após guardar.",
+    "internalSaved": "Este recurso encontra-se nos nossos servidores.",
     "file": "Ficheiro",
     "created": "Data de criação",
     "updated": "Última atualização",
@@ -482,6 +483,7 @@
     "cancel": {
       "title": "Tem a certeza de que quer fechar a página?",
       "description": "Ao fechar sem guardar as alterações, perderá todos os dados introduzidos e terá de carregar novamente os ficheiros adicionados",
+      "editDescription": "Ao fechar sem guardar, perderá as alterações efetuadas. O recurso continuará na lista.",
       "back": "Não, voltar",
       "confirm": "Sim, fechar"
     }

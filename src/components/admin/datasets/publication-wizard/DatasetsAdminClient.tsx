@@ -740,7 +740,7 @@ export default function DatasetsAdminClient({
                 variant="danger"
                 hasIcon
                 leadingIcon="agora-line-trash"
-                leadingIconHover="agora-line-trash"
+                leadingIconHover="agora-solid-trash"
                 disabled={isSubmitting}
                 onClick={() => setCancelDialogOpen(true)}
               >
@@ -753,7 +753,7 @@ export default function DatasetsAdminClient({
                 variant="primary"
                 hasIcon
                 leadingIcon="agora-line-download"
-                leadingIconHover="agora-line-download"
+                leadingIconHover="agora-solid-download"
                 disabled={isSubmitting}
                 onClick={() => {
                   if (isDetailsStep) void handleStep2Next(undefined, true);

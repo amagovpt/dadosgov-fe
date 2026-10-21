@@ -25,6 +25,7 @@ export function PendingResourceEditorDialog({
 }: PendingResourceEditorDialogProps) {
   const { t } = useTranslation("admin-datasets");
   const [confirmingClose, setConfirmingClose] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const closeTrigger = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export function PendingResourceEditorDialog({
   }, []);
 
   function requestClose() {
+    if (isSaving) return;
     closeTrigger.current = document.activeElement as HTMLElement;
     setConfirmingClose(true);
   }
@@ -63,6 +65,7 @@ export function PendingResourceEditorDialog({
                 hasIcon
                 trailingIcon="agora-line-x"
                 trailingIconHover="agora-solid-x"
+                disabled={isSaving}
                 onClick={requestClose}
               >
                 {t("edit.closeAriaLabel")}
@@ -74,6 +77,7 @@ export function PendingResourceEditorDialog({
                   {...resource}
                   onClose={requestClose}
                   onSaved={onClose}
+                  onSavingChange={setIsSaving}
                 />
               </div>
             </div>
@@ -82,7 +86,7 @@ export function PendingResourceEditorDialog({
       </Dialog>
       {confirmingClose && (
         <DatasetWizardCancelDialog
-          variant="resource"
+          variant={onDiscard ? "resource" : "resourceEdit"}
           onClose={() => {
             setConfirmingClose(false);
             requestAnimationFrame(() => closeTrigger.current?.focus());

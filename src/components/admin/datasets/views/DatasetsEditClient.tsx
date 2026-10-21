@@ -401,7 +401,13 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     showApiSuccess(t("edit.transferRequested", { recipient: recipient.label }), 15000);
   };
 
-  const { handleFilesUpload, handleUrlAdd, handleResourceClick } = useDatasetResourceActions({
+  const {
+    handleFilesUpload,
+    handleUrlAdd,
+    handleResourceClick,
+    editor: resourceEditor,
+    allowedExtensions,
+  } = useDatasetResourceActions({
     dataset,
     slug,
     resourceTypes,
@@ -489,8 +495,12 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             variant="primary"
             hasIcon
             appearance={dataset.private ? "solid" : "outline"}
-            leadingIcon={dataset.private ? "agora-line-document" : "/Icons/dataset-move-to-draft.svg"}
-            leadingIconHover={dataset.private ? "agora-solid-document" : "/Icons/dataset-move-to-draft.svg"}
+            leadingIcon={
+              dataset.private ? "agora-line-document" : "/Icons/dataset-move-to-draft.svg"
+            }
+            leadingIconHover={
+              dataset.private ? "agora-solid-document" : "/Icons/dataset-move-to-draft.svg"
+            }
             disabled={isSubmitting}
             onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
           >
@@ -499,6 +509,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         ) : null
       }
     >
+      {resourceEditor}
       <div className="flex flex-wrap items-center justify-start gap-8 md:justify-end">
         {canDelete && (
           <>
@@ -666,6 +677,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               <DatasetsEditResourcesTab
                 dataset={dataset}
                 resourceTypes={resourceTypes}
+                allowedExtensions={allowedExtensions}
                 auxiliaryItems={pageContent.resourceAuxiliaryItems}
                 introduction={pageContent.resourceIntroduction}
                 isSubmitting={isSubmitting}

@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import FileUploadModal from "@/components/admin/FileUploadModal";
 import { DatasetResourcesTable } from "../resources/DatasetResourcesTable";
 import { DatasetWizardHelp } from "../publication-wizard/DatasetWizardHelp";
 import { getResourceDatasetAuxiliarItems } from "../config/datasetsAuxiliarItems";
-import { fetchAllowedExtensions } from "@/service/api/datasets";
 import { can } from "@/utils/permissions";
 import type { AdminAuxiliaryItem, AdminHelpBlock } from "@/service/types/admin/common";
 import type { Dataset, Resource } from "@/service/types/dataset";
@@ -17,6 +16,7 @@ interface DatasetsEditResourcesTabProps {
   dataset: Dataset;
   isSubmitting: boolean;
   resourceTypes: ResourceType[];
+  allowedExtensions: string[] | null;
   auxiliaryItems?: AdminAuxiliaryItem[];
   introduction?: AdminHelpBlock;
   onFilesUpload: (files: File[]) => Promise<void>;
@@ -28,6 +28,7 @@ export default function DatasetsEditResourcesTab({
   dataset,
   isSubmitting,
   resourceTypes,
+  allowedExtensions,
   auxiliaryItems,
   introduction,
   onFilesUpload,
@@ -36,19 +37,7 @@ export default function DatasetsEditResourcesTab({
 }: DatasetsEditResourcesTabProps) {
   const { t } = useTranslation("admin-datasets");
   const inputId = useId();
-  const [allowedExtensions, setAllowedExtensions] = useState<string[] | null>(null);
   const canManage = can(dataset, "edit_resources") && !dataset.deleted;
-  useEffect(() => {
-    let cancelled = false;
-    fetchAllowedExtensions()
-      .then((extensions) => {
-        if (!cancelled) setAllowedExtensions(extensions);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const helpItems = getResourceDatasetAuxiliarItems(auxiliaryItems);
   const formatsHelp = {
     title: t("resources.formatsHelpTitle"),
@@ -79,8 +68,7 @@ export default function DatasetsEditResourcesTab({
         className="flex w-full max-w-[800px] flex-col gap-32"
         aria-labelledby={`${inputId}-add-title`}
       >
-        <p className="text-s-regular text-primary-900">{t("form.optionalFields")}</p>
-        <div className="flex flex-col gap-16 text-primary-900">
+        <div className="flex flex-col gap-8 text-primary-900">
           <h2 id={`${inputId}-add-title`} className="text-xl-bold">
             {t("resources.addTitle")}
           </h2>
@@ -90,7 +78,7 @@ export default function DatasetsEditResourcesTab({
           <legend className="sr-only">{t("resources.addTitle")}</legend>
           <FileUploadModal
             appearance="wizard"
-            saveMode="immediate"
+            saveMode="editor"
             inputId={`${inputId}-url`}
             disabled={isSubmitting || !canManage}
             uploadedFiles={[]}
@@ -100,7 +88,7 @@ export default function DatasetsEditResourcesTab({
             allowedExtensions={allowedExtensions}
           />
         </fieldset>
-        <DatasetWizardHelp item={formatsHelp} background="white" />
+        <DatasetWizardHelp item={formatsHelp} />
       </section>
       <div className="flex min-w-0 flex-col gap-32">
         <DatasetResourcesTable
@@ -109,9 +97,9 @@ export default function DatasetsEditResourcesTab({
           onResourceClick={onResourceClick}
           selectable={!!canManage}
         />
-        <DatasetWizardHelp item={metadataHelp} background="white" />
+        <DatasetWizardHelp item={metadataHelp} />
         {helpItems.slice(2).map((item, index) => (
-          <DatasetWizardHelp key={index} item={item} background="white" />
+          <DatasetWizardHelp key={index} item={item} />
         ))}
       </div>
     </div>
