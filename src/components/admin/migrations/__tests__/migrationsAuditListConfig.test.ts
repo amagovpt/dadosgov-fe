@@ -12,6 +12,7 @@ import {
   filterMigrationsBySearch,
   getDateLabel,
   getDetailLabel,
+  getDetailParts,
   getStateVariant,
   sortMigrations,
 } from "../config/migrationsAuditListConfig";
@@ -158,6 +159,12 @@ describe("getDetailLabel", () => {
 
   it("says only what applies, with nothing padded to zero", () => {
     expect(getDetailLabel(entry({ ops: 1 }), DETAIL_LABELS)).toBe("1 ops");
+  });
+
+  it("returns the parts separately, so the cell can put one per line", () => {
+    const parts = getDetailParts(entry({ ops: 1, errors: 11 }), DETAIL_LABELS);
+
+    expect(parts).toEqual(["1 ops", "11 errors"]);
   });
 
   it("is empty for a migration with no record at all", () => {

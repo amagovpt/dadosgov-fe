@@ -84,13 +84,18 @@ interface DetailLabels {
  * Composed from the structured fields, never from text the backend sent: the
  * payload is technical and language-neutral, and the sentences belong here.
  */
-export function getDetailLabel(entry: MigrationAuditEntry, labels: DetailLabels): string {
+export function getDetailParts(entry: MigrationAuditEntry, labels: DetailLabels): string[] {
   const bits: string[] = [];
   if (entry.ops) bits.push(labels.ops(entry.ops));
   if (entry.marked) bits.push(labels.marked(entry.marked));
   if (entry.failed_runs) bits.push(labels.failedRuns(entry.failed_runs));
   if (entry.errors) bits.push(labels.errors(entry.errors));
-  return bits.join(" · ");
+  return bits;
+}
+
+/** The same parts on one line, for the CSV export where rows cannot wrap. */
+export function getDetailLabel(entry: MigrationAuditEntry, labels: DetailLabels): string {
+  return getDetailParts(entry, labels).join(" · ");
 }
 
 /**
@@ -203,9 +208,13 @@ export function createMigrationColumns({
     {
       id: "detail",
       header: labels.detail,
+      // One part per line: "1 operação · 11 erros registados" on a single row
+      // reads as one fact, when it is two independent ones.
       renderCell: (entry) => (
         <div className="flex flex-col gap-4">
-          <span>{getDetailLabel(entry, detailLabels)}</span>
+          {getDetailParts(entry, detailLabels).map((part) => (
+            <span key={part}>{part}</span>
+          ))}
           {renderToggle?.(entry)}
         </div>
       ),
