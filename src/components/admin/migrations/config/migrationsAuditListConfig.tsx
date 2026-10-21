@@ -211,7 +211,7 @@ export function createMigrationColumns({
       // One part per line: "1 operação · 11 erros registados" on a single row
       // reads as one fact, when it is two independent ones.
       renderCell: (entry) => (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center gap-4 text-center">
           {getDetailParts(entry, detailLabels).map((part) => (
             <span key={part}>{part}</span>
           ))}
