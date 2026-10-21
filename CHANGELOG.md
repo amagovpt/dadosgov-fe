@@ -6,6 +6,23 @@ Entries are newest first. Work sits under `## Unreleased` until it is promoted t
 
 ## Unreleased
 
+- **feat(admin): add a read-only page for the state of the database migrations**
+  - PPR came back from a production dump with 34 migrations claiming to be applied and none of
+    them run, and nothing could see it until the backend refused to start. `/admin/system/migrations`
+    now shows every migration's state, so whoever has no shell on an environment no longer has to
+    request a deploy just to read it.
+  - Nine states rather than the three `udata db status` knows, because three of its green answers
+    are not success: recorded without running, marked by hand after failing, and applied while
+    logging errors. Green here is reserved for the one state that means what it says, and a test
+    pins that — inheriting the command's palette would inherit its blindness.
+  - A verdict card decides itself from the backend's own count, never from the filtered table, so
+    narrowing to "anomalies only" cannot make a healthy environment look broken. The breakdown
+    omits the states at zero, which is what makes a healthy environment legible at a glance:
+    one line instead of nine numbers that are mostly zero.
+  - A failed request and an environment with nothing recorded draw different screens. Saying "the
+    schema is fine" to somebody checking right after a dump restore would be the worst possible
+    accident, so the fetcher returns null on failure rather than an empty envelope.
+
 - **fix(login): the password reset screen stops asking to link a digital identity**
   - After resetting a password the confirmation screen said "Já pode usá-la para associar a conta
     à sua Chave Móvel Digital ou à Autenticação Europeia", behind a single button labelled
