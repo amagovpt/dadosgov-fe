@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StatusCard } from "@ama-pt/agora-design-system";
+import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -51,6 +51,15 @@ export default function SystemMigrationsClient() {
   const [audit, setAudit] = useState<MigrationsAudit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadError, setHasLoadError] = useState(false);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+
+  const toggleExpanded = (filename: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(filename)) next.delete(filename);
+      else next.add(filename);
+      return next;
+    });
 
   const {
     currentPage,
@@ -123,8 +132,29 @@ export default function SystemMigrationsClient() {
           errors: (count) => t("detail.errors", { count }),
         },
         neverLabel: t("values.never"),
+        renderToggle: (entry) =>
+          entry.messages.length > 0 || entry.traceback ? (
+            <Button
+              appearance="link"
+              variant="neutral"
+              onClick={() => toggleExpanded(entry.filename)}
+              aria-expanded={expanded.has(entry.filename)}
+            >
+              <span className="flex items-center gap-4">
+                <Icon
+                  name={
+                    expanded.has(entry.filename)
+                      ? "agora-solid-chevron-up"
+                      : "agora-line-chevron-down"
+                  }
+                  className="h-16 w-16"
+                />
+                {expanded.has(entry.filename) ? t("detail.hideErrors") : t("detail.showErrors")}
+              </span>
+            </Button>
+          ) : null,
       }),
-    [t, stateLabels]
+    [t, stateLabels, expanded]
   );
 
   // Memoised so the filter chain below does not re-run on every render:
@@ -240,6 +270,47 @@ export default function SystemMigrationsClient() {
         getSortOrder={getSortOrder}
         handleSort={handleSort}
         getRowKey={(entry) => entry.filename}
+        renderExpandedRow={(entry) => {
+          if (!expanded.has(entry.filename)) return null;
+
+          return (
+            <div className="flex flex-col gap-8 py-8">
+              {entry.messages.length > 0 && (
+                <div className="flex flex-col gap-4">
+                  <p className="text-sm font-medium text-neutral-900">{t("detail.errorsTitle")}</p>
+                  <ul className="flex flex-col gap-2">
+                    {entry.messages.map((message, index) => (
+                      <li key={index} className="font-mono text-xs break-all text-danger-700">
+                        {message}
+                      </li>
+                    ))}
+                  </ul>
+                  {/* The count is the true total; the list is capped. Saying so
+                      keeps "11 errors" from looking like a contradiction when
+                      only 20 of 30 are listed. */}
+                  {entry.errors > entry.messages.length && (
+                    <p className="text-xs text-neutral-700">
+                      {t("detail.truncated", {
+                        shown: entry.messages.length,
+                        total: entry.errors,
+                      })}
+                    </p>
+                  )}
+                </div>
+              )}
+              {entry.traceback && (
+                <div className="flex flex-col gap-4">
+                  <p className="text-sm font-medium text-neutral-900">
+                    {t("detail.tracebackTitle")}
+                  </p>
+                  <pre className="overflow-x-auto rounded-4 bg-neutral-100 p-8 font-mono text-xs">
+                    {entry.traceback}
+                  </pre>
+                </div>
+              )}
+            </div>
+          );
+        }}
       />
     </AdminListPage>
   );

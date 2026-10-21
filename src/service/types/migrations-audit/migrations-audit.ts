@@ -29,7 +29,12 @@ export interface MigrationAuditEntry {
   /** How many real runs failed. Separates "marked once" from "failed thrice". */
   failed_runs: number;
   errors: number;
-  message: string | null;
+  /**
+   * The error lines themselves, capped at twenty by the backend. `errors`
+   * keeps the true count, so a truncated list never misreports how bad it
+   * was.
+   */
+  messages: string[];
   /** Only present for the failure states, and truncated by the backend. */
   traceback: string | null;
 }

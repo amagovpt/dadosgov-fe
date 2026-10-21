@@ -46,7 +46,7 @@ const entry = (over: Partial<MigrationAuditEntry> = {}): MigrationAuditEntry => 
   marked: 0,
   failed_runs: 0,
   errors: 0,
-  message: null,
+  messages: [],
   traceback: null,
   ...over,
 });

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { format } from "date-fns";
 
 import StatusDot from "@/components/admin/StatusDot";
@@ -153,6 +154,12 @@ interface MigrationColumnsOptions {
   stateLabels: Record<MigrationState, string>;
   detailLabels: DetailLabels;
   neverLabel: string;
+  /**
+   * The control that opens the error list, supplied by the page because the
+   * expansion state lives there. Returns nothing for a migration with nothing
+   * to show, so a healthy row carries no dead affordance.
+   */
+  renderToggle?: (entry: MigrationAuditEntry) => ReactNode;
 }
 
 /**
@@ -164,6 +171,7 @@ export function createMigrationColumns({
   stateLabels,
   detailLabels,
   neverLabel,
+  renderToggle,
 }: MigrationColumnsOptions): AdminListColumn<MigrationAuditEntry, MigrationSortField>[] {
   return [
     {
@@ -195,7 +203,12 @@ export function createMigrationColumns({
     {
       id: "detail",
       header: labels.detail,
-      renderCell: (entry) => getDetailLabel(entry, detailLabels),
+      renderCell: (entry) => (
+        <div className="flex flex-col gap-4">
+          <span>{getDetailLabel(entry, detailLabels)}</span>
+          {renderToggle?.(entry)}
+        </div>
+      ),
       exportValue: (entry) => getDetailLabel(entry, detailLabels),
     },
   ];
