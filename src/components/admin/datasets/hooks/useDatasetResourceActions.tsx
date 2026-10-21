@@ -11,6 +11,7 @@ import {
   createResource,
   updateResource,
   replaceResourceFile,
+  deleteResource,
 } from "@/service/api/datasets";
 import type { ResourceType } from "@/service/types/catalog";
 import type { Dataset, Resource } from "@/service/types/dataset";
@@ -48,6 +49,10 @@ export function useDatasetResourceActions({
 }: UseDatasetResourceActionsParams) {
   const { t } = useTranslation("admin-datasets");
   const { openEditors, editor } = usePendingResourceEditor();
+  const [deletingResource, setDeletingResource] = useState<{
+    resource: Resource;
+    onDeleted?: () => void;
+  } | null>(null);
   const queuedFiles = useRef(new WeakSet<File>());
   const queuedUrls = useRef(new Set<string>());
   const [allowedExtensions, setAllowedExtensions] = useState<string[] | null>(null);
@@ -234,31 +239,26 @@ export function useDatasetResourceActions({
     openResourceEditor(url);
   }
 
-  function handleDeleteResource(resource: Resource) {
+  function handleDeleteResource(resource: Resource, onDeleted?: () => void) {
     if (!dataset || !can(dataset, "edit_resources") || dataset.deleted) return;
+    setDeletingResource({ resource, onDeleted });
+  }
 
-    show(
-      <DeleteResourcePopup
-        datasetId={dataset.id}
-        resource={resource}
-        onDeleted={() => {
-          setDataset((previousDataset) =>
-            previousDataset
-              ? {
-                  ...previousDataset,
-                  resources: previousDataset.resources.filter((item) => item.id !== resource.id),
-                }
-              : previousDataset
-          );
-          showApiSuccess(t("edit.resourceDeleted"));
-        }}
-      />,
-      {
-        title: t("edit.resourceDeleteModalTitle"),
-        closeAriaLabel: t("edit.closeAriaLabel"),
-        dimensions: "m",
-      }
+  async function confirmDeleteResource() {
+    if (!deletingResource) return;
+    const currentDataset = requireResourcePermission();
+    const { resource, onDeleted } = deletingResource;
+    await deleteResource(currentDataset.id, resource.id);
+    setDataset((previous) =>
+      previous
+        ? {
+            ...previous,
+            resources: previous.resources.filter((item) => item.id !== resource.id),
+          }
+        : previous
     );
+    showApiSuccess(t("edit.resourceDeleted"));
+    onDeleted?.();
   }
 
   function handleResourceEdit(resource: Resource) {
@@ -280,7 +280,17 @@ export function useDatasetResourceActions({
   }
 
   return {
-    editor,
+    editor: (
+      <>
+        {editor}
+        {deletingResource && (
+          <DeleteResourcePopup
+            onClose={() => setDeletingResource(null)}
+            onConfirm={confirmDeleteResource}
+          />
+        )}
+      </>
+    ),
     allowedExtensions,
     handleDeleteResource,
     handleFilesUpload,

@@ -40,7 +40,7 @@ import type {
 } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
-import DatasetsEditDeletePopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditDeletePopup";
+import DatasetLifecycleConfirmationDialog from "@/components/admin/datasets/edit-dialogs/DatasetLifecycleConfirmationDialog";
 import DatasetsEditTransferPopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditTransferPopup";
 import DatasetsEditMetadataTab from "@/components/admin/datasets/edit-tabs/DatasetsEditMetadataTab";
 import DatasetsEditResourcesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditResourcesTab";
@@ -93,6 +93,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   const spatialCoverageRef = useRef("");
   const spatialGranularityRef = useRef("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmationAction, setConfirmationAction] = useState<"delete" | "archive" | null>(null);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const isUploadingRef = useRef(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -379,7 +381,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   } = useDatasetLifecycleActions({
     listUrl,
     dataset,
-    hide,
     push: router.push,
     keywordsRef,
     setDataset,
@@ -389,7 +390,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   });
 
   const handleTransferDataset = async (recipient: RecipientSelection, comment: string) => {
-    if (!dataset) throw new Error(t("edit.notFound"));
+    if (!dataset || !can(dataset, "edit") || dataset.deleted)
+      throw new Error(t("edit.transferError"));
     setApiError(null);
     setApiSuccess(null);
     await requestTransfer({
@@ -397,7 +399,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       recipient: { class: recipient.class, id: recipient.id },
       comment: comment || undefined,
     });
-    hide();
     showApiSuccess(t("edit.transferRequested", { recipient: recipient.label }), 15000);
   };
 
@@ -405,6 +406,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     handleFilesUpload,
     handleUrlAdd,
     handleResourceClick,
+    handleDeleteResource,
     editor: resourceEditor,
     allowedExtensions,
   } = useDatasetResourceActions({
@@ -441,17 +443,6 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
 
   const canEdit = can(dataset, "edit");
   const canDelete = can(dataset, "delete");
-  const openTransfer = () =>
-    show(
-      <DatasetsEditTransferPopup datasetTitle={dataset.title} onConfirm={handleTransferDataset} />,
-      { title: t("edit.transferTitle"), closeAriaLabel: t("edit.closeAriaLabel"), dimensions: "m" }
-    );
-  const openDelete = () =>
-    show(<DatasetsEditDeletePopup onClose={hide} onConfirm={handleDeleteDataset} />, {
-      title: t("edit.deleteModalTitle"),
-      closeAriaLabel: t("edit.closeAriaLabel"),
-      dimensions: "m",
-    });
   const feedback =
     apiError || apiSuccess || dataset.archived || dataset.deleted ? (
       <div className="flex flex-col gap-32">
@@ -510,6 +501,20 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       }
     >
       {resourceEditor}
+      {transferDialogOpen && (
+        <DatasetsEditTransferPopup
+          onClose={() => setTransferDialogOpen(false)}
+          onConfirm={handleTransferDataset}
+        />
+      )}
+      {confirmationAction && (
+        <DatasetLifecycleConfirmationDialog
+          key={confirmationAction}
+          action={confirmationAction}
+          onClose={() => setConfirmationAction(null)}
+          onConfirm={confirmationAction === "archive" ? handleArchiveDataset : handleDeleteDataset}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-start gap-8 md:justify-end">
         {canDelete && (
           <>
@@ -520,7 +525,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               leadingIcon="agora-line-trash"
               leadingIconHover="agora-solid-trash"
               disabled={isSubmitting || !!dataset.deleted}
-              onClick={openDelete}
+              onClick={() => setConfirmationAction("delete")}
             >
               {t("edit.confirmDelete")}
             </Button>
@@ -536,7 +541,9 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               leadingIcon="agora-line-folder"
               leadingIconHover="agora-solid-folder"
               disabled={isSubmitting || !!dataset.deleted}
-              onClick={dataset.archived ? handleUnarchiveDataset : handleArchiveDataset}
+              onClick={
+                dataset.archived ? handleUnarchiveDataset : () => setConfirmationAction("archive")
+              }
             >
               {t(dataset.archived ? "editPage.unarchive" : "editPage.archive")}
             </Button>
@@ -548,7 +555,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               leadingIcon="agora-line-download"
               leadingIconHover="agora-solid-download"
               disabled={isSubmitting || !!dataset.deleted}
-              onClick={openTransfer}
+              onClick={() => setTransferDialogOpen(true)}
             >
               {t("editPage.transferOwnership")}
             </Button>
@@ -684,6 +691,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                 onFilesUpload={handleFilesUpload}
                 onUrlAdd={handleUrlAdd}
                 onResourceClick={handleResourceClick}
+                onResourceDelete={handleDeleteResource}
               />
             </TabBody>
           </Tab>

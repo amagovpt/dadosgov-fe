@@ -381,7 +381,7 @@
     "linkAdded": "Link added. It will be saved when you continue or save the draft.",
     "filesAdded": "Files added. They will be saved when you continue or save the draft.",
     "addedTitle": "Added resources",
-    "addedDescription": "Select a resource to view details or edit information.",
+    "addedDescription": "Select a resource to view details, edit information or manage its validation, where applicable.",
     "search": "Search",
     "searchPlaceholder": "Search by added resource title",
     "all": "All",
@@ -389,6 +389,7 @@
     "unavailable": "Unavailable",
     "unknown": "Unknown",
     "selected": "Selected resources - {{count}}",
+    "selectOne": "Select one resource at a time",
     "bulkUnavailable": "Deleting multiple resources is not available yet.",
     "empty": "No resources have been added yet.",
     "noMatches": "No resources found.",
@@ -487,6 +488,31 @@
       "back": "No, go back",
       "confirm": "Yes, close"
     }
+  },
+  "transfer": {
+    "title": "Transfer ownership",
+    "description": "Transfer ownership of this dataset to another user or organization. All fields are required, except those marked as optional.",
+    "warningTitle": "This action is irreversible",
+    "warningDescription": "Once the transfer is complete, you will no longer own this dataset.",
+    "ownerTitle": "New owner",
+    "ownerDescription": "Select the organization or user who will become the owner.",
+    "notes": "Notes"
+  },
+  "datasetArchive": {
+    "title": "Are you sure you want to archive this dataset?",
+    "description": "The dataset will no longer be visible to other users and will be moved to archived content. This action can be reversed later.",
+    "confirm": "Archive dataset",
+    "pending": "Archiving..."
+  },
+  "datasetDeletion": {
+    "title": "Are you sure you want to delete this dataset?",
+    "description": "This action is permanent and cannot be undone. All associated data will be permanently removed.",
+    "confirm": "Delete dataset"
+  },
+  "resourceDeletion": {
+    "title": "Are you sure you want to delete this resource?",
+    "description": "This action is permanent and cannot be undone. All associated data will be permanently removed.",
+    "confirm": "Delete resource"
   },
   "cancelCreation": {
     "title": "Are you sure you want to cancel dataset creation?",

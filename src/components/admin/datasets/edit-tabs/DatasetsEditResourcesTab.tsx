@@ -22,6 +22,7 @@ interface DatasetsEditResourcesTabProps {
   onFilesUpload: (files: File[]) => Promise<void>;
   onUrlAdd: (url: string) => Promise<void>;
   onResourceClick: (resource: Resource) => void;
+  onResourceDelete: (resource: Resource, onDeleted: () => void) => void;
 }
 
 export default function DatasetsEditResourcesTab({
@@ -34,6 +35,7 @@ export default function DatasetsEditResourcesTab({
   onFilesUpload,
   onUrlAdd,
   onResourceClick,
+  onResourceDelete,
 }: DatasetsEditResourcesTabProps) {
   const { t } = useTranslation("admin-datasets");
   const inputId = useId();
@@ -68,6 +70,7 @@ export default function DatasetsEditResourcesTab({
         className="flex w-full max-w-[800px] flex-col gap-32"
         aria-labelledby={`${inputId}-add-title`}
       >
+        <p className="text-s-regular text-primary-900">{t("form.optionalFields")}</p>
         <div className="flex flex-col gap-8 text-primary-900">
           <h2 id={`${inputId}-add-title`} className="text-xl-bold">
             {t("resources.addTitle")}
@@ -95,6 +98,7 @@ export default function DatasetsEditResourcesTab({
           savedResources={dataset.resources}
           resourceTypes={resourceTypes}
           onResourceClick={onResourceClick}
+          onResourceDelete={onResourceDelete}
           selectable={!!canManage}
         />
         <DatasetWizardHelp item={metadataHelp} />

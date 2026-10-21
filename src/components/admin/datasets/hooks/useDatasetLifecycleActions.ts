@@ -3,12 +3,12 @@
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { deleteDataset, updateDataset } from "@/service/api/datasets";
+import { can } from "@/utils/permissions";
 import type { Dataset } from "@/service/types/dataset";
 
 interface UseDatasetLifecycleActionsParams {
   listUrl: string;
   dataset: Dataset | null;
-  hide: () => void;
   push: (href: string) => void;
   keywordsRef: React.MutableRefObject<string>;
   setDataset: React.Dispatch<React.SetStateAction<Dataset | null>>;
@@ -20,7 +20,6 @@ interface UseDatasetLifecycleActionsParams {
 export function useDatasetLifecycleActions({
   listUrl,
   dataset,
-  hide,
   push,
   keywordsRef,
   setDataset,
@@ -68,15 +67,14 @@ export function useDatasetLifecycleActions({
   }
 
   async function handleArchiveDataset() {
-    if (!dataset) return;
+    if (!dataset || !can(dataset, "edit") || dataset.deleted)
+      throw new Error(t("edit.archiveError"));
 
     setIsSubmitting(true);
+    setApiError(null);
     try {
       await updateDataset(dataset.id, { archived: new Date().toISOString() });
       push(`${listUrl}?status=archived`);
-    } catch (error) {
-      console.error("Error archiving dataset:", error);
-      setApiError(t("edit.archiveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -113,17 +111,14 @@ export function useDatasetLifecycleActions({
   }
 
   async function handleDeleteDataset() {
-    if (!dataset) return;
+    if (!dataset || !can(dataset, "delete") || dataset.deleted)
+      throw new Error(t("edit.deleteError"));
 
     setIsSubmitting(true);
+    setApiError(null);
     try {
       await deleteDataset(dataset.id);
-      hide();
       push(listUrl);
-    } catch (error) {
-      console.error("Error deleting dataset:", error);
-      setApiError(t("edit.deleteError"));
-      hide();
     } finally {
       setIsSubmitting(false);
     }

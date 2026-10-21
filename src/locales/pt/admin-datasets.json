@@ -381,7 +381,7 @@
     "linkAdded": "Ligação adicionada. Será guardada ao continuar ou guardar o rascunho.",
     "filesAdded": "Ficheiros adicionados. Serão guardados ao continuar ou guardar o rascunho.",
     "addedTitle": "Recursos adicionados",
-    "addedDescription": "Selecione um recurso para consultar os detalhes ou editar informações.",
+    "addedDescription": "Selecione um recurso para consultar os detalhes, editar informações ou gerir a sua validação, quando aplicável.",
     "search": "Pesquisar",
     "searchPlaceholder": "Pesquise o título do recurso adicionado",
     "all": "Todos",
@@ -389,6 +389,7 @@
     "unavailable": "Indisponível",
     "unknown": "Desconhecida",
     "selected": "Recursos selecionados - {{count}}",
+    "selectOne": "Selecionar um recurso de cada vez",
     "bulkUnavailable": "A eliminação de vários recursos ainda não está disponível.",
     "empty": "Ainda não foram adicionados recursos.",
     "noMatches": "Não foram encontrados recursos.",
@@ -487,6 +488,31 @@
       "back": "Não, voltar",
       "confirm": "Sim, fechar"
     }
+  },
+  "transfer": {
+    "title": "Transferir propriedade",
+    "description": "Transfira a propriedade deste conjunto de dados para outro utilizador ou organização. Todos os campos são obrigatórios, exceto aqueles marcados como opcionais.",
+    "warningTitle": "Esta ação é irreversível",
+    "warningDescription": "Ao concluir a transferência, deixará de ser proprietário deste conjunto de dados.",
+    "ownerTitle": "Novo proprietário",
+    "ownerDescription": "Selecione a organização ou utilizador que passará a ser proprietário.",
+    "notes": "Notas"
+  },
+  "datasetArchive": {
+    "title": "Tem a certeza de que pretende arquivar este conjunto de dados?",
+    "description": "O conjunto de dados deixará de estar visível para os restantes utilizadores e será movido para os conteúdos arquivados. Esta ação poderá ser revertida posteriormente.",
+    "confirm": "Arquivar conjunto de dados",
+    "pending": "A arquivar..."
+  },
+  "datasetDeletion": {
+    "title": "Tem a certeza de que pretende eliminar este conjunto de dados?",
+    "description": "Esta ação é permanente e não poderá ser revertida. Todos os dados associados serão removidos de forma definitiva.",
+    "confirm": "Eliminar conjunto de dados"
+  },
+  "resourceDeletion": {
+    "title": "Tem a certeza de que pretende eliminar este recurso?",
+    "description": "Esta ação é permanente e não poderá ser revertida. Todos os dados associados serão removidos de forma definitiva.",
+    "confirm": "Eliminar recurso"
   },
   "cancelCreation": {
     "title": "Tem a certeza de que quer cancelar criação de conjunto de dados?",

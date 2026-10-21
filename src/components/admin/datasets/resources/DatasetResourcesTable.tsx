@@ -13,7 +13,6 @@ import {
   TableHeaderCell,
   TableRow,
   TableSelectionCell,
-  TableSelectionHeaderCell,
   Toggle,
   ToggleGroup,
   usePopupContext,
@@ -24,7 +23,7 @@ import { getFileExtension, formatFileSize } from "@/components/admin/FileUploadM
 import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceDetailPopup";
 import DatasetsEditResourceEditPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceEditPopup";
 import DeleteResourcePopup from "@/components/admin/datasets/resource-dialogs/DeleteResourcePopup";
-import { fetchDataset } from "@/service/api/datasets";
+import { deleteResource, fetchDataset } from "@/service/api/datasets";
 import type { Resource } from "@/service/types/dataset";
 import type { Dispatch, SetStateAction } from "react";
 import type { ResourceType } from "@/service/types/catalog";
@@ -46,6 +45,7 @@ interface DatasetResourcesTableProps {
   datasetId?: string;
   onResourcesChange?: (resources: Resource[]) => void;
   onResourceClick?: (resource: Resource) => void;
+  onResourceDelete?: (resource: Resource, onDeleted: () => void) => void;
   selectable?: boolean;
   pending?: PendingResources;
 }
@@ -72,7 +72,8 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
   const [query, setQuery] = useState("");
   const [refreshError, setRefreshError] = useState(false);
   const [filter, setFilter] = useState("all");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [deletingRow, setDeletingRow] = useState<Row | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [sort, setSort] = useState<{
@@ -134,12 +135,34 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
     });
   const currentPage = Math.min(page, Math.max(1, Math.ceil(filtered.length / pageSize)));
   const visible = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const selectedKeys = selected.filter((key) => rows.some((row) => row.key === key));
-  const selectedVisible = visible.filter((row) => selectedKeys.includes(row.key)).length;
-  const toggle = (keys: string[], checked: boolean) =>
-    setSelected((previous) =>
-      checked ? [...new Set([...previous, ...keys])] : previous.filter((key) => !keys.includes(key))
-    );
+  const selectedRow = visible.find((row) => row.key === selectedKey);
+  const deleteSelected = () => {
+    if (!selectable || !selectedRow) return;
+    if (selectedRow.resource && props.onResourceDelete) {
+      props.onResourceDelete(selectedRow.resource, () => setSelectedKey(null));
+      return;
+    }
+    if (selectedRow.resource ? props.datasetId : props.pending) setDeletingRow(selectedRow);
+  };
+  const confirmDelete = async () => {
+    if (!deletingRow || !selectable) return;
+    if (deletingRow.resource && props.datasetId) {
+      await deleteResource(props.datasetId, deletingRow.resource.id);
+      props.onResourcesChange?.(
+        (props.savedResources ?? []).filter((resource) => resource.id !== deletingRow.resource!.id)
+      );
+    } else if (props.pending) {
+      if (deletingRow.file)
+        props.pending.setUploadedFiles((previous) =>
+          previous.filter((file) => file !== deletingRow.file)
+        );
+      else
+        props.pending.setResourceUrls((previous) =>
+          previous.filter((url) => url !== deletingRow.url)
+        );
+    }
+    setSelectedKey(null);
+  };
   const refresh = async () => {
     if (!props.datasetId) return;
     try {
@@ -176,20 +199,10 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
             options
           )
         }
-        onDelete={() =>
-          show(
-            <DeleteResourcePopup
-              resource={resource}
-              datasetId={props.datasetId!}
-              onDeleted={() =>
-                props.onResourcesChange?.(
-                  (props.savedResources ?? []).filter((item) => item.id !== resource.id)
-                )
-              }
-            />,
-            { ...options, dimensions: "s" }
-          )
-        }
+        onDelete={() => {
+          hide();
+          setDeletingRow(rows.find((row) => row.resource?.id === resource.id) ?? null);
+        }}
       />,
       options
     );
@@ -197,6 +210,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
   const changeSort = (field: "title" | "date", order: "none" | "ascending" | "descending") => {
     setSort({ field, order });
     setPage(1);
+    setSelectedKey(null);
   };
   const headings = ["title", "availability", "type", "format", "updated"] as const;
   const filters = [
@@ -207,6 +221,9 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
   ];
   return (
     <section className="flex min-w-0 flex-col gap-32" aria-labelledby={`${tableId}-title`}>
+      {deletingRow && (
+        <DeleteResourcePopup onClose={() => setDeletingRow(null)} onConfirm={confirmDelete} />
+      )}
       <div className="flex flex-col gap-8">
         <h3 id={`${tableId}-title`} className="text-xl-bold text-primary-900">
           {t("resources.addedTitle")}
@@ -224,6 +241,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
           onChange={(event) => {
             setQuery(event.target.value);
             setPage(1);
+            setSelectedKey(null);
           }}
         />
       </div>
@@ -238,6 +256,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
           onChange={(values) => {
             setFilter(values[0] || "all");
             setPage(1);
+            setSelectedKey(null);
           }}
           className="max-md:flex-wrap"
         >
@@ -258,26 +277,19 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
         {refreshError && (
           <StatusCard variant="danger" showIcon description={t("resources.refreshError")} />
         )}
-        {selectable && selectedKeys.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-16 bg-warning-50 p-16 text-warning-900">
-            <p className="text-m-bold" role="status">
-              {t("resources.selected", { count: selectedKeys.length })}
-            </p>
-            <div className="flex flex-wrap items-center gap-16">
-              <span id={`${tableId}-bulk-delete-hint`} className="text-s-regular">
-                {t("resources.bulkUnavailable")}
-              </span>
-              <Button
-                appearance="link"
-                variant="danger"
-                hasIcon
-                leadingIcon="agora-line-trash"
-                disabled
-                aria-describedby={`${tableId}-bulk-delete-hint`}
-              >
-                {t("edit.confirmDelete")}
-              </Button>
-            </div>
+        {selectable && selectedRow && (
+          <div className="flex items-center justify-center bg-warning-50 p-8">
+            <Button
+              appearance="link"
+              variant="danger"
+              hasIcon
+              leadingIcon="agora-line-trash"
+              leadingIconHover="agora-solid-trash"
+              className="text-warning-900! [&_svg]:fill-warning-900!"
+              onClick={deleteSelected}
+            >
+              {t("edit.confirmDelete")}
+            </Button>
           </div>
         )}
         <div className="overflow-x-auto">
@@ -285,28 +297,22 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
             pageSize={pageSize}
             totalItems={filtered.length}
             currentPage={currentPage}
-            setCurrentPage={setPage}
-            setPageSize={setPageSize}
+            setCurrentPage={(nextPage) => {
+              setPage(nextPage);
+              setSelectedKey(null);
+            }}
+            setPageSize={(nextSize) => {
+              setPageSize(nextSize);
+              setSelectedKey(null);
+            }}
             paginationOptions={{ availablePageSizes: [5, 10, 20] }}
           >
             <TableHeader>
               <TableRow>
                 {selectable && (
-                  <TableSelectionHeaderCell
-                    selectionState={
-                      !selectedVisible
-                        ? "none"
-                        : selectedVisible === visible.length
-                          ? "all"
-                          : "indeterminate"
-                    }
-                    onSelectionChange={(checked) =>
-                      toggle(
-                        visible.map((row) => row.key),
-                        checked
-                      )
-                    }
-                  />
+                  <TableHeaderCell>
+                    <span className="sr-only">{t("resources.selectOne")}</span>
+                  </TableHeaderCell>
                 )}
                 {headings.map((heading) => (
                   <TableHeaderCell
@@ -336,8 +342,8 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
                   <TableRow key={row.key}>
                     {selectable && (
                       <TableSelectionCell
-                        checked={selectedKeys.includes(row.key)}
-                        onChange={(checked) => toggle([row.key], checked)}
+                        checked={selectedKey === row.key}
+                        onChange={(checked) => setSelectedKey(checked ? row.key : null)}
                         checkboxAriaLabelledBy={`${tableId}-resource-${index}`}
                       />
                     )}
