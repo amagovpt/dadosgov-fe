@@ -50,7 +50,7 @@ interface DatasetResourcesTableProps {
   pending?: PendingResources;
 }
 
-type Availability = "available" | "unavailable" | "unknown" | "unsaved";
+type Availability = "available" | "unavailable" | "unknown";
 type Row = {
   key: string;
   title: string;
@@ -101,7 +101,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
       title: meta?.title || file.name,
       type: meta?.resourceType || "main",
       format: meta?.format || getFileExtension(file.name, false).slice(1),
-      availability: "unsaved",
+      availability: "unknown",
       file,
       index,
     });
@@ -114,7 +114,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
       title: meta?.title || url,
       type: meta?.resourceType || "main",
       format: meta?.format || getFileExtension(url, true).slice(1),
-      availability: "unsaved",
+      availability: "unknown",
       url,
     });
   });
@@ -202,8 +202,8 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
   const filters = [
     { value: "all", icon: "agora-line-layers-menu" },
     { value: "available", icon: "agora-line-check-circle" },
-    { value: "validating", icon: "agora-line-clock" },
     { value: "unavailable", icon: "agora-line-x-circle" },
+    { value: "unknown", icon: "agora-line-info-mark" },
   ];
   return (
     <section className="flex min-w-0 flex-col gap-32" aria-labelledby={`${tableId}-title`}>
@@ -248,18 +248,11 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
               hasIcon
               leadingIcon={item.icon}
               leadingIconHover={item.icon.replace("agora-line-", "agora-solid-")}
-              disabled={item.value === "validating"}
-              aria-describedby={
-                item.value === "validating" ? `${tableId}-validation-hint` : undefined
-              }
             >
               {t(`resources.${item.value}`)}
             </Toggle>
           ))}
         </ToggleGroup>
-        <p id={`${tableId}-validation-hint`} className="text-s-regular text-neutral-700">
-          {t("resources.validationUnavailable")}
-        </p>
       </div>
       <div className="flex flex-col">
         {refreshError && (
