@@ -449,7 +449,7 @@
     "deleteError": "The resource could not be deleted. Try again."
   },
   "resourceEditor": {
-    "title": "Resource metadata and validation",
+    "title": "Resource metadata",
     "availability": "Resource availability",
     "pendingAvailability": "Availability will be checked after the resource is saved.",
     "metadata": "Resource metadata",

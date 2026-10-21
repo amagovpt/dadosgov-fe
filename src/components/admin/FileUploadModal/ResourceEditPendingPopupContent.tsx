@@ -6,11 +6,9 @@ import {
   Button,
   DropdownOption,
   DropdownSection,
-  Icon,
   InputText,
   InputTextArea,
   Pill,
-  ProgressBar,
   StatusCard,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
@@ -467,55 +465,6 @@ function PendingResourceForm({
           </Button>
         </div>
       </form>
-      <section className="flex min-w-0 flex-col gap-32" aria-labelledby={field("validation")}>
-        <div className="flex flex-col gap-16">
-          <h3 id={field("validation")} className="text-xl-bold">
-            {label("validation")}
-          </h3>
-          <p>{label("validationOptional")}</p>
-        </div>
-        <div className="flex flex-col gap-8 border-b border-neutral-700 pb-16">
-          <h4 className="py-8 text-m-medium text-primary-900">{label("validationState")}</h4>
-          <p className="flex items-center gap-8">
-            <span className="text-neutral-400">
-              <Icon name="agora-line-bullet" dimensions="xs" aria-hidden="true" />
-            </span>
-            {label("noSchema")}
-          </p>
-          <ProgressBar
-            value={0}
-            max={100}
-            variant="percentage"
-            hideLabel
-            label={label("validationState")}
-          />
-        </div>
-        <fieldset disabled className="min-w-0">
-          <IsolatedSelect
-            id={field("schema")}
-            label={label("schema")}
-            placeholder={label("noSchema")}
-            defaultValue="none"
-            hideSectionNames
-          >
-            <DropdownSection name="schemas">
-              <DropdownOption value="none">{label("noSchema")}</DropdownOption>
-            </DropdownSection>
-          </IsolatedSelect>
-        </fieldset>
-        <p className="text-s-regular text-neutral-700">{td("resources.validationUnavailable")}</p>
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            disabled
-            hasIcon
-            leadingIcon="agora-line-check-circle"
-            leadingIconHover="agora-solid-check-circle"
-          >
-            {label("validate")}
-          </Button>
-        </div>
-      </section>
     </div>
   );
 }

@@ -449,7 +449,7 @@
     "deleteError": "Não foi possível eliminar o recurso. Tente novamente."
   },
   "resourceEditor": {
-    "title": "Metadados e validação do recurso",
+    "title": "Metadados do recurso",
     "availability": "Disponibilidade do recurso",
     "pendingAvailability": "A disponibilidade será verificada depois de guardar o recurso.",
     "metadata": "Metadados do recurso",
