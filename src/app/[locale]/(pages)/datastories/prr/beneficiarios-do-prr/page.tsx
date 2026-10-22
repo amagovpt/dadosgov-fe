@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const datastorySlug = "portugal-2030/beneficiarios-do-prr";
+  const datastorySlug = "prr/beneficiarios-do-prr";
 
   const { hero } = await getDatastorySearchPage(datastorySlug, locale);
 

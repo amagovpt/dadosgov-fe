@@ -5,6 +5,21 @@ import { useSearchBenProjStore } from "@/hooks/useSearchBenProj";
 import { SearchPagination } from "@ama-pt/agora-design-system";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { SEARCH_BEN_PROJ_ROOT_ID } from "../containers/RootContainer";
+
+// Brings the new page into view; the DS header is sticky, so its height is discounted
+function scrollToResultsTop() {
+  const target = document.getElementById(SEARCH_BEN_PROJ_ROOT_ID);
+  if (!target) return;
+
+  const headerHeight =
+    document.querySelector("header.sticky")?.getBoundingClientRect().height ?? 0;
+
+  window.scrollTo({
+    top: target.getBoundingClientRect().top + window.scrollY - headerHeight - 32,
+    behavior: "smooth",
+  });
+}
 
 export default function Pagination() {
   const { t } = useTranslation();
@@ -22,6 +37,7 @@ export default function Pagination() {
       const nextPage = pageIndex + 1;
       if (nextPage !== page) {
         setPage(nextPage);
+        scrollToResultsTop();
       }
     },
     [page, setPage],

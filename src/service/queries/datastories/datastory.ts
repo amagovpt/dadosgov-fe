@@ -573,6 +573,110 @@ export function getProjectsOfPortugal2030() {
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
+export function getSearchProjectsPRR() {
+  return gql(/* GraphQL */ `
+    query getSearchProjectsPRR {
+      queryBeneficiariesAndProjectsFiltersOfPRR {
+        dimensions
+        regions
+        municipalities
+      }
+      queryProjectsOfPRRSourceInfo {
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          source
+          referenceDate
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getProjectsTotalsPRR() {
+  return gql(/* GraphQL */ `
+    query getProjectsTotalsPRR {
+      queryProjectsTotalsOfPRR {
+        projects
+        approvedValue
+        executedValue
+        endDateMin
+        endDateMax
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getProjectsOfPRR() {
+  return gql(/* GraphQL */ `
+    query SearchPRRProjects(
+      $budgetMax: Float
+      $budgetMin: Float
+      $code: String
+      $description: String
+      $dimension: String
+      $dsNutsii: String
+      $endDateMax: String
+      $endDateMin: String
+      $limit: Int
+      $municipality: String
+      $page: Int
+      $sortBy: ProjectsSortByPRR
+      $sortOrder: SortOrder
+    ) {
+      searchProjectsOfPRR(
+        budgetMax: $budgetMax
+        budgetMin: $budgetMin
+        code: $code
+        description: $description
+        dimension: $dimension
+        dsNutsii: $dsNutsii
+        endDateMax: $endDateMax
+        endDateMin: $endDateMin
+        limit: $limit
+        municipality: $municipality
+        page: $page
+        sortBy: $sortBy
+        sortOrder: $sortOrder
+      ) {
+        limit
+        page
+        total
+        totalFiltered
+        filters {
+          budgetMax
+          budgetMin
+          endDateMax
+          endDateMin
+        }
+        data {
+          code
+          description
+          investment
+          dimension
+          dsNutsii
+          dsMunicipality
+          budget
+          total
+          executedValue
+          endDate
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export function getSearchBeneficiariesPT2030() {
   return gql(/* GraphQL */ `
     query getSearchProjects {
