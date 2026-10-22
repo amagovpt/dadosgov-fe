@@ -47,6 +47,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     pageSize,
     setPageSize,
     searchQuery,
+    setSearchQuery,
     handleSearch,
     sortParam,
     handleSort,
@@ -176,6 +177,9 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           if (index < 0) return;
           const scope = index === 0 ? "organization" : "content";
           if (scope === filters.scope) return;
+          // Replace any pending search so it cannot carry over to the next tab.
+          handleSearch("");
+          setSearchQuery("");
           setIsLoading(true);
           setDiscussions([]);
           setTotalItems(0);

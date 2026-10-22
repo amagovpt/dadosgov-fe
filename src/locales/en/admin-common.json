@@ -9,6 +9,7 @@
   },
   "results_one": "{{formattedCount}} result",
   "results_other": "{{formattedCount}} results",
+  "resultsTitle": "Results list",
   "search": {
     "label": "Search"
   },
@@ -31,7 +32,7 @@
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving...",
-    "downloadCsv": "Download CSV",
+    "downloadCsv": "Download table",
     "downloadingCsv": "Preparing CSV..."
   },
   "activity": {

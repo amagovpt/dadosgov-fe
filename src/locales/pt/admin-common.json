@@ -9,6 +9,7 @@
   },
   "results_one": "{{formattedCount}} resultado",
   "results_other": "{{formattedCount}} resultados",
+  "resultsTitle": "Lista de resultados",
   "search": {
     "label": "Pesquisar"
   },
@@ -31,7 +32,7 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "saving": "A guardar...",
-    "downloadCsv": "Descarregar CSV",
+    "downloadCsv": "Transferir tabela",
     "downloadingCsv": "A preparar CSV..."
   },
   "activity": {
