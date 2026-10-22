@@ -122,10 +122,10 @@ export default async function RootLayout({
           draft={analytics.cmpDraft}
           nonce={nonce}
         />
-        <GoogleConsentDefault nonce={nonce} />
+        <GoogleConsentDefault gaId={analytics.gaId} nonce={nonce} />
+        <GoogleAnalytics gaId={analytics.gaId} />
       </head>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
-        <GoogleAnalytics gaId={analytics.gaId} />
         <RuntimeConfigProvider value={runtimeConfig}>
           <AuthProvider initialSession={initialSession}>
             <ActiveProfileProvider>

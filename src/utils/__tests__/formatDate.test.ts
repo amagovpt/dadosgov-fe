@@ -7,7 +7,14 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { formatDateToTimeAgo, formatPortalDate, parseApiDate } from "../formatDate";
+import {
+  formatDateLong,
+  formatDateToDMY,
+  formatDateToTimeAgo,
+  formatMonthYear,
+  formatPortalDate,
+  parseApiDate,
+} from "../formatDate";
 
 describe("parseApiDate", () => {
   it("reads an offset-less date-time as UTC", () => {
@@ -52,6 +59,31 @@ describe("formatPortalDate", () => {
   it("returns the fallback for an invalid date", () => {
     expect(formatPortalDate("not a date", "dd MMM yyyy")).toBe("");
     expect(formatPortalDate("not a date", "dd MMM yyyy", "pt", "—")).toBe("—");
+  });
+});
+
+describe("formatDateToDMY / formatDateLong / formatMonthYear", () => {
+  // Squidex stores Lisbon midnight as 23:00Z; datastories broke hydration when the
+  // UTC server printed the day before the one the browser printed.
+  const LISBON_MIDNIGHT = "2026-07-06T23:00:00Z";
+
+  it("print the Lisbon calendar day whatever the runtime timezone", () => {
+    expect(formatDateToDMY(LISBON_MIDNIGHT)).toBe("07/07/2026");
+    expect(formatDateLong(LISBON_MIDNIGHT)).toBe("7 de julho de 2026");
+    expect(formatDateLong(LISBON_MIDNIGHT, "en")).toBe("7 July 2026");
+    expect(formatMonthYear("2026-06-30T23:00:00Z")).toBe("julho de 2026");
+  });
+
+  it("keep date-only values on their own day", () => {
+    expect(formatDateToDMY("2026-10-16")).toBe("16/10/2026");
+    expect(formatDateLong("2026-10-16")).toBe("16 de outubro de 2026");
+  });
+
+  it("keep their fallbacks", () => {
+    expect(formatDateToDMY(null)).toBe("—");
+    expect(formatDateToDMY("not a date")).toBe("—");
+    expect(formatDateLong("not a date")).toBe("not a date");
+    expect(formatMonthYear(undefined)).toBe("—");
   });
 });
 

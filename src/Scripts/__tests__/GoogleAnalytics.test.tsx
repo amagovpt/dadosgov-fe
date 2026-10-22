@@ -1,92 +1,70 @@
 /**
- * GA runs in Consent Mode "basic": gtag.js must not be requested until the
- * visitor consents to the GA service in Usercentrics. QA saw cookieless pings
- * after "Rejeitar" because gtag.js used to load unconditionally from <head>.
+ * Usercentrics manages GA: gtag.js is rendered inert (`type="text/plain"`) and
+ * the CMP activates it on consent to the "Google Analytics 4" service. Nothing
+ * may reach Google before that, and React must not preload the script.
  */
 
-import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { renderToString } from "react-dom/server";
+import { describe, expect, it } from "vitest";
 
-import GoogleAnalytics, { isAnalyticsConsented } from "../GoogleAnalytics";
-
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+import GoogleAnalytics, { GA_USERCENTRICS_SERVICE } from "../GoogleAnalytics";
+import GoogleConsentDefault from "../GoogleConsentDefault";
 
 const GA_ID = "G-TEST123";
-const gtagScripts = () => document.head.querySelectorAll('script[src*="googletagmanager.com"]');
-const commands = () => (window.dataLayer ?? []).map((entry) => Array.from(entry as ArrayLike<unknown>));
 
-const details = (gaGiven: boolean) => ({
-  services: {
-    HkocEodjb7: { name: "Google Analytics", consent: { given: gaGiven } },
-    BJ59EidsWQ: { name: "Google reCAPTCHA", consent: { given: true } },
-  },
-});
-
-const fireConsent = (detail: ReturnType<typeof details>) =>
-  act(() => {
-    window.dispatchEvent(new CustomEvent("UC_CONSENT", { detail }));
-  });
+const parse = (html: string) => {
+  const doc = document.implementation.createHTMLDocument();
+  doc.body.innerHTML = html;
+  return doc;
+};
 
 describe("GoogleAnalytics", () => {
-  let container: HTMLDivElement;
-  let root: Root;
+  it("renders gtag.js blocked, for Usercentrics to activate", () => {
+    const doc = parse(renderToString(<GoogleAnalytics gaId={GA_ID} />));
+    const script = doc.querySelector("script");
 
-  beforeEach(async () => {
-    container = document.createElement("div");
-    document.body.appendChild(container);
-    root = createRoot(container);
-    await act(async () => root.render(<GoogleAnalytics gaId={GA_ID} />));
+    expect(script?.getAttribute("type")).toBe("text/plain");
+    expect(script?.getAttribute("data-usercentrics")).toBe(GA_USERCENTRICS_SERVICE);
+    expect(script?.getAttribute("src")).toBe(`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`);
+    expect(doc.querySelector('link[rel="preload"]')).toBeNull();
   });
 
-  afterEach(() => {
-    act(() => root.unmount());
-    container.remove();
-    gtagScripts().forEach((s) => s.remove());
-    delete window.dataLayer;
+  it("renders nothing without a measurement id", () => {
+    expect(renderToString(<GoogleAnalytics gaId="" />)).toBe("");
+  });
+});
+
+describe("GoogleConsentDefault", () => {
+  const run = (html: string) => {
+    window.dataLayer = [];
     delete window.gtag;
-    delete window.__ucCmp;
+    new Function(parse(html).querySelector("script")!.textContent!)();
+    return window.dataLayer.map((entry) => Array.from(entry as ArrayLike<unknown>));
+  };
+
+  it("denies everything by default and waits for the CMP's update", () => {
+    const [consent] = run(renderToString(<GoogleConsentDefault gaId={GA_ID} />));
+    expect(consent).toEqual([
+      "consent",
+      "default",
+      expect.objectContaining({ analytics_storage: "denied", wait_for_update: 500 }),
+    ]);
   });
 
-  it("requests nothing from Google before consent", () => {
-    expect(gtagScripts()).toHaveLength(0);
-    expect(window.dataLayer ?? []).toEqual([]);
+  it("queues the GA config behind the consent default", () => {
+    const commands = run(renderToString(<GoogleConsentDefault gaId={GA_ID} />));
+    expect(commands.map((c) => c[0])).toEqual(["consent", "js", "config"]);
+    expect(commands[2]).toEqual(["config", GA_ID]);
   });
 
-  it("requests nothing when the visitor refuses GA", () => {
-    fireConsent(details(false));
-    expect(gtagScripts()).toHaveLength(0);
-    expect(commands()).toEqual([]);
-  });
-
-  it("loads gtag.js once, granting analytics_storage first, when GA is consented", () => {
-    fireConsent(details(true));
-    fireConsent(details(true));
-
-    expect(gtagScripts()).toHaveLength(1);
-    expect(commands()[0]).toEqual(["consent", "update", { analytics_storage: "granted" }]);
-    expect(commands().filter((c) => c[0] === "config")).toEqual([["config", GA_ID]]);
-  });
-
-  it("denies analytics_storage again when consent is withdrawn", () => {
-    fireConsent(details(true));
-    fireConsent(details(false));
-
-    expect(commands().at(-1)).toEqual(["consent", "update", { analytics_storage: "denied" }]);
+  it("queues no config without a measurement id", () => {
+    expect(run(renderToString(<GoogleConsentDefault />)).map((c) => c[0])).toEqual(["consent"]);
   });
 });
 
-describe("isAnalyticsConsented", () => {
-  it("matches both the GA and GA4 Usercentrics templates by name", () => {
-    const ga4 = { services: { x: { name: "Google Analytics 4", consent: { given: true } } } };
-    expect(isAnalyticsConsented(ga4)).toBe(true);
-    expect(isAnalyticsConsented(details(true))).toBe(true);
-  });
-
-  it("is false without consent details or without a GA service", () => {
-    expect(isAnalyticsConsented(undefined)).toBe(false);
-    expect(
-      isAnalyticsConsented({ services: { y: { name: "Google reCAPTCHA", consent: { given: true } } } })
-    ).toBe(false);
-  });
-});
+declare global {
+  interface Window {
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
+  }
+}

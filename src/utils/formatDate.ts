@@ -70,12 +70,7 @@ export function formatDateToTimeAgo(
 
 export function formatDateToDMY(dateStr: string | null | undefined, fallback: string = "—") {
   if (!dateStr) return fallback;
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) return fallback;
-  const d = String(date.getDate()).padStart(2, "0");
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const y = date.getFullYear();
-  return `${d}/${m}/${y}`;
+  return formatPortalDate(dateStr, "dd/MM/yyyy", "pt", fallback);
 }
 
 export function isWithinDateLimit(dateStr: string | null | undefined): boolean {
@@ -101,12 +96,15 @@ export function formatDateLong(
   // pick a date out of a chain of optional fields, and an empty string is a better
   // answer than a type assertion at every call site.
   if (!dateStr) return "";
-  const date = new Date(dateStr);
+  const date = parseApiDate(dateStr);
   if (Number.isNaN(date.getTime())) return dateStr;
+  // Pinned to Lisbon so the UTC server and the browser print the same day:
+  // Squidex stores Lisbon midnight as `…T23:00:00Z`, and a mismatch is a hydration error.
   return date.toLocaleDateString(INTL_LOCALES[locale], {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: PORTAL_TIME_ZONE,
   });
 }
 
@@ -117,7 +115,11 @@ export function formatMonthYear(
   fallback = "—"
 ) {
   if (!dateStr) return fallback;
-  const date = new Date(dateStr);
+  const date = parseApiDate(dateStr);
   if (Number.isNaN(date.getTime())) return fallback;
-  return date.toLocaleDateString(INTL_LOCALES[locale], { month: "long", year: "numeric" });
+  return date.toLocaleDateString(INTL_LOCALES[locale], {
+    month: "long",
+    year: "numeric",
+    timeZone: PORTAL_TIME_ZONE,
+  });
 }

@@ -1,14 +1,15 @@
 import { test, expect, type Page } from "playwright/test";
 
 /**
- * Usercentrics manages every cookie: its autoblocker (the first script in <head>
- * after Next's own chunks) holds reCAPTCHA and Power BI back until the visitor
- * consents. GA does not rely on it: gtag.js is only requested once the GA
- * service is consented (Consent Mode "basic").
+ * Usercentrics manages every third party. Its autoblocker (the first <head> script
+ * after Next's own chunks, which React always hoists first) holds reCAPTCHA and
+ * Power BI back until the visitor consents. gtag.js is rendered
+ * `type="text/plain" data-usercentrics="Google Analytics 4"` and the CMP
+ * activates it on consent; the CMP's Google Consent Mode sends the update.
  *
  * What gets blocked is decided by the Usercentrics panel (Auto Blocking
- * ruleset + the services its scanner found), so run this against a deployed
- * environment:
+ * ruleset, the services and their names, Google Consent Mode), so run this
+ * against a deployed environment:
  *
  *   CONSENT_BASE_URL=https://preprod.dados.gov.pt PLAYWRIGHT_SKIP_SEED=1 \
  *   PLAYWRIGHT_SKIP_WARMUP=1 npx playwright test tests/e2e/frontend-public/22-consent.spec.ts
@@ -81,7 +82,7 @@ test.describe("Consent (Usercentrics autoblocker)", () => {
   }) => {
     const seen = watch(page);
     const datastory = await firstDatastoryPath(page);
-    for (const path of ["/pt", datastory]) {
+    for (const path of ["/pt", "/pt/datastories", datastory]) {
       await page.goto(path);
       await expectBannerKeptAndScriptsOnce(page);
     }
@@ -109,7 +110,8 @@ test.describe("Consent (Usercentrics autoblocker)", () => {
     expect(seen.consoleErrors).toEqual([]);
   });
 
-  // Needs the "Google Analytics 4" service in the Usercentrics panel.
+  // Needs the "Google Analytics 4" service (exact name) and Google Consent Mode
+  // enabled in the Usercentrics panel.
   test("CS-03: after 'Aceitar tudo', GA sends a page_view with analytics granted", async ({
     page,
   }) => {

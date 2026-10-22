@@ -1,9 +1,14 @@
 interface GoogleConsentDefaultProps {
+    gaId?: string;
     nonce?: string;
 }
 
+export default function GoogleConsentDefault({ gaId, nonce }: GoogleConsentDefaultProps) {
+    const config = gaId
+        ? `window.gtag('js', new Date());
+                window.gtag('config', ${JSON.stringify(gaId)});`
+        : "";
 
-export default function GoogleConsentDefault({ nonce }: GoogleConsentDefaultProps) {
     return (
         <script
             id="google-consent-default"
@@ -19,8 +24,10 @@ export default function GoogleConsentDefault({ nonce }: GoogleConsentDefaultProp
                   ad_storage: 'denied',
                   analytics_storage: 'denied',
                   ad_user_data: 'denied',
-                  ad_personalization: 'denied'
+                  ad_personalization: 'denied',
+                  wait_for_update: 500
                 });
+                ${config}
               `,
             }}
         />
