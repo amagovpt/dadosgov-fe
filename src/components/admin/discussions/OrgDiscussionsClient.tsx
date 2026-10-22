@@ -9,7 +9,7 @@ import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
-import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
+import { fetchDiscussions, fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
 import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
@@ -53,31 +53,47 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     getSortOrder,
     filters,
     updateFilter,
-  } = useAdminListController<DiscussionSortField, { closedFilter: string }>({
-    initialFilters: { closedFilter: "" },
+  } = useAdminListController<DiscussionSortField, { closedFilter: string; scope: string }>({
+    initialFilters: { closedFilter: "", scope: "organization" },
     sortFieldMap: discussionSortFieldMap,
   });
+  const fetchScopedDiscussions =
+    filters.scope === "organization" ? fetchDiscussions : fetchOrgDiscussions;
 
   useEffect(() => {
+    let cancelled = false;
     async function loadDiscussions() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgDiscussions(orgId, currentPage, pageSize, {
+        const data = await fetchScopedDiscussions(orgId, currentPage, pageSize, {
           q: searchQuery.trim() || undefined,
           closed: filters.closedFilter === "" ? undefined : filters.closedFilter === "closed",
           sort: sortParam,
         });
-        setDiscussions(data.data ?? []);
-        setTotalItems(data.total ?? 0);
+        if (!cancelled) {
+          setDiscussions(data.data ?? []);
+          setTotalItems(data.total ?? 0);
+        }
       } catch (error) {
         console.error("Error loading discussions:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
 
     void loadDiscussions();
-  }, [orgId, currentPage, pageSize, searchQuery, filters.closedFilter, sortParam]);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    fetchScopedDiscussions,
+    orgId,
+    currentPage,
+    pageSize,
+    searchQuery,
+    filters.closedFilter,
+    sortParam,
+  ]);
 
   const openDiscussion = useCallback(
     (discussion: Discussion) => {
@@ -87,13 +103,15 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           onUpdated={(updated) =>
             setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
           }
-          onDeleted={() => setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))}
+          onDeleted={() =>
+            setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))
+          }
         />,
         {
           title: t("admin-discussions:popup.title"),
           closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
           dimensions: "l",
-        },
+        }
       );
     },
     [show, t]
@@ -116,14 +134,14 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           closed: t("admin-discussions:status.closed"),
         },
       }),
-    [openDiscussion, t],
+    [openDiscussion, t]
   );
 
   const pageTitle = pageContent.orgHero?.title ?? "";
 
   // One request with page_size = the total the table already received.
   const handleDownloadCsv = useCallback(async () => {
-    const response = await fetchOrgDiscussions(orgId, 1, totalItems, {
+    const response = await fetchScopedDiscussions(orgId, 1, totalItems, {
       q: searchQuery.trim() || undefined,
       closed: filters.closedFilter === "" ? undefined : filters.closedFilter === "closed",
       sort: sortParam,
@@ -134,14 +152,36 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
       throw new Error(t("admin-common:csvExport.fetchError"));
     }
     downloadListCsv(pageTitle || t("admin-discussions:title"), allDiscussions, columns);
-  }, [downloadListCsv, columns, filters.closedFilter, orgId, pageTitle, searchQuery, sortParam, t, totalItems]);
+  }, [
+    downloadListCsv,
+    columns,
+    fetchScopedDiscussions,
+    filters.closedFilter,
+    orgId,
+    pageTitle,
+    searchQuery,
+    sortParam,
+    t,
+    totalItems,
+  ]);
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-discussions:title") },
-      ]}
+      breadcrumbItems={[{ label: t("admin-discussions:title") }]}
       title={pageTitle}
+      tabs={{
+        labels: [t("admin-discussions:tabs.organization"), t("admin-discussions:tabs.content")],
+        activeTab: filters.scope === "organization" ? 0 : 1,
+        onTabActivation: (index) => {
+          if (index < 0) return;
+          const scope = index === 0 ? "organization" : "content";
+          if (scope === filters.scope) return;
+          setIsLoading(true);
+          setDiscussions([]);
+          setTotalItems(0);
+          updateFilter("scope", scope);
+        },
+      }}
       isLoading={isLoading}
       count={totalItems}
       currentPage={currentPage}
@@ -149,6 +189,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
+        defaultValue: searchQuery,
         label: t("admin-discussions:filters.search.label"),
         placeholder: t("admin-discussions:filters.search.placeholder"),
         ariaLabel: t("admin-discussions:filters.search.label"),
@@ -171,7 +212,11 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
         <AdminEmptyState
           icon="agora-line-chat"
           title={pageContent.orgNoResults?.title ?? ""}
-          description={pageContent.orgNoResults?.description ?? ""}
+          description={
+            filters.scope === "organization"
+              ? t("admin-discussions:empty.descriptionOrganization")
+              : (pageContent.orgNoResults?.description ?? "")
+          }
         />
       }
       onDownloadCsv={handleDownloadCsv}
