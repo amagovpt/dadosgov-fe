@@ -26,6 +26,10 @@ const translate = (key: string): string => {
   return typeof raw === "string" ? raw : key;
 };
 
+// SAML/reCAPTCHA come from the container environment via RuntimeConfigProvider.
+const runtimeConfig = vi.hoisted(() => ({ samlEnabled: false, recaptchaSiteKey: "" }));
+vi.mock("@/providers/RuntimeConfigProvider", () => ({ useRuntimeConfig: () => runtimeConfig }));
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: translate }),
   // LEDG-2564 also reached for <Trans>. The real one interpolates components
@@ -116,7 +120,7 @@ describe("the invite shown in place of the page", () => {
     }
     useAuth.mockReturnValue({ migrationInvite: true, isLoading: false, refresh: vi.fn() });
     dismissMigrationInvite.mockResolvedValue({ dismissed: true });
-    process.env.NEXT_PUBLIC_SAML_ENABLED = "true";
+    runtimeConfig.samlEnabled = true;
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);

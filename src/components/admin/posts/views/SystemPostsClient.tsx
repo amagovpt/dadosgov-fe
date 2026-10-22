@@ -12,6 +12,7 @@ import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelper
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchAdminPosts } from "@/service/api/posts";
 import type { Post } from "@/service/types/posts";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import {
@@ -28,6 +29,7 @@ interface SystemPostsClientProps {
 
 export default function SystemPostsClient({ pageContent }: SystemPostsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-posts"]);
+  const downloadListCsv = useCsvExport();
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -126,12 +128,47 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
     [t]
   );
 
+  const pageTitle = pageContent.systemHero?.title ?? "";
+
+  // With the status filter or local sort the list is already fully loaded;
+  // otherwise one request with page_size = the total the table already received.
+  const handleDownloadCsv = useCallback(async () => {
+    let rows = sortedPosts;
+    if (!usesLocalFallback) {
+      const response = await fetchAdminPosts(1, totalItems, {
+        q: searchQuery.trim() || undefined,
+        kind: filters.typeFilter || undefined,
+        sort: sortParam,
+      });
+      const allPosts = response.data ?? [];
+      // The fetchers return an empty page on error.
+      if (totalItems > 0 && allPosts.length === 0) {
+        throw new Error(t("admin-common:csvExport.fetchError"));
+      }
+      rows = sortPosts(allPosts, sortField, sortOrder);
+    }
+    downloadListCsv(pageTitle || t("admin-posts:title"), rows, columns);
+  }, [
+    downloadListCsv,
+    columns,
+    filters.typeFilter,
+    pageTitle,
+    searchQuery,
+    sortField,
+    sortOrder,
+    sortParam,
+    sortedPosts,
+    t,
+    totalItems,
+    usesLocalFallback,
+  ]);
+
   return (
     <AdminListPage
       breadcrumbItems={[
         { label: t("admin-posts:title"), url: "/admin/system/posts" },
       ]}
-      title={pageContent.systemHero?.title ?? ""}
+      title={pageTitle}
       isLoading={isLoading}
       count={usesLocalFallback ? filteredPosts.length : totalItems}
       hasItems={paginatedPosts.length > 0}
@@ -196,6 +233,7 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
           noResults={pageContent.systemNoResults}
         />
       }
+      onDownloadCsv={handleDownloadCsv}
     >
       <AdminListTable
         items={paginatedPosts}

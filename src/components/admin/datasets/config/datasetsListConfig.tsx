@@ -5,10 +5,15 @@ import TableActionsCell from "@/components/admin/TableActionsCell";
 import { can } from "@/utils/permissions";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
-import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
+import {
+  getResourceStatusKey,
+  getResourceStatusSortValue,
+} from "@/utils/admin-lists/listHelpers";
+import type { ResourceStatusKey } from "@/utils/admin-lists/listHelpers";
 import type { Dataset } from "@/service/types/dataset";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 export type DatasetSortField =
   | "title"
@@ -59,7 +64,11 @@ export function sortDatasets(
         comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         break;
       case "last_modified":
-        comparison = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
+        // Display and sort read the same field: the column already sorted by
+        // `last_update` on the server while showing `last_modified` (LEDG-2599).
+        comparison =
+          new Date(getDatasetLastUpdate(a) as string).getTime() -
+          new Date(getDatasetLastUpdate(b) as string).getTime();
         break;
       case "resources":
         comparison = (a.resources?.length || 0) - (b.resources?.length || 0);
@@ -76,7 +85,8 @@ export function sortDatasets(
   });
 }
 
-export function formatDatasetDate(dateStr: string) {
+export function formatDatasetDate(dateStr: string | undefined) {
+  if (!dateStr) return "";
   try {
     const date = new Date(dateStr);
     return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
@@ -99,6 +109,8 @@ interface DatasetColumnsOptions<TVariant extends DatasetSortVariant = "system"> 
   showQualityScore?: boolean;
   sortVariant?: TVariant;
   labels: DatasetColumnLabels;
+  /** Status names for the CSV export. */
+  statusLabels?: Record<ResourceStatusKey, string>;
 }
 
 export function createDatasetColumns<TVariant extends DatasetSortVariant = "system">({
@@ -109,6 +121,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
   showQualityScore = false,
   sortVariant = "system" as TVariant,
   labels,
+  statusLabels,
 }: DatasetColumnsOptions<TVariant>): AdminListColumn<Dataset, DatasetColumnField<TVariant>>[] {
   const createdSortField = (
     sortVariant === "org" ? "created" : "created_at"
@@ -127,6 +140,8 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       renderCell: (dataset) => (
         <TextLink href={`/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
       ),
+      exportValue: (dataset) => dataset.title,
+      exportUrl: (dataset) => `/datasets/${dataset.slug}`,
     },
     {
       id: "status",
@@ -134,6 +149,10 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortField: "status" as DatasetColumnField<TVariant>,
       sortType: "string",
       renderCell: (dataset) => <ResourceStatusBadge item={dataset} />,
+      exportValue: (dataset) => {
+        const statusKey = getResourceStatusKey(dataset);
+        return statusLabels?.[statusKey] ?? statusKey;
+      },
     },
     {
       id: "created_at",
@@ -141,6 +160,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortField: createdSortField,
       sortType: "date",
       renderCell: (dataset) => formatDatasetDate(dataset.created_at),
+      exportValue: (dataset) => formatDatasetDate(dataset.created_at),
     },
     {
       id: "last_modified",
@@ -149,7 +169,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortType: "date",
       renderCell: (dataset) => (
         <div>
-          <div>{formatDatasetDate(dataset.last_modified)}</div>
+          <div>{formatDatasetDate(getDatasetLastUpdate(dataset))}</div>
           {showOwner && dataset.owner && (
             <TextLink href={`/users/${dataset.owner.slug}`} className="text-xs">
               {dataset.owner.first_name} {dataset.owner.last_name}
@@ -162,6 +182,9 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
           )}
         </div>
       ),
+      // Same date the cell above shows, or the downloaded CSV contradicts the
+      // table the user exported it from.
+      exportValue: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
     },
   ];
 
@@ -173,6 +196,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortField: "resources" as DatasetColumnField<TVariant>,
       sortType: "date",
       renderCell: (dataset) => dataset.resources?.length || 0,
+      exportValue: (dataset) => dataset.resources?.length || 0,
     });
   }
 
@@ -202,6 +226,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
           </>
         );
       },
+      exportValue: (dataset) => `${calculateQualityScore(QUALITY_CRITERIA, dataset.quality)}%`,
     });
   }
 

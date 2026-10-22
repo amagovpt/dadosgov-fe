@@ -22,6 +22,7 @@ import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA, getQualityDetails, getQualityMissing } from "@/utils/datasetQuality";
 import { formatDateLong } from "@/utils/formatDate";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 import { formatMetricValue } from "@/utils/formatNumber";
 import TextLink from "@/components/Primitives/TextLink";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
@@ -205,7 +206,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
                 </div>
                 <div className="text-sm mb-16 text-neutral-900">
                   <span className="text-m-semibold">{tds("detail.lastUpdate")}</span>{" "}
-                  {formatDateLong(dataset.last_modified, i18n.language as "pt" | "en")}
+                  {formatDateLong(getDatasetLastUpdate(dataset), i18n.language as "pt" | "en")}
                 </div>
                 {dataset.license && (
                   <div className="text-sm">

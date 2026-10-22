@@ -2,19 +2,20 @@
 
 import { Suspense } from "react";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
-import { RECAPTCHA_KEY } from "./constants";
 import { LoginContent } from "./LoginContent";
+import { useRuntimeConfig } from "@/providers/RuntimeConfigProvider";
 
 export default function LoginClient() {
+  const { recaptchaSiteKey } = useRuntimeConfig();
   const content = (
     <Suspense fallback={null}>
       <LoginContent />
     </Suspense>
   );
 
-  if (RECAPTCHA_KEY) {
+  if (recaptchaSiteKey) {
     return (
-      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY} language="pt">
+      <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey} language="pt">
         {content}
       </GoogleReCaptchaProvider>
     );
