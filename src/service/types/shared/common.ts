@@ -27,23 +27,23 @@ export interface Sitemap {
 }
 
 export interface FileDocument {
-  id: string
-  url: string
-  fileName: string
-  slug: string
-  fileSize: number
-  fileType: string
-  metadataText: string
+  id: string;
+  url: string;
+  fileName: string;
+  slug: string;
+  fileSize: number;
+  fileType: string;
+  metadataText: string;
 }
 
-export interface SearchBar{
+export interface SearchBar {
   label: string;
   placeholder: string;
   searchActionAltText: string;
   voiceActionAltText: string;
 }
 
- export interface Metadata {
+export interface Metadata {
   slug: string;
   theme: string;
   organizationName: string;
@@ -54,12 +54,31 @@ export interface SearchBar{
   tags: {
     tag: string;
   };
-};
+}
 
-export interface FrontOfficePage{
+export interface FrontOfficePage {
   id: string;
   metadata: Metadata;
   hero: Hero;
   search: SearchBar;
   noResults: FoListPageNoResults;
 }
+
+export type Card = {
+  id: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  bignumber: { number: string; description: string };
+  anchor: Anchor;
+};
+
+export type Section = {
+  id: string;
+  iconName: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  cards: Card[];
+};
