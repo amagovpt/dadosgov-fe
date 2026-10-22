@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import type { ChangeEvent, ComponentProps, ReactNode } from "react";
-import { InputSearch, Table, useToastContext } from "@ama-pt/agora-design-system";
+import {
+  InputSearch,
+  Tab,
+  TabBody,
+  TabHeader,
+  Table,
+  Tabs,
+  useToastContext,
+} from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { AdminLayoutProps } from "@/components/Layout/AdminLayout";
@@ -20,6 +28,7 @@ type SearchConfig = {
   placeholder: string;
   ariaLabel?: string;
   hint?: string;
+  defaultValue?: string;
   onChange?: (value: string) => void;
 };
 
@@ -30,6 +39,11 @@ interface AdminListPageProps {
   listTitle?: string;
   breadcrumbItems: AdminLayoutProps["breadcrumbItems"];
   headerAction?: ReactNode;
+  tabs?: {
+    labels: string[];
+    activeTab: number;
+    onTabActivation: (index: number) => void;
+  };
   isLoading: boolean;
   count: number;
   hasItems?: boolean;
@@ -59,6 +73,7 @@ export default function AdminListPage({
   listTitle,
   breadcrumbItems,
   headerAction,
+  tabs,
   isLoading,
   count,
   hasItems,
@@ -122,14 +137,8 @@ export default function AdminListPage({
     }
   };
 
-  return (
-    <AdminLayout
-      title={title}
-      kicker={kicker}
-      description={description}
-      breadcrumbItems={breadcrumbItems}
-      headerAction={headerAction}
-    >
+  const listContent = (
+    <>
       {listTitle && <h2 className="mb-32 text-xl-bold text-brand-blue-secondary">{listTitle}</h2>}
       {shouldRenderToolbar && (
         <div className="flex flex-col gap-32">
@@ -140,6 +149,7 @@ export default function AdminListPage({
                 <div className="w-full max-w-[592px]">
                   <InputSearch
                     required={false}
+                    defaultValue={visibleSearch.defaultValue}
                     label={visibleSearch.label}
                     placeholder={visibleSearch.placeholder}
                     aria-label={
@@ -210,6 +220,36 @@ export default function AdminListPage({
           emptyState
         )}
       </div>
+    </>
+  );
+
+  return (
+    <AdminLayout
+      title={title}
+      kicker={kicker}
+      description={description}
+      breadcrumbItems={breadcrumbItems}
+      headerAction={headerAction}
+    >
+      {tabs ? (
+        <Tabs
+          className="[&_.tab-panel-content]:pt-32 [&_.tab-panel-content]:pb-0"
+          onTabActivation={tabs.onTabActivation}
+        >
+          {tabs.labels.map((label, index) => (
+            <Tab key={label} active={tabs.activeTab === index}>
+              <TabHeader>{label}</TabHeader>
+              <TabBody>
+                {tabs.activeTab === index && (
+                  <div className="mt-32 flex flex-col gap-32">{listContent}</div>
+                )}
+              </TabBody>
+            </Tab>
+          ))}
+        </Tabs>
+      ) : (
+        listContent
+      )}
     </AdminLayout>
   );
 }
