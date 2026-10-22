@@ -1050,3 +1050,222 @@ export function loadMorePT2030ProjectsByBeneficiary() {
 }
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPrrProjectMeta(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getProjectMeta {
+      findFichaDeProjetoPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              subtitle
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function getPrrProjectData(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+      query getProject {
+          findFichaDeProjetoPrrSingleton {
+            data {
+                hero {
+                    ${locale} {
+                        title
+                        subtitle
+                        sitemap {
+                            title
+                            links {
+                                anchor {
+                                    children
+                                    href
+                                    appearance
+                                    variant
+                                    iconName
+                                }
+                            }
+                        }
+                    }
+                }
+                projectSheet {
+                    ${locale} {
+                        id
+                        iconName
+                        title
+                    }
+                }
+                beneficiaries {
+                    ${locale} {
+                        id
+                        title
+                        cards {
+                            cardArticle {
+                                __typename
+                                ... on CardComponent {
+                                    title
+                                    description
+                                }
+                            }
+                        }
+                    }
+                }
+                applications {
+                    ${locale} {
+                        id
+                        title
+                        subtitle
+                        description
+                        cards {
+                            cardArticle {
+                                __typename
+                                ... on CardComponent {
+                                    title
+                                    description
+                                }
+                            }
+                        }
+                    }
+                }
+                publicContracting {
+                    ${locale} {
+                        id
+                        title
+                        description
+                    }
+                }
+                geographicDistribution {
+                    ${locale} {
+                        id
+                        title
+                        cards {
+                            cardArticle {
+                                __typename
+                                ... on CardComponent {
+                                    title
+                                    description
+                                    imageAlt
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+          }
+        }
+    `);
+}
+
+export function getPrrProjectSheet() {
+  return gql(/* GraphQL */ `
+    query getPrrProjectSheet($recipientId: String!) {
+      queryProjectSheetOfPRR(recipientId: $recipientId) {
+        data {
+          code
+          projectForm {
+            component
+            dimension
+            executedValue
+            grantFunding
+            investment
+            loanFunding
+            name
+            plannedConclusionDate
+            startDate
+            summary
+            totalProjectValue
+          }
+          tabs {
+            candidature {
+              baseScore
+              finalScore
+              tabName
+              link
+            }
+            contracts {
+              contractsCount
+              tabName
+              totalContractsValue
+              contractDetails {
+                contractsCount
+                contractsValue
+                principalDescription
+                secondaryDescription
+                detailContract {
+                  link
+                  name
+                  value
+                }
+              }
+            }
+            contestAndContracts {
+              tabName
+              criteria
+              contractDetails {
+                contractsCount
+                contractsValue
+                principalDescription
+                secondaryDescription
+                detailContract {
+                  link
+                  name
+                  value
+                }
+              }
+            }
+            geoDistributionFinancing {
+              tabName
+              source
+              sourceLink
+              referenceDate
+              valuePercentage
+              distribution {
+                type
+                divisions {
+                  description
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function loadMorePrrProjectSheetBeneficiaryFinancing(
+  beneficiaryType: "BENEFICIARY" | "INTERMEDIARY_BENEFICIARY" | "PARTNER" | "SUPPLIER"
+) {
+  return gql(/* GraphQL */ `
+    query loadMorePrrProjectSheetBeneficiaryFinancing(
+      $page: Int
+      $limit: Int
+      $projectCode: String
+    ) {
+      queryProjectSheetBeneficiaryFinancingOfPRR(
+        page: $page
+        limit: $limit
+        projectCode: $projectCode
+        beneficiaryType: ${beneficiaryType}
+      ) {
+        totalFiltered
+        total
+        page
+        limit
+        beneficiaryType
+        data {
+          description
+          id
+          name
+          paid
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */

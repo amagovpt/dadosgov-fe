@@ -524,5 +524,17 @@
   "totalAmountPaid": "Valor total pago",
   "seeMore": "Ver mais {{about}}",
   "technicalSheet": "Ficha técnica",
-  "consult": "Consultar"
+  "consult": "Consultar",
+  "prr": {
+    "sheet": {
+      "nonRepayableFunding": "Financiamento não reembolsável",
+      "loanFunding": "Financiamento por empréstimos",
+      "dimension": "Dimensão",
+      "component": "Componente",
+      "investment": "Investimento",
+      "totalProjectValue": "Valor total do projeto",
+      "startDate": "Data de início",
+      "conclusionDate": "Data de conclusão"
+    }
+  }
 }
