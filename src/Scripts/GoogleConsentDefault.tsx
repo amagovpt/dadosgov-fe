@@ -9,6 +9,8 @@ export default function GoogleConsentDefault({ nonce }: GoogleConsentDefaultProp
             id="google-consent-default"
             data-uc-allowed="true"
             nonce={nonce}
+            // The autoblocker stamps attributes (`type`) on head scripts before hydration.
+            suppressHydrationWarning
             dangerouslySetInnerHTML={{
                 __html: `
                 window.dataLayer = window.dataLayer || [];
@@ -17,8 +19,7 @@ export default function GoogleConsentDefault({ nonce }: GoogleConsentDefaultProp
                   ad_storage: 'denied',
                   analytics_storage: 'denied',
                   ad_user_data: 'denied',
-                  ad_personalization: 'denied',
-                  wait_for_update: 500
+                  ad_personalization: 'denied'
                 });
               `,
             }}

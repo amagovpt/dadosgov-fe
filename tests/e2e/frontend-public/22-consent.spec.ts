@@ -1,8 +1,10 @@
 import { test, expect, type Page } from "playwright/test";
 
 /**
- * Usercentrics manages every cookie: its autoblocker (first script in <head>)
- * holds GA, reCAPTCHA and Power BI back until the visitor consents.
+ * Usercentrics manages every cookie: its autoblocker (the first script in <head>
+ * after Next's own chunks) holds reCAPTCHA and Power BI back until the visitor
+ * consents. GA does not rely on it: gtag.js is only requested once the GA
+ * service is consented (Consent Mode "basic").
  *
  * What gets blocked is decided by the Usercentrics panel (Auto Blocking
  * ruleset + the services its scanner found), so run this against a deployed
@@ -20,7 +22,7 @@ test.use({
 });
 
 const THIRD_PARTY =
-  /google-analytics\.com|googletagmanager\.com|app\.powerbi\.com|www\.google\.com\/recaptcha|gstatic\.com\/recaptcha/;
+  /google-analytics\.com|googletagmanager\.com|app\.powerbi\.com|www\.google\.com\/recaptcha|gstatic\.com\/recaptcha|cdnjs\.cloudflare\.com/;
 
 const PAGES_WITHOUT_DATASTORY = [
   "/pt",
@@ -58,14 +60,31 @@ async function gaCookies(page: Page) {
   return (await page.context().cookies()).filter((c) => c.name.startsWith("_ga"));
 }
 
+/**
+ * A hydration error makes React re-render the whole document, which drops the
+ * CMP's banner from <body> and re-inserts the head scripts next to the ones
+ * that already ran. Check both after the page settles.
+ */
+async function expectBannerKeptAndScriptsOnce(page: Page) {
+  await expect(bannerButton(page, "uc-deny-all-button", /rejeitar/i)).toBeVisible({
+    timeout: 20_000,
+  });
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator("#usercentrics-cmp-ui")).toHaveCount(1);
+  await expect(page.locator('script[src*="usercentrics.eu/ui/loader.js"]')).toHaveCount(1);
+  await expect(page.locator('script[src*="usercentrics.eu/modules/autoblocker.js"]')).toHaveCount(1);
+}
+
 test.describe("Consent (Usercentrics autoblocker)", () => {
-  test("CS-01: before any choice, nothing non-essential loads", async ({ page }) => {
+  test("CS-01: before any choice, the banner stays up and nothing non-essential loads", async ({
+    page,
+  }) => {
     const seen = watch(page);
-    await page.goto("/pt");
-    await expect(bannerButton(page, "uc-deny-all-button", /rejeitar/i)).toBeVisible({
-      timeout: 20_000,
-    });
-    await page.waitForLoadState("networkidle");
+    const datastory = await firstDatastoryPath(page);
+    for (const path of ["/pt", datastory]) {
+      await page.goto(path);
+      await expectBannerKeptAndScriptsOnce(page);
+    }
 
     expect(seen.thirdParty).toEqual([]);
     expect(await gaCookies(page)).toEqual([]);

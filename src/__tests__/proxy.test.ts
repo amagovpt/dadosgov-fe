@@ -93,6 +93,14 @@ describe("proxy CSP", () => {
     );
   });
 
+  it("no longer allows cdnjs: Swagger UI is served same-origin", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const csp = await directives();
+    for (const name of ["script-src", "style-src"]) {
+      expect(csp[name]).not.toContain("https://cdnjs.cloudflare.com");
+    }
+  });
+
   it("allows the local backend in development", async () => {
     vi.stubEnv("NODE_ENV", "development");
     const csp = await directives();

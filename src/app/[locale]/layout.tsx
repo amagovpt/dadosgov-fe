@@ -123,9 +123,9 @@ export default async function RootLayout({
           nonce={nonce}
         />
         <GoogleConsentDefault nonce={nonce} />
-        <GoogleAnalytics gaId={analytics.gaId} nonce={nonce} />
       </head>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
+        <GoogleAnalytics gaId={analytics.gaId} />
         <RuntimeConfigProvider value={runtimeConfig}>
           <AuthProvider initialSession={initialSession}>
             <ActiveProfileProvider>

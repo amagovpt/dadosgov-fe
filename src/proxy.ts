@@ -126,8 +126,8 @@ function buildCsp(nonce: string): string {
     "https://*.usercentrics.eu https://*.google-analytics.com https://www.googletagmanager.com";
   return [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com ${analyticsScriptSrc}${scriptSrcExtras}`,
-    `style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com`,
+    `script-src 'self' 'nonce-${nonce}' https://www.google.com https://www.gstatic.com ${analyticsScriptSrc}${scriptSrcExtras}`,
+    `style-src 'self' 'unsafe-inline' https://www.gstatic.com`,
     `img-src 'self' data: blob:${devImgSrc}${cmsImgSrc} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com https://www.gstatic.com ${analyticsImgSrc}`,
     `frame-src 'self' https://app.powerbi.com https://www.google.com`,
     `font-src 'self' data:`,
