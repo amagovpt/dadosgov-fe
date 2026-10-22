@@ -253,7 +253,7 @@ export default async function DataStoryProjectsPRR({
           </InfoBlock.Root>
         </Section>
       </SearchBenProjStoreProvider>
-      {relatedDatastories && relatedDatastories.active !== false && (
+      {relatedDatastories && relatedDatastories.active  !== false && relatedDatastories.datastories && (
         <RelatedDatastories {...relatedDatastories} />
       )}
       {relatedDatasets && relatedDatasets.active !== false && <Sources {...relatedDatasets} />}
