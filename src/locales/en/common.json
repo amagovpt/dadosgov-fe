@@ -536,7 +536,12 @@
       "investment": "Investment",
       "totalProjectValue": "Total project value",
       "startDate": "Start date",
-      "conclusionDate": "Conclusion date"
+      "conclusionDate": "Conclusion date",
+      "contractedFunding": "Contracted funding",
+      "selectionCriteria": "Project selection criteria",
+      "totalContractsValue": "Total contracts value",
+      "totalContracts": "Total contracts",
+      "value": "Value"
     }
   }
 }

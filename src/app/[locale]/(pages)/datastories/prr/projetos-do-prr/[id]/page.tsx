@@ -1,9 +1,12 @@
 import initTranslations from "@/app/i18n";
 import { BenProjSheet } from "@/components/datastories/BeneficiaryAndProject/Sheet";
+import { BenProjSheetTabPRR } from "@/components/datastories/BeneficiaryAndProjectPrr/Sheet/Tabs";
+import ProjectTabsHashSync from "@/components/datastories/BeneficiaryAndProjectPrr/Sheet/Tabs/ProjectTabsHashSync";
 import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
 import { SourceInfoFooter } from "@/components/Shared/SourceInfoFooter";
+import { Tabs } from "@/components/Shared/Tabs";
 import {
   getPrrProjectData,
   getPrrProjectMeta,
