@@ -422,7 +422,10 @@
       "municipalityOperationCode": "Código do Município da Operação",
       "municipalityOperationName": "Nome do Município da Operação",
       "projectsAmount": "Número de Projetos",
-      "operationName": "Nome"
+      "operationName": "Nome",
+      "dimension": "Dimensão",
+      "region": "Região",
+      "municipality": "Município"
     },
     "exportResults": "Resultados da pesquisa de {{subject}}"
   },

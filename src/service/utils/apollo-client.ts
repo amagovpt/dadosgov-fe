@@ -17,9 +17,10 @@ import { getCmsBaseUrl } from "./cmsBaseUrl";
 // CMS fails fast and the stale-while-revalidate cache below (or the caller's
 // fallback) takes over. Browser requests keep the default behaviour —
 // AbortSignal.any/timeout support is uneven there and the user can navigate
-// away.
+// away. 10s leaves room for the unfiltered European-funds searches (PRR
+// projects totals take ~4-5s uncached), which kept tripping a 5s deadline.
 const timeoutMs = Number(process.env.CMS_FETCH_TIMEOUT_MS);
-const CMS_TIMEOUT_MS = Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 5000;
+const CMS_TIMEOUT_MS = Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 10000;
 
 const link = new HttpLink({
   uri: `${getCmsBaseUrl()}/graphql`,
