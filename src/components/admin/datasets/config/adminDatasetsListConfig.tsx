@@ -1,3 +1,4 @@
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 import { Pill } from "@ama-pt/agora-design-system";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
@@ -43,7 +44,7 @@ export function sortAdminDatasets(
   return sortItems(datasets, field, order, {
     title: createLocaleStringSorter((dataset) => dataset.title),
     producer: createLocaleStringSorter(getDatasetProducer),
-    last_modified: createDateSorter((dataset) => dataset.last_modified),
+    last_modified: createDateSorter((dataset) => getDatasetLastUpdate(dataset)),
     quality: (a, b) => getQualityScore(a) - getQualityScore(b),
   });
 }
@@ -88,8 +89,8 @@ export function createAdminDatasetColumns({
       header: labels.lastModified,
       sortField: "last_modified",
       sortType: "date",
-      renderCell: (dataset) => formatDatasetDate(dataset.last_modified),
-      exportValue: (dataset) => formatDatasetDate(dataset.last_modified),
+      renderCell: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
+      exportValue: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
     },
     {
       id: "quality",

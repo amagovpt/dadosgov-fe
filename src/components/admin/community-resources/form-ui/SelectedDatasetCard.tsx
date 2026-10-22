@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import type { Dataset } from "@/service/types/dataset";
 import { formatMetricValue } from "@/utils/formatNumber";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 interface SelectedDatasetCardProps {
   dataset: Dataset;
@@ -67,7 +68,7 @@ export default function SelectedDatasetCard({
         date={
           <span className="font-[300]">
             {t("form.updatedAgo", {
-              time: formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
+              time: formatDistanceToNow(new Date(getDatasetLastUpdate(dataset) as string), { locale: pt })
                 .replace("aproximadamente ", "")
                 .replace("quase ", "")
                 .replace("menos de ", "")

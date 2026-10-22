@@ -8,9 +8,11 @@ interface ReusesEditMetadataDangerZoneProps {
   isSubmitting: boolean;
   canEdit?: boolean;
   canDelete?: boolean;
+  transferCard?: AdminCard;
   archiveCard?: AdminCard;
   unarchiveCard?: AdminCard;
   deleteCard?: AdminCard;
+  onOpenTransferPopup: () => void;
   onArchiveReuse: () => void | Promise<void>;
   onUnarchiveReuse: () => void | Promise<void>;
   onOpenDeletePopup: () => void;
@@ -21,9 +23,11 @@ export default function ReusesEditMetadataDangerZone({
   isSubmitting,
   canEdit = true,
   canDelete = true,
+  transferCard,
   archiveCard,
   unarchiveCard,
   deleteCard,
+  onOpenTransferPopup,
   onArchiveReuse,
   onUnarchiveReuse,
   onOpenDeletePopup,
@@ -33,6 +37,13 @@ export default function ReusesEditMetadataDangerZone({
   return (
     <AdminDangerActions
       actions={[
+        {
+          variant: "informative",
+          heading: canEdit ? transferCard?.title : undefined,
+          description: canEdit ? formatHtmlParagraphs(transferCard?.description) : undefined,
+          actionLabel: canEdit ? transferCard?.anchor?.children : undefined,
+          onAction: canEdit && transferCard ? onOpenTransferPopup : undefined,
+        },
         {
           variant: "warning",
           heading: canEdit ? archiveActionCard?.title : undefined,

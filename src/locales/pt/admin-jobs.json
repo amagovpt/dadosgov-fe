@@ -1,0 +1,52 @@
+{
+  "title": "Tarefas agendadas",
+  "metadata": {
+    "title": "Tarefas agendadas",
+    "description": "Consulta das tarefas agendadas do portal: recolhas, métricas e limpezas."
+  },
+  "intro": {
+    "description": "Tarefas que o portal corre automaticamente, com a periodicidade e a última execução de cada uma. Esta página é apenas de consulta."
+  },
+  "columns": {
+    "name": "Nome",
+    "task": "Tarefa",
+    "kind": "Tipo",
+    "schedule": "Periodicidade",
+    "lastRun": "Última execução",
+    "status": "Estado"
+  },
+  "kind": {
+    "harvester": "Recolha",
+    "system": "Sistema"
+  },
+  "status": {
+    "enabled": "Activa",
+    "disabled": "Inactiva"
+  },
+  "filters": {
+    "label": "Tipo",
+    "all": "Todas",
+    "harvester": "Recolhas",
+    "system": "Sistema"
+  },
+  "search": {
+    "label": "Pesquisar",
+    "placeholder": "Pesquise pelo nome da tarefa"
+  },
+  "values": {
+    "never": "—"
+  },
+  "emptyState": {
+    "title": "Não há tarefas agendadas",
+    "description": "Nenhuma tarefa está agendada neste portal."
+  },
+  "errors": {
+    "loadFailed": "Não foi possível obter as tarefas agendadas. Tente novamente dentro de instantes."
+  },
+  "unscheduled": {
+    "title": "Tarefas registadas sem agendamento",
+    "description": "O portal sabe executar estas tarefas, mas nenhuma está agendada. Pode ser intencional ou ter ficado por configurar.",
+    "count": "{{count}} tarefa sem agendamento",
+    "count_other": "{{count}} tarefas sem agendamento"
+  }
+}

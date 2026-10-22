@@ -7,6 +7,7 @@ import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import { Typograph } from "../Shared/Generics/Typograph";
 import { submitSamlForm } from "./loginUtils";
+import { useRuntimeConfig } from "@/providers/RuntimeConfigProvider";
 
 /**
  * The permanent way into the CMD/eIDAS linking flow, shown in the profile
@@ -30,7 +31,7 @@ export function MigrationLinkSection() {
 
   // Says whether SAML is wired up at all, so whether a button can work. Never
   // whether an ACCOUNT should link — that is the backend's answer above.
-  const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
+  const { samlEnabled } = useRuntimeConfig();
 
   // Same reason as its sibling: /me is fetched in the browser, so rendering
   // before the answer arrives makes the server and the client disagree.

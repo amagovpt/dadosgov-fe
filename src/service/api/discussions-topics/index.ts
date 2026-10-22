@@ -10,12 +10,17 @@ import type {
 import { API_AUTH_URL, API_BASE_URL, API_V2_BASE_URL } from "@/service/utils/API";
 import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 
+interface DiscussionFilters {
+  q?: string;
+  closed?: boolean;
+  sort?: string;
+}
 
 export async function fetchOrgDiscussions(
   orgId: string,
   page: number = 1,
   pageSize: number = 20,
-  filters?: { q?: string; closed?: boolean; sort?: string }
+  filters?: DiscussionFilters
 ): Promise<APIResponse<Discussion>> {
   try {
     const params = new URLSearchParams({
@@ -53,7 +58,8 @@ export async function fetchOrgDiscussions(
 export async function fetchDiscussions(
   subjectId: string,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  filters?: DiscussionFilters
 ): Promise<APIResponse<Discussion>> {
   try {
     const params = new URLSearchParams({
@@ -61,6 +67,9 @@ export async function fetchDiscussions(
       page: String(page),
       page_size: String(pageSize),
     });
+    if (filters?.q) params.set("q", filters.q);
+    if (filters?.closed !== undefined) params.set("closed", String(filters.closed));
+    if (filters?.sort) params.set("sort", filters.sort);
     const res = await fetch(`${API_BASE_URL}/discussions/?${params.toString()}`, {
       cache: "no-store",
     });

@@ -46,6 +46,9 @@ export async function getDataserviceDatasets(id: string): Promise<RelatedDataset
         slug: dataset.slug,
         title: dataset.title,
         description: dataset.description,
+        // Both: the card picks `last_update` and falls back to `last_modified`
+        // when a payload predates the field (LEDG-2599).
+        last_update: dataset.last_update,
         last_modified: dataset.last_modified,
         metrics: dataset.metrics,
         quality: dataset.quality ? { score: dataset.quality.score } : undefined,

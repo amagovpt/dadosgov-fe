@@ -1,4 +1,6 @@
-import type { Organization, UserRef } from '@/service/types/identity';
+import type { Organization, UserRef } from "@/service/types/identity";
+import type { TransferRecipientClass, TransferSubjectClass } from "@/service/types/transfer-system";
+import type { HarvestSourceValidation } from "@/service/types/harvester";
 
 export interface DiscussionNotificationDetails {
   discussion: string | null;
@@ -12,15 +14,31 @@ export interface MembershipRequestNotificationDetails {
 }
 
 export interface TransferRequestNotificationDetails {
-  transfer_owner: object | null;
-  transfer_recipient: object | null;
-  transfer_subject: object | null;
+  transfer_owner: TransferNotificationPerson | null;
+  transfer_recipient: TransferNotificationPerson | null;
+  transfer_subject: {
+    class: TransferSubjectClass;
+    id: string;
+    title?: string;
+    slug?: string;
+  } | null;
+}
+
+interface TransferNotificationPerson {
+  class: TransferRecipientClass;
+  id: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 export interface ValidateHarvesterNotificationSource {
   id: string;
   name: string;
-  slug: string;
+  slug?: string;
+  validation?: Pick<HarvestSourceValidation, "state"> | null;
+  organization?: Pick<Organization, "name"> | null;
+  owner?: Pick<UserRef, "first_name" | "last_name"> | null;
 }
 
 export interface ValidateHarvesterNotificationDetails {
@@ -66,5 +84,3 @@ export interface Report {
   subject_deleted_at: string | null;
   self_api_url: string;
 }
-
-

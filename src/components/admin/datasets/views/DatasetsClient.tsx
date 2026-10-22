@@ -230,6 +230,7 @@ export default function DatasetsClient({
       breadcrumbItems={[{ label: t("admin-datasets:list.title") }]}
       listTitle={t(`admin-datasets:list.${listTitleKey}`)}
       resultsCount={null}
+      showResultsSummary={false}
       beforeList={
         scope === "personal" && !isUserLoading && user && !hasOrganization ? (
           <StatusCard
@@ -270,6 +271,7 @@ export default function DatasetsClient({
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
+        appearance: "bar",
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,

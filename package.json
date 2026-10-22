@@ -1,6 +1,6 @@
 {
   "name": "dados-gov",
-  "version": "0.1.0",
+  "version": "1.4.14",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=reports/junit.xml",
     "test:watch": "vitest",
     "test:e2e": "playwright test --project=frontend-public --reporter=html",
     "test:e2e:backoffice": "playwright test --project=backoffice --reporter=html",
@@ -61,6 +62,7 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.11",
     "@vitest/ui": "^4.1.11",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
