@@ -1,32 +1,29 @@
 interface GoogleAnalyticsProps {
+    gaId: string;
     nonce?: string;
 }
 
-export default function GoogleAnalytics({ nonce }: GoogleAnalyticsProps) {
-
-    const GAIsActive = true; // process.env.NEXT_PUBLIC_GA_IS_ACTIVE === "true";
-    const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "";
-
-    if (!GAIsActive || !GA_ID) return null;
+export default function GoogleAnalytics({ gaId, nonce }: GoogleAnalyticsProps) {
+    if (!gaId) return null;
+    const src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
     return (
-        <>
-            <script
-                src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`}
-                nonce={nonce}
-                async
-            />
-            <script
-                id="google-analytics"
-                nonce={nonce}
-                dangerouslySetInnerHTML={{
-                    __html: `
+        <script
+            id="google-analytics"
+            nonce={nonce}
+            dangerouslySetInnerHTML={{
+                __html: `
                 window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', ${JSON.stringify(GA_ID)});
+                window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+                window.gtag('js', new Date());
+                window.gtag('config', ${JSON.stringify(gaId)});
+                (function(){
+                  var s = document.createElement('script');
+                  s.async = true;
+                  s.src = ${JSON.stringify(src)};
+                  document.head.appendChild(s);
+                })();
               `,
-                }}
-            />
-        </>
+            }}
+        />
     );
 }

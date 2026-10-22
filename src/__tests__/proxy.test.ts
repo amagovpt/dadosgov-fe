@@ -59,3 +59,44 @@ describe("proxy backend forwarding", () => {
     }
   );
 });
+
+describe("proxy CSP", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const directives = async () => {
+    const csp = (await run("/pt")).headers.get("content-security-policy") ?? "";
+    return Object.fromEntries(
+      csp.split(";").map((d) => {
+        const [name, ...sources] = d.trim().split(/\s+/);
+        return [name, sources];
+      })
+    ) as Record<string, string[]>;
+  };
+
+  it("keeps local hosts out of production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const csp = await directives();
+    for (const name of ["img-src", "connect-src"]) {
+      expect(csp[name].some((s) => s.startsWith("http://"))).toBe(false);
+    }
+  });
+
+  it("allows the Usercentrics autoblocker, its images and the embedded frames", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const csp = await directives();
+    expect(csp["script-src"]).toContain("https://web.cmp.usercentrics.eu");
+    expect(csp["img-src"]).toContain("https://*.usercentrics.eu");
+    expect(csp["frame-src"]).toEqual(
+      expect.arrayContaining(["https://app.powerbi.com", "https://www.google.com"])
+    );
+  });
+
+  it("allows the local backend in development", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const csp = await directives();
+    expect(csp["img-src"]).toContain("http://localhost:7000");
+    expect(csp["connect-src"]).toContain("http://localhost:7000");
+  });
+});

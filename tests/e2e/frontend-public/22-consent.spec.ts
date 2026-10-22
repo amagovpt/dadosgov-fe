@@ -1,0 +1,109 @@
+import { test, expect, type Page } from "playwright/test";
+
+/**
+ * Usercentrics manages every cookie: its autoblocker (first script in <head>)
+ * holds GA, reCAPTCHA and Power BI back until the visitor consents.
+ *
+ * What gets blocked is decided by the Usercentrics panel (Auto Blocking
+ * ruleset + the services its scanner found), so run this against a deployed
+ * environment:
+ *
+ *   CONSENT_BASE_URL=https://preprod.dados.gov.pt PLAYWRIGHT_SKIP_SEED=1 \
+ *   PLAYWRIGHT_SKIP_WARMUP=1 npx playwright test tests/e2e/frontend-public/22-consent.spec.ts
+ *
+ * Every test starts from a fresh browser context, so no stored choice.
+ */
+
+test.use({
+  baseURL: process.env.CONSENT_BASE_URL ?? "http://localhost:3000",
+  ignoreHTTPSErrors: true,
+});
+
+const THIRD_PARTY =
+  /google-analytics\.com|googletagmanager\.com|app\.powerbi\.com|www\.google\.com\/recaptcha|gstatic\.com\/recaptcha/;
+
+const PAGES_WITHOUT_DATASTORY = [
+  "/pt",
+  "/pt/login",
+  "/pt/ajuda-e-contactos",
+  "/pt/recursos/desenvolvimento/referencia-api",
+];
+
+/** Records third-party requests and CSP / hydration errors for the whole test. */
+function watch(page: Page) {
+  const thirdParty: string[] = [];
+  const consoleErrors: string[] = [];
+  page.on("request", (request) => {
+    if (THIRD_PARTY.test(request.url())) thirdParty.push(request.url());
+  });
+  page.on("console", (message) => {
+    const text = message.text();
+    if (/Content-Security-Policy|Minified React error #418/.test(text)) consoleErrors.push(text);
+  });
+  return { thirdParty, consoleErrors };
+}
+
+const bannerButton = (page: Page, testId: string, name: RegExp) =>
+  // The v3 UI renders in an open shadow root, which Playwright locators pierce.
+  page.getByTestId(testId).or(page.getByRole("button", { name })).first();
+
+async function firstDatastoryPath(page: Page): Promise<string> {
+  await page.goto("/pt/datastories");
+  const href = await page.locator('a[href*="/datastories/"]').first().getAttribute("href");
+  expect(href, "no datastory link on /pt/datastories").toBeTruthy();
+  return href!;
+}
+
+async function gaCookies(page: Page) {
+  return (await page.context().cookies()).filter((c) => c.name.startsWith("_ga"));
+}
+
+test.describe("Consent (Usercentrics autoblocker)", () => {
+  test("CS-01: before any choice, nothing non-essential loads", async ({ page }) => {
+    const seen = watch(page);
+    await page.goto("/pt");
+    await expect(bannerButton(page, "uc-deny-all-button", /rejeitar/i)).toBeVisible({
+      timeout: 20_000,
+    });
+    await page.waitForLoadState("networkidle");
+
+    expect(seen.thirdParty).toEqual([]);
+    expect(await gaCookies(page)).toEqual([]);
+    expect(seen.consoleErrors).toEqual([]);
+  });
+
+  test("CS-02: after 'Rejeitar tudo', nothing non-essential loads on any page", async ({
+    page,
+  }) => {
+    const seen = watch(page);
+    await page.goto("/pt");
+    await bannerButton(page, "uc-deny-all-button", /rejeitar/i).click({ timeout: 20_000 });
+
+    const datastory = await firstDatastoryPath(page);
+    for (const path of [...PAGES_WITHOUT_DATASTORY, datastory]) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+    }
+
+    expect(seen.thirdParty).toEqual([]);
+    expect(await gaCookies(page)).toEqual([]);
+    expect(seen.consoleErrors).toEqual([]);
+  });
+
+  // Needs the "Google Analytics 4" service in the Usercentrics panel.
+  test("CS-03: after 'Aceitar tudo', GA sends a page_view with analytics granted", async ({
+    page,
+  }) => {
+    const seen = watch(page);
+    await page.goto("/pt");
+    const collect = page.waitForRequest((r) => /\/g\/collect/.test(r.url()), {
+      timeout: 20_000,
+    });
+    await bannerButton(page, "uc-accept-all-button", /aceitar/i).click({ timeout: 20_000 });
+
+    // gcs=G1<ad_storage><analytics_storage>: the last digit is analytics.
+    const gcs = new URL((await collect).url()).searchParams.get("gcs") ?? "";
+    expect(gcs, `gcs=${gcs}`).toMatch(/^G1.1$/);
+    expect(seen.consoleErrors).toEqual([]);
+  });
+});

@@ -114,21 +114,24 @@ function buildCsp(nonce: string): string {
   // 'unsafe-eval' is only added in development: React uses eval() for
   // callstack reconstruction and other dev-mode debugging features, but
   // never in production builds.
-  const scriptSrcExtras = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
-  // Analytics hosts: Usercentrics CMP (consent banner) and Google Analytics
-  // (gtag loader + collection endpoints), loaded from the root layout <head>.
+  const isDev = process.env.NODE_ENV === "development";
+  const scriptSrcExtras = isDev ? " 'unsafe-eval'" : "";
+  const devImgSrc = isDev ? ` http://localhost:7000 ${API_URL}` : "";
+  const cmsImgSrc = !isDev && API_URL.startsWith("https://") ? ` ${API_URL}` : "";
+  const devConnectSrc = isDev ? " http://localhost:7000" : "";
   const analyticsScriptSrc = "https://web.cmp.usercentrics.eu https://www.googletagmanager.com";
   const analyticsConnectSrc =
     "https://*.usercentrics.eu https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com";
-  const analyticsImgSrc = "https://*.google-analytics.com https://www.googletagmanager.com";
+  const analyticsImgSrc =
+    "https://*.usercentrics.eu https://*.google-analytics.com https://www.googletagmanager.com";
   return [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com ${analyticsScriptSrc}${scriptSrcExtras}`,
     `style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com`,
-    `img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com https://www.gstatic.com ${analyticsImgSrc}`,
+    `img-src 'self' data: blob:${devImgSrc}${cmsImgSrc} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com https://www.gstatic.com ${analyticsImgSrc}`,
     `frame-src 'self' https://app.powerbi.com https://www.google.com`,
     `font-src 'self' data:`,
-    `connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt ${analyticsConnectSrc}`,
+    `connect-src 'self'${devConnectSrc} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt ${analyticsConnectSrc}`,
     `frame-ancestors 'none'`,
   ].join("; ");
 }
