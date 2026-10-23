@@ -1,7 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
 import { useCallback, useState } from "react";
-import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { formatCompactEUR } from "@/utils/formatCurrency";
 import { PT2030ProjectsByBeneficiary } from "@/service/types/datastories/pt2030/pt2030";
 import { LoadMoreWrapper } from "@/components/Shared/Wrappers/LoadMoreWrapper";
