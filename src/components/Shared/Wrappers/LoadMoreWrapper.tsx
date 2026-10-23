@@ -56,12 +56,9 @@ export function LoadMoreWrapper<T>({
   }, [totalItems, items]);
 
   return (
-    <div className="w-full flex flex-col gap-32">
+    <div className="flex w-full flex-col gap-32">
       <div
-        className={twMerge(
-          "grid xs:grid-cols-1 xl:grid-cols-2 gap-32 w-full",
-          className,
-        )}
+        className={twMerge("grid w-full gap-32 xs:grid-cols-1 xl:grid-cols-2", className)}
         data-testid="load-more-wrapper"
       >
         {items.map((item, index) => renderItem(item, index))}
@@ -73,6 +70,7 @@ export function LoadMoreWrapper<T>({
             onClick={handleAction}
             disabled={isLoading}
             appearance="link"
+            variant="neutral"
             trailingIcon="agora-line-plus-circle"
             trailingIconHover="agora-solid-plus-circle"
             hasIcon
