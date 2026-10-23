@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import FileUploadModal from "@/components/admin/FileUploadModal";
 import { usePendingResourceEditor } from "@/components/admin/FileUploadModal/usePendingResourceEditor";
 import { PendingResourceTable } from "@/components/admin/FileUploadModal/PendingResourceTable";
-import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
+import type {
+  PendingResourceMeta,
+  ResourceUploadFeedback,
+} from "@/components/admin/FileUploadModal/types";
 import type { ResourceType } from "@/service/types/catalog";
 import type { AdminHelpBlock } from "@/service/types/admin/common";
 import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
@@ -58,6 +61,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
   } = props;
 
   const { openEditors, editor } = usePendingResourceEditor();
+  const [uploadFeedback, setUploadFeedback] = useState<ResourceUploadFeedback | null>(null);
   const latestProps = useRef(props);
   const knownFiles = useRef(uploadedFiles);
   useEffect(() => {
@@ -66,6 +70,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
   }, [props]);
 
   function editResources(items: (File | string)[], isNew = false) {
+    setUploadFeedback(null);
     openEditors(
       items.map((item) => {
         const isUrl = typeof item === "string";
@@ -85,6 +90,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
           },
           onDiscard: isNew
             ? () => {
+                setUploadFeedback(null);
                 const current = latestProps.current;
                 if (file)
                   current.setUploadedFiles((previous) =>
@@ -116,6 +122,12 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
               );
               current.onEditMeta(`file-${replacement.name}`, meta);
             } else current.onEditMeta(key, meta, newUrl);
+            if (isNew)
+              setUploadFeedback({
+                source: isUrl ? "url" : "file",
+                variant: "success",
+                message: t(isUrl ? "resources.linkAdded" : "resources.filesAdded"),
+              });
           },
         };
       })
@@ -193,6 +205,9 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
               <legend className="sr-only">{t("resources.addTitle")}</legend>
               <FileUploadModal
                 appearance="wizard"
+                saveMode="editor"
+                feedback={uploadFeedback}
+                onClearFeedback={() => setUploadFeedback(null)}
                 uploadedFiles={uploadedFiles}
                 resourceUrls={resourceUrls}
                 hasError={showFileError}

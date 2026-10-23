@@ -20,7 +20,10 @@ import { can } from "@/utils/permissions";
 import DeleteResourcePopup from "@/components/admin/datasets/resource-dialogs/DeleteResourcePopup";
 import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceDetailPopup";
 import { usePendingResourceEditor } from "@/components/admin/FileUploadModal/usePendingResourceEditor";
-import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
+import type {
+  PendingResourceMeta,
+  ResourceUploadFeedback,
+} from "@/components/admin/FileUploadModal/types";
 
 interface UseDatasetResourceActionsParams {
   dataset: Dataset | null;
@@ -49,6 +52,7 @@ export function useDatasetResourceActions({
 }: UseDatasetResourceActionsParams) {
   const { t } = useTranslation("admin-datasets");
   const { openEditors, editor } = usePendingResourceEditor();
+  const [uploadFeedback, setUploadFeedback] = useState<ResourceUploadFeedback | null>(null);
   const [deletingResource, setDeletingResource] = useState<{
     resource: Resource;
     onDeleted?: () => void;
@@ -102,6 +106,7 @@ export function useDatasetResourceActions({
   }
 
   function openResourceEditor(item: File | string | Resource) {
+    setUploadFeedback(null);
     const saved = typeof item === "object" && !(item instanceof File) ? item : undefined;
     const file = item instanceof File ? item : undefined;
     const isUrl = typeof item === "string" || saved?.filetype === "remote";
@@ -139,6 +144,7 @@ export function useDatasetResourceActions({
         onDiscard: saved
           ? undefined
           : () => {
+              setUploadFeedback(null);
               if (isUrl) queuedUrls.current.delete(name);
             },
         onSave: async (meta: PendingResourceMeta, newUrl?: string, replacement?: File) => {
@@ -196,20 +202,25 @@ export function useDatasetResourceActions({
             }
             await refreshDataset();
             if (isUrl) queuedUrls.current.delete(name);
-            showApiSuccess(
-              t(
-                saved
-                  ? "edit.resourceUpdated"
-                  : isUrl
-                    ? "resources.linkSaved"
-                    : "resources.filesSaved"
-              )
-            );
+            if (saved) showApiSuccess(t("edit.resourceUpdated"));
+            else
+              setUploadFeedback({
+                source: isUrl ? "url" : "file",
+                variant: "success",
+                message: t(isUrl ? "resources.linkSaved" : "resources.filesSaved"),
+              });
           } catch (error) {
             const err = error as { data?: { message?: string }; message?: string };
-            throw new Error(
-              translateUploadError(err.data?.message || err.message || t("edit.resourceSaveError"))
+            const message = translateUploadError(
+              err.data?.message || err.message || t("edit.resourceSaveError")
             );
+            if (!saved)
+              setUploadFeedback({
+                source: isUrl ? "url" : "file",
+                variant: "danger",
+                message: `${t(isUrl ? "resources.linkNotAdded" : "resources.fileNotUploaded")} ${message}`,
+              });
+            throw new Error(message);
           } finally {
             isUploadingRef.current = false;
             setIsSubmitting(false);
@@ -292,6 +303,8 @@ export function useDatasetResourceActions({
       </>
     ),
     allowedExtensions,
+    uploadFeedback,
+    clearUploadFeedback: () => setUploadFeedback(null),
     handleDeleteResource,
     handleFilesUpload,
     handleUrlAdd,

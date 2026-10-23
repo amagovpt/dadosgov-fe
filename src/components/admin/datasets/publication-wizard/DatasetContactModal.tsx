@@ -242,6 +242,7 @@ export function DatasetContactModal({ producerId, contact, onSaved }: DatasetCon
           variant="primary"
           hasIcon
           leadingIcon="agora-line-check-circle"
+          leadingIconHover="agora-solid-check-circle"
           disabled={saving}
         >
           {t(saving ? "admin-datasets:contacts.saving" : "admin-datasets:form.saveContactAction")}

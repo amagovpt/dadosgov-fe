@@ -3,6 +3,7 @@
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import FileUploadModal from "@/components/admin/FileUploadModal";
+import type { ResourceUploadFeedback } from "@/components/admin/FileUploadModal/types";
 import { DatasetResourcesTable } from "../resources/DatasetResourcesTable";
 import { DatasetWizardHelp } from "../publication-wizard/DatasetWizardHelp";
 import { getResourceDatasetAuxiliarItems } from "../config/datasetsAuxiliarItems";
@@ -13,6 +14,8 @@ import type { ResourceType } from "@/service/types/catalog";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface DatasetsEditResourcesTabProps {
+  uploadFeedback: ResourceUploadFeedback | null;
+  onClearUploadFeedback: () => void;
   dataset: Dataset;
   isSubmitting: boolean;
   resourceTypes: ResourceType[];
@@ -26,6 +29,8 @@ interface DatasetsEditResourcesTabProps {
 }
 
 export default function DatasetsEditResourcesTab({
+  uploadFeedback,
+  onClearUploadFeedback,
   dataset,
   isSubmitting,
   resourceTypes,
@@ -82,6 +87,8 @@ export default function DatasetsEditResourcesTab({
           <FileUploadModal
             appearance="wizard"
             saveMode="editor"
+            feedback={uploadFeedback}
+            onClearFeedback={onClearUploadFeedback}
             inputId={`${inputId}-url`}
             disabled={isSubmitting || !canManage}
             uploadedFiles={[]}

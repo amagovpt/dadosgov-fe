@@ -103,6 +103,7 @@ export function DatasetWizardContacts({
                 variant="primary"
                 hasIcon
                 leadingIcon="agora-line-edit"
+                leadingIconHover="agora-solid-edit"
                 onClick={(event) => openModal(event.currentTarget, contact)}
               >
                 {t("admin-datasets:contacts.edit")}
@@ -113,6 +114,7 @@ export function DatasetWizardContacts({
                 variant="danger"
                 hasIcon
                 leadingIcon="agora-line-trash"
+                leadingIconHover="agora-solid-trash"
                 onClick={() => onRemove(contact.id)}
               >
                 {t("admin-datasets:contacts.remove")}
@@ -126,6 +128,7 @@ export function DatasetWizardContacts({
         variant="primary"
         hasIcon
         trailingIcon="agora-line-plus-circle"
+        trailingIconHover="agora-solid-plus-circle"
         disabled={!isOrganization}
         onClick={(event) => openModal(event.currentTarget)}
       >

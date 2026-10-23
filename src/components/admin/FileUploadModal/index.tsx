@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, InputText, StatusCard } from "@ama-pt/agora-design-system";
+import { Button, Icon, InputText, StatusCard } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { validateFileExtensions } from "@/lib/files/validateFileExtensions";
@@ -19,6 +19,8 @@ export default function FileUploadModal({
   saveMode = "pending",
   inputId = "inline-resource-url",
   disabled = false,
+  feedback,
+  onClearFeedback,
 }: FileUploadModalProps) {
   const { t } = useTranslation("admin-common");
   const { t: td } = useTranslation("admin-datasets");
@@ -46,9 +48,42 @@ export default function FileUploadModal({
   const [fileSaveError, setFileSaveError] = useState<string | null>(null);
 
   const invalidUrlMessage = t("fileUpload.url.invalid");
+  const fileError =
+    fileSaveError ||
+    (securityErrors.length > 0
+      ? t("fileUpload.files.securityError")
+      : extensionErrors.length > 0
+        ? extensionErrors.length === 1
+          ? t("fileUpload.files.invalidSingle", { name: extensionErrors[0] })
+          : t("fileUpload.files.invalidMultiple", { names: extensionErrors.join(", ") })
+        : hasError && !hasSelection
+          ? t("forms.requiredField")
+          : undefined);
+  const urlFeedback = urlError
+    ? { variant: "danger" as const, message: `${td("resources.linkNotAdded")} ${urlError}` }
+    : feedback?.source === "url"
+      ? feedback
+      : saveMode !== "editor" && added === "url"
+        ? {
+            variant: "success" as const,
+            message: td(saveMode === "immediate" ? "resources.linkSaved" : "resources.linkAdded"),
+          }
+        : null;
+  const fileFeedback = fileError
+    ? { variant: "danger" as const, message: `${td("resources.fileNotUploaded")} ${fileError}` }
+    : feedback?.source === "file"
+      ? feedback
+      : saveMode !== "editor" && added === "file"
+        ? {
+            variant: "success" as const,
+            message: td(saveMode === "immediate" ? "resources.filesSaved" : "resources.filesAdded"),
+          }
+        : null;
 
   const handleAddUrl = async () => {
     if (addingUrl.current || disabled) return;
+    onClearFeedback?.();
+    setAdded(null);
     const trimmedUrl = (localUrl || localUrlRef.current).trim();
     if (!trimmedUrl) {
       setUrlError(invalidUrlMessage);
@@ -87,8 +122,21 @@ export default function FileUploadModal({
           label={wizard ? td("resources.addLink") : t("fileUpload.url.label")}
           placeholder={wizard ? td("resources.urlPlaceholder") : "https://"}
           hasHelperText={wizard}
-          helperText={wizard ? td("resources.urlHint") : undefined}
+          helperText={
+            wizard ? (
+              <span id={`${inputId}-hint`} className="flex items-start gap-8">
+                <Icon
+                  name="agora-solid-info-mark"
+                  dimensions="s"
+                  aria-hidden="true"
+                  className="my-4 size-16 shrink-0 fill-informative-500!"
+                />
+                {td("resources.urlHint")}
+              </span>
+            ) : undefined
+          }
           id={inputId}
+          aria-describedby={wizard ? `${inputId}-hint` : undefined}
           disabled={disabled}
           value={localUrl}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +151,7 @@ export default function FileUploadModal({
             }
           }}
           hasError={!!urlError || (!hasSelection && hasError)}
-          hasFeedback={!!urlError}
+          hasFeedback={!wizard && !!urlError}
           feedbackState="danger"
           feedbackText={urlError ?? ""}
         />
@@ -120,14 +168,10 @@ export default function FileUploadModal({
             {t("fileUpload.actions.add")}
           </Button>
         </div>
-        {wizard && saveMode !== "editor" && added === "url" && !urlError && (
-          <StatusCard
-            variant="success"
-            showIcon
-            description={td(
-              saveMode === "immediate" ? "resources.linkSaved" : "resources.linkAdded"
-            )}
-          />
+        {wizard && urlFeedback && (
+          <div role={urlFeedback.variant === "danger" ? "alert" : "status"}>
+            <StatusCard variant={urlFeedback.variant} showIcon description={urlFeedback.message} />
+          </div>
         )}
       </div>
 
@@ -142,7 +186,16 @@ export default function FileUploadModal({
       </div>
 
       <div
-        className={`${wizard ? "[&_.drag-and-drop-area_.agora-btn]:w-full" : "[&_.drag-and-drop-area_.agora-btn]:w-fit"} [&_.instructions]:items-center [&_.instructions]:text-center`}
+        className={`${wizard ? "flex flex-col gap-32 [&_.drag-and-drop-area_.agora-btn]:w-full" : "[&_.drag-and-drop-area_.agora-btn]:w-fit"} [&_.instructions]:items-center [&_.instructions]:text-center`}
+        onClickCapture={(event) => {
+          if (!(event.target instanceof Element)) return;
+          if (!event.target.closest("button, input[type='file']")) return;
+          setAdded(null);
+          setFileSaveError(null);
+          setSecurityErrors([]);
+          setExtensionErrors([]);
+          onClearFeedback?.();
+        }}
       >
         <DragAndDropUploader
           key={uploaderKey}
@@ -173,27 +226,9 @@ export default function FileUploadModal({
             extensionErrors.length > 0 ||
             (hasError && !hasSelection)
           }
-          hasFeedback={
-            !!fileSaveError ||
-            securityErrors.length > 0 ||
-            extensionErrors.length > 0 ||
-            (hasError && !hasSelection)
-          }
+          hasFeedback={!wizard && !!fileError}
           feedbackState="danger"
-          feedbackText={
-            fileSaveError ||
-            (securityErrors.length > 0
-              ? t("fileUpload.files.securityError")
-              : extensionErrors.length > 0
-                ? extensionErrors.length === 1
-                  ? t("fileUpload.files.invalidSingle", { name: extensionErrors[0] })
-                  : t("fileUpload.files.invalidMultiple", {
-                      names: extensionErrors.join(", "),
-                    })
-                : hasError && !hasSelection
-                  ? t("forms.requiredField")
-                  : undefined)
-          }
+          feedbackText={fileError}
           onChange={async (e) => {
             if (disabled || processingFiles.current) return;
             const picked = Array.from((e.target as HTMLInputElement).files || []);
@@ -226,20 +261,15 @@ export default function FileUploadModal({
             setSecurityErrors(rejections.map(() => POISONED_FILE_WARNING));
           }}
         />
-        {wizard &&
-          saveMode !== "editor" &&
-          added === "file" &&
-          !fileSaveError &&
-          !securityErrors.length &&
-          !extensionErrors.length && (
+        {wizard && fileFeedback && (
+          <div role={fileFeedback.variant === "danger" ? "alert" : "status"}>
             <StatusCard
-              variant="success"
+              variant={fileFeedback.variant}
               showIcon
-              description={td(
-                saveMode === "immediate" ? "resources.filesSaved" : "resources.filesAdded"
-              )}
+              description={fileFeedback.message}
             />
-          )}
+          </div>
+        )}
       </div>
     </div>
   );

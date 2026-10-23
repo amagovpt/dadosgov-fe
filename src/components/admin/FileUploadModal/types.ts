@@ -7,7 +7,15 @@ export interface PendingResourceMeta {
   mime?: string;
 }
 
+export interface ResourceUploadFeedback {
+  source: "url" | "file";
+  variant: "success" | "danger";
+  message: string;
+}
+
 export interface FileUploadModalProps {
+  feedback?: ResourceUploadFeedback | null;
+  onClearFeedback?: () => void;
   saveMode?: "pending" | "immediate" | "editor";
   inputId?: string;
   disabled?: boolean;

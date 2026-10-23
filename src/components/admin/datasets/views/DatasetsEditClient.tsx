@@ -409,6 +409,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     handleResourceClick,
     handleDeleteResource,
     editor: resourceEditor,
+    uploadFeedback,
+    clearUploadFeedback,
     allowedExtensions,
   } = useDatasetResourceActions({
     dataset,
@@ -472,7 +474,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         { label: dataset.title },
       ]}
       title={dataset.title}
-      className="max-w-[1112px]! gap-64 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2 [&_.agora-btn]:min-h-[60px] [&_.agora-btn]:py-[14px] [&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!"
+      className="max-w-[1112px]! gap-64 pb-64 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2 [&_.agora-btn]:min-h-[60px] [&_.agora-btn]:py-[14px] [&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!"
       headerClassName="xl:items-center"
       headerInfoClassName="w-full max-w-[592px]"
       headerMeta={
@@ -600,7 +602,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         <Tabs
           fullWidth
           currentType="primary"
-          className="[&_.accordion-body>.children-wrapper]:w-full [&_.accordion-body>.children-wrapper]:min-w-0 [&_.tab-list]:mb-0! [&_.tab-list-item]:text-m-medium [&_.tab-list-item.active]:bg-neutral-100! [&_.tab-list.mobile_.accordion-body-block]:p-16! [&_.tab-panel]:mt-0! [&_.tab-panel]:border-0! [&_.tab-panel]:bg-neutral-100! [&_.tab-panel]:px-0! [&_.tab-panel]:py-64! min-[1440px]:[&_.tab-panel]:-mr-[112px] min-[1440px]:[&_.tab-panel]:-ml-[104px] min-[1440px]:[&_.tab-panel]:pr-[112px]! min-[1440px]:[&_.tab-panel]:pl-[104px]!"
+          className="[&_.accordion-body>.children-wrapper]:w-full [&_.accordion-body>.children-wrapper]:min-w-0 [&_.tab-list]:mb-0! [&_.tab-list-item]:text-m-medium [&_.tab-list-item.active]:bg-neutral-100! [&_.tab-list.mobile_.accordion-body-block]:p-16! [&_.tab-panel]:mt-0! [&_.tab-panel]:border-0! [&_.tab-panel]:bg-neutral-100! [&_.tab-panel]:px-0! [&_.tab-panel]:py-64! min-[1440px]:[&_.tab-panel]:-mr-[112px] min-[1440px]:[&_.tab-panel]:-ml-[104px] min-[1440px]:[&_.tab-panel]:pr-[112px]! min-[1440px]:[&_.tab-panel]:pl-[104px]! [&_.tab-panel-content]:py-0!"
           onTabActivation={(index: number) => {
             setApiError(null);
             setApiSuccess(null);
@@ -697,6 +699,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             <TabBody>
               {feedback}
               <DatasetsEditResourcesTab
+                uploadFeedback={uploadFeedback}
+                onClearUploadFeedback={clearUploadFeedback}
                 dataset={dataset}
                 resourceTypes={resourceTypes}
                 allowedExtensions={allowedExtensions}
