@@ -24,6 +24,10 @@ const DEFAULT_STATUS_ICONS: Record<string, string> = {
   deleted: "agora-line-trash",
 };
 
+// Agora treats an empty selected value as unchecked. Prefix every value so
+// the "Todos" option can remain selected while the API filter stays empty.
+const TOGGLE_VALUE_PREFIX = "status:";
+
 export function StatusFilterSelect({
   value = "",
   onChange,
@@ -43,14 +47,13 @@ export function StatusFilterSelect({
     return () => mql.removeEventListener("change", update);
   }, []);
 
-  const opts: Option[] =
-    options ?? [
-      { value: "", label: t("filters.all"), icon: DEFAULT_STATUS_ICONS[""] },
-      { value: "public", label: t("status.public"), icon: DEFAULT_STATUS_ICONS.public },
-      { value: "archived", label: t("status.archived"), icon: DEFAULT_STATUS_ICONS.archived },
-      { value: "draft", label: t("status.draft"), icon: DEFAULT_STATUS_ICONS.draft },
-      { value: "deleted", label: t("status.deleted"), icon: DEFAULT_STATUS_ICONS.deleted },
-    ];
+  const opts: Option[] = options ?? [
+    { value: "", label: t("filters.all"), icon: DEFAULT_STATUS_ICONS[""] },
+    { value: "public", label: t("status.public"), icon: DEFAULT_STATUS_ICONS.public },
+    { value: "archived", label: t("status.archived"), icon: DEFAULT_STATUS_ICONS.archived },
+    { value: "draft", label: t("status.draft"), icon: DEFAULT_STATUS_ICONS.draft },
+    { value: "deleted", label: t("status.deleted"), icon: DEFAULT_STATUS_ICONS.deleted },
+  ];
 
   return (
     <div className="flex w-full overflow-auto py-2">
@@ -65,8 +68,8 @@ export function StatusFilterSelect({
         orientation={isVertical ? "vertical" : "horizontal"}
         fullWidth
         multiple={false}
-        value={value || defaultValue || ""}
-        onChange={(vals) => onChange(vals[0] ?? "")}
+        value={`${TOGGLE_VALUE_PREFIX}${value || defaultValue || ""}`}
+        onChange={(vals) => onChange(vals[0]?.slice(TOGGLE_VALUE_PREFIX.length) ?? "")}
       >
         {opts.map((o) => {
           const icon = o.icon ?? DEFAULT_STATUS_ICONS[o.value];
@@ -76,7 +79,7 @@ export function StatusFilterSelect({
           return (
             <Toggle
               key={o.value}
-              value={o.value}
+              value={`${TOGGLE_VALUE_PREFIX}${o.value}`}
               hasIcon={Boolean(icon)}
               leadingIcon={icon}
               leadingIconHover={iconHover}

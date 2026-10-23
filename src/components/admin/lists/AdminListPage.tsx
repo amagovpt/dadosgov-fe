@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ChangeEvent, ComponentProps, ReactNode } from "react";
 import {
   InputSearch,
+  InputSearchBar,
   Tab,
   TabBody,
   TabHeader,
@@ -24,6 +25,7 @@ import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 const TOAST_DURATION_MS = 10000;
 
 type SearchConfig = {
+  appearance?: "input" | "bar";
   label?: string;
   placeholder: string;
   ariaLabel?: string;
@@ -33,12 +35,16 @@ type SearchConfig = {
 };
 
 interface AdminListPageProps {
+  className?: AdminLayoutProps["className"];
   title: string;
   kicker?: string;
   description?: string;
   listTitle?: string;
   breadcrumbItems: AdminLayoutProps["breadcrumbItems"];
   headerAction?: ReactNode;
+  headerClassName?: AdminLayoutProps["headerClassName"];
+  headerInfoClassName?: AdminLayoutProps["headerInfoClassName"];
+  beforeList?: ReactNode;
   tabs?: {
     labels: string[];
     activeTab: number;
@@ -61,18 +67,24 @@ interface AdminListPageProps {
   children: ComponentProps<typeof Table>["children"];
   loadingContent?: ReactNode;
   resultsCount?: ReactNode;
+  showResultsSummary?: boolean;
   paginationOptions?: CreatePaginationPropsOptions;
+  showPaginationSummary?: boolean;
   /** Shows the table download action. */
   onDownloadCsv?: () => Promise<void>;
 }
 
 export default function AdminListPage({
+  className,
   title,
   kicker,
   description,
   listTitle,
   breadcrumbItems,
   headerAction,
+  headerClassName,
+  headerInfoClassName,
+  beforeList,
   tabs,
   isLoading,
   count,
@@ -90,7 +102,9 @@ export default function AdminListPage({
   children,
   loadingContent,
   resultsCount,
+  showResultsSummary = true,
   paginationOptions,
+  showPaginationSummary,
   onDownloadCsv,
 }: AdminListPageProps) {
   const { t } = useTranslation("admin-common");
@@ -146,19 +160,34 @@ export default function AdminListPage({
           {(visibleSearch || toolbarActions) && (
             <div className="flex flex-wrap items-end justify-between gap-16">
               {visibleSearch && (
-                <div className="w-full max-w-[592px]">
-                  <InputSearch
-                    required={false}
-                    defaultValue={visibleSearch.defaultValue}
-                    label={visibleSearch.label}
-                    placeholder={visibleSearch.placeholder}
-                    aria-label={
-                      visibleSearch.ariaLabel ?? visibleSearch.label ?? visibleSearch.placeholder
-                    }
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      visibleSearch.onChange?.(e.target.value);
-                    }}
-                  />
+                <div className="admin-search-wrapper w-full max-w-[592px]">
+                  {visibleSearch.appearance === "bar" ? (
+                    <InputSearchBar
+                      hasVoiceActionButton={false}
+                      defaultValue={visibleSearch.defaultValue}
+                      label={visibleSearch.label}
+                      placeholder={visibleSearch.placeholder}
+                      aria-label={
+                        visibleSearch.ariaLabel ?? visibleSearch.label ?? visibleSearch.placeholder
+                      }
+                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                        visibleSearch.onChange?.(event.target.value)
+                      }
+                    />
+                  ) : (
+                    <InputSearch
+                      required={false}
+                      defaultValue={visibleSearch.defaultValue}
+                      label={visibleSearch.label}
+                      placeholder={visibleSearch.placeholder}
+                      aria-label={
+                        visibleSearch.ariaLabel ?? visibleSearch.label ?? visibleSearch.placeholder
+                      }
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        visibleSearch.onChange?.(e.target.value);
+                      }}
+                    />
+                  )}
                 </div>
               )}
 
@@ -171,14 +200,16 @@ export default function AdminListPage({
       <div className="flex flex-col gap-16">
         {feedback}
 
-        {showListControls && (
+        {showListControls && (showResultsSummary || canDownloadCsv) && (
           <div className="flex flex-wrap items-center justify-between gap-16">
-            <div className="flex flex-col gap-8">
-              <h2 className="text-l-medium text-primary-900">{t("resultsTitle")}</h2>
-              {resultsCount ?? (
-                <ResultsCount count={count} isLoading={isInitialLoading} className="mb-0" />
-              )}
-            </div>
+            {showResultsSummary && (
+              <div className="flex flex-col gap-8">
+                <h2 className="text-l-medium text-primary-900">{t("resultsTitle")}</h2>
+                {resultsCount ?? (
+                  <ResultsCount count={count} isLoading={isInitialLoading} className="mb-0" />
+                )}
+              </div>
+            )}
 
             {canDownloadCsv && (
               <Button
@@ -212,6 +243,7 @@ export default function AdminListPage({
               setCurrentPage={setCurrentPage}
               setPageSize={setPageSize}
               paginationOptions={paginationOptions}
+              showPaginationSummary={showPaginationSummary}
             >
               {children}
             </AdminPaginatedTable>
@@ -225,12 +257,16 @@ export default function AdminListPage({
 
   return (
     <AdminLayout
+      className={className}
+      headerClassName={headerClassName}
+      headerInfoClassName={headerInfoClassName}
       title={title}
       kicker={kicker}
       description={description}
       breadcrumbItems={breadcrumbItems}
       headerAction={headerAction}
     >
+      {beforeList}
       {tabs ? (
         <Tabs
           className="[&_.tab-panel-content]:pt-32 [&_.tab-panel-content]:pb-0"

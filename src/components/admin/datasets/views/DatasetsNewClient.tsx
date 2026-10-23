@@ -1,146 +1,106 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Button, CardAction } from "@ama-pt/agora-design-system";
 import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { AdminStepper } from "@/components/admin/AdminStepper";
-import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
+import { DatasetContentProvider } from "../DatasetContentProvider";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
-import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
-import { stripHtmlTags } from "@/utils/htmlToParagraphs";
+import { localizeHref } from "@/utils/localizeHref";
+import { splitLocale } from "@/utils/stripLocale";
+import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 
 interface DatasetsNewClientProps {
   pageContent: BoDatasetsPage;
+  orgId?: string;
 }
 
-export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProps) {
-  const { t } = useTranslation(["admin-common", "admin-datasets"]);
+export default function DatasetsNewClient(props: DatasetsNewClientProps) {
+  return (
+    <DatasetContentProvider content={props.pageContent}>
+      <DatasetsNewContent {...props} />
+    </DatasetContentProvider>
+  );
+}
+
+function DatasetsNewContent({ pageContent, orgId }: DatasetsNewClientProps) {
+  const { t } = useTranslation("admin-datasets");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const totalSteps = 4;
-  const currentStep = Number(searchParams.get("step")) || 1;
-  const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(
-    searchParams.get("datasetId"),
-  );
-  const [sessionKey, setSessionKey] = useState(0);
+  const { locale } = splitLocale(usePathname());
+  const { activeProfile, isLoading: isProfileLoading } = useActiveProfile();
+  const profile = orgId ? { type: "organization" as const, orgId } : activeProfile;
+  const basePath = adminProfileBasePath(profile);
+  const requestedStep = Number(searchParams.get("step"));
+  const currentStep =
+    Number.isInteger(requestedStep) && requestedStep >= 1 && requestedStep <= 4 ? requestedStep : 1;
+  const datasetId = searchParams.get("datasetId");
+  const creationId = searchParams.get("creationId");
+  const pendingCreationId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (isProfileLoading) return;
+    if (creationId) {
+      pendingCreationId.current = null;
+      return;
+    }
+    // A bare creation link starts a new attempt; its URL then survives reloads.
+    pendingCreationId.current ??= crypto.randomUUID();
+    const query = new URLSearchParams(searchParams);
+    query.set("creationId", pendingCreationId.current);
+    router.replace(localizeHref(`${basePath}/datasets/new?${query}`, locale));
+  }, [basePath, creationId, isProfileLoading, locale, router, searchParams]);
+  const listUrl = localizeHref(`${basePath}/datasets`, locale);
+  const buildStepUrl = (step: number, id = datasetId) => {
+    const query = new URLSearchParams({ step: String(step) });
+    if (creationId) query.set("creationId", creationId);
+    if (id) query.set("datasetId", id);
+    return localizeHref(`${basePath}/datasets/new?${query}`, locale);
+  };
   const pageTitle = pageContent.createHero?.title ?? "";
 
-  const buildStepUrl = (step: number, id?: string | null) => {
-    const base = `/admin/datasets/new?step=${step}`;
-    return id ? `${base}&datasetId=${id}` : base;
-  };
-
-  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
-  const [startEntry, adminAutomationEntry, catalogEntry] = pageContent.publicationEntry ?? [];
+  if (isProfileLoading || !creationId) return null;
 
   return (
     <AdminLayout
+      className={[
+        `max-w-[1112px]! ${currentStep === 4 ? "gap-32" : "gap-64"}`,
+        "[&_h1]:text-primary-900 [&_h1+p]:leading-7 [&_h1+p]:text-primary-900",
+        "[&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2",
+        "[&_.agora-btn]:min-h-60! [&_.agora-btn]:py-[14px]",
+        "[&_[data-dataset-actions]]:w-full [&_[data-dataset-actions]]:justify-between!",
+        "[&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900",
+        "max-md:[&_.grid-cols-2]:grid-cols-1 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!",
+      ].join(" ")}
       breadcrumbItems={[
-        { label: t("admin-datasets:form.breadcrumbs.datasets"), url: "/admin/me/datasets" },
-        { label: pageTitle || t("admin-common:breadcrumbs.new") },
+        { label: t("form.breadcrumbs.datasets"), url: listUrl },
+        { label: pageTitle },
       ]}
       title={pageTitle}
+      hideHeader={currentStep === 4}
+      description={t(currentStep === 3 ? "resources.requiredFields" : "form.optionalFields")}
+      headerAction={null}
+      headerInfoClassName="max-w-[592px]"
     >
-      {/* Stepper*/}
-      <AdminStepper
+      <DatasetsAdminClient
+        key={`${basePath}:${creationId}`}
+        pageContent={pageContent}
+        redesigned
+        draftScope={basePath}
+        creationId={creationId}
+        initialProducerId={profile.type === "organization" ? profile.orgId : undefined}
         currentStep={currentStep}
-        totalSteps={totalSteps}
-        labelWord={t("admin-common:stepper.step")}
-        labelFormat="slash"
-        stepTitle={stepTitle}
+        datasetId={datasetId}
+        onNextStep={() => router.push(buildStepUrl(currentStep + 1))}
+        onPreviousStep={() =>
+          router.push(currentStep > 1 ? buildStepUrl(currentStep - 1) : listUrl)
+        }
+        onDatasetCreated={(id) => {
+          router.push(buildStepUrl(currentStep + 1, id));
+        }}
+        onComplete={() => router.push(listUrl)}
       />
-
-      {currentStep === 1 && (
-        <>
-          {startEntry ? (
-            <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
-              <CardAction
-                variant="neutral-100"
-                titleText={startEntry.title}
-                descriptionText={stripHtmlTags(startEntry.description)}
-                icon={{ name: "agora-line-edit" }}
-                button={{
-                  children: startEntry.anchor?.children,
-                  variant: "primary",
-                  appearance: "outline",
-                  onClick: () => {
-                    setSessionKey((k) => k + 1);
-                    setCreatedDatasetId(null);
-                    router.push("/admin/datasets/new?step=2");
-                  },
-                }}
-              />
-            </div>
-          ) : null}
-
-          {/* Admin sections */}
-          <div className="admin-new-page__admin-sections">
-            {adminAutomationEntry ? (
-              <div className="admin-new-page__admin-section">
-                <p className="text-primary-900 text-base font-bold leading-7">
-                  {adminAutomationEntry.title}
-                </p>
-                <div className="text-neutral-700 text-sm leading-relaxed">
-                  {formatHtmlParagraphs(adminAutomationEntry.description)}
-                </div>
-                <div className="flex gap-4 flex-wrap">
-                  <Button
-                    appearance="link"
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-external-link"
-                    trailingIconHover="agora-solid-external-link"
-                    onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
-                  >
-                    {t("admin-datasets:form.apiDocsAction")}
-                  </Button>
-                  <Button
-                    appearance="link"
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-external-link"
-                    trailingIconHover="agora-solid-external-link"
-                    onClick={() => router.push("/ajuda-e-contactos")}
-                  >
-                    {t("admin-datasets:form.contactAction")}
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-
-            {catalogEntry ? (
-              <div className="admin-new-page__admin-section">
-                <p className="text-primary-900 text-base font-bold leading-7">
-                  {catalogEntry.title}
-                </p>
-                <div className="text-neutral-700 text-sm leading-relaxed">
-                  {formatHtmlParagraphs(catalogEntry.description)}
-                </div>
-                <div className="flex gap-4 flex-wrap"></div>
-              </div>
-            ) : null}
-          </div>
-        </>
-      )}
-
-      {currentStep >= 2 && (
-        <DatasetsAdminClient
-          pageContent={pageContent}
-          key={sessionKey}
-          currentStep={currentStep}
-          datasetId={createdDatasetId}
-          onNextStep={() => router.push(buildStepUrl(currentStep + 1, createdDatasetId))}
-          onPreviousStep={() => router.push(buildStepUrl(currentStep - 1, createdDatasetId))}
-          onDatasetCreated={(id) => {
-            setCreatedDatasetId(id);
-            router.push(buildStepUrl(currentStep + 1, id));
-          }}
-          onComplete={() => router.push("/admin/me/datasets")}
-        />
-      )}
     </AdminLayout>
   );
 }
