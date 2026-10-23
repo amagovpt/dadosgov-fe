@@ -61,6 +61,7 @@ import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import { can } from "@/utils/permissions";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
+import { getDatasetPublicationIssues, hasMissingDraftFrequency } from "@/utils/datasetPublication";
 
 interface DatasetsEditClientProps {
   pageContent: BoDatasetsPage;
@@ -152,7 +153,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
         setFeatured(ds.featured || false);
 
         const license = ds.license || "";
-        const frequency = ds.frequency || "";
+        const frequency = hasMissingDraftFrequency(ds) ? "" : ds.frequency || "";
         const keywords = (ds.tags || []).join(",");
         const spatialGranularity = ds.spatial?.granularity || "";
 
@@ -443,6 +444,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
 
   const canEdit = can(dataset, "edit");
   const canDelete = can(dataset, "delete");
+  const publicationIssues = getDatasetPublicationIssues(dataset);
+  const publicationBlocked = dataset.private && publicationIssues.length > 0;
   const feedback =
     apiError || apiSuccess || dataset.archived || dataset.deleted ? (
       <div className="flex flex-col gap-32">
@@ -492,7 +495,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             leadingIconHover={
               dataset.private ? "agora-solid-document" : "/Icons/dataset-move-to-draft.svg"
             }
-            disabled={isSubmitting}
+            disabled={isSubmitting || publicationBlocked}
+            aria-describedby={publicationBlocked ? "dataset-publication-requirements" : undefined}
             onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
           >
             {t(dataset.private ? "review.publishAction" : "resourceEditing.moveToDraft")}
@@ -501,6 +505,17 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
       }
     >
       {resourceEditor}
+      {publicationBlocked && (
+        <div id="dataset-publication-requirements">
+          <StatusCard
+            variant="warning"
+            showIcon
+            description={t("publication.incomplete", {
+              fields: publicationIssues.map((field) => t(`publication.fields.${field}`)).join(", "),
+            })}
+          />
+        </div>
+      )}
       {transferDialogOpen && (
         <DatasetsEditTransferPopup
           onClose={() => setTransferDialogOpen(false)}

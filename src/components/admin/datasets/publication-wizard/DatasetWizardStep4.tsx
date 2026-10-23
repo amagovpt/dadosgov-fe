@@ -24,6 +24,7 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import type { AdminCard } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
+import { getDatasetPublicationIssues } from "@/utils/datasetPublication";
 
 export interface DatasetWizardStep4Props {
   redesigned?: boolean;
@@ -47,6 +48,18 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
     onSaveDraft,
     isSubmitting,
   } = props;
+  const publicationIssues = createdDataset ? getDatasetPublicationIssues(createdDataset) : [];
+  const publicationBlocked = !createdDataset || publicationIssues.length > 0;
+  const publicationFeedback =
+    publicationIssues.length > 0 ? (
+      <StatusCard
+        variant="warning"
+        showIcon
+        description={t("publication.incomplete", {
+          fields: publicationIssues.map((field) => t(`publication.fields.${field}`)).join(", "),
+        })}
+      />
+    ) : null;
 
   const qualityScore =
     createdDataset?.quality?.score != null ? Math.round(createdDataset.quality.score * 100) : 0;
@@ -56,7 +69,9 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
     if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
     return String(value);
   };
-  const timeAgo = formatDateToTimeAgo(createdDataset ? getDatasetLastUpdate(createdDataset) : undefined);
+  const timeAgo = formatDateToTimeAgo(
+    createdDataset ? getDatasetLastUpdate(createdDataset) : undefined
+  );
   const href = createdDataset
     ? `/datasets/${createdDataset.slug}`
     : `/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
@@ -159,6 +174,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
               </CardDescription>
             </BodySectionContainer>
           </CardGeneralV2>
+          {publicationFeedback}
           <div className="flex flex-wrap items-center justify-end gap-32">
             <Button
               appearance="link"
@@ -167,7 +183,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
               leadingIcon="agora-line-download"
               leadingIconHover="agora-solid-download"
               onClick={onSaveDraft}
-              disabled={disabled}
+              disabled={isSubmitting}
             >
               {isSubmitting ? t("form.savingDraft") : t("form.saveCreationDraft")}
             </Button>
@@ -177,7 +193,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
               leadingIcon="agora-line-check-circle"
               leadingIconHover="agora-solid-check-circle"
               onClick={onPublish}
-              disabled={disabled}
+              disabled={disabled || publicationBlocked}
             >
               {isSubmitting ? t("form.publishingDataset") : t("review.publishAction")}
             </Button>
@@ -321,10 +337,11 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
         >
           {isSubmitting ? t("form.savingDraft") : t("form.saveDraftAction")}
         </Button>
-        <Button variant="primary" onClick={onPublish} disabled={isSubmitting}>
+        <Button variant="primary" onClick={onPublish} disabled={isSubmitting || publicationBlocked}>
           {isSubmitting ? t("form.publishingDataset") : t("form.publishDatasetAction")}
         </Button>
       </div>
+      {publicationFeedback}
     </>
   );
 }

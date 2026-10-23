@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
@@ -26,19 +26,32 @@ export default function DatasetsNewClient({ pageContent, orgId }: DatasetsNewCli
   const requestedStep = Number(searchParams.get("step"));
   const currentStep =
     Number.isInteger(requestedStep) && requestedStep >= 1 && requestedStep <= 4 ? requestedStep : 1;
-  const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(
-    searchParams.get("datasetId")
-  );
-  const datasetId = createdDatasetId ?? searchParams.get("datasetId");
+  const datasetId = searchParams.get("datasetId");
+  const creationId = searchParams.get("creationId");
+  const pendingCreationId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (isProfileLoading) return;
+    if (creationId) {
+      pendingCreationId.current = null;
+      return;
+    }
+    // A bare creation link starts a new attempt; its URL then survives reloads.
+    pendingCreationId.current ??= crypto.randomUUID();
+    const query = new URLSearchParams(searchParams);
+    query.set("creationId", pendingCreationId.current);
+    router.replace(localizeHref(`${basePath}/datasets/new?${query}`, locale));
+  }, [basePath, creationId, isProfileLoading, locale, router, searchParams]);
   const listUrl = localizeHref(`${basePath}/datasets`, locale);
   const buildStepUrl = (step: number, id = datasetId) => {
     const query = new URLSearchParams({ step: String(step) });
+    if (creationId) query.set("creationId", creationId);
     if (id) query.set("datasetId", id);
     return localizeHref(`${basePath}/datasets/new?${query}`, locale);
   };
   const pageTitle = t("form.createTitle");
 
-  if (isProfileLoading) return null;
+  if (isProfileLoading || !creationId) return null;
 
   return (
     <AdminLayout
@@ -62,9 +75,11 @@ export default function DatasetsNewClient({ pageContent, orgId }: DatasetsNewCli
       headerInfoClassName="max-w-[592px]"
     >
       <DatasetsAdminClient
-        key={basePath}
+        key={`${basePath}:${creationId}`}
         pageContent={pageContent}
         redesigned
+        draftScope={basePath}
+        creationId={creationId}
         initialProducerId={profile.type === "organization" ? profile.orgId : undefined}
         currentStep={currentStep}
         datasetId={datasetId}
@@ -73,7 +88,6 @@ export default function DatasetsNewClient({ pageContent, orgId }: DatasetsNewCli
           router.push(currentStep > 1 ? buildStepUrl(currentStep - 1) : listUrl)
         }
         onDatasetCreated={(id) => {
-          setCreatedDatasetId(id);
           router.push(buildStepUrl(currentStep + 1, id));
         }}
         onComplete={() => router.push(listUrl)}

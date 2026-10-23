@@ -83,6 +83,7 @@
     "savingDraft": "Saving...",
     "publishDatasetAction": "Publish the dataset",
     "publishingDataset": "Publishing...",
+    "localSaveError": "The form could not be saved in this browser. Keep this page open to avoid losing your changes.",
     "restoreError": "Could not recover the dataset. Go back to the previous step.",
     "step2SaveError": "Error saving the dataset. Try again.",
     "missingDatasetError": "Error: the dataset was not created. Go back to the previous step and complete the form.",
@@ -413,6 +414,18 @@
     "filesSaved": "Files uploaded successfully.",
     "immediateFileHint": "Selected files are uploaded to this dataset.",
     "editorFileHint": "Files will be saved after confirming the resource metadata."
+  },
+  "publication": {
+    "incomplete": "Complete and save the required fields before publishing: {{fields}}.",
+    "draftMinimum": "Select a publisher and enter a title and a description to save the draft.",
+    "fields": {
+      "title": "title",
+      "description": "description",
+      "frequency": "update frequency",
+      "producer": "publisher",
+      "resources": "at least one resource",
+      "temporalCoverage": "valid temporal coverage"
+    }
   },
   "review": {
     "successTitle": "Your dataset has been created successfully",

@@ -1,7 +1,8 @@
 "use client";
 
 import type React from "react";
-import { createContactPoint } from "@/service/api/organizations";
+import { useEffect } from "react";
+import { createContactPoint, fetchOrgContactPoints } from "@/service/api/organizations";
 import type { ContactPoint } from "@/service/types/dataset";
 import type { DatasetWizardDraftContact } from "@/components/admin/datasets/publication-wizard/datasetWizardTypes";
 
@@ -22,11 +23,50 @@ export function useDatasetWizardContactActions({
   setSelectedContactPointIds,
   setDraftContacts,
 }: UseDatasetWizardContactActionsParams) {
+  // Ignore a previous producer's response after switching organizations.
+  useEffect(() => {
+    if (!selectedProducer || selectedProducer === "user") return;
+    let cancelled = false;
+    async function loadContactPoints() {
+      const response = await fetchOrgContactPoints(selectedProducer);
+      if (cancelled) return;
+      setOrgContactPoints((previous) => {
+        const contacts = new Map(response.data.map((contact) => [contact.id, contact]));
+        // Keep contacts saved while the producer's initial request was in flight.
+        previous.forEach((contact) => contacts.set(contact.id, contact));
+        return [...contacts.values()];
+      });
+      if (response.data.length > 0) setDraftContacts([]);
+    }
+    void loadContactPoints();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedProducer, setDraftContacts, setOrgContactPoints]);
+
+  const handleContactSaved = (contact: ContactPoint, isNew: boolean) => {
+    setOrgContactPoints((previous) => {
+      const index = previous.findIndex((item) => item.id === contact.id);
+      return index < 0
+        ? [...previous, contact]
+        : previous.map((item) => (item.id === contact.id ? contact : item));
+    });
+    if (isNew)
+      setSelectedContactPointIds((previous) =>
+        previous.includes(contact.id) ? previous : [...previous, contact.id]
+      );
+  };
+
+  const handleRemoveContact = (id: string) => {
+    setOrgContactPoints((previous) => previous.filter((contact) => contact.id !== id));
+    setSelectedContactPointIds((previous) => previous.filter((contactId) => contactId !== id));
+  };
+
   function toggleExistingContact(id: string) {
     setSelectedContactPointIds((previousIds) =>
       previousIds.includes(id)
         ? previousIds.filter((currentId) => currentId !== id)
-        : [...previousIds, id],
+        : [...previousIds, id]
     );
   }
 
@@ -35,8 +75,8 @@ export function useDatasetWizardContactActions({
       previousDrafts.map((draft) =>
         draft.id === draftId
           ? { ...draft, [field]: value, errors: { ...draft.errors, [field]: false } }
-          : draft,
-      ),
+          : draft
+      )
     );
   }
 
@@ -54,8 +94,8 @@ export function useDatasetWizardContactActions({
     if (Object.keys(errors).length > 0) {
       setDraftContacts((previousDrafts) =>
         previousDrafts.map((currentDraft) =>
-          currentDraft.id === draftId ? { ...currentDraft, errors } : currentDraft,
-        ),
+          currentDraft.id === draftId ? { ...currentDraft, errors } : currentDraft
+        )
       );
       requestAnimationFrame(() => {
         document
@@ -81,7 +121,7 @@ export function useDatasetWizardContactActions({
       setOrgContactPoints((previousContactPoints) => [...previousContactPoints, newContact]);
       setSelectedContactPointIds((previousIds) => [...previousIds, newContact.id]);
       setDraftContacts((previousDrafts) =>
-        previousDrafts.filter((currentDraft) => currentDraft.id !== draftId),
+        previousDrafts.filter((currentDraft) => currentDraft.id !== draftId)
       );
     } catch (error) {
       console.error("Error creating contact point:", error);
@@ -104,6 +144,8 @@ export function useDatasetWizardContactActions({
   }
 
   return {
+    handleContactSaved,
+    handleRemoveContact,
     handleAddDraftContactRow,
     handleSaveContactDraft,
     toggleExistingContact,

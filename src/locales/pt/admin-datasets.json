@@ -83,6 +83,7 @@
     "savingDraft": "A guardar...",
     "publishDatasetAction": "Publicar o conjunto de dados",
     "publishingDataset": "A publicar...",
+    "localSaveError": "Não foi possível guardar o formulário neste navegador. Mantenha esta página aberta para não perder as alterações.",
     "restoreError": "Não foi possível recuperar o conjunto de dados. Volte ao passo anterior.",
     "step2SaveError": "Erro ao guardar o conjunto de dados. Tente novamente.",
     "missingDatasetError": "Erro: o conjunto de dados não foi criado. Volte ao passo anterior e preencha o formulário.",
@@ -413,6 +414,18 @@
     "filesSaved": "Ficheiros carregados com sucesso.",
     "immediateFileHint": "Os ficheiros selecionados são carregados para este conjunto de dados.",
     "editorFileHint": "Os ficheiros serão guardados após confirmar os metadados do recurso."
+  },
+  "publication": {
+    "incomplete": "Preencha e guarde os campos obrigatórios antes de publicar: {{fields}}.",
+    "draftMinimum": "Indique um produtor, um título e uma descrição para guardar o rascunho.",
+    "fields": {
+      "title": "título",
+      "description": "descrição",
+      "frequency": "frequência de atualização",
+      "producer": "produtor",
+      "resources": "pelo menos um recurso",
+      "temporalCoverage": "cobertura temporal válida"
+    }
   },
   "review": {
     "successTitle": "O seu conjunto de dados foi criado com sucesso",

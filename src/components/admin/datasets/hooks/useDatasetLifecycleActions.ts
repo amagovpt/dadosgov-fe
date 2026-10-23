@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { deleteDataset, updateDataset } from "@/service/api/datasets";
 import { can } from "@/utils/permissions";
 import type { Dataset } from "@/service/types/dataset";
+import { getDatasetPublicationIssues } from "@/utils/datasetPublication";
 
 interface UseDatasetLifecycleActionsParams {
   listUrl: string;
@@ -30,7 +31,16 @@ export function useDatasetLifecycleActions({
   const { t } = useTranslation("admin-datasets");
 
   async function handlePublishDataset() {
-    if (!dataset) return;
+    if (!dataset || !can(dataset, "edit")) return;
+    const issues = getDatasetPublicationIssues(dataset);
+    if (issues.length) {
+      setApiError(
+        t("publication.incomplete", {
+          fields: issues.map((field) => t(`publication.fields.${field}`)).join(", "),
+        })
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     setApiError(null);
