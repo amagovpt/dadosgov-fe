@@ -9,6 +9,7 @@ import {
   Icon,
   ProgressBar,
   CardExpandable,
+  ModalProvider,
 } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
@@ -19,11 +20,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
 import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import {
-  QUALITY_CRITERIA,
-  getQualityDetails,
-  getQualityMissing,
-} from "@/utils/datasetQuality";
+import { QUALITY_CRITERIA, getQualityDetails, getQualityMissing } from "@/utils/datasetQuality";
 import { formatDateLong } from "@/utils/formatDate";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
 import { formatMetricValue } from "@/utils/formatNumber";
@@ -60,10 +57,14 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
     if (!user) return;
     let cancelled = false;
     isFollowing("datasets", dataset.id, user.id)
-      .then((following) => { if (!cancelled) setIsFavorite(following); })
-      .catch(() => { });
-    return () => { cancelled = true; };
-  }, [user,user?.id, dataset.id]);
+      .then((following) => {
+        if (!cancelled) setIsFavorite(following);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [user, user?.id, dataset.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -96,14 +97,12 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
   const qualityMissing = getQualityMissing(dataset.quality);
 
   return (
-    <main className="flex w-full flex-col items-center justify-center gap-64">
-      {/* Breadcrumb */}
-      <div className="container flex items-center justify-between py-64">
-        <BreadcrumbDynamic
-          darkMode={false}
-          overrides={{ [dataset.slug]: dataset.title }}
-        />
-      </div>
+    <ModalProvider>
+      <main className="flex w-full flex-col items-center justify-center gap-64">
+        {/* Breadcrumb */}
+        <div className="container flex items-center justify-between py-64">
+          <BreadcrumbDynamic darkMode={false} overrides={{ [dataset.slug]: dataset.title }} />
+        </div>
 
       {/* Actions */}
       <div className="container flex items-center justify-end gap-16">
@@ -135,23 +134,23 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
               </Button>
             </Link>
           )}
-      </div>
-
-      <div className="container grid gap-32 xl:grid-cols-12">
-        {/* Main Content Column */}
-        <div className="xl:col-span-6 xl:block">
-          <div className="flex flex-col gap-4" ref={titleRef}>
-            <h1 className="mb-24 text-xl-bold leading-tight text-primary-900">{dataset.title}</h1>
-            <DatasetBadges badges={dataset.badges} className="mb-24" />
-          </div>
-
-          {/* Description */}
-          <DescriptionWithReadMore
-            text={dataset.description}
-            sidebarRef={sidebarRef}
-            titleRef={titleRef}
-          />
         </div>
+
+        <div className="container grid gap-32 xl:grid-cols-12">
+          {/* Main Content Column */}
+          <div className="xl:col-span-6 xl:block">
+            <div className="flex flex-col gap-4" ref={titleRef}>
+              <h1 className="mb-24 text-xl-bold leading-tight text-primary-900">{dataset.title}</h1>
+              <DatasetBadges badges={dataset.badges} className="mb-24" />
+            </div>
+
+            {/* Description */}
+            <DescriptionWithReadMore
+              text={dataset.description}
+              sidebarRef={sidebarRef}
+              titleRef={titleRef}
+            />
+          </div>
 
         {/* Sidebar */}
         <div className="xl:col-span-6">
@@ -182,17 +181,17 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
                 </div>
               )}
 
-              <div className="space-y-16">
-                <div className="mb-8 text-m-light text-neutral-900">
-                  {dataset.organization ? (
-                    <Link
-                      href={`/organizations/${dataset.organization.slug}`}
-                      className="hover:underline"
-                    >
-                      {dataset.organization.name}
-                    </Link>
-                  ) : dataset.owner ? (
-                    /* LEDG-1861: user-authored datasets link to the public
+                <div className="space-y-16">
+                  <div className="mb-8 text-m-light text-neutral-900">
+                    {dataset.organization ? (
+                      <Link
+                        href={`/organizations/${dataset.organization.slug}`}
+                        className="hover:underline"
+                      >
+                        {dataset.organization.name}
+                      </Link>
+                    ) : dataset.owner ? (
+                      /* LEDG-1861: user-authored datasets link to the public
                        profile instead of the broken "Organização Desconhecida"
                        fallback. */
                     <Link
@@ -264,60 +263,61 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
               </div>
             </div>
 
-            {/* Quality */}
-            <CardExpandable
-              variant="primary-100"
-              cardTitle={tds("detail.quality.title")}
-              cardHeadingLevel="h3"
-              cardSubtitle={
-                <div className="mt-8 flex flex-col gap-4">
-                  <div
-                    className={
-                      qualityScore <= 45
-                        ? "quality-progress-warning"
-                        : qualityScore > 50
-                          ? "quality-progress-success"
-                          : ""
-                    }
-                  >
-                    <ProgressBar value={qualityScore} max={100} hidePercentageValue={true} />
-                  </div>
-                  <div className="text-xs text-neutral-700">
-                    {qualityScore}%
-                    {qualityDetails.length > 0 &&
-                      ` (${qualityDetails.map((key) => tds(`quality.${key}`)).join(", ")})`}
-                  </div>
-                </div>
-              }
-              accordionHeadingTitle={
-                qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")
-              }
-              expanded={qualityExpanded}
-              onExpanded={() => syncQualityExpanded(true)}
-              onCollapsed={() => syncQualityExpanded(false)}
-            >
-              {qualityMissing.length > 0 && (
-                <div className="flex flex-col gap-8">
-                  {qualityMissing.map((key) => (
-                    <div key={key} className="flex items-center gap-8">
-                      <Icon
-                        name="agora-line-alert-triangle"
-                        className="h-20 w-20 fill-[#B06112]"
-                      />
-                      <span className="text-base text-neutral-900">
-                        {tds("detail.quality.missing", { label: tds(`quality.${key}`) })}
-                      </span>
+              {/* Quality */}
+              <CardExpandable
+                variant="primary-100"
+                cardTitle={tds("detail.quality.title")}
+                cardHeadingLevel="h3"
+                cardSubtitle={
+                  <div className="mt-8 flex flex-col gap-4">
+                    <div
+                      className={
+                        qualityScore <= 45
+                          ? "quality-progress-warning"
+                          : qualityScore > 50
+                            ? "quality-progress-success"
+                            : ""
+                      }
+                    >
+                      <ProgressBar value={qualityScore} max={100} hidePercentageValue={true} />
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardExpandable>
+                    <div className="text-xs text-neutral-700">
+                      {qualityScore}%
+                      {qualityDetails.length > 0 &&
+                        ` (${qualityDetails.map((key) => tds(`quality.${key}`)).join(", ")})`}
+                    </div>
+                  </div>
+                }
+                accordionHeadingTitle={
+                  qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")
+                }
+                expanded={qualityExpanded}
+                onExpanded={() => syncQualityExpanded(true)}
+                onCollapsed={() => syncQualityExpanded(false)}
+              >
+                {qualityMissing.length > 0 && (
+                  <div className="flex flex-col gap-8">
+                    {qualityMissing.map((key) => (
+                      <div key={key} className="flex items-center gap-8">
+                        <Icon
+                          name="agora-line-alert-triangle"
+                          className="h-20 w-20 fill-[#B06112]"
+                        />
+                        <span className="text-base text-neutral-900">
+                          {tds("detail.quality.missing", { label: tds(`quality.${key}`) })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardExpandable>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <DatasetTabs dataset={dataset} />
-    </main>
+        {/* Tabs */}
+        <DatasetTabs dataset={dataset} />
+      </main>
+    </ModalProvider>
   );
 }
