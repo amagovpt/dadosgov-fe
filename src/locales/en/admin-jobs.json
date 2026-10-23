@@ -1,0 +1,52 @@
+{
+  "title": "Scheduled jobs",
+  "metadata": {
+    "title": "Scheduled jobs",
+    "description": "Read-only view of the portal's scheduled jobs: harvesting, metrics and purges."
+  },
+  "intro": {
+    "description": "Jobs the portal runs automatically, with each one's schedule and last run. This page is read-only."
+  },
+  "columns": {
+    "name": "Name",
+    "task": "Task",
+    "kind": "Type",
+    "schedule": "Schedule",
+    "lastRun": "Last run",
+    "status": "Status"
+  },
+  "kind": {
+    "harvester": "Harvesting",
+    "system": "System"
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "filters": {
+    "label": "Type",
+    "all": "All",
+    "harvester": "Harvesting",
+    "system": "System"
+  },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search by job name"
+  },
+  "values": {
+    "never": "—"
+  },
+  "emptyState": {
+    "title": "No scheduled jobs",
+    "description": "No job is scheduled on this portal."
+  },
+  "errors": {
+    "loadFailed": "The scheduled jobs could not be loaded. Please try again in a moment."
+  },
+  "unscheduled": {
+    "title": "Registered jobs with no schedule",
+    "description": "The portal knows how to run these, but none of them is scheduled. That may be deliberate, or simply never configured.",
+    "count": "{{count}} job with no schedule",
+    "count_other": "{{count}} jobs with no schedule"
+  }
+}

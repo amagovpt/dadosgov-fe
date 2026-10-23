@@ -17,7 +17,7 @@ export default function ResultsCount({ count, isLoading, className }: ResultsCou
   const formattedCount = count.toLocaleString(intlLocale);
 
   return (
-    <p className={twMerge("text-sm mb-16 text-neutral-700", className)}>
+    <p className={twMerge("text-s-regular! mb-16 text-neutral-700", className)}>
       {isLoading ? t("loading") : t("results", { count, formattedCount })}
     </p>
   );
