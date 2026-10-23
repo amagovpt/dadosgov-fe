@@ -825,6 +825,10 @@ export function getPT2030ProjectData(locale: string = "pt") {
                   }
                 }
               }
+              breadcrumbs {
+                label
+                url
+              }
             }
           }
           projectSheet {
@@ -1017,6 +1021,10 @@ export function getPT2030BeneficiaryData(locale: string = "pt") {
                   }
                 }
               }
+              breadcrumbs {
+                label
+                url
+              }
             }
           }
           beneficiarySheet {
@@ -1190,6 +1198,10 @@ export function getPrrProjectData(locale: string = "pt") {
                     icon
                   }
                 }
+              }
+              breadcrumbs {
+                label
+                url
               }
             }
           }

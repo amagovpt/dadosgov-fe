@@ -298,7 +298,7 @@ export default async function ProjectPage({
     ),
   };
 
-  const prrProjectTechnicalSheet = await getTechnicalSheetData("prr-ficha-de-projeto", locale);
+  // const prrProjectTechnicalSheet = await getTechnicalSheetData("prr-ficha-de-projeto", locale);
 
   const {
     hero,
@@ -346,7 +346,7 @@ export default async function ProjectPage({
 
         <BenProjSheet.Root>
           <BenProjSheet.List>
-            <BenProjSheet.Wrapper className="border-t-2 border-t-neutral-200">
+            <BenProjSheet.Wrapper>
               <BenProjSheet.Item title={t("sheetBenProj.fields.nome")} value={viewData.nome} />
             </BenProjSheet.Wrapper>
             <BenProjSheet.Wrapper>
@@ -378,7 +378,7 @@ export default async function ProjectPage({
           </BenProjSheet.List>
 
           <BenProjSheet.List>
-            <BenProjSheet.Wrapper className="xl:border-t-2 xl:border-t-neutral-200">
+            <BenProjSheet.Wrapper>
               <BenProjSheet.Item
                 title={t("prr.sheet.totalProjectValue")}
                 value={valorTotalProjeto}
@@ -408,7 +408,7 @@ export default async function ProjectPage({
         </BenProjSheet.Root>
       </Section>
 
-      {/* <Section className="flex flex-col items-center">
+      <Section className="flex flex-col items-center">
         <InfoBlock.Content className="flex flex-col">
           <ProjectTabsHashSync>
             <Tabs.Section data-tab-id={beneficiaries.id}>
@@ -456,7 +456,7 @@ export default async function ProjectPage({
                   geographicDistribution={geographicDistribution.cards}
                   geographicDistributionData={viewData.geographicDistributionData}
                 >
-                  <SourceInfoFooter
+                  {/* <SourceInfoFooter
                     dataSource={
                       viewData.geographicDistributionSourceInfo.sourceLink ? (
                         <a
@@ -472,13 +472,13 @@ export default async function ProjectPage({
                     }
                     update={viewData.geographicDistributionSourceInfo.referenceDate ?? ""}
                     technicalSheet={prrProjectTechnicalSheet}
-                  />
+                  /> */}
                 </BenProjSheetTabPRR.GeographicDistribution>
               </Tabs.Body>
             </Tabs.Section>
           </ProjectTabsHashSync>
         </InfoBlock.Content>
-      </Section> */}
+      </Section>
     </main>
   );
 }
