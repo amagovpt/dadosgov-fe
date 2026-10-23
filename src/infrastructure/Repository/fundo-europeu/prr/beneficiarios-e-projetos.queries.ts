@@ -937,6 +937,42 @@ entidades AS (
         a_1.montante_contratualizado, a_1.perc_participacao, a_1.valor_contrato, a_1.dt_referencia
 ),
 
+entidades_saida_base AS (
+    SELECT DISTINCT
+        e.cd_projeto,
+        e.nif_entidade,
+        e.ds_entidade,
+        e.papel_entidade,
+        e.flg_consorcio,
+        e.cd_entidade,
+        e.perc_participacao,
+        e.valor_contratado,
+        e.valor_pago
+    FROM entidades e
+),
+
+entidades_saida AS (
+    SELECT
+        e.cd_projeto,
+        e.nif_entidade,
+        e.ds_entidade,
+        e.papel_entidade,
+        e.flg_consorcio,
+        SUM(
+            CASE
+                WHEN e.perc_participacao IS NULL THEN e.valor_contratado
+                ELSE e.perc_participacao * e.valor_contratado / 100::numeric
+            END
+        ) AS total
+    FROM entidades_saida_base e
+    GROUP BY
+        e.cd_projeto,
+        e.nif_entidade,
+        e.ds_entidade,
+        e.papel_entidade,
+        e.flg_consorcio
+),
+
 exclusoes_entidades AS (
     SELECT (z.cd_contrato || z.cd_projeto) || z.cd_entidade AS chave
     FROM (
@@ -1051,6 +1087,50 @@ tmp_criterios_atribuicao AS (
     GROUP BY a.cd_projeto, a.link_criterio_atribuicao
 ),
 
+consorcio_desagregada AS (
+    SELECT c.cd_projeto,
+           c.cd_contrato,
+           unnest(string_to_array(c.cd_entidade, '|'::text)) AS cd_entidade
+    FROM prr.consorcio c
+    WHERE c.cd_projeto = (SELECT cd FROM params)
+),
+
+entidades_contrato_projeto AS (
+    SELECT ec.cd_contrato,
+           ec.dt_referencia,
+           ec.ds_contrato,
+           ec.cd_entidade,
+           ec.ds_entidade,
+           ec.ds_papel_entidade_contrato,
+           ec.valor_contrato,
+           c.cd_projeto
+    FROM prr.entidades_contratos ec
+    JOIN prr.contratos c
+      ON ec.cd_contrato = c.cd_contrato
+    WHERE ec.dt_referencia = (SELECT max(dt_referencia) FROM prr.entidades_contratos)
+      AND c.dt_referencia = (SELECT max(dt_referencia) FROM prr.contratos)
+      AND c.cd_projeto = (SELECT cd FROM params)
+),
+
+entidades_especiais AS (
+    SELECT b.cd_contrato,
+           b.dt_referencia,
+           b.ds_contrato,
+           b.cd_entidade,
+           b.ds_entidade,
+           b.ds_papel_entidade_contrato,
+           b.valor_contrato,
+           b.cd_projeto
+    FROM entidades_contrato_projeto b
+    WHERE EXISTS (
+        SELECT 1
+        FROM consorcio_desagregada a
+        WHERE a.cd_projeto = b.cd_projeto
+          AND a.cd_entidade = b.cd_entidade
+          AND a.cd_contrato <> b.cd_contrato
+    )
+),
+
 tmp_benef_fornecedores AS (
     SELECT a.code,
            jsonb_agg(jsonb_build_object(
@@ -1080,20 +1160,10 @@ tmp_benef_fornecedores AS (
         FROM projetos p
         JOIN tmp_entidades_contratos e ON p.cd_projeto = e.cd_projeto
         LEFT JOIN exclusoes_entidades ex ON e.chave = ex.chave
-        LEFT JOIN (
-            SELECT DISTINCT ON (a_2.cd_projeto)
-                   a_2.cd_contrato,
-                   a_2.dt_referencia,
-                   a_2.ds_contrato,
-                   a_2.cd_entidade,
-                   a_2.ds_entidade,
-                   a_2.ds_papel_entidade_contrato,
-                   a_2.valor_contrato,
-                   a_2.cd_projeto
-            FROM prr.entidades_especiais a_2
-        ) a1 ON e.cd_projeto = a1.cd_projeto
-            AND e.cd_contrato = a1.cd_contrato
-            AND e.cd_entidade = a1.cd_entidade
+        LEFT JOIN entidades_especiais a1
+          ON e.cd_projeto = a1.cd_projeto
+         AND e.cd_contrato = a1.cd_contrato
+         AND e.cd_entidade = a1.cd_entidade
         WHERE ex.chave IS NULL
           AND e.papel_entidade = 'Fornecedor'
         GROUP BY
@@ -1537,8 +1607,7 @@ FROM (
                     ELSE p.dt_efetiva_conclusao END AS end_date,
                p.dt_inicio,
                p.sumario AS summary,
-               CASE WHEN e.perc_participacao IS NULL THEN e.valor_contratado
-                    ELSE e.perc_participacao * e.valor_contratado / 100::numeric END AS total,
+               e.total,
                i.cd_dimensao_estruturante AS dimension_code,
                i.ds_dimensao_estruturante AS dimension,
                i.cd_componente AS component_code,
@@ -1558,7 +1627,7 @@ FROM (
                e.flg_consorcio,
                contratos_contratacao.first_prr_contracts
         FROM projetos p
-        JOIN entidades e ON p.cd_projeto = e.cd_projeto
+        JOIN entidades_saida e ON p.cd_projeto = e.cd_projeto
         LEFT JOIN contratos_contratacao
                ON p.cd_projeto = contratos_contratacao.cd_projeto
               AND e.nif_entidade = contratos_contratacao.id_entidade_principal
