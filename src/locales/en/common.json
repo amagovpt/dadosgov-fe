@@ -383,6 +383,11 @@
     "mainBeneficiaries": "Main beneficiaries",
     "otherBeneficiaries": "Other beneficiaries",
     "suppliers": "Suppliers",
+    "roles": {
+      "intermediateBeneficiary": "Intermediate beneficiary",
+      "beneficiary": "Beneficiary",
+      "supplier": "Supplier"
+    },
     "filters": {
       "amounts": {
         "from": "From {{min}}€",
@@ -426,7 +431,15 @@
       "paidValue": "Paid Amount",
       "dimension": "Dimension",
       "region": "Region",
-      "municipality": "Municipality"
+      "municipality": "Municipality",
+      "approvedValueIntermediateBeneficiaries": "Approved Amount as Intermediate Beneficiary",
+      "approvedValueBeneficiaries": "Approved Amount as Beneficiary",
+      "approvedValueSuppliers": "Approved Amount as Supplier",
+      "approvedValuePartners": "Approved Amount as Partner",
+      "paidValueIntermediateBeneficiaries": "Amount Received as Intermediate Beneficiary",
+      "paidValueBeneficiaries": "Amount Received as Beneficiary",
+      "paidValueSuppliers": "Amount Received as Supplier",
+      "paidValuePartners": "Amount Received as Partner"
     },
     "exportResults": "Results of the search for {{subject}}"
   },
