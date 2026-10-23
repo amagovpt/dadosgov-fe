@@ -51,7 +51,7 @@ export default function DatasetsClient({
     scope === "organization"
       ? `/admin/org/${orgId}/datasets/new`
       : scope === "system"
-        ? "/admin/datasets/new"
+        ? "/admin/system/datasets/new"
         : "/admin/me/datasets/new";
   const listTitleKey =
     scope === "organization"

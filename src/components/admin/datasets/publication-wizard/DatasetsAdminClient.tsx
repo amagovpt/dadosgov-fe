@@ -31,6 +31,7 @@ import {
 } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
 import { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import { useAuth } from "@/context/AuthContext";
+import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { getZoneName } from "@/utils/spatialLabels";
@@ -56,6 +57,7 @@ interface DatasetsAdminClientProps {
   redesigned?: boolean;
   currentStep?: number;
   datasetId?: string | null;
+  initialProducerId?: string;
   onNextStep?: () => void;
   onPreviousStep?: () => void;
   onDatasetCreated?: (datasetId: string) => void;
@@ -67,6 +69,7 @@ export default function DatasetsAdminClient({
   redesigned = false,
   currentStep: controlledCurrentStep,
   datasetId,
+  initialProducerId,
   onNextStep,
   onPreviousStep,
   onDatasetCreated,
@@ -76,6 +79,7 @@ export default function DatasetsAdminClient({
   const router = useRouter();
   const { locale } = splitLocale(usePathname());
   const { user } = useAuth();
+  const { organizations } = useActiveOrganization();
   const [internalCurrentStep, setInternalCurrentStep] = useState(2);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -93,7 +97,7 @@ export default function DatasetsAdminClient({
   const [datasetAcronym, setDatasetAcronym] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
   const [datasetShortDescription] = useState("");
-  const selectedProducerRef = useRef("");
+  const selectedProducerRef = useRef(initialProducerId ?? "");
   const selectedLicenseRef = useRef("");
   const selectedFrequencyRef = useRef("");
   const selectedKeywordsRef = useRef("");
@@ -111,7 +115,7 @@ export default function DatasetsAdminClient({
     resetErrors,
     focusFirstError,
   } = useFormErrors<DatasetFormField>();
-  const [selectedProducer, setSelectedProducer] = useState("");
+  const [selectedProducer, setSelectedProducer] = useState(initialProducerId ?? "");
   const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
   const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
 
@@ -185,14 +189,14 @@ export default function DatasetsAdminClient({
       <DropdownOption key="user" value="user" selected={producerDefaultValue === "user"}>
         {user ? `${user.first_name} ${user.last_name}` : t("admin-datasets:form.producerSelf")}
       </DropdownOption>,
-      ...(user?.organizations || []).map((org) => (
+      ...organizations.map((org) => (
         <DropdownOption key={org.id} value={org.id} selected={producerDefaultValue === org.id}>
           {org.name}
         </DropdownOption>
       )),
     ];
     return <DropdownSection name="identity">{options}</DropdownSection>;
-  }, [user, producerDefaultValue, t]);
+  }, [user, organizations, producerDefaultValue, t]);
 
   const licenseOptions = useMemo(() => {
     const options = licenses.map((license) => (

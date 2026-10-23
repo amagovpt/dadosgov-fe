@@ -8,16 +8,21 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
+import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 
 interface DatasetsNewClientProps {
   pageContent: BoDatasetsPage;
+  orgId?: string;
 }
 
-export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProps) {
+export default function DatasetsNewClient({ pageContent, orgId }: DatasetsNewClientProps) {
   const { t } = useTranslation("admin-datasets");
   const searchParams = useSearchParams();
   const router = useRouter();
   const { locale } = splitLocale(usePathname());
+  const { activeProfile, isLoading: isProfileLoading } = useActiveProfile();
+  const profile = orgId ? { type: "organization" as const, orgId } : activeProfile;
+  const basePath = adminProfileBasePath(profile);
   const requestedStep = Number(searchParams.get("step"));
   const currentStep =
     Number.isInteger(requestedStep) && requestedStep >= 1 && requestedStep <= 4 ? requestedStep : 1;
@@ -25,13 +30,15 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
     searchParams.get("datasetId")
   );
   const datasetId = createdDatasetId ?? searchParams.get("datasetId");
-  const listUrl = localizeHref("/admin/me/datasets", locale);
+  const listUrl = localizeHref(`${basePath}/datasets`, locale);
   const buildStepUrl = (step: number, id = datasetId) => {
     const query = new URLSearchParams({ step: String(step) });
     if (id) query.set("datasetId", id);
-    return localizeHref(`/admin/me/datasets/new?${query}`, locale);
+    return localizeHref(`${basePath}/datasets/new?${query}`, locale);
   };
   const pageTitle = t("form.createTitle");
+
+  if (isProfileLoading) return null;
 
   return (
     <AdminLayout
@@ -55,8 +62,10 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
       headerInfoClassName="max-w-[592px]"
     >
       <DatasetsAdminClient
+        key={basePath}
         pageContent={pageContent}
         redesigned
+        initialProducerId={profile.type === "organization" ? profile.orgId : undefined}
         currentStep={currentStep}
         datasetId={datasetId}
         onNextStep={() => router.push(buildStepUrl(currentStep + 1))}
