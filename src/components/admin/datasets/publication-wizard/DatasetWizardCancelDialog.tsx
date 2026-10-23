@@ -1,7 +1,8 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { AdminConfirmationDialog } from "@/components/admin/AdminConfirmationDialog";
+import { useDatasetConfirmation } from "../DatasetContentProvider";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface DatasetWizardCancelDialogProps {
   variant?: "creation" | "resource" | "resourceEdit";
@@ -14,15 +15,20 @@ export function DatasetWizardCancelDialog({
   onClose,
   onConfirm,
 }: DatasetWizardCancelDialogProps) {
-  const { t } = useTranslation("admin-datasets");
-  const translationKey = variant === "creation" ? "cancelCreation" : "resourceEditor.cancel";
-  const descriptionKey = variant === "resourceEdit" ? "editDescription" : "description";
+  const content = useDatasetConfirmation(
+    variant === "creation"
+      ? "cancel-creation"
+      : variant === "resourceEdit"
+        ? "discard-resource-changes"
+        : "discard-new-resource"
+  );
+  if (!content) return null;
   return (
     <AdminConfirmationDialog
-      title={t(`${translationKey}.title`)}
-      description={t(`${translationKey}.${descriptionKey}`)}
-      cancelLabel={t(`${translationKey}.back`)}
-      confirmLabel={t(`${translationKey}.confirm`)}
+      title={content.title}
+      description={formatHtmlParagraphs(content.description)}
+      cancelLabel={content.cancelLabel}
+      confirmLabel={content.confirmLabel}
       onClose={onClose}
       onConfirm={onConfirm}
     />

@@ -7,6 +7,8 @@ import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
 import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
 import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
 import { DatasetWizardHelp } from "../publication-wizard/DatasetWizardHelp";
+import { getDatasetAuxiliarItem } from "../config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 type DatasetsEditDescriptionSectionProps = {
@@ -47,6 +49,7 @@ export default function DatasetsEditDescriptionSection({
   onRemoveKeyword,
 }: DatasetsEditDescriptionSectionProps) {
   const { t } = useTranslation("admin-datasets");
+  const identificationSection = useDatasetSection("dataset-identification");
 
   const requiredHint = (
     <span className="flex items-center gap-8 text-s-regular text-neutral-700">
@@ -59,14 +62,17 @@ export default function DatasetsEditDescriptionSection({
       {t("form.fieldRequired")}
     </span>
   );
-  const help = (index: number) => (
-    <DatasetWizardHelp item={auxiliaryItems[index]} background="white" />
+  const help = (key: string) => (
+    <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, key)} background="white" />
   );
   return (
     <section className="flex min-w-0 flex-col gap-32">
       <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
-        <h2 className="text-xl-bold">{t("form.identificationSectionTitle")}</h2>
-        <p className="text-m-regular">{t("form.identificationDescription")}</p>
+        <h2 className="text-xl-bold">{identificationSection?.title ?? ""}</h2>
+        <DatasetContentDescription
+          html={identificationSection?.description}
+          className="text-m-regular"
+        />
       </div>
       <div className="flex min-w-0 flex-col gap-16">
         <IsolatedInput
@@ -82,7 +88,7 @@ export default function DatasetsEditDescriptionSection({
           errorFeedbackText={t("edit.fieldRequired")}
         />
         <div className="-mt-8">{requiredHint}</div>
-        {help(0)}
+        {help("title")}
       </div>
       <div className="flex min-w-0 flex-col gap-16">
         <IsolatedInput
@@ -92,7 +98,7 @@ export default function DatasetsEditDescriptionSection({
           defaultValue={loadedAcronym}
           onChange={onAcronymChange}
         />
-        {help(1)}
+        {help("acronym")}
       </div>
       <div className="flex min-w-0 flex-col gap-16">
         <IsolatedTextArea
@@ -126,7 +132,7 @@ export default function DatasetsEditDescriptionSection({
             </span>
           </div>
         </div>
-        {help(2)}
+        {help("description")}
       </div>
       <div className="flex min-w-0 flex-col gap-16">
         <KeywordSelectField
@@ -139,7 +145,7 @@ export default function DatasetsEditDescriptionSection({
           onChange={onKeywordsChange}
           onRemoveKeyword={onRemoveKeyword}
         />
-        {help(3)}
+        {help("keywords")}
       </div>
     </section>
   );

@@ -5,6 +5,8 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 
 import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
 import { DatasetWizardHelp } from "../publication-wizard/DatasetWizardHelp";
+import { getDatasetAuxiliarItem } from "../config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 
 type DatasetsEditAccessTimeSectionProps = {
   auxiliaryItems: AuxiliarItem[];
@@ -40,13 +42,15 @@ export default function DatasetsEditAccessTimeSection({
   onTemporalEndChange,
 }: DatasetsEditAccessTimeSectionProps) {
   const { t } = useTranslation("admin-datasets");
+  const accessSection = useDatasetSection("access-conditions");
+  const temporalSection = useDatasetSection("temporal-coverage");
 
   return (
     <>
       <section className="flex flex-col gap-32">
         <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
-          <h2 className="text-xl-bold">{t("edit.accessSectionTitle")}</h2>
-          <p className="text-m-regular">{t("coverage.accessDescription")}</p>
+          <h2 className="text-xl-bold">{accessSection?.title ?? ""}</h2>
+          <DatasetContentDescription html={accessSection?.description} className="text-m-regular" />
         </div>
         <div className="flex min-w-0 flex-col gap-16">
           <IsolatedSelect
@@ -58,13 +62,19 @@ export default function DatasetsEditAccessTimeSection({
           >
             {licenseOptions}
           </IsolatedSelect>
-          <DatasetWizardHelp item={auxiliaryItems[0]} background="white" />
+          <DatasetWizardHelp
+            item={getDatasetAuxiliarItem(auxiliaryItems, "license")}
+            background="white"
+          />
         </div>
       </section>
       <section id="edit-time-section" className="flex scroll-mt-32 flex-col gap-32">
         <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
-          <h2 className="text-xl-bold">{t("coverage.temporalSectionTitle")}</h2>
-          <p className="text-m-regular">{t("coverage.temporalDescription")}</p>
+          <h2 className="text-xl-bold">{temporalSection?.title ?? ""}</h2>
+          <DatasetContentDescription
+            html={temporalSection?.description}
+            className="text-m-regular"
+          />
         </div>
         <div className="flex min-w-0 flex-col gap-16">
           <IsolatedSelect
@@ -86,7 +96,10 @@ export default function DatasetsEditAccessTimeSection({
             />
             {t("form.fieldRequired")}
           </span>
-          <DatasetWizardHelp item={auxiliaryItems[1]} background="white" />
+          <DatasetWizardHelp
+            item={getDatasetAuxiliarItem(auxiliaryItems, "frequency")}
+            background="white"
+          />
         </div>
         <h3 className="text-l-semibold text-primary-900">{t("coverage.temporalCoverageTitle")}</h3>
         <div className="grid grid-cols-1 gap-32 md:grid-cols-2">
@@ -137,7 +150,10 @@ export default function DatasetsEditAccessTimeSection({
             }
           />
         </div>
-        <DatasetWizardHelp item={auxiliaryItems[2]} background="white" />
+        <DatasetWizardHelp
+          item={getDatasetAuxiliarItem(auxiliaryItems, "temporal-coverage")}
+          background="white"
+        />
       </section>
     </>
   );

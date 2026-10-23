@@ -25,6 +25,8 @@ import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
 import { DatasetWizardCoverageFields } from "./DatasetWizardCoverageFields";
 import { DatasetWizardContacts } from "./DatasetWizardContacts";
 import { DatasetWizardHelp } from "./DatasetWizardHelp";
+import { getDatasetAuxiliarItem } from "../config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 
 type DropdownSection = ReactElement<DropdownSectionProps> | ReactElement<DropdownSectionProps>[];
 
@@ -94,6 +96,9 @@ export interface DatasetWizardStep2Props {
 
 export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
   const { t } = useTranslation("admin-datasets");
+  const identitySection = useDatasetSection("create-identity");
+  const identificationSection = useDatasetSection("dataset-identification");
+  const accessSection = useDatasetSection("access-conditions");
   const {
     router,
     redesigned = false,
@@ -314,9 +319,13 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                     redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"
                   }
                 >
-                  {t(redesigned ? "form.identitySectionTitle" : "form.producerSectionTitle")}
+                  {redesigned ? (identitySection?.title ?? "") : t("form.producerSectionTitle")}
                 </h2>
-                <p>{t(redesigned ? "form.identityDescription" : "form.producerHelper")}</p>
+                {redesigned ? (
+                  <DatasetContentDescription html={identitySection?.description} />
+                ) : (
+                  <p>{t("form.producerHelper")}</p>
+                )}
               </div>
               <div className="flex min-w-0 flex-col gap-16">
                 <IsolatedSelect
@@ -366,11 +375,13 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                     redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"
                   }
                 >
-                  {t(
-                    redesigned ? "form.identificationSectionTitle" : "form.descriptionSectionTitle"
-                  )}
+                  {redesigned
+                    ? (identificationSection?.title ?? "")
+                    : t("form.descriptionSectionTitle")}
                 </h2>
-                {redesigned && <p>{t("form.identificationDescription")}</p>}
+                {redesigned && (
+                  <DatasetContentDescription html={identificationSection?.description} />
+                )}
               </div>
 
               <div className="admin-page__fields-group">
@@ -396,7 +407,9 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                     }
                   />
                   {redesigned && <div className="-mt-8">{requiredHint}</div>}
-                  {redesigned && <DatasetWizardHelp item={auxiliaryItems[0]} />}
+                  {redesigned && (
+                    <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "title")} />
+                  )}
                 </div>
                 <div className="flex min-w-0 flex-col gap-16">
                   <InputText
@@ -409,7 +422,9 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                     value={datasetAcronym}
                     onChange={onDatasetAcronymChange}
                   />
-                  {redesigned && <DatasetWizardHelp item={auxiliaryItems[1]} />}
+                  {redesigned && (
+                    <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "acronym")} />
+                  )}
                 </div>
                 <div className="flex min-w-0 flex-col gap-16">
                   <InputTextArea
@@ -450,7 +465,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                       </div>
                     </div>
                   )}
-                  {redesigned && <DatasetWizardHelp item={auxiliaryItems[2]} />}
+                  {redesigned && (
+                    <DatasetWizardHelp
+                      item={getDatasetAuxiliarItem(auxiliaryItems, "description")}
+                    />
+                  )}
                 </div>
                 <div className="flex min-w-0 flex-col gap-16">
                   <IsolatedSelect
@@ -484,7 +503,9 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                       ))}
                     </div>
                   )}
-                  {redesigned && <DatasetWizardHelp item={auxiliaryItems[3]} />}
+                  {redesigned && (
+                    <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "keywords")} />
+                  )}
                 </div>
               </div>
             </section>
@@ -496,7 +517,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             <h2
               className={redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"}
             >
-              {t("form.accessSectionTitle")}
+              {accessSection?.title}
             </h2>
 
             <div className="admin-page__fields-group">
@@ -510,7 +531,9 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
               >
                 {licenseOptions}
               </IsolatedSelect>
-              {redesigned && <DatasetWizardHelp item={auxiliaryItems[4]} />}
+              {redesigned && (
+                <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "license")} />
+              )}
             </div>
 
             {!redesigned && contactFields}
@@ -534,7 +557,9 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
               >
                 {frequencyOptions}
               </IsolatedSelect>
-              {redesigned && <DatasetWizardHelp item={auxiliaryItems[5]} />}
+              {redesigned && (
+                <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "frequency")} />
+              )}
 
               <div className="grid grid-cols-2 gap-[18px]">
                 <InputDate
@@ -589,7 +614,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
               </div>
             </div>
 
-            {redesigned && <DatasetWizardHelp item={auxiliaryItems[6]} />}
+            {redesigned && (
+              <DatasetWizardHelp
+                item={getDatasetAuxiliarItem(auxiliaryItems, "temporal-coverage")}
+              />
+            )}
             <h2
               className={redesigned ? "text-xl-bold text-primary-900" : "admin-page__section-title"}
             >
@@ -641,7 +670,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
               >
                 {granularityOptions}
               </IsolatedSelect>
-              {redesigned && <DatasetWizardHelp item={auxiliaryItems[7]} />}
+              {redesigned && (
+                <DatasetWizardHelp
+                  item={getDatasetAuxiliarItem(auxiliaryItems, "spatial-granularity")}
+                />
+              )}
             </div>
           </>
         )}

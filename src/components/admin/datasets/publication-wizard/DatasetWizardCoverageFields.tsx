@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { getZoneName } from "@/utils/spatialLabels";
 import { DatasetWizardHelp } from "./DatasetWizardHelp";
+import { getDatasetAuxiliarItem } from "../config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 import type { DatasetWizardStep2Props } from "./DatasetWizardStep2";
 
 type CoverageFieldsProps = Pick<
@@ -66,6 +68,8 @@ export function DatasetWizardCoverageFields({
   granularityOptions,
 }: CoverageFieldsProps) {
   const { t } = useTranslation("admin-datasets");
+  const accessSection = useDatasetSection("access-conditions");
+  const temporalSection = useDatasetSection("temporal-coverage");
   const hasTemporalError =
     !!formErrors.temporalCoverage || !!formErrors.temporalCoverageInvalidFormat;
   const temporalError = t(
@@ -93,8 +97,8 @@ export function DatasetWizardCoverageFields({
     <>
       <section className="flex flex-col gap-32 [&_.indicator_svg]:fill-neutral-900!">
         <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
-          <h2 className="text-xl-bold">{t("form.accessSectionTitle")}</h2>
-          <p className="text-m-regular">{t("coverage.accessDescription")}</p>
+          <h2 className="text-xl-bold">{accessSection?.title ?? ""}</h2>
+          <DatasetContentDescription html={accessSection?.description} className="text-m-regular" />
         </div>
         <IsolatedSelect
           label={t("coverage.licenseLabel")}
@@ -107,13 +111,16 @@ export function DatasetWizardCoverageFields({
         >
           {licenseOptions}
         </IsolatedSelect>
-        <DatasetWizardHelp item={auxiliaryItems[4]} />
+        <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "license")} />
       </section>
 
       <section className="flex flex-col gap-32 [&_.indicator_svg]:fill-neutral-900!">
         <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
-          <h2 className="text-xl-bold">{t("coverage.temporalSectionTitle")}</h2>
-          <p className="text-m-regular">{t("coverage.temporalDescription")}</p>
+          <h2 className="text-xl-bold">{temporalSection?.title ?? ""}</h2>
+          <DatasetContentDescription
+            html={temporalSection?.description}
+            className="text-m-regular"
+          />
         </div>
         <div className="flex flex-col gap-8">
           <IsolatedSelect
@@ -138,11 +145,7 @@ export function DatasetWizardCoverageFields({
             {t("coverage.frequencyRequired")}
           </p>
         </div>
-        <DatasetWizardHelp
-          item={
-            auxiliaryItems[5] && { ...auxiliaryItems[5], title: t("coverage.frequencyHelpTitle") }
-          }
-        />
+        <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "frequency")} />
         <h3 className="text-l-semibold text-primary-900">{t("coverage.temporalCoverageTitle")}</h3>
         <div className="grid grid-cols-1 gap-32 md:grid-cols-2 [&_.input-trailing-icon_svg]:fill-neutral-900!">
           <InputDate
@@ -173,7 +176,7 @@ export function DatasetWizardCoverageFields({
             }}
           />
         </div>
-        <DatasetWizardHelp item={auxiliaryItems[6]} />
+        <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "temporal-coverage")} />
       </section>
 
       <section className="flex flex-col gap-32 [&_.indicator_svg]:fill-neutral-900!">
@@ -229,11 +232,7 @@ export function DatasetWizardCoverageFields({
             {granularityOptions}
           </IsolatedSelect>
         </div>
-        <DatasetWizardHelp
-          item={
-            auxiliaryItems[7] && { ...auxiliaryItems[7], title: t("coverage.geographicHelpTitle") }
-          }
-        />
+        <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "spatial-granularity")} />
       </section>
     </>
   );

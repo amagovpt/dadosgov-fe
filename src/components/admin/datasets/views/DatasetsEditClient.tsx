@@ -13,6 +13,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { DatasetContentProvider } from "../DatasetContentProvider";
 import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { fetchActivity } from "@/service/api/activity";
@@ -67,7 +68,15 @@ interface DatasetsEditClientProps {
   pageContent: BoDatasetsPage;
 }
 
-export default function DatasetsEditClient({ pageContent }: DatasetsEditClientProps) {
+export default function DatasetsEditClient(props: DatasetsEditClientProps) {
+  return (
+    <DatasetContentProvider content={props.pageContent}>
+      <DatasetsEditContent {...props} />
+    </DatasetContentProvider>
+  );
+}
+
+function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
   const { t } = useTranslation("admin-datasets");
   const { activeProfile } = useActiveProfile();
   const searchParams = useSearchParams();

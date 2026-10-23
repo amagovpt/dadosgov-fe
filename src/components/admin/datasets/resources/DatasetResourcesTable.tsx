@@ -28,6 +28,7 @@ import type { Resource } from "@/service/types/dataset";
 import type { Dispatch, SetStateAction } from "react";
 import type { ResourceType } from "@/service/types/catalog";
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 
 interface PendingResources {
   uploadedFiles: File[];
@@ -68,6 +69,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
   const tableId = useId();
   const selectable = props.selectable !== false;
   const { t, i18n } = useTranslation("admin-datasets");
+  const listSection = useDatasetSection("resource-list");
   const { show, hide } = usePopupContext();
   const [query, setQuery] = useState("");
   const [refreshError, setRefreshError] = useState(false);
@@ -226,9 +228,12 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
       )}
       <div className="flex flex-col gap-8">
         <h3 id={`${tableId}-title`} className="text-xl-bold text-primary-900">
-          {t("resources.addedTitle")}
+          {listSection?.title ?? ""}
         </h3>
-        <p className="text-m-regular text-primary-900">{t("resources.addedDescription")}</p>
+        <DatasetContentDescription
+          html={listSection?.description}
+          className="text-m-regular text-primary-900"
+        />
       </div>
       <div className="[&_.magnifier-icon]:size-44! [&_.magnifier-icon]:min-h-44! [&_.magnifier-icon]:min-w-44! w-full max-w-[592px] [&_.input-search-bar-container]:min-w-0! [&_.input-search-bar-container]:border-neutral-700! [&_.input-search-bar-container]:p-4! [&_.input-search-bar-container]:pl-16! [&_.magnifier-icon]:border-transparent! [&_.magnifier-icon]:bg-transparent! [&_.magnifier-icon]:p-[10px]! [&_.magnifier-icon]:text-neutral-900! [&_.magnifier-icon]:opacity-100! [&_.magnifier-icon_svg]:fill-neutral-900! [&_input]:min-w-0!">
         <InputSearchBar

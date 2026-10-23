@@ -17,6 +17,8 @@ import { DatasetWizardHelp } from "./DatasetWizardHelp";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { Resource } from "@/service/types/dataset";
 import { DatasetResourcesTable } from "../resources/DatasetResourcesTable";
+import { getDatasetAuxiliarItem } from "../config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 
 export interface DatasetWizardStep3Props {
   redesigned?: boolean;
@@ -42,6 +44,8 @@ export interface DatasetWizardStep3Props {
 
 export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
   const { t } = useTranslation("admin-datasets");
+  const addSection = useDatasetSection("add-resources");
+  const listSection = useDatasetSection("resource-list");
   const {
     uploadedFiles,
     introduction,
@@ -162,12 +166,18 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
   }
 
   if (props.redesigned) {
+    const formatsItem = getDatasetAuxiliarItem(auxiliaryItems ?? [], "resource-formats");
+    const documentationItem = getDatasetAuxiliarItem(
+      auxiliaryItems ?? [],
+      "resource-documentation"
+    );
     const formatsHelp = {
-      title: t("resources.formatsHelpTitle"),
+      title: formatsItem?.title ?? "",
+      hidden: formatsItem?.hidden,
       content: (
         <>
           {introduction && formatHtmlParagraphs(introduction.description)}
-          {auxiliaryItems?.[0]?.content}
+          {formatsItem?.content}
           {!!allowedExtensions?.length && (
             <p className="mt-16">
               {t("resources.allowedFiles", { extensions: allowedExtensions.join(", ") })}
@@ -177,11 +187,12 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
       ),
     };
     const metadataHelp = {
-      title: t("resources.metadataHelpTitle"),
+      title: documentationItem?.title ?? "",
+      hidden: documentationItem?.hidden,
       content: (
         <>
           <p>{t("resources.metadataHelp")}</p>
-          {auxiliaryItems?.[1]?.content}
+          {documentationItem?.content}
         </>
       ),
     };
@@ -195,14 +206,15 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
           >
             <div className="flex flex-col gap-8">
               <h3 id="add-resources-title" className="text-xl-bold text-primary-900">
-                {t("resources.addTitle")}
+                {addSection?.title ?? ""}
               </h3>
-              <p className="max-w-[592px] text-m-regular text-primary-900">
-                {t("resources.addDescription")}
-              </p>
+              <DatasetContentDescription
+                html={addSection?.description}
+                className="max-w-[592px] text-m-regular text-primary-900"
+              />
             </div>
             <fieldset disabled={isSubmitting} className="min-w-0">
-              <legend className="sr-only">{t("resources.addTitle")}</legend>
+              <legend className="sr-only">{addSection?.title}</legend>
               <FileUploadModal
                 appearance="wizard"
                 saveMode="editor"
@@ -219,7 +231,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
             <DatasetWizardHelp item={formatsHelp} />
           </section>
           <fieldset disabled={isSubmitting} className="flex min-w-0 flex-col gap-32">
-            <legend className="sr-only">{t("resources.addedTitle")}</legend>
+            <legend className="sr-only">{listSection?.title}</legend>
             <DatasetResourcesTable
               savedResources={props.savedResources}
               resourceTypes={resourceTypes}
@@ -236,9 +248,13 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
               }}
             />
             <DatasetWizardHelp item={metadataHelp} />
-            {auxiliaryItems?.slice(2).map((item, index) => (
-              <DatasetWizardHelp key={index} item={item} />
-            ))}
+            {auxiliaryItems
+              ?.filter(
+                (item) => !["resource-formats", "resource-documentation"].includes(item.key ?? "")
+              )
+              .map((item, index) => (
+                <DatasetWizardHelp key={item.key || index} item={item} />
+              ))}
           </fieldset>
           <div data-dataset-actions className="flex w-full justify-between gap-16">
             <Button

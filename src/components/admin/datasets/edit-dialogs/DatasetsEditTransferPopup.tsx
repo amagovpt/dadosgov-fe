@@ -14,6 +14,7 @@ import {
 import RecipientSelect, { type RecipientSelection } from "@/components/admin/RecipientSelect";
 import { useAuth } from "@/context/AuthContext";
 import { localizeHref } from "@/utils/localizeHref";
+import { DatasetContentDescription, useDatasetContent } from "../DatasetContentProvider";
 
 interface DatasetsEditTransferPopupProps {
   onClose: () => void;
@@ -25,6 +26,7 @@ export default function DatasetsEditTransferPopup({
   onConfirm,
 }: DatasetsEditTransferPopupProps) {
   const { t, i18n } = useTranslation("admin-datasets");
+  const { transferIntroduction } = useDatasetContent();
   const { user, hasOrganization, isLoading: isUserLoading } = useAuth();
   const id = useId();
   const dialogRef = useRef<DialogElement>(null);
@@ -119,12 +121,15 @@ export default function DatasetsEditTransferPopup({
               }}
             >
               <fieldset disabled={isSubmitting} className="flex min-w-0 flex-col gap-32">
-                <legend className="sr-only">{t("transfer.title")}</legend>
+                <legend className="sr-only">{transferIntroduction?.title ?? ""}</legend>
                 <div className="flex max-w-[592px] flex-col gap-16">
                   <h2 id={`${id}-title`} className="text-2xl-bold">
-                    {t("transfer.title")}
+                    {transferIntroduction?.title ?? ""}
                   </h2>
-                  <p className="text-m-regular">{t("transfer.description")}</p>
+                  <DatasetContentDescription
+                    html={transferIntroduction?.description}
+                    className="text-m-regular"
+                  />
                 </div>
                 <StatusCard
                   variant="warning"
@@ -223,7 +228,7 @@ export default function DatasetsEditTransferPopup({
                   className="h-[60px]! min-h-[60px]! py-[14px]!"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? t("edit.transferring") : t("transfer.title")}
+                  {isSubmitting ? t("edit.transferring") : t("transfer.action")}
                 </Button>
               </div>
             </form>

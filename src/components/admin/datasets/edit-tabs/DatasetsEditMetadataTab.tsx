@@ -8,7 +8,11 @@ import {
   DropdownOption,
   type DropdownSectionProps,
 } from "@ama-pt/agora-design-system";
-import { getEditDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
+import {
+  getDatasetAuxiliarItem,
+  getEditDatasetAuxiliarItems,
+} from "@/components/admin/datasets/config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 import type { SpatialZone } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
 import DatasetsEditDescriptionSection from "@/components/admin/datasets/edit-sections/DatasetsEditDescriptionSection";
@@ -118,6 +122,7 @@ export default function DatasetsEditMetadataTab({
   onSaveMetadata,
 }: DatasetsEditMetadataTabProps) {
   const { t } = useTranslation("admin-datasets");
+  const identitySection = useDatasetSection("edit-identity");
   const canEdit = can(dataset, "edit");
   const auxiliarItems = getEditDatasetAuxiliarItems({ items: auxiliaryItems });
   const producer =
@@ -158,8 +163,11 @@ export default function DatasetsEditMetadataTab({
         >
           <section className="flex flex-col gap-32">
             <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
-              <h2 className="text-xl-bold">{t("form.identitySectionTitle")}</h2>
-              <p className="text-m-regular">{t("editPage.identityDescription")}</p>
+              <h2 className="text-xl-bold">{identitySection?.title ?? ""}</h2>
+              <DatasetContentDescription
+                html={identitySection?.description}
+                className="text-m-regular"
+              />
             </div>
             <InputSelect
               id="edit-producer"
@@ -191,7 +199,7 @@ export default function DatasetsEditMetadataTab({
             onKeywordSearch={onKeywordSearch}
             onKeywordsChange={onKeywordsChange}
             onRemoveKeyword={onRemoveKeyword}
-            auxiliaryItems={auxiliarItems.slice(0, 4)}
+            auxiliaryItems={auxiliarItems}
           />
           <DatasetsEditAccessTimeSection
             formErrors={formErrors}
@@ -205,7 +213,7 @@ export default function DatasetsEditMetadataTab({
             selectedFrequencyRef={selectedFrequencyRef}
             onTemporalStartChange={onTemporalStartChange}
             onTemporalEndChange={onTemporalEndChange}
-            auxiliaryItems={auxiliarItems.slice(4, 7)}
+            auxiliaryItems={auxiliarItems}
           />
           <DatasetsEditSpaceSection
             loadedSpatialZones={loadedSpatialZones}
@@ -220,7 +228,7 @@ export default function DatasetsEditMetadataTab({
             onSpatialCoverageChange={onSpatialCoverageChange}
             onSpatialSearch={onSpatialSearch}
             onRemoveSpatialZone={onRemoveSpatialZone}
-            helpItem={auxiliarItems[7]}
+            helpItem={getDatasetAuxiliarItem(auxiliarItems, "spatial-granularity")}
           />
         </fieldset>
         <div className="mt-32 flex flex-wrap justify-end gap-16">

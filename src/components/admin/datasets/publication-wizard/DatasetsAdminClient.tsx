@@ -8,12 +8,12 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import {
   getDatasetAuxiliarItems,
+  getCreateDatasetAuxiliarItems,
   getResourceDatasetAuxiliarItems,
 } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
-import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
 import { DatasetWizardStep2 } from "./DatasetWizardStep2";
@@ -140,11 +140,7 @@ export default function DatasetsAdminClient({
   });
 
   const auxiliarItemsStep2 = redesigned
-    ? (pageContent.createAuxiliaryItems ?? []).map((item) => ({
-        title: item.title,
-        content: formatHtmlParagraphs(item.description),
-        hidden: item.enabled === false,
-      }))
+    ? getCreateDatasetAuxiliarItems({ items: pageContent.createAuxiliaryItems })
     : getDatasetAuxiliarItems({ items: pageContent.createAuxiliaryItems });
 
   const auxiliarItemsStep3 = getResourceDatasetAuxiliarItems(pageContent.resourceAuxiliaryItems);
@@ -219,9 +215,7 @@ export default function DatasetsAdminClient({
               totalSteps={4}
               labelFormat="de"
               appearance="form"
-              stepTitle={t(
-                `admin-datasets:form.${["identityStepTitle", "coverageStepTitle", "resourcesStepTitle", "publishStepTitle"][currentStep - 1]}`
-              )}
+              stepTitle={pageContent.steps?.[currentStep - 1]?.title ?? ""}
             />
           </div>
         </>

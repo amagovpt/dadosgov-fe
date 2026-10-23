@@ -1,12 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useId, useRef } from "react";
+import { useLayoutEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button, Dialog, StatusCard, type DialogElement } from "@ama-pt/agora-design-system";
 
 interface AdminConfirmationDialogProps {
   title: string;
-  description: string;
+  description: ReactNode;
   cancelLabel: string;
   confirmLabel: string;
   confirmVariant?: "danger" | "warning";
@@ -61,9 +61,15 @@ export function AdminConfirmationDialog({
           {title}
         </h2>
         <div className="flex flex-col gap-32">
-          <p id={`${id}-description`} className="text-m-regular">
-            {description}
-          </p>
+          {typeof description === "string" ? (
+            <p id={`${id}-description`} className="text-m-regular">
+              {description}
+            </p>
+          ) : (
+            <div id={`${id}-description`} className="text-m-regular">
+              {description}
+            </div>
+          )}
           {error && (
             <StatusCard variant="danger" showIcon description={<span role="alert">{error}</span>} />
           )}

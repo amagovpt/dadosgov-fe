@@ -25,6 +25,7 @@ import type { AdminCard } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
 import { getDatasetPublicationIssues } from "@/utils/datasetPublication";
+import { DatasetContentDescription } from "../DatasetContentProvider";
 
 export interface DatasetWizardStep4Props {
   redesigned?: boolean;
@@ -102,9 +103,11 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
           <StatusCard
             variant="success"
             showIcon
-            title={t("review.successTitle")}
+            title={publishStepCard?.title ?? ""}
             description={
-              <span className="block max-w-[592px]">{t("review.successDescription")}</span>
+              <div className="block max-w-[592px]">
+                <DatasetContentDescription html={publishStepCard?.description} />
+              </div>
             }
             className="w-full rounded-4 p-16! [&_.status-card-content]:gap-8"
           />

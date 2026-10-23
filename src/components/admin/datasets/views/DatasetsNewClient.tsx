@@ -5,6 +5,7 @@ import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { DatasetContentProvider } from "../DatasetContentProvider";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
@@ -15,7 +16,15 @@ interface DatasetsNewClientProps {
   orgId?: string;
 }
 
-export default function DatasetsNewClient({ pageContent, orgId }: DatasetsNewClientProps) {
+export default function DatasetsNewClient(props: DatasetsNewClientProps) {
+  return (
+    <DatasetContentProvider content={props.pageContent}>
+      <DatasetsNewContent {...props} />
+    </DatasetContentProvider>
+  );
+}
+
+function DatasetsNewContent({ pageContent, orgId }: DatasetsNewClientProps) {
   const { t } = useTranslation("admin-datasets");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -49,7 +58,7 @@ export default function DatasetsNewClient({ pageContent, orgId }: DatasetsNewCli
     if (id) query.set("datasetId", id);
     return localizeHref(`${basePath}/datasets/new?${query}`, locale);
   };
-  const pageTitle = t("form.createTitle");
+  const pageTitle = pageContent.createHero?.title ?? "";
 
   if (isProfileLoading || !creationId) return null;
 
