@@ -299,7 +299,7 @@ export default async function ProjectPage({
     ),
   };
 
-  // const prrProjectTechnicalSheet = await getTechnicalSheetData("prr-ficha-de-projeto", locale);
+  const prrProjectTechnicalSheet = await getTechnicalSheetData("prr-ficha-de-projeto", locale);
 
   const {
     hero,
@@ -308,7 +308,7 @@ export default async function ProjectPage({
     applications,
     publicContracting,
     geographicDistribution,
-    datasets
+    datasets,
   } = flattenData(
     pageDataResult.data.findFichaDeProjetoPrrSingleton.data as Record<string, unknown>
   ) as Project;
@@ -461,7 +461,7 @@ export default async function ProjectPage({
                   geographicDistribution={geographicDistribution.cards}
                   geographicDistributionData={viewData.geographicDistributionData}
                 >
-                  {/* <SourceInfoFooter
+                  <SourceInfoFooter
                     dataSource={
                       viewData.geographicDistributionSourceInfo.sourceLink ? (
                         <a
@@ -477,7 +477,7 @@ export default async function ProjectPage({
                     }
                     update={viewData.geographicDistributionSourceInfo.referenceDate ?? ""}
                     technicalSheet={prrProjectTechnicalSheet}
-                  /> */}
+                  />
                 </BenProjSheetTabPRR.GeographicDistribution>
               </Tabs.Body>
             </Tabs.Section>
