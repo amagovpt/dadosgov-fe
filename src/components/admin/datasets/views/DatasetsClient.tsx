@@ -15,6 +15,7 @@ import type { DatasetFilters } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { useCsvExport } from "@/hooks/admin-lists/useCsvExport";
 import {
   createAdminDatasetColumns,
   type AdminDatasetSortField,
@@ -42,6 +43,7 @@ export default function DatasetsClient({
   orgId,
 }: DatasetsClientProps) {
   const { t, i18n } = useTranslation(["admin-common", "admin-datasets"]);
+  const downloadListCsv = useCsvExport();
   const { user, hasOrganization, isLoading: isUserLoading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -107,6 +109,19 @@ export default function DatasetsClient({
     };
   }, [scope, searchQuery, sortParam, statusFilter, user?.id]);
 
+  const fetchDatasetPage = useCallback(
+    async (page: number, size: number) => {
+      const response =
+        scope === "organization"
+          ? await fetchOrgDatasets(orgId!, page, size, filters)
+          : await fetchAdminDatasets(page, size, filters);
+      return scope === "system" && response.total === 0 && !searchQuery.trim() && !statusFilter
+        ? fetchDatasets(page, size, filters)
+        : response;
+    },
+    [filters, orgId, scope, searchQuery, statusFilter]
+  );
+
   const loadDatasets = useCallback(
     async (isCancelled: () => boolean) => {
       if (isUserLoading) return;
@@ -123,14 +138,7 @@ export default function DatasetsClient({
         // records together; organization and system lists fetch one page.
         const requestedPage = sortsAllPersonalDatasets ? 1 : currentPage;
         const requestedPageSize = sortsAllPersonalDatasets ? 9999 : pageSize;
-        const response =
-          scope === "organization"
-            ? await fetchOrgDatasets(orgId!, requestedPage, requestedPageSize, filters)
-            : await fetchAdminDatasets(requestedPage, requestedPageSize, filters);
-        const result =
-          scope === "system" && response.total === 0 && !searchQuery.trim() && !statusFilter
-            ? await fetchDatasets(requestedPage, requestedPageSize, filters)
-            : response;
+        const result = await fetchDatasetPage(requestedPage, requestedPageSize);
         if (!isCancelled()) {
           setDatasets(result.data || []);
           setTotalItems(result.total || 0);
@@ -141,18 +149,7 @@ export default function DatasetsClient({
         if (!isCancelled()) setIsLoading(false);
       }
     },
-    [
-      currentPage,
-      filters,
-      isUserLoading,
-      pageSize,
-      user?.id,
-      sortsAllPersonalDatasets,
-      scope,
-      orgId,
-      searchQuery,
-      statusFilter,
-    ]
+    [currentPage, fetchDatasetPage, isUserLoading, pageSize, user?.id, sortsAllPersonalDatasets]
   );
 
   useEffect(() => {
@@ -211,6 +208,26 @@ export default function DatasetsClient({
     [orgId, scope, t]
   );
 
+  const handleDownloadCsv = useCallback(async () => {
+    const response = await fetchDatasetPage(1, totalItems);
+    const allDatasets = response.data ?? [];
+    if (totalItems > 0 && allDatasets.length === 0) {
+      throw new Error(t("admin-common:csvExport.fetchError"));
+    }
+    const rows = usesLocalSort ? sortAdminDatasets(allDatasets, sortField, sortOrder) : allDatasets;
+    downloadListCsv(t(`admin-datasets:list.${listTitleKey}`), rows, columns);
+  }, [
+    columns,
+    downloadListCsv,
+    fetchDatasetPage,
+    listTitleKey,
+    sortField,
+    sortOrder,
+    t,
+    totalItems,
+    usesLocalSort,
+  ]);
+
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
     sortOrder,
@@ -229,8 +246,7 @@ export default function DatasetsClient({
       headerInfoClassName="w-full max-w-[592px]"
       breadcrumbItems={[{ label: t("admin-datasets:list.title") }]}
       listTitle={t(`admin-datasets:list.${listTitleKey}`)}
-      resultsCount={null}
-      showResultsSummary={false}
+      onDownloadCsv={handleDownloadCsv}
       beforeList={
         scope === "personal" && !isUserLoading && user && !hasOrganization ? (
           <StatusCard
@@ -267,7 +283,6 @@ export default function DatasetsClient({
       hasActiveFilters={statusFilter !== ""}
       currentPage={currentPage}
       pageSize={pageSize}
-      showPaginationSummary
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
