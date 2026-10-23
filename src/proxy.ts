@@ -141,7 +141,18 @@ export async function proxy(request: NextRequest) {
   // serves auto-submit forms with their own CSP; a second one would break the
   // SAML dance.
   const backend = backendDestination(request);
-  if (backend) return NextResponse.rewrite(backend);
+  if (backend) {
+    if (process.env.NODE_ENV === "development" && !request.headers.get("upgrade")) {
+      // The rewrite proxy has its own HTTP connection pool, separate from the
+      // fetch dispatcher configured in instrumentation.ts. A development
+      // backend can close an idle socket just before the proxy reuses it,
+      // causing ECONNRESET on the first API calls after navigation or idling.
+      const headers = new Headers(request.headers);
+      headers.set("connection", "close");
+      return NextResponse.rewrite(backend, { request: { headers } });
+    }
+    return NextResponse.rewrite(backend);
+  }
   if (NON_PAGE_PREFIXES.some((p) => hasPrefix(pathname.replace(/\/+$/, ""), p))) {
     return NextResponse.next();
   }
