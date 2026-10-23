@@ -54,63 +54,7 @@ SELECT COALESCE(
 FROM distinct_investimentos c;
 `;
 
-export const searchBeneficiariesPRRQuery = (orderBy: string) => `WITH base AS (
-    SELECT *
-    FROM prr.search_prr_beneficiaries_basecte f
-    WHERE ($1::text IS NULL OR f."recipientId"::text = $1)
-      AND ($2::text IS NULL OR f."recipientName" ILIKE '%' || $2 || '%')
-      AND ($3::text IS NULL OR f."dsMunicipalities"::text = $3)
-      AND ($4::text IS NULL OR f."dsNutsii"::text = $4)
-      AND ($5::text IS NULL OR f."dimension"::text = $5)
-      AND ($6::text IS NULL OR f."component"::text = $6)
-      AND ($7::text IS NULL OR f."investment"::text = $7)
-      AND ($8::numeric  IS NULL OR f."budget" >= $8)
-      AND ($9::numeric  IS NULL OR f."budget" <= $9)
-      AND ($10::numeric IS NULL OR f."paidBudget" >= $10)
-      AND ($11::numeric IS NULL OR f."paidBudget" <= $11)
-      AND ($12::int IS NULL OR f."numProjects" >= $12)
-      AND ($13::int IS NULL OR f."numProjects" <= $13)
-      AND (
-        ($14 AND f."finalRecipient")
-        OR ($15 AND f."intermediaryRecipient")
-        OR ($16 AND f."supplierRecipient")
-        OR ($17 AND f."partnerRecipient")
-      )
-),
-por_entidade_tipo AS (
-    SELECT
-        "recipientId", "recipientName", "recipientType",
-        MAX("budget")      AS budget,  
-        MAX("paidBudget")  AS paid_budget,
-        MAX("numProjects") AS num_projects
-    FROM base
-    GROUP BY "recipientId", "recipientName", "recipientType"
-),
-por_entidade AS (
-    SELECT
-        "recipientId",
-        MAX("recipientName") AS "recipientName",
-        jsonb_agg(jsonb_build_object(
-            'entityRole',     "recipientType",
-            'approvedValue',  budget,
-            'paidValue',      paid_budget,
-            'projectsAmount', num_projects
-        ) ORDER BY "recipientType") AS values_by_type
-    FROM por_entidade_tipo
-    GROUP BY "recipientId"
-)
-SELECT
-    (jsonb_build_object(
-        'entityNif',    "recipientId",
-        'entityName',   "recipientName",
-        'valuesByType', values_by_type
-    ), '[]'::jsonb) AS data
-FROM por_entidade
-ORDER BY ${orderBy}
-LIMIT $18 OFFSET $19;
-`;
-
-export const searchBeneficiariesPRRCountQuery = `SELECT COUNT(*)::int AS total
+const searchBeneficiariesPRRFilteredRows = `SELECT *
 FROM prr.search_prr_beneficiaries_basecte f
 WHERE ($1::text IS NULL OR f."recipientId"::text = $1)
     AND ($2::text IS NULL OR f."recipientName" ILIKE '%' || $2::text || '%')
@@ -128,10 +72,55 @@ WHERE ($1::text IS NULL OR f."recipientId"::text = $1)
         OR ($13::boolean AND f."intermediaryRecipient")
         OR ($14::boolean AND f."supplierRecipient")
         OR ($15::boolean AND f."partnerRecipient")
-    );
+    )`;
+
+export const searchBeneficiariesPRRQuery = (orderBy: string) => `WITH filtered AS (
+    ${searchBeneficiariesPRRFilteredRows}
+),
+por_entidade AS (
+    SELECT
+        f."recipientId",
+        f."recipientType",
+        MAX(f."recipientName") AS "recipientName",
+        MAX(f."budget") AS "budget",
+        MAX(f."paidBudget") AS "paidBudget",
+        MAX(f."numProjects") AS "numProjects",
+        MAX(f."benefType") AS "benefType",
+        MAX(f."economicActivity") AS "economicActivity",
+        bool_or(f."finalRecipient") AS "finalRecipient",
+        bool_or(f."intermediaryRecipient") AS "intermediaryRecipient",
+        bool_or(f."supplierRecipient") AS "supplierRecipient",
+        bool_or(f."partnerRecipient") AS "partnerRecipient",
+        bool_or(f."consortium") AS "consortium",
+        string_agg(DISTINCT f."cdDimension"::text, '; ') AS "cdDimension",
+        string_agg(DISTINCT f."dimension"::text, '; ') AS "dimension",
+        string_agg(DISTINCT f."cdComponent"::text, '; ') AS "cdComponent",
+        string_agg(DISTINCT f."component"::text, '; ') AS "component",
+        string_agg(DISTINCT f."cdInvestment"::text, '; ') AS "cdInvestment",
+        string_agg(DISTINCT f."investment"::text, '; ') AS "investment",
+        string_agg(DISTINCT f."cdInvestmentId"::text, '; ') AS "cdInvestmentId",
+        string_agg(DISTINCT f."cdNutsii"::text, '; ') AS "cdNutsii",
+        string_agg(DISTINCT f."dsNutsii"::text, '; ') AS "dsNutsii",
+        string_agg(DISTINCT f."cdNutsiii"::text, '; ') AS "cdNutsiii",
+        string_agg(DISTINCT f."dsNutsiii"::text, '; ') AS "dsNutsiii",
+        string_agg(DISTINCT f."cdMunicipalities"::text, '; ') AS "cdMunicipalities",
+        string_agg(DISTINCT f."dsMunicipalities"::text, '; ') AS "dsMunicipalities"
+    FROM filtered f
+    GROUP BY f."recipientId", f."recipientType"
+)
+SELECT *
+FROM por_entidade
+ORDER BY ${orderBy}
+LIMIT $16 OFFSET $17;
 `;
 
-export const searchBeneficiariesPRRTotalQuery = `SELECT COUNT(*)::int AS total
+export const searchBeneficiariesPRRCountQuery = `SELECT COUNT(DISTINCT (f."recipientId", f."recipientType"))::int AS total
+FROM (
+    ${searchBeneficiariesPRRFilteredRows}
+) f;
+`;
+
+export const searchBeneficiariesPRRTotalQuery = `SELECT COUNT(DISTINCT ("recipientId", "recipientType"))::int AS total
 FROM prr.search_prr_beneficiaries_basecte;
 `;
 

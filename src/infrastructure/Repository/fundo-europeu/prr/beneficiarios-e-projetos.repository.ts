@@ -59,7 +59,7 @@ export class BeneficiariesAndProjectsPRRepository implements IBeneficiariesAndPr
 
     const field = fieldMap[sortBy] || '"budget"';
     const direction = sortOrder === SortOrder.ASC ? 'ASC' : 'DESC';
-    return `${field} ${direction}`;
+    return `${field} ${direction}, "recipientId", "recipientType"`;
   }
 
   async searchBeneficiariesOfPRR(
