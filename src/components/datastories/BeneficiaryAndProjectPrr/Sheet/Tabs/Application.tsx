@@ -43,7 +43,7 @@ export default function BenProjSheetTabApplicationPRR({
   const gradeCard = getCard(2);
 
   return (
-    <div className="flex w-full flex-col gap-32 py-64">
+    <div className="flex w-full flex-col gap-32">
       <Typograph tag="h2" className="text-xl-bold text-primary-900">
         {title}
       </Typograph>

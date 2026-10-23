@@ -118,7 +118,7 @@ export default function BenProjSheetTabGeographicDistribution({
     );
   }, [countryData, sortedAreasData]);
   return (
-    <div className="flex w-full flex-col gap-64 py-64">
+    <div className="flex w-full flex-col gap-64">
       <Typograph tag="h2" className="text-xl-bold text-primary-900">
         {title}
       </Typograph>
@@ -157,7 +157,7 @@ export default function BenProjSheetTabGeographicDistribution({
                 icon={{
                   name: "agora-line-arrow-down-anchor",
                   color: "white",
-                  backgroundColor: "fundo-europeu-500",
+                  backgroundColor: "primary-600",
                 }}
               />
             </div>

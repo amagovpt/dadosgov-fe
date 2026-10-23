@@ -3,6 +3,7 @@ import { BenProjSheet } from "@/components/datastories/BeneficiaryAndProject/She
 import { BenProjSheetTabPRR } from "@/components/datastories/BeneficiaryAndProjectPrr/Sheet/Tabs";
 import ProjectTabsHashSync from "@/components/datastories/BeneficiaryAndProjectPrr/Sheet/Tabs/ProjectTabsHashSync";
 import { Datastory } from "@/components/Shared/Datastories";
+import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
 import { SourceInfoFooter } from "@/components/Shared/SourceInfoFooter";
@@ -307,6 +308,7 @@ export default async function ProjectPage({
     applications,
     publicContracting,
     geographicDistribution,
+    datasets
   } = flattenData(
     pageDataResult.data.findFichaDeProjetoPrrSingleton.data as Record<string, unknown>
   ) as Project;
@@ -322,7 +324,7 @@ export default async function ProjectPage({
   const financiamentoEmprestimos = formatCurrency(viewData.financiamentoEmprestimos, t);
 
   return (
-    <main className="flex flex-col gap-128 pb-128">
+    <main className="flex flex-col gap-64 pb-128">
       <Datastory.Hero
         breadcrumbs={[
           ...hero.breadcrumbs,
@@ -340,7 +342,10 @@ export default async function ProjectPage({
       <Section className="flex flex-col items-center gap-32" id={projectSheet.id}>
         <InfoBlock.Root>
           <InfoBlock.Header className="flex flex-row gap-24">
-            <InfoBlock.Title title={projectSheet.title} />
+            <InfoBlock.Title
+              title={projectSheet.title}
+              className="text-2xl-bold! text-neutral-900!"
+            />
           </InfoBlock.Header>
         </InfoBlock.Root>
 
@@ -479,6 +484,8 @@ export default async function ProjectPage({
           </ProjectTabsHashSync>
         </InfoBlock.Content>
       </Section>
+
+      {datasets && datasets.active !== false && <Sources {...datasets} className="p-0" />}
     </main>
   );
 }

@@ -1257,6 +1257,24 @@ export function getPrrProjectData(locale: string = "pt") {
               }
             }
           }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
         }
       }
     }

@@ -61,27 +61,19 @@ function scheduleScrollToElement(getElement: () => HTMLElement | null) {
   window.setTimeout(scroll, 120);
 }
 
-export default function ProjectTabsHashSync({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function ProjectTabsHashSync({ children }: { children: ReactNode }) {
   const tabsRootRef = useRef<HTMLDivElement>(null);
-  const hasHandledInitialTabActivationRef = useRef(false);
 
   const tabChildren = useMemo(
     () =>
-      Children.toArray(children).filter(
-        (child): child is ReactElement<TabSectionLikeProps> =>
-          isValidElement(child),
+      Children.toArray(children).filter((child): child is ReactElement<TabSectionLikeProps> =>
+        isValidElement(child)
       ),
-    [children],
+    [children]
   );
 
   const defaultActiveIndex = useMemo(() => {
-    const activeIndex = tabChildren.findIndex((child) =>
-      isTruthyBooleanProp(child.props.active),
-    );
+    const activeIndex = tabChildren.findIndex((child) => isTruthyBooleanProp(child.props.active));
     return activeIndex >= 0 ? activeIndex : 0;
   }, [tabChildren]);
 
@@ -92,9 +84,7 @@ export default function ProjectTabsHashSync({
     if (tabChildren.length === 0) return;
 
     const getTabIndexFromHash = (normalizedHash: string) =>
-      tabChildren.findIndex(
-        (tab) => normalizeHash(getTabHashId(tab)) === normalizedHash,
-      );
+      tabChildren.findIndex((tab) => normalizeHash(getTabHashId(tab)) === normalizedHash);
 
     const syncWithHash = (forcedHash?: string) => {
       const normalizedHash = forcedHash ?? normalizeHash(window.location.hash);
@@ -178,28 +168,18 @@ export default function ProjectTabsHashSync({
   }, [tabChildren]);
 
   const tabsWithActiveState = useMemo(
-    () =>
-      tabChildren.map((tab, index) =>
-        cloneElement(tab, { active: index === activeIndex }),
-      ),
-    [activeIndex, tabChildren],
+    () => tabChildren.map((tab, index) => cloneElement(tab, { active: index === activeIndex })),
+    [activeIndex, tabChildren]
   );
 
   return (
     <div ref={tabsRootRef} style={{ scrollMarginTop: "167px" }}>
       <Tabs.Root
         onTabActivation={(index) => {
+          if (index === activeIndex || !tabChildren[index]) return;
+
           setActiveIndex(index);
-
-          // The design-system Tabs emits one activation on initial render.
-          // We skip that first automatic event so URLs can remain without a hash.
-          if (!hasHandledInitialTabActivationRef.current) {
-            hasHandledInitialTabActivationRef.current = true;
-            return;
-          }
-
-          const hashId = getTabHashId(tabChildren[index]);
-          updateUrlHashWithoutScroll(hashId);
+          updateUrlHashWithoutScroll(getTabHashId(tabChildren[index]));
         }}
       >
         {tabsWithActiveState}

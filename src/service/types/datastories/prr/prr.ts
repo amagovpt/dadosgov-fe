@@ -1,5 +1,5 @@
 import { Section } from "../../shared/common";
-import { DatastoryHero } from "../datastory";
+import { DatastoryHero, SourceSection } from "../datastory";
 
 // ----------------------------------------------------------------------------------------------
 
@@ -102,6 +102,7 @@ export type Project = {
   applications: Section;
   publicContracting: Section;
   geographicDistribution: Section;
+  datasets: SourceSection;
 };
 
 export type ApplicationTabData = {
