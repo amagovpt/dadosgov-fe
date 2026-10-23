@@ -16,8 +16,6 @@ export default function AppliedFilters({ locale }: IAppliedFilters) {
   const showFilters = useSearchBenProjStore((state) => state.showFilters);
   const removeFilter = useSearchBenProjStore((state) => state.removeFilter);
   const reset = useSearchBenProjStore((state) => state.reset);
-  const loading = useSearchBenProjStore((state) => state.loading);
-  const data = useSearchBenProjStore((state) => state.data);
 
   const handleClick = useCallback(
     (name: string) => {
@@ -30,11 +28,8 @@ export default function AppliedFilters({ locale }: IAppliedFilters) {
     reset(t, locale);
   }, [reset, t, locale]);
 
-  if (
-    !showFilters ||
-    showFilters.length === 0 ||
-    (!loading && (!data || data.length === 0))
-  ) {
+  // stays visible when nothing matches, so the filters that emptied the list can be removed
+  if (!showFilters || showFilters.length === 0) {
     return null;
   }
 

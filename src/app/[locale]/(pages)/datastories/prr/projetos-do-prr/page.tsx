@@ -27,6 +27,7 @@ import { RelatedDatastories } from "@/components/Shared/Datastories/Sections/Rel
 import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { INoResults } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsPT2030";
 import { slugify } from "@/utils/slugify";
+import { toSortedUnique } from "@/utils/toSortedUnique";
 import { CardBigNumberProps } from "@/components/Shared/CardCompound/CardBigNumber";
 
 const DATASTORY_SLUG = "prr/projetos-do-prr";
@@ -41,15 +42,6 @@ interface ProjectsTotalsPrr {
   bigNumberValues: BigNumberValue[];
   conclusionYears: string[];
 }
-
-const toSortedUnique = (values: Array<string | null | undefined>) =>
-  Array.from(
-    new Set(
-      values
-        .map((value) => (typeof value === "string" ? value.trim() : ""))
-        .filter((value) => value.length > 0)
-    )
-  ).sort((a, b) => a.localeCompare(b, "pt"));
 
 function yearsBetween(min: string | null, max: string | null): string[] {
   const from = Number(min?.slice(0, 4));
