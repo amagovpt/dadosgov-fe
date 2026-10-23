@@ -324,7 +324,7 @@ export default async function ProjectPage({
   const financiamentoEmprestimos = formatCurrency(viewData.financiamentoEmprestimos, t);
 
   return (
-    <main className="flex flex-col gap-64 pb-128">
+    <main className="datastory-page flex flex-col gap-64 pb-128">
       <Datastory.Hero
         breadcrumbs={[
           ...hero.breadcrumbs,
