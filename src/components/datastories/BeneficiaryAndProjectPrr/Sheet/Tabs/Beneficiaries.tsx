@@ -135,7 +135,7 @@ export default function BenProjSheetTabBeneficiariesPRR({
                 className="grid-cols-1 xl:grid-cols-2"
                 onLoadMore={async (nextPage) => {
                   const res = await fetch(
-                    `/api/fundos-europeus/plano-de-recuperacao-e-resiliencia/beneficiarios-e-projetos/pesquisar-projetos/${encodeURIComponent(projectId)}/beneficiary-financing`,
+                    `/internal-api/fundos-europeus/plano-de-recuperacao-e-resiliencia/beneficiarios-e-projetos/pesquisar-projetos/${encodeURIComponent(projectId)}/beneficiary-financing`,
                     {
                       method: "POST",
                       headers: {

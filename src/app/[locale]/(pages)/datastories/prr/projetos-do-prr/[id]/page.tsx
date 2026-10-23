@@ -332,7 +332,7 @@ export default async function ProjectPage({
           },
         ]}
         pretitle={hero.title}
-        title={projectCode}
+        title={viewData.nome}
         index={hero.index}
         className="[&_.info-datastory]:justify-center"
       />
