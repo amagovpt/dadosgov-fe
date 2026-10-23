@@ -408,7 +408,7 @@ export default async function ProjectPage({
         </BenProjSheet.Root>
       </Section>
 
-      <Section className="flex flex-col items-center">
+      {/* <Section className="flex flex-col items-center">
         <InfoBlock.Content className="flex flex-col">
           <ProjectTabsHashSync>
             <Tabs.Section data-tab-id={beneficiaries.id}>
@@ -478,7 +478,7 @@ export default async function ProjectPage({
             </Tabs.Section>
           </ProjectTabsHashSync>
         </InfoBlock.Content>
-      </Section>
+      </Section> */}
     </main>
   );
 }

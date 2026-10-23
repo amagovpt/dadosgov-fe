@@ -1157,13 +1157,13 @@ export function loadMorePT2030ProjectsByBeneficiary() {
 
 export function getPrrProjectMeta(locale: string = "pt") {
   return gql(/* GraphQL */ `
-    query getProjectMeta {
+    query getPrrProjectMeta {
       findFichaDeProjetoPrrSingleton {
         data {
           hero {
             ${locale} {
               title
-              subtitle
+              description
             }
           }
         }
@@ -1174,93 +1174,81 @@ export function getPrrProjectMeta(locale: string = "pt") {
 
 export function getPrrProjectData(locale: string = "pt") {
   return gql(/* GraphQL */ `
-      query getProject {
-          findFichaDeProjetoPrrSingleton {
-            data {
-                hero {
-                    ${locale} {
-                        title
-                        subtitle
-                        sitemap {
-                            title
-                            links {
-                                anchor {
-                                    children
-                                    href
-                                    appearance
-                                    variant
-                                    iconName
-                                }
-                            }
-                        }
-                    }
+    query getPrrProjectData {
+      findFichaDeProjetoPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+              index {
+                title
+                anchors {
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
                 }
-                projectSheet {
-                    ${locale} {
-                        id
-                        iconName
-                        title
-                    }
+              }
+            }
+          }
+          projectSheet {
+            ${locale} {
+              id
+              iconName
+              title
+            }
+          }
+          beneficiaries {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  title
+                  description
                 }
-                beneficiaries {
-                    ${locale} {
-                        id
-                        title
-                        cards {
-                            cardArticle {
-                                __typename
-                                ... on CardComponent {
-                                    title
-                                    description
-                                }
-                            }
-                        }
-                    }
+              }
+            }
+          }
+          applications {
+            ${locale} {
+              id
+              title
+              subtitle
+              description
+              cards {
+                card {
+                  title
+                  description
                 }
-                applications {
-                    ${locale} {
-                        id
-                        title
-                        subtitle
-                        description
-                        cards {
-                            cardArticle {
-                                __typename
-                                ... on CardComponent {
-                                    title
-                                    description
-                                }
-                            }
-                        }
-                    }
+              }
+            }
+          }
+          publicContracting {
+            ${locale} {
+              id
+              title
+              description
+            }
+          }
+          geographicDistribution {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  title
+                  description
                 }
-                publicContracting {
-                    ${locale} {
-                        id
-                        title
-                        description
-                    }
-                }
-                geographicDistribution {
-                    ${locale} {
-                        id
-                        title
-                        cards {
-                            cardArticle {
-                                __typename
-                                ... on CardComponent {
-                                    title
-                                    description
-                                    imageAlt
-                                }
-                            }
-                        }
-                    }
-                }
+              }
             }
           }
         }
-    `);
+      }
+    }
+  `);
 }
 
 export function getPrrProjectSheet() {
