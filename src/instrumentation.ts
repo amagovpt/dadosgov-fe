@@ -11,8 +11,8 @@ import { installServerApiErrorInterceptor } from "@/lib/server/apiErrorIntercept
  *    fetch stops being silently painted as an empty result set.
  *
  * 2) Disables HTTP keep-alive for server-side `fetch` calls to the backend.
- * The rewrite proxy uses a separate HTTP pool; its development connections
- * are closed by src/proxy.ts instead.
+ * The rewrite proxy uses a separate HTTP pool. Its upstream must advertise
+ * connection closure correctly or support persistent HTTP connections.
  *
  * Why: when the upstream (particularly the Werkzeug dev server) closes an
  * idle socket, undici can reuse it before noticing it is gone, producing
