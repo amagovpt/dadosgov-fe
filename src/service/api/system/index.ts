@@ -1,5 +1,6 @@
 import type { Dataset } from "@/service/types/dataset";
 import type { ScheduledJob } from "@/service/types/scheduled-jobs";
+import type { MigrationsAudit } from "@/service/types/migrations-audit";
 import type { HomepageData } from "@/service/types/home";
 import type { Reuse } from "@/service/types/reuse";
 import type { APIResponse } from "@/service/types/shared";
@@ -402,6 +403,29 @@ export async function fetchSchedulableJobs(): Promise<string[] | null> {
   } catch (error) {
     rethrowControlFlow(error);
     console.error("Error fetching schedulable jobs:", error);
+    return null;
+  }
+}
+
+/**
+ * The database migration audit, for the read-only page (LEDG-2655).
+ *
+ * 🚩 null ON FAILURE, never an empty envelope. A portal with no migrations is
+ * a valid answer -- `{ total: 0, migrations: [] }` -- and it must stay
+ * distinguishable from the backend being unreachable, on a page whose entire
+ * job is to report the state of the schema. Saying "no migrations" to somebody
+ * checking after a dump restore would be the worst possible lie.
+ */
+export async function fetchMigrationsAudit(): Promise<MigrationsAudit | null> {
+  try {
+    const res = await authFetch("/site/migrations/", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch migrations audit: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    rethrowControlFlow(error);
+    console.error("Error fetching migrations audit:", error);
     return null;
   }
 }

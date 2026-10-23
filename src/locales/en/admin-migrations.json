@@ -1,0 +1,67 @@
+{
+  "title": "Migrations",
+  "metadata": {
+    "title": "Database migrations",
+    "description": "State of this environment's database schema migrations."
+  },
+  "intro": {
+    "description": "The state of every schema migration in this environment. This page is read-only."
+  },
+  "columns": {
+    "filename": "Migration",
+    "state": "State",
+    "date": "Last operation",
+    "detail": "Detail"
+  },
+  "states": {
+    "applied": "Applied",
+    "not_applied": "Not applied",
+    "recorded_only": "Recorded, never ran",
+    "recorded_after_failure": "Marked after failing",
+    "applied_with_errors": "Applied with errors",
+    "failed": "Failed",
+    "empty_record": "Empty record",
+    "orphan": "Record with no file",
+    "legacy": "Legacy record (pre-2.0)"
+  },
+  "summary": {
+    "clean": "No anomalies — {{total}} migrations, all in order.",
+    "anomalies": "{{count}} anomaly found",
+    "anomalies_other": "{{count}} anomalies found",
+    "ofTotal": "of {{total}} migrations"
+  },
+  "detail": {
+    "ops": "{{count}} operation",
+    "ops_other": "{{count}} operations",
+    "marked": "marked {{count}}x",
+    "failedRuns": "{{count}} failed run",
+    "failedRuns_other": "{{count}} failed runs",
+    "errors": "{{count}} error logged",
+    "errors_other": "{{count}} errors logged",
+    "showTraceback": "Show error detail",
+    "showErrors": "Show errors",
+    "errorsTitle": "Errors logged during the migration",
+    "truncated": "Showing the first {{shown}} of {{total}} errors. The rest are in the server logs.",
+    "tracebackTitle": "Technical detail of the failure",
+    "closeErrors": "Close"
+  },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search by migration name"
+  },
+  "filters": {
+    "all": "All",
+    "anomalies": "Anomalies only",
+    "applied": "Applied"
+  },
+  "values": {
+    "never": "—"
+  },
+  "emptyState": {
+    "title": "No migrations recorded",
+    "description": "This environment has no migrations on disk or in the database."
+  },
+  "errors": {
+    "loadFailed": "The migration state could not be loaded. Please try again in a moment."
+  }
+}
