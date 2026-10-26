@@ -928,6 +928,10 @@ export function getPT2030ProjectData(locale: string = "pt") {
                   }
                 }
               }
+              breadcrumbs {
+                label
+                url
+              }
             }
           }
           projectSheet {
@@ -1120,6 +1124,10 @@ export function getPT2030BeneficiaryData(locale: string = "pt") {
                   }
                 }
               }
+              breadcrumbs {
+                label
+                url
+              }
             }
           }
           beneficiarySheet {
@@ -1254,6 +1262,235 @@ export const queryLoadMorePT2030ProjectsByBeneficiary = gql(/* GraphQL */ `
 
 export function loadMorePT2030ProjectsByBeneficiary() {
   return queryLoadMorePT2030ProjectsByBeneficiary;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPrrProjectMeta(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPrrProjectMeta {
+      findFichaDeProjetoPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function getPrrProjectData(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPrrProjectData {
+      findFichaDeProjetoPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+              index {
+                title
+                anchors {
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
+                }
+              }
+              breadcrumbs {
+                label
+                url
+              }
+            }
+          }
+          projectSheet {
+            ${locale} {
+              id
+              iconName
+              title
+            }
+          }
+          beneficiaries {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  title
+                  description
+                }
+              }
+            }
+          }
+          applications {
+            ${locale} {
+              id
+              title
+              subtitle
+              description
+              cards {
+                card {
+                  title
+                  description
+                }
+              }
+            }
+          }
+          publicContracting {
+            ${locale} {
+              id
+              title
+              description
+            }
+          }
+          geographicDistribution {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  title
+                  description
+                }
+              }
+            }
+          }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function getPrrProjectSheet() {
+  return gql(/* GraphQL */ `
+    query getPrrProjectSheet($recipientId: String!) {
+      queryProjectSheetOfPRR(recipientId: $recipientId) {
+        data {
+          code
+          projectForm {
+            component
+            dimension
+            executedValue
+            grantFunding
+            investment
+            loanFunding
+            name
+            plannedConclusionDate
+            startDate
+            summary
+            totalProjectValue
+          }
+          tabs {
+            candidature {
+              baseScore
+              finalScore
+              tabName
+              link
+            }
+            contracts {
+              contractsCount
+              tabName
+              totalContractsValue
+              contractDetails {
+                contractsCount
+                contractsValue
+                principalDescription
+                secondaryDescription
+                detailContract {
+                  link
+                  name
+                  value
+                }
+              }
+            }
+            contestAndContracts {
+              tabName
+              criteria
+              contractDetails {
+                contractsCount
+                contractsValue
+                principalDescription
+                secondaryDescription
+                detailContract {
+                  link
+                  name
+                  value
+                }
+              }
+            }
+            geoDistributionFinancing {
+              tabName
+              source
+              sourceLink
+              referenceDate
+              valuePercentage
+              distribution {
+                type
+                divisions {
+                  description
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function loadMorePrrProjectSheetBeneficiaryFinancing(
+  beneficiaryType: "BENEFICIARY" | "INTERMEDIARY_BENEFICIARY" | "PARTNER" | "SUPPLIER"
+) {
+  return gql(/* GraphQL */ `
+    query loadMorePrrProjectSheetBeneficiaryFinancing(
+      $page: Int
+      $limit: Int
+      $projectCode: String
+    ) {
+      queryProjectSheetBeneficiaryFinancingOfPRR(
+        page: $page
+        limit: $limit
+        projectCode: $projectCode
+        beneficiaryType: ${beneficiaryType}
+      ) {
+        totalFiltered
+        total
+        page
+        limit
+        beneficiaryType
+        data {
+          description
+          id
+          name
+          paid
+        }
+      }
+    }
+  `);
 }
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */

@@ -522,7 +522,9 @@
       "subregiao_pl": "sub-regions",
       "regiao": "region",
       "regiao_pl": "regions"
-    }
+    },
+    "suppliersValues": "Funding amounts to suppliers",
+    "suppliersInDetail": "Suppliers in detail"
   },
   "suppliersValues": "Financing amounts to suppliers",
   "suppliersInDetail": "Suppliers in detail",
@@ -541,5 +543,22 @@
   "totalAmountPaid": "Total amount paid",
   "seeMore": "See more {{about}}",
   "technicalSheet": "Technical sheet",
-  "consult": "Consult"
+  "consult": "Consult",
+  "prr": {
+    "sheet": {
+      "nonRepayableFunding": "Non-repayable funding",
+      "loanFunding": "Funding through loans",
+      "dimension": "Dimension",
+      "component": "Component",
+      "investment": "Investment",
+      "totalProjectValue": "Total project value",
+      "startDate": "Start date",
+      "conclusionDate": "Conclusion date",
+      "contractedFunding": "Contracted funding",
+      "selectionCriteria": "Project selection criteria",
+      "totalContractsValue": "Total contracts value",
+      "totalContracts": "Total contracts",
+      "value": "Value"
+    }
+  }
 }
