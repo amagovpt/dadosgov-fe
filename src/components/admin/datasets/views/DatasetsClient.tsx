@@ -273,7 +273,6 @@ export default function DatasetsClient({
       }
       headerAction={
         <Button
-          className="border-0"
           variant="primary"
           hasIcon
           leadingIcon="agora-line-plus-circle"
