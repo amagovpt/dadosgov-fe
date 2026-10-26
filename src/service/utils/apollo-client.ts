@@ -56,18 +56,22 @@ interface CachedResult {
   result: unknown;
 }
 
+type QueryFn = ApolloClient["query"];
+
 class SwrApolloClient extends ApolloClient {
   private results = new Map<string, CachedResult>();
   private inflight = new Map<string, Promise<unknown>>();
 
-  async query<
+  private readonly networkQuery: QueryFn = this.query;
+
+  override query = (async <
     TData = unknown,
     TVariables extends OperationVariables = OperationVariables,
   >(
     options: ApolloClient.QueryOptions<TData, TVariables>,
-  ): Promise<ApolloClient.QueryResult<MaybeMasked<TData>>> {
+  ): Promise<ApolloClient.QueryResult<MaybeMasked<TData>>> => {
     if (typeof window !== "undefined") {
-      return super.query(options);
+      return this.networkQuery(options);
     }
 
     // Locale is interpolated into the query text (e.g. getHome), so the
@@ -89,7 +93,7 @@ class SwrApolloClient extends ApolloClient {
       return hit.result as ApolloClient.QueryResult<MaybeMasked<TData>>;
     }
     return refresh;
-  }
+  }) as QueryFn;
 
   /** Network fetch deduped per key: concurrent misses share one request. */
   private refresh<
@@ -104,8 +108,7 @@ class SwrApolloClient extends ApolloClient {
       return existing as Promise<ApolloClient.QueryResult<MaybeMasked<TData>>>;
     }
 
-    const promise = super
-      .query({ ...options, fetchPolicy: "network-only" })
+    const promise = this.networkQuery({ ...options, fetchPolicy: "network-only" })
       .then((result) => {
         this.results.set(key, { fetchedAt: Date.now(), result });
         if (this.results.size > MAX_ENTRIES) {

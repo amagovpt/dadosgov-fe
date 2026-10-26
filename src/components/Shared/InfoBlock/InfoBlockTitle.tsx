@@ -21,7 +21,7 @@ export default function InfoBlockTitle({
       return (
         <Typograph
           tag={titleLevel}
-          className={twJoin("text-2xl-light text-primary-900 max-w-[596px]", className)}
+          className={twJoin("text-2xl-light text-neutral-900 max-w-[596px]", className)}
         >
           {text}
         </Typograph>
