@@ -329,7 +329,7 @@ export default async function ProjectPage({
         breadcrumbs={[
           ...hero.breadcrumbs,
           {
-            url: `/datastories/portugal-2030/projetos-do-portugal-2030/${id}`,
+            url: `/datastories/prr/projetos-do-prr/${id}`,
             label: projectCode,
           },
         ]}

@@ -1,14 +1,249 @@
+import initTranslations from "@/app/i18n";
+import BeneficiarySheetContent from "@/components/datastories/BeneficiaryAndProjectPrr/Beneficiary/BeneficiarySheetContent";
+import DistributionValuesChart from "@/components/datastories/BeneficiaryAndProjectPrr/Beneficiary/DistributionValuesChart";
+import RelatedProjectsContent from "@/components/datastories/BeneficiaryAndProjectPrr/Beneficiary/RelatedProjectsContent";
+import { Datastory } from "@/components/Shared/Datastories";
+import { InfoBlock } from "@/components/Shared/InfoBlock";
+import Section from "@/components/Shared/Section";
+import { getPrrBeneficiaryData, getPrrBeneficiaryMeta } from "@/service/queries/datastories/datastory";
+import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
+import {
+  Beneficiary,
+  PRRBeneficiaryRelatedProjects,
+  PRRBeneficiaryRelatedProjectsResponse,
+  PRRBeneficiarySheetResponse,
+  PRRBeneficiarySheetSourceInfoResponse,
+} from "@/service/types/datastories/prr/prr";
+import apolloClient from "@/service/utils/apollo-client";
+import { flattenData } from "@/utils/flattenObject";
+import { formatCompactEUR } from "@/utils/formatCurrency";
+import { Metadata } from "next";
+import { headers } from "next/headers";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const host = (await headers()).get("host") || "localhost:3000";
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  const siteUrl = `${protocol}://${host}`;
+
+  const { data, error } = await apolloClient.query<{
+    findFichaDeBeneficiarioPrrSingleton: { data: unknown };
+  }>({
+    query: getPrrBeneficiaryMeta(locale),
+  });
+
+  if (!data || error) {
+    console.error("Error:", error);
+    throw new Error(error?.message ?? "Failed to fetch data");
+  }
+
+  const { hero } = flattenData(
+    data.findFichaDeBeneficiarioPrrSingleton.data as Record<string, unknown>
+  ) as Beneficiary;
+
+  return {
+    title: `${hero?.title}`,
+    description: hero?.description,
+    openGraph: {
+      images: [`${siteUrl}/images/og-images/social_media.jpg`],
+    },
+  };
+}
 
 export default async function BeneficiaryPage({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
+  const { locale, id } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["common"],
+  });
+
+  const { data, error } = await apolloClient.query<{
+    findFichaDeBeneficiarioPrrSingleton: { data: unknown };
+    queryBeneficiarySheetOfPRR: PRRBeneficiarySheetResponse;
+    beneficiaryProjects: PRRBeneficiaryRelatedProjectsResponse;
+    intermediaryBeneficiaryProjects: PRRBeneficiaryRelatedProjectsResponse;
+    partnerProjects: PRRBeneficiaryRelatedProjectsResponse;
+    supplierProjects: PRRBeneficiaryRelatedProjectsResponse;
+    queryBeneficiarySheetSourceInfoOfPRR: PRRBeneficiarySheetSourceInfoResponse;
+  }>({
+    query: getPrrBeneficiaryData(locale),
+    variables: {
+      nif: id,
+    },
+    fetchPolicy: "no-cache",
+  });
+
+  if (error || !data) {
+    console.error("Error:", error);
+    throw new Error(error?.message ?? "Failed to fetch data");
+  }
+
+  const { hero, beneficiarySheet, distribution, projects } = flattenData(
+    data.findFichaDeBeneficiarioPrrSingleton.data as Record<string, unknown>
+  ) as Beneficiary;
+
+  const beneficiarySheetData = data.queryBeneficiarySheetOfPRR?.data;
+  const beneficiaryForm = beneficiarySheetData?.beneficiaryForm;
+
+  if (!beneficiarySheetData || !beneficiaryForm) {
+    throw new Error("Failed to fetch beneficiary sheet data");
+  }
+
+  const beneficiaryRelatedProjects: PRRBeneficiaryRelatedProjects = {
+    beneficiaryProjects: {
+      total: Number(data.beneficiaryProjects?.total ?? 0),
+      list: data.beneficiaryProjects?.data ?? [],
+    },
+    intermediaryBeneficiaryProjects: {
+      total: Number(data.intermediaryBeneficiaryProjects?.total ?? 0),
+      list: data.intermediaryBeneficiaryProjects?.data ?? [],
+    },
+    partnerProjects: {
+      total: Number(data.partnerProjects?.total ?? 0),
+      list: data.partnerProjects?.data ?? [],
+    },
+    supplierProjects: {
+      total: Number(data.supplierProjects?.total ?? 0),
+      list: data.supplierProjects?.data ?? [],
+    },
+  };
+
+  const beneficiarySheetViewData = {
+    ...beneficiaryForm,
+    budget: beneficiarySheetData.budget,
+    valuesByEntityRole: beneficiarySheetData.valuesByEntityRole,
+  };
+
+  const beneficiaryTechnicalSheet = await getTechnicalSheetData(
+    "prr-ficha-de-beneficiario",
+    locale
+  );
+
+  const sourceInfo = data.queryBeneficiarySheetSourceInfoOfPRR?.sourceInfo ?? [];
+  const mainSourceInfo = sourceInfo[0];
+  const beneficiarySourceInfo = {
+    dataSource: mainSourceInfo?.source ?? "",
+    update: mainSourceInfo?.modificationDate ?? "",
+    technicalSheet: beneficiaryTechnicalSheet,
+  };
+
+  const formatValuesWithSuffix = (value: number | string) => {
+    const [finValue, finSuffix] = formatCompactEUR(Number(value));
+    return `${finValue} ${t(finSuffix)} \u20AC`;
+  };
+
+  const suppliersLabel = t("searchBenProj.suppliers");
+  const projectsLabel = t("projects");
+
+  const beneficiarySheetLabels = {
+    name: t("sheetBenProj.fields.ben_name"),
+    financedValue: t("sheetBenProj.fields.valor_financiamento"),
+    totalProjects: t("sheetBenProj.fields.total_projetos"),
+    taxId: t("sheetBenProj.fields.nif"),
+    economicActivity: t("sheetBenProj.fields.atividade_economica"),
+    headquartersLocation: t("sheetBenProj.fields.localizacao_sede"),
+    financedValueTooltip: t("sheetBenProj.tooltips.valor_financiamento_beneficiario"),
+  };
+
+  const distributionLabels = {
+    financedValue: t("sheetBenProj.fields.valor_financiamento"),
+    receivedValue: t("sheetBenProj.fields.valor_recebido"),
+    suppliersValues: t("sheetBenProj.suppliersValues"),
+    totalFunded: t("sheetBenProj.fields.total_financiado"),
+    suppliersInDetail: t("sheetBenProj.suppliersInDetail"),
+    suppliers: suppliersLabel,
+    fundedValue: t("sheetBenProj.fields.valor_financiamento"),
+    seeMoreSuppliers: t("seeMore", { about: suppliersLabel.toLowerCase() }),
+  };
+
+  const relatedProjectsLabels = {
+    projects: projectsLabel,
+    conclusionDate: t("conclusionDate"),
+    receivedFinancing: t("sheetBenProj.fields.financiamento_recebido"),
+    receivedValue: t("sheetBenProj.fields.valor_recebido"),
+    seeMoreProjects: t("seeMore", { about: projectsLabel.toLowerCase() }),
+  };
 
   return (
-    <main className="datastory-page project-sheet flex flex-col pb-64">
+    <main className="flex flex-col pb-128">
+      <Datastory.Hero
+        breadcrumbs={[
+          ...hero.breadcrumbs,
+          {
+            url: `/datastories/prr/beneficiarios-do-prr/${id}`,
+            label: beneficiarySheetViewData.nif,
+          },
+        ]}
+        pretitle={hero.title}
+        title={beneficiarySheetViewData.name}
+        index={hero.index}
+        className="[&_.info-datastory]:justify-center"
+      />
 
+      <Section className="flex flex-col items-center gap-32 py-128" id={beneficiarySheet.id}>
+        <InfoBlock.Root>
+          <InfoBlock.Header className="flex flex-row gap-24">
+            <InfoBlock.Title title={beneficiarySheet.title} />
+          </InfoBlock.Header>
+        </InfoBlock.Root>
+
+        <BeneficiarySheetContent
+          beneficiaryData={beneficiarySheetViewData}
+          formatValuesWithSuffix={formatValuesWithSuffix}
+          labels={beneficiarySheetLabels}
+        />
+      </Section>
+
+      <Section
+        className="flex flex-col items-center gap-64 bg-neutral-100 pt-128"
+        id={distribution.id}
+      >
+        <InfoBlock.Root>
+          <InfoBlock.Header className="flex flex-row gap-24">
+            <InfoBlock.Title title={distribution.title} />
+          </InfoBlock.Header>
+        </InfoBlock.Root>
+
+        <DistributionValuesChart
+          distribution={distribution}
+          approvedValue={Number(beneficiarySheetViewData.budget ?? 0)}
+          relatedProjects={beneficiaryRelatedProjects}
+          valuesByEntityRole={beneficiarySheetViewData.valuesByEntityRole}
+          formatValuesWithSuffix={formatValuesWithSuffix}
+          labels={distributionLabels}
+          sourceInfo={beneficiarySourceInfo}
+        />
+      </Section>
+
+      <Section
+        className="flex flex-col items-center gap-64 bg-neutral-100 pt-64 pb-128"
+        id={projects.id}
+      >
+        <InfoBlock.Root>
+          <InfoBlock.Header className="flex flex-row gap-24">
+            <InfoBlock.Title title={projects.title} />
+          </InfoBlock.Header>
+        </InfoBlock.Root>
+
+        <InfoBlock.Root>
+          <InfoBlock.Content className="flex flex-col gap-64">
+            <RelatedProjectsContent
+              projectsSection={projects}
+              relatedProjects={beneficiaryRelatedProjects}
+              labels={relatedProjectsLabels}
+              nif={id}
+            />
+          </InfoBlock.Content>
+        </InfoBlock.Root>
+      </Section>
     </main>
   );
 }

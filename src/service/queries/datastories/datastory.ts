@@ -1494,3 +1494,256 @@ export function loadMorePrrProjectSheetBeneficiaryFinancing(
 }
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPrrBeneficiaryMeta(locale: string = "pt") {
+  return gql`
+    query getPrrBeneficiaryMeta {
+      findFichaDeBeneficiarioPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              subtitle
+            }
+          }
+        }
+      }
+    }
+  `;
+}
+
+export function getPrrBeneficiaryData(locale: string = "pt") {
+  return gql`
+    query getPrrBeneficiaryData($nif: String!) {
+      findFichaDeBeneficiarioPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              subtitle
+              sitemap {
+                title
+                links {
+                  anchor {
+                    children
+                    href
+                    appearance
+                    iconName
+                    variant
+                  }
+                }
+              }
+            }
+          }
+          beneficiarySheet {
+            ${locale} {
+              id
+              iconName
+              title
+            }
+          }
+          consortiums {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              description
+              cards {
+                cardArticle {
+                  __typename
+                  ... on CardComponent {
+                    title
+                    description
+                    iconName
+                    imageAlt
+                    anchor {
+                      children
+                      href
+                      iconName
+                    }
+                  }
+                }
+              }
+            }
+          }
+          distribution {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              description
+              cards {
+                cardArticle {
+                  __typename
+                  ... on CardComponent {
+                    title
+                    description
+                    iconName
+                    imageAlt
+                    anchorGroup {
+                      children
+                      href
+                      iconName
+                    }
+                  }
+                }
+              }
+            }
+          }
+          projects {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              description
+              cards {
+                cardArticle {
+                  __typename
+                  ... on CardComponent {
+                    title
+                    description
+                    iconName
+                    anchor {
+                      children
+                      href
+                      iconName
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      queryBeneficiarySheetOfPRR(nif: $nif) {
+        data {
+          budget
+          economicActivity
+          location
+          name
+          nif
+          totalProjects
+          beneficiaryForm {
+            economicActivity
+            location
+            name
+            nif
+            totalConsortiumParticipations
+            totalProjects
+          }
+          valuesByEntityRole {
+            approvedValue
+            entityRole
+            executedValue
+            percentageExecutedValue
+          }
+        }
+      }
+      queryBeneficiarySheetSourceInfoOfPRR {
+        sourceInfo {
+          format
+          publicationDate
+          modificationDate
+          sourceLink
+          source
+          title
+          url
+        }
+      }
+      beneficiaryProjects: queryBeneficiaryRelatedProjectsOfPRR(
+        nif: $nif
+        type: BENEFICIARY
+        page: 1
+        limit: 10
+      ) {
+        nif
+        total
+        data {
+          amount
+          date
+          id
+          name
+          paid
+        }
+      }
+      intermediaryBeneficiaryProjects: queryBeneficiaryRelatedProjectsOfPRR(
+        nif: $nif
+        type: INTERMEDIARY
+        page: 1
+        limit: 10
+      ) {
+        nif
+        total
+        data {
+          amount
+          date
+          id
+          name
+          paid
+        }
+      }
+      partnerProjects: queryBeneficiaryRelatedProjectsOfPRR(
+        nif: $nif
+        type: PARTNER
+        page: 1
+        limit: 10
+      ) {
+        nif
+        total
+        data {
+          amount
+          date
+          id
+          name
+          paid
+        }
+      }
+      supplierProjects: queryBeneficiaryRelatedProjectsOfPRR(
+        nif: $nif
+        type: SUPPLIER
+        page: 1
+        limit: 10
+      ) {
+        nif
+        total
+        data {
+          amount
+          date
+          id
+          name
+          paid
+        }
+      }
+    }
+  `;
+}
+
+export function queryLoadMorePrrProjectsByBeneficiary(type: PRRBeneficiaryRelatedProjectsType) {
+  return gql`
+    query queryLoadMorePrrProjectsByBeneficiary(
+      $nif: String!
+      $page: Int
+      $limit: Int
+    ) {
+      queryBeneficiaryRelatedProjectsOfPRR(
+        nif: $nif
+        type: ${type}
+        page: $page
+        limit: $limit
+      ) {
+        nif
+        total
+        data {
+          amount
+          date
+          id
+          name
+          paid
+        }
+      }
+    }
+  `;
+}

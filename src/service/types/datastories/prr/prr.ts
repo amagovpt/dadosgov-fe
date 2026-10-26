@@ -358,3 +358,92 @@ export type ProjectSheetOfPRRData = {
     } | null;
   } | null;
 };
+
+// ----------------------------------------------------------------------------------------------
+
+/** BENEFICIARY **/
+
+export type Beneficiary = {
+  hero: DatastoryHero;
+  beneficiarySheet: Section;
+  consortiums: Section;
+  distribution: Section;
+  projects: Section;
+  datasets: SourceSection;
+};
+
+export type BeneficiaryRole = "intermediate" | "beneficiary" | "partner" | "supplier";
+
+export type PRRBeneficiaryProjectItem = {
+  amount: number;
+  date: string | null;
+  id: string;
+  name: string;
+  paid: number;
+};
+
+export type PRRBeneficiaryProjectGroup = {
+  total: number;
+  list: PRRBeneficiaryProjectItem[] | null;
+};
+
+export type PRRBeneficiaryValueByEntityRole = {
+  approvedValue: number;
+  entityRole: string;
+  executedValue: number;
+  percentageExecutedValue: number;
+};
+
+export type PRRBeneficiarySheetForm = {
+  economicActivity: string | null;
+  location: string | null;
+  name: string;
+  nif: string;
+  totalConsortiumParticipations: number;
+  totalProjects: number;
+};
+
+export type PRRBeneficiarySheetData = {
+  budget: number;
+  economicActivity: string | null;
+  location: string | null;
+  name: string;
+  nif: string;
+  totalProjects: number;
+  beneficiaryForm: PRRBeneficiarySheetForm | null;
+  valuesByEntityRole?: PRRBeneficiaryValueByEntityRole[] | null;
+};
+
+export type PRRBeneficiarySheetResponse = {
+  data: PRRBeneficiarySheetData;
+};
+
+export type PRRBeneficiarySheetSourceInfoItem = {
+  format: string | null;
+  publicationDate: string | null;
+  modificationDate: string | null;
+  sourceLink: string | null;
+  source: string | null;
+  title: string | null;
+  url: string | null;
+};
+
+export type PRRBeneficiarySheetSourceInfoResponse = {
+  sourceInfo: PRRBeneficiarySheetSourceInfoItem[];
+};
+
+export type PRRBeneficiaryRelatedProjectsResponse = {
+  nif: string;
+  total: number;
+  data: PRRBeneficiaryProjectItem[];
+};
+
+export type PRRBeneficiaryRelatedProjectsType =
+  "BENEFICIARY" | "INTERMEDIARY" | "PARTNER" | "SUPPLIER";
+
+export type PRRBeneficiaryRelatedProjects = {
+  beneficiaryProjects: PRRBeneficiaryProjectGroup;
+  intermediaryBeneficiaryProjects: PRRBeneficiaryProjectGroup;
+  partnerProjects: PRRBeneficiaryProjectGroup;
+  supplierProjects: PRRBeneficiaryProjectGroup;
+};
