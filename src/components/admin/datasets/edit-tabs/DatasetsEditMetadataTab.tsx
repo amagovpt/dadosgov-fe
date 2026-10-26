@@ -1,28 +1,32 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button, type DropdownSectionProps, Switch } from "@ama-pt/agora-design-system";
-import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
-import { getEditDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
+import {
+  Button,
+  StatusCard,
+  InputSelect,
+  DropdownSection,
+  DropdownOption,
+  type DropdownSectionProps,
+} from "@ama-pt/agora-design-system";
+import {
+  getDatasetAuxiliarItem,
+  getEditDatasetAuxiliarItems,
+} from "@/components/admin/datasets/config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
 import type { SpatialZone } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
-import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
 import DatasetsEditDescriptionSection from "@/components/admin/datasets/edit-sections/DatasetsEditDescriptionSection";
 import DatasetsEditAccessTimeSection from "@/components/admin/datasets/edit-sections/DatasetsEditAccessTimeSection";
 import DatasetsEditSpaceSection from "@/components/admin/datasets/edit-sections/DatasetsEditSpaceSection";
-import DatasetsEditDangerZone from "@/components/admin/datasets/edit-sections/DatasetsEditDangerZone";
 import { can } from "@/utils/permissions";
-import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
-import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
+import type { ReactNode } from "react";
 
 type DatasetsEditMetadataTabProps = {
   auxiliaryItems?: AdminAuxiliaryItem[];
-  visibilityCard?: AdminCard;
-  transferCard?: AdminCard;
-  archiveCard?: AdminCard;
-  unarchiveCard?: AdminCard;
-  deleteCard?: AdminCard;
   dataset: Dataset;
-  featured: boolean;
+  feedback?: ReactNode;
+  onCancel: () => void;
   isSubmitting: boolean;
   formErrors: Partial<Record<string, boolean | string>>;
   loadedTitle: string;
@@ -59,8 +63,6 @@ type DatasetsEditMetadataTabProps = {
   selectedFrequencyRef: React.MutableRefObject<string>;
   spatialCoverageRef: React.MutableRefObject<string>;
   spatialGranularityRef: React.MutableRefObject<string>;
-  onPublishDataset: () => void | Promise<void>;
-  onFeaturedChange: (checked: boolean) => void;
   onTitleChange: (value: string) => void;
   onAcronymChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
@@ -73,20 +75,13 @@ type DatasetsEditMetadataTabProps = {
   onSpatialSearch: (query: string) => void;
   onRemoveSpatialZone: (zoneId: string) => void;
   onSaveMetadata: () => void | Promise<void>;
-  onOpenTransferPopup: (e: React.MouseEvent) => void;
-  onToggleArchive: (e: React.MouseEvent) => void | Promise<void>;
-  onOpenDeletePopup: (e: React.MouseEvent) => void;
 };
 
 export default function DatasetsEditMetadataTab({
   auxiliaryItems,
-  visibilityCard,
-  transferCard,
-  archiveCard,
-  unarchiveCard,
-  deleteCard,
   dataset,
-  featured,
+  feedback,
+  onCancel,
   isSubmitting,
   formErrors,
   loadedTitle,
@@ -113,8 +108,6 @@ export default function DatasetsEditMetadataTab({
   selectedFrequencyRef,
   spatialCoverageRef,
   spatialGranularityRef,
-  onPublishDataset,
-  onFeaturedChange,
   onTitleChange,
   onAcronymChange,
   onDescriptionChange,
@@ -127,61 +120,72 @@ export default function DatasetsEditMetadataTab({
   onSpatialSearch,
   onRemoveSpatialZone,
   onSaveMetadata,
-  onOpenTransferPopup,
-  onToggleArchive,
-  onOpenDeletePopup,
 }: DatasetsEditMetadataTabProps) {
   const { t } = useTranslation("admin-datasets");
+  const identitySection = useDatasetSection("edit-identity");
   const canEdit = can(dataset, "edit");
-  const canDelete = can(dataset, "delete");
-  const auxiliarItems = getEditDatasetAuxiliarItems({
-    items: auxiliaryItems,
-  });
+  const auxiliarItems = getEditDatasetAuxiliarItems({ items: auxiliaryItems });
+  const producer =
+    dataset.organization?.name ||
+    [dataset.owner?.first_name, dataset.owner?.last_name].filter(Boolean).join(" ") ||
+    t("form.withoutOrganization");
 
   return (
-    <div className="flex flex-col gap-32 min-[1025px]:flex-row">
-      <div className="flex min-w-0 flex-1 flex-col gap-24">
-        {dataset.private && canEdit && visibilityCard && (
-          <AdminVisibilityBanner
-            description={
-              <>
-                <strong>{visibilityCard.title}</strong>
-                {visibilityCard.description && (
-                  <>
-                    <br />
-                    {formatHtmlParagraphs(visibilityCard.description)}
-                  </>
-                )}
-              </>
-            }
-            actionLabel={visibilityCard.anchor?.children ?? ""}
-            disabled={isSubmitting}
-            onAction={onPublishDataset}
-          />
-        )}
-
-        <form
-          className="admin-page__form"
-          noValidate
-          onSubmit={(event) => {
-            event.preventDefault();
-            void onSaveMetadata();
-          }}
-        >
-          <p className="text-neutral-900 text-base leading-7">{t("edit.requiredFields")}</p>
-
-          <div>
-            <h2 className="admin-page__section-title admin-page__section-title--no-top">
-              {t("edit.featuredSectionTitle")}
-            </h2>
-            <Switch
-              id="edit-featured"
-              label={t("edit.featuredLabel")}
-              checked={featured}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFeaturedChange(e.target.checked)}
+    <div className="flex min-w-0 flex-col gap-32">
+      {feedback}
+      <form
+        className="flex w-full flex-col gap-32"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          void onSaveMetadata();
+        }}
+      >
+        <p className="text-s-regular text-primary-900">{t("form.optionalFields")}</p>
+        {dataset.quality?.update_fulfilled_in_time === false && (
+          <div className="rounded-4 bg-white">
+            <StatusCard
+              variant="outline-warning"
+              showIcon
+              title={t("editPage.overdueTitle")}
+              description={t("editPage.overdueDescription")}
+              anchor={{
+                href: "#edit-time-section",
+                children: t("editPage.updateSchedule"),
+                hasIcon: true,
+                trailingIcon: "agora-line-arrow-right-circle",
+                trailingIconHover: "agora-solid-arrow-right-circle",
+              }}
             />
           </div>
-
+        )}
+        <fieldset
+          disabled={isSubmitting || !canEdit}
+          className="mt-32 flex w-full min-w-0 max-w-[800px] flex-col gap-64"
+        >
+          <section className="flex flex-col gap-32">
+            <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
+              <h2 className="text-xl-bold">{identitySection?.title ?? ""}</h2>
+              <DatasetContentDescription
+                html={identitySection?.description}
+                className="text-m-regular"
+              />
+            </div>
+            <InputSelect
+              id="edit-producer"
+              label={t("form.producerInputLabel")}
+              value="current"
+              disabled
+              hasHelperText
+              helperText={t("editPage.producerTransferHint")}
+            >
+              <DropdownSection name="producer">
+                <DropdownOption value="current" selected>
+                  {producer}
+                </DropdownOption>
+              </DropdownSection>
+            </InputSelect>
+          </section>
           <DatasetsEditDescriptionSection
             formErrors={formErrors}
             loadedTitle={loadedTitle}
@@ -197,8 +201,8 @@ export default function DatasetsEditMetadataTab({
             onKeywordSearch={onKeywordSearch}
             onKeywordsChange={onKeywordsChange}
             onRemoveKeyword={onRemoveKeyword}
+            auxiliaryItems={auxiliarItems}
           />
-
           <DatasetsEditAccessTimeSection
             formErrors={formErrors}
             loadedLicense={loadedLicense}
@@ -211,8 +215,8 @@ export default function DatasetsEditMetadataTab({
             selectedFrequencyRef={selectedFrequencyRef}
             onTemporalStartChange={onTemporalStartChange}
             onTemporalEndChange={onTemporalEndChange}
+            auxiliaryItems={auxiliarItems}
           />
-
           <DatasetsEditSpaceSection
             loadedSpatialZones={loadedSpatialZones}
             spatialCoverageValue={spatialCoverageValue}
@@ -226,38 +230,31 @@ export default function DatasetsEditMetadataTab({
             onSpatialCoverageChange={onSpatialCoverageChange}
             onSpatialSearch={onSpatialSearch}
             onRemoveSpatialZone={onRemoveSpatialZone}
+            helpItem={getDatasetAuxiliarItem(auxiliarItems, "spatial-granularity")}
           />
-
-          <div className="admin-page__actions mt-24 flex justify-end">
-            <Button
-              type="submit"
-              variant="primary"
-              hasIcon
-              trailingIcon="agora-line-check-circle"
-              trailingIconHover="agora-solid-check-circle"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? t("edit.saving") : t("edit.save")}
-            </Button>
-          </div>
-
-          <DatasetsEditDangerZone
-            datasetArchived={!!dataset.archived}
-            isSubmitting={isSubmitting}
-            canEdit={canEdit}
-            canDelete={canDelete}
-            transferCard={transferCard}
-            archiveCard={archiveCard}
-            unarchiveCard={unarchiveCard}
-            deleteCard={deleteCard}
-            onOpenTransferPopup={onOpenTransferPopup}
-            onToggleArchive={onToggleArchive}
-            onOpenDeletePopup={onOpenDeletePopup}
-          />
-        </form>
-      </div>
-
-      {auxiliarItems.length > 0 && <AdminAuxiliarySidebar items={auxiliarItems} />}
+        </fieldset>
+        <div className="mt-32 flex w-full max-w-[800px] flex-wrap justify-end gap-16">
+          <Button
+            type="button"
+            appearance="link"
+            variant="neutral"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            {t("edit.cancel")}
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            hasIcon
+            leadingIcon="agora-line-check-circle"
+            leadingIconHover="agora-solid-check-circle"
+            disabled={isSubmitting || !canEdit}
+          >
+            {isSubmitting ? t("edit.saving") : t("editPage.saveChanges")}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

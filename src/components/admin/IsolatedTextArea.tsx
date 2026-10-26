@@ -4,6 +4,7 @@ import React from "react";
 import { InputTextArea } from "@ama-pt/agora-design-system";
 
 interface IsolatedTextAreaProps {
+  className?: string;
   label: string;
   placeholder?: string;
   id: string;
@@ -21,6 +22,7 @@ interface IsolatedTextAreaProps {
 }
 
 const IsolatedTextArea = React.memo(function IsolatedTextArea({
+  className,
   label,
   placeholder,
   id,
@@ -56,6 +58,7 @@ const IsolatedTextArea = React.memo(function IsolatedTextArea({
 
   return (
     <InputTextArea
+      className={className}
       label={label}
       placeholder={placeholder}
       id={id}

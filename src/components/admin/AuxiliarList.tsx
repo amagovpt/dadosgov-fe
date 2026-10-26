@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Icon } from "@ama-pt/agora-design-system";
 
 export interface AuxiliarItem {
+  key?: string;
   title: string;
   content: React.ReactNode;
   hasError?: boolean;
