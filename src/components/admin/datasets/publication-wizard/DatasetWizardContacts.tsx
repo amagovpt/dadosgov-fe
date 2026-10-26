@@ -4,6 +4,9 @@ import { Button, Icon, Switch } from "@ama-pt/agora-design-system";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ContactPoint } from "@/service/types/dataset";
+import { AdminConfirmationDialog } from "@/components/admin/AdminConfirmationDialog";
+import { useDatasetConfirmation } from "../DatasetContentProvider";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { DatasetContactModal } from "./DatasetContactModal";
 
 interface DatasetWizardContactsProps {
@@ -12,7 +15,7 @@ interface DatasetWizardContactsProps {
   selectedIds: string[];
   onToggle: (id: string) => void;
   onSaved: (contact: ContactPoint, isNew: boolean) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => Promise<void>;
 }
 
 export function DatasetWizardContacts({
@@ -24,6 +27,10 @@ export function DatasetWizardContacts({
   onRemove,
 }: DatasetWizardContactsProps) {
   const { t } = useTranslation(["admin-datasets", "datasets"]);
+  const removeConfirmation = useDatasetConfirmation("delete-contact");
+  const [contactToRemove, setContactToRemove] = useState<ContactPoint | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState(false);
   const [modal, setModal] = useState<{
     trigger: HTMLButtonElement;
     contact?: ContactPoint;
@@ -34,8 +41,37 @@ export function DatasetWizardContacts({
     setModal({ trigger, contact });
   }
 
+  async function removeContact() {
+    if (!contactToRemove || removingId) return;
+    const id = contactToRemove.id;
+    setRemovingId(id);
+    setRemoveError(false);
+    try {
+      await onRemove(id);
+      setContactToRemove(null);
+    } catch {
+      setRemoveError(true);
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
   return (
     <div className="flex w-full flex-col items-start gap-16">
+      {contactToRemove && removeConfirmation && (
+        <AdminConfirmationDialog
+          title={removeConfirmation.title}
+          description={formatHtmlParagraphs(removeConfirmation.description)}
+          cancelLabel={removeConfirmation.cancelLabel}
+          confirmLabel={
+            removingId ? t("admin-datasets:edit.deleting") : removeConfirmation.confirmLabel
+          }
+          isBusy={removingId !== null}
+          error={removeError ? t("admin-datasets:contacts.removeError") : undefined}
+          onClose={() => setContactToRemove(null)}
+          onConfirm={() => void removeContact()}
+        />
+      )}
       {modal && (
         <DatasetContactModal
           producerId={producerId}
@@ -56,6 +92,7 @@ export function DatasetWizardContacts({
             key={contact.id}
             className="flex w-full flex-col gap-16 rounded-4 bg-primary-100 p-24 text-m-regular text-neutral-900 md:p-32"
             aria-label={contact.name}
+            aria-busy={removingId === contact.id}
           >
             <div className="flex flex-wrap items-center gap-16 md:flex-nowrap">
               <span className="flex shrink-0 items-center justify-center rounded-full border-2 border-primary-300 p-16">
@@ -67,6 +104,7 @@ export function DatasetWizardContacts({
                 label={t("admin-datasets:contacts.active")}
                 aria-label={`${t("admin-datasets:contacts.active")}: ${contact.name}`}
                 checked={selectedIds.includes(contact.id)}
+                disabled={removingId === contact.id}
                 onChange={() => onToggle(contact.id)}
               />
             </div>
@@ -94,6 +132,7 @@ export function DatasetWizardContacts({
                 hasIcon
                 leadingIcon="agora-line-edit"
                 leadingIconHover="agora-solid-edit"
+                disabled={removingId === contact.id}
                 onClick={(event) => openModal(event.currentTarget, contact)}
               >
                 {t("admin-datasets:contacts.edit")}
@@ -105,7 +144,11 @@ export function DatasetWizardContacts({
                 hasIcon
                 leadingIcon="agora-line-trash"
                 leadingIconHover="agora-solid-trash"
-                onClick={() => onRemove(contact.id)}
+                disabled={!removeConfirmation || removingId !== null}
+                onClick={() => {
+                  setRemoveError(false);
+                  setContactToRemove(contact);
+                }}
               >
                 {t("admin-datasets:contacts.remove")}
               </Button>

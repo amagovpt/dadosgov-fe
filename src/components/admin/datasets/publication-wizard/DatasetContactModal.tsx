@@ -152,6 +152,8 @@ export function DatasetContactModal({
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
+        // Portal events still bubble to the surrounding dataset form.
+        event.stopPropagation();
         void saveContact();
       }}
     >

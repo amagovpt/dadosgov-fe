@@ -64,7 +64,7 @@ export interface DatasetWizardStep2Props {
   selectedContactPointIds: string[];
   onToggleExistingContact: (id: string) => void;
   onContactSaved: (contact: ContactPoint, isNew: boolean) => void;
-  onRemoveContact: (id: string) => void;
+  onRemoveContact: (id: string) => Promise<void>;
   draftContacts: DatasetWizardDraftContact[];
   onDraftFieldChange: (draftId: number, field: string, value: string) => void;
   onSaveContactDraft: (draftId: number) => void;

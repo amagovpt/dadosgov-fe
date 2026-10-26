@@ -2,7 +2,11 @@
 
 import type React from "react";
 import { useEffect } from "react";
-import { createContactPoint, fetchOrgContactPoints } from "@/service/api/organizations";
+import {
+  createContactPoint,
+  deleteContactPoint,
+  fetchOrgContactPoints,
+} from "@/service/api/organizations";
 import type { ContactPoint } from "@/service/types/dataset";
 import type { DatasetWizardDraftContact } from "@/components/admin/datasets/publication-wizard/datasetWizardTypes";
 
@@ -57,7 +61,8 @@ export function useDatasetWizardContactActions({
       );
   };
 
-  const handleRemoveContact = (id: string) => {
+  const handleRemoveContact = async (id: string) => {
+    await deleteContactPoint(id);
     setOrgContactPoints((previous) => previous.filter((contact) => contact.id !== id));
     setSelectedContactPointIds((previous) => previous.filter((contactId) => contactId !== id));
   };

@@ -454,6 +454,17 @@ export async function updateContactPoint(
   return await res.json();
 }
 
+export async function deleteContactPoint(id: string): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/contacts/${encodeURIComponent(id)}/`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+}
+
 
 // --- CSV Export URL Builders ---
 
