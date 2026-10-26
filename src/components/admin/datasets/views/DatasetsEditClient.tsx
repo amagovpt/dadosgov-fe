@@ -483,7 +483,8 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
         { label: dataset.title },
       ]}
       title={dataset.title}
-      className="gap-64 pb-64 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2 [&_.agora-btn]:min-h-[60px] [&_.agora-btn]:py-[14px] [&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!"
+      className="gap-64 pb-64 [&_.agora-btn]:py-[14px]"
+      breadcrumbClassName="[&_li:first-child>span]:border-b-2 [&_li:first-child>span]:border-neutral-900 [&_li:first-child>span]:py-2"
       headerClassName="xl:items-center"
       headerInfoClassName="w-full max-w-[592px]"
       headerMeta={

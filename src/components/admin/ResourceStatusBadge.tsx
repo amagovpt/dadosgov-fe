@@ -35,6 +35,7 @@ export interface ResourceStatusBadgeI {
    * component stays out of it.
    */
   className?: string;
+  dotClassName?: string;
   /**
    * Render nothing when the resource is simply public.
    *
@@ -54,6 +55,7 @@ export function ResourceStatusBadge({
   item,
   display = "dot",
   className,
+  dotClassName,
   hidePublic = false,
   labels,
 }: ResourceStatusBadgeI) {
@@ -87,5 +89,9 @@ export function ResourceStatusBadge({
     );
   }
 
-  return <StatusDot variant={getStatusVariant()}>{getStatusLabel()}</StatusDot>;
+  return (
+    <StatusDot variant={getStatusVariant()} dotClassName={dotClassName}>
+      {getStatusLabel()}
+    </StatusDot>
+  );
 }

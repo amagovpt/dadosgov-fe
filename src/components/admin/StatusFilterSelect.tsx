@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Toggle, ToggleGroup } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
+import { twMerge } from "tailwind-merge";
 
 type Option = { value: string; label: string; icon?: string };
 
@@ -12,6 +13,8 @@ type Props = {
   id?: string;
   placeholder?: string;
   className?: string;
+  wrapperClassName?: string;
+  optionClassName?: string;
   options?: Option[];
   defaultValue?: string | undefined;
 };
@@ -33,6 +36,8 @@ export function StatusFilterSelect({
   onChange,
   id = "filter-status",
   className,
+  wrapperClassName,
+  optionClassName,
   options,
   defaultValue,
 }: Props) {
@@ -56,7 +61,7 @@ export function StatusFilterSelect({
   ];
 
   return (
-    <div className="flex w-full overflow-auto py-2">
+    <div className={twMerge("flex w-full overflow-auto py-2", wrapperClassName)}>
       <ToggleGroup
         // The design system seeds its orientation state from the prop on mount and never
         // syncs it again, so the group has to be remounted for a breakpoint change to apply.
@@ -79,6 +84,7 @@ export function StatusFilterSelect({
           return (
             <Toggle
               key={o.value}
+              className={optionClassName}
               value={`${TOGGLE_VALUE_PREFIX}${o.value}`}
               hasIcon={Boolean(icon)}
               leadingIcon={icon}

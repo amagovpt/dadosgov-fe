@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import type { ChangeEvent, ComponentProps, ReactNode } from "react";
+import { twMerge } from "tailwind-merge";
 import {
-  InputSearch,
-  InputSearchBar,
   Tab,
   TabBody,
   TabHeader,
@@ -19,6 +18,7 @@ import ResultsCount from "@/components/admin/ResultsCount";
 import type { CreatePaginationPropsOptions } from "@/utils/createPaginationProps";
 import { useHasListData } from "@/hooks/admin-lists/useHasListData";
 import AdminPaginatedTable from "./AdminPaginatedTable";
+import { AdminSearch, AdminSearchBar } from "./AdminSearch";
 import Button from "@/components/Primitives/Button";
 import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 
@@ -34,12 +34,21 @@ type SearchConfig = {
   onChange?: (value: string) => void;
 };
 
-interface AdminListPageProps {
+interface AdminListPageProps extends Pick<
+  AdminLayoutProps,
+  | "introClassName"
+  | "breadcrumbClassName"
+  | "titleClassName"
+  | "descriptionClassName"
+  | "kickerClassName"
+> {
   className?: AdminLayoutProps["className"];
   title: string;
   kicker?: string;
   description?: string;
   listTitle?: string;
+  listTitleClassName?: string;
+  tableClassName?: string;
   breadcrumbItems: AdminLayoutProps["breadcrumbItems"];
   headerAction?: ReactNode;
   headerClassName?: AdminLayoutProps["headerClassName"];
@@ -79,10 +88,17 @@ export default function AdminListPage({
   kicker,
   description,
   listTitle,
+  listTitleClassName,
+  tableClassName,
   breadcrumbItems,
   headerAction,
   headerClassName,
   headerInfoClassName,
+  introClassName,
+  breadcrumbClassName,
+  titleClassName,
+  descriptionClassName,
+  kickerClassName,
   beforeList,
   tabs,
   isLoading,
@@ -151,7 +167,13 @@ export default function AdminListPage({
 
   const listContent = (
     <>
-      {listTitle && <h2 className="mb-32 text-xl-bold text-brand-blue-secondary">{listTitle}</h2>}
+      {listTitle && (
+        <h2
+          className={`text-xl-bold ${twMerge("mb-32 text-brand-blue-secondary", listTitleClassName)}`}
+        >
+          {listTitle}
+        </h2>
+      )}
       {shouldRenderToolbar && (
         <div className="flex flex-col gap-32">
           {visibleFilters}
@@ -160,7 +182,7 @@ export default function AdminListPage({
               {visibleSearch && (
                 <div className="admin-search-wrapper w-full max-w-[592px]">
                   {visibleSearch.appearance === "bar" ? (
-                    <InputSearchBar
+                    <AdminSearchBar
                       hasVoiceActionButton={false}
                       defaultValue={visibleSearch.defaultValue}
                       label={visibleSearch.label}
@@ -173,7 +195,7 @@ export default function AdminListPage({
                       }
                     />
                   ) : (
-                    <InputSearch
+                    <AdminSearch
                       required={false}
                       defaultValue={visibleSearch.defaultValue}
                       label={visibleSearch.label}
@@ -230,11 +252,13 @@ export default function AdminListPage({
         {isInitialLoading ? (
           (loadingContent ?? defaultLoadingContent)
         ) : shouldRenderTable ? (
+          // Agora's closed pagination dropdown extends 8px below its trigger.
           <div
             aria-busy={isRefreshing}
-            className="flex flex-col gap-16 overflow-auto xl:overflow-hidden [&_.agora-table-pagination]:w-full!"
+            className="-mb-8 flex flex-col gap-16 overflow-x-auto pb-8 xl:overflow-hidden [&_.agora-table-pagination]:w-full!"
           >
             <AdminPaginatedTable
+              tableClassName={tableClassName}
               pageSize={pageSize}
               totalItems={count}
               currentPage={currentPage}
@@ -257,6 +281,11 @@ export default function AdminListPage({
       className={className}
       headerClassName={headerClassName}
       headerInfoClassName={headerInfoClassName}
+      introClassName={introClassName}
+      breadcrumbClassName={breadcrumbClassName}
+      titleClassName={titleClassName}
+      descriptionClassName={descriptionClassName}
+      kickerClassName={kickerClassName}
       title={title}
       kicker={kicker}
       description={description}

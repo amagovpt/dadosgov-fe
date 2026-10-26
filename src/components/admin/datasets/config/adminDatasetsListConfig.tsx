@@ -73,7 +73,9 @@ export function createAdminDatasetColumns({
     {
       id: "status",
       header: labels.status,
-      renderCell: (dataset) => <ResourceStatusBadge item={dataset} labels={statusLabels} />,
+      renderCell: (dataset) => (
+        <ResourceStatusBadge item={dataset} labels={statusLabels} dotClassName="md:size-8" />
+      ),
       exportValue: (dataset) => statusLabels[getResourceStatusKey(dataset)],
     },
     {
@@ -95,7 +97,9 @@ export function createAdminDatasetColumns({
     {
       id: "quality",
       header: (
-        <span className="inline-block max-w-[160px] whitespace-normal">{labels.quality}</span>
+        <span className="inline-block max-w-[160px] font-semibold whitespace-normal">
+          {labels.quality}
+        </span>
       ),
       headerLabel: labels.quality,
       sortField: "quality",

@@ -27,7 +27,6 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import Image from "next/image";
 import { can } from "@/utils/permissions";
-import styles from "./datasetsList.module.css";
 
 type DatasetsClientProps = {
   pageContent: BoDatasetsPage;
@@ -238,7 +237,13 @@ export default function DatasetsClient({
 
   return (
     <AdminListPage
-      className={styles.page}
+      introClassName="mb-32"
+      titleClassName="text-primary-900"
+      descriptionClassName="text-primary-900"
+      kickerClassName="text-neutral-900"
+      breadcrumbClassName="[&_li:first-child>span]:border-b-2 [&_li:first-child>span]:border-neutral-900 [&_li:first-child>span]:py-2"
+      listTitleClassName="mb-0 text-primary-900"
+      tableClassName="md:table-fixed"
       title={t("admin-datasets:list.title")}
       kicker={t("admin-datasets:list.kicker")}
       description={t("admin-datasets:list.heroDescription")}
@@ -268,6 +273,7 @@ export default function DatasetsClient({
       }
       headerAction={
         <Button
+          className="border-0"
           variant="primary"
           hasIcon
           leadingIcon="agora-line-plus-circle"
@@ -286,7 +292,6 @@ export default function DatasetsClient({
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        appearance: "bar",
         label: pageContent.search?.label,
         placeholder: pageContent.search?.placeholder ?? "",
         hint: pageContent.search?.hint,
@@ -294,6 +299,8 @@ export default function DatasetsClient({
       }}
       filters={
         <StatusFilterSelect
+          wrapperClassName="py-0"
+          optionClassName="py-[14px]! [&_.children-content]:font-medium"
           value={statusFilter}
           options={[
             { value: "", label: t("admin-common:filters.all") },

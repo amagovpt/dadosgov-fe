@@ -21,6 +21,11 @@ export type AdminLayoutProps = {
     headerClassName?: string
     headerMeta?: React.ReactNode
     headerInfoClassName?: string
+    introClassName?: string
+    breadcrumbClassName?: string
+    titleClassName?: string
+    descriptionClassName?: string
+    kickerClassName?: string
     hideHeader?: boolean
     children: React.ReactNode
 }
@@ -35,6 +40,11 @@ export default function AdminLayout({
     headerClassName,
     headerMeta,
     headerInfoClassName,
+    introClassName,
+    breadcrumbClassName,
+    titleClassName,
+    descriptionClassName,
+    kickerClassName,
     hideHeader = false,
     children,
 }: AdminLayoutProps) {
@@ -64,9 +74,10 @@ export default function AdminLayout({
 
     return (
         <div className={twMerge("container flex flex-col gap-32 pt-64 pb-96", className)}>
-            <div className="w-full flex flex-col gap-32">
+            <div className={twMerge("w-full flex flex-col gap-32", introClassName)}>
                 <div className="w-full">
                     <Breadcrumb
+                        className={breadcrumbClassName}
                         items={buildAdminBreadcrumbItems({ t, items: breadcrumbItems })}
                         validateUrls={false}
                         onClickCapture={handleBreadcrumbClick}
@@ -75,12 +86,12 @@ export default function AdminLayout({
 
                 {!hideHeader && <div className={twMerge("w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between", headerClassName)}>
                     <div className={twMerge("flex flex-col gap-8 max-w-[696px]", headerInfoClassName)}>
-                        {kicker && <span className="text-sm text-neutral-700">{kicker}</span>}
-                        <h1 className="text-2xl-bold text-brand-blue-secondary">
+                        {kicker && <span className={twMerge("text-sm text-neutral-700", kickerClassName)}>{kicker}</span>}
+                        <h1 className={`text-2xl-bold ${twMerge("text-brand-blue-secondary", titleClassName)}`}>
                             {title}
                         </h1>
                         {headerMeta}
-                        {description && <p className="text-base text-neutral-700">{description}</p>}
+                        {description && <p className={twMerge("text-base text-neutral-700", descriptionClassName)}>{description}</p>}
                     </div>
                     {headerAction}
                 </div>}

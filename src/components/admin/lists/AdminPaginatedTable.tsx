@@ -14,6 +14,7 @@ interface AdminPaginatedTableProps {
   setCurrentPage: (page: number) => void;
   setPageSize?: (pageSize: number) => void;
   paginationOptions?: CreatePaginationPropsOptions;
+  tableClassName?: string;
 }
 
 export default function AdminPaginatedTable({
@@ -24,6 +25,7 @@ export default function AdminPaginatedTable({
   setCurrentPage,
   setPageSize,
   paginationOptions,
+  tableClassName,
 }: AdminPaginatedTableProps) {
   const { t } = useTranslation("admin-common");
 
@@ -43,5 +45,9 @@ export default function AdminPaginatedTable({
     }
   );
 
-  return <Table paginationProps={paginationProps}>{children}</Table>;
+  return (
+    <Table className={tableClassName} paginationProps={paginationProps}>
+      {children}
+    </Table>
+  );
 }

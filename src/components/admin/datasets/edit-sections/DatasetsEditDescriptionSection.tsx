@@ -102,6 +102,7 @@ export default function DatasetsEditDescriptionSection({
       </div>
       <div className="flex min-w-0 flex-col gap-16">
         <IsolatedTextArea
+          className="h-[108px] min-h-[108px]"
           label={t("edit.descriptionField")}
           placeholder={t("form.descriptionInputPlaceholder")}
           id="edit-description"

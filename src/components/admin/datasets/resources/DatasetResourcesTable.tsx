@@ -4,7 +4,6 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
-  InputSearch,
   Pill,
   StatusCard,
   TableBody,
@@ -18,6 +17,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { AdminSearch } from "@/components/admin/lists/AdminSearch";
 import { ResourceItem } from "@/components/admin/FileUploadModal/ResourceItem";
 import { getFileExtension, formatFileSize } from "@/components/admin/FileUploadModal/utils";
 import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceDetailPopup";
@@ -242,7 +242,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
         >
           {t("resources.search")}
         </label>
-        <InputSearch
+        <AdminSearch
           id={`${tableId}-search`}
           hideLabel
           aria-label={t("resources.search")}
