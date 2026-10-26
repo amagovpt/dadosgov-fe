@@ -6,7 +6,6 @@ import {
   Button,
   CardFrame,
   CardNoResults,
-  InputSearchBar,
   Tabs,
   Tab,
   TabHeader,
@@ -14,6 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { AdminSearchBar } from "@/components/admin/lists/AdminSearch";
 import { fetchAdminDataservices } from "@/service/api/dataservices";
 import { fetchAdminDatasets } from "@/service/api/datasets";
 import { fetchReuses } from "@/service/api/reuses";
@@ -196,7 +196,7 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
               {showDatasetsSearch && (
                 <div className="mb-24 flex items-end gap-16">
                   <div className="admin-search-wrapper xl:w-1/2 w-full">
-                    <InputSearchBar
+                    <AdminSearchBar
                       hasVoiceActionButton={false}
                       label={pageContent.datasetsSearch?.label ?? ""}
                       placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
@@ -255,7 +255,7 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
               {showReusesSearch && (
                 <div className="mb-24 flex items-end gap-16">
                   <div className="admin-search-wrapper">
-                    <InputSearchBar
+                    <AdminSearchBar
                       hasVoiceActionButton={false}
                       label={pageContent.reusesSearch?.label ?? ""}
                       placeholder={pageContent.reusesSearch?.placeholder ?? ""}

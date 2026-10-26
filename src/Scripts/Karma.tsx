@@ -1,22 +1,28 @@
 interface KarmaAnalyticsProps {
+    settingsId: string;
+    draft: boolean;
     nonce?: string;
 }
 
-export default function KarmaAnalytics({ nonce }: KarmaAnalyticsProps) {
-
-    const KARMAIsActive = true; // process.env.NEXT_PUBLIC_KARMA_IS_ACTIVE === "true";
-    const KARMA_ID = process.env.NEXT_PUBLIC_KARMA_ID || "";
-
-    if (!KARMAIsActive || !KARMA_ID) return null;
+export default function KarmaAnalytics({ settingsId, draft, nonce }: KarmaAnalyticsProps) {
+    if (!settingsId) return null;
 
     return (
-        <script
-            id="usercentrics-cmp"
-            src="https://web.cmp.usercentrics.eu/ui/loader.js"
-            data-draft="true"
-            data-settings-id={KARMA_ID}
-            nonce={nonce}
-            async
-        />
+        <>
+            {/* eslint-disable-next-line @next/next/no-sync-scripts -- must block parsing so it runs before any other script (Usercentrics requirement) */}
+            <script
+                id="usercentrics-autoblocker"
+                src="https://web.cmp.usercentrics.eu/modules/autoblocker.js"
+                nonce={nonce}
+            />
+            <script
+                id="usercentrics-cmp"
+                src="https://web.cmp.usercentrics.eu/ui/loader.js"
+                data-settings-id={settingsId}
+                {...(draft ? { "data-draft": "true" } : {})}
+                nonce={nonce}
+                defer
+            />
+        </>
     );
 }

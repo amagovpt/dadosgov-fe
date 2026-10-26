@@ -22,6 +22,8 @@ declare global {
 const SWAGGER_UI_URL = "/api/1/";
 const SWAGGER_JSON_URL = "/api/1/swagger.json";
 const SWAGGER_JSON_FILENAME = "dados-gov-api-swagger.json";
+const SWAGGER_UI_CSS_URL = "/swaggerui/swagger-ui.css";
+const SWAGGER_UI_SCRIPT_URL = "/swaggerui/swagger-ui-bundle.js";
 const SWAGGER_CSS_ID = "swagger-ui-css";
 const SWAGGER_SCRIPT_ID = "swagger-ui-script";
 
@@ -64,8 +66,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
       const swaggerUiCss = document.createElement("link");
       swaggerUiCss.id = SWAGGER_CSS_ID;
       swaggerUiCss.rel = "stylesheet";
-      swaggerUiCss.href =
-        "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css";
+      swaggerUiCss.href = SWAGGER_UI_CSS_URL;
       document.head.appendChild(swaggerUiCss);
     }
 
@@ -120,8 +121,7 @@ export default function ApiTutorialClient({ page }: { page: ApiReferencePage }) 
     } else {
       const script = document.createElement("script");
       script.id = SWAGGER_SCRIPT_ID;
-      script.src =
-        "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js";
+      script.src = SWAGGER_UI_SCRIPT_URL;
       script.addEventListener("load", handleScriptLoad, { once: true });
       document.body.appendChild(script);
     }

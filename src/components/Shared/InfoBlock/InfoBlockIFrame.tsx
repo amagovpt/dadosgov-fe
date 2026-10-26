@@ -1,5 +1,5 @@
 "use client"
-import { useMemo, useRef } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 import { twJoin } from 'tailwind-merge';
 
 export type IInfoBlockIFrame = {
@@ -12,7 +12,11 @@ export default function InfoBlockIFrame({
     src,
 }: IInfoBlockIFrame) {
 
-    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const mounted = useSyncExternalStore(
+        () => () => {},
+        () => true,
+        () => false
+    );
 
     const embedUrl = useMemo(() => {
         try {
@@ -35,16 +39,17 @@ export default function InfoBlockIFrame({
 
     return (
         <div className={twJoin("relative overflow-hidden flex item-center justify-center h-full", className)}>
-            <iframe
-                ref={iframeRef}
-                src={embedUrl}
-                className='absolute top-0 left-0 w-full h-full'
-                style={{
-                    clipPath: 'inset(0 0 118px 0)',
-                    top: 0,
-                }}
-                allow="fullscreen"
-            />
+            {mounted && (
+                <iframe
+                    src={embedUrl}
+                    className='absolute top-0 left-0 w-full h-full'
+                    style={{
+                        clipPath: 'inset(0 0 118px 0)',
+                        top: 0,
+                    }}
+                    allow="fullscreen"
+                />
+            )}
         </div>
     )
 }

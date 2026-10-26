@@ -1,32 +1,34 @@
 interface GoogleAnalyticsProps {
-    nonce?: string;
+    gaId: string;
 }
 
-export default function GoogleAnalytics({ nonce }: GoogleAnalyticsProps) {
+/**
+ * Must match the service name in the Usercentrics panel exactly: the CMP only
+ * activates a `data-usercentrics` script whose name it knows.
+ */
+export const GA_USERCENTRICS_SERVICE = "Google Analytics 4";
 
-    const GAIsActive = true; // process.env.NEXT_PUBLIC_GA_IS_ACTIVE === "true";
-    const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "";
+/**
+ * gtag.js, held back by Usercentrics' own manual blocking: `type="text/plain"`
+ * keeps the browser from running it, and the CMP flips it on once the visitor
+ * consents to the GA service. This works wherever the autoblocker ends up in
+ * <head> (Next/React always hoist their own chunks ahead of it). The `js` /
+ * `config` commands are queued by GoogleConsentDefault.
+ */
+export default function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
+    if (!gaId) return null;
 
-    if (!GAIsActive || !GA_ID) return null;
     return (
-        <>
-            <script
-                src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`}
-                nonce={nonce}
-                async
-            />
-            <script
-                id="google-analytics"
-                nonce={nonce}
-                dangerouslySetInnerHTML={{
-                    __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', ${JSON.stringify(GA_ID)});
-              `,
-                }}
-            />
-        </>
+        <script
+            id="google-analytics"
+            type="text/plain"
+            data-usercentrics={GA_USERCENTRICS_SERVICE}
+            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`}
+            // Not `async`: React 19 hoists async scripts as resources and may
+            // preload them, which would reach Google before consent.
+            defer
+            // Usercentrics rewrites `type` when it activates the script.
+            suppressHydrationWarning
+        />
     );
 }

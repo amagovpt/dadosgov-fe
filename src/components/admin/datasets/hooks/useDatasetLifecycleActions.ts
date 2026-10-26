@@ -3,11 +3,13 @@
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { deleteDataset, updateDataset } from "@/service/api/datasets";
+import { can } from "@/utils/permissions";
 import type { Dataset } from "@/service/types/dataset";
+import { getDatasetPublicationIssues } from "@/utils/datasetPublication";
 
 interface UseDatasetLifecycleActionsParams {
+  listUrl: string;
   dataset: Dataset | null;
-  hide: () => void;
   push: (href: string) => void;
   keywordsRef: React.MutableRefObject<string>;
   setDataset: React.Dispatch<React.SetStateAction<Dataset | null>>;
@@ -17,8 +19,8 @@ interface UseDatasetLifecycleActionsParams {
 }
 
 export function useDatasetLifecycleActions({
+  listUrl,
   dataset,
-  hide,
   push,
   keywordsRef,
   setDataset,
@@ -29,7 +31,16 @@ export function useDatasetLifecycleActions({
   const { t } = useTranslation("admin-datasets");
 
   async function handlePublishDataset() {
-    if (!dataset) return;
+    if (!dataset || !can(dataset, "edit")) return;
+    const issues = getDatasetPublicationIssues(dataset);
+    if (issues.length) {
+      setApiError(
+        t("publication.incomplete", {
+          fields: issues.map((field) => t(`publication.fields.${field}`)).join(", "),
+        })
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     setApiError(null);
@@ -65,32 +76,30 @@ export function useDatasetLifecycleActions({
     }
   }
 
-  async function handleMoveToDraft() {
-    if (!dataset) return;
+  async function handleArchiveDataset() {
+    if (!dataset || !can(dataset, "edit") || dataset.deleted)
+      throw new Error(t("edit.archiveError"));
 
     setIsSubmitting(true);
     setApiError(null);
     try {
-      const updated = await updateDataset(dataset.id, { private: true });
-      setDataset(updated);
-      showApiSuccess(t("edit.moveToDraftSuccess"));
-    } catch {
-      setApiError(t("edit.moveToDraftError"));
+      await updateDataset(dataset.id, { archived: new Date().toISOString() });
+      push(`${listUrl}?status=archived`);
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  async function handleArchiveDataset() {
+  async function handleMoveToDraft() {
     if (!dataset) return;
-
     setIsSubmitting(true);
+    setApiError(null);
     try {
-      await updateDataset(dataset.id, { archived: new Date().toISOString() });
-      push("/admin/me/datasets?status=archived");
-    } catch (error) {
-      console.error("Error archiving dataset:", error);
-      setApiError(t("edit.archiveError"));
+      const updated = await updateDataset(dataset.id, { private: true });
+      setDataset(updated);
+      showApiSuccess(t("resourceEditing.movedToDraft"));
+    } catch {
+      setApiError(t("resourceEditing.moveToDraftError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -112,17 +121,14 @@ export function useDatasetLifecycleActions({
   }
 
   async function handleDeleteDataset() {
-    if (!dataset) return;
+    if (!dataset || !can(dataset, "delete") || dataset.deleted)
+      throw new Error(t("edit.deleteError"));
 
     setIsSubmitting(true);
+    setApiError(null);
     try {
       await deleteDataset(dataset.id);
-      hide();
-      push("/admin/me/datasets");
-    } catch (error) {
-      console.error("Error deleting dataset:", error);
-      setApiError(t("edit.deleteError"));
-      hide();
+      push(listUrl);
     } finally {
       setIsSubmitting(false);
     }
