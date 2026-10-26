@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
-  InputSearchBar,
+  InputSearch,
   Pill,
   StatusCard,
   TableBody,
@@ -235,12 +235,19 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
           className="text-m-regular text-primary-900"
         />
       </div>
-      <div className="[&_.magnifier-icon]:size-44! [&_.magnifier-icon]:min-h-44! [&_.magnifier-icon]:min-w-44! w-full max-w-[592px] [&_.input-search-bar-container]:min-w-0! [&_.input-search-bar-container]:border-neutral-700! [&_.input-search-bar-container]:p-4! [&_.input-search-bar-container]:pl-16! [&_.magnifier-icon]:border-transparent! [&_.magnifier-icon]:bg-transparent! [&_.magnifier-icon]:p-[10px]! [&_.magnifier-icon]:text-neutral-900! [&_.magnifier-icon]:opacity-100! [&_.magnifier-icon_svg]:fill-neutral-900! [&_input]:min-w-0!">
-        <InputSearchBar
-          hasVoiceActionButton={false}
-          searchActionAltText={t("resources.search")}
+      <div className="w-full max-w-[592px]">
+        <label
+          htmlFor={`${tableId}-search`}
+          className="input-label-wrapper mb-16 block text-l-bold text-primary-900"
+        >
+          {t("resources.search")}
+        </label>
+        <InputSearch
           id={`${tableId}-search`}
-          label={t("resources.search")}
+          hideLabel
+          aria-label={t("resources.search")}
+          required={false}
+          className="h-[72px]! min-w-0 rounded-8! shadow-center-medium"
           placeholder={t("resources.searchPlaceholder")}
           value={query}
           onChange={(event) => {
@@ -297,7 +304,8 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
             </Button>
           </div>
         )}
-        <div className="overflow-x-auto">
+        {/* Agora's pagination dropdown extends 8px below its trigger even while closed. */}
+        <div className="-mb-8 overflow-x-auto pb-8">
           <AdminPaginatedTable
             pageSize={pageSize}
             totalItems={filtered.length}

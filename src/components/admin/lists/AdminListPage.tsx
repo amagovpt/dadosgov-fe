@@ -69,7 +69,6 @@ interface AdminListPageProps {
   resultsCount?: ReactNode;
   showResultsSummary?: boolean;
   paginationOptions?: CreatePaginationPropsOptions;
-  showPaginationSummary?: boolean;
   /** Shows the table download action. */
   onDownloadCsv?: () => Promise<void>;
 }
@@ -104,7 +103,6 @@ export default function AdminListPage({
   resultsCount,
   showResultsSummary = true,
   paginationOptions,
-  showPaginationSummary,
   onDownloadCsv,
 }: AdminListPageProps) {
   const { t } = useTranslation("admin-common");
@@ -243,7 +241,6 @@ export default function AdminListPage({
               setCurrentPage={setCurrentPage}
               setPageSize={setPageSize}
               paginationOptions={paginationOptions}
-              showPaginationSummary={showPaginationSummary}
             >
               {children}
             </AdminPaginatedTable>

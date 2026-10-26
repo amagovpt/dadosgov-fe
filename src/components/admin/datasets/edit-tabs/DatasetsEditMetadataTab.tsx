@@ -134,7 +134,7 @@ export default function DatasetsEditMetadataTab({
     <div className="flex min-w-0 flex-col gap-32">
       {feedback}
       <form
-        className="flex w-full max-w-[800px] flex-col gap-32"
+        className="flex w-full flex-col gap-32"
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
@@ -159,7 +159,7 @@ export default function DatasetsEditMetadataTab({
         )}
         <fieldset
           disabled={isSubmitting || !canEdit}
-          className="mt-32 flex min-w-0 flex-col gap-64"
+          className="mt-32 flex w-full min-w-0 max-w-[800px] flex-col gap-64"
         >
           <section className="flex flex-col gap-32">
             <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
@@ -231,7 +231,7 @@ export default function DatasetsEditMetadataTab({
             helpItem={getDatasetAuxiliarItem(auxiliarItems, "spatial-granularity")}
           />
         </fieldset>
-        <div className="mt-32 flex flex-wrap justify-end gap-16">
+        <div className="mt-32 flex w-full max-w-[800px] flex-wrap justify-end gap-16">
           <Button
             type="button"
             appearance="link"

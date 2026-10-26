@@ -65,13 +65,10 @@ function DatasetsNewContent({ pageContent, orgId }: DatasetsNewClientProps) {
   return (
     <AdminLayout
       className={[
-        `max-w-[1112px]! ${currentStep === 4 ? "gap-32" : "gap-64"}`,
+        currentStep === 4 ? "gap-32" : "gap-64",
         "[&_h1]:text-primary-900 [&_h1+p]:leading-7 [&_h1+p]:text-primary-900",
         "[&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2",
         "[&_.agora-btn]:min-h-60! [&_.agora-btn]:py-[14px]",
-        "[&_[data-dataset-actions]]:w-full [&_[data-dataset-actions]]:justify-between!",
-        "[&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900",
-        "max-md:[&_.grid-cols-2]:grid-cols-1 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!",
       ].join(" ")}
       breadcrumbItems={[
         { label: t("form.breadcrumbs.datasets"), url: listUrl },

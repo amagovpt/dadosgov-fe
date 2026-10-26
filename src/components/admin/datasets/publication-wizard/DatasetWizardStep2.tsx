@@ -428,6 +428,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                 </div>
                 <div className="flex min-w-0 flex-col gap-16">
                   <InputTextArea
+                    className={redesigned ? "h-[108px] min-h-[108px]" : undefined}
                     label={t(redesigned ? "form.descriptionInputLabel" : "form.descriptionField")}
                     placeholder={t(
                       redesigned
@@ -678,7 +679,14 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             </div>
           </>
         )}
-        <div data-dataset-actions className="admin-page__actions flex justify-between gap-[18px]">
+        <div
+          data-dataset-actions
+          className={
+            redesigned
+              ? "flex w-full justify-between gap-[18px]"
+              : "admin-page__actions flex justify-between gap-[18px]"
+          }
+        >
           <Button
             type="button"
             variant="primary"

@@ -186,19 +186,32 @@ export default function DatasetsEditTransferPopup({
                     errorFeedbackText={t("edit.transferRecipientRequired")}
                   />
                 </section>
-                <div className="w-full max-w-[592px] [&_.agora-input-textarea-wrapper_textarea.agora-input-textarea]:h-[144px]! [&_.agora-input-textarea-wrapper_textarea.agora-input-textarea]:min-h-[144px]! [&_.char-counter]:mt-8 [&_.char-counter]:shrink-0 [&_.char-counter_span]:mt-0! [&_.char-counter_span]:text-neutral-700! [&_.feedback-icon-wrapper]:mt-4! [&_.feedback-icon-wrapper_svg]:size-16! [&_.feedback-icon-wrapper_svg]:min-h-16! [&_.feedback-icon-wrapper_svg]:min-w-16!">
+                <div className="w-full max-w-[592px]">
                   <InputTextArea
                     id={`${id}-notes`}
                     label={t("transfer.notes")}
+                    className="h-[144px] min-h-[144px]"
                     rows={4}
                     maxLength={3000}
-                    showCharCounter
-                    hasFeedback
-                    feedbackState="info"
-                    feedbackText={t("resourceEditor.optional")}
+                    required={false}
+                    aria-description={t("resourceEditor.optional")}
                     value={comment}
                     onChange={(event) => setComment(event.target.value)}
                   />
+                  <div className="mt-8 flex items-start justify-between gap-16">
+                    <span className="flex items-center gap-8 text-s-regular text-neutral-700">
+                      <Icon
+                        name="agora-solid-info-mark"
+                        dimensions="xs"
+                        className="shrink-0 fill-informative-500"
+                        aria-hidden
+                      />
+                      {t("resourceEditor.optional")}
+                    </span>
+                    <span className="shrink-0 text-s-regular text-neutral-700">
+                      {comment.length} / 3000
+                    </span>
+                  </div>
                 </div>
                 {errorMessage && (
                   <StatusCard

@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import {
   Button,
+  Dialog,
   DropdownOption,
   DropdownSection,
   Icon,
   InputText,
   StatusCard,
-  useModalContext,
+  type DialogElement,
 } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { createContactPoint, updateContactPoint } from "@/service/api/organizations";
@@ -35,11 +37,18 @@ interface DatasetContactModalProps {
   producerId: string;
   contact?: ContactPoint;
   onSaved: (contact: ContactPoint) => void;
+  onClose: () => void;
 }
 
-export function DatasetContactModal({ producerId, contact, onSaved }: DatasetContactModalProps) {
+export function DatasetContactModal({
+  producerId,
+  contact,
+  onSaved,
+  onClose,
+}: DatasetContactModalProps) {
   const { t } = useTranslation(["admin-datasets", "datasets"]);
-  const { hide } = useModalContext();
+  const titleId = useId();
+  const dialogRef = useRef<DialogElement>(null);
   const [name, setName] = useState(contact?.name ?? "");
   const [role, setRole] = useState(contact?.role ?? "");
   const roleRef = useRef(role);
@@ -50,6 +59,19 @@ export function DatasetContactModal({ producerId, contact, onSaved }: DatasetCon
   const [saving, setSaving] = useState(false);
   const submittingRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
+  useLayoutEffect(() => {
+    const ownDialog = dialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    // Other Agora dialogs can reset the body class when responsive navigation remounts.
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      const anotherDialogOpen = Array.from(
+        document.querySelectorAll(".agora-dialog:not(.closed)")
+      ).some((dialog) => dialog !== ownDialog);
+      document.body.classList.toggle("overflow-hidden", anotherDialogOpen);
+    };
+  }, []);
   const roleOptions = useMemo(
     () => (
       <DropdownSection name="contact-roles">
@@ -65,6 +87,10 @@ export function DatasetContactModal({ producerId, contact, onSaved }: DatasetCon
 
   function clearError(field: ContactField) {
     setErrors((previous) => ({ ...previous, [field]: undefined }));
+  }
+
+  function close() {
+    dialogRef.current?.hide();
   }
 
   async function saveContact() {
@@ -110,7 +136,7 @@ export function DatasetContactModal({ producerId, contact, onSaved }: DatasetCon
         ? await updateContactPoint(contact.id, payload)
         : await createContactPoint(payload);
       onSaved(saved);
-      hide();
+      close();
     } catch {
       setApiError(t("admin-datasets:contacts.saveError"));
     } finally {
@@ -119,17 +145,17 @@ export function DatasetContactModal({ producerId, contact, onSaved }: DatasetCon
     }
   }
 
-  return (
+  const form = (
     <form
       ref={formRef}
-      className="flex w-full flex-col gap-32 md:gap-64"
+      className="mx-auto flex w-full max-w-[1008px] flex-col gap-32 md:gap-64"
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
         void saveContact();
       }}
     >
-      <h2 className="text-2xl-bold">
+      <h2 id={titleId} className="text-2xl-bold">
         {t(contact ? "admin-datasets:contacts.edit" : "admin-datasets:form.addContactAction")}
       </h2>
       {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
@@ -234,13 +260,21 @@ export function DatasetContactModal({ producerId, contact, onSaved }: DatasetCon
         </div>
       </section>
       <div className="flex flex-wrap items-center justify-end gap-16">
-        <Button type="button" appearance="link" variant="neutral" disabled={saving} onClick={hide}>
+        <Button
+          type="button"
+          appearance="link"
+          variant="neutral"
+          className="py-[14px]"
+          disabled={saving}
+          onClick={close}
+        >
           {t("admin-datasets:contacts.cancel")}
         </Button>
         <Button
           type="submit"
           variant="primary"
           hasIcon
+          className="py-[14px]"
           leadingIcon="agora-line-check-circle"
           leadingIconHover="agora-solid-check-circle"
           disabled={saving}
@@ -249,5 +283,30 @@ export function DatasetContactModal({ producerId, contact, onSaved }: DatasetCon
         </Button>
       </div>
     </form>
+  );
+
+  return createPortal(
+    <Dialog ref={dialogRef} visible fullScreen onHide={onClose} aria-labelledby={titleId}>
+      <div className="h-full w-full overflow-y-auto bg-white text-neutral-900">
+        <div className="mx-auto min-h-full w-full max-w-[1440px]">
+          <div className="flex h-[76px] items-start justify-end px-16 pt-16">
+            <Button
+              type="button"
+              appearance="link"
+              variant="neutral"
+              hasIcon
+              trailingIcon="agora-line-x"
+              trailingIconHover="agora-solid-x"
+              className="py-[14px]"
+              onClick={close}
+            >
+              {t("admin-datasets:edit.closeAriaLabel")}
+            </Button>
+          </div>
+          <div className="px-24 py-32 md:px-32 md:py-64">{form}</div>
+        </div>
+      </div>
+    </Dialog>,
+    document.body
   );
 }

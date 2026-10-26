@@ -1,7 +1,3 @@
-.page:global(.container) {
-  max-width: 1112px;
-}
-
 /* Shared dataset lists separate the introduction from the listing by 64px. */
 .page > :first-child {
   margin-bottom: 32px;

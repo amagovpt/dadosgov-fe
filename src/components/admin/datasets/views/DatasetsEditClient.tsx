@@ -483,7 +483,7 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
         { label: dataset.title },
       ]}
       title={dataset.title}
-      className="max-w-[1112px]! gap-64 pb-64 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2 [&_.agora-btn]:min-h-[60px] [&_.agora-btn]:py-[14px] [&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!"
+      className="gap-64 pb-64 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2 [&_.agora-btn]:min-h-[60px] [&_.agora-btn]:py-[14px] [&_.input-label-wrapper]:mb-8 [&_.input-label-wrapper_label]:text-m-medium [&_.input-label-wrapper_label]:text-primary-900 [&_textarea.agora-input-textarea]:h-[108px]! [&_textarea.agora-input-textarea]:min-h-[108px]!"
       headerClassName="xl:items-center"
       headerInfoClassName="w-full max-w-[592px]"
       headerMeta={
@@ -501,10 +501,10 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
             hasIcon
             appearance={dataset.private ? "solid" : "outline"}
             leadingIcon={
-              dataset.private ? "agora-line-document" : "/Icons/dataset-move-to-draft.svg"
+              dataset.private ? "agora-line-document" : "/Icons/move-to-draft.svg"
             }
             leadingIconHover={
-              dataset.private ? "agora-solid-document" : "/Icons/dataset-move-to-draft.svg"
+              dataset.private ? "agora-solid-document" : "/Icons/move-to-draft.svg"
             }
             disabled={isSubmitting || publicationBlocked}
             aria-describedby={publicationBlocked ? "dataset-publication-requirements" : undefined}

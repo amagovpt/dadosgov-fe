@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Button, Icon, ModalProvider, StatusCard } from "@ama-pt/agora-design-system";
+import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import {
@@ -155,7 +155,7 @@ export default function DatasetsAdminClient({
   }
 
   return (
-    <ModalProvider>
+    <>
       {cancelDialogOpen && (
         <DatasetWizardCancelDialog
           onClose={() => {
@@ -375,6 +375,6 @@ export default function DatasetsAdminClient({
           </aside>
         )}
       </div>
-    </ModalProvider>
+    </>
   );
 }
