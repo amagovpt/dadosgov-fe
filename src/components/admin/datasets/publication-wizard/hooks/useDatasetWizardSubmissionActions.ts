@@ -66,6 +66,7 @@ interface UseDatasetWizardSubmissionActionsParams {
   resetErrors: () => void;
   focusFirstError: () => void;
   onDatasetCreated?: (datasetId: string) => void;
+  onDraftSaved: (datasetId: string) => void;
   onNextStep: () => void;
   onComplete?: () => void;
   navigateToStep: (nextStep: number, nextDatasetId: string) => void;
@@ -156,6 +157,7 @@ export function useDatasetWizardSubmissionActions({
   resetErrors,
   focusFirstError,
   onDatasetCreated,
+  onDraftSaved,
   onNextStep,
   onComplete,
   navigateToStep,
@@ -359,8 +361,7 @@ export function useDatasetWizardSubmissionActions({
       setCreatedDataset(dataset);
       if (saveAsDraft) {
         await savePendingResources(dataset);
-        if (onComplete) onComplete();
-        else finishWizard();
+        onDraftSaved(dataset.id);
       } else if (onDatasetCreated) {
         onDatasetCreated(dataset.id);
       } else {

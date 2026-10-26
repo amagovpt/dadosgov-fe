@@ -107,6 +107,14 @@ export default function DatasetsAdminClient({
         );
     },
     onNextStep: handleNextStep,
+    onDraftSaved: (id) => {
+      persistence.clearSession();
+      const editPath =
+        draftScope === "/admin/system"
+          ? `/admin/datasets/${encodeURIComponent(id)}`
+          : `${draftScope}/datasets/edit?id=${encodeURIComponent(id)}`;
+      router.push(localizeHref(editPath, locale));
+    },
     onComplete: completeWizard,
     navigateToStep: (nextStep, nextDatasetId) => {
       router.push(
