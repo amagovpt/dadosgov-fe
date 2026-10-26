@@ -64,12 +64,10 @@ function DatasetsNewContent({ pageContent, orgId }: DatasetsNewClientProps) {
 
   return (
     <AdminLayout
-      className={[
-        currentStep === 4 ? "gap-32" : "gap-64",
-        "[&_h1]:text-primary-900 [&_h1+p]:leading-7 [&_h1+p]:text-primary-900",
-        "[&_.agora-breadcrumb-desktop_li:first-child>span]:border-b-2 [&_.agora-breadcrumb-desktop_li:first-child>span]:border-neutral-900 [&_.agora-breadcrumb-desktop_li:first-child>span]:py-2",
-        "[&_.agora-btn]:min-h-60! [&_.agora-btn]:py-[14px]",
-      ].join(" ")}
+      className={`${currentStep === 4 ? "gap-32" : "gap-64"} [&_.agora-btn]:py-[14px]`}
+      titleClassName="text-primary-900"
+      descriptionClassName="text-primary-900"
+      breadcrumbClassName="[&_li:first-child>span]:border-b-2 [&_li:first-child>span]:border-neutral-900 [&_li:first-child>span]:py-2"
       breadcrumbItems={[
         { label: t("form.breadcrumbs.datasets"), url: listUrl },
         { label: pageTitle },

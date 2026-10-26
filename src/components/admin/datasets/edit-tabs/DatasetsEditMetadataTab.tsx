@@ -143,19 +143,21 @@ export default function DatasetsEditMetadataTab({
       >
         <p className="text-s-regular text-primary-900">{t("form.optionalFields")}</p>
         {dataset.quality?.update_fulfilled_in_time === false && (
-          <StatusCard
-            variant="outline-warning"
-            showIcon
-            title={t("editPage.overdueTitle")}
-            description={t("editPage.overdueDescription")}
-            anchor={{
-              href: "#edit-time-section",
-              children: t("editPage.updateSchedule"),
-              hasIcon: true,
-              trailingIcon: "agora-line-arrow-right-circle",
-            }}
-            className="bg-white"
-          />
+          <div className="rounded-4 bg-white">
+            <StatusCard
+              variant="outline-warning"
+              showIcon
+              title={t("editPage.overdueTitle")}
+              description={t("editPage.overdueDescription")}
+              anchor={{
+                href: "#edit-time-section",
+                children: t("editPage.updateSchedule"),
+                hasIcon: true,
+                trailingIcon: "agora-line-arrow-right-circle",
+                trailingIconHover: "agora-solid-arrow-right-circle",
+              }}
+            />
+          </div>
         )}
         <fieldset
           disabled={isSubmitting || !canEdit}

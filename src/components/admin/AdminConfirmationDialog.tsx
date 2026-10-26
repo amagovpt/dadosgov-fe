@@ -56,7 +56,7 @@ export function AdminConfirmationDialog({
       aria-labelledby={`${id}-title`}
       aria-describedby={`${id}-description`}
     >
-      <div className="relative z-dialog mt-64 flex h-fit max-h-[min(544px,calc(100dvh-96px))] w-[592px] max-w-[calc(100vw-32px)] flex-col gap-16 overflow-y-auto rounded-16 bg-white p-24 text-neutral-900 shadow-bottom-high md:mt-128 md:max-h-[min(544px,calc(100dvh-160px))] md:p-32">
+      <div className="z-dialog mt-64 h-fit max-h-[min(544px,calc(100dvh-96px))] w-[592px] max-w-[calc(100vw-32px)] space-y-16 overflow-y-auto rounded-16 bg-white p-24 text-neutral-900 shadow-bottom-high md:mt-128 md:max-h-[min(544px,calc(100dvh-160px))] md:p-32">
         <h2 id={`${id}-title`} className="text-xl-bold">
           {title}
         </h2>

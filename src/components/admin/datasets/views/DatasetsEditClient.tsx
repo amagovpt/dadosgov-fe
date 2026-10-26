@@ -608,11 +608,14 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
         </Button>
       </div>
 
-      <div ref={tabsRef} tabIndex={-1} className="outline-none">
+      <div ref={tabsRef} tabIndex={-1} className="outline-none min-[1440px]:-mx-112">
         <Tabs
           fullWidth
           currentType="primary"
-          className="[&_.accordion-body>.children-wrapper]:w-full [&_.accordion-body>.children-wrapper]:min-w-0 [&_.tab-list]:mb-0! [&_.tab-list-item]:text-m-medium [&_.tab-list-item.active]:bg-neutral-100! [&_.tab-list.mobile_.accordion-body-block]:p-16! [&_.tab-panel]:mt-0! [&_.tab-panel]:border-0! [&_.tab-panel]:bg-neutral-100! [&_.tab-panel]:px-0! [&_.tab-panel]:py-64! min-[1440px]:[&_.tab-panel]:-mr-[112px] min-[1440px]:[&_.tab-panel]:-ml-[104px] min-[1440px]:[&_.tab-panel]:pr-[112px]! min-[1440px]:[&_.tab-panel]:pl-[104px]! [&_.tab-panel-content]:py-0!"
+          className={[
+            "[&_.accordion-body>.children-wrapper]:min-w-0 [&_.tab-list.mobile_.accordion-body-block]:p-16!",
+            "[&_.tab-panel]:border-0! [&_:is(.tab-panel,.tab-list-item.active)]:bg-neutral-100!",
+          ].join(" ")}
           onTabActivation={(index: number) => {
             setApiError(null);
             setApiSuccess(null);
