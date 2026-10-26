@@ -677,6 +677,109 @@ export function getProjectsOfPRR() {
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
+export function getSearchBeneficiariesPRR() {
+  return gql(/* GraphQL */ `
+    query getSearchBeneficiariesPRR {
+      queryBeneficiariesAndProjectsFiltersOfPRR {
+        dimensions
+        regions
+        municipalities
+      }
+      queryBeneficiarySourceInfoOfPRR {
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          source
+          referenceDate
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+export function getBeneficiariesOfPRR() {
+  return gql(/* GraphQL */ `
+    query SearchPRRBeneficiaries(
+      $budgetMax: Float
+      $budgetMin: Float
+      $dimension: String
+      $finalRecipient: Boolean
+      $intermediaryRecipient: Boolean
+      $limit: Int
+      $municipality: String
+      $page: Int
+      $paidBudgetMax: Float
+      $paidBudgetMin: Float
+      $partnerRecipient: Boolean
+      $projectsAmountMax: Int
+      $projectsAmountMin: Int
+      $recipientId: String
+      $recipientName: String
+      $region: String
+      $sortBy: BeneficiariesSortByPRR
+      $sortOrder: SortOrder
+      $supplierRecipient: Boolean
+    ) {
+      searchBeneficiariesOfPRR(
+        budgetMax: $budgetMax
+        budgetMin: $budgetMin
+        dimension: $dimension
+        finalRecipient: $finalRecipient
+        intermediaryRecipient: $intermediaryRecipient
+        limit: $limit
+        municipality: $municipality
+        page: $page
+        paidBudgetMax: $paidBudgetMax
+        paidBudgetMin: $paidBudgetMin
+        partnerRecipient: $partnerRecipient
+        projectsAmountMax: $projectsAmountMax
+        projectsAmountMin: $projectsAmountMin
+        recipientId: $recipientId
+        recipientName: $recipientName
+        region: $region
+        sortBy: $sortBy
+        sortOrder: $sortOrder
+        supplierRecipient: $supplierRecipient
+      ) {
+        limit
+        page
+        total
+        totalFiltered
+        filters {
+          budgetMax
+          budgetMin
+          paidBudgetMax
+          paidBudgetMin
+          projectsAmountMax
+          projectsAmountMin
+        }
+        data {
+          recipientId
+          recipientName
+          recipientType
+          dimension
+          dsNutsii
+          dsMunicipalities
+          numProjects
+          budget
+          paidBudget
+          finalRecipient
+          intermediaryRecipient
+          supplierRecipient
+          partnerRecipient
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export function getSearchBeneficiariesPT2030() {
   return gql(/* GraphQL */ `
     query getSearchProjects {

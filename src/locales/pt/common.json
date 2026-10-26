@@ -383,6 +383,11 @@
     "mainBeneficiaries": "Beneficiários principais",
     "otherBeneficiaries": "Outros beneficiários",
     "suppliers": "Fornecedores",
+    "roles": {
+      "intermediateBeneficiary": "Beneficiário intermediário",
+      "beneficiary": "Beneficiário",
+      "supplier": "Fornecedor"
+    },
     "filters": {
       "amounts": {
         "from": "Desde {{min}}€",
@@ -425,7 +430,15 @@
       "operationName": "Nome",
       "dimension": "Dimensão",
       "region": "Região",
-      "municipality": "Município"
+      "municipality": "Município",
+      "approvedValueIntermediateBeneficiaries": "Valor Aprovado como Beneficiário Intermediário",
+      "approvedValueBeneficiaries": "Valor Aprovado como Beneficiário",
+      "approvedValueSuppliers": "Valor Aprovado como Fornecedor",
+      "approvedValuePartners": "Valor Aprovado como Parceiro",
+      "paidValueIntermediateBeneficiaries": "Valor Recebido como Beneficiário Intermediário",
+      "paidValueBeneficiaries": "Valor Recebido como Beneficiário",
+      "paidValueSuppliers": "Valor Recebido como Fornecedor",
+      "paidValuePartners": "Valor Recebido como Parceiro"
     },
     "exportResults": "Resultados da pesquisa de {{subject}}"
   },
