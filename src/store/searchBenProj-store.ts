@@ -9,9 +9,42 @@ import { EntityRole } from "@/service/types/datastories/pt2030/pt2030";
 
 const LIMIT = 10;
 
-const BENEFICIARIES_TYPES = {
+// beneficiary type filter -> entityRole value sent to the api route
+const BENEFICIARIES_TYPES: Record<string, string> = {
   mainBeneficiaries: EntityRole.BENEFICIARIO_PRINCIPAL,
   otherBeneficiaries: EntityRole.OUTROS_BENEFICIARIOS,
+};
+
+// CMS switch name -> role the PRR route maps onto its recipient flags
+const BENEFICIARIES_TYPES_PRR: Record<string, string> = {
+  intermediaryBeneficiary: "intermediateBeneficiaries",
+  beneficiary: "beneficiaries",
+  supplier: "suppliers",
+  partner: "partners",
+};
+
+// same check the shared indicators use to pick the PRR labels
+const isPrrRoute = (apiRoute: string) => apiRoute.includes("/plano-de-recuperacao-e-resiliencia/");
+
+const getBeneficiariesTypes = (apiRoute: string) =>
+  isPrrRoute(apiRoute) ? BENEFICIARIES_TYPES_PRR : BENEFICIARIES_TYPES;
+
+// separates the beneficiary type switches from the other filters, turning the enabled ones
+// into the entityRole list the api route expects
+const splitBeneficiariesTypes = (filters: Filters, apiRoute: string) => {
+  const types = getBeneficiariesTypes(apiRoute);
+  const entityRole: string[] = [];
+  const optionalFilters: Filters = {};
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (!(key in types)) {
+      optionalFilters[key] = value;
+    } else if (value) {
+      entityRole.push(types[key]);
+    }
+  });
+
+  return { entityRole, optionalFilters };
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -97,22 +130,22 @@ export type SearchBenProjStore = SearchBenProjStoreStates & SearchBenProjStoreAc
 
 // ----------------------------------------------------------------------------------------------------
 
-const getDefaultFilters = (subject: "beneficiaries" | "projects"): Filters => {
+const getDefaultFilters = (subject: "beneficiaries" | "projects", apiRoute: string): Filters => {
   if (subject === "projects") {
     return {};
   }
 
-  return {
-    mainBeneficiaries: true,
-    otherBeneficiaries: true,
-  };
+  // every beneficiary type starts enabled
+  return Object.fromEntries(
+    Object.keys(getBeneficiariesTypes(apiRoute)).map((type) => [type, true])
+  );
 };
 
 const createInitialState = (
   subject: "beneficiaries" | "projects",
   apiRoute: string
 ): SearchBenProjStoreStates => {
-  const filters = getDefaultFilters(subject);
+  const filters = getDefaultFilters(subject, apiRoute);
 
   return {
     subject: subject,
@@ -156,7 +189,7 @@ export const createSearchBenProjStore = (
     t: ReturnType<typeof useTranslation>["t"],
     locale: string
   ) => {
-    const defaultFilters = getDefaultFilters(subject);
+    const defaultFilters = getDefaultFilters(subject, apiRoute);
 
     const res: Array<[string, FilterValue]> = [];
 
@@ -224,13 +257,19 @@ export const createSearchBenProjStore = (
       const params = new URLSearchParams(window.location.search);
 
       const searchBy = params.get("searchBy") ?? initialState.searchBy;
-      const indicator = params.get("indicator") ?? initialState.indicator;
+      const requestedIndicator = params.get("indicator") ?? initialState.indicator;
+      // PRR beneficiaries have no executed amount, so that indicator is not offered
+      const indicator =
+        isPrrRoute(apiRoute) && subject === "beneficiaries" && requestedIndicator === "executed"
+          ? initialState.indicator
+          : requestedIndicator;
       const sortBy = params.get("sortBy") ?? initialState.sortBy;
 
+      const booleanFilters = [...Object.keys(initialState.filters), "supliers"];
       const filters: Filters = { ...initialState.filters };
       params.forEach((value, key) => {
         if (!["searchBy", "indicator", "sortBy", "page"].includes(key)) {
-          if (["mainBeneficiaries", "otherBeneficiaries", "supliers"].includes(key)) {
+          if (booleanFilters.includes(key)) {
             filters[key] = value === "true";
           } else {
             filters[key] = value;
@@ -427,25 +466,15 @@ export const createSearchBenProjStore = (
           };
         }
 
-        const {
-          mainBeneficiaries,
-          otherBeneficiaries,
-          amountsMin,
-          amountsMax,
-          projectsAmountMin,
-          projectsAmountMax,
-          ...optionalFilters
-        } = state.appliedFilters;
+        const { amountsMin, amountsMax, projectsAmountMin, projectsAmountMax, ...otherFilters } =
+          state.appliedFilters;
+        const { entityRole, optionalFilters } = splitBeneficiariesTypes(
+          otherFilters,
+          state.apiRoute
+        );
 
         // add beneficiaries types
         if (state.subject === "beneficiaries") {
-          const entityRole: string[] = [];
-          if (mainBeneficiaries) {
-            entityRole.push(BENEFICIARIES_TYPES.mainBeneficiaries);
-          }
-          if (otherBeneficiaries) {
-            entityRole.push(BENEFICIARIES_TYPES.otherBeneficiaries);
-          }
           bodyData = { ...bodyData, entityRole: entityRole };
         }
 
@@ -583,25 +612,15 @@ export const createSearchBenProjStore = (
           };
         }
 
-        const {
-          mainBeneficiaries,
-          otherBeneficiaries,
-          amountsMin,
-          amountsMax,
-          projectsAmountMin,
-          projectsAmountMax,
-          ...optionalFilters
-        } = state.appliedFilters;
+        const { amountsMin, amountsMax, projectsAmountMin, projectsAmountMax, ...otherFilters } =
+          state.appliedFilters;
+        const { entityRole, optionalFilters } = splitBeneficiariesTypes(
+          otherFilters,
+          state.apiRoute
+        );
 
         // add beneficiaries types
         if (state.subject === "beneficiaries") {
-          const entityRole: string[] = [];
-          if (mainBeneficiaries) {
-            entityRole.push(BENEFICIARIES_TYPES.mainBeneficiaries);
-          }
-          if (otherBeneficiaries) {
-            entityRole.push(BENEFICIARIES_TYPES.otherBeneficiaries);
-          }
           bodyData = { ...bodyData, entityRole: entityRole };
         }
 

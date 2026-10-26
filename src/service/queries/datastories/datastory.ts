@@ -573,6 +573,213 @@ export function getProjectsOfPortugal2030() {
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
+export function getSearchProjectsPRR() {
+  return gql(/* GraphQL */ `
+    query getSearchProjectsPRR {
+      queryBeneficiariesAndProjectsFiltersOfPRR {
+        dimensions
+        regions
+        municipalities
+      }
+      queryProjectsOfPRRSourceInfo {
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          source
+          referenceDate
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getProjectsTotalsPRR() {
+  return gql(/* GraphQL */ `
+    query getProjectsTotalsPRR {
+      queryProjectsTotalsOfPRR {
+        projects
+        approvedValue
+        executedValue
+        endDateMin
+        endDateMax
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getProjectsOfPRR() {
+  return gql(/* GraphQL */ `
+    query SearchPRRProjects(
+      $budgetMax: Float
+      $budgetMin: Float
+      $code: String
+      $description: String
+      $dimension: String
+      $dsNutsii: String
+      $endDateMax: String
+      $endDateMin: String
+      $limit: Int
+      $municipality: String
+      $page: Int
+      $sortBy: ProjectsSortByPRR
+      $sortOrder: SortOrder
+    ) {
+      searchProjectsOfPRR(
+        budgetMax: $budgetMax
+        budgetMin: $budgetMin
+        code: $code
+        description: $description
+        dimension: $dimension
+        dsNutsii: $dsNutsii
+        endDateMax: $endDateMax
+        endDateMin: $endDateMin
+        limit: $limit
+        municipality: $municipality
+        page: $page
+        sortBy: $sortBy
+        sortOrder: $sortOrder
+      ) {
+        limit
+        page
+        total
+        totalFiltered
+        filters {
+          budgetMax
+          budgetMin
+          endDateMax
+          endDateMin
+        }
+        data {
+          code
+          description
+          investment
+          dimension
+          dsNutsii
+          dsMunicipality
+          budget
+          total
+          executedValue
+          endDate
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getSearchBeneficiariesPRR() {
+  return gql(/* GraphQL */ `
+    query getSearchBeneficiariesPRR {
+      queryBeneficiariesAndProjectsFiltersOfPRR {
+        dimensions
+        regions
+        municipalities
+      }
+      queryBeneficiarySourceInfoOfPRR {
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          source
+          referenceDate
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+export function getBeneficiariesOfPRR() {
+  return gql(/* GraphQL */ `
+    query SearchPRRBeneficiaries(
+      $budgetMax: Float
+      $budgetMin: Float
+      $dimension: String
+      $finalRecipient: Boolean
+      $intermediaryRecipient: Boolean
+      $limit: Int
+      $municipality: String
+      $page: Int
+      $paidBudgetMax: Float
+      $paidBudgetMin: Float
+      $partnerRecipient: Boolean
+      $projectsAmountMax: Int
+      $projectsAmountMin: Int
+      $recipientId: String
+      $recipientName: String
+      $region: String
+      $sortBy: BeneficiariesSortByPRR
+      $sortOrder: SortOrder
+      $supplierRecipient: Boolean
+    ) {
+      searchBeneficiariesOfPRR(
+        budgetMax: $budgetMax
+        budgetMin: $budgetMin
+        dimension: $dimension
+        finalRecipient: $finalRecipient
+        intermediaryRecipient: $intermediaryRecipient
+        limit: $limit
+        municipality: $municipality
+        page: $page
+        paidBudgetMax: $paidBudgetMax
+        paidBudgetMin: $paidBudgetMin
+        partnerRecipient: $partnerRecipient
+        projectsAmountMax: $projectsAmountMax
+        projectsAmountMin: $projectsAmountMin
+        recipientId: $recipientId
+        recipientName: $recipientName
+        region: $region
+        sortBy: $sortBy
+        sortOrder: $sortOrder
+        supplierRecipient: $supplierRecipient
+      ) {
+        limit
+        page
+        total
+        totalFiltered
+        filters {
+          budgetMax
+          budgetMin
+          paidBudgetMax
+          paidBudgetMin
+          projectsAmountMax
+          projectsAmountMin
+        }
+        data {
+          recipientId
+          recipientName
+          recipientType
+          dimension
+          dsNutsii
+          dsMunicipalities
+          numProjects
+          budget
+          paidBudget
+          finalRecipient
+          intermediaryRecipient
+          supplierRecipient
+          partnerRecipient
+        }
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export function getSearchBeneficiariesPT2030() {
   return gql(/* GraphQL */ `
     query getSearchProjects {
@@ -720,6 +927,10 @@ export function getPT2030ProjectData(locale: string = "pt") {
                     children
                   }
                 }
+              }
+              breadcrumbs {
+                label
+                url
               }
             }
           }
@@ -913,6 +1124,10 @@ export function getPT2030BeneficiaryData(locale: string = "pt") {
                   }
                 }
               }
+              breadcrumbs {
+                label
+                url
+              }
             }
           }
           beneficiarySheet {
@@ -1047,6 +1262,235 @@ export const queryLoadMorePT2030ProjectsByBeneficiary = gql(/* GraphQL */ `
 
 export function loadMorePT2030ProjectsByBeneficiary() {
   return queryLoadMorePT2030ProjectsByBeneficiary;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPrrProjectMeta(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPrrProjectMeta {
+      findFichaDeProjetoPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function getPrrProjectData(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPrrProjectData {
+      findFichaDeProjetoPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+              index {
+                title
+                anchors {
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
+                }
+              }
+              breadcrumbs {
+                label
+                url
+              }
+            }
+          }
+          projectSheet {
+            ${locale} {
+              id
+              iconName
+              title
+            }
+          }
+          beneficiaries {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  title
+                  description
+                }
+              }
+            }
+          }
+          applications {
+            ${locale} {
+              id
+              title
+              subtitle
+              description
+              cards {
+                card {
+                  title
+                  description
+                }
+              }
+            }
+          }
+          publicContracting {
+            ${locale} {
+              id
+              title
+              description
+            }
+          }
+          geographicDistribution {
+            ${locale} {
+              id
+              title
+              cards {
+                card {
+                  title
+                  description
+                }
+              }
+            }
+          }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function getPrrProjectSheet() {
+  return gql(/* GraphQL */ `
+    query getPrrProjectSheet($recipientId: String!) {
+      queryProjectSheetOfPRR(recipientId: $recipientId) {
+        data {
+          code
+          projectForm {
+            component
+            dimension
+            executedValue
+            grantFunding
+            investment
+            loanFunding
+            name
+            plannedConclusionDate
+            startDate
+            summary
+            totalProjectValue
+          }
+          tabs {
+            candidature {
+              baseScore
+              finalScore
+              tabName
+              link
+            }
+            contracts {
+              contractsCount
+              tabName
+              totalContractsValue
+              contractDetails {
+                contractsCount
+                contractsValue
+                principalDescription
+                secondaryDescription
+                detailContract {
+                  link
+                  name
+                  value
+                }
+              }
+            }
+            contestAndContracts {
+              tabName
+              criteria
+              contractDetails {
+                contractsCount
+                contractsValue
+                principalDescription
+                secondaryDescription
+                detailContract {
+                  link
+                  name
+                  value
+                }
+              }
+            }
+            geoDistributionFinancing {
+              tabName
+              source
+              sourceLink
+              referenceDate
+              valuePercentage
+              distribution {
+                type
+                divisions {
+                  description
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function loadMorePrrProjectSheetBeneficiaryFinancing(
+  beneficiaryType: "BENEFICIARY" | "INTERMEDIARY_BENEFICIARY" | "PARTNER" | "SUPPLIER"
+) {
+  return gql(/* GraphQL */ `
+    query loadMorePrrProjectSheetBeneficiaryFinancing(
+      $page: Int
+      $limit: Int
+      $projectCode: String
+    ) {
+      queryProjectSheetBeneficiaryFinancingOfPRR(
+        page: $page
+        limit: $limit
+        projectCode: $projectCode
+        beneficiaryType: ${beneficiaryType}
+      ) {
+        totalFiltered
+        total
+        page
+        limit
+        beneficiaryType
+        data {
+          description
+          id
+          name
+          paid
+        }
+      }
+    }
+  `);
 }
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
