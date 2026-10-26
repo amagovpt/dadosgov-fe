@@ -19,8 +19,9 @@ import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
 import { RuntimeConfigProvider } from "@/providers/RuntimeConfigProvider";
-import { getRuntimeConfig } from "@/config/runtimeConfig";
+import { getAnalyticsConfig, getRuntimeConfig } from "@/config/runtimeConfig";
 import KarmaAnalytics from "@/Scripts/Karma";
+import GoogleConsentDefault from "@/Scripts/GoogleConsentDefault";
 import GoogleAnalytics from "@/Scripts/GoogleAnalytics";
 
 const namespaces = [
@@ -111,12 +112,18 @@ export default async function RootLayout({
   const { headerNavigation, footerData } = await loadShellData(locale);
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const runtimeConfig = await getRuntimeConfig();
+  const analytics = await getAnalyticsConfig();
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
       <head>
-        <KarmaAnalytics nonce={nonce} />
-        <GoogleAnalytics nonce={nonce} />
+        <KarmaAnalytics
+          settingsId={analytics.cmpSettingsId}
+          draft={analytics.cmpDraft}
+          nonce={nonce}
+        />
+        <GoogleConsentDefault gaId={analytics.gaId} nonce={nonce} />
+        <GoogleAnalytics gaId={analytics.gaId} />
       </head>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <RuntimeConfigProvider value={runtimeConfig}>
