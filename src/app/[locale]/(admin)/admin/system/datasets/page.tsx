@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getBoDatasets, getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
-import SystemDatasetsClient from "@/components/admin/datasets/views/SystemDatasetsClient";
+import DatasetsClient from "@/components/admin/datasets/views/DatasetsClient";
 
 export async function generateMetadata({
   params,
@@ -24,5 +24,5 @@ export default async function SystemDatasetsPage({
   const { locale } = await params;
   const pageContent = await getBoDatasets(locale);
 
-  return <SystemDatasetsClient pageContent={pageContent} />;
+  return <DatasetsClient key="system" scope="system" pageContent={pageContent} />;
 }

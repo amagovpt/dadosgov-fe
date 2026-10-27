@@ -79,7 +79,7 @@ export function PendingResourceTable({
           const displayName =
             meta.title && meta.title !== item.name
               ? meta.title +
-                (fileExt && !meta.title.toLowerCase().endsWith(fileExt.toLowerCase())
+                (!item.isUrl && fileExt && !meta.title.toLowerCase().endsWith(fileExt.toLowerCase())
                   ? fileExt
                   : "")
               : item.isUrl

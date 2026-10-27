@@ -8,23 +8,44 @@ import PublishDropdown from '../admin/PublishDropdown'
 import { buildAdminBreadcrumbItems, type AdminBreadcrumbItem } from '@/utils/adminBreadcrumbs'
 import { localizeHref } from '@/utils/localizeHref'
 import { splitLocale } from '@/utils/stripLocale'
+import { twMerge } from 'tailwind-merge'
 
 export type AdminLayoutProps = {
+    className?: string
     title: string
     kicker?: string
     description?: string
     /** Section and detail items; the layout adds the administration root. */
     breadcrumbItems: AdminBreadcrumbItem[],
     headerAction?: React.ReactNode
+    headerClassName?: string
+    headerMeta?: React.ReactNode
+    headerInfoClassName?: string
+    introClassName?: string
+    breadcrumbClassName?: string
+    titleClassName?: string
+    descriptionClassName?: string
+    kickerClassName?: string
+    hideHeader?: boolean
     children: React.ReactNode
 }
 
 export default function AdminLayout({
+    className,
     title,
     kicker,
     description,
     breadcrumbItems,
     headerAction = <PublishDropdown />,
+    headerClassName,
+    headerMeta,
+    headerInfoClassName,
+    introClassName,
+    breadcrumbClassName,
+    titleClassName,
+    descriptionClassName,
+    kickerClassName,
+    hideHeader = false,
     children,
 }: AdminLayoutProps) {
     const { t } = useTranslation('admin-common')
@@ -52,26 +73,28 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="container flex flex-col gap-32 pt-64 pb-96">
-            <div className="w-full flex flex-col gap-32">
+        <div className={twMerge("container flex flex-col gap-32 pt-64 pb-96", className)}>
+            <div className={twMerge("w-full flex flex-col gap-32", introClassName)}>
                 <div className="w-full">
                     <Breadcrumb
+                        className={breadcrumbClassName}
                         items={buildAdminBreadcrumbItems({ t, items: breadcrumbItems })}
                         validateUrls={false}
                         onClickCapture={handleBreadcrumbClick}
                     />
                 </div>
 
-                <div className="w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between">
-                    <div className="flex flex-col gap-8 max-w-[696px]">
-                        {kicker && <span className="text-sm text-neutral-700">{kicker}</span>}
-                        <h1 className="text-2xl-bold text-brand-blue-secondary">
+                {!hideHeader && <div className={twMerge("w-full flex flex-col items-start gap-24 xl:flex-row xl:items-end xl:justify-between", headerClassName)}>
+                    <div className={twMerge("flex flex-col gap-8 max-w-[696px]", headerInfoClassName)}>
+                        {kicker && <span className={twMerge("text-sm text-neutral-700", kickerClassName)}>{kicker}</span>}
+                        <h1 className={`text-2xl-bold ${twMerge("text-brand-blue-secondary", titleClassName)}`}>
                             {title}
                         </h1>
-                        {description && <p className="text-base text-neutral-700">{description}</p>}
+                        {headerMeta}
+                        {description && <p className={twMerge("text-base text-neutral-700", descriptionClassName)}>{description}</p>}
                     </div>
                     {headerAction}
-                </div>
+                </div>}
             </div>
             <>
                 {children}
