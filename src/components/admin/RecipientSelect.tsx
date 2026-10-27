@@ -17,6 +17,8 @@ export interface RecipientSelection {
 
 interface RecipientSelectProps {
   id: string;
+  label?: string;
+  required?: boolean;
   placeholder: string;
   onChange: (selection: RecipientSelection | null) => void;
   hasError?: boolean;
@@ -29,6 +31,8 @@ const MAX_RESULTS = 10;
 
 export default function RecipientSelect({
   id,
+  label,
+  required,
   placeholder,
   onChange,
   hasError,
@@ -92,14 +96,14 @@ export default function RecipientSelect({
         class: "User",
         id: u.id,
         label: `${u.first_name} ${u.last_name}`.trim(),
-      }),
+      })
     );
     orgs.forEach((o) =>
       next.set(`Organization:${o.id}`, {
         class: "Organization",
         id: o.id,
         label: o.name,
-      }),
+      })
     );
     indexRef.current = next;
   }, [users, orgs]);
@@ -122,8 +126,9 @@ export default function RecipientSelect({
 
   return (
     <IsolatedSelect
-      label=""
-      hideLabel
+      label={label || ""}
+      hideLabel={!label}
+      required={required}
       placeholder={placeholder}
       id={id}
       onChangeRef={valueRef}

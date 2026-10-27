@@ -35,6 +35,7 @@ import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { useTranslation } from "react-i18next";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 interface ReuseDetailClientProps {
   reuse: Reuse;
@@ -346,7 +347,7 @@ export default function ReuseDetailClient({
                   }}
                 >
                   {paginatedDatasets.map((dataset, index) => {
-                    const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+                    const timeAgo = formatDateToTimeAgo(getDatasetLastUpdate(dataset));
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,

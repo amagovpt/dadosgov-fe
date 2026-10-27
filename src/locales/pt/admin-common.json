@@ -9,6 +9,7 @@
   },
   "results_one": "{{formattedCount}} resultado",
   "results_other": "{{formattedCount}} resultados",
+  "resultsTitle": "Lista de resultados",
   "search": {
     "label": "Pesquisar"
   },
@@ -31,7 +32,7 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "saving": "A guardar...",
-    "downloadCsv": "Descarregar CSV",
+    "downloadCsv": "Transferir tabela",
     "downloadingCsv": "A preparar CSV..."
   },
   "activity": {
@@ -130,6 +131,8 @@
     "irreversible": "Atenção esta ação é irreversível."
   },
   "pagination": {
+    "range_one": "{{start}} a {{end}} de {{count}} item",
+    "range_other": "{{start}} a {{end}} de {{count}} itens",
     "itemsPerPage": "Linhas por página",
     "selectItemsPerPage": "Selecionar linhas por página",
     "itemsPerPageOptions": "Opções de linhas por página",

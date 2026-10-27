@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import {
   Icon,
   InputSelect,
-  InputSearchBar,
   DropdownSection,
   DropdownOption,
   Table,
@@ -18,6 +17,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { AdminSearchBar } from "@/components/admin/lists/AdminSearch";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvestJob, fetchHarvester } from "@/service/api/harvesters";
@@ -441,7 +441,7 @@ export default function HarvestJobDetailClient({
         {items.length > 0 && (
           <div className="flex items-end gap-16 w-full">
             <div className="admin-search-wrapper xl:w-1/2 w-full ">
-              <InputSearchBar
+              <AdminSearchBar
                 hasVoiceActionButton={false}
                 label={t("admin-harvesters:jobDetail.searchLabel")}
                 placeholder={t("admin-harvesters:jobDetail.searchPlaceholder")}

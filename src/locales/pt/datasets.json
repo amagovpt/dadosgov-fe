@@ -66,6 +66,30 @@
       "missing": "{{label}} dos dados não preenchidos"
     }
   },
+  "labels": {
+    "title": "Título",
+    "id": "Identificador",
+    "description": "Descrição",
+    "format": "Formato",
+    "url": "URL",
+    "latest": "URL estável",
+    "filetype": "Tipo de ficheiro",
+    "type": "Tipo",
+    "mime": "Tipo MIME",
+    "filesize": "Tamanho",
+    "checksum": "Checksum",
+    "created_at": "Data de criação",
+    "last_modified": "Última modificação",
+    "schema": "Esquema",
+    "metrics": "Métricas",
+    "extras": "Extras",
+    "preview_url": "URL de pré-visualização",
+    "fileTypes": {
+      "main": "Ficheiro principal",
+      "doc": "Ficheiro de documentação",
+      "community": "Ficheiro comunitário"
+    }
+  },
   "contactRoles": {
     "contact": "Contacto",
     "creator": "Criador",
@@ -208,10 +232,12 @@
     "other": "Outro"
   },
   "resources": {
-    "mainFiles_one": "{{count}} FICHEIRO PRINCIPAL",
-    "mainFiles_other": "{{count}} FICHEIROS PRINCIPAIS",
-    "documentation_one": "{{count}} DOCUMENTAÇÃO",
-    "documentation_other": "{{count}} DOCUMENTAÇÃO",
+    "mainFiles_one": "Ficheiro principal",
+    "mainFiles_other": "Ficheiros principais",
+    "documentation_one": "Documentação",
+    "documentation_other": "Documentação",
+    "comFiles_one": "Ficheiro comunitário",
+    "comFiles_other": "Ficheiros comunitários",
     "copyTitle": "Copiar título",
     "copy": "Copiar {{label}}",
     "copied": "Copiado!",
@@ -219,16 +245,19 @@
     "by": "Por",
     "format": "Formato {{format}}",
     "fileFallback": "Ficheiro",
-    "download": "Descarregar {{title}}",
+    "details": "Detalhes do ficheiro",
+    "download": "Transferir ficheiro",
     "seeMore": "Ver mais",
     "seeLess": "Ver menos",
     "tabs": {
-      "preview": "Pré-visualização",
+      "preview": "Pré-visualização dos dados",
       "structure": "Estrutura de dados",
-      "metadata": "Metadados",
+      "metadata": "Metadados do ficheiro",
       "downloads": "Downloads"
     },
     "preview": {
+      "explorer": "Explorador de dados",
+      "explorerStructureError": "Erro ao verificar a estrutura do recurso:",
       "loading": "A carregar pré-visualização...",
       "loadingStructure": "A carregar estrutura...",
       "unavailableRemote": "Pré-visualização não disponível para ficheiros externos.",
@@ -248,7 +277,9 @@
       "modifiedAt": "Modificado em",
       "type": "Tipo",
       "mime": "Tipo MIME",
-      "extras": "Recursos extras"
+      "extras": "Recursos extras",
+      "mainInfo": "Informação principal",
+      "additional": "Metadados adicionais"
     },
     "downloads": {
       "originalFormat": "Formato original",
@@ -283,5 +314,6 @@
       "false": "falso",
       "empty": "—"
     }
-  }
+  },
+  "goToDataset": "Voltar ao conjunto de dados"
 }

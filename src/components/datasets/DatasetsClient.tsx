@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import FoNoResults from "../common/FoNoResults";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { FrontOfficePage } from "@/service/types/shared/common";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -207,7 +208,7 @@ export default function DatasetsClient({
                 {datasets.length > 0 ? (
                   datasets.map((dataset) => {
                     const timeAgo = formatDateToTimeAgo(
-                      dataset.last_modified || dataset.created_at,
+                      getDatasetLastUpdate(dataset),
                       language as "pt" | "en"
                     );
                     const cardProps = {

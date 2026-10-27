@@ -1,6 +1,9 @@
 "use client";
 
 import type React from "react";
+import { useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { getDatasetDraftExtras, getDatasetPublicationIssues } from "@/utils/datasetPublication";
 import {
   createDataset,
   createResource,
@@ -11,20 +14,20 @@ import {
   uploadResource,
 } from "@/service/api/datasets";
 import type { SpatialZone } from "@/service/types/catalog";
-import type { Dataset, DatasetUpdatePayload } from "@/service/types/dataset";
+import type { Dataset, DatasetUpdatePayload, Resource } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import type { DatasetWizardDraftContact } from "@/components/admin/datasets/publication-wizard/datasetWizardTypes";
 import {
   buildDatasetCreatePayload,
-  toDatasetIsoDate,
   type DatasetFormField,
   validateDatasetDetails,
 } from "@/components/admin/datasets/publication-wizard/datasetFormModel";
 
 interface UseDatasetWizardSubmissionActionsParams {
   currentStep: number;
+  optionalContacts?: boolean;
   datasetId?: string | null;
   createdDataset: Dataset | null;
   datasetTitle: string;
@@ -39,6 +42,7 @@ interface UseDatasetWizardSubmissionActionsParams {
   uploadedFiles: File[];
   resourceUrls: string[];
   resourceMetadata: Record<string, PendingResourceMeta>;
+  uploadProgressKey?: string;
   selectedProducerRef: React.MutableRefObject<string>;
   selectedLicenseRef: React.MutableRefObject<string>;
   selectedFrequencyRef: React.MutableRefObject<string>;
@@ -48,21 +52,21 @@ interface UseDatasetWizardSubmissionActionsParams {
   setCreatedDataset: React.Dispatch<React.SetStateAction<Dataset | null>>;
   setSelectedSpatialZonesValue: React.Dispatch<React.SetStateAction<string | null>>;
   setDraftContacts: React.Dispatch<React.SetStateAction<DatasetWizardDraftContact[]>>;
+  setUploadedFiles: React.Dispatch<React.SetStateAction<File[]>>;
   setResourceUrls: React.Dispatch<React.SetStateAction<string[]>>;
-  setResourceMetadata: React.Dispatch<
-    React.SetStateAction<Record<string, PendingResourceMeta>>
-  >;
+  setResourceMetadata: React.Dispatch<React.SetStateAction<Record<string, PendingResourceMeta>>>;
   setShowFileError: React.Dispatch<React.SetStateAction<boolean>>;
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
   setApiError: React.Dispatch<React.SetStateAction<string | null>>;
   setErrors: (
     next:
       | FormErrors<DatasetFormField>
-      | ((previous: FormErrors<DatasetFormField>) => FormErrors<DatasetFormField>),
+      | ((previous: FormErrors<DatasetFormField>) => FormErrors<DatasetFormField>)
   ) => void;
   resetErrors: () => void;
   focusFirstError: () => void;
   onDatasetCreated?: (datasetId: string) => void;
+  onDraftSaved: (datasetId: string) => void;
   onNextStep: () => void;
   onComplete?: () => void;
   navigateToStep: (nextStep: number, nextDatasetId: string) => void;
@@ -92,7 +96,9 @@ function flattenApiError(errorData: Record<string, unknown>): string {
   const flattenValue = (value: unknown): string => {
     if (Array.isArray(value)) return value.map(flattenValue).join("; ");
     if (value && typeof value === "object") {
-      return Object.values(value as Record<string, unknown>).map(flattenValue).join("; ");
+      return Object.values(value as Record<string, unknown>)
+        .map(flattenValue)
+        .join("; ");
     }
     return String(value);
   };
@@ -102,8 +108,21 @@ function flattenApiError(errorData: Record<string, unknown>): string {
     .join(", ");
 }
 
+function readUploadProgress(key: string): Record<string, string> {
+  try {
+    const value: unknown = JSON.parse(sessionStorage.getItem(key) || "{}");
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return Object.fromEntries(Object.entries(value).filter(([, id]) => typeof id === "string"));
+    }
+  } catch {
+    // A malformed local record must not stop resource uploads.
+  }
+  return {};
+}
+
 export function useDatasetWizardSubmissionActions({
   currentStep,
+  optionalContacts = false,
   datasetId,
   createdDataset,
   datasetTitle,
@@ -118,6 +137,7 @@ export function useDatasetWizardSubmissionActions({
   uploadedFiles,
   resourceUrls,
   resourceMetadata,
+  uploadProgressKey,
   selectedProducerRef,
   selectedLicenseRef,
   selectedFrequencyRef,
@@ -127,6 +147,7 @@ export function useDatasetWizardSubmissionActions({
   setCreatedDataset,
   setSelectedSpatialZonesValue,
   setDraftContacts,
+  setUploadedFiles,
   setResourceUrls,
   setResourceMetadata,
   setShowFileError,
@@ -136,6 +157,7 @@ export function useDatasetWizardSubmissionActions({
   resetErrors,
   focusFirstError,
   onDatasetCreated,
+  onDraftSaved,
   onNextStep,
   onComplete,
   navigateToStep,
@@ -143,7 +165,75 @@ export function useDatasetWizardSubmissionActions({
   validationMessages,
   restoreErrors,
 }: UseDatasetWizardSubmissionActionsParams) {
-  async function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>) {
+  const { t } = useTranslation("admin-datasets");
+  // Keep the upload result if updating its metadata fails, so retrying never uploads it twice.
+  const uploadedResourceIds = useRef(new Map<File, Resource>());
+
+  async function savePendingResources(dataset: Dataset) {
+    const recordSaved = (resource: Resource) => {
+      setCreatedDataset((previous) =>
+        previous
+          ? {
+              ...previous,
+              resources: [
+                ...(previous.resources ?? []).filter((item) => item.id !== resource.id),
+                resource,
+              ],
+            }
+          : previous
+      );
+    };
+    for (const file of uploadedFiles) {
+      const meta = resourceMetadata[`file-${file.name}`];
+      let resource = uploadedResourceIds.current.get(file);
+      const fileKey = JSON.stringify([file.name, file.size, file.lastModified]);
+      if (!resource && uploadProgressKey) {
+        const progress = readUploadProgress(uploadProgressKey);
+        resource = dataset.resources?.find((item) => item.id === progress[fileKey]);
+      }
+      if (!resource) {
+        resource = await uploadResource(dataset.id, file);
+        uploadedResourceIds.current.set(file, resource);
+        if (uploadProgressKey) {
+          const progress = readUploadProgress(uploadProgressKey);
+          progress[fileKey] = resource.id;
+          sessionStorage.setItem(uploadProgressKey, JSON.stringify(progress));
+        }
+      }
+      if (meta)
+        resource = await updateResource(dataset.id, resource.id, {
+          title: meta.title || file.name,
+          type: meta.resourceType || "main",
+          description: meta.description || undefined,
+          format: meta.format || undefined,
+          mime: meta.mime || undefined,
+          filesize: meta.filesize ? Number(meta.filesize) : undefined,
+        });
+      recordSaved(resource);
+      uploadedResourceIds.current.delete(file);
+      setUploadedFiles((previous) => previous.filter((item) => item !== file));
+    }
+    for (const url of resourceUrls) {
+      const meta = resourceMetadata[`url-${url}`];
+      const payload = {
+        title: meta?.title || url,
+        type: meta?.resourceType || "main",
+        description: meta?.description || undefined,
+        url: url.trim(),
+        filetype: "remote",
+        format: meta?.format || undefined,
+        mime: meta?.mime || undefined,
+        filesize: meta?.filesize ? Number(meta.filesize) : undefined,
+      };
+      const existing = dataset.resources?.find((resource) => resource.url === url.trim());
+      const resource = existing
+        ? await updateResource(dataset.id, existing.id, payload)
+        : await createResource(dataset.id, payload);
+      recordSaved(resource);
+      setResourceUrls((previous) => previous.filter((item) => item !== url));
+    }
+  }
+  async function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>, saveAsDraft = false) {
     const { errors, draftErrors } = validateDatasetDetails(
       {
         producer: selectedProducerRef.current,
@@ -152,18 +242,23 @@ export function useDatasetWizardSubmissionActions({
         frequency: selectedFrequencyRef.current,
         temporalStart,
         temporalEnd,
-        selectedProducer,
+        selectedProducer: optionalContacts ? "user" : selectedProducer,
         selectedContactPointIds,
         draftContacts,
       },
-      validationMessages,
+      validationMessages
     );
+
+    if (saveAsDraft) {
+      delete errors.datasetFrequency;
+      delete errors.contactDrafts;
+    }
 
     if (errors.contactDrafts) {
       setDraftContacts((previousDrafts) =>
         previousDrafts.map((draft) =>
-          draftErrors[draft.id] ? { ...draft, errors: draftErrors[draft.id] } : draft,
-        ),
+          draftErrors[draft.id] ? { ...draft, errors: draftErrors[draft.id] } : draft
+        )
       );
     }
 
@@ -176,6 +271,12 @@ export function useDatasetWizardSubmissionActions({
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
+      if (
+        saveAsDraft &&
+        (errors.datasetProducer || errors.datasetTitle || errors.datasetDescription)
+      ) {
+        setApiError(t("publication.draftMinimum"));
+      }
       focusFirstError();
       return;
     }
@@ -192,12 +293,17 @@ export function useDatasetWizardSubmissionActions({
         shortDescription: datasetShortDescription,
         producer: selectedProducerRef.current,
         license: selectedLicenseRef.current,
-        frequency: selectedFrequencyRef.current,
+        frequency: selectedFrequencyRef.current || (saveAsDraft ? "unknown" : ""),
         keywords: selectedKeywordsRef.current,
         contactPointIds: selectedContactPointIds,
         temporalStart,
         temporalEnd,
       });
+
+      payload.extras = getDatasetDraftExtras(createdDataset?.extras, selectedFrequencyRef.current);
+
+      // An empty selection must also clear associations when updating a draft.
+      if (optionalContacts) payload.contact_points = selectedContactPointIds;
 
       const spatialZoneIds = spatialCoverageRef.current
         .split(",")
@@ -225,8 +331,8 @@ export function useDatasetWizardSubmissionActions({
             zoneDetails
               .filter((zone) => selectedZoneSet.has(zone.id))
               .map((zone) => (typeof zone.level === "string" ? zone.level.trim() : ""))
-              .filter(Boolean),
-          ),
+              .filter(Boolean)
+          )
         );
         if (levels.length === 1) {
           resolvedGranularity = levels[0];
@@ -253,7 +359,10 @@ export function useDatasetWizardSubmissionActions({
         : await createDataset(payload);
 
       setCreatedDataset(dataset);
-      if (onDatasetCreated) {
+      if (saveAsDraft) {
+        await savePendingResources(dataset);
+        onDraftSaved(dataset.id);
+      } else if (onDatasetCreated) {
         onDatasetCreated(dataset.id);
       } else {
         navigateToStep(currentStep + 1, dataset.id);
@@ -275,7 +384,7 @@ export function useDatasetWizardSubmissionActions({
       const oldUrl = key.slice(4);
       if (oldUrl !== newUrl) {
         setResourceUrls((previousUrls) =>
-          previousUrls.map((url) => (url === oldUrl ? newUrl : url)),
+          previousUrls.map((url) => (url === oldUrl ? newUrl : url))
         );
         setResourceMetadata((previousMetadata) => {
           const updated = { ...previousMetadata, [`url-${newUrl}`]: meta };
@@ -293,7 +402,7 @@ export function useDatasetWizardSubmissionActions({
     const hasFiles = uploadedFiles.length > 0;
     const hasUrls = trimmedUrls.length > 0;
 
-    if (!hasFiles && !hasUrls) {
+    if (!hasFiles && !hasUrls && !createdDataset?.resources?.length) {
       setShowFileError(true);
       return;
     }
@@ -320,43 +429,14 @@ export function useDatasetWizardSubmissionActions({
     }
 
     try {
-      if (hasFiles) {
-        for (const file of uploadedFiles) {
-          const meta = resourceMetadata[`file-${file.name}`];
-          const resource = await uploadResource(dataset.id, file);
-          if (meta) {
-            await updateResource(dataset.id, resource.id, {
-              title: meta.title || file.name,
-              type: meta.resourceType || "main",
-              description: meta.description || undefined,
-              format: meta.format || undefined,
-              mime: meta.mime || undefined,
-              filesize: meta.filesize ? Number(meta.filesize) : undefined,
-            });
-          }
-        }
-      }
-
-      for (const url of trimmedUrls) {
-        const meta = resourceMetadata[`url-${url}`];
-        await createResource(dataset.id, {
-          title: meta?.title || url,
-          type: meta?.resourceType || "main",
-          description: meta?.description || undefined,
-          url,
-          filetype: "remote",
-          format: meta?.format || undefined,
-          mime: meta?.mime || undefined,
-          filesize: meta?.filesize ? Number(meta.filesize) : undefined,
-        });
-      }
+      await savePendingResources(dataset);
 
       onNextStep();
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error uploading resources:", error.message, error.stack);
         setApiError(
-          restoreErrors.saveResource.replace("{{message}}", translateUploadError(error.message)),
+          restoreErrors.saveResource.replace("{{message}}", translateUploadError(error.message))
         );
       } else {
         const err = error as { status?: number; data?: Record<string, unknown> };
@@ -364,7 +444,7 @@ export function useDatasetWizardSubmissionActions({
         if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
           const message = (err.data.message as string) || flattenApiError(err.data);
           setApiError(
-            restoreErrors.saveResource.replace("{{message}}", translateUploadError(message)),
+            restoreErrors.saveResource.replace("{{message}}", translateUploadError(message))
           );
         } else {
           const statusHint = err.status ? ` (${err.status})` : "";
@@ -378,6 +458,15 @@ export function useDatasetWizardSubmissionActions({
 
   async function handlePublish() {
     if (!createdDataset) return;
+    const issues = getDatasetPublicationIssues(createdDataset);
+    if (issues.length) {
+      setApiError(
+        t("publication.incomplete", {
+          fields: issues.map((field) => t(`publication.fields.${field}`)).join(", "),
+        })
+      );
+      return;
+    }
 
     setApiError(null);
     setIsSubmitting(true);
@@ -412,61 +501,7 @@ export function useDatasetWizardSubmissionActions({
   }
 
   async function handleSaveDraft() {
-    if (!createdDataset) {
-      if (onComplete) onComplete();
-      else finishWizard();
-      return;
-    }
-
-    setApiError(null);
-    setIsSubmitting(true);
-    try {
-      const refTags = selectedKeywordsRef.current
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean);
-      const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
-      const startIso = toDatasetIsoDate(temporalStart);
-      const endIso = toDatasetIsoDate(temporalEnd);
-      let temporalCoverage: DatasetUpdatePayload["temporal_coverage"] =
-        createdDataset.temporal_coverage || undefined;
-      if (startIso || endIso) {
-        const start = startIso || createdDataset.temporal_coverage?.start;
-        if (start) {
-          temporalCoverage = {
-            start,
-            ...(endIso
-              ? { end: endIso }
-              : createdDataset.temporal_coverage?.end
-                ? { end: createdDataset.temporal_coverage.end }
-                : {}),
-          };
-        }
-      }
-
-      const draftPayload: DatasetUpdatePayload = {
-        private: true,
-        title: createdDataset.title,
-        description: createdDataset.description,
-        description_short: createdDataset.description_short || undefined,
-        acronym: createdDataset.acronym || undefined,
-        tags,
-        license: createdDataset.license || undefined,
-        frequency: createdDataset.frequency || undefined,
-        temporal_coverage: temporalCoverage,
-        spatial: createdDataset.spatial || undefined,
-        organization: createdDataset.organization?.id,
-      };
-
-      await updateDataset(createdDataset.id, draftPayload);
-      if (onComplete) onComplete();
-      else finishWizard();
-    } catch (error) {
-      console.error("Error saving draft dataset:", error);
-      setApiError(restoreErrors.saveDraft);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await handleStep2Next(undefined, true);
   }
 
   return {
