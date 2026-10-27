@@ -41,6 +41,7 @@ services:
       NEXT_PUBLIC_KARMA_ID: ${NEXT_PUBLIC_KARMA_ID:-}
       NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
       NEXT_PUBLIC_UC_DRAFT: ${NEXT_PUBLIC_UC_DRAFT:-false}
+      EXPLORER_URL: ${EXPLORER_URL}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
