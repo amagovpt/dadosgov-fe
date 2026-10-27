@@ -6,6 +6,7 @@ import { flattenData } from "@/utils/flattenObject";
 import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
 import { notFound } from "next/navigation";
+import { PRRBeneficiaryRelatedProjectsType } from "@/service/types/datastories/prr/prr";
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
@@ -1503,7 +1504,7 @@ export function getPrrBeneficiaryMeta(locale: string = "pt") {
           hero {
             ${locale} {
               title
-              subtitle
+              description
             }
           }
         }
@@ -1520,16 +1521,14 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
           hero {
             ${locale} {
               title
-              subtitle
-              sitemap {
+              description
+              index {
                 title
-                links {
+                anchors {
                   anchor {
                     children
                     href
-                    appearance
-                    iconName
-                    variant
+                    icon
                   }
                 }
               }
@@ -1550,18 +1549,15 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
               subtitle
               description
               cards {
-                cardArticle {
-                  __typename
-                  ... on CardComponent {
-                    title
-                    description
-                    iconName
-                    imageAlt
-                    anchor {
-                      children
-                      href
-                      iconName
-                    }
+                card {
+                  title
+                  subtitle
+                  description
+                  icon
+                  anchor {
+                    children
+                    href
+                    icon
                   }
                 }
               }
@@ -1575,18 +1571,15 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
               subtitle
               description
               cards {
-                cardArticle {
-                  __typename
-                  ... on CardComponent {
-                    title
-                    description
-                    iconName
-                    imageAlt
-                    anchorGroup {
-                      children
-                      href
-                      iconName
-                    }
+                card {
+                  title
+                  subtitle
+                  description
+                  icon
+                  anchor {
+                    children
+                    href
+                    icon
                   }
                 }
               }
@@ -1600,17 +1593,15 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
               subtitle
               description
               cards {
-                cardArticle {
-                  __typename
-                  ... on CardComponent {
-                    title
-                    description
-                    iconName
-                    anchor {
-                      children
-                      href
-                      iconName
-                    }
+                card {
+                  title
+                  subtitle
+                  description
+                  icon
+                  anchor {
+                    children
+                    href
+                    icon
                   }
                 }
               }
