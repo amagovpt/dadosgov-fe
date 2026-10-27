@@ -38,7 +38,7 @@ services:
       TABULAR_API_URL: ${TABULAR_API_URL:-http://host.docker.internal:8005}
       NEXT_PUBLIC_SAML_ENABLED: ${NEXT_PUBLIC_SAML_ENABLED:-false}
       NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
-      EXPLORER_URL: ${EXPLORER_URL:-http://host.docker.internal:3030}
+      EXPLORER_URL: ${EXPLORER_URL}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
