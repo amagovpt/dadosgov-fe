@@ -376,7 +376,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                       {error || tds("resources.preview.unavailable")}
                     </Typograph>
                   ) : (
-                    <div className="space-y-32">
+                    <div className="flex flex-col gap-32">
                       {pageError && (
                         <Typograph tag="p" className="text-m-regular text-neutral-900">
                           {tds("resources.preview.pageLoadError")}

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Button from "@/components/Primitives/Button";
-import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { getExplorerUrl } from "@/app/[locale]/(pages)/datasets/[slug]/actions";
+import Link from "next/link";
 
 export type ExploreDataI = {
   id: string;
@@ -12,7 +12,6 @@ export type ExploreDataI = {
 
 export default function ExploreData({ id }: ExploreDataI) {
   const { t: tds } = useTranslation("datasets");
-  const routerNav = useRouter();
   const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,22 +35,19 @@ export default function ExploreData({ id }: ExploreDataI) {
     };
   }, [id, tds]);
 
-  const handleClick = () => {
-    if (explorerUrl) routerNav.push(explorerUrl);
-  };
-
   if (!id || !explorerUrl) return null;
 
   return (
-    <Button
-      appearance="solid"
-      hasIcon
-      trailingIcon="agora-line-external-link"
-      trailingIconHover="agora-line-external-link"
-      onClick={() => handleClick()}
-      className="px-56"
-    >
-      {tds("resources.preview.explorer")}
-    </Button>
+    <Link href={explorerUrl} target="_blank">
+      <Button
+        appearance="solid"
+        hasIcon
+        trailingIcon="agora-line-external-link"
+        trailingIconHover="agora-line-external-link"
+        className="px-56"
+      >
+        {tds("resources.preview.explorer")}
+      </Button>
+    </Link>
   );
 }
