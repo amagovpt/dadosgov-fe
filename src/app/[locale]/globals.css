@@ -182,6 +182,7 @@
      5.10 Toggle (Organizations Filters)
      5.11 Popup Dialog
      5.12 Timeline
+     5.13 ADS modal
   6. PAGES ..................................................... [06]
      6.1 Homepage
      6.2 Login
@@ -1081,6 +1082,12 @@ li.section-name:empty {
   height: 16px !important;
   min-width: 16px !important;
   min-height: 16px !important;
+}
+
+/* ------------- 5.13 ADS modal ------------- */
+
+div.agora-dialog {
+  z-index: 9999 !important;
 }
 
 /* ==========================================================================
