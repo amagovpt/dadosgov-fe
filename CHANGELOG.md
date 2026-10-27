@@ -2,9 +2,94 @@
 
 All notable changes to the dados.gov.pt frontend (`dadosgov-fe`).
 
-This project has no version tags, so entries are grouped by month (newest first), each linking the pull request that introduced the change.
+Entries are newest first. Work sits under `## Unreleased` until it is promoted to production, where the heading becomes the released version (see **Versioning & Releases** in `CLAUDE.md`). Entries written before the first tag are grouped by month.
 
 ## Unreleased
+
+- **feat(admin): add a read-only page for the state of the database migrations**
+  - PPR came back from a production dump with 34 migrations claiming to be applied and none of
+    them run, and nothing could see it until the backend refused to start. `/admin/system/migrations`
+    now shows every migration's state, so whoever has no shell on an environment no longer has to
+    request a deploy just to read it.
+  - Nine states rather than the three `udata db status` knows, because three of its green answers
+    are not success: recorded without running, marked by hand after failing, and applied while
+    logging errors. Green here is reserved for the one state that means what it says, and a test
+    pins that — inheriting the command's palette would inherit its blindness.
+  - A verdict card decides itself from the backend's own count, never from the filtered table, so
+    narrowing to "anomalies only" cannot make a healthy environment look broken. The breakdown
+    omits the states at zero, which is what makes a healthy environment legible at a glance:
+    one line instead of nine numbers that are mostly zero.
+  - A failed request and an environment with nothing recorded draw different screens. Saying "the
+    schema is fine" to somebody checking right after a dump restore would be the worst possible
+    accident, so the fetcher returns null on failure rather than an empty envelope.
+- **feat(admin): add a read-only page for the portal's scheduled jobs**
+  - The portal schedules 48 jobs through Celery Beat — 39 harvesters and 9 system chores that
+    keep metrics, badges and purges running — and until now the only way to see any of it was
+    to open a shell on the machine. When a statistic stopped updating or a harvester failed to
+    start, there was no screen that answered "is this job on?", "when did it last run?" or "how
+    often is it scheduled?". The API has been serving all of it; the page is what was never
+    ported from the old backoffice.
+  - `/admin/system/jobs` lists them with name, type, task, schedule, last run and enabled state,
+    with search and sorting. Harvesters are told apart by their task rather than their name: the
+    backend names a harvester's schedule after its source as a consequence of setting
+    `task="harvest"`, so reading the name reads the side effect.
+  - It also names the registered tasks that nothing schedules — the purges and the
+    inactive-account chores — which is the harder question and the one that sends people to the
+    machine. Reading the schedule says what runs; only the difference says what does not.
+  - A failed request and an empty schedule draw different screens. The fetchers return null on
+    failure rather than the empty array their siblings use, because on a page whose whole job is
+    to report what is running, "the backend is down" must not read as "nothing is scheduled".
+  - Read-only throughout: no create, edit, delete, enable or run. The page also clears the
+    layout's default header action, which would otherwise have given a consultation screen a
+    "Publicar" dropdown.
+
+- **fix(login): the password reset screen stops asking to link a digital identity**
+  - After resetting a password the confirmation screen said "Já pode usá-la para associar a conta
+    à sua Chave Móvel Digital ou à Autenticação Europeia", behind a single button labelled
+    "Associar conta" that in fact navigated to the login page. Somebody who had just recovered
+    their access read it as being made to link an identity before they could get back in — and
+    the copy promised one thing while the button did another.
+  - It is copy from when migration was going to be mandatory and resetting a password was a step
+    inside it. That stopped being true; the screen did not follow. It now says the password was
+    changed and offers "Iniciar sessão", which is what the button has always done.
+  - The test pins the rule rather than the sentences: no string under `resetPassword`, in either
+    language, may mention a digital identity. The wording is the part that gets rewritten, and
+    whoever rewrites it next may not know why the mention does not belong there.
+
+- **chore(release): give this repo a release script, with the guard the footer now depends on**
+  - Releases were cut by hand, step by step, including the `package.json` bump -- the one step
+    with nothing to catch it if forgotten, leaving the version the repo states and the version
+    the tag claims free to drift apart.
+  - `tag-version.sh` mirrors the backend's: it refuses to run outside production, refuses to tag
+    a version `package.json` does not declare, takes the release notes from the matching
+    `CHANGELOG.md` section, and resolves the real GitHub CLI past any pyenv shim shadowing it.
+
+- **fix(datasets): every date on the portal now says when the data actually changed**
+  - A dataset page contradicted itself: the header said 12 January while the four resources
+    listed below it said 29 September. The header was reading `last_modified`, which freezes
+    at the value the document held when it was last written -- for a harvested dataset,
+    usually its creation. The date the label promises is `last_update`, recomputed from the
+    dataset's own resources every time it is saved.
+  - It was never two places. Sixteen read the frozen field: the detail header and info tab,
+    the listing cards, the homepage, search results, the organization's datasets tab, the
+    public profile, the cards that cross-link from reuses and APIs, and six backoffice
+    screens. Fixing only the page that was reported would have left the portal disagreeing
+    with itself, which is harder to explain than being consistently wrong.
+  - One of those backoffice screens was already sorting by the right field while displaying
+    the wrong one, so its column ordered by a date it never showed, and its CSV export would
+    have disagreed with the table it was exported from.
+  - Neither field answers the question on its own, and each is stale in the opposite direction.
+    `last_modified` freezes at the value the document carried when it was last written, so a
+    harvest that brings no modification date of its own never moves it. `last_update` is
+    recomputed from the resources only on a full save, and the three resource mutators write
+    through an atomic update that skips it -- so a dataset can gain a file today and still
+    carry a year-old `last_update`. A single helper now takes the most recent of the two,
+    which is right in both directions and reads the way the label does: the newest signal we
+    have that something changed. The creation date closes the chain so there is always an
+    answer, and a response that predates the field still renders.
+  - Three date formatters took an absent date badly, and one of them threw outright: a
+    non-empty string that is not a date reached date-fns and raised, taking the render with
+    it. They all degrade now.
 
 - **fix(organizations): the discussions tab shows discussions about the organization itself**
   - The tab asked the API for every discussion on everything the organization published, so on

@@ -107,6 +107,30 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
               }
             }
           }
+          formSections {
+            ${locale} {
+              key
+              title
+              description
+            }
+          }
+          confirmationDialogs {
+            ${locale} {
+              key
+              title
+              description
+              cancelLabel
+              confirmLabel
+            }
+          }
+          transferIntroduction {
+            ${locale} {
+              title
+              description {
+                html
+              }
+            }
+          }
           publicationIntroduction {
             ${locale} {
               title
@@ -205,6 +229,7 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
           }
           createAuxiliaryItems {
             ${locale} {
+              key
               enabled
               title
               description {
@@ -218,6 +243,7 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
           }
           editAuxiliaryItems {
             ${locale} {
+              key
               enabled
               title
               description {
@@ -231,6 +257,7 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
           }
           resourceAuxiliaryItems {
             ${locale} {
+              key
               enabled
               title
               description {
@@ -258,7 +285,11 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
     throw new Error("Failed to fetch bo-datasets content");
   }
 
-  const page = flattenData(data).findBoDatasetsSingleton as BoDatasetsPage;
+  const page = flattenData(data, locale).findBoDatasetsSingleton as BoDatasetsPage;
   if (!page) throw new Error("Bo datasets content is missing");
-  return page;
+  // The generic flattener unwraps a component containing only `title` into a string.
+  return {
+    ...page,
+    steps: page.steps?.map((step) => (typeof step === "string" ? { title: step } : step)),
+  };
 }

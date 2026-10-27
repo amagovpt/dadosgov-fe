@@ -1,5 +1,7 @@
 import {
   AdminAuxiliaryItem,
+  AdminConfirmationContent,
+  AdminFormSection,
   AdminCard,
   AdminHelpBlock,
   AdminHero,
@@ -34,6 +36,9 @@ export type BoDatasetsPage = {
   orgNoResults?: FoListPageNoResults;
   systemNoResults?: FoListPageNoResults;
   steps?: AdminStep[];
+  formSections?: AdminFormSection[];
+  confirmationDialogs?: AdminConfirmationContent[];
+  transferIntroduction?: AdminHelpBlock;
   publicationEntry?: AdminHelpBlock[];
   publicationIntroduction?: AdminHelpBlock;
   resourceIntroduction?: AdminHelpBlock;

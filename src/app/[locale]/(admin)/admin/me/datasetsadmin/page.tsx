@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
+import DatasetsNewClient from "@/components/admin/datasets/views/DatasetsNewClient";
 import { getBoDatasets, getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
@@ -25,5 +25,5 @@ export default async function DatasetsAdminPage({
   const { locale } = await params;
   const pageContent = await getBoDatasets(locale);
 
-  return <DatasetsAdminClient pageContent={pageContent} />;
+  return <DatasetsNewClient pageContent={pageContent} />;
 }

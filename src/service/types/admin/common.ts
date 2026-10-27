@@ -40,8 +40,23 @@ export type AdminCard = {
 };
 
 export type AdminAuxiliaryItem = {
+  key?: string;
   enabled?: boolean;
   title: string;
   description: string;
   anchor?: AdminAnchor;
+};
+
+export type AdminFormSection = {
+  key: string;
+  title: string;
+  description?: string;
+};
+
+export type AdminConfirmationContent = {
+  key: string;
+  title: string;
+  description: string;
+  cancelLabel: string;
+  confirmLabel: string;
 };

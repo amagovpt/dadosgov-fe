@@ -24,6 +24,7 @@ import { Organization } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
 import AppIcon from "../Primitives/AppIcon";
 import { useTranslation } from "react-i18next";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
 
@@ -574,9 +575,9 @@ export default function SearchClient() {
                             {dataset.organization && (
                               <p className="mt-4 text-s-regular text-neutral-500">
                                 {dataset.organization.name}
-                                {dataset.last_modified && (
+                                {getDatasetLastUpdate(dataset) && (
                                   <span className="ml-8">
-                                    — {t("search.updatedOn", { date: new Date(dataset.last_modified).toLocaleDateString(i18n.language) })}
+                                    — {t("search.updatedOn", { date: new Date(getDatasetLastUpdate(dataset) as string).toLocaleDateString(i18n.language) })}
                                   </span>
                                 )}
                               </p>

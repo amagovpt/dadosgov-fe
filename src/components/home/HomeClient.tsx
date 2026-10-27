@@ -18,15 +18,13 @@ import { Dataset } from "@/service/types/dataset";
 import { Post } from "@/service/types/posts";
 import { Reuse } from "@/service/types/reuse";
 import { SiteMetrics } from "@/service/types/shared";
-import { format } from "date-fns";
-import { enGB, pt } from "date-fns/locale";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
 import { Hero } from "@/components/Shared/Hero";
 import PublishDropdown from "../admin/PublishDropdown";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { formatDateToTimeAgo, formatPortalDate } from "@/utils/formatDate";
 import Image from "next/image";
 import AppIcon from "../Primitives/AppIcon";
 import { useTranslation } from "react-i18next";
@@ -38,6 +36,7 @@ import Anchor from "../Shared/Anchor";
 import { StatusCard as StatusCardType } from "@/service/types/home/home";
 import StatusCard from "@/components/Shared/StatusCard";
 import { MigrationInvite } from "../login/MigrationInvite";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -82,6 +81,7 @@ export default function HomeClient({
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
   const { t, i18n } = useTranslation("common");
+  const dateLocale = i18n.language === "en" ? "en" : "pt";
   // Design-system card anchors bypass <LocalizedLink>; localize them
   // explicitly so the i18n proxy never has to 307 (prefetch-loop fix).
   const localizeHref = useLocalizedHref();
@@ -273,7 +273,7 @@ export default function HomeClient({
             <div className="grid grid-cols-1 gap-32 lg:grid-cols-2 xl:grid-cols-3">
               {latestDatasets.length > 0 ? (
                 latestDatasets.map((dataset, index) => {
-                  const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+                  const timeAgo = formatDateToTimeAgo(getDatasetLastUpdate(dataset));
                   const cardProps = {
                     ...dataset,
                     last_modified: timeAgo,
@@ -334,9 +334,7 @@ export default function HomeClient({
                           <CardSubtitle>
                             {story.createdAt
                               ? t("publishedAt", {
-                                  date: format(new Date(story.createdAt), "dd MMM yyyy", {
-                                    locale: i18n.language === "en" ? enGB : pt,
-                                  }),
+                                  date: formatPortalDate(story.createdAt, "dd MMM yyyy", dateLocale),
                                 })
                               : ""}
                           </CardSubtitle>
@@ -399,9 +397,7 @@ export default function HomeClient({
                           <CardSubtitle>
                             {post.created_at
                               ? t("publishedAt", {
-                                  date: format(new Date(post.created_at), "d MM yyyy", {
-                                    locale: i18n.language === "en" ? enGB : pt,
-                                  }),
+                                  date: formatPortalDate(post.created_at, "d MM yyyy", dateLocale),
                                 })
                               : ""}
                           </CardSubtitle>

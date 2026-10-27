@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import OrgDatasetsNewClient from "@/components/admin/datasets/views/OrgDatasetsNewClient";
+import DatasetsNewClient from "@/components/admin/datasets/views/DatasetsNewClient";
 import { getBoDatasets, getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
@@ -23,12 +23,12 @@ export default async function OrgDatasetsNewPage({
 }: {
   params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await params;
+  const { locale, orgId } = await params;
   const pageContent = await getBoDatasets(locale);
 
   return (
     <Suspense>
-      <OrgDatasetsNewClient pageContent={pageContent} />
+      <DatasetsNewClient key={orgId} pageContent={pageContent} orgId={orgId} />
     </Suspense>
   );
 }

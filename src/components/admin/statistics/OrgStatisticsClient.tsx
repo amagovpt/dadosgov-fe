@@ -7,7 +7,6 @@ import {
   CardFrame,
   CardNoResults,
   Icon,
-  InputSearchBar,
   Tabs,
   Tab,
   TabHeader,
@@ -30,6 +29,7 @@ import type { Dataset } from "@/service/types/dataset";
 import type { Organization, OrganizationMetrics } from "@/service/types/identity";
 import type { Reuse } from "@/service/types/reuse";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { AdminSearchBar } from "@/components/admin/lists/AdminSearch";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
@@ -250,7 +250,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
               {showDatasetsSearch && (
                 <div className="mb-24 flex items-end gap-16">
                   <div className="admin-search-wrapper xl:w-1/2 w-full">
-                    <InputSearchBar
+                    <AdminSearchBar
                       hasVoiceActionButton={false}
                       label={pageContent.datasetsSearch?.label ?? ""}
                       placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
@@ -327,7 +327,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
               {showDataservicesSearch && (
                 <div className="mb-24 flex items-end gap-16">
                   <div className="admin-search-wrapper xl:w-1/2 w-full">
-                    <InputSearchBar
+                    <AdminSearchBar
                       hasVoiceActionButton={false}
                       label={pageContent.dataservicesSearch?.label ?? ""}
                       placeholder={pageContent.dataservicesSearch?.placeholder ?? ""}
@@ -436,7 +436,7 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
               {showReusesSearch && (
                 <div className="mb-24 flex items-end gap-16">
                   <div className="admin-search-wrapper xl:w-1/2 w-full">
-                    <InputSearchBar
+                    <AdminSearchBar
                       hasVoiceActionButton={false}
                       label={pageContent.reusesSearch?.label ?? ""}
                       placeholder={pageContent.reusesSearch?.placeholder ?? ""}
