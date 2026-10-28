@@ -1,5 +1,5 @@
 import RoundedIcon from "@/components/Primitives/RoundedIcon";
-import { LinkIcon } from "@/components/Primitives/LinkIcon";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import { SourceInfoFooter } from "@/components/Shared/SourceInfoFooter";
 import { Fragment } from "react";
@@ -161,13 +161,12 @@ export default function DistributionValuesChart({
     const approvedValueByRole = roleValues.approvedValue;
     const paidValueByRole = roleValues.executedValue;
     const percentageExecutedValue = roleValues.percentageExecutedValue;
-    const supplierItems = (roleData.group.list ?? []).map((project) => ({
-      area: project.name,
-      value: Number(project.amount ?? 0),
-    }));
-    const visibleSuppliers = supplierItems.slice(0, 5);
+    const supplierRows = (roleData.group.list ?? []).map((project) => [
+      project.name,
+      formatValuesWithSuffix(Number(project.amount ?? 0)),
+      formatValuesWithSuffix(Number(project.paid ?? 0)),
+    ]);
     const totalSuppliers = Number(roleData.group.total ?? 0);
-    const hasMoreSuppliers = totalSuppliers > visibleSuppliers.length;
 
     return (
       <div className="col-span-12 flex flex-col gap-64 pb-64 md:col-span-9">
@@ -219,28 +218,27 @@ export default function DistributionValuesChart({
             ]}
           />
 
-          <BenProjSheet.AreaValuelist
-            areaTitle={labels.suppliersInDetail}
-            areaSubtitle={`${totalSuppliers} ${labels.suppliers}`}
-            header={{
-              area: labels.suppliers,
-              value: labels.fundedValue,
-            }}
-            items={visibleSuppliers}
-          />
-
-          {hasMoreSuppliers && (
-            <div className="flex w-full justify-center">
-              <LinkIcon
-                title={labels.seeMoreSuppliers}
-                href="#"
-                icon={{
-                  name: "agora-line-plus-circle",
-                  hoverName: "agora-solid-plus-circle",
-                }}
-              />
+          <div className="flex flex-col gap-32">
+            <div className="flex flex-col gap-8">
+              <Typograph tag="p" className="text-l-bold text-neutral-900">
+                {labels.suppliersInDetail}
+              </Typograph>
+              <Typograph tag="p" className="text-s-regular text-neutral-900">
+                {`${totalSuppliers} ${labels.suppliers}`}
+              </Typograph>
             </div>
-          )}
+
+            <BenProjSheet.Table
+              header={[
+                { label: labels.suppliers },
+                { label: labels.fundedValue, align: "right", highlight: true },
+                { label: labels.receivedValue, align: "right", highlight: true },
+              ]}
+              data={supplierRows}
+              loadByParts={5}
+              seeMoreText={labels.suppliers.toLowerCase()}
+            />
+          </div>
         </div>
       </div>
     );

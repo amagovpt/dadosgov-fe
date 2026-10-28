@@ -42,7 +42,7 @@ function TableHeader({ columns }: ITableHeader) {
             key={`table-head-${id}-${index}`}
             scope="col"
             className={twMerge(
-              "pb-8 px-16 text-s-bold text-neutral-900 align-bottom",
+              "px-16 pb-8 align-bottom text-s-bold text-neutral-900",
               alignClass[column.align ?? "left"],
               column.className
             )}
@@ -75,9 +75,9 @@ function TableItem({ row, columns, boldValues }: ITableItem) {
           <td
             key={`table-cell-${id}-${index}`}
             className={twMerge(
-              "py-8 px-16 text-m-regular text-neutral-900",
+              "px-16 py-8 text-m-regular text-neutral-900",
               alignClass[column?.align ?? "left"],
-              column?.highlight && "text-primary-900",
+              column?.highlight && "text-neutral-900",
               column?.highlight && boldValues && "text-m-bold",
               column?.className
             )}
@@ -96,8 +96,7 @@ export interface ITable {
   header?: TableColumn[];
   data: TableRow[];
   boldValues?: boolean;
-  /** Rows shown per step, with a "see more" button for the next step. Ignored when < 1. */
-  loadByParts?: number;
+  loadByParts?: number; // show row step by step, with a "see more" button. ignored when < 1
   seeMoreText?: string;
   className?: string;
 }
@@ -120,7 +119,7 @@ export default function Table({
   const hasMoreRows = visibleRows.length < data.length;
 
   return (
-    <div className="w-full flex flex-col gap-32">
+    <div className="flex w-full flex-col gap-32">
       <div className={twMerge("w-full overflow-x-auto", className)}>
         <table className="w-full border-collapse">
           {header && <TableHeader columns={columns} />}
@@ -142,6 +141,7 @@ export default function Table({
           <Button
             onClick={() => setParts((prev) => prev + 1)}
             appearance="link"
+            variant="neutral"
             trailingIcon="agora-line-plus-circle"
             trailingIconHover="agora-solid-plus-circle"
             hasIcon
