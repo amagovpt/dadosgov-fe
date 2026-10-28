@@ -498,7 +498,11 @@
       "nif": "Número de identificação fiscal",
       "ben_name": "Nome",
       "total_projetos": "Total de projetos",
-      "total_financiado": "Total financiado"
+      "total_financiado": "Total financiado",
+      "financiamento_recebido": "Financiamento recebido",
+      "valor_recebido": "Valor recebido",
+      "atividade_economica": "Atividade económica",
+      "localizacao_sede": "Localização da sede"
     },
     "tooltips": {
       "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus."

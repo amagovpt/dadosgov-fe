@@ -499,7 +499,11 @@
       "nif": "Tax identification number",
       "ben_name": "Name",
       "total_projetos": "Total number of projects",
-      "total_financiado": "Total financed"
+      "total_financiado": "Total financed",
+      "financiamento_recebido": "Received financing",
+      "valor_recebido": "Received value",
+      "atividade_economica": "Economic activity",
+      "localizacao_sede": "Headquarters location"
     },
     "tooltips": {
       "codigo_projeto": "A code that identifies each project carried out with European funds."

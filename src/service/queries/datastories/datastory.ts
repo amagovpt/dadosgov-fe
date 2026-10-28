@@ -1532,6 +1532,10 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
                   }
                 }
               }
+              breadcrumbs {
+                label
+                url
+              }
             }
           }
           beneficiarySheet {

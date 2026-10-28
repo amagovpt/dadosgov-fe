@@ -5,7 +5,10 @@ import RelatedProjectsContent from "@/components/datastories/BeneficiaryAndProje
 import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
-import { getPrrBeneficiaryData, getPrrBeneficiaryMeta } from "@/service/queries/datastories/datastory";
+import {
+  getPrrBeneficiaryData,
+  getPrrBeneficiaryMeta,
+} from "@/service/queries/datastories/datastory";
 import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Beneficiary,
@@ -173,7 +176,7 @@ export default async function BeneficiaryPage({
   };
 
   return (
-    <main className="flex flex-col pb-128">
+    <main className="datastory-page flex flex-col pb-128">
       <Datastory.Hero
         breadcrumbs={[
           ...hero.breadcrumbs,
@@ -191,7 +194,10 @@ export default async function BeneficiaryPage({
       <Section className="flex flex-col items-center gap-32 py-128" id={beneficiarySheet.id}>
         <InfoBlock.Root>
           <InfoBlock.Header className="flex flex-row gap-24">
-            <InfoBlock.Title title={beneficiarySheet.title} />
+            <InfoBlock.Title
+              title={beneficiarySheet.title}
+              className="text-2xl-bold! text-neutral-900!"
+            />
           </InfoBlock.Header>
         </InfoBlock.Root>
 
@@ -208,7 +214,10 @@ export default async function BeneficiaryPage({
       >
         <InfoBlock.Root>
           <InfoBlock.Header className="flex flex-row gap-24">
-            <InfoBlock.Title title={distribution.title} />
+            <InfoBlock.Title
+              title={distribution.title}
+              className="text-2xl-bold! text-neutral-900!"
+            />
           </InfoBlock.Header>
         </InfoBlock.Root>
 
@@ -229,7 +238,7 @@ export default async function BeneficiaryPage({
       >
         <InfoBlock.Root>
           <InfoBlock.Header className="flex flex-row gap-24">
-            <InfoBlock.Title title={projects.title} />
+            <InfoBlock.Title title={projects.title} className="text-2xl-bold! text-neutral-900!" />
           </InfoBlock.Header>
         </InfoBlock.Root>
 

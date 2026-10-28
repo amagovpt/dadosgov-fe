@@ -3,7 +3,12 @@ import { LinkIcon } from "@/components/Primitives/LinkIcon";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import { SourceInfoFooter } from "@/components/Shared/SourceInfoFooter";
 import { Fragment } from "react";
-import { Beneficiary, PRRBeneficiaryProjectGroup, PRRBeneficiaryRelatedProjects, PRRBeneficiaryValueByEntityRole } from "@/service/types/datastories/prr/prr";
+import {
+  Beneficiary,
+  PRRBeneficiaryProjectGroup,
+  PRRBeneficiaryRelatedProjects,
+  PRRBeneficiaryValueByEntityRole,
+} from "@/service/types/datastories/prr/prr";
 import { BenProjSheet } from "../../BeneficiaryAndProject/Sheet";
 import { TechnicalSheetModalData } from "@/service/types/modal/technical-sheet";
 
@@ -82,9 +87,7 @@ export default function DistributionValuesChart({
   labels,
   sourceInfo,
 }: DistributionValuesChartProps) {
-  const valuesByRole = (valuesByEntityRole ?? []).reduce<
-    Record<DisplayRole, RoleValues>
-  >(
+  const valuesByRole = (valuesByEntityRole ?? []).reduce<Record<DisplayRole, RoleValues>>(
     (acc, item) => {
       const role = normalizeRole(item.entityRole);
       if (!role || role === "partner") return acc;
@@ -125,25 +128,25 @@ export default function DistributionValuesChart({
         executedValue: 0,
         percentageExecutedValue: 0,
       },
-    },
+    }
   );
 
-  const roleRows: RoleRow[] = ([
-    {
-      role: "intermediate",
-      group: relatedProjects.intermediaryBeneficiaryProjects,
-    },
-    {
-      role: "beneficiary",
-      group: relatedProjects.beneficiaryProjects,
-    },
-    {
-      role: "supplier",
-      group: relatedProjects.supplierProjects,
-    },
-  ] as RoleRow[]).filter(
-    ({ role }) => Number(valuesByRole[role].approvedValue ?? 0) > 0,
-  );
+  const roleRows: RoleRow[] = (
+    [
+      {
+        role: "intermediate",
+        group: relatedProjects.intermediaryBeneficiaryProjects,
+      },
+      {
+        role: "beneficiary",
+        group: relatedProjects.beneficiaryProjects,
+      },
+      {
+        role: "supplier",
+        group: relatedProjects.supplierProjects,
+      },
+    ] as RoleRow[]
+  ).filter(({ role }) => Number(valuesByRole[role].approvedValue ?? 0) > 0);
 
   const renderDistributionBlock = (roleData: {
     role: DisplayRole;
@@ -167,25 +170,25 @@ export default function DistributionValuesChart({
     const hasMoreSuppliers = totalSuppliers > visibleSuppliers.length;
 
     return (
-      <div className="col-span-12 md:col-span-9 flex flex-col gap-64 pb-64">
-        <div className="grid grid-cols-9 gap-16 items-center">
+      <div className="col-span-12 flex flex-col gap-64 pb-64 md:col-span-9">
+        <div className="grid grid-cols-9 items-center gap-16">
           <div className="col-span-9 md:col-span-5">
             <BenProjSheet.CardIcon
               icon={{
                 name: iconName,
-                color: "#007CF8",
-                backgroundColor: "bg-fundo-europeu-50",
+                color: "#034AD8",
+                backgroundColor: "bg-primary-100",
               }}
               title={title}
               description={description}
-              className="bg-white max-w-[488px] w-full"
+              className="w-full max-w-[488px] bg-white"
             >
               <BenProjSheet.BigValue
                 value={formatValuesWithSuffix(approvedValueByRole)}
                 label={labels.financedValue}
               />
               {roleData.role !== "supplier" && (
-                <div className="w-full flex flex-col md:flex-row gap-32">
+                <div className="flex w-full flex-col gap-32 md:flex-row">
                   <BenProjSheet.MediumValue
                     value={formatValuesWithSuffix(paidValueByRole)}
                     label={labels.receivedValue}
@@ -194,7 +197,7 @@ export default function DistributionValuesChart({
               )}
             </BenProjSheet.CardIcon>
           </div>
-          <div className="col-span-9 md:col-span-1 border-dashed border-neutral-500 border-r mr-1/2 md:mr-0 md:border-t h-64 md:h-0" />
+          <div className="col-span-9 mr-1/2 h-64 border-r border-dashed border-neutral-500 md:col-span-1 md:mr-0 md:h-0 md:border-t" />
           <div className="col-span-9 md:col-span-3">
             <BenProjSheet.CardGraph
               description={graphDescription}
@@ -228,7 +231,7 @@ export default function DistributionValuesChart({
             />
 
             {hasMoreSuppliers && (
-              <div className="w-full flex justify-center">
+              <div className="flex w-full justify-center">
                 <LinkIcon
                   title={labels.seeMoreSuppliers}
                   href="#"
@@ -245,40 +248,36 @@ export default function DistributionValuesChart({
     );
   };
 
-  const renderDistributionRow = (
-    roleData: RoleRow,
-    rowIndex: number,
-    totalRows: number,
-  ) => {
+  const renderDistributionRow = (roleData: RoleRow, rowIndex: number, totalRows: number) => {
     const hasNextRow = rowIndex < totalRows - 1;
     const connectorTop = "top-[60px]";
 
     return (
       <div key={`distribution-${roleData.role}`} className="contents">
-        <div className="col-span-12 md:col-span-3 relative">
+        <div className="relative col-span-12 md:col-span-3">
           <div
-            className={`hidden md:block absolute left-1/2 top-0 border-l border-dashed border-neutral-500 ${
+            className={`absolute top-0 left-1/2 hidden border-l border-dashed border-neutral-500 md:block ${
               hasNextRow ? "bottom-0" : "h-[60px]"
             }`}
           />
           <div
-            className={`hidden md:block absolute left-1/2 ${connectorTop} w-[calc(50%+32px)] border-t border-dashed border-neutral-500`}
+            className={`absolute left-1/2 hidden md:block ${connectorTop} w-[calc(50%+32px)] border-t border-dashed border-neutral-500`}
           />
           <RoundedIcon
-            className={`hidden md:flex roundedIcon z-10 absolute left-1/2 ${connectorTop} -translate-x-1/2 -translate-y-1/2`}
+            className={`roundedIcon absolute left-1/2 z-10 hidden md:flex ${connectorTop} -translate-x-1/2 -translate-y-1/2`}
             icon={{
               name: "agora-line-arrow-right-anchor",
               color: "white",
-              backgroundColor: "fundo-europeu-500",
+              backgroundColor: "primary-600",
             }}
           />
-          <div className="md:hidden h-64 ml-1/2 border-l border-dashed border-neutral-500 relative">
+          <div className="relative ml-1/2 h-64 border-l border-dashed border-neutral-500 md:hidden">
             <RoundedIcon
-              className="roundedIcon z-10 absolute left-0 bottom-1/2 -translate-x-1/2 translate-y-1/2"
+              className="roundedIcon absolute bottom-1/2 left-0 z-10 -translate-x-1/2 translate-y-1/2"
               icon={{
                 name: "agora-line-arrow-down-anchor",
                 color: "white",
-                backgroundColor: "fundo-europeu-500",
+                backgroundColor: "primary-600",
               }}
             />
           </div>
@@ -290,21 +289,21 @@ export default function DistributionValuesChart({
 
   return (
     <InfoBlock.Root>
-      <InfoBlock.Content className="grid grid-cols-12! gap-y-0 gap-x-32">
+      <InfoBlock.Content className="grid grid-cols-12! gap-x-32 gap-y-0">
         <div className="col-span-12 md:col-span-3">
-            <BenProjSheet.CardLined
-              title={formatValuesWithSuffix(approvedValue)}
-              description={labels.financedValue}
-              className="w-sm"
-            />
+          <BenProjSheet.CardLined
+            title={formatValuesWithSuffix(approvedValue)}
+            description={labels.financedValue}
+            className="w-sm"
+          />
         </div>
         <div className="col-span-12 md:col-span-9" />
 
         <div className="contents">
           <div className="col-span-12 md:col-span-3">
-            <div className="hidden md:block h-64 ml-1/2 border-l border-dashed border-neutral-500" />
+            <div className="ml-1/2 hidden h-64 border-l border-dashed border-neutral-500 md:block" />
           </div>
-          <div className="hidden md:block col-span-12 md:col-span-9 h-64" />
+          <div className="col-span-12 hidden h-64 md:col-span-9 md:block" />
         </div>
 
         {roleRows.map((roleData, index) => (
@@ -313,16 +312,16 @@ export default function DistributionValuesChart({
             {index < roleRows.length - 1 && (
               <div className="contents">
                 <div className="col-span-12 md:col-span-3">
-                  <div className="hidden md:block h-64 ml-1/2 border-l border-dashed border-neutral-500" />
+                  <div className="ml-1/2 hidden h-64 border-l border-dashed border-neutral-500 md:block" />
                 </div>
-                <div className="hidden md:block col-span-12 md:col-span-9 h-64" />
+                <div className="col-span-12 hidden h-64 md:col-span-9 md:block" />
               </div>
             )}
           </Fragment>
         ))}
 
         {sourceInfo && (sourceInfo.dataSource || sourceInfo.update) && (
-          <div className="pt-32 pb-64 col-span-12">
+          <div className="col-span-12 pt-32 pb-64">
             <SourceInfoFooter
               dataSource={sourceInfo.dataSource}
               update={sourceInfo.update}

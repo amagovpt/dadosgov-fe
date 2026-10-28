@@ -31,13 +31,13 @@ export default function BeneficiarySheetContent({
 }: BeneficiarySheetContentProps) {
   return (
     <BenProjSheet.Root>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-32">
+      <div className="grid w-full grid-cols-1 gap-x-32 xl:grid-cols-2">
         <BenProjSheet.Item
           title={labels.name}
           value={beneficiaryData.name}
           className="border-t-2 border-t-neutral-200"
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-32 border-t-2 border-t-neutral-200">
+        <div className="grid grid-cols-1 gap-x-32 border-t-2 border-t-neutral-200 md:grid-cols-2">
           <BenProjSheet.Item
             title={labels.financedValue}
             value={formatValuesWithSuffix(beneficiaryData.budget)}
@@ -52,9 +52,9 @@ export default function BeneficiarySheetContent({
         <BenProjSheet.Item
           title={labels.taxId}
           value={formatByThree(beneficiaryData.nif)}
-          className="border-t-2 border-t-neutral-200 border-b-2 border-b-neutral-200"
+          className="border-t-2 border-b-2 border-t-neutral-200 border-b-neutral-200"
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-32 border-t-2 border-t-neutral-200 border-b-2 border-b-neutral-200">
+        <div className="grid grid-cols-1 gap-x-32 border-t-2 border-b-2 border-t-neutral-200 border-b-neutral-200 md:grid-cols-2">
           <BenProjSheet.Item
             title={labels.economicActivity}
             value={beneficiaryData.economicActivity ?? ""}

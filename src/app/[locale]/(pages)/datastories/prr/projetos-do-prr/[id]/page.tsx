@@ -313,6 +313,8 @@ export default async function ProjectPage({
     pageDataResult.data.findFichaDeProjetoPrrSingleton.data as Record<string, unknown>
   ) as Project;
 
+  console.log("hero", hero);
+
   const viewData = mapProjectSheetToViewData(projectSheetData, beneficiaryFinancingData, locale);
 
   const valorTotalProjeto = formatCurrency(viewData.valorTotalProjeto, t);
