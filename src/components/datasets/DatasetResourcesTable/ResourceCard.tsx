@@ -6,7 +6,6 @@ import { Resource } from "@/service/types/dataset";
 import { formatDateLong } from "@/utils/formatDate";
 import { downloadUrl, formatBytes } from "./utils";
 import Button from "@/components/Primitives/Button";
-import Link from "next/link";
 import { ModalConfiguration, useModalContext } from "@ama-pt/agora-design-system";
 import { ResourceExpandedContent } from "./ResourceExpandedContent";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
@@ -99,7 +98,24 @@ export const ResourceCard: FC<{
             {tds("resources.details")}
           </Button>
 
-          <Link href={downloadUrl(resource)} target="_blank" className="text-neutral-600!">
+          {/*
+            A plain anchor, deliberately not `next/link`: the href is the backend's
+            download permalink, not a route. The router prefetches a `<Link>` on sight,
+            which made the backend fetch the file from its origin with nobody asking —
+            answering 502 when that origin is slow, or the OGC 302 the browser then
+            blocks on `connect-src`. Either way the global API error policy raised a
+            toast on a page where nothing was wrong (LEDG-2675).
+
+            No `download` attribute: the backend already sends Content-Disposition
+            with the filename `_ensure_extension` built (LEDG-1765), and a client-side
+            `download` would override it.
+          */}
+          <a
+            href={downloadUrl(resource)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-600!"
+          >
             <Button
               appearance="link"
               hasIcon
@@ -109,7 +125,7 @@ export const ResourceCard: FC<{
             >
               {tds("resources.download")}
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
     </div>
