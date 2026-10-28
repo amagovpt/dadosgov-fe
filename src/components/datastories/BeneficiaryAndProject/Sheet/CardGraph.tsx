@@ -23,12 +23,12 @@ export default function CardGraph({
     <div className={twMerge("w-full h-auto flex flex-col gap-32", className)}>
       {formatHtmlParagraphs(
         description,
-        twMerge("text-m-regular text-primary-900", classNameDescription),
+        twMerge("text-m-regular text-neutral-900", classNameDescription),
       )}
 
       <div className="flex flex-row gap-16">
         <DonutCard
-          textColor={"primary-900"}
+          textColor={"text-neutral-900"}
           percentual={graphValue}
           color={"#034AD8"}
           secondaryColor={"#FFFFFF"}

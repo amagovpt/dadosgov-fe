@@ -208,42 +208,40 @@ export default function DistributionValuesChart({
           </div>
         </div>
 
-        {roleData.role === "supplier" && supplierItems.length > 0 && (
-          <div className="flex flex-col gap-24">
-            <BenProjSheet.AreaValuelist
-              areaTitle={labels.suppliersValues}
-              items={[
-                {
-                  area: labels.totalFunded,
-                  value: approvedValueByRole,
-                },
-              ]}
-            />
+        <div className="flex flex-col gap-24">
+          <BenProjSheet.AreaValuelist
+            areaTitle={labels.suppliersValues}
+            items={[
+              {
+                area: labels.totalFunded,
+                value: approvedValueByRole,
+              },
+            ]}
+          />
 
-            <BenProjSheet.AreaValuelist
-              areaTitle={labels.suppliersInDetail}
-              areaSubtitle={`${totalSuppliers} ${labels.suppliers}`}
-              header={{
-                area: labels.suppliers,
-                value: labels.fundedValue,
-              }}
-              items={visibleSuppliers}
-            />
+          <BenProjSheet.AreaValuelist
+            areaTitle={labels.suppliersInDetail}
+            areaSubtitle={`${totalSuppliers} ${labels.suppliers}`}
+            header={{
+              area: labels.suppliers,
+              value: labels.fundedValue,
+            }}
+            items={visibleSuppliers}
+          />
 
-            {hasMoreSuppliers && (
-              <div className="flex w-full justify-center">
-                <LinkIcon
-                  title={labels.seeMoreSuppliers}
-                  href="#"
-                  icon={{
-                    name: "agora-line-plus-circle",
-                    hoverName: "agora-solid-plus-circle",
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        )}
+          {hasMoreSuppliers && (
+            <div className="flex w-full justify-center">
+              <LinkIcon
+                title={labels.seeMoreSuppliers}
+                href="#"
+                icon={{
+                  name: "agora-line-plus-circle",
+                  hoverName: "agora-solid-plus-circle",
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     );
   };

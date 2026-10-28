@@ -32,12 +32,8 @@ export default function BeneficiarySheetContent({
   return (
     <BenProjSheet.Root>
       <div className="grid w-full grid-cols-1 gap-x-32 xl:grid-cols-2">
-        <BenProjSheet.Item
-          title={labels.name}
-          value={beneficiaryData.name}
-          className="border-t-2 border-t-neutral-200"
-        />
-        <div className="grid grid-cols-1 gap-x-32 border-t-2 border-t-neutral-200 md:grid-cols-2">
+        <BenProjSheet.Item title={labels.name} value={beneficiaryData.name} />
+        <div className="grid grid-cols-1 gap-x-32 md:grid-cols-2">
           <BenProjSheet.Item
             title={labels.financedValue}
             value={formatValuesWithSuffix(beneficiaryData.budget)}

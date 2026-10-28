@@ -22,7 +22,7 @@ function ListHeader({ header }: IListHeader) {
     <li>
       <div className="w-full flex flex-row gap-32 pb-8 px-16">
         <div className="grow text-s-bold text-neutral-900">{header.area}</div>
-        <div className="text-s-bold text-primary-900">{header.value}</div>
+        <div className="text-s-bold text-neutral-900">{header.value}</div>
       </div>
     </li>
   );
@@ -103,12 +103,12 @@ export default function AreaValuelist({
       {hasAreaInfo && (
         <div className="flex flex-col gap-8">
           {areaTitle && (
-            <Typograph tag="p" className="text-l-bold text-primary-900">
+            <Typograph tag="p" className="text-l-bold text-neutral-900">
               {areaTitle}
             </Typograph>
           )}
           {areaSubtitle && (
-            <Typograph tag="p" className="text-s-regular text-primary-900">
+            <Typograph tag="p" className="text-s-regular text-neutral-900">
               {areaSubtitle}
             </Typograph>
           )}
