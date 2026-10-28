@@ -1,12 +1,15 @@
 {
   "title": "Discussões",
+  "description": "Gerir as discussões da comunidade, acompanhando os tópicos criados pelos utilizadores, o seu estado e a atividade associada.",
   "tabs": {
+    "label": "Âmbito das discussões",
     "content": "Conteúdos",
     "organization": "Organização"
   },
   "popup": {
     "title": "Discussão"
   },
+  "resultsTitle": "Lista de discussões",
   "columns": {
     "title": "Título",
     "author": "Autor",
@@ -14,7 +17,9 @@
     "date": "Data",
     "messages": "Mensagens",
     "createdAt": "Criado em",
-    "closedAt": "Fechado em"
+    "closedAt": "Fechado em",
+    "createdDate": "Data de criação",
+    "closedDate": "Data de conclusão"
   },
   "status": {
     "open": "ABERTA",
@@ -23,12 +28,20 @@
   "filters": {
     "all": "Todas",
     "search": {
+      "toolbarLabel": "Pesquisar",
       "label": "Pesquisar discussões",
       "placeholder": "Pesquisar por título ou conteúdo da discussão"
     },
     "status": {
-      "placeholder": "Filtrar por estado"
-    }
+      "label": "Estado",
+      "placeholder": "Selecione o estado da discussão",
+      "open": "Ativa",
+      "closed": "Fechada"
+    },
+    "applied": "Filtros aplicados ({{count}})",
+    "clear": "Limpar filtros aplicados",
+    "removeSearch": "Remover filtro de pesquisa: {{query}}",
+    "removeStatus": "Remover filtro de estado: {{status}}"
   },
   "empty": {
     "descriptionOrganization": "Ainda não existem discussões sobre esta organização."

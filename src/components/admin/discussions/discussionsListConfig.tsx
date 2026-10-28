@@ -33,7 +33,7 @@ export interface DiscussionColumnLabels {
 }
 
 export function createDiscussionColumns(
-  labels: DiscussionColumnLabels,
+  labels: DiscussionColumnLabels
 ): AdminListColumn<Discussion, DiscussionListSortField>[] {
   return [
     {
@@ -101,7 +101,7 @@ export function createOrgDiscussionColumns({
       sortType: "string",
       renderCell: (discussion) => (
         <button
-          className="text-left text-primary-600 underline"
+          className="text-left [overflow-wrap:anywhere] text-primary-600 underline"
           onClick={(event) => {
             event.stopPropagation();
             onOpenDiscussion(discussion);
@@ -111,6 +111,19 @@ export function createOrgDiscussionColumns({
         </button>
       ),
       exportValue: (discussion) => discussion.title,
+    },
+    {
+      id: "status",
+      header: labels.status,
+      renderCell: (discussion) => (
+        <StatusDot
+          variant={discussion.closed ? "neutral" : "success"}
+          dotClassName={discussion.closed ? "size-8 bg-neutral-400!" : "size-8"}
+        >
+          {discussion.closed ? labels.closed : labels.open}
+        </StatusDot>
+      ),
+      exportValue: (discussion) => (discussion.closed ? labels.closed : labels.open),
     },
     {
       id: "created",
@@ -125,7 +138,7 @@ export function createOrgDiscussionColumns({
       header: labels.closedAt,
       sortField: "closed",
       sortType: "date",
-      renderCell: (discussion) => (discussion.closed ? formatDate(discussion.closed) : "-"),
+      renderCell: (discussion) => (discussion.closed ? formatDate(discussion.closed) : "N/A"),
       exportValue: (discussion) => (discussion.closed ? formatDate(discussion.closed) : ""),
     },
   ];

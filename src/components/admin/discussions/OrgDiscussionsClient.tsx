@@ -1,11 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
-import { usePopupContext } from "@ama-pt/agora-design-system";
+import { Toggle, ToggleGroup, usePopupContext } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
-import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import DiscussionsFilters from "./DiscussionsFilters";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
@@ -20,14 +18,7 @@ import {
   type DiscussionSortField,
 } from "./discussionsListConfig";
 import type { BoDiscussionsPage } from "@/service/types/admin/discussions";
-
-const formatDate = (dateStr: string) => {
-  try {
-    return format(new Date(dateStr), "d 'de' MMMM 'de' yyyy HH:mm", { locale: pt });
-  } catch {
-    return dateStr;
-  }
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 interface OrgDiscussionsClientProps {
   orgId: string;
@@ -41,6 +32,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
   const {
     currentPage,
     setCurrentPage,
@@ -122,17 +114,17 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     () =>
       createOrgDiscussionColumns({
         onOpenDiscussion: openDiscussion,
-        formatDate,
+        formatDate: formatDateToDMY,
         labels: {
           title: t("admin-discussions:columns.title"),
           author: t("admin-discussions:columns.author"),
           status: t("admin-discussions:columns.status"),
           date: t("admin-discussions:columns.date"),
           messages: t("admin-discussions:columns.messages"),
-          createdAt: t("admin-discussions:columns.createdAt"),
-          closedAt: t("admin-discussions:columns.closedAt"),
-          open: t("admin-discussions:status.open"),
-          closed: t("admin-discussions:status.closed"),
+          createdAt: t("admin-discussions:columns.createdDate"),
+          closedAt: t("admin-discussions:columns.closedDate"),
+          open: t("admin-discussions:filters.status.open"),
+          closed: t("admin-discussions:filters.status.closed"),
         },
       }),
     [openDiscussion, t]
@@ -170,46 +162,71 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     <AdminListPage
       breadcrumbItems={[{ label: t("admin-discussions:title") }]}
       title={pageTitle}
-      tabs={{
-        labels: [t("admin-discussions:tabs.organization"), t("admin-discussions:tabs.content")],
-        activeTab: filters.scope === "organization" ? 0 : 1,
-        onTabActivation: (index) => {
-          if (index < 0) return;
-          const scope = index === 0 ? "organization" : "content";
-          if (scope === filters.scope) return;
-          // Replace any pending search so it cannot carry over to the next tab.
-          handleSearch("");
-          setSearchQuery("");
-          setIsLoading(true);
-          setDiscussions([]);
-          setTotalItems(0);
-          updateFilter("scope", scope);
-        },
-      }}
+      description={pageContent.orgHero?.description?.trim() || t("admin-discussions:description")}
+      headerAction={null}
+      introClassName="mb-32"
+      breadcrumbClassName="xl:[&_li]:min-h-[44px] xl:[&_li]:items-center xl:[&_li:first-child]:border-b-2 xl:[&_li:first-child]:border-neutral-900"
+      headerInfoClassName="max-w-[592px] gap-16"
+      descriptionClassName="text-m-regular text-brand-blue-secondary"
+      resultsTitle={<span className="text-neutral-900">{t("admin-discussions:resultsTitle")}</span>}
+      tableClassName="xl:table-fixed"
+      beforeList={
+        <ToggleGroup
+          id="discussion-scope"
+          className="[&_.agora-toggle]:h-[60px] [&_.agora-toggle]:py-[14px]"
+          aria-label={t("admin-discussions:tabs.label")}
+          variant="primary"
+          appearance="button"
+          orientation="horizontal"
+          fullWidth
+          multiple={false}
+          value={filters.scope}
+          onChange={(values) => {
+            const scope = values[0];
+            if (!scope || scope === filters.scope) return;
+            // Replace any pending search so it cannot carry over to the next scope.
+            handleSearch("");
+            setSearchQuery("");
+            setSearchInput("");
+            setIsLoading(true);
+            setDiscussions([]);
+            setTotalItems(0);
+            updateFilter("scope", scope);
+          }}
+        >
+          <Toggle value="organization">{t("admin-discussions:tabs.organization")}</Toggle>
+          <Toggle value="content">{t("admin-discussions:tabs.content")}</Toggle>
+        </ToggleGroup>
+      }
       isLoading={isLoading}
       count={totalItems}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
-      search={{
-        defaultValue: searchQuery,
-        label: t("admin-discussions:filters.search.label"),
-        placeholder: t("admin-discussions:filters.search.placeholder"),
-        ariaLabel: t("admin-discussions:filters.search.label"),
-        onChange: handleSearch,
-      }}
-      filters={
-        <StatusFilterSelect
-          id="discussion-filter-status"
-          value={filters.closedFilter}
-          onChange={(value) => updateFilter("closedFilter", value)}
-          placeholder={t("admin-discussions:filters.status.placeholder")}
-          options={[
-            { value: "", label: t("admin-discussions:filters.all") },
-            { value: "open", label: t("admin-discussions:status.open") },
-            { value: "closed", label: t("admin-discussions:status.closed") },
-          ]}
+      hasActiveFilters={Boolean(searchInput.trim() || searchQuery.trim() || filters.closedFilter)}
+      toolbar={
+        <DiscussionsFilters
+          searchValue={searchInput}
+          appliedSearch={searchQuery}
+          status={filters.closedFilter}
+          onSearchChange={(value) => {
+            setSearchInput(value);
+            handleSearch(value);
+          }}
+          onClearSearch={() => {
+            handleSearch("");
+            setSearchQuery("");
+            setSearchInput("");
+            setCurrentPage(1);
+          }}
+          onStatusChange={(value) => updateFilter("closedFilter", value)}
+          onClear={() => {
+            handleSearch("");
+            setSearchQuery("");
+            setSearchInput("");
+            updateFilter("closedFilter", "");
+          }}
         />
       }
       emptyState={
