@@ -92,6 +92,7 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     (discussion: Discussion) => {
       show(
         <DiscussionDetailPopup
+          key={discussion.id}
           discussion={discussion}
           onUpdated={(updated) =>
             setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))

@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useDiscussionTab } from '@/hooks/useDiscussionDeepLink';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { Tabs, Tab, TabHeader, CardNoResults, Icon, StatusCard, Button } from '@ama-pt/agora-design-system';
@@ -25,8 +25,7 @@ interface DatasetTabsProps {
 
 export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     const { t: tds } = useTranslation('datasets');
-    const searchParams = useSearchParams();
-    const tabParam = searchParams.get('tab');
+    const { isDiscussionTab, tabsKey } = useDiscussionTab();
     const [reuses, setReuses] = useState<Reuse[]>([]);
     const [reuseCount, setReuseCount] = useState(dataset.metrics.reuses || 0);
     const [dataservices, setDataservices] = useState<Dataservice[]>([]);
@@ -57,7 +56,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     }, [dataset.id]);
     return (
         <div className="w-full">
-            <Tabs>
+            <Tabs key={tabsKey}>
                 <Tab>
                     <TabHeader>{tds('tabs.files', { count: dataset.resources.length })}</TabHeader>
                     <TabBodyWrapper>
@@ -120,7 +119,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                         </div>
                     </TabBodyWrapper>
                 </Tab>
-                <Tab active={tabParam === 'discussions' || undefined}>
+                <Tab active={isDiscussionTab || undefined}>
                     <TabHeader>
                         {tds('tabs.discussions', { count: discussionCount })}
                     </TabHeader>

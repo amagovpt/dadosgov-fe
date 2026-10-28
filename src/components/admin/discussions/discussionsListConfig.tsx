@@ -1,4 +1,5 @@
 import { Icon } from "@ama-pt/agora-design-system";
+import { getDiscussionHref } from "@/utils/discussionLinks";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import StatusDot from "@/components/admin/StatusDot";
 import type { Discussion } from "@/service/types/discussion";
@@ -111,6 +112,7 @@ export function createOrgDiscussionColumns({
         </button>
       ),
       exportValue: (discussion) => discussion.title,
+      exportUrl: (discussion) => getDiscussionHref(discussion) ?? undefined,
     },
     {
       id: "status",

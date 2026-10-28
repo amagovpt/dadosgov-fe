@@ -16,6 +16,21 @@ interface DiscussionFilters {
   sort?: string;
 }
 
+export async function fetchDiscussion(id: string): Promise<Discussion | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/discussions/${encodeURIComponent(id)}/`, {
+      cache: "no-store",
+    });
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error(`Failed to fetch discussion: ${response.statusText}`);
+    return await response.json();
+  } catch (error) {
+    rethrowControlFlow(error);
+    console.error("Error fetching discussion:", error);
+    return null;
+  }
+}
+
 export async function fetchOrgDiscussions(
   orgId: string,
   page: number = 1,
