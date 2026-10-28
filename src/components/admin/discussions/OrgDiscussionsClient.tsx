@@ -185,10 +185,6 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           onChange={(values) => {
             const scope = values[0];
             if (!scope || scope === filters.scope) return;
-            // Replace any pending search so it cannot carry over to the next scope.
-            handleSearch("");
-            setSearchQuery("");
-            setSearchInput("");
             setIsLoading(true);
             setDiscussions([]);
             setTotalItems(0);
