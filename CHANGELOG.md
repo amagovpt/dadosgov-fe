@@ -6,6 +6,17 @@ Entries are newest first. Work sits under `## Unreleased` until it is promoted t
 
 ## Unreleased
 
+- **fix(datasets): stop prefetching the resource download permalink**
+  - The download button was a `next/link` pointing at the backend's download permalink
+    (`/api/1/datasets/r/<id>/`). The router prefetches a `<Link>` on sight, so merely opening a
+    dataset's file details made the backend fetch that file from its origin with nobody asking.
+  - When the origin was slow the backend answered 502; when the resource was a WMS/WFS service
+    the backend's 302 to the producer was blocked by the page's `connect-src`. Either way the
+    global API error policy raised "Serviço indisponível" or "Sem ligação" on a page where
+    nothing was wrong — reported for months and blamed on the database and on releases.
+  - A download is not a router navigation, so it is a plain anchor now. Deliberately without a
+    `download` attribute: the backend already sends `Content-Disposition` with the filename it
+    builds server-side, and a client-side one would override it.
 - **feat(admin): add a read-only page for the state of the database migrations**
   - PPR came back from a production dump with 34 migrations claiming to be applied and none of
     them run, and nothing could see it until the backend refused to start. `/admin/system/migrations`
