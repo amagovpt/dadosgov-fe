@@ -14,6 +14,8 @@ export type TableColumn = {
   align?: TableAlign;
   /** Renders the column values in `primary-900`, like the value column of AreaValueList. */
   highlight?: boolean;
+  /** Any CSS width ("30%", "200px", "12rem", ...); a number is read as px. Unset columns share the rest. */
+  width?: string | number;
   className?: string;
 };
 
@@ -122,6 +124,13 @@ export default function Table({
     <div className="flex w-full flex-col gap-32">
       <div className={twMerge("w-full overflow-x-auto", className)}>
         <table className="w-full border-collapse">
+          {columns.some((column) => column.width !== undefined) && (
+            <colgroup>
+              {columns.map((column, index) => (
+                <col key={`table-col-${id}-${index}`} style={{ width: column.width }} />
+              ))}
+            </colgroup>
+          )}
           {header && <TableHeader columns={columns} />}
           <tbody>
             {visibleRows.map((row, index) => (

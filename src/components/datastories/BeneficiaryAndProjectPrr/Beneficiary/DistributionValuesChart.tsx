@@ -231,8 +231,8 @@ export default function DistributionValuesChart({
             <BenProjSheet.Table
               header={[
                 { label: labels.suppliers },
-                { label: labels.fundedValue, align: "right", highlight: true },
-                { label: labels.receivedValue, align: "right", highlight: true },
+                { label: labels.fundedValue, align: "right", highlight: true, width: "20%" },
+                { label: labels.receivedValue, align: "right", highlight: true, width: "20%" },
               ]}
               data={supplierRows}
               loadByParts={5}
