@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Reply } from "lucide-react";
 import { useSearchParams, useRouter, useParams, usePathname } from "next/navigation";
 import {
   Button,
@@ -501,17 +502,18 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
             variant="primary"
             hasIcon
             appearance={dataset.private ? "solid" : "outline"}
-            leadingIcon={
-              dataset.private ? "agora-line-document" : "/Icons/move-to-draft.svg"
-            }
-            leadingIconHover={
-              dataset.private ? "agora-solid-document" : "/Icons/move-to-draft.svg"
-            }
+            leadingIcon={dataset.private ? "agora-line-document" : undefined}
+            leadingIconHover={dataset.private ? "agora-solid-document" : undefined}
             disabled={isSubmitting || publicationBlocked}
             aria-describedby={publicationBlocked ? "dataset-publication-requirements" : undefined}
             onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
           >
-            {t(dataset.private ? "review.publishAction" : "resourceEditing.moveToDraft")}
+            <span className="flex items-center gap-8">
+              {!dataset.private && (
+                <Reply className="fill-none!" aria-hidden />
+              )}
+              {t(dataset.private ? "review.publishAction" : "resourceEditing.moveToDraft")}
+            </span>
           </Button>
         ) : null
       }
