@@ -16,7 +16,7 @@ import {
  * what they do about a failure — throw the render away versus raise a toast —
  * so that is the single thing they pass in. Everything else (which URLs count,
  * how a transport failure is told apart from a status, what a cancelled request
- * means) lives here, once.
+ * or a router prefetch means) lives here, once.
  *
  * What it deliberately does NOT do: read the response body. Only
  * `response.status` is inspected, so streaming responses and the chunked upload
@@ -46,7 +46,8 @@ export function installFetchErrorInterceptor({
     let watched = false;
     try {
       url = urlOf(input);
-      watched = !skipsGlobalErrorHandling(init) && isWatchedApiUrl(url);
+      watched =
+        !skipsGlobalErrorHandling(init) && !isRouterPrefetch(init) && isWatchedApiUrl(url);
     } catch {
       // Classification must never be the reason a request does not go out.
       watched = false;
@@ -75,4 +76,8 @@ export function installFetchErrorInterceptor({
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+function isRouterPrefetch(init?: RequestInit): boolean {
+  return new Headers(init?.headers).has("next-router-prefetch");
 }

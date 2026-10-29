@@ -73,6 +73,30 @@ describe("installFetchErrorInterceptor", () => {
     expect(onFailure).not.toHaveBeenCalled();
   });
 
+  // A visible <Link> to /api/1/datasets/r/<id>/ is prefetched on page open; the
+  // backend answers the RSC request with 502 and nobody asked for it.
+  it("ignores a failed router prefetch", async () => {
+    const onFailure = vi.fn();
+    const scope = makeScope(failing(502));
+    installFetchErrorInterceptor({ scope, onFailure });
+
+    await scope.fetch("/api/1/datasets/r/abc/?_rsc=x", {
+      headers: { rsc: "1", "next-router-prefetch": "1" },
+    });
+
+    expect(onFailure).not.toHaveBeenCalled();
+  });
+
+  it("still reports a failed router navigation", async () => {
+    const onFailure = vi.fn();
+    const scope = makeScope(failing(502));
+    installFetchErrorInterceptor({ scope, onFailure });
+
+    await scope.fetch("/api/1/datasets/r/abc/?_rsc=x", { headers: { rsc: "1" } });
+
+    expect(onFailure).toHaveBeenCalledWith(502, "/api/1/datasets/r/abc/?_rsc=x");
+  });
+
   it("reports a transport failure as NETWORK_FAILURE and still throws", async () => {
     const onFailure = vi.fn();
     const boom = new TypeError("fetch failed");
