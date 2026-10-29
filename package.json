@@ -1,6 +1,6 @@
 {
   "name": "dados-gov",
-  "version": "1.4.14",
+  "version": "1.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=reports/junit.xml",
+    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=junit.xml",
     "test:watch": "vitest",
     "test:e2e": "playwright test --project=frontend-public --reporter=html",
     "test:e2e:backoffice": "playwright test --project=backoffice --reporter=html",
