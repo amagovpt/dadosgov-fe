@@ -91,10 +91,8 @@ describe("notification-helpers", () => {
   });
 
   describe("harvesterValidationLink", () => {
-    it("builds admin link from source.slug", () => {
-      expect(harvesterValidationLink(harvesterDetails)).toBe(
-        "/admin/system/harvesters/test-source"
-      );
+    it("builds the admin detail link from source.id", () => {
+      expect(harvesterValidationLink(harvesterDetails)).toBe("/admin/harvesters/abc");
     });
 
     it("returns null when source is missing", () => {
@@ -103,9 +101,9 @@ describe("notification-helpers", () => {
       );
     });
 
-    it("returns null when slug is empty", () => {
+    it("returns null when id is empty", () => {
       const details = {
-        source: { id: "abc", name: "Test", slug: "" },
+        source: { id: "", name: "Test", slug: "test-source" },
         status: "pending" as const,
       };
       expect(harvesterValidationLink(details)).toBe(null);
