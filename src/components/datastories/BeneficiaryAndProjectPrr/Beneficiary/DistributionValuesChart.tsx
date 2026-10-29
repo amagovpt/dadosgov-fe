@@ -32,6 +32,9 @@ type DistributionValuesChartProps = {
     suppliersInDetail: string;
     suppliers: string;
     fundedValue: string;
+    paidValue: string;
+    beneficiary: string;
+    supplier: string;
     seeMoreSuppliers: string;
   };
   sourceInfo?: {
@@ -148,6 +151,14 @@ export default function DistributionValuesChart({
     ] as RoleRow[]
   ).filter(({ role }) => Number(valuesByRole[role].approvedValue ?? 0) > 0);
 
+  // The table lists the entities one level below the role: an intermediate funds beneficiaries,
+  // a beneficiary pays suppliers, and the supplier block lists the suppliers themselves.
+  const nameColumnLabel: Record<DisplayRole, string> = {
+    intermediate: labels.beneficiary,
+    beneficiary: labels.supplier,
+    supplier: labels.supplier,
+  };
+
   const renderDistributionBlock = (roleData: {
     role: DisplayRole;
     group: PRRBeneficiaryProjectGroup;
@@ -230,9 +241,9 @@ export default function DistributionValuesChart({
 
             <BenProjSheet.Table
               header={[
-                { label: labels.suppliers },
+                { label: nameColumnLabel[roleData.role] },
                 { label: labels.fundedValue, align: "right", highlight: true, width: "20%" },
-                { label: labels.receivedValue, align: "right", highlight: true, width: "20%" },
+                { label: labels.paidValue, align: "right", highlight: true, width: "20%" },
               ]}
               data={supplierRows}
               loadByParts={5}

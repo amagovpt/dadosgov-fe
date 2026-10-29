@@ -163,7 +163,10 @@ export default async function BeneficiaryPage({
     totalFunded: t("sheetBenProj.fields.total_financiado"),
     suppliersInDetail: t("sheetBenProj.suppliersInDetail"),
     suppliers: suppliersLabel,
-    fundedValue: t("sheetBenProj.fields.valor_financiamento"),
+    fundedValue: t("financingValue"),
+    paidValue: t("paidValue"),
+    beneficiary: t("searchBenProj.roles.beneficiary"),
+    supplier: t("searchBenProj.roles.supplier"),
     seeMoreSuppliers: t("seeMore", { about: suppliersLabel.toLowerCase() }),
   };
 
