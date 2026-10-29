@@ -17,9 +17,10 @@ import { getCmsBaseUrl } from "./cmsBaseUrl";
 // CMS fails fast and the stale-while-revalidate cache below (or the caller's
 // fallback) takes over. Browser requests keep the default behaviour —
 // AbortSignal.any/timeout support is uneven there and the user can navigate
-// away.
+// away. 10s leaves room for the unfiltered European-funds searches (PRR
+// projects totals take ~4-5s uncached), which kept tripping a 5s deadline.
 const timeoutMs = Number(process.env.CMS_FETCH_TIMEOUT_MS);
-const CMS_TIMEOUT_MS = Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 5000;
+const CMS_TIMEOUT_MS = Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 10000;
 
 const link = new HttpLink({
   uri: `${getCmsBaseUrl()}/graphql`,
@@ -56,18 +57,22 @@ interface CachedResult {
   result: unknown;
 }
 
+type QueryFn = ApolloClient["query"];
+
 class SwrApolloClient extends ApolloClient {
   private results = new Map<string, CachedResult>();
   private inflight = new Map<string, Promise<unknown>>();
 
-  async query<
+  private readonly networkQuery: QueryFn = this.query;
+
+  override query = (async <
     TData = unknown,
     TVariables extends OperationVariables = OperationVariables,
   >(
     options: ApolloClient.QueryOptions<TData, TVariables>,
-  ): Promise<ApolloClient.QueryResult<MaybeMasked<TData>>> {
+  ): Promise<ApolloClient.QueryResult<MaybeMasked<TData>>> => {
     if (typeof window !== "undefined") {
-      return super.query(options);
+      return this.networkQuery(options);
     }
 
     // Locale is interpolated into the query text (e.g. getHome), so the
@@ -89,7 +94,7 @@ class SwrApolloClient extends ApolloClient {
       return hit.result as ApolloClient.QueryResult<MaybeMasked<TData>>;
     }
     return refresh;
-  }
+  }) as QueryFn;
 
   /** Network fetch deduped per key: concurrent misses share one request. */
   private refresh<
@@ -104,8 +109,7 @@ class SwrApolloClient extends ApolloClient {
       return existing as Promise<ApolloClient.QueryResult<MaybeMasked<TData>>>;
     }
 
-    const promise = super
-      .query({ ...options, fetchPolicy: "network-only" })
+    const promise = this.networkQuery({ ...options, fetchPolicy: "network-only" })
       .then((result) => {
         this.results.set(key, { fetchedAt: Date.now(), result });
         if (this.results.size > MAX_ENTRIES) {

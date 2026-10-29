@@ -1264,7 +1264,7 @@ Entries are newest first. Work sits under `## Unreleased` until it is promoted t
     `ReuseDetailClient`, `PublicProfileClient`) — all now consume the shared
     `formatDateLong(dateStr, i18n.language)`, so the long date follows the
     active locale instead of being hardcoded to Portuguese.
-    
+
 - **fix(routing): retire the legacy `/pages` URL segment for good** [#483](https://github.com/amagovpt/dadosgov-fe/pull/483)
   - Public routes moved from `src/app/pages/...` to the `[locale]/(pages)`
     route group a while ago, so URLs no longer carry `/pages` — but old links

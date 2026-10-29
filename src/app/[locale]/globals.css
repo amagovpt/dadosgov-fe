@@ -796,10 +796,6 @@ li.section-name:empty {
   height: 100%;
 }
 
-.related-datastories .card-general .content {
-  height: 100%;
-}
-
 /* 5.5 Cards (Illustrative) - Mini-courses */
 .mini-courses-cards .agora-card-illustrative.horizontal {
   align-items: center;
@@ -1266,6 +1262,36 @@ div.agora-dialog {
 /* TODO: remove this when we have a connection to the BE to get metadata */
 .datastory-page .datastory-datasets .card-general .quality-progress-warning div:last-child {
   display: block !important;
+}
+
+.datastory-page .result-card .card-general,
+.datastory-page .result-card .card-general .content,
+.datastory-page .result-card .card-general .content div:first-child {
+  width: 100% !important;
+}
+
+.datastory-page .result-card .card-general svg,
+.datastory-page .advanced-filters .agora-sidebar svg {
+  fill: var(--color-neutral-900) !important;
+}
+
+.datastory-page .result-card:hover svg,
+.datastory-page .advanced-filters .agora-sidebar .agora-sidebar-item:hover svg {
+  fill: var(--color-primary-600) !important;
+}
+
+.related-datastories .card-general,
+.related-datastories .card-general .content {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.datastory-page .ranged-number-filter span.feedback-icon-wrapper {
+  display: none !important;
+}
+
+.datastory-page .ranged-number-filter .feedback-right .agora-input-text-wrapper div.feedback {
+  flex-direction: row-reverse;
 }
 
 /* ==========================================================================
