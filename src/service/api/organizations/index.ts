@@ -437,6 +437,34 @@ export async function createContactPoint(
   return await res.json();
 }
 
+export async function updateContactPoint(
+  id: string,
+  payload: ContactPointCreatePayload,
+): Promise<ContactPoint> {
+  const res = await fetch(`${API_AUTH_URL}/contacts/${encodeURIComponent(id)}/`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
+export async function deleteContactPoint(id: string): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/contacts/${encodeURIComponent(id)}/`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+}
+
 
 // --- CSV Export URL Builders ---
 

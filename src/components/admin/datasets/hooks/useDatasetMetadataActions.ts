@@ -6,6 +6,7 @@ import type { FormErrors } from "@/hooks/forms/useFormErrors";
 import { fetchSpatialZonesByIds, updateDataset } from "@/service/api/datasets";
 import type { SpatialZone } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
+import { getDatasetDraftExtras } from "@/utils/datasetPublication";
 import {
   buildDatasetEditPayload,
   type DatasetEditField,
@@ -79,7 +80,7 @@ export function useDatasetMetadataActions({
         titleRequired: t("edit.fieldRequired"),
         descriptionRequired: t("edit.fieldRequired"),
         invalidRange: t("edit.invalidTemporalRange"),
-      },
+      }
     );
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -125,8 +126,8 @@ export function useDatasetMetadataActions({
             zoneDetails
               .filter((zone) => selectedZoneSet.has(zone.id))
               .map((zone) => (typeof zone.level === "string" ? zone.level.trim() : ""))
-              .filter(Boolean),
-          ),
+              .filter(Boolean)
+          )
         );
 
         if (levels.length === 1) {
@@ -142,9 +143,8 @@ export function useDatasetMetadataActions({
         spatialGranularityRef.current = resolvedGranularity || "";
       }
 
-      const updated = await updateDataset(
-        dataset.id,
-        buildDatasetEditPayload({
+      const updated = await updateDataset(dataset.id, {
+        ...buildDatasetEditPayload({
           title,
           description,
           shortDescription,
@@ -160,7 +160,8 @@ export function useDatasetMetadataActions({
           spatialGranularity: resolvedGranularity,
           existingSpatialZones: dataset.spatial?.zones,
         }),
-      );
+        extras: getDatasetDraftExtras(dataset.extras, selectedFrequencyRef.current),
+      });
 
       setDataset(updated);
       showApiSuccess(t("edit.metadataSaved"));

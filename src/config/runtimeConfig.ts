@@ -30,3 +30,19 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
     recaptchaSiteKey: runtimeEnv("NEXT_PUBLIC_RECAPTCHA_SITE_KEY") || "",
   };
 }
+
+export interface AnalyticsConfig {
+  cmpSettingsId: string;
+  cmpDraft: boolean;
+  gaId: string;
+}
+
+export async function getAnalyticsConfig(): Promise<AnalyticsConfig> {
+  await connection();
+  return {
+    cmpSettingsId:
+      runtimeEnv("NEXT_PUBLIC_KARMA_ID") || process.env.NEXT_PUBLIC_KARMA_ID || "",
+    cmpDraft: runtimeEnv("NEXT_PUBLIC_UC_DRAFT") === "true",
+    gaId: runtimeEnv("NEXT_PUBLIC_GA_ID") || process.env.NEXT_PUBLIC_GA_ID || "",
+  };
+}

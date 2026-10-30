@@ -1,61 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
-import { Resource } from "@/service/types/dataset";
-import { deleteResource } from "@/service/api/datasets";
+import { AdminConfirmationDialog } from "@/components/admin/AdminConfirmationDialog";
+import { useDatasetConfirmation } from "../DatasetContentProvider";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface DeleteResourcePopupProps {
-  datasetId: string;
-  resource: Resource;
-  onDeleted: () => void;
+  onClose: () => void;
+  onConfirm: () => void | Promise<void>;
 }
 
-export default function DeleteResourcePopup({
-  datasetId,
-  resource,
-  onDeleted,
-}: DeleteResourcePopupProps) {
+export default function DeleteResourcePopup({ onClose, onConfirm }: DeleteResourcePopupProps) {
   const { t } = useTranslation("admin-datasets");
-  const { hide } = usePopupContext();
+  const content = useDatasetConfirmation("delete-resource");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const deleting = useRef(false);
+  if (!content) return null;
 
-  const handleDelete = async () => {
+  async function handleDelete() {
+    if (deleting.current) return;
+    deleting.current = true;
     setIsDeleting(true);
+    setHasError(false);
     try {
-      await deleteResource(datasetId, resource.id);
-      onDeleted();
-      hide();
-    } catch (error) {
-      console.error("Error deleting resource:", error);
+      await onConfirm();
+      onClose();
+    } catch {
+      setHasError(true);
     } finally {
+      deleting.current = false;
       setIsDeleting(false);
     }
-  };
+  }
 
   return (
-    <div className="flex flex-col gap-24">
-      <p className="text-sm text-neutral-700">
-        {t("edit.resourceDeleteConfirm", { title: resource.title })}
-      </p>
-      <StatusCard variant="warning" showIcon description={t("edit.resourceDeleteWarning")} />
-      <div className="flex justify-end gap-16">
-        <Button variant="primary" appearance="outline" onClick={hide} disabled={isDeleting}>
-          {t("edit.cancel")}
-        </Button>
-        <Button
-          variant="danger"
-          appearance="solid"
-          hasIcon
-          leadingIcon="agora-line-trash"
-          leadingIconHover="agora-solid-trash"
-          onClick={handleDelete}
-          disabled={isDeleting}
-        >
-          {isDeleting ? t("edit.deleting") : t("edit.confirmDelete")}
-        </Button>
-      </div>
-    </div>
+    <AdminConfirmationDialog
+      title={content.title}
+      description={formatHtmlParagraphs(content.description)}
+      cancelLabel={content.cancelLabel}
+      confirmLabel={isDeleting ? t("edit.deleting") : content.confirmLabel}
+      isBusy={isDeleting}
+      error={hasError ? t("resourceEditing.deleteError") : undefined}
+      onClose={onClose}
+      onConfirm={() => {
+        void handleDelete();
+      }}
+    />
   );
 }

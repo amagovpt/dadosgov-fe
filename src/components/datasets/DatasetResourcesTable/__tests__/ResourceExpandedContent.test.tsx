@@ -21,8 +21,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ptDatasets from "@/locales/pt/datasets.json";
 
+// One router for every render, as in Next. A fresh object per render changes
+// Pagination's `onChange` each time, and the design system's SearchPagination
+// re-reports its own page whenever that happens -- which, with two paginations
+// on screen, sends the preview straight back to page 1.
+const router = vi.hoisted(() => ({ push: () => {} }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => router,
 }));
 
 /**
@@ -307,6 +312,10 @@ describe("resource preview — remote file served by api-tabular", () => {
     });
 
     await clickByText("button", "2");
+    // SearchPagination reports the new page from a setTimeout (10ms), not on click.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
 
     expect(requestedUrls().some((url) => url.includes("page=2"))).toBe(true);
     expect(container.textContent).toContain("Faro");

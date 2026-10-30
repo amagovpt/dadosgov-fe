@@ -1,9 +1,15 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { InputDate, type DropdownSectionProps } from "@ama-pt/agora-design-system";
+import { Icon, InputDate, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 
+import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
+import { DatasetWizardHelp } from "../publication-wizard/DatasetWizardHelp";
+import { getDatasetAuxiliarItem } from "../config/datasetsAuxiliarItems";
+import { DatasetContentDescription, useDatasetSection } from "../DatasetContentProvider";
+
 type DatasetsEditAccessTimeSectionProps = {
+  auxiliaryItems: AuxiliarItem[];
   formErrors: Partial<Record<string, boolean | string>>;
   loadedLicense: string;
   licenseOptions:
@@ -22,6 +28,7 @@ type DatasetsEditAccessTimeSectionProps = {
 };
 
 export default function DatasetsEditAccessTimeSection({
+  auxiliaryItems,
   formErrors,
   loadedLicense,
   licenseOptions,
@@ -35,38 +42,70 @@ export default function DatasetsEditAccessTimeSection({
   onTemporalEndChange,
 }: DatasetsEditAccessTimeSectionProps) {
   const { t } = useTranslation("admin-datasets");
+  const accessSection = useDatasetSection("access-conditions");
+  const temporalSection = useDatasetSection("temporal-coverage");
 
   return (
     <>
-      <h2 className="admin-page__section-title">{t("edit.accessSectionTitle")}</h2>
-      <div className="admin-page__fields-group">
-        <IsolatedSelect
-          label={t("edit.licenseField")}
-          placeholder={t("edit.licensePlaceholder")}
-          id="edit-license"
-          defaultValue={loadedLicense}
-          onChangeRef={selectedLicenseRef}
-        >
-          {licenseOptions}
-        </IsolatedSelect>
-      </div>
+      <section className="flex flex-col gap-32">
+        <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
+          <h2 className="text-xl-bold">{accessSection?.title ?? ""}</h2>
+          <DatasetContentDescription html={accessSection?.description} className="text-m-regular" />
+        </div>
+        <div className="flex min-w-0 flex-col gap-16">
+          <IsolatedSelect
+            label={t("coverage.licenseLabel")}
+            placeholder={t("edit.licensePlaceholder")}
+            id="edit-license"
+            defaultValue={loadedLicense}
+            onChangeRef={selectedLicenseRef}
+          >
+            {licenseOptions}
+          </IsolatedSelect>
+          <DatasetWizardHelp
+            item={getDatasetAuxiliarItem(auxiliaryItems, "license")}
+            background="white"
+          />
+        </div>
+      </section>
+      <section id="edit-time-section" className="flex scroll-mt-32 flex-col gap-32">
+        <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
+          <h2 className="text-xl-bold">{temporalSection?.title ?? ""}</h2>
+          <DatasetContentDescription
+            html={temporalSection?.description}
+            className="text-m-regular"
+          />
+        </div>
+        <div className="flex min-w-0 flex-col gap-16">
+          <IsolatedSelect
+            label={t("edit.frequencyField")}
+            placeholder={t("edit.frequencyPlaceholder")}
+            id="edit-frequency"
+            defaultValue={loadedFrequency}
+            onChangeRef={selectedFrequencyRef}
+          >
+            {frequencyOptions}
+          </IsolatedSelect>
 
-      <h2 className="admin-page__section-title">{t("edit.timeSectionTitle")}</h2>
-      <div className="admin-page__fields-group">
-        <IsolatedSelect
-          label={t("edit.frequencyField")}
-          placeholder={t("edit.frequencyPlaceholder")}
-          id="edit-frequency"
-          defaultValue={loadedFrequency}
-          onChangeRef={selectedFrequencyRef}
-        >
-          {frequencyOptions}
-        </IsolatedSelect>
-
-        <div className="flex gap-[18px] [&>*]:flex-1">
+          <span className="-mt-8 flex items-center gap-8 text-s-regular text-neutral-700">
+            <Icon
+              name="agora-solid-info-mark"
+              dimensions="xs"
+              className="fill-informative-500!"
+              aria-hidden="true"
+            />
+            {t("form.fieldRequired")}
+          </span>
+          <DatasetWizardHelp
+            item={getDatasetAuxiliarItem(auxiliaryItems, "frequency")}
+            background="white"
+          />
+        </div>
+        <h3 className="text-l-semibold text-primary-900">{t("coverage.temporalCoverageTitle")}</h3>
+        <div className="grid grid-cols-1 gap-32 md:grid-cols-2">
           <InputDate
             key={`date-start-${temporalStart}`}
-            label={t("edit.temporalStartField")}
+            label={t("coverage.startDateLabel")}
             id="edit-date-start"
             defaultValue={temporalStart}
             dayInputPlaceholder={t("edit.date.day")}
@@ -111,7 +150,11 @@ export default function DatasetsEditAccessTimeSection({
             }
           />
         </div>
-      </div>
+        <DatasetWizardHelp
+          item={getDatasetAuxiliarItem(auxiliaryItems, "temporal-coverage")}
+          background="white"
+        />
+      </section>
     </>
   );
 }

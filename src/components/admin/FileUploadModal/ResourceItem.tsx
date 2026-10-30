@@ -19,6 +19,8 @@ interface ResourceItemProps {
   onSaveMeta: (meta: PendingResourceMeta, newUrl?: string) => void;
   onReplace?: (f: File) => void;
   onRemove: () => void;
+  onEdit?: () => void;
+  appearance?: "actions" | "title";
 }
 
 export function ResourceItem({
@@ -31,6 +33,8 @@ export function ResourceItem({
   onSaveMeta,
   onReplace,
   onRemove,
+  onEdit,
+  appearance = "actions",
 }: ResourceItemProps) {
   const { t } = useTranslation("admin-common");
   const { show, hide } = usePopupContext();
@@ -42,6 +46,10 @@ export function ResourceItem({
       : baseDisplayName;
 
   const handleEdit = () => {
+    if (onEdit) {
+      onEdit();
+      return;
+    }
     show(
       <ResourceEditPendingPopupContent
         key={`pending-${name}`}
@@ -88,6 +96,18 @@ export function ResourceItem({
       { title: displayName, closeAriaLabel: t("fileUpload.popup.close"), dimensions: "l" }
     );
   };
+
+  if (appearance === "title") {
+    return (
+      <button
+        type="button"
+        className="text-left break-words text-primary-600 underline hover:text-primary-700"
+        onClick={handleEdit}
+      >
+        {displayName}
+      </button>
+    );
+  }
 
   return (
     <>

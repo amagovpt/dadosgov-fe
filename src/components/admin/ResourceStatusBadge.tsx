@@ -3,6 +3,7 @@
 import { Pill } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
 import StatusDot from "./StatusDot";
+import type { ResourceStatusKey } from "@/utils/admin-lists/listHelpers";
 
 export type ResourceStatusItem = {
   // Datasets/reuses expose archived/deleted; dataservices expose the
@@ -34,6 +35,7 @@ export interface ResourceStatusBadgeI {
    * component stays out of it.
    */
   className?: string;
+  dotClassName?: string;
   /**
    * Render nothing when the resource is simply public.
    *
@@ -44,6 +46,7 @@ export interface ResourceStatusBadgeI {
    * state whatever it is, which is what they have always done.
    */
   hidePublic?: boolean;
+  labels?: Partial<Record<ResourceStatusKey, string>>;
 }
 
 type ResourceStatusVariant = "danger" | "neutral" | "warning" | "success";
@@ -52,7 +55,9 @@ export function ResourceStatusBadge({
   item,
   display = "dot",
   className,
+  dotClassName,
   hidePublic = false,
+  labels,
 }: ResourceStatusBadgeI) {
   const { t } = useTranslation("admin-common");
   const isDeleted = item.deleted || item.deleted_at;
@@ -68,10 +73,10 @@ export function ResourceStatusBadge({
   if (hidePublic && !isDeleted && !isArchived && !item.private) return null;
 
   const getStatusLabel = (): string => {
-    if (isDeleted) return t("status.deleted");
-    if (isArchived) return t("status.archived");
-    if (item.private) return t("status.draft");
-    return t("status.public");
+    if (isDeleted) return labels?.deleted ?? t("status.deleted");
+    if (isArchived) return labels?.archived ?? t("status.archived");
+    if (item.private) return labels?.draft ?? t("status.draft");
+    return labels?.public ?? t("status.public");
   };
 
   if (display === "pill") {
@@ -84,5 +89,9 @@ export function ResourceStatusBadge({
     );
   }
 
-  return <StatusDot variant={getStatusVariant()}>{getStatusLabel()}</StatusDot>;
+  return (
+    <StatusDot variant={getStatusVariant()} dotClassName={dotClassName}>
+      {getStatusLabel()}
+    </StatusDot>
+  );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { twMerge } from "tailwind-merge";
 
 type StatusDotVariant =
   | "success"
@@ -24,16 +25,14 @@ const VARIANT_COLORS: Record<StatusDotVariant, string> = {
 interface StatusDotProps {
   variant?: StatusDotVariant;
   children: React.ReactNode;
+  dotClassName?: string;
 }
 
-export default function StatusDot({
-  variant = "neutral",
-  children,
-}: StatusDotProps) {
+export default function StatusDot({ variant = "neutral", children, dotClassName }: StatusDotProps) {
   return (
-    <span className="flex items-center gap-8 text-sm text-neutral-900">
+    <span className="text-sm flex items-center gap-8 text-neutral-900">
       <span
-        className="inline-block w-[10px] h-[10px] rounded-full flex-shrink-0"
+        className={twMerge("inline-block size-[10px] shrink-0 rounded-full", dotClassName)}
         style={{ backgroundColor: VARIANT_COLORS[variant] }}
       />
       {children}

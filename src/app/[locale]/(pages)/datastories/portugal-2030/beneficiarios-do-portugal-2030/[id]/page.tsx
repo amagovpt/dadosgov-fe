@@ -25,7 +25,6 @@ import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { formatByThree } from "@/utils/formatByThree";
 import { formatCompactEUR } from "@/utils/formatCurrency";
-import { LinkWrapper } from "@ama-pt/agora-design-system";
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -440,6 +439,7 @@ export default async function BeneficiaryPage({
                           trailingIcon={projects.cards[1].anchor.icon ?? ""}
                           trailingIconHover={projects.cards[1].anchor.icon ?? ""}
                           appearance="link"
+                          variant="neutral"
                         >
                           {"anchor" in projects.cards[1] ? projects.cards[1].anchor.children : ""}
                         </ButtonGeneral>
@@ -480,6 +480,7 @@ export default async function BeneficiaryPage({
                           trailingIcon={projects.cards[3].anchor.icon ?? ""}
                           trailingIconHover={projects.cards[3].anchor.icon ?? ""}
                           appearance="link"
+                          variant="neutral"
                         >
                           {"anchor" in projects.cards[3] ? projects.cards[3].anchor.children : ""}
                         </ButtonGeneral>

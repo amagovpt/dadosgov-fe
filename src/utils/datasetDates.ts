@@ -1,3 +1,5 @@
+import { parseApiDate } from "@/utils/formatDate";
+
 /**
  * When did anything about this dataset last change.
  *
@@ -24,7 +26,7 @@ export function getDatasetLastUpdate(dataset: {
 }): string | undefined {
   const dated = [dataset.last_update, dataset.last_modified, dataset.created_at]
     .filter((value): value is string => Boolean(value))
-    .map((value) => ({ value, time: new Date(value).getTime() }))
+    .map((value) => ({ value, time: parseApiDate(value).getTime() }))
     .filter(({ time }) => !Number.isNaN(time));
 
   if (dated.length === 0) return undefined;
