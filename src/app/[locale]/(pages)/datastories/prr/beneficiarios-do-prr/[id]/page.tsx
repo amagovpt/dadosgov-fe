@@ -190,14 +190,30 @@ export default async function BeneficiaryPage({
   const distributionLabels = {
     financedValue: t("sheetBenProj.fields.valor_financiamento"),
     receivedValue: t("sheetBenProj.fields.valor_recebido"),
-    suppliersValues: t("sheetBenProj.suppliersValues"),
     totalFunded: t("sheetBenProj.fields.total_financiado"),
-    suppliersInDetail: t("sheetBenProj.suppliersInDetail"),
     suppliers: suppliersLabel,
     fundedValue: t("financingValue"),
     paidValue: t("paidValue"),
-    beneficiary: t("searchBenProj.roles.beneficiary"),
-    supplier: t("searchBenProj.roles.supplier"),
+    byRole: {
+      intermediate: {
+        areaTitle: t("sheetBenProj.beneficiariesValues"),
+        tableTitle: t("sheetBenProj.beneficiariesInDetail"),
+        nameColumn: t("searchBenProj.roles.beneficiary"),
+        countLabel: t("beneficiaries"),
+      },
+      beneficiary: {
+        areaTitle: t("sheetBenProj.suppliersValues"),
+        tableTitle: t("sheetBenProj.suppliersInDetail"),
+        nameColumn: suppliersLabel,
+        countLabel: suppliersLabel,
+      },
+      supplier: {
+        areaTitle: t("sheetBenProj.consortiumMembersValues"),
+        tableTitle: t("sheetBenProj.suppliersInDetail"),
+        nameColumn: suppliersLabel,
+        countLabel: suppliersLabel,
+      },
+    },
     seeMoreSuppliers: t("seeMore", { about: suppliersLabel.toLowerCase() }),
   };
 
@@ -243,7 +259,7 @@ export default async function BeneficiaryPage({
       </Section>
 
       <Section
-        className="flex flex-col items-center gap-64 bg-neutral-100 pt-128"
+        className="flex flex-col items-center gap-64 bg-primary-100 pt-128"
         id={distribution.id}
       >
         <InfoBlock.Root>

@@ -529,6 +529,9 @@
     },
     "suppliersValues": "Funding amounts to suppliers",
     "suppliersInDetail": "Suppliers in detail",
+    "beneficiariesValues": "Amounts awarded to beneficiaries",
+    "beneficiariesInDetail": "Beneficiaries in detail",
+    "consortiumMembersValues": "Amounts contracted as consortium members",
     "loadMoreProjectsError": "Could not load more projects (error {{status}})"
   },
   "suppliersValues": "Financing amounts to suppliers",

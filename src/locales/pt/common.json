@@ -528,6 +528,9 @@
     },
     "suppliersValues": "Valores de financiamento a fornecedores",
     "suppliersInDetail": "Fornecedores em detalhe",
+    "beneficiariesValues": "Valores atribuídos a beneficiários",
+    "beneficiariesInDetail": "Beneficiários em detalhe",
+    "consortiumMembersValues": "Valores contratados como membros do consórcio",
     "loadMoreProjectsError": "Não foi possível carregar mais projetos (erro {{status}})"
   },
   "approvedValue": "Valor aprovado",

@@ -20,6 +20,12 @@ const roleCardIndex = {
   supplier: 3,
 } as const;
 
+const roleIcon: Record<DisplayRole, string> = {
+  intermediate: "agora-line-star",
+  beneficiary: "agora-line-package",
+  supplier: "agora-line-log-out",
+};
+
 const roleApiType: Record<DisplayRole, PRRBeneficiaryRelatedProjectsType> = {
   intermediate: "INTERMEDIARY",
   beneficiary: "BENEFICIARY",
@@ -36,14 +42,11 @@ type DistributionValuesChartProps = {
   labels: {
     financedValue: string;
     receivedValue: string;
-    suppliersValues: string;
     totalFunded: string;
-    suppliersInDetail: string;
     suppliers: string;
     fundedValue: string;
     paidValue: string;
-    beneficiary: string;
-    supplier: string;
+    byRole: Record<DisplayRole, RoleLabels>;
     seeMoreSuppliers: string;
   };
   sourceInfo?: {
@@ -54,6 +57,16 @@ type DistributionValuesChartProps = {
 };
 
 type DisplayRole = "intermediate" | "beneficiary" | "supplier";
+type RoleLabels = {
+  /** AreaValuelist title */
+  areaTitle: string;
+  /** Title above the DistributionTable */
+  tableTitle: string;
+  /** Header of the table's first (name) column */
+  nameColumn: string;
+  /** Plural of the name column, used in the count under the table title and in "see more" */
+  countLabel: string;
+};
 type RoleRow = { role: DisplayRole; group: PRRBeneficiaryProjectGroup };
 type RoleValues = {
   approvedValue: number;
@@ -161,20 +174,12 @@ export default function DistributionValuesChart({
     ] as RoleRow[]
   ).filter(({ role }) => Number(valuesByRole[role].approvedValue ?? 0) > 0);
 
-  // The table lists the entities one level below the role: an intermediate funds beneficiaries,
-  // a beneficiary pays suppliers, and the supplier block lists the suppliers themselves.
-  const nameColumnLabel: Record<DisplayRole, string> = {
-    intermediate: labels.beneficiary,
-    beneficiary: labels.supplier,
-    supplier: labels.supplier,
-  };
-
   const renderDistributionBlock = (roleData: {
     role: DisplayRole;
     group: PRRBeneficiaryProjectGroup;
   }) => {
     const card = getCard(distribution.cards, roleCardIndex[roleData.role]);
-    const iconName = (card?.iconName as string) || "agora-line-star";
+    const roleLabels = labels.byRole[roleData.role];
     const title = (card?.title as string) || "";
     const description = (card?.subtitle as string) || "";
     const graphDescription = (card?.description as string) || "";
@@ -190,7 +195,7 @@ export default function DistributionValuesChart({
           <div className="col-span-9 md:col-span-5">
             <BenProjSheet.CardIcon
               icon={{
-                name: iconName,
+                name: roleIcon[roleData.role],
                 color: "#034AD8",
                 backgroundColor: "bg-primary-100",
               }}
@@ -225,7 +230,7 @@ export default function DistributionValuesChart({
 
         <div className="flex flex-col gap-24 max-w-3/4">
           <BenProjSheet.AreaValuelist
-            areaTitle={labels.suppliersValues}
+            areaTitle={roleLabels.areaTitle}
             items={[
               {
                 area: labels.totalFunded,
@@ -237,10 +242,10 @@ export default function DistributionValuesChart({
           <div className="flex flex-col gap-32">
             <div className="flex flex-col gap-8">
               <Typograph tag="p" className="text-l-bold text-neutral-900">
-                {labels.suppliersInDetail}
+                {roleLabels.tableTitle}
               </Typograph>
               <Typograph tag="p" className="text-s-regular text-neutral-900">
-                {`${totalSuppliers} ${labels.suppliers}`}
+                {`${totalSuppliers} ${roleLabels.countLabel}`}
               </Typograph>
             </div>
 
@@ -249,10 +254,10 @@ export default function DistributionValuesChart({
               type={roleApiType[roleData.role]}
               group={roleData.group}
               labels={{
-                name: nameColumnLabel[roleData.role],
+                name: roleLabels.nameColumn,
                 fundedValue: labels.fundedValue,
                 paidValue: labels.paidValue,
-                seeMore: labels.suppliers.toLowerCase(),
+                seeMore: roleLabels.countLabel.toLowerCase(),
               }}
             />
           </div>
