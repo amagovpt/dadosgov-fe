@@ -386,6 +386,7 @@
     "roles": {
       "intermediateBeneficiary": "Intermediate beneficiary",
       "beneficiary": "Beneficiary",
+      "partner": "Partner",
       "supplier": "Supplier"
     },
     "filters": {
@@ -530,6 +531,7 @@
     "suppliersValues": "Funding amounts to suppliers",
     "suppliersInDetail": "Suppliers in detail",
     "beneficiariesValues": "Amounts awarded to beneficiaries",
+    "projectsByRoleTitle": "Projects it takes part in as {{role}}",
     "beneficiariesInDetail": "Beneficiaries in detail",
     "consortiumMembersValues": "Amounts contracted as consortium members",
     "loadMoreProjectsError": "Could not load more projects (error {{status}})"

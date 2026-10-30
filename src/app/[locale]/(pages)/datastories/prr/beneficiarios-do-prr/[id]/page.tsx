@@ -223,6 +223,19 @@ export default async function BeneficiaryPage({
     receivedFinancing: t("sheetBenProj.fields.financiamento_recebido"),
     receivedValue: t("sheetBenProj.fields.valor_recebido"),
     seeMoreProjects: t("seeMore", { about: projectsLabel.toLowerCase() }),
+    titleByRole: Object.fromEntries(
+      (
+        [
+          ["intermediate", "searchBenProj.roles.intermediateBeneficiary"],
+          ["beneficiary", "searchBenProj.roles.beneficiary"],
+          ["partner", "searchBenProj.roles.partner"],
+          ["supplier", "searchBenProj.roles.supplier"],
+        ] as const
+      ).map(([role, roleKey]) => [
+        role,
+        t("sheetBenProj.projectsByRoleTitle", { role: t(roleKey).toLowerCase() }),
+      ])
+    ) as Record<"intermediate" | "beneficiary" | "partner" | "supplier", string>,
   };
 
   return (
@@ -284,7 +297,7 @@ export default async function BeneficiaryPage({
       </Section>
 
       <Section
-        className="flex flex-col items-center gap-64 bg-neutral-100 pt-64 pb-128"
+        className="flex flex-col items-center gap-64 pt-64 pb-128"
         id={projects.id}
       >
         <InfoBlock.Root>

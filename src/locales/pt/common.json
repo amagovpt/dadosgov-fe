@@ -386,6 +386,7 @@
     "roles": {
       "intermediateBeneficiary": "Beneficiário intermediário",
       "beneficiary": "Beneficiário",
+      "partner": "Parceiro",
       "supplier": "Fornecedor"
     },
     "filters": {
@@ -529,6 +530,7 @@
     "suppliersValues": "Valores de financiamento a fornecedores",
     "suppliersInDetail": "Fornecedores em detalhe",
     "beneficiariesValues": "Valores atribuídos a beneficiários",
+    "projectsByRoleTitle": "Projetos em que participa enquanto {{role}}",
     "beneficiariesInDetail": "Beneficiários em detalhe",
     "consortiumMembersValues": "Valores contratados como membros do consórcio",
     "loadMoreProjectsError": "Não foi possível carregar mais projetos (erro {{status}})"

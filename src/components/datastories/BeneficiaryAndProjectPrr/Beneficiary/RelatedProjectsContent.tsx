@@ -46,6 +46,8 @@ type RelatedProjectsContentProps = {
     receivedFinancing: string;
     receivedValue: string;
     seeMoreProjects: string;
+    /** "Projetos em que participa enquanto <role>", one per role */
+    titleByRole: Record<DisplayRole, string>;
   };
   nif: string;
 };
@@ -158,13 +160,12 @@ export default function RelatedProjectsContent({
     <div className="flex flex-col gap-64">
       {orderedRelatedProjects.map(({ role, group }) => {
         const cardIdx = roleProjectCardIndex[role];
-        const titleCard = getCard(projectsSection.cards, cardIdx.title);
         const ctaCard = getCard(projectsSection.cards, cardIdx.cta);
 
         return (
           <div key={`related-${role}`} className="flex flex-col gap-32">
             <Typograph tag="h3" className="text-l-bold text-neutral-900">
-              {(titleCard?.title as string) || ""}
+              {labels.titleByRole[role]}
             </Typograph>
             <div className="grid grid-cols-12 gap-32">
               <div className="order-1 col-span-12 grid grid-cols-5 gap-32 xl:order-2 xl:col-span-5">
@@ -183,6 +184,7 @@ export default function RelatedProjectsContent({
                         (ctaCard?.anchor as Record<string, string>)?.icon ?? ""
                       }
                       appearance="link"
+                      variant="neutral"
                     >
                       {(ctaCard?.anchor as Record<string, string>)?.children ?? ""}
                     </ButtonGeneral>

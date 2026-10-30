@@ -54,6 +54,7 @@ export function LoadMoreWrapper<T>({
             trailingIcon="agora-line-plus-circle"
             trailingIconHover="agora-solid-plus-circle"
             hasIcon
+            variant="neutral"
           >
             {t("seeMore", { about: seeMoreText })}
           </Button>
