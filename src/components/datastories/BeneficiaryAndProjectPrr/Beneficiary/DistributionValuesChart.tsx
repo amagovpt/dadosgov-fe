@@ -223,7 +223,7 @@ export default function DistributionValuesChart({
           </div>
         </div>
 
-        <div className="flex flex-col gap-24">
+        <div className="flex flex-col gap-24 xl:max-w-3/4">
           <BenProjSheet.AreaValuelist
             areaTitle={labels.suppliersValues}
             items={[
@@ -244,7 +244,6 @@ export default function DistributionValuesChart({
               </Typograph>
             </div>
 
-            <div className="xl:max-w-3/4">
               <DistributionTable
                 nif={nif}
                 type={roleApiType[roleData.role]}
@@ -256,7 +255,6 @@ export default function DistributionValuesChart({
                   seeMore: labels.suppliers.toLowerCase(),
                 }}
               />
-            </div>
           </div>
         </div>
       </div>
