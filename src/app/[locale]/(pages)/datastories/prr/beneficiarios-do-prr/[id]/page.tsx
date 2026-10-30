@@ -28,6 +28,7 @@ import { flattenData } from "@/utils/flattenObject";
 import { formatCompactEUR } from "@/utils/formatCurrency";
 import { Metadata } from "next";
 import { headers } from "next/headers";
+import Sources from "@/components/Shared/Datastories/Sections/Sources";
 
 export async function generateMetadata({
   params,
@@ -127,7 +128,7 @@ export default async function BeneficiaryPage({
     throw new Error(sheetResult.error?.message ?? "Failed to fetch data");
   }
 
-  const { hero, beneficiarySheet, distribution, projects } = flattenData(
+  const { hero, beneficiarySheet, distribution, projects, datasets } = flattenData(
     pageResult.data.findFichaDeBeneficiarioPrrSingleton.data as Record<string, unknown>
   ) as Beneficiary;
 
@@ -317,6 +318,8 @@ export default async function BeneficiaryPage({
           </InfoBlock.Content>
         </InfoBlock.Root>
       </Section>
+
+      {datasets && datasets.active !== false && <Sources {...datasets} className="p-0" />}
     </main>
   );
 }

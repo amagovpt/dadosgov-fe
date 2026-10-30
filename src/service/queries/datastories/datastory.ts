@@ -1611,6 +1611,24 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
               }
             }
           }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
         }
       }
     }
