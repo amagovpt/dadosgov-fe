@@ -41,11 +41,11 @@ function TableHeader<T>({ columns }: ITableHeader<T>) {
           <th
             key={`table-head-${id}-${index}`}
             scope="col"
-            className={twMerge(
-              "px-16 pb-8 align-bottom text-s-bold text-neutral-900",
+            className={`text-s-bold ${twMerge(
+              "px-16 pb-8 align-bottom text-neutral-900",
               alignClass[column.align ?? "left"],
               column.className
-            )}
+            )}`}
           >
             {column.label}
           </th>
@@ -72,13 +72,12 @@ function TableItem<T>({ item, index, columns, boldValues }: ITableItem<T>) {
       {columns.map((column, columnIndex) => (
         <td
           key={`table-cell-${id}-${columnIndex}`}
-          className={twMerge(
-            "px-16 py-8 text-m-regular text-neutral-900",
+          className={`${column.highlight && boldValues ? "text-m-bold" : "text-m-regular"} ${twMerge(
+            "px-16 py-8 text-neutral-900",
             alignClass[column.align ?? "left"],
             column.highlight && "text-neutral-900",
-            column.highlight && boldValues && "text-m-bold",
             column.className
-          )}
+          )}`}
         >
           {column.render(item, index)}
         </td>

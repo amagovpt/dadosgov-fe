@@ -244,17 +244,19 @@ export default function DistributionValuesChart({
               </Typograph>
             </div>
 
-            <DistributionTable
-              nif={nif}
-              type={roleApiType[roleData.role]}
-              group={roleData.group}
-              labels={{
-                name: nameColumnLabel[roleData.role],
-                fundedValue: labels.fundedValue,
-                paidValue: labels.paidValue,
-                seeMore: labels.suppliers.toLowerCase(),
-              }}
-            />
+            <div className="xl:max-w-3/4">
+              <DistributionTable
+                nif={nif}
+                type={roleApiType[roleData.role]}
+                group={roleData.group}
+                labels={{
+                  name: nameColumnLabel[roleData.role],
+                  fundedValue: labels.fundedValue,
+                  paidValue: labels.paidValue,
+                  seeMore: labels.suppliers.toLowerCase(),
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

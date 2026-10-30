@@ -48,14 +48,14 @@ export default function DistributionTable({ nif, type, group, labels }: Distribu
       label: labels.fundedValue,
       align: "right",
       highlight: true,
-      width: "20%",
+      width: "23%",
       render: (item) => formatValuesWithSuffix(item.amount ?? 0),
     },
     {
       label: labels.paidValue,
       align: "right",
       highlight: true,
-      width: "20%",
+      width: "23%",
       render: (item) => formatValuesWithSuffix(item.paid ?? 0),
     },
   ];
