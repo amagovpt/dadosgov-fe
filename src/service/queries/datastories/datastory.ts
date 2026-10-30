@@ -1515,7 +1515,7 @@ export function getPrrBeneficiaryMeta(locale: string = "pt") {
 
 export function getPrrBeneficiaryData(locale: string = "pt") {
   return gql`
-    query getPrrBeneficiaryData($nif: String!) {
+    query getPrrBeneficiaryData {
       findFichaDeBeneficiarioPrrSingleton {
         data {
           hero {
@@ -1613,6 +1613,13 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
           }
         }
       }
+    }
+  `;
+}
+
+export function getPrrBeneficiarySheet() {
+  return gql`
+    query getPrrBeneficiarySheet($nif: String!) {
       queryBeneficiarySheetOfPRR(nif: $nif) {
         data {
           budget
@@ -1637,6 +1644,13 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
           }
         }
       }
+    }
+  `;
+}
+
+export function getPrrBeneficiarySourceInfo() {
+  return gql`
+    query getPrrBeneficiarySourceInfo {
       queryBeneficiarySheetSourceInfoOfPRR {
         sourceInfo {
           format
@@ -1646,70 +1660,6 @@ export function getPrrBeneficiaryData(locale: string = "pt") {
           source
           title
           url
-        }
-      }
-      beneficiaryProjects: queryBeneficiaryRelatedProjectsOfPRR(
-        nif: $nif
-        type: BENEFICIARY
-        page: 1
-        limit: 10
-      ) {
-        nif
-        total
-        data {
-          amount
-          date
-          id
-          name
-          paid
-        }
-      }
-      intermediaryBeneficiaryProjects: queryBeneficiaryRelatedProjectsOfPRR(
-        nif: $nif
-        type: INTERMEDIARY
-        page: 1
-        limit: 10
-      ) {
-        nif
-        total
-        data {
-          amount
-          date
-          id
-          name
-          paid
-        }
-      }
-      partnerProjects: queryBeneficiaryRelatedProjectsOfPRR(
-        nif: $nif
-        type: PARTNER
-        page: 1
-        limit: 10
-      ) {
-        nif
-        total
-        data {
-          amount
-          date
-          id
-          name
-          paid
-        }
-      }
-      supplierProjects: queryBeneficiaryRelatedProjectsOfPRR(
-        nif: $nif
-        type: SUPPLIER
-        page: 1
-        limit: 10
-      ) {
-        nif
-        total
-        data {
-          amount
-          date
-          id
-          name
-          paid
         }
       }
     }

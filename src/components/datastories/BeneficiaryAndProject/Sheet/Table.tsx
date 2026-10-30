@@ -1,25 +1,23 @@
 "use client";
 
-import { ReactNode, useId, useState } from "react";
+import { ReactNode, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { twMerge } from "tailwind-merge";
 import { Button } from "@ama-pt/agora-design-system";
+import { LoadMoreHandler, useLoadMore } from "@/hooks/useLoadMore";
 
 /** ------------------------------------------------------------------------------------------------------ */
 
 type TableAlign = "left" | "center" | "right";
 
-export type TableColumn = {
+export type TableColumn<T> = {
   label: ReactNode;
+  render: (item: T, index: number) => ReactNode;
   align?: TableAlign;
-  /** Renders the column values in `primary-900`, like the value column of AreaValueList. */
   highlight?: boolean;
-  /** Any CSS width ("30%", "200px", "12rem", ...); a number is read as px. Unset columns share the rest. */
   width?: string | number;
   className?: string;
 };
-
-export type TableRow = ReactNode[];
 
 const alignClass: Record<TableAlign, string> = {
   left: "text-left",
@@ -29,11 +27,11 @@ const alignClass: Record<TableAlign, string> = {
 
 /** ------------------------------------------------------------------------------------------------------ */
 
-interface ITableHeader {
-  columns: TableColumn[];
+interface ITableHeader<T> {
+  columns: TableColumn<T>[];
 }
 
-function TableHeader({ columns }: ITableHeader) {
+function TableHeader<T>({ columns }: ITableHeader<T>) {
   const id = useId();
 
   return (
@@ -59,66 +57,68 @@ function TableHeader({ columns }: ITableHeader) {
 
 /** ------------------------------------------------------------------------------------------------------ */
 
-interface ITableItem {
-  row: TableRow;
-  columns: TableColumn[];
+interface ITableItem<T> {
+  item: T;
+  index: number;
+  columns: TableColumn<T>[];
   boldValues?: boolean;
 }
 
-function TableItem({ row, columns, boldValues }: ITableItem) {
+function TableItem<T>({ item, index, columns, boldValues }: ITableItem<T>) {
   const id = useId();
 
   return (
     <tr className="border-b-2 border-b-neutral-200">
-      {row.map((cell, index) => {
-        const column = columns[index];
-
-        return (
-          <td
-            key={`table-cell-${id}-${index}`}
-            className={twMerge(
-              "px-16 py-8 text-m-regular text-neutral-900",
-              alignClass[column?.align ?? "left"],
-              column?.highlight && "text-neutral-900",
-              column?.highlight && boldValues && "text-m-bold",
-              column?.className
-            )}
-          >
-            {cell}
-          </td>
-        );
-      })}
+      {columns.map((column, columnIndex) => (
+        <td
+          key={`table-cell-${id}-${columnIndex}`}
+          className={twMerge(
+            "px-16 py-8 text-m-regular text-neutral-900",
+            alignClass[column.align ?? "left"],
+            column.highlight && "text-neutral-900",
+            column.highlight && boldValues && "text-m-bold",
+            column.className
+          )}
+        >
+          {column.render(item, index)}
+        </td>
+      ))}
     </tr>
   );
 }
 
 /** ------------------------------------------------------------------------------------------------------ */
 
-export interface ITable {
-  header?: TableColumn[];
-  data: TableRow[];
+export interface ITable<T> {
+  columns: TableColumn<T>[];
+  initialItems: T[];
+  onLoadMore?: LoadMoreHandler<T>; // fetches the next page; the "see more" button only shows when this is provided
+  totalItems?: number; // total available on the server; hides "see more" once every item is loaded
+  getRowKey?: (item: T, index: number) => string;
+  hideHeader?: boolean;
   boldValues?: boolean;
-  loadByParts?: number; // show row step by step, with a "see more" button. ignored when < 1
   seeMoreText?: string;
   className?: string;
 }
 
-export default function Table({
-  header,
-  data,
+export default function Table<T>({
+  columns,
+  initialItems,
+  onLoadMore,
+  totalItems,
+  getRowKey,
+  hideHeader,
   boldValues,
-  loadByParts,
   seeMoreText,
   className,
-}: ITable) {
+}: ITable<T>) {
   const id = useId();
   const { t } = useTranslation();
-  const [parts, setParts] = useState(1);
-  const columns = header ?? [];
-
-  const partSize = loadByParts && loadByParts >= 1 ? Math.floor(loadByParts) : undefined;
-  const visibleRows = partSize ? data.slice(0, partSize * parts) : data;
-  const hasMoreRows = visibleRows.length < data.length;
+  const { items, isLoading, hasMore, loadMore } = useLoadMore({
+    initialItems,
+    onLoadMore,
+    totalItems,
+  });
 
   return (
     <div className="flex w-full flex-col gap-32">
@@ -131,12 +131,13 @@ export default function Table({
               ))}
             </colgroup>
           )}
-          {header && <TableHeader columns={columns} />}
+          {!hideHeader && <TableHeader columns={columns} />}
           <tbody>
-            {visibleRows.map((row, index) => (
+            {items.map((item, index) => (
               <TableItem
-                key={`table-row-${id}-${index}`}
-                row={row}
+                key={getRowKey?.(item, index) ?? `table-row-${id}-${index}`}
+                item={item}
+                index={index}
                 columns={columns}
                 boldValues={boldValues}
               />
@@ -145,10 +146,11 @@ export default function Table({
         </table>
       </div>
 
-      {hasMoreRows && (
+      {hasMore && (
         <div className="flex justify-center">
           <Button
-            onClick={() => setParts((prev) => prev + 1)}
+            onClick={loadMore}
+            disabled={isLoading}
             appearance="link"
             variant="neutral"
             trailingIcon="agora-line-plus-circle"

@@ -5,15 +5,21 @@ import RelatedProjectsContent from "@/components/datastories/BeneficiaryAndProje
 import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
+import { PRR_BENEFICIARY_PROJECTS_LIMIT } from "@/components/datastories/BeneficiaryAndProjectPrr/Beneficiary/loadMoreRelatedProjects";
 import {
   getPrrBeneficiaryData,
   getPrrBeneficiaryMeta,
+  getPrrBeneficiarySheet,
+  getPrrBeneficiarySourceInfo,
+  queryLoadMorePrrProjectsByBeneficiary,
 } from "@/service/queries/datastories/datastory";
 import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Beneficiary,
+  PRRBeneficiaryProjectGroup,
   PRRBeneficiaryRelatedProjects,
   PRRBeneficiaryRelatedProjectsResponse,
+  PRRBeneficiaryRelatedProjectsType,
   PRRBeneficiarySheetResponse,
   PRRBeneficiarySheetSourceInfoResponse,
 } from "@/service/types/datastories/prr/prr";
@@ -68,55 +74,84 @@ export default async function BeneficiaryPage({
     namespaces: ["common"],
   });
 
-  const { data, error } = await apolloClient.query<{
-    findFichaDeBeneficiarioPrrSingleton: { data: unknown };
-    queryBeneficiarySheetOfPRR: PRRBeneficiarySheetResponse;
-    beneficiaryProjects: PRRBeneficiaryRelatedProjectsResponse;
-    intermediaryBeneficiaryProjects: PRRBeneficiaryRelatedProjectsResponse;
-    partnerProjects: PRRBeneficiaryRelatedProjectsResponse;
-    supplierProjects: PRRBeneficiaryRelatedProjectsResponse;
-    queryBeneficiarySheetSourceInfoOfPRR: PRRBeneficiarySheetSourceInfoResponse;
-  }>({
-    query: getPrrBeneficiaryData(locale),
-    variables: {
-      nif: id,
-    },
-    fetchPolicy: "no-cache",
-  });
+  const relatedProjectsQuery = (type: PRRBeneficiaryRelatedProjectsType) =>
+    apolloClient.query<{
+      queryBeneficiaryRelatedProjectsOfPRR: PRRBeneficiaryRelatedProjectsResponse;
+    }>({
+      query: queryLoadMorePrrProjectsByBeneficiary(type),
+      variables: { nif: id, page: 1, limit: PRR_BENEFICIARY_PROJECTS_LIMIT },
+      fetchPolicy: "no-cache",
+    });
 
-  if (error || !data) {
-    console.error("Error:", error);
-    throw new Error(error?.message ?? "Failed to fetch data");
+  const [
+    pageResult,
+    sheetResult,
+    sourceInfoResult,
+    beneficiaryProjectsResult,
+    intermediaryProjectsResult,
+    partnerProjectsResult,
+    supplierProjectsResult,
+    beneficiaryTechnicalSheet,
+  ] = await Promise.all([
+    apolloClient.query<{
+      findFichaDeBeneficiarioPrrSingleton: { data: unknown };
+    }>({
+      query: getPrrBeneficiaryData(locale),
+    }),
+    apolloClient.query<{
+      queryBeneficiarySheetOfPRR: PRRBeneficiarySheetResponse;
+    }>({
+      query: getPrrBeneficiarySheet(),
+      variables: { nif: id },
+      fetchPolicy: "no-cache",
+    }),
+    apolloClient.query<{
+      queryBeneficiarySheetSourceInfoOfPRR: PRRBeneficiarySheetSourceInfoResponse;
+    }>({
+      query: getPrrBeneficiarySourceInfo(),
+    }),
+    relatedProjectsQuery("BENEFICIARY"),
+    relatedProjectsQuery("INTERMEDIARY"),
+    relatedProjectsQuery("PARTNER"),
+    relatedProjectsQuery("SUPPLIER"),
+    getTechnicalSheetData("prr-ficha-de-beneficiario", locale),
+  ]);
+
+  if (pageResult.error || !pageResult.data) {
+    console.error("Error:", pageResult.error);
+    throw new Error(pageResult.error?.message ?? "Failed to fetch data");
+  }
+
+  if (sheetResult.error || !sheetResult.data) {
+    console.error("Error:", sheetResult.error);
+    throw new Error(sheetResult.error?.message ?? "Failed to fetch data");
   }
 
   const { hero, beneficiarySheet, distribution, projects } = flattenData(
-    data.findFichaDeBeneficiarioPrrSingleton.data as Record<string, unknown>
+    pageResult.data.findFichaDeBeneficiarioPrrSingleton.data as Record<string, unknown>
   ) as Beneficiary;
 
-  const beneficiarySheetData = data.queryBeneficiarySheetOfPRR?.data;
+  const beneficiarySheetData = sheetResult.data.queryBeneficiarySheetOfPRR?.data;
   const beneficiaryForm = beneficiarySheetData?.beneficiaryForm;
 
   if (!beneficiarySheetData || !beneficiaryForm) {
     throw new Error("Failed to fetch beneficiary sheet data");
   }
 
+  // A failed group renders as empty instead of breaking the whole sheet.
+  const toProjectGroup = (
+    result: Awaited<ReturnType<typeof relatedProjectsQuery>>
+  ): PRRBeneficiaryProjectGroup => {
+    if (result.error) console.error("Error:", result.error);
+    const response = result.data?.queryBeneficiaryRelatedProjectsOfPRR;
+    return { total: Number(response?.total ?? 0), list: response?.data ?? [] };
+  };
+
   const beneficiaryRelatedProjects: PRRBeneficiaryRelatedProjects = {
-    beneficiaryProjects: {
-      total: Number(data.beneficiaryProjects?.total ?? 0),
-      list: data.beneficiaryProjects?.data ?? [],
-    },
-    intermediaryBeneficiaryProjects: {
-      total: Number(data.intermediaryBeneficiaryProjects?.total ?? 0),
-      list: data.intermediaryBeneficiaryProjects?.data ?? [],
-    },
-    partnerProjects: {
-      total: Number(data.partnerProjects?.total ?? 0),
-      list: data.partnerProjects?.data ?? [],
-    },
-    supplierProjects: {
-      total: Number(data.supplierProjects?.total ?? 0),
-      list: data.supplierProjects?.data ?? [],
-    },
+    beneficiaryProjects: toProjectGroup(beneficiaryProjectsResult),
+    intermediaryBeneficiaryProjects: toProjectGroup(intermediaryProjectsResult),
+    partnerProjects: toProjectGroup(partnerProjectsResult),
+    supplierProjects: toProjectGroup(supplierProjectsResult),
   };
 
   const beneficiarySheetViewData = {
@@ -125,12 +160,8 @@ export default async function BeneficiaryPage({
     valuesByEntityRole: beneficiarySheetData.valuesByEntityRole,
   };
 
-  const beneficiaryTechnicalSheet = await getTechnicalSheetData(
-    "prr-ficha-de-beneficiario",
-    locale
-  );
-
-  const sourceInfo = data.queryBeneficiarySheetSourceInfoOfPRR?.sourceInfo ?? [];
+  if (sourceInfoResult.error) console.error("Error:", sourceInfoResult.error);
+  const sourceInfo = sourceInfoResult.data?.queryBeneficiarySheetSourceInfoOfPRR?.sourceInfo ?? [];
   const mainSourceInfo = sourceInfo[0];
   const beneficiarySourceInfo = {
     dataSource: mainSourceInfo?.source ?? "",
@@ -225,6 +256,7 @@ export default async function BeneficiaryPage({
         </InfoBlock.Root>
 
         <DistributionValuesChart
+          nif={id}
           distribution={distribution}
           approvedValue={Number(beneficiarySheetViewData.budget ?? 0)}
           relatedProjects={beneficiaryRelatedProjects}

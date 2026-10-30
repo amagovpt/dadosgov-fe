@@ -7,10 +7,12 @@ import {
   Beneficiary,
   PRRBeneficiaryProjectGroup,
   PRRBeneficiaryRelatedProjects,
+  PRRBeneficiaryRelatedProjectsType,
   PRRBeneficiaryValueByEntityRole,
 } from "@/service/types/datastories/prr/prr";
 import { BenProjSheet } from "../../BeneficiaryAndProject/Sheet";
 import { TechnicalSheetModalData } from "@/service/types/modal/technical-sheet";
+import DistributionTable from "./DistributionTable";
 
 const roleCardIndex = {
   intermediate: 1,
@@ -18,7 +20,14 @@ const roleCardIndex = {
   supplier: 3,
 } as const;
 
+const roleApiType: Record<DisplayRole, PRRBeneficiaryRelatedProjectsType> = {
+  intermediate: "INTERMEDIARY",
+  beneficiary: "BENEFICIARY",
+  supplier: "SUPPLIER",
+};
+
 type DistributionValuesChartProps = {
+  nif: string;
   distribution: Beneficiary["distribution"];
   approvedValue: number;
   relatedProjects: PRRBeneficiaryRelatedProjects;
@@ -82,6 +91,7 @@ const normalizeRole = (role: string): DisplayRole | "partner" | null => {
 };
 
 export default function DistributionValuesChart({
+  nif,
   distribution,
   approvedValue,
   relatedProjects,
@@ -172,11 +182,6 @@ export default function DistributionValuesChart({
     const approvedValueByRole = roleValues.approvedValue;
     const paidValueByRole = roleValues.executedValue;
     const percentageExecutedValue = roleValues.percentageExecutedValue;
-    const supplierRows = (roleData.group.list ?? []).map((project) => [
-      project.name,
-      formatValuesWithSuffix(Number(project.amount ?? 0)),
-      formatValuesWithSuffix(Number(project.paid ?? 0)),
-    ]);
     const totalSuppliers = Number(roleData.group.total ?? 0);
 
     return (
@@ -239,15 +244,16 @@ export default function DistributionValuesChart({
               </Typograph>
             </div>
 
-            <BenProjSheet.Table
-              header={[
-                { label: nameColumnLabel[roleData.role] },
-                { label: labels.fundedValue, align: "right", highlight: true, width: "20%" },
-                { label: labels.paidValue, align: "right", highlight: true, width: "20%" },
-              ]}
-              data={supplierRows}
-              loadByParts={5}
-              seeMoreText={labels.suppliers.toLowerCase()}
+            <DistributionTable
+              nif={nif}
+              type={roleApiType[roleData.role]}
+              group={roleData.group}
+              labels={{
+                name: nameColumnLabel[roleData.role],
+                fundedValue: labels.fundedValue,
+                paidValue: labels.paidValue,
+                seeMore: labels.suppliers.toLowerCase(),
+              }}
             />
           </div>
         </div>

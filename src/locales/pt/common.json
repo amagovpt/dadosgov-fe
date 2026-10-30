@@ -527,7 +527,8 @@
       "regiao_pl": "regiões"
     },
     "suppliersValues": "Valores de financiamento a fornecedores",
-    "suppliersInDetail": "Fornecedores em detalhe"
+    "suppliersInDetail": "Fornecedores em detalhe",
+    "loadMoreProjectsError": "Não foi possível carregar mais projetos (erro {{status}})"
   },
   "approvedValue": "Valor aprovado",
   "executedValue": "Valor executado",

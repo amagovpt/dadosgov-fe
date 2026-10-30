@@ -528,7 +528,8 @@
       "regiao_pl": "regions"
     },
     "suppliersValues": "Funding amounts to suppliers",
-    "suppliersInDetail": "Suppliers in detail"
+    "suppliersInDetail": "Suppliers in detail",
+    "loadMoreProjectsError": "Could not load more projects (error {{status}})"
   },
   "suppliersValues": "Financing amounts to suppliers",
   "suppliersInDetail": "Suppliers in detail",

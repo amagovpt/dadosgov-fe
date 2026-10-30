@@ -11,12 +11,12 @@ import {
   PRRBeneficiaryProjectGroup,
   PRRBeneficiaryProjectItem,
   PRRBeneficiaryRelatedProjects,
-  PRRBeneficiaryRelatedProjectsResponse,
   PRRBeneficiaryRelatedProjectsType,
 } from "@/service/types/datastories/prr/prr";
 import { LoadMoreWrapper } from "@/components/Shared/Wrappers/LoadMoreWrapper";
 import { BenProjSheet } from "../../BeneficiaryAndProject/Sheet";
 import Link from "next/link";
+import { loadMoreRelatedProjects } from "./loadMoreRelatedProjects";
 
 const roleProjectCardIndex = {
   intermediate: { title: 0, cta: 1 },
@@ -68,31 +68,11 @@ function ProjectsByRoleList({ role, group, labels, nif }: ProjectsByRoleListProp
 
   const handleLoadMore = useCallback(
     async (page: number) => {
-      const res = await fetch(
-        "/api/fundos-europeus/plano-de-recuperacao-e-resiliencia/beneficiarios-e-projetos/ficha-de-beneficiario",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            nif,
-            type: roleApiType[role],
-            page,
-            limit: 10,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error(`Failed to load more projects: ${res.status}`);
-      }
-
-      const resObj = (await res.json()) as PRRBeneficiaryRelatedProjectsResponse;
+      const resObj = await loadMoreRelatedProjects(nif, roleApiType[role], page, t);
       setTotalItems(Number(resObj.total ?? 0));
       return { data: resObj.data ?? [] };
     },
-    [nif, role]
+    [nif, role, t]
   );
 
   return (
