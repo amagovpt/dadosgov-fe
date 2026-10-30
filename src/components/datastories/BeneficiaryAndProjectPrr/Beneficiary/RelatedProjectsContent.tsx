@@ -173,16 +173,14 @@ export default function RelatedProjectsContent({
                   <BenProjSheet.CardLined
                     title={String(group.total ?? 0)}
                     description={labels.projects}
-                    className="border-t-primary-600 bg-primary-100 items-center border-t-4 border-l-0"
+                    className="items-center border-t-4 border-l-0 border-t-primary-600 bg-primary-100"
                   />
                   <Link href={(ctaCard?.anchor as Record<string, string>)?.href ?? "#"}>
                     <ButtonGeneral
                       fullWidth
                       hasIcon
                       trailingIcon={(ctaCard?.anchor as Record<string, string>)?.icon ?? ""}
-                      trailingIconHover={
-                        (ctaCard?.anchor as Record<string, string>)?.icon ?? ""
-                      }
+                      trailingIconHover={(ctaCard?.anchor as Record<string, string>)?.icon ?? ""}
                       appearance="link"
                       variant="neutral"
                     >
