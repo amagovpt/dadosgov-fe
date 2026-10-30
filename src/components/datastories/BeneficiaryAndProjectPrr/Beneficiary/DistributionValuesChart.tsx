@@ -176,7 +176,7 @@ export default function DistributionValuesChart({
     const card = getCard(distribution.cards, roleCardIndex[roleData.role]);
     const iconName = (card?.iconName as string) || "agora-line-star";
     const title = (card?.title as string) || "";
-    const description = (card?.imageAlt as string) || "";
+    const description = (card?.subtitle as string) || "";
     const graphDescription = (card?.description as string) || "";
     const roleValues = valuesByRole[roleData.role];
     const approvedValueByRole = roleValues.approvedValue;
@@ -223,7 +223,7 @@ export default function DistributionValuesChart({
           </div>
         </div>
 
-        <div className="flex flex-col gap-24 xl:max-w-3/4">
+        <div className="flex flex-col gap-24 max-w-3/4">
           <BenProjSheet.AreaValuelist
             areaTitle={labels.suppliersValues}
             items={[
@@ -244,17 +244,17 @@ export default function DistributionValuesChart({
               </Typograph>
             </div>
 
-              <DistributionTable
-                nif={nif}
-                type={roleApiType[roleData.role]}
-                group={roleData.group}
-                labels={{
-                  name: nameColumnLabel[roleData.role],
-                  fundedValue: labels.fundedValue,
-                  paidValue: labels.paidValue,
-                  seeMore: labels.suppliers.toLowerCase(),
-                }}
-              />
+            <DistributionTable
+              nif={nif}
+              type={roleApiType[roleData.role]}
+              group={roleData.group}
+              labels={{
+                name: nameColumnLabel[roleData.role],
+                fundedValue: labels.fundedValue,
+                paidValue: labels.paidValue,
+                seeMore: labels.suppliers.toLowerCase(),
+              }}
+            />
           </div>
         </div>
       </div>
