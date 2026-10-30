@@ -6,6 +6,7 @@ import { flattenData } from "@/utils/flattenObject";
 import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
 import { notFound } from "next/navigation";
+import { PRRBeneficiaryRelatedProjectsType } from "@/service/types/datastories/prr/prr";
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
@@ -1494,3 +1495,218 @@ export function loadMorePrrProjectSheetBeneficiaryFinancing(
 }
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
+
+export function getPrrBeneficiaryMeta(locale: string = "pt") {
+  return gql`
+    query getPrrBeneficiaryMeta {
+      findFichaDeBeneficiarioPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `;
+}
+
+export function getPrrBeneficiaryData(locale: string = "pt") {
+  return gql`
+    query getPrrBeneficiaryData {
+      findFichaDeBeneficiarioPrrSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+              index {
+                title
+                anchors {
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
+                }
+              }
+              breadcrumbs {
+                label
+                url
+              }
+            }
+          }
+          beneficiarySheet {
+            ${locale} {
+              id
+              iconName
+              title
+            }
+          }
+          consortiums {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              description
+              cards {
+                card {
+                  title
+                  subtitle
+                  description
+                  icon
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
+                }
+              }
+            }
+          }
+          distribution {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              description
+              cards {
+                card {
+                  title
+                  subtitle
+                  description
+                  icon
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
+                }
+              }
+            }
+          }
+          projects {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              description
+              cards {
+                card {
+                  title
+                  subtitle
+                  description
+                  icon
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
+                }
+              }
+            }
+          }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+}
+
+export function getPrrBeneficiarySheet() {
+  return gql`
+    query getPrrBeneficiarySheet($nif: String!) {
+      queryBeneficiarySheetOfPRR(nif: $nif) {
+        data {
+          budget
+          economicActivity
+          location
+          name
+          nif
+          totalProjects
+          beneficiaryForm {
+            economicActivity
+            location
+            name
+            nif
+            totalConsortiumParticipations
+            totalProjects
+          }
+          valuesByEntityRole {
+            approvedValue
+            entityRole
+            executedValue
+            percentageExecutedValue
+          }
+        }
+      }
+    }
+  `;
+}
+
+export function getPrrBeneficiarySourceInfo() {
+  return gql`
+    query getPrrBeneficiarySourceInfo {
+      queryBeneficiarySheetSourceInfoOfPRR {
+        sourceInfo {
+          format
+          publicationDate
+          modificationDate
+          sourceLink
+          source
+          title
+          url
+        }
+      }
+    }
+  `;
+}
+
+export function queryLoadMorePrrProjectsByBeneficiary(type: PRRBeneficiaryRelatedProjectsType) {
+  return gql`
+    query queryLoadMorePrrProjectsByBeneficiary(
+      $nif: String!
+      $page: Int
+      $limit: Int
+    ) {
+      queryBeneficiaryRelatedProjectsOfPRR(
+        nif: $nif
+        type: ${type}
+        page: $page
+        limit: $limit
+      ) {
+        nif
+        total
+        data {
+          amount
+          date
+          id
+          name
+          paid
+        }
+      }
+    }
+  `;
+}

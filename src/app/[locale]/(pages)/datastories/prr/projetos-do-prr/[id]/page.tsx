@@ -313,6 +313,8 @@ export default async function ProjectPage({
     pageDataResult.data.findFichaDeProjetoPrrSingleton.data as Record<string, unknown>
   ) as Project;
 
+  console.log("hero", hero);
+
   const viewData = mapProjectSheetToViewData(projectSheetData, beneficiaryFinancingData, locale);
 
   const valorTotalProjeto = formatCurrency(viewData.valorTotalProjeto, t);
@@ -329,7 +331,7 @@ export default async function ProjectPage({
         breadcrumbs={[
           ...hero.breadcrumbs,
           {
-            url: `/datastories/portugal-2030/projetos-do-portugal-2030/${id}`,
+            url: `/datastories/prr/projetos-do-prr/${id}`,
             label: projectCode,
           },
         ]}
