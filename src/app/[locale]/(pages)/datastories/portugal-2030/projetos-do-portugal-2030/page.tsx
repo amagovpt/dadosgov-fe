@@ -21,6 +21,7 @@ import { AdvancedFilter } from "@/components/Shared/SearchBeneficiariesAndProjec
 import { QueryFiltersPt2030, SourceInfo } from "@/service/types/datastories/pt2030/pt2030";
 import { RelatedDatastories } from "@/components/Shared/Datastories/Sections/RelatedDatastories";
 import Sources from "@/components/Shared/Datastories/Sections/Sources";
+import { getRelatedDatasets } from "@/service/api/datasets/server";
 import { INoResults } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsPT2030";
 import { slugify } from "@/utils/slugify";
 import { CardBigNumberProps } from "@/components/Shared/CardCompound/CardBigNumber";
@@ -95,7 +96,12 @@ export default async function DataStoryProjectsPT2030({
       relatedDatastories,
     },
     bigNumberValues,
-  ] = await Promise.all([getDatastorySearchPage(datastorySlug, locale), getBigNumberValues()]);
+    pt2030Datasets,
+  ] = await Promise.all([
+    getDatastorySearchPage(datastorySlug, locale),
+    getBigNumberValues(),
+    getRelatedDatasets("pt2030"),
+  ]);
 
   const { data, error } = await apolloClient.query<{
     queryBeneficiariesAndProjectsFiltersOfPortugal2030: QueryFiltersPt2030;
@@ -231,7 +237,9 @@ export default async function DataStoryProjectsPT2030({
       {relatedDatastories && relatedDatastories.active !== false && (
         <RelatedDatastories {...relatedDatastories} />
       )}
-      {relatedDatasets && relatedDatasets.active !== false && <Sources {...relatedDatasets} />}
+      {relatedDatasets && relatedDatasets.active !== false && pt2030Datasets.length > 0 && (
+        <Sources {...relatedDatasets} datasets={pt2030Datasets} pageSize={6} fromCatalog />
+      )}
     </main>
   );
 }
