@@ -173,7 +173,7 @@ export default function RelatedProjectsContent({
                   <BenProjSheet.CardLined
                     title={String(group.total ?? 0)}
                     description={labels.projects}
-                    className="border-t-fundo-europeu-500 items-center border-t-4 border-l-0"
+                    className="border-t-primary-600 bg-primary-100 items-center border-t-4 border-l-0"
                   />
                   <Link href={(ctaCard?.anchor as Record<string, string>)?.href ?? "#"}>
                     <ButtonGeneral
