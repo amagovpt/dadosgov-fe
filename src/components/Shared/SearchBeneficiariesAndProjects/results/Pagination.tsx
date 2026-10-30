@@ -33,12 +33,11 @@ export default function Pagination() {
   const data = useSearchBenProjStore((state) => state.data);
 
   const handlePageChange = useCallback(
-    (pageIndex: number) => {
-      const nextPage = pageIndex + 1;
-      if (nextPage !== page) {
-        setPage(nextPage);
-        scrollToResultsTop();
-      }
+    (nextPage: number) => {
+      // The DS also fires onChange (1-based) on mount with the active page; skip it
+      if (nextPage === page) return;
+      setPage(nextPage);
+      scrollToResultsTop();
     },
     [page, setPage],
   );
@@ -53,6 +52,7 @@ export default function Pagination() {
         <SearchPagination
           key={`${sortBy}-${indicator}`}
           totalPages={nPages}
+          activePage={page}
           boundaryCount={1}
           siblingCount={isMobile ? 1 : 4}
           label={t("pagination")}

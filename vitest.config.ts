@@ -7,6 +7,8 @@ export default defineConfig({
     alias: {
       ...resolveAgoraActionIcons(__dirname),
       "@": path.resolve(__dirname, "./src"),
+      // Next resolves `server-only` from its own compiled copy; it is not a top-level package
+      "server-only": path.resolve(__dirname, "./node_modules/next/dist/compiled/server-only/empty.js"),
     },
   },
   test: {
