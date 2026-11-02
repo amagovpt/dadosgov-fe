@@ -1009,6 +1009,19 @@ li.section-name:empty {
   background-color: #22863a !important;
 }
 
+.dimension-progress .progress-bar,
+.dimension-progress .progress-bar::-webkit-progress-bar {
+  background-color: var(--color-neutral-50) !important;
+}
+
+.dimension-progress .progress-bar::-webkit-progress-value {
+  background-color: var(--color-primary-600) !important;
+}
+
+.dimension-progress .progress-bar::-moz-progress-bar {
+  background-color: var(--color-primary-600) !important;
+}
+
 /* Force buttons row inside CardNoResults extra-description */
 .agora-card-no-results .extra-description > div {
   display: flex !important;

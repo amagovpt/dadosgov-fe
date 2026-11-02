@@ -569,6 +569,35 @@
       "totalContractsValue": "Total contracts value",
       "totalContracts": "Total contracts",
       "value": "Value"
+    },
+    "dimensions": {
+      "completionPercentage": "Completion percentage",
+      "investments": "Investments",
+      "reforms": "Reforms",
+      "investment": "Investment",
+      "reform": "Reform",
+      "seeMore": "See more",
+      "seeLess": "See less",
+      "backToChart": "Back to chart",
+      "conclusionDate": "Conclusion date",
+      "expectedCompletionDate": "Expected completion date",
+      "completedIn": "Completed in",
+      "until": "Until",
+      "consultBeneficiaries": "View beneficiaries",
+      "consultProjects": "View projects",
+      "milestoneYearStart": "Start year {{year}}, ",
+      "milestoneYearMiddle": "{{year}} reached {{value}}, ",
+      "milestoneYearEnd": "{{year}} reached {{value}}, progress {{percentage}}%",
+      "milestoneYearEndComplete": "{{year}} concluded with {{value}}, progress {{percentage}}%",
+      "milestoneObjectiveExceeded": "Objective achieved!",
+      "milestoneCurrentlyAt": "Currently at {{percentage}}%",
+      "currentInterventions": "Currently {{count}} interventions",
+      "totalValue": "Total value",
+      "spentValue": "Spent value",
+      "fundingChartAria": "Funding chart: total value {{totalValue}}, spent value {{spentValue}}",
+      "financingTypes": "Financing typologies",
+      "supportValues": "Grants",
+      "loanValues": "Loans"
     }
   }
 }

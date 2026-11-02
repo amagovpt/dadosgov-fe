@@ -10,6 +10,7 @@ interface SeeMoreToggleProps {
   textClassName?: string;
   moreLabel?: string;
   lessLabel?: string;
+  ariaControls?: string;
 }
 
 export const SeeMoreToggle: React.FC<SeeMoreToggleProps> = ({
@@ -20,6 +21,7 @@ export const SeeMoreToggle: React.FC<SeeMoreToggleProps> = ({
   textClassName = "",
   moreLabel = "Ver mais",
   lessLabel = "Ver menos",
+  ariaControls,
 }) => {
   const iconBaseClass = `block [transform-style:preserve-3d] transition-transform duration-[250ms] ease-linear ${
     isExpanded ? "[transform:rotateX(180deg)]" : "[transform:rotateX(0deg)]"
@@ -30,6 +32,7 @@ export const SeeMoreToggle: React.FC<SeeMoreToggleProps> = ({
       type="button"
       onClick={onToggle}
       aria-expanded={isExpanded}
+      aria-controls={ariaControls}
       className={className}
     >
       <svg

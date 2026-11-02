@@ -19,7 +19,7 @@ type RelatedDatasetsSearch = {
 
 const RELATED_DATASETS = {
   prr: {
-    terms: ["prr", "plano de recuperação e resiliência"],
+    terms: ["prr"],
     ownOrganizationId: "61140a0107819099529af103",
     includeOwnOrganization: true,
   },
@@ -93,8 +93,6 @@ export async function getRelatedDatasets(
 
   const isOwn = (dataset: Dataset) => Number(dataset.organization?.id === ownOrganizationId);
   return [...byId.values()]
-    .sort(
-      (a, b) => isOwn(b) - isOwn(a) || Date.parse(updatedAt(b)) - Date.parse(updatedAt(a))
-    )
+    .sort((a, b) => isOwn(b) - isOwn(a) || Date.parse(updatedAt(b)) - Date.parse(updatedAt(a)))
     .map(toSourceDataset);
 }

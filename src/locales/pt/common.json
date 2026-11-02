@@ -566,6 +566,35 @@
       "totalContractsValue": "Valor total dos contratos",
       "totalContracts": "Total de contratos",
       "value": "Valor"
+    },
+    "dimensions": {
+      "completionPercentage": "Percentagem de conclusão",
+      "investments": "Investimentos",
+      "reforms": "Reformas",
+      "investment": "Investimento",
+      "reform": "Reforma",
+      "seeMore": "Ver mais",
+      "seeLess": "Ver menos",
+      "backToChart": "Voltar ao gráfico",
+      "conclusionDate": "Data de conclusão",
+      "expectedCompletionDate": "Data de conclusão prevista",
+      "completedIn": "Concluído em",
+      "until": "Até",
+      "consultBeneficiaries": "Consultar beneficiários",
+      "consultProjects": "Consultar projetos",
+      "milestoneYearStart": "Ano de início {{year}}, ",
+      "milestoneYearMiddle": "{{year}} alcançou {{value}}, ",
+      "milestoneYearEnd": "{{year}} alcançou {{value}}, progresso {{percentage}}%",
+      "milestoneYearEndComplete": "{{year}} terminou com {{value}}, progresso {{percentage}}%",
+      "milestoneObjectiveExceeded": "Objetivo superado!",
+      "milestoneCurrentlyAt": "Atualmente a {{percentage}}%",
+      "currentInterventions": "Atualmente {{count}} intervenções",
+      "totalValue": "Valor total",
+      "spentValue": "Valor gasto",
+      "fundingChartAria": "Gráfico de financiamento: valor total {{totalValue}}, valor gasto {{spentValue}}",
+      "financingTypes": "Tipologias de financiamento",
+      "supportValues": "Apoios",
+      "loanValues": "Empréstimos"
     }
   }
 }
