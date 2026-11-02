@@ -25,6 +25,7 @@ import {
 } from "@/service/types/datastories/prr/prr";
 import { RelatedDatastories } from "@/components/Shared/Datastories/Sections/RelatedDatastories";
 import Sources from "@/components/Shared/Datastories/Sections/Sources";
+import { getRelatedDatasets } from "@/service/api/datasets/server";
 import { INoResults } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsPRR";
 import { slugify } from "@/utils/slugify";
 import { toSortedUnique } from "@/utils/toSortedUnique";
@@ -98,7 +99,12 @@ export default async function DataStoryBeneficiariesPRR({
       relatedDatastories,
     },
     bigNumberValues,
-  ] = await Promise.all([getDatastorySearchPage(DATASTORY_SLUG, locale), getBigNumberValues()]);
+    prrDatasets,
+  ] = await Promise.all([
+    getDatastorySearchPage(DATASTORY_SLUG, locale),
+    getBigNumberValues(),
+    getRelatedDatasets("prr"),
+  ]);
 
   const { data, error } = await apolloClient.query<{
     queryBeneficiariesAndProjectsFiltersOfPRR: QueryFiltersPrr;
@@ -254,7 +260,9 @@ export default async function DataStoryBeneficiariesPRR({
       {relatedDatastories && relatedDatastories.active !== false && (
         <RelatedDatastories {...relatedDatastories} />
       )}
-      {relatedDatasets && relatedDatasets.active !== false && <Sources {...relatedDatasets} />}
+      {relatedDatasets && relatedDatasets.active !== false && prrDatasets.length > 0 && (
+        <Sources {...relatedDatasets} datasets={prrDatasets} pageSize={6} fromCatalog />
+      )}
     </main>
   );
 }

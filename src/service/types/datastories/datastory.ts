@@ -1,4 +1,5 @@
 ﻿import { BreadcrumbItem } from "../shared";
+import type { Badge, UserRef } from "../identity";
 
 type Anchor = {
   children: string;
@@ -154,13 +155,24 @@ export type RelatedSection = {
 
 // ----------------------------------------------------------------------------------------------
 
-type Metadata = {
+// Squidex fills only the base fields; datasets read from the API also carry what the /datasets
+// card shows (metrics, quality, badges and the owner of datasets without an organization)
+export type SourceDataset = {
   image?: string[];
   slug: string;
   organizationName: string;
   title: string;
   description: string;
   createdAt: string;
+  metrics?: {
+    views?: number;
+    resources_downloads?: number;
+    reuses?: number;
+    followers?: number;
+  };
+  quality?: { score: number };
+  badges?: Badge[];
+  owner?: Pick<UserRef, "slug" | "first_name" | "last_name" | "avatar_thumbnail"> | null;
 };
 
 export type SourceSection = {
@@ -168,7 +180,7 @@ export type SourceSection = {
   id: string;
   active?: boolean;
   title: string;
-  datasets: Metadata[];
+  datasets: SourceDataset[];
 };
 
 // ----------------------------------------------------------------------------------------------
