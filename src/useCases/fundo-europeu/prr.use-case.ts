@@ -1,3 +1,4 @@
+import { InvestmentInDetails, ReformsInDetails } from '@/@types/dimensions-types';
 import {
   BeneficiariesSearchOfPRR,
   IBeneficiariesAndProjectsPRRepository,
@@ -19,7 +20,15 @@ import {
   SpecificComponentsByDimensionsOfPRR,
   SpecificInvestmentsByComponentsOfPRR,
 } from '@domain/fundo-europeu/prr/beneficiarios-e-projetos';
+import { BigNumberMoreResilientCountryEconomy, IEuDimensaoResilienciaRepository, ResiliencyInNumbers } from '@domain/fundo-europeu/prr/dimensao-resiliencia';
+import { bigNumbersSustainableDevelopment, IEuDimensionClimateTransitionRepository, TransitionClimaticInNumbers } from '@domain/fundo-europeu/prr/dimensao-transicao-climatica';
+import { BigNumbersDigitalAtTheServiceOfPeople, DigitalTransitionInNumbers, IEuDimensionDigitalTransitionRepository } from '@domain/fundo-europeu/prr/dimensao-transicao-digital';
+import { Dimensions, IEuDimensoesRepository } from '@domain/fundo-europeu/prr/dimensoes';
 import { BeneficiariesAndProjectsPRRepository } from '@infrastructure/Repository/fundo-europeu/prr/beneficiarios-e-projetos.repository';
+import { DimensaoResilienciaRepository } from '@infrastructure/Repository/fundo-europeu/prr/dimensao-resiliencia.repository';
+import { DimensaoTransicaoClimaticaRepository } from '@infrastructure/Repository/fundo-europeu/prr/dimensao-transicao-climatica.repository';
+import { DigitalTransitionDimensionRepository } from '@infrastructure/Repository/fundo-europeu/prr/dimensao-transicao-digital.repository';
+import { DimensoesRepository } from '@infrastructure/Repository/fundo-europeu/prr/dimensoes.repository';
 
 export class BeneficiariesAndProjectsPRRUseCase {
   private readonly beneficiariesAndProjectsPRRRepo: IBeneficiariesAndProjectsPRRepository;
@@ -177,5 +186,111 @@ export class BeneficiariesAndProjectsPRRUseCase {
     return this.beneficiariesAndProjectsPRRRepo.getSpecificInvestmentsByComponentsOfPRR(
       dsComponent,
     );
+  }
+}
+
+export class DimensionsUseCase {
+  private readonly dimensionsRepo: IEuDimensoesRepository;
+
+  constructor() {
+    this.dimensionsRepo = new DimensoesRepository();
+  }
+
+  async getDimensionsPRRUseCase(): Promise<Dimensions[]> {
+    const data = await this.dimensionsRepo.getDimensionsPRR();
+    return data;
+  }
+}
+
+export class DimensaoResilienciaUseCase {
+  private readonly dimensaoResilienciaRepo: IEuDimensaoResilienciaRepository;
+
+  constructor() {
+    this.dimensaoResilienciaRepo = new DimensaoResilienciaRepository();
+  }
+
+  async getResiliencyInNumbersUseCase(): Promise<ResiliencyInNumbers> {
+    const data = await this.dimensaoResilienciaRepo.getResiliencyInNumbers();
+    return data;
+  }
+
+  async getBigNumberMoreResilientCountryEconomyUseCase(): Promise<BigNumberMoreResilientCountryEconomy> {
+    const data =
+      await this.dimensaoResilienciaRepo.getBigNumberMoreResilientCountryEconomy();
+    return data;
+  }
+
+  async getInvestmentInDetailsUseCase(): Promise<InvestmentInDetails> {
+    const data = await this.dimensaoResilienciaRepo.getInvestmentInDetails();
+    return data;
+  }
+
+  async getReformsInDetailsUseCase(): Promise<ReformsInDetails> {
+    const data = await this.dimensaoResilienciaRepo.getReformsInDetails();
+    return data;
+  }
+}
+
+export class DimensaoTransicaoClimaticaUseCase {
+  private readonly dimensaoTransicaoClimaticaRepo: IEuDimensionClimateTransitionRepository;
+  constructor() {
+    this.dimensaoTransicaoClimaticaRepo =
+      new DimensaoTransicaoClimaticaRepository();
+  }
+
+  async getTransitionClimaticInNumbersUseCase(): Promise<TransitionClimaticInNumbers> {
+    const data =
+      await this.dimensaoTransicaoClimaticaRepo.getTransitionClimaticInNumbers();
+    return data;
+  }
+
+  async getBigNumbersSustainableDevelopmentUseCase(): Promise<bigNumbersSustainableDevelopment> {
+    const data =
+      await this.dimensaoTransicaoClimaticaRepo.getBigNumbersSustainableDevelopment();
+    return data;
+  }
+
+  async getInvestmentInDetailsClimateTransitionUseCase(): Promise<InvestmentInDetails> {
+    const data =
+      await this.dimensaoTransicaoClimaticaRepo.getInvestmentInDetailsClimateTransition();
+    return data;
+  }
+
+  async getReformsInDetailsClimateTransitionUseCase(): Promise<ReformsInDetails> {
+    const data =
+      await this.dimensaoTransicaoClimaticaRepo.getReformsInDetailsClimateTransition();
+    return data;
+  }
+}
+
+export class DigitalTransitionDimensionUseCase {
+  private readonly climateTransitionDimensionRepo: IEuDimensionDigitalTransitionRepository;
+  constructor() {
+    this.climateTransitionDimensionRepo =
+      new DigitalTransitionDimensionRepository();
+  }
+
+  async getDigitalTransitionInNumbers(): Promise<DigitalTransitionInNumbers> {
+    const data =
+      await this.climateTransitionDimensionRepo.getDigitalTransitionInNumbers();
+    return data;
+  }
+
+  async getBigNumbersDigitalAtTheServiceOfPeople(): Promise<BigNumbersDigitalAtTheServiceOfPeople> {
+    const data =
+      await this.climateTransitionDimensionRepo.getBigNumbersDigitalAtTheServiceOfPeople();
+    return data;
+  }
+
+  async getInvestmentInDetails(): Promise<InvestmentInDetails> {
+    const data =
+      await this.climateTransitionDimensionRepo.getInvestmentInDetails();
+    return data;
+  }
+
+  async getReformsInDetails(): Promise<ReformsInDetails> {
+    const data =
+      await this.climateTransitionDimensionRepo.getReformsInDetails();
+    return data;
   }
 }
