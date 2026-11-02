@@ -386,6 +386,7 @@
     "roles": {
       "intermediateBeneficiary": "Beneficiário intermediário",
       "beneficiary": "Beneficiário",
+      "partner": "Parceiro",
       "supplier": "Fornecedor"
     },
     "filters": {
@@ -498,7 +499,11 @@
       "nif": "Número de identificação fiscal",
       "ben_name": "Nome",
       "total_projetos": "Total de projetos",
-      "total_financiado": "Total financiado"
+      "total_financiado": "Total financiado",
+      "financiamento_recebido": "Financiamento recebido",
+      "valor_recebido": "Valor recebido",
+      "atividade_economica": "Atividade económica",
+      "localizacao_sede": "Localização da sede"
     },
     "tooltips": {
       "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus."
@@ -523,7 +528,12 @@
       "regiao_pl": "regiões"
     },
     "suppliersValues": "Valores de financiamento a fornecedores",
-    "suppliersInDetail": "Fornecedores em detalhe"
+    "suppliersInDetail": "Fornecedores em detalhe",
+    "beneficiariesValues": "Valores atribuídos a beneficiários",
+    "projectsByRoleTitle": "Projetos em que participa enquanto {{role}}",
+    "beneficiariesInDetail": "Beneficiários em detalhe",
+    "consortiumMembersValues": "Valores contratados como membros do consórcio",
+    "loadMoreProjectsError": "Não foi possível carregar mais projetos (erro {{status}})"
   },
   "approvedValue": "Valor aprovado",
   "executedValue": "Valor executado",

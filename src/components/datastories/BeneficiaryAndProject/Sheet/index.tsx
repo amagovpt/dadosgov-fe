@@ -8,6 +8,7 @@ import SheetBenProjList from "./List";
 import MediumValue from "./MediumValue";
 import SheetBenProjRoot from "./Root";
 import SheetBenProjWrapper from "./Wrapper";
+import Table from "./Table";
 
 
 export const BenProjSheet = {
@@ -21,4 +22,5 @@ export const BenProjSheet = {
   BigValue: BigValue,
   MediumValue: MediumValue,
   AreaValuelist: AreaValuelist,
+  Table: Table,
 };

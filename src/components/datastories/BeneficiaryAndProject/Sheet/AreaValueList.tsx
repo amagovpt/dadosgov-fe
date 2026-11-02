@@ -3,7 +3,7 @@
 import { formatCompactEUR } from "@/utils/formatCurrency";
 import { useTranslation } from "react-i18next";
 import { useId } from "react";
-import { twMerge } from "tailwind-merge";
+import { twJoin } from "tailwind-merge";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 
 /** ------------------------------------------------------------------------------------------------------ */
@@ -20,9 +20,9 @@ interface IListHeader {
 function ListHeader({ header }: IListHeader) {
   return (
     <li>
-      <div className="w-full flex flex-row gap-32 pb-8 px-16">
+      <div className="flex w-full flex-row gap-32 px-16 pb-8">
         <div className="grow text-s-bold text-neutral-900">{header.area}</div>
-        <div className="text-s-bold text-primary-900">{header.value}</div>
+        <div className="text-s-bold text-neutral-900">{header.value}</div>
       </div>
     </li>
   );
@@ -48,14 +48,9 @@ function ListItem({ item, boldValues }: IListItem) {
 
   return (
     <li>
-      <div className="w-full flex flex-row gap-32 pb-8 px-16 border-b-2 border-b-neutral-200">
+      <div className="flex w-full flex-row gap-32 border-b-2 border-b-neutral-200 px-16 pb-8">
         <div className="grow text-m-regular text-neutral-900">{item.area}</div>
-        <div
-          className={twMerge(
-            "text-primary-900",
-            boldValues ? "text-m-bold" : "text-m-regular",
-          )}
-        >
+        <div className={twJoin("text-neutral-900", boldValues ? "text-m-bold" : "text-m-regular")}>
           {valor_financiamento}
         </div>
       </div>
@@ -74,7 +69,7 @@ function List({ header, items }: IList) {
   const id = useId();
 
   return (
-    <ul className="w-full flex flex-col gap-8">
+    <ul className="flex w-full flex-col gap-8">
       {header && <ListHeader header={header} />}
       {items.map((item, index) => {
         return <ListItem key={`list-${id}-${index}`} item={item} />;
@@ -90,25 +85,20 @@ export interface IAreaValuelist extends IList {
   areaSubtitle?: string;
 }
 
-export default function AreaValuelist({
-  areaTitle,
-  areaSubtitle,
-  header,
-  items,
-}: IAreaValuelist) {
+export default function AreaValuelist({ areaTitle, areaSubtitle, header, items }: IAreaValuelist) {
   const hasAreaInfo = areaTitle || areaSubtitle;
 
   return (
-    <div className="col-span-12 xl:col-span-7 flex flex-col gap-32">
+    <div className="col-span-12 flex flex-col gap-32 xl:col-span-7">
       {hasAreaInfo && (
         <div className="flex flex-col gap-8">
           {areaTitle && (
-            <Typograph tag="p" className="text-l-bold text-primary-900">
+            <Typograph tag="p" className="text-l-bold text-neutral-900">
               {areaTitle}
             </Typograph>
           )}
           {areaSubtitle && (
-            <Typograph tag="p" className="text-s-regular text-primary-900">
+            <Typograph tag="p" className="text-s-regular text-neutral-900">
               {areaSubtitle}
             </Typograph>
           )}
