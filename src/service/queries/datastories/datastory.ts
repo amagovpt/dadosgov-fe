@@ -6,7 +6,10 @@ import { flattenData } from "@/utils/flattenObject";
 import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
 import { notFound } from "next/navigation";
-import { PRRBeneficiaryRelatedProjectsType } from "@/service/types/datastories/prr/prr";
+import {
+  DimensionPage,
+  PRRBeneficiaryRelatedProjectsType,
+} from "@/service/types/datastories/prr/prr";
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
@@ -457,6 +460,126 @@ export async function getDatastorySearchPage(
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
+// The PRR dimension pages have a schema of their own (`Dimensoes`) in Squidex
+export async function getDimensionPage(
+  slug: string,
+  locale: string = "pt"
+): Promise<DimensionPage> {
+  const query = gql(/* GraphQL */ `
+    query QueryGetDimensionPageData($slug: String!) {
+      queryDimensoesContents(filter: $slug) {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+              index {
+                title
+                anchors {
+                  anchor {
+                    href
+                    children
+                    icon
+                  }
+                }
+              }
+              breadcrumbs {
+                url
+                label
+              }
+            }
+          }
+          dimensionInNumbers{
+            ${locale}
+          }
+          bigNumbers {
+            ${locale} {
+              description
+            }
+          }
+          investmentsInDetail {
+            ${locale} {
+              title
+              description
+            }
+          }
+          reformsInDetail {
+            ${locale} {
+              title
+              description
+            }
+          }
+          relatedDatastories {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              description
+              datastories {
+                data {
+                  metadata {
+                    ${locale} {
+                      createdAt
+                      description
+                      slug
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+          relatedDatasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  const { data, error } = await apolloClient.query<{
+    queryDimensoesContents: Array<{
+      data: Record<string, unknown>;
+    }>;
+  }>({
+    query: query,
+    variables: {
+      slug: `data/id/iv eq '${slug}'`,
+    },
+  });
+
+  if (!data || error) {
+    console.error("Error fetching dimension page information:", error);
+    throw new Error("Failed to fetch dimension page information");
+  }
+
+  const page = data.queryDimensoesContents[0]?.data;
+
+  if (!page) {
+    return notFound();
+  }
+
+  return flattenData(page) as DimensionPage;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
 export function getSearchProjectsPT2030() {
   return gql(/* GraphQL */ `
     query getSearchProjects {
@@ -610,6 +733,99 @@ export function getProjectsTotalsPRR() {
         executedValue
         endDateMin
         endDateMax
+      }
+    }
+  `);
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------- */
+
+const DIMENSION_MILESTONES_FIELDS = `
+  milestonesTargets {
+    completionPercentage
+    dsExecutionIndicator
+    dtConclusionMilestoneTarget
+    executionIndicatorName
+    numberOfInterventions
+    finished
+    hasGraph
+    milestoneOrTarget
+    graphicData {
+      baseline
+      objective
+      quarter
+      year
+    }
+  }
+`;
+
+const DIMENSION_SOURCE_INFO_FIELDS = `
+  sourceInfo {
+    format
+    modificationDate
+    publicationDate
+    referenceDate
+    source
+    sourceLink
+    title
+    updateDate
+    url
+  }
+`;
+
+export function getResilienceDimensionData() {
+  return gql(/* GraphQL */ `
+    query getResilienceDimensionData {
+      queryResiliencyInNumbers {
+        totalInvestmentPrr
+        allocatedFundsDimension
+        fundsSpentDimension
+      }
+      queryInvestmentInDetailsDimensionResiliency {
+        data {
+          id
+          name
+          number
+          completionPercentage
+          investments {
+            amountSpent
+            assignedAmount
+            cdInvestment
+            completionDate
+            completionPercentage
+            finished
+            idInvestment
+            investmentDateCompletion
+            investmentDescription
+            investmentName
+            loanValue
+            lostFundAmount
+            ${DIMENSION_MILESTONES_FIELDS}
+          }
+        }
+        ${DIMENSION_SOURCE_INFO_FIELDS}
+      }
+      queryReformsInDetailsDimensionResiliency {
+        data {
+          id
+          name
+          number
+          completionPercentage
+          reforms {
+            amountSpent
+            assignedAmount
+            cdReform
+            completionDate
+            completionPercentage
+            dsReform
+            finished
+            nameReform
+            reformId
+            renovationCompletionDate
+            ${DIMENSION_MILESTONES_FIELDS}
+          }
+        }
+        ${DIMENSION_SOURCE_INFO_FIELDS}
       }
     }
   `);

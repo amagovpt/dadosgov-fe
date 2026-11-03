@@ -1,5 +1,6 @@
 import { Section } from "../../shared/common";
-import { DatastoryHero, SourceSection } from "../datastory";
+import { DatastoryHero, RelatedSection, SourceSection } from "../datastory";
+import { SourceInfo } from "../pt2030/pt2030";
 
 // ----------------------------------------------------------------------------------------------
 
@@ -155,7 +156,10 @@ export type BeneficiaryResponseItemPrr = {
 
 /** Beneficiary types of the PRR search, as the store sends them in `entityRole`. */
 export type BeneficiaryTypePrr =
-  "intermediateBeneficiaries" | "beneficiaries" | "suppliers" | "partners";
+  | "intermediateBeneficiaries"
+  | "beneficiaries"
+  | "suppliers"
+  | "partners";
 
 export type SearchBeneficiariesPrrRequestBody = {
   limit?: number;
@@ -297,7 +301,10 @@ export type ProjectSheetContestAndContractsTab = {
 };
 
 export type ProjectSheetBeneficiaryFinancingType =
-  "BENEFICIARY" | "INTERMEDIARY_BENEFICIARY" | "PARTNER" | "SUPPLIER";
+  | "BENEFICIARY"
+  | "INTERMEDIARY_BENEFICIARY"
+  | "PARTNER"
+  | "SUPPLIER";
 
 export type ProjectSheetBeneficiaryFinancingItem = {
   description: number | null;
@@ -439,11 +446,110 @@ export type PRRBeneficiaryRelatedProjectsResponse = {
 };
 
 export type PRRBeneficiaryRelatedProjectsType =
-  "BENEFICIARY" | "INTERMEDIARY" | "PARTNER" | "SUPPLIER";
+  | "BENEFICIARY"
+  | "INTERMEDIARY"
+  | "PARTNER"
+  | "SUPPLIER";
 
 export type PRRBeneficiaryRelatedProjects = {
   beneficiaryProjects: PRRBeneficiaryProjectGroup;
   intermediaryBeneficiaryProjects: PRRBeneficiaryProjectGroup;
   partnerProjects: PRRBeneficiaryProjectGroup;
   supplierProjects: PRRBeneficiaryProjectGroup;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+/** DIMENSIONS **/
+
+export type DimensionTextBlock = {
+  title: string;
+  description: string;
+};
+
+/** Squidex entry of a dimension page, in the `Dimensoes` schema. */
+export type DimensionPage = {
+  hero: DatastoryHero;
+  dimensionInNumbers: string;
+  bigNumbers: string[];
+  investmentsInDetail: DimensionTextBlock;
+  reformsInDetail: DimensionTextBlock;
+  relatedDatastories: RelatedSection;
+  relatedDatasets: SourceSection;
+};
+
+export type DimensionInNumbers = {
+  totalInvestmentPrr: number;
+  allocatedFundsDimension: number;
+  fundsSpentDimension: number;
+};
+
+export type DimensionMilestoneGraphicData = {
+  year: string;
+  quarter: string;
+  baseline: number | null;
+  objective: number | null;
+};
+
+export type DimensionMilestoneTarget = {
+  hasGraph: boolean;
+  milestoneOrTarget: string;
+  completionPercentage: number;
+  dsExecutionIndicator: string;
+  dtConclusionMilestoneTarget: string;
+  executionIndicatorName: string;
+  /** Interventions so far; the CMS sends it as text, "" when unknown. */
+  numberOfInterventions: string | null;
+  finished: boolean;
+  graphicData: DimensionMilestoneGraphicData[] | null;
+};
+
+export type DimensionInvestment = {
+  amountSpent: number;
+  assignedAmount: number;
+  cdInvestment: string;
+  completionDate: string;
+  completionPercentage: number;
+  finished: boolean;
+  idInvestment: string;
+  investmentDateCompletion: string;
+  investmentDescription: string;
+  investmentName: string;
+  loanValue: number;
+  lostFundAmount: number;
+  milestonesTargets: DimensionMilestoneTarget[] | null;
+};
+
+export type DimensionReform = {
+  amountSpent: number;
+  assignedAmount: number;
+  cdReform: string;
+  completionDate: string;
+  completionPercentage: number;
+  dsReform: string;
+  finished: boolean;
+  milestonesTargets: DimensionMilestoneTarget[] | null;
+  nameReform: string;
+  reformId: string;
+  renovationCompletionDate: string;
+};
+
+type DimensionDetailCategory = {
+  id: string;
+  name: string;
+  number: number;
+  completionPercentage: number;
+};
+
+export type DimensionInvestmentCategory = DimensionDetailCategory & {
+  investments: DimensionInvestment[] | null;
+};
+
+export type DimensionReformCategory = DimensionDetailCategory & {
+  reforms: DimensionReform[] | null;
+};
+
+export type DimensionDetails<TCategory> = {
+  data: TCategory[] | null;
+  sourceInfo: SourceInfo[] | null;
 };
