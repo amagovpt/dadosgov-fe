@@ -35,6 +35,19 @@ export const CLIMATE_TRANSITION_DIMENSION: DimensionConfig = {
   },
 };
 
+export const DIGITAL_TRANSITION_DIMENSION: DimensionConfig = {
+  slug: "prr/dimensao-transicao-digital",
+  queries: {
+    inNumbers: "queryDigitalTransitionInNumbersPRR",
+    investments: "queryInvestmentInDetailsDigitalTransitionPRR",
+    reforms: "queryReformsInDetailsDigitalTransitionPRR",
+  },
+  technicalSheets: {
+    investments: "prr-dimensao-digital-investimentos",
+    reforms: "prr-dimensao-digital-reformas",
+  },
+};
+
 export type DimensionMilestoneStep = {
   year: string;
   value: number;
