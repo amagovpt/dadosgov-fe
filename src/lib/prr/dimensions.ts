@@ -2,12 +2,38 @@ import type { SourceInfoFooterProps } from "@/components/Shared/SourceInfoFooter
 import type { TechnicalSheetModalData } from "@/service/types/modal/technical-sheet";
 import type { SourceInfo } from "@/service/types/datastories/pt2030/pt2030";
 import type {
+  DimensionConfig,
   DimensionInvestmentCategory,
   DimensionMilestoneGraphicData,
   DimensionMilestoneTarget,
   DimensionReformCategory,
 } from "@/service/types/datastories/prr/prr";
 
+export const RESILIENCE_DIMENSION: DimensionConfig = {
+  slug: "prr/dimensao-resiliencia",
+  queries: {
+    inNumbers: "queryResiliencyInNumbers",
+    investments: "queryInvestmentInDetailsDimensionResiliency",
+    reforms: "queryReformsInDetailsDimensionResiliency",
+  },
+  technicalSheets: {
+    investments: "prr-dimensao-resiliencia-investimentos",
+    reforms: "prr-dimensao-resiliencia-reformas",
+  },
+};
+
+export const CLIMATE_TRANSITION_DIMENSION: DimensionConfig = {
+  slug: "prr/dimensao-transicao-climatica",
+  queries: {
+    inNumbers: "queryTransitionClimaticInNumbersPRR",
+    investments: "queryInvestmentInDetailsClimateTransitionPRR",
+    reforms: "queryReformsInDetailsClimateTransitionPRR",
+  },
+  technicalSheets: {
+    investments: "prr-dimensao-climatica-investimentos",
+    reforms: "prr-dimensao-climatica-reformas",
+  },
+};
 
 export type DimensionMilestoneStep = {
   year: string;

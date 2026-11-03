@@ -7,6 +7,7 @@ import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
 import { notFound } from "next/navigation";
 import {
+  DimensionDataQueries,
   DimensionPage,
   PRRBeneficiaryRelatedProjectsType,
 } from "@/service/types/datastories/prr/prr";
@@ -773,15 +774,15 @@ const DIMENSION_SOURCE_INFO_FIELDS = `
   }
 `;
 
-export function getResilienceDimensionData() {
+export function getDimensionData(queries: DimensionDataQueries) {
   return gql(/* GraphQL */ `
-    query getResilienceDimensionData {
-      queryResiliencyInNumbers {
+    query getDimensionData {
+      inNumbers: ${queries.inNumbers} {
         totalInvestmentPrr
         allocatedFundsDimension
         fundsSpentDimension
       }
-      queryInvestmentInDetailsDimensionResiliency {
+      investments: ${queries.investments} {
         data {
           id
           name
@@ -805,7 +806,7 @@ export function getResilienceDimensionData() {
         }
         ${DIMENSION_SOURCE_INFO_FIELDS}
       }
-      queryReformsInDetailsDimensionResiliency {
+      reforms: ${queries.reforms} {
         data {
           id
           name

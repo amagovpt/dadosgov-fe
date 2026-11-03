@@ -553,3 +553,21 @@ export type DimensionDetails<TCategory> = {
   data: TCategory[] | null;
   sourceInfo: SourceInfo[] | null;
 };
+
+/** Names of the Squidex queries that serve one dimension's numbers, investments and reforms. */
+export type DimensionDataQueries = {
+  inNumbers: string;
+  investments: string;
+  reforms: string;
+};
+
+/** What sets one PRR dimension page apart from the others. */
+export type DimensionConfig = {
+  /** Id of the page's entry in the `Dimensoes` schema. */
+  slug: string;
+  queries: DimensionDataQueries;
+  technicalSheets: {
+    investments: string;
+    reforms: string;
+  };
+};
