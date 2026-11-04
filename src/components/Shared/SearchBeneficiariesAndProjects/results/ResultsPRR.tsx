@@ -9,8 +9,6 @@ import { type INoResults, ResultCard, ResultsLayout } from "./ResultsShared";
 
 export type { INoResults } from "./ResultsShared";
 
-// There is no PRR beneficiary sheet yet, so the cards do not navigate
-const PRR_CARD_LINKS_ENABLED = false;
 
 const ROLE_VALUE_KEYS = {
   financed: {
@@ -99,7 +97,6 @@ export default function ResultsPRR({ noResults }: { noResults?: INoResults }) {
             description={description}
             href={`${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`}
             isLast={index === data.length - 1}
-            linkEnabled={PRR_CARD_LINKS_ENABLED}
           />
         );
       })}
