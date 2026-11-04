@@ -502,8 +502,8 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
             variant="primary"
             hasIcon
             appearance={dataset.private ? "solid" : "outline"}
-            leadingIcon={dataset.private ? "agora-line-document" : undefined}
-            leadingIconHover={dataset.private ? "agora-solid-document" : undefined}
+            leadingIcon={dataset.private ? "agora-line-calendar" : undefined}
+            leadingIconHover={dataset.private ? "agora-solid-calendar" : undefined}
             disabled={isSubmitting || publicationBlocked}
             aria-describedby={publicationBlocked ? "dataset-publication-requirements" : undefined}
             onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
