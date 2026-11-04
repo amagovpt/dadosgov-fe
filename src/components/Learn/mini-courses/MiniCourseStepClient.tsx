@@ -1,9 +1,9 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@ama-pt/agora-design-system';
 import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import Image from 'next/image';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { BodyCourse } from '@/service/types/courses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
@@ -26,14 +26,20 @@ const socialLinks = [
   { name: 'e-mail', icon: 'agora-line-mail' },
 ];
 
-export default function CourseStepClient({ title, slug, stepCourse, step }: Props) {
+export default function CourseStepClient({ title, slug, stepCourse, step: initialStep }: Props) {
   const { t } = useTranslation('learning');
 
 
   const router = useRouter();
+  const pathname = usePathname();
   const course = stepCourse;
   const parentRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Steps change through `history.pushState` (see `goToStep`), which Next syncs into
+  // `usePathname`, so the step is read from the URL and back/forward keep working.
+  const urlStep = parseInt(pathname.slice(pathname.lastIndexOf('/') + 1), 10);
+  const step = Number.isNaN(urlStep) ? initialStep : urlStep;
 
   function getImagePositionClass(position: string) {
     switch (position) {
@@ -50,12 +56,31 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
   }
 
 
-  useEffect(() => {
-    if (parentRef.current && cardRef.current) {
-      const cardHeight = cardRef.current.offsetHeight;
-      parentRef.current.style.minHeight = `${cardHeight + 96}px`;
-    }
+  // The card is absolutely positioned, so the band reserves its height by hand. Before paint,
+  // and again whenever the card resizes (another step, an image finishing loading).
+  useLayoutEffect(() => {
+    const parent = parentRef.current;
+    const card = cardRef.current;
+    if (!parent || !card) return;
+
+    const syncHeight = () => {
+      parent.style.minHeight = `${card.offsetHeight + 96}px`;
+    };
+    syncHeight();
+    const observer = new ResizeObserver(syncHeight);
+    observer.observe(card);
+    return () => observer.disconnect();
   }, []);
+
+  // Warm the cache with the neighbouring steps' images so they are ready when shown.
+  useEffect(() => {
+    [course?.[step], course?.[step - 2]].forEach((neighbour) => {
+      const imageId = neighbour?.image?.[0]?.id;
+      if (imageId) {
+        new window.Image().src = getAssets(imageId);
+      }
+    });
+  }, [course, step]);
 
   if (!course) {
     return (
@@ -79,16 +104,29 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
   const progressPercent = (step / course.length) * 100;
   const stepLabel = step.toString().padStart(2, "0");
 
+  // Every step is already loaded, so switching is client-only: a router navigation would
+  // re-render the page on the server and remount it, which is what made it flicker.
+  const goToStep = (target: number) => {
+    const coursePath = pathname.slice(0, pathname.lastIndexOf('/'));
+    window.history.pushState(null, '', `${coursePath}/${target}`);
+
+    const band = parentRef.current;
+    if (band && band.getBoundingClientRect().top < 0) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      band.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+  };
+
   const handleNext = () => {
     if (isLastStep) {
       router.push(`/recursos/aprender/minicursos`);
     } else {
-      router.push(`/recursos/aprender/minicursos/${slug}/${step + 1}`);
+      goToStep(step + 1);
     }
   };
 
   const handlePrevious = () => {
-    router.push(`/recursos/aprender/minicursos/${slug}/${step - 1}`);
+    goToStep(step - 1);
   };
 
 
@@ -128,7 +166,13 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
 
                   <div className='flex flex-col gap-32'>
                     <div className="bg-white rounded-b-8 shadow-[0_20px_20px_rgba(0,0,0,0.05)]  p-48">
-                      <div className={twJoin("flex gap-16", getImagePositionClass(currentStep.imagePosition ?? "left"))}>
+                      <div
+                        key={step}
+                        className={twJoin(
+                          "flex gap-16 animate-fade-in motion-reduce:animate-none",
+                          getImagePositionClass(currentStep.imagePosition ?? "left")
+                        )}
+                      >
                         <div className="flex-1 flex flex-col gap-8">
                           {currentStep.title && (
                             <h2 className={twMerge("text-neutral-900", isLastStep ? "!text-xl-bold text-brand-blue-secondary whitespace-break-spaces" : "text-l-bold")}>
