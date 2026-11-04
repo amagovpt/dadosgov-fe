@@ -384,7 +384,7 @@
   "resourceEditor": {
     "title": "Resource metadata",
     "availability": "Resource availability",
-    "pendingAvailability": "The resource is being analysed",
+    "pendingAvailability": "The availability of the resource is being analyzed",
     "metadata": "Resource metadata",
     "requiredFields": "All fields are required except those marked as optional.",
     "titleField": "Title",
