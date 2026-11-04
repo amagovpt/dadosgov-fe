@@ -18,6 +18,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import { AdminSearch } from "@/components/admin/lists/AdminSearch";
+import ResultsCount from "@/components/admin/ResultsCount";
 import { ResourceItem } from "@/components/admin/FileUploadModal/ResourceItem";
 import { getFileExtension, formatFileSize } from "@/components/admin/FileUploadModal/utils";
 import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceDetailPopup";
@@ -69,6 +70,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
   const tableId = useId();
   const selectable = props.selectable !== false;
   const { t, i18n } = useTranslation("admin-datasets");
+  const { t: tc } = useTranslation("admin-common");
   const listSection = useDatasetSection("resource-list");
   const { show, hide } = usePopupContext();
   const [query, setQuery] = useState("");
@@ -286,6 +288,10 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
         </ToggleGroup>
       </div>
       <div className="flex flex-col">
+        <div className="mb-16 flex flex-col gap-8">
+          <h4 className="text-l-medium text-primary-900">{tc("resultsTitle")}</h4>
+          <ResultsCount count={filtered.length} isLoading={false} className="mb-0" />
+        </div>
         {refreshError && (
           <StatusCard variant="danger" showIcon description={t("resources.refreshError")} />
         )}
