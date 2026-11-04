@@ -104,6 +104,18 @@
     variable is still out of scope.
   */
   --font-sans: var(--font-noto-sans, "Noto Sans"), sans-serif;
+
+  /* Content swap without a navigation (mini-course steps). */
+  --animate-fade-in: fade-in 200ms ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 /*

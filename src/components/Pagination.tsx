@@ -17,7 +17,7 @@ interface PaginationProps {
   isOnUrl?: boolean;
 }
 
-function buildPageUrl(page: number): string {
+export function buildPageUrl(page: number): string {
   if (typeof window === "undefined") return `?page=${page}`;
   const params = new URLSearchParams(window.location.search);
   if (page === 1) {
