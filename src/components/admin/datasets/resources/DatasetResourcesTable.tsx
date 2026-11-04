@@ -311,7 +311,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
           </div>
         )}
         {/* Agora's pagination dropdown extends 8px below its trigger even while closed. */}
-        <div className="-mb-8 overflow-x-auto pb-8">
+        <div>
           <AdminPaginatedTable
             pageSize={pageSize}
             totalItems={filtered.length}
@@ -373,7 +373,7 @@ export function DatasetResourcesTable(props: DatasetResourcesTableProps) {
                       {row.resource ? (
                         <button
                           type="button"
-                          className="text-left break-words text-primary-600 underline"
+                          className="text-left text-primary-600 underline"
                           onClick={() => (props.onResourceClick ?? openSaved)(row.resource!)}
                         >
                           {row.title}
