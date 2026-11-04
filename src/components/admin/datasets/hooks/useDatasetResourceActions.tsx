@@ -196,7 +196,7 @@ export function useDatasetResourceActions({
               if (!stored) throw new Error(t("edit.resourceSaveError"));
               stored = await updateResource(currentDataset.id, stored.id, {
                 ...payload,
-                ...(isUrl ? { url: newUrl } : {}),
+                ...(isUrl ? { url: newUrl, filesize: payload.filesize ?? null } : {}),
               });
               recordResource(stored);
             }

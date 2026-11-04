@@ -40,7 +40,7 @@ export interface ResourceUpdatePayload {
   filetype?: string;
   format?: string;
   mime?: string;
-  filesize?: number;
+  filesize?: number | null;
 }
 
 export interface DatasetPermissions {

@@ -225,7 +225,10 @@ export function useDatasetWizardSubmissionActions({
       };
       const existing = dataset.resources?.find((resource) => resource.url === url.trim());
       const resource = existing
-        ? await updateResource(dataset.id, existing.id, payload)
+        ? await updateResource(dataset.id, existing.id, {
+            ...payload,
+            filesize: payload.filesize ?? null,
+          })
         : await createResource(dataset.id, payload);
       recordSaved(resource);
       setResourceUrls((previous) => previous.filter((item) => item !== url));
