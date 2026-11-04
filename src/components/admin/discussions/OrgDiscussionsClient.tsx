@@ -33,6 +33,10 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const refreshDiscussions = useCallback(() => {
+    setRefreshVersion((version) => version + 1);
+  }, []);
   const {
     currentPage,
     setCurrentPage,
@@ -64,6 +68,11 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           sort: sortParam,
         });
         if (!cancelled) {
+          const lastPage = Math.max(1, Math.ceil((data.total ?? 0) / pageSize));
+          if (currentPage > lastPage) {
+            setCurrentPage(lastPage);
+            return;
+          }
           setDiscussions(data.data ?? []);
           setTotalItems(data.total ?? 0);
         }
@@ -86,6 +95,8 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
     searchQuery,
     filters.closedFilter,
     sortParam,
+    refreshVersion,
+    setCurrentPage,
   ]);
 
   const openDiscussion = useCallback(
@@ -94,12 +105,8 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
         <DiscussionDetailPopup
           key={discussion.id}
           discussion={discussion}
-          onUpdated={(updated) =>
-            setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
-          }
-          onDeleted={() =>
-            setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))
-          }
+          onUpdated={refreshDiscussions}
+          onDeleted={refreshDiscussions}
         />,
         {
           title: t("admin-discussions:popup.title"),
@@ -108,14 +115,30 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
         }
       );
     },
-    [show, t]
+    [show, t, refreshDiscussions]
   );
 
   const columns = useMemo(
-    () =>
-      createOrgDiscussionColumns({
+    () => {
+      const contentTypeLabels: Record<string, string> = {
+        Dataset: t("admin-discussions:contentTypes.dataset"),
+        Reuse: t("admin-discussions:contentTypes.reuse"),
+        Dataservice: t("admin-discussions:contentTypes.dataservice"),
+        Organization: t("admin-discussions:contentTypes.organization"),
+      };
+
+      return createOrgDiscussionColumns({
         onOpenDiscussion: openDiscussion,
         formatDate: formatDateToDMY,
+        contentTypeColumn:
+          filters.scope === "content"
+            ? {
+                label: t("admin-discussions:columns.contentType"),
+                getValue: (discussion) =>
+                  contentTypeLabels[discussion.subject?.class] ??
+                  t("admin-discussions:contentTypes.unknown"),
+              }
+            : undefined,
         labels: {
           title: t("admin-discussions:columns.title"),
           author: t("admin-discussions:columns.author"),
@@ -127,8 +150,9 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
           open: t("admin-discussions:filters.status.open"),
           closed: t("admin-discussions:filters.status.closed"),
         },
-      }),
-    [openDiscussion, t]
+      });
+    },
+    [openDiscussion, t, filters.scope]
   );
 
   const pageTitle = pageContent.orgHero?.title ?? "";
@@ -245,8 +269,6 @@ export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussi
         getSortOrder={getSortOrder}
         handleSort={handleSort}
         getRowKey={(discussion) => discussion.id}
-        getRowClassName={() => "cursor-pointer hover:bg-neutral-50"}
-        onRowClick={openDiscussion}
       />
     </AdminListPage>
   );

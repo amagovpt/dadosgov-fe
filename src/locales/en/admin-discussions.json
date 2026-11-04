@@ -13,6 +13,7 @@
   "columns": {
     "title": "Title",
     "author": "Author",
+    "contentType": "Content type",
     "status": "Status",
     "date": "Date",
     "messages": "Messages",
@@ -20,6 +21,13 @@
     "closedAt": "Closed at",
     "createdDate": "Creation date",
     "closedDate": "Completion date"
+  },
+  "contentTypes": {
+    "dataset": "Dataset",
+    "reuse": "Reuse",
+    "dataservice": "API",
+    "organization": "Organization",
+    "unknown": "Other"
   },
   "status": {
     "open": "OPEN",

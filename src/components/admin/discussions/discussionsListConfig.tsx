@@ -19,6 +19,10 @@ interface OrgDiscussionColumnsOptions {
   onOpenDiscussion: (discussion: Discussion) => void;
   formatDate: (date: string) => string;
   labels: DiscussionColumnLabels;
+  contentTypeColumn?: {
+    label: string;
+    getValue: (discussion: Discussion) => string;
+  };
 }
 
 export interface DiscussionColumnLabels {
@@ -92,6 +96,7 @@ export function createOrgDiscussionColumns({
   onOpenDiscussion,
   formatDate,
   labels,
+  contentTypeColumn,
 }: OrgDiscussionColumnsOptions): AdminListColumn<Discussion, DiscussionSortField>[] {
   return [
     {
@@ -102,11 +107,8 @@ export function createOrgDiscussionColumns({
       sortType: "string",
       renderCell: (discussion) => (
         <button
-          className="text-left [overflow-wrap:anywhere] text-primary-600 underline"
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpenDiscussion(discussion);
-          }}
+          className="cursor-pointer text-left [overflow-wrap:anywhere] text-primary-600 underline"
+          onClick={() => onOpenDiscussion(discussion)}
         >
           {discussion.title}
         </button>
@@ -127,6 +129,16 @@ export function createOrgDiscussionColumns({
       ),
       exportValue: (discussion) => (discussion.closed ? labels.closed : labels.open),
     },
+    ...(contentTypeColumn
+      ? [
+          {
+            id: "contentType",
+            header: contentTypeColumn.label,
+            renderCell: contentTypeColumn.getValue,
+            exportValue: contentTypeColumn.getValue,
+          },
+        ]
+      : []),
     {
       id: "created",
       header: labels.createdAt,

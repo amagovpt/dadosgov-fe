@@ -13,6 +13,7 @@
   "columns": {
     "title": "Título",
     "author": "Autor",
+    "contentType": "Tipologia",
     "status": "Estado",
     "date": "Data",
     "messages": "Mensagens",
@@ -20,6 +21,13 @@
     "closedAt": "Fechado em",
     "createdDate": "Data de criação",
     "closedDate": "Data de conclusão"
+  },
+  "contentTypes": {
+    "dataset": "Conjunto de dados",
+    "reuse": "Reutilização",
+    "dataservice": "API",
+    "organization": "Organização",
+    "unknown": "Outro"
   },
   "status": {
     "open": "ABERTA",
