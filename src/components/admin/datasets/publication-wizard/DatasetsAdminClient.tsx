@@ -16,6 +16,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
+import { getDatasetDraftExtras } from "@/utils/datasetPublication";
 import { DatasetWizardStep2 } from "./DatasetWizardStep2";
 import { DatasetWizardStep3 } from "./DatasetWizardStep3";
 import { DatasetWizardStep4 } from "./DatasetWizardStep4";
@@ -36,7 +37,6 @@ interface DatasetsAdminClientProps {
   creationId?: string;
   onNextStep?: () => void;
   onPreviousStep?: () => void;
-  onDatasetCreated?: (datasetId: string) => void;
   onComplete?: () => void;
 }
 
@@ -50,7 +50,6 @@ export default function DatasetsAdminClient({
   creationId,
   onNextStep,
   onPreviousStep,
-  onDatasetCreated,
   onComplete,
 }: DatasetsAdminClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
@@ -77,8 +76,6 @@ export default function DatasetsAdminClient({
     creationId,
     datasetId,
     licenseDefaultValue: options.licenseDefaultValue,
-    currentStep,
-    redesigned,
   });
   const contacts = useDatasetWizardContactActions(form);
   const completeWizard = () => {
@@ -94,18 +91,9 @@ export default function DatasetsAdminClient({
     handleStep2Next,
     handleStep3Next,
   } = useDatasetWizardSubmissionActions({
-    currentStep,
     optionalContacts: redesigned,
-    datasetId,
     ...form,
     uploadProgressKey: persistence.uploadProgressKey,
-    onDatasetCreated: (id) => {
-      if (onDatasetCreated) onDatasetCreated(id);
-      else
-        router.push(
-          localizeHref(`${draftScope}/datasets/new?step=${currentStep + 1}&datasetId=${id}`, locale)
-        );
-    },
     onNextStep: handleNextStep,
     onDraftSaved: (id) => {
       persistence.clearSession();
@@ -116,11 +104,6 @@ export default function DatasetsAdminClient({
       router.push(localizeHref(editPath, locale));
     },
     onComplete: completeWizard,
-    navigateToStep: (nextStep, nextDatasetId) => {
-      router.push(
-        localizeHref(`/admin/me/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`, locale)
-      );
-    },
     finishWizard: () => {
       router.push(localizeHref("/admin/me/datasets", locale));
     },
@@ -135,13 +118,6 @@ export default function DatasetsAdminClient({
       contactDraftRequired: t("admin-datasets:form.contactPointRequired"),
     },
     restoreErrors: {
-      missingDataset: t("admin-datasets:form.missingDatasetError"),
-      loadDataset: t("admin-datasets:form.step3LoadError"),
-      saveDataset: t("admin-datasets:form.step2SaveError"),
-      saveResource: t("admin-datasets:form.step3SaveError", { message: "{{message}}" }),
-      saveResourceRetry: t("admin-datasets:form.step3SaveRetryError", {
-        statusHint: "{{statusHint}}",
-      }),
       publish: t("admin-datasets:form.publishError"),
       saveDraft: t("admin-datasets:form.saveDraftError"),
     },
@@ -155,6 +131,17 @@ export default function DatasetsAdminClient({
 
   const auxiliarItems =
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
+
+  const previewDataset = {
+    title: form.datasetTitle,
+    description: form.datasetDescription,
+    frequency: form.frequencyDefaultValue,
+    organization:
+      organizations.find((organization) => organization.id === form.selectedProducer) ?? null,
+    owner: form.selectedProducer === "user" ? user : null,
+    extras: getDatasetDraftExtras(form.createdDataset?.extras, form.frequencyDefaultValue),
+    temporal_coverage: { start: form.temporalStart, end: form.temporalEnd },
+  };
 
   if (!persistence.isRestored) {
     return form.apiError ? (
@@ -359,10 +346,11 @@ export default function DatasetsAdminClient({
               redesigned={redesigned}
               publishStepCard={pageContent.publishStepCard}
               createdDataset={form.createdDataset}
+              previewDataset={previewDataset}
               datasetTitle={form.datasetTitle}
               datasetDescription={form.datasetDescription}
               onPublish={handlePublish}
-              onSaveDraft={handleSaveDraft}
+              onSaveDraft={completeWizard}
               isSubmitting={form.isSubmitting}
             />
           )}

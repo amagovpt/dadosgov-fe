@@ -3,6 +3,11 @@ import { parseDatasetDateToTime } from "@/components/admin/datasets/publication-
 
 const MISSING_FIELDS_KEY = "draft:missing_fields";
 
+export type DatasetPublicationMetadata = Pick<
+  Dataset,
+  "title" | "description" | "frequency" | "organization" | "owner" | "extras" | "temporal_coverage"
+>;
+
 export type DatasetPublicationIssue =
   | "title"
   | "description"
@@ -27,12 +32,14 @@ export function getDatasetDraftExtras(
   return extras;
 }
 
-export function hasMissingDraftFrequency(dataset: Dataset): boolean {
+export function hasMissingDraftFrequency(dataset: Pick<Dataset, "extras">): boolean {
   const fields = dataset.extras?.[MISSING_FIELDS_KEY];
   return Array.isArray(fields) && fields.includes("frequency");
 }
 
-export function getDatasetPublicationIssues(dataset: Dataset): DatasetPublicationIssue[] {
+export function getDatasetPublicationIssues(
+  dataset: DatasetPublicationMetadata
+): DatasetPublicationIssue[] {
   const issues: DatasetPublicationIssue[] = [];
   if (!dataset.title?.trim() || dataset.title.trim().length > 350) issues.push("title");
   if (!dataset.description?.trim() || dataset.description.trim().length > 3000)

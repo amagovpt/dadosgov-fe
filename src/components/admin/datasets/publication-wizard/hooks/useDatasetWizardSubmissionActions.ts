@@ -14,7 +14,7 @@ import {
   uploadResource,
 } from "@/service/api/datasets";
 import type { SpatialZone } from "@/service/types/catalog";
-import type { Dataset, DatasetUpdatePayload, Resource } from "@/service/types/dataset";
+import type { Dataset, Resource } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
@@ -26,9 +26,7 @@ import {
 } from "@/components/admin/datasets/publication-wizard/datasetFormModel";
 
 interface UseDatasetWizardSubmissionActionsParams {
-  currentStep: number;
   optionalContacts?: boolean;
-  datasetId?: string | null;
   createdDataset: Dataset | null;
   datasetTitle: string;
   datasetAcronym: string;
@@ -64,11 +62,9 @@ interface UseDatasetWizardSubmissionActionsParams {
   ) => void;
   resetErrors: () => void;
   focusFirstError: () => void;
-  onDatasetCreated?: (datasetId: string) => void;
   onDraftSaved: (datasetId: string) => void;
   onNextStep: () => void;
   onComplete?: () => void;
-  navigateToStep: (nextStep: number, nextDatasetId: string) => void;
   finishWizard: () => void;
   validationMessages: {
     producerRequired: string;
@@ -81,11 +77,6 @@ interface UseDatasetWizardSubmissionActionsParams {
     contactDraftRequired: string;
   };
   restoreErrors: {
-    missingDataset: string;
-    loadDataset: string;
-    saveDataset: string;
-    saveResource: string;
-    saveResourceRetry: string;
     publish: string;
     saveDraft: string;
   };
@@ -120,9 +111,7 @@ function readUploadProgress(key: string): Record<string, string> {
 }
 
 export function useDatasetWizardSubmissionActions({
-  currentStep,
   optionalContacts = false,
-  datasetId,
   createdDataset,
   datasetTitle,
   datasetAcronym,
@@ -154,11 +143,9 @@ export function useDatasetWizardSubmissionActions({
   setErrors,
   resetErrors,
   focusFirstError,
-  onDatasetCreated,
   onDraftSaved,
   onNextStep,
   onComplete,
-  navigateToStep,
   finishWizard,
   validationMessages,
   restoreErrors,
@@ -166,6 +153,7 @@ export function useDatasetWizardSubmissionActions({
   const { t } = useTranslation("admin-datasets");
   // Keep the upload result if updating its metadata fails, so retrying never uploads it twice.
   const uploadedResourceIds = useRef(new Map<File, Resource>());
+  const submissionInFlight = useRef(false);
 
   async function savePendingResources(dataset: Dataset) {
     const recordSaved = (resource: Resource) => {
@@ -234,7 +222,7 @@ export function useDatasetWizardSubmissionActions({
       setResourceUrls((previous) => previous.filter((item) => item !== url));
     }
   }
-  async function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>, saveAsDraft = false) {
+  function validateDetails(e?: React.MouseEvent<HTMLButtonElement>, saveAsDraft = false) {
     const { errors, draftErrors } = validateDatasetDetails(
       {
         producer: selectedProducerRef.current,
@@ -279,105 +267,93 @@ export function useDatasetWizardSubmissionActions({
         setApiError(t("publication.draftMinimum"));
       }
       focusFirstError();
-      return;
+      return false;
     }
 
     resetErrors();
     setApiError(null);
-    setIsSubmitting(true);
+    return true;
+  }
 
-    try {
-      const payload = buildDatasetCreatePayload({
-        title: datasetTitle,
-        acronym: datasetAcronym,
-        description: datasetDescription,
-        shortDescription: datasetShortDescription,
-        producer: selectedProducerRef.current,
-        license: selectedLicenseRef.current,
-        frequency: selectedFrequencyRef.current || (saveAsDraft ? "unknown" : ""),
-        keywords: selectedKeywordsRef.current,
-        contactPointIds: selectedContactPointIds,
-        temporalStart,
-        temporalEnd,
-      });
+  async function saveDataset(saveAsDraft: boolean) {
+    const payload = buildDatasetCreatePayload({
+      title: datasetTitle,
+      acronym: datasetAcronym,
+      description: datasetDescription,
+      shortDescription: datasetShortDescription,
+      producer: selectedProducerRef.current,
+      license: selectedLicenseRef.current,
+      frequency: selectedFrequencyRef.current || (saveAsDraft ? "unknown" : ""),
+      keywords: selectedKeywordsRef.current,
+      contactPointIds: selectedContactPointIds,
+      temporalStart,
+      temporalEnd,
+    });
 
-      payload.extras = getDatasetDraftExtras(createdDataset?.extras, selectedFrequencyRef.current);
+    payload.extras = getDatasetDraftExtras(createdDataset?.extras, selectedFrequencyRef.current);
 
-      // An empty selection must also clear associations when updating a draft.
-      if (optionalContacts) payload.contact_points = selectedContactPointIds;
+    // An empty selection must also clear associations when updating a draft.
+    if (optionalContacts) payload.contact_points = selectedContactPointIds;
 
-      const spatialZoneIds = spatialCoverageRef.current
-        .split(",")
-        .map((id) => id.trim())
-        .filter(Boolean);
-      let validSpatialZoneIds = spatialZoneIds;
-      let zoneDetails: SpatialZone[] = [];
+    const spatialZoneIds = spatialCoverageRef.current
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+    let validSpatialZoneIds = spatialZoneIds;
+    let zoneDetails: SpatialZone[] = [];
 
-      if (spatialZoneIds.length > 0) {
-        zoneDetails = await fetchSpatialZonesByIds(spatialZoneIds);
-        const validZoneIds = new Set(zoneDetails.map((zone) => zone.id));
-        validSpatialZoneIds = spatialZoneIds.filter((id) => validZoneIds.has(id));
-        if (validSpatialZoneIds.length !== spatialZoneIds.length) {
-          const normalized = validSpatialZoneIds.join(",");
-          spatialCoverageRef.current = normalized;
-          setSelectedSpatialZonesValue(normalized);
-        }
+    if (spatialZoneIds.length > 0) {
+      zoneDetails = await fetchSpatialZonesByIds(spatialZoneIds);
+      const validZoneIds = new Set(zoneDetails.map((zone) => zone.id));
+      validSpatialZoneIds = spatialZoneIds.filter((id) => validZoneIds.has(id));
+      if (validSpatialZoneIds.length !== spatialZoneIds.length) {
+        const normalized = validSpatialZoneIds.join(",");
+        spatialCoverageRef.current = normalized;
+        setSelectedSpatialZonesValue(normalized);
       }
-
-      let resolvedGranularity = spatialGranularityRef.current || null;
-      if (validSpatialZoneIds.length > 0) {
-        const selectedZoneSet = new Set(validSpatialZoneIds);
-        const levels = Array.from(
-          new Set(
-            zoneDetails
-              .filter((zone) => selectedZoneSet.has(zone.id))
-              .map((zone) => (typeof zone.level === "string" ? zone.level.trim() : ""))
-              .filter(Boolean)
-          )
-        );
-        if (levels.length === 1) {
-          resolvedGranularity = levels[0];
-        } else if (
-          levels.length > 1 &&
-          resolvedGranularity &&
-          !levels.includes(resolvedGranularity)
-        ) {
-          resolvedGranularity = levels[0];
-        }
-        spatialGranularityRef.current = resolvedGranularity || "";
-      }
-
-      if (validSpatialZoneIds.length > 0 || resolvedGranularity) {
-        payload.spatial = {
-          geom: null,
-          zones: validSpatialZoneIds,
-          granularity: resolvedGranularity,
-        };
-      }
-
-      const dataset = createdDataset
-        ? await updateDataset(createdDataset.id, payload as DatasetUpdatePayload)
-        : await createDataset(payload);
-
-      setCreatedDataset(dataset);
-      if (saveAsDraft) {
-        await savePendingResources(dataset);
-        onDraftSaved(dataset.id);
-      } else if (onDatasetCreated) {
-        onDatasetCreated(dataset.id);
-      } else {
-        navigateToStep(currentStep + 1, dataset.id);
-      }
-    } catch (error: unknown) {
-      const err = error as { data?: Record<string, unknown> };
-      if (err.data && typeof err.data === "object") {
-        setApiError(flattenApiError(err.data));
-      } else {
-        setApiError(restoreErrors.saveDataset);
-      }
-    } finally {
-      setIsSubmitting(false);
     }
+
+    let resolvedGranularity = spatialGranularityRef.current || null;
+    if (validSpatialZoneIds.length > 0) {
+      const selectedZoneSet = new Set(validSpatialZoneIds);
+      const levels = Array.from(
+        new Set(
+          zoneDetails
+            .filter((zone) => selectedZoneSet.has(zone.id))
+            .map((zone) => (typeof zone.level === "string" ? zone.level.trim() : ""))
+            .filter(Boolean)
+        )
+      );
+      if (levels.length === 1) {
+        resolvedGranularity = levels[0];
+      } else if (
+        levels.length > 1 &&
+        resolvedGranularity &&
+        !levels.includes(resolvedGranularity)
+      ) {
+        resolvedGranularity = levels[0];
+      }
+      spatialGranularityRef.current = resolvedGranularity || "";
+    }
+
+    if (validSpatialZoneIds.length > 0 || resolvedGranularity) {
+      payload.spatial = {
+        geom: null,
+        zones: validSpatialZoneIds,
+        granularity: resolvedGranularity,
+      };
+    }
+
+    const dataset = createdDataset
+      ? await updateDataset(createdDataset.id, payload)
+      : await createDataset(payload);
+
+    setCreatedDataset(dataset);
+    return dataset;
+  }
+
+  function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>) {
+    if (validateDetails(e)) onNextStep();
   }
 
   function updateResourceMetadata(key: string, meta: PendingResourceMeta, newUrl?: string) {
@@ -399,100 +375,65 @@ export function useDatasetWizardSubmissionActions({
   }
 
   async function handleStep3Next() {
-    setApiError(null);
+    await submit("review");
+  }
+
+  async function submit(action: "review" | "draft" | "publish") {
+    const saveAsDraft = action !== "publish";
+    if (submissionInFlight.current || !validateDetails(undefined, saveAsDraft)) return;
+    submissionInFlight.current = true;
     setIsSubmitting(true);
-
-    let dataset = createdDataset;
-    if (!dataset) {
-      if (!datasetId) {
-        setApiError(restoreErrors.missingDataset);
-        setIsSubmitting(false);
-        return;
-      }
-      try {
-        dataset = await fetchDataset(datasetId);
-        setCreatedDataset(dataset);
-      } catch {
-        setApiError(restoreErrors.loadDataset);
-        setIsSubmitting(false);
-        return;
-      }
-    }
-
     try {
-      await savePendingResources(dataset);
-
-      onNextStep();
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error uploading resources:", error.message, error.stack);
-        setApiError(
-          restoreErrors.saveResource.replace("{{message}}", translateUploadError(error.message))
-        );
-      } else {
-        const err = error as { status?: number; data?: Record<string, unknown> };
-        console.error("Error uploading resources:", err.status, err.data);
-        if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
-          const message = (err.data.message as string) || flattenApiError(err.data);
+      const dataset = await saveDataset(saveAsDraft);
+      if (!saveAsDraft) {
+        const issues = getDatasetPublicationIssues(dataset);
+        if (issues.length) {
           setApiError(
-            restoreErrors.saveResource.replace("{{message}}", translateUploadError(message))
+            t("publication.incomplete", {
+              fields: issues.map((field) => t(`publication.fields.${field}`)).join(", "),
+            })
           );
-        } else {
-          const statusHint = err.status ? ` (${err.status})` : "";
-          setApiError(restoreErrors.saveResourceRetry.replace("{{statusHint}}", statusHint));
+          return;
         }
       }
+      await savePendingResources(dataset);
+      if (action === "review") {
+        setCreatedDataset(await fetchDataset(dataset.id));
+        onNextStep();
+        return;
+      }
+      if (saveAsDraft) {
+        onDraftSaved(dataset.id);
+        return;
+      }
+      await updateDataset(dataset.id, { private: false });
+      if (onComplete) onComplete();
+      else finishWizard();
+    } catch (error: unknown) {
+      const err = error as { data?: Record<string, unknown>; message?: string };
+      if (err.data && typeof err.data === "object") {
+        setApiError(flattenApiError(err.data));
+      } else {
+        setApiError(
+          err.message
+            ? translateUploadError(err.message)
+            : saveAsDraft
+              ? restoreErrors.saveDraft
+              : restoreErrors.publish
+        );
+      }
     } finally {
+      submissionInFlight.current = false;
       setIsSubmitting(false);
     }
   }
 
   async function handlePublish() {
-    if (!createdDataset) return;
-    const issues = getDatasetPublicationIssues(createdDataset);
-    if (issues.length) {
-      setApiError(
-        t("publication.incomplete", {
-          fields: issues.map((field) => t(`publication.fields.${field}`)).join(", "),
-        })
-      );
-      return;
-    }
-
-    setApiError(null);
-    setIsSubmitting(true);
-    try {
-      const refTags = selectedKeywordsRef.current
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean);
-      const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
-      const publishPayload: DatasetUpdatePayload = {
-        private: false,
-        title: createdDataset.title,
-        description: createdDataset.description,
-        description_short: createdDataset.description_short || undefined,
-        acronym: createdDataset.acronym || undefined,
-        tags,
-        license: createdDataset.license || undefined,
-        frequency: createdDataset.frequency || undefined,
-        temporal_coverage: createdDataset.temporal_coverage || undefined,
-        spatial: createdDataset.spatial || undefined,
-        organization: createdDataset.organization?.id,
-      };
-      await updateDataset(createdDataset.id, publishPayload);
-      if (onComplete) onComplete();
-      else finishWizard();
-    } catch (error) {
-      console.error("Error publishing dataset:", error);
-      setApiError(restoreErrors.publish);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submit("publish");
   }
 
   async function handleSaveDraft() {
-    await handleStep2Next(undefined, true);
+    await submit("draft");
   }
 
   return {
