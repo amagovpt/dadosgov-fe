@@ -55,7 +55,6 @@ interface UseDatasetWizardSubmissionActionsParams {
   setUploadedFiles: React.Dispatch<React.SetStateAction<File[]>>;
   setResourceUrls: React.Dispatch<React.SetStateAction<string[]>>;
   setResourceMetadata: React.Dispatch<React.SetStateAction<Record<string, PendingResourceMeta>>>;
-  setShowFileError: React.Dispatch<React.SetStateAction<boolean>>;
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
   setApiError: React.Dispatch<React.SetStateAction<string | null>>;
   setErrors: (
@@ -150,7 +149,6 @@ export function useDatasetWizardSubmissionActions({
   setUploadedFiles,
   setResourceUrls,
   setResourceMetadata,
-  setShowFileError,
   setIsSubmitting,
   setApiError,
   setErrors,
@@ -398,16 +396,6 @@ export function useDatasetWizardSubmissionActions({
   }
 
   async function handleStep3Next() {
-    const trimmedUrls = resourceUrls.map((url) => url.trim()).filter(Boolean);
-    const hasFiles = uploadedFiles.length > 0;
-    const hasUrls = trimmedUrls.length > 0;
-
-    if (!hasFiles && !hasUrls && !createdDataset?.resources?.length) {
-      setShowFileError(true);
-      return;
-    }
-
-    setShowFileError(false);
     setApiError(null);
     setIsSubmitting(true);
 

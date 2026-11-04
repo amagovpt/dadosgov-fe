@@ -344,8 +344,6 @@ export default function DatasetsAdminClient({
               setUploadedFiles={form.setUploadedFiles}
               resourceUrls={form.resourceUrls}
               setResourceUrls={form.setResourceUrls}
-              showFileError={form.showFileError}
-              setShowFileError={form.setShowFileError}
               allowedExtensions={options.allowedExtensions}
               resourceTypes={options.resourceTypes}
               resourceMetadata={form.resourceMetadata}

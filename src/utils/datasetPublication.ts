@@ -8,7 +8,6 @@ export type DatasetPublicationIssue =
   | "description"
   | "frequency"
   | "producer"
-  | "resources"
   | "temporalCoverage";
 
 export function getDatasetDraftExtras(
@@ -42,7 +41,6 @@ export function getDatasetPublicationIssues(dataset: Dataset): DatasetPublicatio
   // draft value distinct from an explicit selection of that valid option.
   if (!dataset.frequency?.trim() || hasMissingDraftFrequency(dataset)) issues.push("frequency");
   if (!dataset.organization?.id && !dataset.owner?.id) issues.push("producer");
-  if (!dataset.resources?.length) issues.push("resources");
   const start = dataset.temporal_coverage?.start;
   const end = dataset.temporal_coverage?.end;
   const startTime = start ? parseDatasetDateToTime(start) : null;
