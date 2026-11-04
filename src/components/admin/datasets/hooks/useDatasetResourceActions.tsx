@@ -138,7 +138,7 @@ export function useDatasetResourceActions({
           description: saved?.description || "",
           format: saved?.format,
           mime: saved?.mime,
-          filesize: saved?.filesize === undefined ? undefined : String(saved.filesize),
+          filesize: saved?.filesize == null ? undefined : String(saved.filesize),
         },
         // New selections have not been persisted, so closing discards only this editor session.
         onDiscard: saved
