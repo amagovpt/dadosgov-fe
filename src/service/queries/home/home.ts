@@ -1,5 +1,6 @@
 import apolloClient from "@/service/utils/apollo-client";
-import { Home } from "@/service/types/home";
+import { Datastory, Home } from "@/service/types/home";
+import { activeDatastories, DatastoryRef } from "@/utils/activeDatastories";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 
@@ -37,6 +38,9 @@ export async function getHome(locale: string = "pt"): Promise<Home> {
                 description
                 datastories {
                   data {
+                    isActive {
+                      iv
+                    }
                     metadata {
                       ${locale}{
                         title
@@ -97,5 +101,13 @@ export async function getHome(locale: string = "pt"): Promise<Home> {
     return {} as Home;
   }
 
-  return flattenData(data, locale).findHomeSingleton as Home;
+  const home = flattenData(data, locale).findHomeSingleton as Home;
+
+  if (home.datastories) {
+    home.datastories.datastories = activeDatastories(
+      home.datastories.datastories as unknown as DatastoryRef<Datastory>[]
+    );
+  }
+
+  return home;
 }

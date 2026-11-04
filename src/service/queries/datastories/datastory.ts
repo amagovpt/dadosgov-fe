@@ -1,7 +1,12 @@
 import { DataStoryMetadata } from "@/service/types/datastories";
 import apolloClient from "@/service/utils/apollo-client";
-import { Datastory } from "@/service/types/datastories/datastory";
 import { DatastorySearchPage } from "@/service/types/datastories/pt2030/pt2030";
+import {
+  Datastory,
+  DatastorySection,
+  RelatedSection,
+} from "@/service/types/datastories/datastory";
+import { activeDatastories, DatastoryRef } from "@/utils/activeDatastories";
 import { flattenData } from "@/utils/flattenObject";
 import { buildDatastoryIndex } from "@/utils/buildDatastoryIndex";
 import { gql } from "@apollo/client";
@@ -13,6 +18,21 @@ import {
 } from "@/service/types/datastories/prr/prr";
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
+
+type RelatedDatastory = RelatedSection["datastories"][number];
+
+/**
+ * Removes deactivated datastories from a "related" section, and turns the section off when none
+ * are left so neither the page nor the hero index shows an empty block.
+ */
+function withoutInactiveRelated(section: DatastorySection): DatastorySection {
+  if (section?.schemaName !== "section-datastory-related-datastory") return section;
+
+  const datastories = activeDatastories(
+    section.datastories as unknown as DatastoryRef<RelatedDatastory>[]
+  );
+  return { ...section, datastories, active: datastories.length === 0 ? false : section.active };
+}
 
 export async function getDatastoryMetadata(
   slug: string,
@@ -154,6 +174,9 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                   description
                   datastories {
                     data {
+                      isActive {
+                        iv
+                      }
                       metadata {
                         ${locale} {
                           createdAt
@@ -287,7 +310,11 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
     return notFound();
   }
 
-  const { hero, sections } = flattenData(datastory) as Datastory;
+  const { hero, sections: rawSections } = flattenData(datastory) as Datastory;
+  const sections = rawSections && {
+    ...rawSections,
+    sections: rawSections.sections?.map(withoutInactiveRelated),
+  };
   // `index` only asks for `title`, and flattenData unwraps single-key objects, so it
   // arrives as the title string itself.
   const index = hero?.index as unknown as string | { title?: string } | undefined;
