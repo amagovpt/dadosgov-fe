@@ -23,6 +23,10 @@ interface OrgDiscussionColumnsOptions {
     label: string;
     getValue: (discussion: Discussion) => string;
   };
+  authorColumn?: {
+    label: string;
+    getValue: (discussion: Discussion) => string;
+  };
 }
 
 export interface DiscussionColumnLabels {
@@ -97,6 +101,7 @@ export function createOrgDiscussionColumns({
   formatDate,
   labels,
   contentTypeColumn,
+  authorColumn,
 }: OrgDiscussionColumnsOptions): AdminListColumn<Discussion, DiscussionSortField>[] {
   return [
     {
@@ -136,6 +141,16 @@ export function createOrgDiscussionColumns({
             header: contentTypeColumn.label,
             renderCell: contentTypeColumn.getValue,
             exportValue: contentTypeColumn.getValue,
+          },
+        ]
+      : []),
+    ...(authorColumn
+      ? [
+          {
+            id: "author",
+            header: authorColumn.label,
+            renderCell: authorColumn.getValue,
+            exportValue: authorColumn.getValue,
           },
         ]
       : []),

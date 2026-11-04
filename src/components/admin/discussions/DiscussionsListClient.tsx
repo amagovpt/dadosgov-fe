@@ -10,6 +10,7 @@ import { useAdminListController } from "@/hooks/admin-lists/useAdminListControll
 import {
   fetchDiscussions,
   fetchOrgDiscussions,
+  fetchSystemDiscussions,
   fetchUserDiscussions,
 } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
@@ -27,7 +28,8 @@ import Button from "@/components/Primitives/Button";
 
 type DiscussionsListClientProps =
   | { scope: "organization"; orgId: string; userId?: never; pageContent: BoDiscussionsPage }
-  | { scope: "personal"; userId: string; orgId?: never; pageContent?: never };
+  | { scope: "personal"; userId: string; orgId?: never; pageContent?: never }
+  | { scope: "system"; userId?: never; orgId?: never; pageContent?: never };
 
 export default function DiscussionsListClient({
   scope,
@@ -62,6 +64,8 @@ export default function DiscussionsListClient({
     updateFilter,
   } = useAdminListController<DiscussionSortField, { closedFilter: string; scope: string }>({
     initialFilters: { closedFilter: "", scope: "organization" },
+    initialSortField: scope === "system" ? "created" : undefined,
+    initialSortOrder: scope === "system" ? "descending" : "none",
     sortFieldMap: discussionSortFieldMap,
   });
   const fetchDiscussionPage = useCallback(
@@ -74,6 +78,7 @@ export default function DiscussionsListClient({
       if (scope === "personal") {
         return fetchUserDiscussions(userId, page, size, query);
       }
+      if (scope === "system") return fetchSystemDiscussions(page, size, query);
       const fetchPage = filters.scope === "organization" ? fetchDiscussions : fetchOrgDiscussions;
       return fetchPage(orgId, page, size, query);
     },
@@ -141,12 +146,22 @@ export default function DiscussionsListClient({
       onOpenDiscussion: openDiscussion,
       formatDate: formatDateToDMY,
       contentTypeColumn:
-        scope === "personal" || filters.scope === "content"
+        scope !== "organization" || filters.scope === "content"
           ? {
               label: t("admin-discussions:columns.contentType"),
               getValue: (discussion) =>
                 contentTypeLabels[discussion.subject?.class] ??
                 t("admin-discussions:contentTypes.unknown"),
+            }
+          : undefined,
+      authorColumn:
+        scope === "system"
+          ? {
+              label: t("admin-discussions:columns.author"),
+              getValue: (discussion) =>
+                [discussion.user?.first_name, discussion.user?.last_name]
+                  .filter(Boolean)
+                  .join(" ") || t("admin-discussions:system.unknownAuthor"),
             }
           : undefined,
       labels: {
@@ -164,14 +179,14 @@ export default function DiscussionsListClient({
   }, [openDiscussion, t, filters.scope, scope]);
 
   const pageTitle =
-    scope === "personal"
-      ? t("admin-discussions:personal.title")
-      : (pageContent?.orgHero?.title ?? "");
+    scope === "organization"
+      ? (pageContent.orgHero?.title ?? "")
+      : t(`admin-discussions:${scope}.title`);
   const hasActiveFilters = Boolean(
     searchInput.trim() || searchQuery.trim() || filters.closedFilter
   );
 
-  // One request with page_size
+  // CSV export fetches the full matching list in one request.
   const handleDownloadCsv = useCallback(async () => {
     const response = await fetchDiscussionPage(1, totalItems);
     const allDiscussions = response.data ?? [];
@@ -187,9 +202,9 @@ export default function DiscussionsListClient({
       breadcrumbItems={[{ label: t("admin-discussions:title") }]}
       title={pageTitle}
       description={
-        scope === "personal"
-          ? t("admin-discussions:personal.description")
-          : pageContent?.orgHero?.description?.trim() || t("admin-discussions:description")
+        scope === "organization"
+          ? pageContent.orgHero?.description?.trim() || t("admin-discussions:description")
+          : t(`admin-discussions:${scope}.description`)
       }
       headerAction={null}
       introClassName="mb-32"
@@ -270,20 +285,20 @@ export default function DiscussionsListClient({
           <AdminEmptyState
             icon="agora-line-chat"
             title={
-              scope === "personal"
+              scope !== "organization"
                 ? t(
                     hasActiveFilters
-                      ? "admin-discussions:personal.noResultsTitle"
-                      : "admin-discussions:personal.emptyTitle"
+                      ? `admin-discussions:${scope}.noResultsTitle`
+                      : `admin-discussions:${scope}.emptyTitle`
                   )
                 : (pageContent?.orgNoResults?.title ?? "")
             }
             description={
-              scope === "personal"
+              scope !== "organization"
                 ? t(
                     hasActiveFilters
-                      ? "admin-discussions:personal.noResultsDescription"
-                      : "admin-discussions:personal.emptyDescription"
+                      ? `admin-discussions:${scope}.noResultsDescription`
+                      : `admin-discussions:${scope}.emptyDescription`
                   )
                 : filters.scope === "organization"
                   ? t("admin-discussions:empty.descriptionOrganization")

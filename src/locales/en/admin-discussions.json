@@ -1,5 +1,14 @@
 {
   "title": "Discussions",
+  "system": {
+    "title": "Discussions",
+    "description": "View and manage community discussions across the portal.",
+    "emptyTitle": "There are no discussions yet",
+    "emptyDescription": "Discussions started by the community appear here.",
+    "noResultsTitle": "No discussions found",
+    "noResultsDescription": "Try changing your search or clearing the applied filters.",
+    "unknownAuthor": "User unavailable"
+  },
   "personal": {
     "title": "My discussions",
     "description": "Follow the discussions you started in the community and reply to comments.",
