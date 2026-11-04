@@ -14,6 +14,10 @@ export default function MiniCoursesSearchInput(args: Omit<InputSearchProps, "onC
     useEffect(() => {
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => {
+            // Only a changed term resets paging; on mount this would send `?page=2` back to 1.
+            const urlQuery = new URLSearchParams(window.location.search).get("q") ?? "";
+            if (value.trim() === urlQuery) return;
+
             const params = new URLSearchParams();
             if (value.trim()) params.set("q", value.trim());
             params.set("page", "1");
