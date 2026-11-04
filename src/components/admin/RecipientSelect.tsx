@@ -20,6 +20,7 @@ interface RecipientSelectProps {
   label?: string;
   required?: boolean;
   placeholder: string;
+  value?: RecipientSelection | null;
   onChange: (selection: RecipientSelection | null) => void;
   hasError?: boolean;
   errorFeedbackText?: string;
@@ -34,6 +35,7 @@ export default function RecipientSelect({
   label,
   required,
   placeholder,
+  value,
   onChange,
   hasError,
   errorFeedbackText,
@@ -44,12 +46,10 @@ export default function RecipientSelect({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const valueRef = useRef("");
-  // Index from "Class:id" key to the full RecipientSelection so the parent
-  // can be notified with the resolved label without re-fetching the entity.
-  const indexRef = useRef<Map<string, RecipientSelection>>(new Map());
 
   useEffect(() => {
     const q = searchQuery.trim();
+    let cancelled = false;
     let frameId: number | null = null;
 
     if (q.length < MIN_QUERY_LENGTH) {
@@ -73,23 +73,29 @@ export default function RecipientSelect({
           suggestUsers(q, MAX_RESULTS),
           suggestOrganizations(q, MAX_RESULTS),
         ]);
-        setUsers(u);
-        setOrgs(o);
+        if (!cancelled) {
+          setUsers(u);
+          setOrgs(o);
+        }
       } catch {
-        setUsers([]);
-        setOrgs([]);
+        if (!cancelled) {
+          setUsers([]);
+          setOrgs([]);
+        }
       } finally {
-        setIsSearching(false);
+        if (!cancelled) setIsSearching(false);
       }
     }, DEBOUNCE_MS);
 
     return () => {
+      cancelled = true;
       if (frameId !== null) cancelAnimationFrame(frameId);
       clearTimeout(timer);
     };
   }, [searchQuery]);
 
-  useEffect(() => {
+  // Keep a controlled selection available when the search results change.
+  const selectionIndex = useMemo(() => {
     const next = new Map<string, RecipientSelection>();
     users.forEach((u) =>
       next.set(`User:${u.id}`, {
@@ -105,15 +111,17 @@ export default function RecipientSelect({
         label: o.name,
       })
     );
-    indexRef.current = next;
-  }, [users, orgs]);
+    if (value) next.set(`${value.class}:${value.id}`, value);
+    return next;
+  }, [users, orgs, value]);
+  const selections = Array.from(selectionIndex.values());
 
   const handleChange = (value: string) => {
     if (!value) {
       onChange(null);
       return;
     }
-    onChange(indexRef.current.get(value) ?? null);
+    onChange(selectionIndex.get(value) ?? null);
   };
 
   const noResultsText = useMemo(() => {
@@ -132,6 +140,7 @@ export default function RecipientSelect({
       placeholder={placeholder}
       id={id}
       onChangeRef={valueRef}
+      defaultValue={value === undefined ? undefined : value ? `${value.class}:${value.id}` : ""}
       searchable
       searchInputPlaceholder={t("recipient.searchPlaceholder")}
       searchNoResultsText={noResultsText}
@@ -141,18 +150,22 @@ export default function RecipientSelect({
       onSearchCallback={setSearchQuery}
     >
       <DropdownSection name={t("recipient.usersSection")}>
-        {users.map((u) => (
-          <DropdownOption key={`user-${u.id}`} value={`User:${u.id}`}>
-            {`${u.first_name} ${u.last_name}`.trim()}
-          </DropdownOption>
-        ))}
+        {selections
+          .filter((selection) => selection.class === "User")
+          .map((selection) => (
+            <DropdownOption key={`user-${selection.id}`} value={`User:${selection.id}`}>
+              {selection.label}
+            </DropdownOption>
+          ))}
       </DropdownSection>
       <DropdownSection name={t("recipient.organizationsSection")}>
-        {orgs.map((o) => (
-          <DropdownOption key={`org-${o.id}`} value={`Organization:${o.id}`}>
-            {o.name}
-          </DropdownOption>
-        ))}
+        {selections
+          .filter((selection) => selection.class === "Organization")
+          .map((selection) => (
+            <DropdownOption key={`org-${selection.id}`} value={`Organization:${selection.id}`}>
+              {selection.label}
+            </DropdownOption>
+          ))}
       </DropdownSection>
     </IsolatedSelect>
   );

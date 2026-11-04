@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { AdminSearch } from "@/components/admin/lists/AdminSearch";
 import Button from "@/components/Primitives/Button";
+import RecipientSelect, { type RecipientSelection } from "@/components/admin/RecipientSelect";
 
 const filterTagClassName =
   "h-auto! min-h-[44px]! max-w-full px-16! py-8! [&>.children-wrapper]:min-w-0 [&>.children-wrapper]:text-s-regular! [&>.children-wrapper]:text-neutral-700 [&>.children-wrapper]:[overflow-wrap:anywhere] [&>.icon-wrapper]:shrink-0 [&>.icon-wrapper_svg]:fill-neutral-700";
@@ -13,6 +14,10 @@ interface DiscussionsFiltersProps {
   searchValue: string;
   appliedSearch: string;
   status: string;
+  identityFilter?: {
+    value: RecipientSelection | null;
+    onChange: (selection: RecipientSelection | null) => void;
+  };
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onStatusChange: (value: string) => void;
@@ -23,6 +28,7 @@ export default function DiscussionsFilters({
   searchValue,
   appliedSearch,
   status,
+  identityFilter,
   onSearchChange,
   onClearSearch,
   onStatusChange,
@@ -30,12 +36,15 @@ export default function DiscussionsFilters({
 }: DiscussionsFiltersProps) {
   const { t } = useTranslation("admin-discussions");
   const query = appliedSearch.trim();
-  const activeCount = Number(Boolean(query)) + Number(Boolean(status));
+  const identity = identityFilter?.value;
+  const activeCount = Number(Boolean(query)) + Number(Boolean(status)) + Number(Boolean(identity));
   const statusLabel = t(`filters.status.${status === "closed" ? "closed" : "open"}`);
 
   return (
     <div className="flex flex-col gap-32">
-      <div className="grid grid-cols-1 items-end gap-32 lg:grid-cols-2">
+      <div
+        className={`grid grid-cols-1 items-end gap-32 ${identityFilter ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}
+      >
         <div className="admin-search-wrapper min-w-0">
           <AdminSearch
             id="discussion-search"
@@ -66,6 +75,18 @@ export default function DiscussionsFilters({
             </DropdownSection>
           </IsolatedSelect>
         </div>
+        {identityFilter && (
+          <div className="min-w-0">
+            <RecipientSelect
+              id="discussion-filter-identity"
+              label={t("filters.identity.label")}
+              placeholder={t("filters.identity.placeholder")}
+              value={identityFilter.value}
+              required={false}
+              onChange={identityFilter.onChange}
+            />
+          </div>
+        )}
       </div>
 
       {activeCount > 0 && (
@@ -92,6 +113,18 @@ export default function DiscussionsFilters({
                 onClick={() => onStatusChange("")}
               >
                 <strong>{t("filters.status.label")}</strong> {statusLabel}
+              </Tag>
+            )}
+            {identity && (
+              <Tag
+                className={filterTagClassName}
+                aria-label={t("filters.removeIdentity", { name: identity.label })}
+                onClick={() => identityFilter?.onChange(null)}
+              >
+                <strong>
+                  {t(`filters.identity.${identity.class === "User" ? "user" : "organization"}`)}
+                </strong>{" "}
+                {identity.label}
               </Tag>
             )}
             <Button

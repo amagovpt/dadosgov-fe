@@ -16,11 +16,16 @@ interface DiscussionFilters {
   sort?: string;
 }
 
+interface SystemDiscussionFilters extends DiscussionFilters {
+  user?: string;
+  org?: string;
+}
+
 /** Global, paginated listing for the system administration view. */
 export async function fetchSystemDiscussions(
   page: number = 1,
   pageSize: number = 20,
-  filters?: DiscussionFilters
+  filters?: SystemDiscussionFilters
 ): Promise<APIResponse<Discussion>> {
   const params = new URLSearchParams({
     page: String(page),
@@ -29,6 +34,8 @@ export async function fetchSystemDiscussions(
   });
   if (filters?.q) params.set("q", filters.q);
   if (filters?.closed !== undefined) params.set("closed", String(filters.closed));
+  if (filters?.user) params.set("user", filters.user);
+  if (filters?.org) params.set("org", filters.org);
 
   const response = await fetch(`${API_AUTH_URL}/discussions/?${params}`, {
     cache: "no-store",

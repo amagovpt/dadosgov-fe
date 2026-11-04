@@ -65,6 +65,13 @@
       "open": "Ativa",
       "closed": "Fechada"
     },
+    "identity": {
+      "label": "Organização ou utilizador",
+      "placeholder": "Pesquise uma organização ou utilizador",
+      "user": "Utilizador",
+      "organization": "Organização"
+    },
+    "removeIdentity": "Remover filtro: {{name}}",
     "applied": "Filtros aplicados ({{count}})",
     "clear": "Limpar filtros aplicados",
     "removeSearch": "Remover filtro de pesquisa: {{query}}",

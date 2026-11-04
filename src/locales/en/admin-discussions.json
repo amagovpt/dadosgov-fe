@@ -65,6 +65,13 @@
       "open": "Active",
       "closed": "Closed"
     },
+    "identity": {
+      "label": "Organization or user",
+      "placeholder": "Search for an organization or user",
+      "user": "User",
+      "organization": "Organization"
+    },
+    "removeIdentity": "Remove filter: {{name}}",
     "applied": "Applied filters ({{count}})",
     "clear": "Clear applied filters",
     "removeSearch": "Remove search filter: {{query}}",

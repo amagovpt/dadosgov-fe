@@ -25,6 +25,7 @@ import {
 import type { BoDiscussionsPage } from "@/service/types/admin/discussions";
 import { formatDateToDMY } from "@/utils/formatDate";
 import Button from "@/components/Primitives/Button";
+import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 
 type DiscussionsListClientProps =
   | { scope: "organization"; orgId: string; userId?: never; pageContent: BoDiscussionsPage }
@@ -45,6 +46,7 @@ export default function DiscussionsListClient({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  const [identity, setIdentity] = useState<RecipientSelection | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const refreshDiscussions = useCallback(() => {
     setRefreshVersion((version) => version + 1);
@@ -78,11 +80,17 @@ export default function DiscussionsListClient({
       if (scope === "personal") {
         return fetchUserDiscussions(userId, page, size, query);
       }
-      if (scope === "system") return fetchSystemDiscussions(page, size, query);
+      if (scope === "system") {
+        return fetchSystemDiscussions(page, size, {
+          ...query,
+          user: identity?.class === "User" ? identity.id : undefined,
+          org: identity?.class === "Organization" ? identity.id : undefined,
+        });
+      }
       const fetchPage = filters.scope === "organization" ? fetchDiscussions : fetchOrgDiscussions;
       return fetchPage(orgId, page, size, query);
     },
-    [scope, userId, orgId, filters.scope, filters.closedFilter, searchQuery, sortParam]
+    [scope, userId, orgId, filters.scope, filters.closedFilter, searchQuery, sortParam, identity]
   );
 
   useEffect(() => {
@@ -183,7 +191,7 @@ export default function DiscussionsListClient({
       ? (pageContent.orgHero?.title ?? "")
       : t(`admin-discussions:${scope}.title`);
   const hasActiveFilters = Boolean(
-    searchInput.trim() || searchQuery.trim() || filters.closedFilter
+    searchInput.trim() || searchQuery.trim() || filters.closedFilter || identity
   );
 
   // CSV export fetches the full matching list in one request.
@@ -261,6 +269,20 @@ export default function DiscussionsListClient({
           searchValue={searchInput}
           appliedSearch={searchQuery}
           status={filters.closedFilter}
+          identityFilter={
+            scope === "system"
+              ? {
+                  value: identity,
+                  onChange: (selection) => {
+                    if (selection?.class === identity?.class && selection?.id === identity?.id) {
+                      return;
+                    }
+                    setIdentity(selection);
+                    setCurrentPage(1);
+                  },
+                }
+              : undefined
+          }
           onSearchChange={(value) => {
             setSearchInput(value);
             handleSearch(value);
@@ -277,6 +299,7 @@ export default function DiscussionsListClient({
             setSearchQuery("");
             setSearchInput("");
             updateFilter("closedFilter", "");
+            setIdentity(null);
           }}
         />
       }
