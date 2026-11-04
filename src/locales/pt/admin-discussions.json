@@ -1,6 +1,16 @@
 {
   "title": "Discussões",
+  "personal": {
+    "title": "As minhas discussões",
+    "description": "Acompanhe as discussões que iniciou na comunidade e responda aos comentários.",
+    "noResultsTitle": "Nenhuma discussão encontrada",
+    "noResultsDescription": "Experimente alterar a pesquisa ou limpar os filtros aplicados.",
+    "emptyTitle": "Ainda não iniciou discussões",
+    "emptyDescription": "Pode iniciar uma discussão nas páginas dos conjuntos de dados, reutilizações, APIs e organizações."
+  },
   "description": "Gerir as discussões da comunidade, acompanhando os tópicos criados pelos utilizadores, o seu estado e a atividade associada.",
+  "loadError": "Não foi possível carregar as discussões. Tente novamente.",
+  "retry": "Tentar novamente",
   "tabs": {
     "label": "Âmbito das discussões",
     "content": "Conteúdos",

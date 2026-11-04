@@ -16,6 +16,32 @@ interface DiscussionFilters {
   sort?: string;
 }
 
+/** Lists discussions started by this user, not every discussion they replied to. */
+export async function fetchUserDiscussions(
+  userId: string,
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: DiscussionFilters
+): Promise<APIResponse<Discussion>> {
+  if (!userId) throw new Error("A user is required to fetch personal discussions");
+
+  const params = new URLSearchParams({
+    user: userId,
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  if (filters?.q) params.set("q", filters.q);
+  if (filters?.closed !== undefined) params.set("closed", String(filters.closed));
+  if (filters?.sort) params.set("sort", filters.sort);
+
+  const response = await fetch(`${API_AUTH_URL}/discussions/?${params}`, {
+    cache: "no-store",
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error(`Failed to fetch personal discussions: ${response.statusText}`);
+  return await response.json();
+}
+
 export async function fetchDiscussion(id: string): Promise<Discussion | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/discussions/${encodeURIComponent(id)}/`, {

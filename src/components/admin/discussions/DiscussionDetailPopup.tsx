@@ -161,14 +161,16 @@ export default function DiscussionDetailPopup({
               >
                 {t("actions.addComment")}
               </Button>
-              <Button
-                variant="primary"
-                appearance="outline"
-                onClick={handleCloseWithComment}
-                disabled={isSubmitting || !comment.trim()}
-              >
-                {t("actions.commentAndClose")}
-              </Button>
+              {discussion.permissions?.close && (
+                <Button
+                  variant="primary"
+                  appearance="outline"
+                  onClick={handleCloseWithComment}
+                  disabled={isSubmitting || !comment.trim()}
+                >
+                  {t("actions.commentAndClose")}
+                </Button>
+              )}
             </>
           )}
         </div>
