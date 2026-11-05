@@ -90,23 +90,25 @@ export function DatasetWizardContacts({
         contacts.map((contact) => (
           <article
             key={contact.id}
-            className="flex w-full flex-col gap-16 rounded-4 bg-primary-100 p-24 text-m-regular text-neutral-900 md:p-32"
+            className="@container flex min-w-0 w-full flex-col gap-16 rounded-4 bg-primary-100 p-24 text-m-regular text-neutral-900 md:p-32"
             aria-label={contact.name}
             aria-busy={removingId === contact.id}
           >
-            <div className="flex flex-wrap items-center gap-16 md:flex-nowrap">
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-16 @min-[32rem]:grid-cols-[auto_minmax(0,1fr)_auto]">
               <span className="flex shrink-0 items-center justify-center rounded-full border-2 border-primary-300 p-16">
                 <Icon name="agora-line-user" />
               </span>
-              <h4 className="min-w-0 flex-1 text-m-bold wrap-anywhere">{contact.name}</h4>
-              <Switch
-                id={`dataset-contact-active-${contact.id}`}
-                label={t("admin-datasets:contacts.active")}
-                aria-label={`${t("admin-datasets:contacts.active")}: ${contact.name}`}
-                checked={selectedIds.includes(contact.id)}
-                disabled={removingId === contact.id}
-                onChange={() => onToggle(contact.id)}
-              />
+              <h4 className="min-w-0 text-m-bold wrap-anywhere">{contact.name}</h4>
+              <div className="col-span-full row-start-1 min-w-0 @min-[32rem]:col-span-1 @min-[32rem]:row-auto">
+                <Switch
+                  id={`dataset-contact-active-${contact.id}`}
+                  label={t("admin-datasets:contacts.active")}
+                  aria-label={`${t("admin-datasets:contacts.active")}: ${contact.name}`}
+                  checked={selectedIds.includes(contact.id)}
+                  disabled={removingId === contact.id}
+                  onChange={() => onToggle(contact.id)}
+                />
+              </div>
             </div>
             <dl className="grid grid-cols-1 gap-x-16 gap-y-32 md:grid-cols-2">
               <div className="border-b border-neutral-700 pb-16 text-m-regular [&_dd]:wrap-anywhere [&_dt]:py-8 [&_dt]:text-m-medium [&_dt]:text-primary-900">
