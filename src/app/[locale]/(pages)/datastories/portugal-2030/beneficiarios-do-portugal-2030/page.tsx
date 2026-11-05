@@ -3,7 +3,7 @@ import {
   getBeneficiariesOfPortugal2030,
   getSearchBeneficiariesPT2030,
 } from "@/service/queries/datastories/datastories-pt2030";
-import { getDatastorySearchPage } from "@/service/queries/datastories/datastories";
+import { getDatastorySearchPage } from "@/service/queries/datastories/datastories-eu-funds";
 import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
