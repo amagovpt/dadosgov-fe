@@ -101,6 +101,23 @@ export interface Dataset {
   permissions?: DatasetPermissions;
 }
 
+export type DatasetListItem = Pick<
+  Dataset,
+  | "id"
+  | "title"
+  | "slug"
+  | "organization"
+  | "owner"
+  | "private"
+  | "archived"
+  | "deleted"
+  | "last_modified"
+  | "last_update"
+  | "created_at"
+  | "quality"
+  | "permissions"
+>;
+
 export interface DatasetCreatePayload {
   title: string;
   description: string;
