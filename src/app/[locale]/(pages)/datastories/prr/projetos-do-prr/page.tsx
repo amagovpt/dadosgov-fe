@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 import {
-  getDatastorySearchPage,
   getProjectsTotalsPRR,
   getSearchProjectsPRR,
-} from "@/service/queries/datastories/datastory";
+} from "@/service/queries/datastories/datastories-prr";
+import { getDatastorySearchPage } from "@/service/queries/datastories/datastories";
 import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";

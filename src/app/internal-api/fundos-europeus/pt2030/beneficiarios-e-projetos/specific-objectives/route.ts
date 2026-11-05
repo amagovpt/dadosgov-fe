@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import apolloClient from "@/service/utils/apollo-client";
-import { getSpecificObjectivesByPolicyObjective } from "@/service/queries/datastories/datastory";
+import { getSpecificObjectivesByPolicyObjective } from "@/service/queries/datastories/datastories-pt2030";
 
 interface SpecificObjective {
   code: string;

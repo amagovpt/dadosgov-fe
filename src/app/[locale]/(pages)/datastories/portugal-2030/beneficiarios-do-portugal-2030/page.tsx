@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 import {
   getBeneficiariesOfPortugal2030,
-  getDatastorySearchPage,
   getSearchBeneficiariesPT2030,
-} from "@/service/queries/datastories/datastory";
+} from "@/service/queries/datastories/datastories-pt2030";
+import { getDatastorySearchPage } from "@/service/queries/datastories/datastories";
 import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
 import Section from "@/components/Shared/Section";
