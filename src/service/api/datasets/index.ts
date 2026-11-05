@@ -11,6 +11,7 @@ import type {
   Dataset,
   DatasetCreatePayload,
   DatasetFilters,
+  DatasetListItem,
   DatasetSuggestion,
   DatasetUpdatePayload,
   Resource,
@@ -201,6 +202,23 @@ export async function fetchAdminDatasets(
   pageSize: number = 20,
   filters?: DatasetFilters
 ): Promise<APIResponse<Dataset>> {
+  return fetchAuthenticatedDatasets<Dataset>(1, page, pageSize, filters);
+}
+
+export async function fetchAdminDatasetList(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: DatasetFilters
+): Promise<APIResponse<DatasetListItem>> {
+  return fetchAuthenticatedDatasets<DatasetListItem>(2, page, pageSize, filters);
+}
+
+async function fetchAuthenticatedDatasets<T>(
+  version: 1 | 2,
+  page: number,
+  pageSize: number,
+  filters?: DatasetFilters
+): Promise<APIResponse<T>> {
   try {
     const params = new URLSearchParams();
     params.set("page", String(page));
@@ -237,8 +255,9 @@ export async function fetchAdminDatasets(
       }
     }
 
-    const res = await authFetch(`/datasets/?${params.toString()}`, {
+    const res = await fetch(`/api/${version}/datasets/?${params.toString()}`, {
       cache: "no-store",
+      credentials: "include",
     });
 
     if (!res.ok) {
