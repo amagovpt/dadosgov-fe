@@ -275,7 +275,7 @@ export function useDatasetWizardSubmissionActions({
     return true;
   }
 
-  async function saveDataset(saveAsDraft: boolean) {
+  async function buildDatasetPayload() {
     const payload = buildDatasetCreatePayload({
       title: datasetTitle,
       acronym: datasetAcronym,
@@ -283,7 +283,7 @@ export function useDatasetWizardSubmissionActions({
       shortDescription: datasetShortDescription,
       producer: selectedProducerRef.current,
       license: selectedLicenseRef.current,
-      frequency: selectedFrequencyRef.current || (saveAsDraft ? "unknown" : ""),
+      frequency: selectedFrequencyRef.current || "unknown",
       keywords: selectedKeywordsRef.current,
       contactPointIds: selectedContactPointIds,
       temporalStart,
@@ -344,12 +344,7 @@ export function useDatasetWizardSubmissionActions({
       };
     }
 
-    const dataset = createdDataset
-      ? await updateDataset(createdDataset.id, payload)
-      : await createDataset(payload);
-
-    setCreatedDataset(dataset);
-    return dataset;
+    return payload;
   }
 
   function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>) {
@@ -380,13 +375,16 @@ export function useDatasetWizardSubmissionActions({
 
   async function submit(action: "review" | "draft" | "publish") {
     const saveAsDraft = action !== "publish";
-    if (submissionInFlight.current || !validateDetails(undefined, saveAsDraft)) return;
+    if (submissionInFlight.current || (saveAsDraft && !validateDetails(undefined, true))) return;
     submissionInFlight.current = true;
     setIsSubmitting(true);
     try {
-      const dataset = await saveDataset(saveAsDraft);
-      if (!saveAsDraft) {
-        const issues = getDatasetPublicationIssues(dataset);
+      if (action === "publish") {
+        if (!createdDataset || uploadedFiles.length || resourceUrls.length) {
+          setApiError(t("publication.reviewRequired"));
+          return;
+        }
+        const issues = getDatasetPublicationIssues(createdDataset);
         if (issues.length) {
           setApiError(
             t("publication.incomplete", {
@@ -395,20 +393,44 @@ export function useDatasetWizardSubmissionActions({
           );
           return;
         }
+        setApiError(null);
+        // Publish the saved draft without rebuilding metadata or saving resources.
+        // The API still needs these fields in a PUT to preserve their saved values.
+        setCreatedDataset(
+          await updateDataset(createdDataset.id, {
+            title: createdDataset.title,
+            description: createdDataset.description,
+            description_short: createdDataset.description_short ?? undefined,
+            acronym: createdDataset.acronym ?? undefined,
+            tags: createdDataset.tags,
+            license: createdDataset.license ?? undefined,
+            frequency: createdDataset.frequency,
+            frequency_date: createdDataset.frequency_date ?? undefined,
+            temporal_coverage: createdDataset.temporal_coverage ?? undefined,
+            spatial: createdDataset.spatial ?? undefined,
+            organization: createdDataset.organization?.id,
+            contact_points: createdDataset.contact_points?.map((contact) => contact.id),
+            extras: createdDataset.extras,
+            private: false,
+          })
+        );
+        if (onComplete) onComplete();
+        else finishWizard();
+        return;
       }
+
+      const payload = await buildDatasetPayload();
+      const dataset = createdDataset
+        ? await updateDataset(createdDataset.id, payload)
+        : await createDataset(payload);
+      setCreatedDataset(dataset);
       await savePendingResources(dataset);
       if (action === "review") {
         setCreatedDataset(await fetchDataset(dataset.id));
         onNextStep();
         return;
       }
-      if (saveAsDraft) {
-        onDraftSaved(dataset.id);
-        return;
-      }
-      await updateDataset(dataset.id, { private: false });
-      if (onComplete) onComplete();
-      else finishWizard();
+      onDraftSaved(dataset.id);
     } catch (error: unknown) {
       const err = error as { data?: Record<string, unknown>; message?: string };
       if (err.data && typeof err.data === "object") {

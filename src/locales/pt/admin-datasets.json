@@ -337,6 +337,7 @@
     "editorFileHint": "Os ficheiros serão guardados após confirmar os metadados do recurso."
   },
   "publication": {
+    "reviewRequired": "Conclua o passo anterior para guardar o conjunto de dados e os seus recursos antes de publicar.",
     "incomplete": "Preencha e guarde os campos obrigatórios antes de publicar: {{fields}}.",
     "draftMinimum": "Indique um produtor, um título e uma descrição para guardar o rascunho.",
     "fields": {

@@ -150,6 +150,7 @@ export interface DatasetUpdatePayload {
   featured?: boolean;
   archived?: string | null;
   organization?: string;
+  contact_points?: string[];
   extras?: Record<string, unknown>;
 }
 
