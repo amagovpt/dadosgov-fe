@@ -10,7 +10,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { addMember } from "@/service/api/organizations";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import IsolatedSelect, { type SelectOptionAvatar } from "@/components/admin/IsolatedSelect";
 import { MemberRoleRadioGroup } from "../MemberRoleRadioGroup";
 import { DEFAULT_MEMBER_ROLE, type MemberRole } from "../membersConstants";
 import { useUserSearch } from "../hooks/useUserSearch";
@@ -35,6 +35,14 @@ export function AddMemberPopupContent({
   const [hasPendingInvite, setHasPendingInvite] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const { dropdownUsers, setSearchQuery, isSearching, getUserStatus } = useUserSearch(orgId);
+
+  const optionAvatars = useMemo<Record<string, SelectOptionAvatar>>(
+    () =>
+      Object.fromEntries(
+        dropdownUsers.map((user) => [user.id, { src: user.avatar_url, type: "user" }])
+      ),
+    [dropdownUsers]
+  );
 
   const userDropdownChildren = useMemo(
     () => (
@@ -84,7 +92,7 @@ export function AddMemberPopupContent({
         />
       )}
       <div className="flex flex-col gap-4">
-        <span className="text-base font-medium leading-7 text-primary-900">
+        <span className="text-base leading-7 font-medium text-primary-900">
           {t("admin-members:addPopup.userLabel")} <span className="text-danger-600">*</span>
         </span>
         <IsolatedSelect
@@ -105,13 +113,14 @@ export function AddMemberPopupContent({
           errorFeedbackText={t("admin-members:addPopup.alreadyMember")}
           onChangeCallback={onUserChangeCallback}
           onSearchCallback={setSearchQuery}
+          optionAvatars={optionAvatars}
         >
           {userDropdownChildren}
         </IsolatedSelect>
       </div>
 
       <div className="flex flex-col gap-12">
-        <span className="text-base font-medium leading-7 text-primary-900">
+        <span className="text-base leading-7 font-medium text-primary-900">
           {t("admin-members:addPopup.roleLabel")} <span className="text-danger-600">*</span>
         </span>
         <MemberRoleRadioGroup
