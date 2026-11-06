@@ -16,7 +16,6 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import { localizeHref } from "@/utils/localizeHref";
 import { splitLocale } from "@/utils/stripLocale";
-import { getDatasetDraftExtras } from "@/utils/datasetPublication";
 import { DatasetWizardStep2 } from "./DatasetWizardStep2";
 import { DatasetWizardStep3 } from "./DatasetWizardStep3";
 import { DatasetWizardStep4 } from "./DatasetWizardStep4";
@@ -131,17 +130,6 @@ export default function DatasetsAdminClient({
 
   const auxiliarItems =
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
-
-  const previewDataset = {
-    title: form.datasetTitle,
-    description: form.datasetDescription,
-    frequency: form.frequencyDefaultValue,
-    organization:
-      organizations.find((organization) => organization.id === form.selectedProducer) ?? null,
-    owner: form.selectedProducer === "user" ? user : null,
-    extras: getDatasetDraftExtras(form.createdDataset?.extras, form.frequencyDefaultValue),
-    temporal_coverage: { start: form.temporalStart, end: form.temporalEnd },
-  };
 
   if (!persistence.isRestored) {
     return form.apiError ? (
@@ -346,7 +334,6 @@ export default function DatasetsAdminClient({
               redesigned={redesigned}
               publishStepCard={pageContent.publishStepCard}
               createdDataset={form.createdDataset}
-              previewDataset={previewDataset}
               datasetTitle={form.datasetTitle}
               datasetDescription={form.datasetDescription}
               onPublish={handlePublish}

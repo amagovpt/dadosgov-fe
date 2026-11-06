@@ -337,6 +337,7 @@
     "editorFileHint": "Files will be saved after confirming the resource metadata."
   },
   "publication": {
+    "reviewRequired": "Complete the previous step to save the dataset and its resources before publishing.",
     "incomplete": "Complete and save the required fields before publishing: {{fields}}.",
     "draftMinimum": "Select a publisher and enter a title and a description to save the draft.",
     "fields": {
