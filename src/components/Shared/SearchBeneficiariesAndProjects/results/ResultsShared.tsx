@@ -8,7 +8,6 @@ import Image from "next/image";
 import { type MouseEvent, type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Typograph } from "../../Generics/Typograph";
-import ResultsNumber from "./ResultsNumber";
 import useMobile from "@/hooks/useMobile";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useLoader } from "@/hooks/useLoader";
@@ -78,10 +77,8 @@ export function ResultsLayout({
   children: ReactNode;
 }) {
   const { showLoader, hideLoader } = useLoader();
-  const isMobile = useMobile();
   const loading = useSearchBenProjStore((state) => state.loading);
   const data = useSearchBenProjStore((state) => state.data);
-  const showFilters = useSearchBenProjStore((state) => state.showFilters);
 
   useEffect(() => {
     if (loading) showLoader();
