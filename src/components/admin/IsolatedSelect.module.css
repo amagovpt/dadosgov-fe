@@ -1,0 +1,22 @@
+.avatarOption :global(.option-content),
+.withSelectedAvatar :global(.agora-input-select-control .content) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.avatarOption :global(.option-content)::before,
+.withSelectedAvatar :global(.agora-input-select-control .content)::before {
+  content: "";
+  display: block;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--select-avatar-radius);
+  background-color: var(--color-neutral-100, #f1f5f9);
+  background-image: var(--select-avatar-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: var(--select-avatar-fit);
+}

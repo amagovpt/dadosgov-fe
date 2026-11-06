@@ -205,8 +205,7 @@ export interface OrganizationSuggestion {
   id: string;
   name: string;
   slug: string;
-  logo: string | null;
-  score: number;
+  image_url: string | null;
 }
 
 export interface OrgBadges {
@@ -270,6 +269,5 @@ export interface UserSuggestion {
   first_name: string;
   last_name: string;
   slug: string;
-  avatar_thumbnail: string | null;
-  score: number;
+  avatar_url: string | null;
 }

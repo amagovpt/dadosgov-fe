@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
-import IsolatedSelect from "./IsolatedSelect";
+import IsolatedSelect, { type SelectOptionAvatar } from "./IsolatedSelect";
 import { suggestOrganizations } from "@/service/api/organizations";
 import { suggestUsers } from "@/service/api/search";
 import type { OrganizationSuggestion, UserSuggestion } from "@/service/types/identity";
@@ -116,6 +116,21 @@ export default function RecipientSelect({
     onChange(indexRef.current.get(value) ?? null);
   };
 
+  const optionAvatars = useMemo<Record<string, SelectOptionAvatar>>(
+    () =>
+      Object.fromEntries([
+        ...users.map((user) => [
+          `User:${user.id}`,
+          { src: user.avatar_url, type: "user" as const },
+        ]),
+        ...orgs.map((org) => [
+          `Organization:${org.id}`,
+          { src: org.image_url, type: "organization" as const },
+        ]),
+      ]),
+    [users, orgs]
+  );
+
   const noResultsText = useMemo(() => {
     if (searchQuery.trim().length < MIN_QUERY_LENGTH) {
       return t("recipient.minChars", { count: MIN_QUERY_LENGTH });
@@ -139,6 +154,7 @@ export default function RecipientSelect({
       errorFeedbackText={errorFeedbackText}
       onChangeCallback={handleChange}
       onSearchCallback={setSearchQuery}
+      optionAvatars={optionAvatars}
     >
       <DropdownSection name={t("recipient.usersSection")}>
         {users.map((u) => (
