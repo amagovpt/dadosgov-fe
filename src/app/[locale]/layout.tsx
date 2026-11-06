@@ -18,6 +18,7 @@ import { getInitialSession } from "@/service/api/auth/server";
 import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
+import { LoaderProvider } from "@/providers/LoaderProvider";
 import { RuntimeConfigProvider } from "@/providers/RuntimeConfigProvider";
 import { getAnalyticsConfig, getRuntimeConfig } from "@/config/runtimeConfig";
 import KarmaAnalytics from "@/Scripts/Karma";
@@ -133,15 +134,17 @@ export default async function RootLayout({
               <ApolloWrapper>
                 <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
                   <ToastProviderWrapper>
-                    <ApiErrorProvider>
-                      <PopupProviderWrapper>
-                        <ShellProvider headerNavigation={headerNavigation}>
-                          <ScrollTop />
-                          {children}
-                          <Footer data={footerData} />
-                        </ShellProvider>
-                      </PopupProviderWrapper>
-                    </ApiErrorProvider>
+                    <LoaderProvider>
+                      <ApiErrorProvider>
+                        <PopupProviderWrapper>
+                          <ShellProvider headerNavigation={headerNavigation}>
+                            <ScrollTop />
+                            {children}
+                            <Footer data={footerData} />
+                          </ShellProvider>
+                        </PopupProviderWrapper>
+                      </ApiErrorProvider>
+                    </LoaderProvider>
                   </ToastProviderWrapper>
                 </TranslationsProvider>
               </ApolloWrapper>

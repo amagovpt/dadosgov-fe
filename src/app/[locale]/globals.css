@@ -808,10 +808,6 @@ li.section-name:empty {
   height: 100%;
 }
 
-.related-datastories .card-general .content {
-  height: 100%;
-}
-
 /* 5.5 Cards (Illustrative) - Mini-courses */
 .mini-courses-cards .agora-card-illustrative.horizontal {
   align-items: center;
@@ -1023,6 +1019,19 @@ li.section-name:empty {
 
 .quality-progress-success .progress-progress .progress-bar::-moz-progress-bar {
   background-color: #22863a !important;
+}
+
+.dimension-progress .progress-bar,
+.dimension-progress .progress-bar::-webkit-progress-bar {
+  background-color: var(--color-neutral-50) !important;
+}
+
+.dimension-progress .progress-bar::-webkit-progress-value {
+  background-color: var(--color-primary-600) !important;
+}
+
+.dimension-progress .progress-bar::-moz-progress-bar {
+  background-color: var(--color-primary-600) !important;
 }
 
 /* Force buttons row inside CardNoResults extra-description */
@@ -1269,15 +1278,45 @@ div.agora-dialog {
   text-wrap: initial !important;
 }
 
-/* TODO: remove this when we have a connection to the BE to get metadata */
-.datastory-page .datastory-datasets .card-general .quality-progress-warning span,
-.datastory-page .datastory-datasets .card-general .quality-progress-warning div {
+/* Datasets typed in Squidex carry no metrics or quality, so their cards would show an empty bar
+   and zeros: keep only the arrow. Datasets read from the API (PT2030/PRR) show the full card. */
+.datastory-page .datastory-datasets-static .card-general .quality-progress-warning span,
+.datastory-page .datastory-datasets-static .card-general .quality-progress-warning div {
   display: none !important;
 }
 
-/* TODO: remove this when we have a connection to the BE to get metadata */
-.datastory-page .datastory-datasets .card-general .quality-progress-warning div:last-child {
+.datastory-page .datastory-datasets-static .card-general .quality-progress-warning div:last-child {
   display: block !important;
+}
+
+.datastory-page .result-card .card-general,
+.datastory-page .result-card .card-general .content,
+.datastory-page .result-card .card-general .content div:first-child {
+  width: 100% !important;
+}
+
+.datastory-page .result-card .card-general svg,
+.datastory-page .advanced-filters .agora-sidebar svg {
+  fill: var(--color-neutral-900) !important;
+}
+
+.datastory-page .result-card:hover svg,
+.datastory-page .advanced-filters .agora-sidebar .agora-sidebar-item:hover svg {
+  fill: var(--color-primary-600) !important;
+}
+
+.related-datastories .card-general,
+.related-datastories .card-general .content {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.datastory-page .ranged-number-filter span.feedback-icon-wrapper {
+  display: none !important;
+}
+
+.datastory-page .ranged-number-filter .feedback-right .agora-input-text-wrapper div.feedback {
+  flex-direction: row-reverse;
 }
 
 /* ==========================================================================
