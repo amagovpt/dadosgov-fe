@@ -1,4 +1,4 @@
-import { queryLoadMorePrrProjectsByBeneficiary } from "@/service/queries/datastories/datastory";
+import { queryLoadMorePrrProjectsByBeneficiary } from "@/service/queries/datastories/datastories-prr";
 import {
   PRRBeneficiaryRelatedProjectsResponse,
   PRRBeneficiaryRelatedProjectsType,

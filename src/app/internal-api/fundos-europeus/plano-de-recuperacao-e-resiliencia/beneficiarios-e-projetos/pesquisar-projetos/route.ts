@@ -1,5 +1,5 @@
 import { print } from "graphql";
-import { getProjectsOfPRR } from "@/service/queries/datastories/datastory";
+import { getProjectsOfPRR } from "@/service/queries/datastories/datastories-prr";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
 import { FilterValue } from "@/store/searchBenProj-store";
 import {
