@@ -54,19 +54,6 @@ export async function POST(request: Request) {
         approvedValueMax: filters.approvedValueMax,
       };
     }
-  } else if ("executedValueMin" in filters || "executedValueMax" in filters) {
-    if ("executedValueMin" in filters) {
-      variables = {
-        ...variables,
-        executedValueMin: filters.executedValueMin,
-      };
-    }
-    if ("executedValueMax" in filters) {
-      variables = {
-        ...variables,
-        executedValueMax: filters.executedValueMax,
-      };
-    }
   }
 
   // make the query request
