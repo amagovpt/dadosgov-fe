@@ -214,6 +214,8 @@ export default async function DataStoryBeneficiariesPRR({
                 darkMode={false}
                 label={inputSearch?.label}
                 placeholder={inputSearch?.placeholder}
+                searchActionAltText={inputSearch?.searchActionAltText}
+                voiceActionAltText={inputSearch?.voiceActionAltText}
                 showTotal
               />
             </InfoBlock.Content>

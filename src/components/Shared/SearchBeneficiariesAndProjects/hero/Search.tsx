@@ -5,6 +5,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { ChangeEvent, KeyboardEvent, useCallback, useEffect } from "react";
 import RadioButtonGroup, { RadioButtonOption } from "../../RadioButtonGroup";
 import { useSearchBenProjStore } from "@/hooks/useSearchBenProj";
+import { useSpeechToText } from "@/hooks/useSpeechToText";
 
 export interface IHeroContentSearchBenProj {
   subject: "beneficiaries" | "projects";
@@ -12,6 +13,8 @@ export interface IHeroContentSearchBenProj {
   darkMode?: boolean;
   label?: string;
   placeholder?: string;
+  searchActionAltText?: string;
+  voiceActionAltText?: string;
   showTotal?: boolean;
 }
 
@@ -21,6 +24,8 @@ export default function HeroContentSearchBenProj({
   darkMode = true,
   label,
   placeholder,
+  searchActionAltText,
+  voiceActionAltText,
   showTotal = false,
 }: IHeroContentSearchBenProj) {
   const { t } = useTranslation();
@@ -34,6 +39,9 @@ export default function HeroContentSearchBenProj({
   const loading = useSearchBenProjStore((state) => state.loading);
   const search = useSearchBenProjStore((state) => state.search);
   const total = useSearchBenProjStore((state) => state.total);
+
+  const { text, fullText, isListening, isSupported, startListening, stopListening, resetText } =
+    useSpeechToText({ lang: locale });
 
   const handleFilterChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +99,19 @@ export default function HeroContentSearchBenProj({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // mirrors the live transcript in the input while the user speaks
+  useEffect(() => {
+    if (isListening && fullText) handleQueryChange(fullText);
+  }, [isListening, fullText, handleQueryChange]);
+
+  // runs the search once recognition ends; `text` holds only the final transcript
+  useEffect(() => {
+    if (isListening || !text) return;
+    addFilter("query", text, t, locale);
+    applyFilter("query", t, locale);
+    resetText();
+  }, [isListening, text, addFilter, applyFilter, resetText, t, locale]);
+
   return (
     <div className="flex flex-col gap-32">
       <RadioButtonGroup
@@ -105,6 +126,17 @@ export default function HeroContentSearchBenProj({
         <InputSearchBar
           label={searchLabel}
           placeholder={searchPlaceholder}
+          // the DS uses these as the buttons' aria-label; an empty CMS value leaves them unnamed
+          searchActionAltText={searchActionAltText || t("search.label")}
+          voiceActionAltText={
+            // the DS equalizer is visual only, so the label tells a second click stops listening
+            isListening
+              ? t("search.voiceActionStop")
+              : voiceActionAltText || t("search.voiceAction")
+          }
+          hasVoiceActionButton={isSupported}
+          isVoiceActive={isListening}
+          onVoiceActivate={isListening ? stopListening : startListening}
           className="col-span-12 xl:col-span-7"
           value={(filters.query ?? "") as string}
           onChange={(e) => handleQueryChange(e.target.value)}

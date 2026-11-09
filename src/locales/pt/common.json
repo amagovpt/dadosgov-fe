@@ -137,6 +137,7 @@
     "articlesLabel": "O que procura nas novidades?",
     "articlesPlaceholder": "Pesquisar artigos, notícias, webinars...",
     "voiceAction": "Pesquisar por voz",
+    "voiceActionStop": "Parar pesquisa por voz",
     "types": {
       "datasets": "Conjunto de dados",
       "reuses": "Reutilizações",
