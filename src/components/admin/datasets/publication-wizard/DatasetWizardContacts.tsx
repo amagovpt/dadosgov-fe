@@ -13,6 +13,7 @@ interface DatasetWizardContactsProps {
   producerId: string;
   contacts: ContactPoint[];
   selectedIds: string[];
+  disabled?: boolean;
   onToggle: (id: string) => void;
   onSaved: (contact: ContactPoint, isNew: boolean) => void;
   onRemove: (id: string) => Promise<void>;
@@ -22,6 +23,7 @@ export function DatasetWizardContacts({
   producerId,
   contacts,
   selectedIds,
+  disabled = false,
   onToggle,
   onSaved,
   onRemove,
@@ -105,7 +107,7 @@ export function DatasetWizardContacts({
                   label={t("admin-datasets:contacts.active")}
                   aria-label={`${t("admin-datasets:contacts.active")}: ${contact.name}`}
                   checked={selectedIds.includes(contact.id)}
-                  disabled={removingId === contact.id}
+                  disabled={disabled || removingId === contact.id}
                   onChange={() => onToggle(contact.id)}
                 />
               </div>
@@ -134,7 +136,7 @@ export function DatasetWizardContacts({
                 hasIcon
                 leadingIcon="agora-line-edit"
                 leadingIconHover="agora-solid-edit"
-                disabled={removingId === contact.id}
+                disabled={disabled || removingId === contact.id}
                 onClick={(event) => openModal(event.currentTarget, contact)}
               >
                 {t("admin-datasets:contacts.edit")}
@@ -146,7 +148,7 @@ export function DatasetWizardContacts({
                 hasIcon
                 leadingIcon="agora-line-trash"
                 leadingIconHover="agora-solid-trash"
-                disabled={!removeConfirmation || removingId !== null}
+                disabled={disabled || !removeConfirmation || removingId !== null}
                 onClick={() => {
                   setRemoveError(false);
                   setContactToRemove(contact);
@@ -164,7 +166,7 @@ export function DatasetWizardContacts({
         hasIcon
         trailingIcon="agora-line-plus-circle"
         trailingIconHover="agora-solid-plus-circle"
-        disabled={!isOrganization}
+        disabled={disabled || !isOrganization}
         onClick={(event) => openModal(event.currentTarget)}
       >
         {t("admin-datasets:form.addContactAction")}

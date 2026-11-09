@@ -33,7 +33,7 @@ import type {
   Activity,
   ResourceType,
 } from "@/service/types/catalog";
-import type { Dataset } from "@/service/types/dataset";
+import type { ContactPoint, Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
 import DatasetLifecycleConfirmationDialog from "@/components/admin/datasets/edit-dialogs/DatasetLifecycleConfirmationDialog";
 import DatasetsEditTransferPopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditTransferPopup";
@@ -49,6 +49,8 @@ import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { useDatasetLifecycleActions } from "@/components/admin/datasets/hooks/useDatasetLifecycleActions";
 import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/useDatasetMetadataActions";
+import { useDatasetEditContactActions } from "@/components/admin/datasets/hooks/useDatasetEditContactActions";
+import { DatasetWizardContacts } from "@/components/admin/datasets/publication-wizard/DatasetWizardContacts";
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
@@ -130,6 +132,14 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
   const [loadedSpatialGranularity, setLoadedSpatialGranularity] = useState("");
   const [loadedSpatialZones, setLoadedSpatialZones] = useState<string[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
+  const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
+  const contactActions = useDatasetEditContactActions({
+    datasetId: dataset?.id ?? "",
+    producerId: dataset?.organization?.id ?? "",
+    setContacts: setOrgContactPoints,
+    setSelectedIds: setSelectedContactPointIds,
+  });
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(false);
   const [discussionsLoaded, setDiscussionsLoaded] = useState(false);
@@ -148,6 +158,8 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
           fetchResourceTypes(),
         ]);
         setDataset(ds);
+        setOrgContactPoints(ds.contact_points ?? []);
+        setSelectedContactPointIds(ds.contact_points?.map((contact) => contact.id) ?? []);
         setTitle(ds.title);
         setAcronym(ds.acronym || "");
         setLoadedTitle(ds.title);
@@ -355,6 +367,7 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
     featured,
     temporalStart,
     temporalEnd,
+    selectedContactPointIds,
     keywordsRef,
     selectedLicenseRef,
     selectedFrequencyRef,
@@ -646,6 +659,41 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
           >
             <DatasetsEditMetadataTab
               feedback={feedback}
+              contacts={
+                dataset.organization && (
+                  <div className="flex min-w-0 flex-col gap-16" aria-busy={contactActions.isLoading}>
+                    {contactActions.isLoading && (
+                      <p role="status" className="text-m-regular text-primary-900">
+                        {t("contacts.loading")}
+                      </p>
+                    )}
+                    {contactActions.loadError && (
+                      <>
+                        <StatusCard variant="danger" showIcon description={t("contacts.loadError")} />
+                        <Button
+                          type="button"
+                          appearance="outline"
+                          disabled={isSubmitting || !canEdit}
+                          onClick={contactActions.retry}
+                        >
+                          {t("contacts.retry")}
+                        </Button>
+                      </>
+                    )}
+                    <DatasetWizardContacts
+                      producerId={dataset.organization.id}
+                      contacts={orgContactPoints}
+                      selectedIds={selectedContactPointIds}
+                      disabled={
+                        isSubmitting || contactActions.isLoading || !canEdit || !!dataset.deleted
+                      }
+                      onToggle={contactActions.toggleContact}
+                      onSaved={contactActions.handleContactSaved}
+                      onRemove={contactActions.handleRemoveContact}
+                    />
+                  </div>
+                )
+              }
               onCancel={() => router.push(listUrl)}
               auxiliaryItems={pageContent.editAuxiliaryItems}
               dataset={dataset}

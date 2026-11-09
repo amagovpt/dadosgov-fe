@@ -264,6 +264,9 @@
     "archivedBanner": "Este conjunto de dados está arquivado e a sua página pública não está disponível."
   },
   "contacts": {
+    "loading": "A carregar os pontos de contacto...",
+    "loadError": "Não foi possível carregar os pontos de contacto da organização. As atribuições existentes foram mantidas.",
+    "retry": "Tentar novamente",
     "assignments": "Atribuições e pontos de contacto",
     "active": "Contacto ativo",
     "edit": "Editar contacto",

@@ -26,6 +26,7 @@ type DatasetsEditMetadataTabProps = {
   auxiliaryItems?: AdminAuxiliaryItem[];
   dataset: Dataset;
   feedback?: ReactNode;
+  contacts?: ReactNode;
   onCancel: () => void;
   isSubmitting: boolean;
   formErrors: Partial<Record<string, boolean | string>>;
@@ -81,6 +82,7 @@ export default function DatasetsEditMetadataTab({
   auxiliaryItems,
   dataset,
   feedback,
+  contacts,
   onCancel,
   isSubmitting,
   formErrors,
@@ -185,6 +187,7 @@ export default function DatasetsEditMetadataTab({
                 </DropdownOption>
               </DropdownSection>
             </InputSelect>
+            {contacts}
           </section>
           <DatasetsEditDescriptionSection
             formErrors={formErrors}
