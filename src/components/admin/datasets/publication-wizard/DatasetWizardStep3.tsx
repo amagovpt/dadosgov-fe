@@ -31,8 +31,6 @@ export interface DatasetWizardStep3Props {
   setUploadedFiles: Dispatch<SetStateAction<File[]>>;
   resourceUrls: string[];
   setResourceUrls: Dispatch<SetStateAction<string[]>>;
-  showFileError: boolean;
-  setShowFileError: Dispatch<SetStateAction<boolean>>;
   allowedExtensions: string[] | null;
   resourceTypes: ResourceType[];
   resourceMetadata: Record<string, PendingResourceMeta>;
@@ -53,8 +51,6 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
     setUploadedFiles,
     resourceUrls,
     setResourceUrls,
-    showFileError,
-    setShowFileError,
     allowedExtensions,
     resourceTypes,
     resourceMetadata,
@@ -150,7 +146,6 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
     const next = [...knownFiles.current, ...added];
     knownFiles.current = next;
     setUploadedFiles(next);
-    if (files.length) setShowFileError(false);
     editResources(added, true);
   }
 
@@ -161,7 +156,6 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
     )
       throw new Error(t("resourceEditing.duplicateUrl"));
     setResourceUrls((previous) => [...previous, url]);
-    setShowFileError(false);
     editResources([url], true);
   }
 
@@ -222,7 +216,6 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
                 onClearFeedback={() => setUploadFeedback(null)}
                 uploadedFiles={uploadedFiles}
                 resourceUrls={resourceUrls}
-                hasError={showFileError}
                 onFilesChange={addFiles}
                 onUrlAdd={addUrl}
                 allowedExtensions={allowedExtensions}
@@ -309,7 +302,6 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
         <FileUploadModal
           uploadedFiles={uploadedFiles}
           resourceUrls={resourceUrls}
-          hasError={showFileError}
           onFilesChange={addFiles}
           onUrlAdd={addUrl}
           allowedExtensions={allowedExtensions}

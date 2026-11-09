@@ -1,6 +1,11 @@
-import { Datastories, DataStoriesPage } from "@/service/types/datastories/datastories";
+import {
+  Datastories,
+  DataStoriesPage,
+  DataStoryMetadata,
+} from "@/service/types/datastories/datastories";
 import { FoListPageHero } from "@/service/types/shared";
 import apolloClient from "@/service/utils/apollo-client";
+import { activeDatastories, DatastoryRef } from "@/utils/activeDatastories";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 
@@ -64,6 +69,9 @@ export async function getDataStories(locale: string = "pt") {
         }
         queryDataStoriesContents {
             data {
+                isActive {
+                    iv
+                }
                 metadata{
                     ${locale} {
                         slug
@@ -101,9 +109,11 @@ export async function getDataStories(locale: string = "pt") {
 
   const pageContent = flattenData(data).findDataStoriesPageSingleton as DataStoriesPage;
 
-  const datastories = Object.values(
-    flattenData(data.queryDataStoriesContents as unknown as Record<string, unknown>)
-  ) as Datastories;
+  const datastories: Datastories = activeDatastories(
+    Object.values(
+      flattenData(data.queryDataStoriesContents as unknown as Record<string, unknown>)
+    ) as DatastoryRef<DataStoryMetadata>[]
+  );
 
   return { pageContent: pageContent, datastories: datastories };
 }

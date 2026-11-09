@@ -18,15 +18,22 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
 
     // after mount, sync with the current URL hash (avoids SSR/client mismatch)
     useEffect(() => {
+        const initialId = normalizeId(window.location.hash);
+        const isKnown = props.anchor.some((anchor) => normalizeId(anchor.href) === initialId);
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setActiveId(normalizeId(window.location.hash));
-    }, []);
+        setActiveId(isKnown ? initialId : "");
+    }, [props.anchor]);
 
     useEffect(() => {
         const elements = ids
             .map((id) => document.getElementById(id))
             .filter((el): el is HTMLElement => el !== null);
         if (!elements.length) return;
+
+        // Wait for native anchor scrolling before tracking sections passed on the way.
+        // Resolves for example open license page on correct section when the page is loaded with a hash in the URL.
+        let requestedId = normalizeId(window.location.hash);
+        if (!elements.some((element) => element.id === requestedId)) requestedId = "";
 
         const visible = new Set<string>();
         const observer = new IntersectionObserver(
@@ -36,6 +43,12 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
                         ? visible.add(entry.target.id)
                         : visible.delete(entry.target.id)
                 );
+                if (requestedId) {
+                    if (!visible.has(requestedId)) return;
+                    setActiveId(requestedId);
+                    requestedId = "";
+                    return;
+                }
                 const next = ids.find((id) => visible.has(id));
                 if (next) setActiveId(next);
             },
@@ -60,7 +73,7 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
             )}
             <div className=" flex flex-col">
                 {props.anchor.map((anchor, index) => {
-                    const isActive = normalizeId(anchor.href) === activeId;
+                    const isActive = normalizeId(anchor.href) === (activeId || ids[0]);
                     return (
                         <Anchor
                             key={index}
