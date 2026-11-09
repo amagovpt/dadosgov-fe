@@ -55,9 +55,9 @@ export default function Pagination() {
           activePage={page}
           boundaryCount={1}
           siblingCount={isMobile ? 1 : 4}
-          label={t("pagination")}
-          previousPageAriaLabel={t("previous")}
-          nextPageAriaLabel={t("next")}
+          label={t("pagination.pagination")}
+          previousPageAriaLabel={t("pagination.previous")}
+          nextPageAriaLabel={t("pagination.next")}
           onChange={handlePageChange}
         />
       </div>

@@ -213,6 +213,8 @@ export default async function DataStoryBeneficiariesPT2030({
                 darkMode={false}
                 label={inputSearch?.label}
                 placeholder={inputSearch?.placeholder}
+                searchActionAltText={inputSearch?.searchActionAltText}
+                voiceActionAltText={inputSearch?.voiceActionAltText}
                 showTotal
               />
             </InfoBlock.Content>

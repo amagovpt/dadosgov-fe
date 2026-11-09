@@ -219,6 +219,8 @@ export default async function DataStoryProjectsPRR({
                 darkMode={false}
                 label={inputSearch?.label}
                 placeholder={inputSearch?.placeholder}
+                searchActionAltText={inputSearch?.searchActionAltText}
+                voiceActionAltText={inputSearch?.voiceActionAltText}
                 showTotal
               />
             </InfoBlock.Content>

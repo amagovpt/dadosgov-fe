@@ -137,6 +137,7 @@
     "articlesLabel": "What are you looking for in the news?",
     "articlesPlaceholder": "Search articles, news, webinars...",
     "voiceAction": "Search by voice",
+    "voiceActionStop": "Stop voice search",
     "types": {
       "datasets": "Dataset",
       "reuses": "Reuses",
