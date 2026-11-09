@@ -62,10 +62,7 @@ export default function DatasetsEditAccessTimeSection({
           >
             {licenseOptions}
           </IsolatedSelect>
-          <DatasetWizardHelp
-            item={getDatasetAuxiliarItem(auxiliaryItems, "license")}
-            background="white"
-          />
+          <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "license")} />
         </div>
       </section>
       <section id="edit-time-section" className="flex scroll-mt-32 flex-col gap-32">
@@ -96,10 +93,7 @@ export default function DatasetsEditAccessTimeSection({
             />
             {t("form.fieldRequired")}
           </span>
-          <DatasetWizardHelp
-            item={getDatasetAuxiliarItem(auxiliaryItems, "frequency")}
-            background="white"
-          />
+          <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "frequency")} />
         </div>
         <h3 className="text-l-semibold text-primary-900">{t("coverage.temporalCoverageTitle")}</h3>
         <div className="grid grid-cols-1 gap-32 md:grid-cols-2">
@@ -150,10 +144,7 @@ export default function DatasetsEditAccessTimeSection({
             }
           />
         </div>
-        <DatasetWizardHelp
-          item={getDatasetAuxiliarItem(auxiliaryItems, "temporal-coverage")}
-          background="white"
-        />
+        <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, "temporal-coverage")} />
       </section>
     </>
   );

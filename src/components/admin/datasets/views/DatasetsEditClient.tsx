@@ -638,7 +638,7 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
             if (section === "activity") loadActivities();
           }}
         />
-        <div className="py-32 md:py-64">
+        <div className="pt-64">
           <div
             hidden={activeSection !== "metadata"}
             role="region"

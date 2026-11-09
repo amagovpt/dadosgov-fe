@@ -161,7 +161,7 @@ export default function DatasetsEditMetadataTab({
         )}
         <fieldset
           disabled={isSubmitting || !canEdit}
-          className="mt-32 flex w-full min-w-0 max-w-[800px] flex-col gap-64"
+          className="flex w-full min-w-0 max-w-[800px] flex-col gap-64"
         >
           <section className="flex flex-col gap-32">
             <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
