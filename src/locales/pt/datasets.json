@@ -56,6 +56,9 @@
     "authorAlt": "Autor",
     "lastUpdate": "Última atualização:",
     "license": "Licença:",
+    "updatedOn": "Atualizado a {{date}}",
+    "transfers": "Transferências",
+    "contacts": "Atribuições e pontos de contacto",
     "contactForm": "Formulário de contacto",
     "views": "Visualizações",
     "downloads": "Downloads",
@@ -63,6 +66,8 @@
       "title": "Qualidade dos metadados",
       "expand": "Ver mais informação",
       "collapse": "Fechar informação",
+      "improvements": "Lista de melhorias",
+      "complete": "Todos os critérios de qualidade estão preenchidos.",
       "missing": "{{label}} dos dados não preenchidos"
     }
   },

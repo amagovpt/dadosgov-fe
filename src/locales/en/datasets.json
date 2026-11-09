@@ -56,6 +56,9 @@
     "authorAlt": "Author",
     "lastUpdate": "Last update:",
     "license": "License:",
+    "updatedOn": "Updated on {{date}}",
+    "transfers": "Downloads",
+    "contacts": "Attributions and contact points",
     "contactForm": "Contact form",
     "views": "Views",
     "downloads": "Downloads",
@@ -63,6 +66,8 @@
       "title": "Metadata quality",
       "expand": "See more information",
       "collapse": "Close information",
+      "improvements": "List of improvements",
+      "complete": "All quality criteria are complete.",
       "missing": "{{label}} of the data not filled in"
     }
   },
