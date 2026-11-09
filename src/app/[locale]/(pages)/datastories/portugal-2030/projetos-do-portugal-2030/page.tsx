@@ -23,7 +23,6 @@ import { RelatedDatastories } from "@/components/Shared/Datastories/Sections/Rel
 import Sources from "@/components/Shared/Datastories/Sections/Sources";
 import { getRelatedDatasets } from "@/service/api/datasets/server";
 import { INoResults } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsPT2030";
-import { slugify } from "@/utils/slugify";
 import { CardBigNumberProps } from "@/components/Shared/CardCompound/CardBigNumber";
 
 type BigNumberValue = Pick<CardBigNumberProps, "number" | "type" | "unit">;
@@ -159,7 +158,7 @@ export default async function DataStoryProjectsPT2030({
       />
       {/* ids are the slug of the section title, which is what the CMS index anchors point to */}
       <Section
-        id={slugify(bigNumberTitle)}
+        id={hero.index.anchors[0]?.href.replace("#", "") ?? ""} 
         className="flex flex-col items-center bg-primary-700 pt-32 pb-64"
       >
         <InfoBlock.Root className="gap-32">
@@ -186,7 +185,7 @@ export default async function DataStoryProjectsPT2030({
         subject={"projects"}
         apiRoute="/internal-api/fundos-europeus/pt2030/beneficiarios-e-projetos/pesquisar-projetos"
       >
-        <Section id={slugify(block.title)} className="flex flex-col items-center py-64">
+        <Section className="flex flex-col items-center py-64">
           <InfoBlock.Root className="gap-16">
             <InfoBlock.Header>
               <InfoBlock.Title title={block.title} className="max-w-[592px] text-2xl-bold!" />
@@ -209,7 +208,7 @@ export default async function DataStoryProjectsPT2030({
             </InfoBlock.Content>
           </InfoBlock.Root>
         </Section>
-        <Section className="flex w-full flex-col items-center">
+        <Section className="flex w-full flex-col items-center" id={hero.index.anchors[1]?.href.replace("#", "") ?? ""}>
           <InfoBlock.Root>
             <InfoBlock.Content className="flex flex-col">
               <SeachContainer.Root>
@@ -237,10 +236,10 @@ export default async function DataStoryProjectsPT2030({
         </Section>
       </SearchBenProjStoreProvider>
       {relatedDatastories && relatedDatastories.active !== false && (
-        <RelatedDatastories {...relatedDatastories} />
+        <RelatedDatastories {...relatedDatastories} id={hero.index.anchors[2]?.href.replace("#", "") ?? ""} />
       )}
       {relatedDatasets && relatedDatasets.active !== false && pt2030Datasets.length > 0 && (
-        <Sources {...relatedDatasets} datasets={pt2030Datasets} pageSize={6} fromCatalog />
+        <Sources {...relatedDatasets} datasets={pt2030Datasets} pageSize={6} fromCatalog id={hero.index.anchors[3]?.href.replace("#", "") ?? ""} />
       )}
     </main>
   );
