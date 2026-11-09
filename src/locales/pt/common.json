@@ -570,8 +570,10 @@
     },
     "dimensions": {
       "completionPercentage": "Percentagem de conclusão",
-      "investments": "Investimentos",
-      "reforms": "Reformas",
+      "investments_one": "{{count}} Investimento",
+      "investments_other": "{{count}} Investimentos",
+      "reforms_one": "{{count}} Reforma",
+      "reforms_other": "{{count}} Reformas",
       "investment": "Investimento",
       "reform": "Reforma",
       "seeMore": "Ver mais",
