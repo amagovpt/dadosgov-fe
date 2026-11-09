@@ -337,6 +337,7 @@
     "editorFileHint": "Files will be saved after confirming the resource metadata."
   },
   "publication": {
+    "reviewRequired": "Complete the previous step to save the dataset and its resources before publishing.",
     "incomplete": "Complete and save the required fields before publishing: {{fields}}.",
     "draftMinimum": "Select a publisher and enter a title and a description to save the draft.",
     "fields": {
@@ -384,7 +385,7 @@
   "resourceEditor": {
     "title": "Resource metadata",
     "availability": "Resource availability",
-    "pendingAvailability": "The resource is being analysed",
+    "pendingAvailability": "The availability of the resource is being analyzed",
     "metadata": "Resource metadata",
     "requiredFields": "All fields are required except those marked as optional.",
     "titleField": "Title",
@@ -394,7 +395,8 @@
     "format": "Format",
     "mime": "MIME Type",
     "size": "Size",
-    "invalidSize": "Enter a whole number of bytes equal to or greater than zero.",
+    "invalidSize": "Include a unit (B, KB, MB, GB or TB), for example 4.2 MB.",
+    "sizePlaceholder": "e.g. 4.2 MB",
     "url": "URL",
     "origin": "Resource origin",
     "external": "External link",

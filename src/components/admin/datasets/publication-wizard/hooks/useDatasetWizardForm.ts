@@ -23,7 +23,6 @@ export function useDatasetWizardForm({
   const { t } = useTranslation("admin-datasets");
   // Form state
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [showFileError, setShowFileError] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState("");
   const [datasetAcronym, setDatasetAcronym] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
@@ -240,8 +239,6 @@ export function useDatasetWizardForm({
   return {
     uploadedFiles,
     setUploadedFiles,
-    showFileError,
-    setShowFileError,
     datasetTitle,
     setDatasetTitle,
     datasetAcronym,
