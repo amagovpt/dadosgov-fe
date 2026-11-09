@@ -280,6 +280,106 @@ export function loadMoreBeneficiariesInProjectSheetOfPortugal2020() {
 
 /** BENEFICIARIES LIST **/
 
+export function getSearchBeneficiariesPT2020() {
+  return gql(/* GraphQL */ `
+    query getSearchProjects {
+      queryBeneficiariesAndProjectsFiltersOfPortugal2020 {
+        funds
+        policyObjectives
+        programmes
+        thematicAreas
+        regions
+        municipalities
+      }
+      queryBeneficiariesOfPortugal2020SourceInfo {
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          source
+          referenceDate
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+export function getBeneficiariesOfPortugal2020() {
+  return gql(/* GraphQL */ `
+    query SearchPT2020Beneficiaries(
+      $limit: Int
+      $page: Int
+      $sortBy: BeneficiarySortBy
+      $sortOrder: SortOrder
+      $nif: String
+      $name: String
+      $entityRoles: [EntityRole!]
+      $funds: String
+      $programmes: String
+      $areas: String
+      $regions: String
+      $municipalities: String
+      $approvedValueMin: Float
+      $approvedValueMax: Float
+      $projectsAmountMin: Int
+      $projectsAmountMax: Int
+    ) {
+      searchBeneficiariesOfPortugal2020(
+        limit: $limit
+        page: $page
+        sortBy: $sortBy
+        sortOrder: $sortOrder
+        nif: $nif
+        name: $name
+        entityRoles: $entityRoles
+        fund: $funds
+        policyObjective: $policyObjectives
+        specificObjective: $specificObjective
+        programme: $programmes
+        thematicArea: $thematicAreas
+        region: $regions
+        municipality: $municipalities
+        approvedValueMin: $approvedValueMin
+        approvedValueMax: $approvedValueMax
+        executedValueMin: $executedValueMin
+        executedValueMax: $executedValueMax
+        paidValueMin: $paidValueMin
+        paidValueMax: $paidValueMax
+        projectsAmountMin: $projectsAmountMin
+        projectsAmountMax: $projectsAmountMax
+      ) {
+        limit
+        page
+        total
+        totalFiltered
+        filters {
+          approvedValueMin
+          approvedValueMax
+          executedValueMin
+          executedValueMax
+          paidValueMin
+          paidValueMax
+          projectsAmountMin
+          projectsAmountMax
+        }
+        data {
+          entityName
+          entityNif
+          entityRole
+          approvedValue
+          executedValue
+          paidValue
+          projectsAmount
+        }
+      }
+    }
+  `);
+}
+
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
 /** BENEFICIARY SHEET **/
