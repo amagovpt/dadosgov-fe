@@ -573,8 +573,10 @@
     },
     "dimensions": {
       "completionPercentage": "Completion percentage",
-      "investments": "Investments",
-      "reforms": "Reforms",
+      "investments_one": "{{count}} Investment",
+      "investments_other": "{{count}} Investments",
+      "reforms_one": "{{count}} Reform",
+      "reforms_other": "{{count}} Reforms",
       "investment": "Investment",
       "reform": "Reform",
       "seeMore": "See more",
