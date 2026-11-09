@@ -12,7 +12,7 @@ import {
   getPrrBeneficiarySheet,
   getPrrBeneficiarySourceInfo,
   queryLoadMorePrrProjectsByBeneficiary,
-} from "@/service/queries/datastories/datastory";
+} from "@/service/queries/datastories/datastories-prr";
 import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Beneficiary,

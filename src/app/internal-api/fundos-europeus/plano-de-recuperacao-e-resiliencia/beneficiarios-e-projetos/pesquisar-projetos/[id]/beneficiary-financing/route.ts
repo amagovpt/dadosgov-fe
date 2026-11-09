@@ -1,5 +1,5 @@
 
-import { loadMorePrrProjectSheetBeneficiaryFinancing } from "@/service/queries/datastories/datastory";
+import { loadMorePrrProjectSheetBeneficiaryFinancing } from "@/service/queries/datastories/datastories-prr";
 import { FinancialEntity, ProjectSheetBeneficiaryFinancingResponse, ProjectSheetBeneficiaryFinancingType } from "@/service/types/datastories/prr/prr";
 import apolloClient from "@/service/utils/apollo-client";
 
