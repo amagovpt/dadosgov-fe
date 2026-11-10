@@ -3,12 +3,16 @@ import { parseDatasetDateToTime } from "@/components/admin/datasets/publication-
 
 const MISSING_FIELDS_KEY = "draft:missing_fields";
 
+export type DatasetPublicationMetadata = Pick<
+  Dataset,
+  "title" | "description" | "frequency" | "organization" | "owner" | "extras" | "temporal_coverage"
+>;
+
 export type DatasetPublicationIssue =
   | "title"
   | "description"
   | "frequency"
   | "producer"
-  | "resources"
   | "temporalCoverage";
 
 export function getDatasetDraftExtras(
@@ -28,12 +32,14 @@ export function getDatasetDraftExtras(
   return extras;
 }
 
-export function hasMissingDraftFrequency(dataset: Dataset): boolean {
+export function hasMissingDraftFrequency(dataset: Pick<Dataset, "extras">): boolean {
   const fields = dataset.extras?.[MISSING_FIELDS_KEY];
   return Array.isArray(fields) && fields.includes("frequency");
 }
 
-export function getDatasetPublicationIssues(dataset: Dataset): DatasetPublicationIssue[] {
+export function getDatasetPublicationIssues(
+  dataset: DatasetPublicationMetadata
+): DatasetPublicationIssue[] {
   const issues: DatasetPublicationIssue[] = [];
   if (!dataset.title?.trim() || dataset.title.trim().length > 350) issues.push("title");
   if (!dataset.description?.trim() || dataset.description.trim().length > 3000)
@@ -42,7 +48,6 @@ export function getDatasetPublicationIssues(dataset: Dataset): DatasetPublicatio
   // draft value distinct from an explicit selection of that valid option.
   if (!dataset.frequency?.trim() || hasMissingDraftFrequency(dataset)) issues.push("frequency");
   if (!dataset.organization?.id && !dataset.owner?.id) issues.push("producer");
-  if (!dataset.resources?.length) issues.push("resources");
   const start = dataset.temporal_coverage?.start;
   const end = dataset.temporal_coverage?.end;
   const startTime = start ? parseDatasetDateToTime(start) : null;

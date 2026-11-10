@@ -106,7 +106,7 @@ export default function DatasetsEditSpaceSection({
           {spatialGranularityOptions}
         </IsolatedSelect>
       </div>
-      <DatasetWizardHelp item={helpItem} background="white" />
+      <DatasetWizardHelp item={helpItem} />
     </section>
   );
 }

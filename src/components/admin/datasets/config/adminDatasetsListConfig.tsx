@@ -4,7 +4,7 @@ import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import TextLink from "@/components/Primitives/TextLink";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
-import type { Dataset } from "@/service/types/dataset";
+import type { DatasetListItem } from "@/service/types/dataset";
 import {
   createDateSorter,
   createLocaleStringSorter,
@@ -25,22 +25,22 @@ export const adminDatasetSortFieldMap: Record<AdminDatasetSortField, string | nu
   quality: null,
 };
 
-export function getDatasetProducer(dataset: Dataset): string {
+export function getDatasetProducer(dataset: DatasetListItem): string {
   return (
     dataset.organization?.name ||
     [dataset.owner?.first_name, dataset.owner?.last_name].filter(Boolean).join(" ")
   );
 }
 
-function getQualityScore(dataset: Dataset): number {
+function getQualityScore(dataset: DatasetListItem): number {
   return calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
 }
 
 export function sortAdminDatasets(
-  datasets: Dataset[],
+  datasets: DatasetListItem[],
   field: AdminDatasetSortField | null,
   order: SortOrder
-): Dataset[] {
+): DatasetListItem[] {
   return sortItems(datasets, field, order, {
     title: createLocaleStringSorter((dataset) => dataset.title),
     producer: createLocaleStringSorter(getDatasetProducer),
@@ -50,7 +50,7 @@ export function sortAdminDatasets(
 }
 
 interface AdminDatasetColumnsOptions {
-  editHref?: (dataset: Dataset) => string;
+  editHref?: (dataset: DatasetListItem) => string;
   labels: Record<"title" | "status" | "producer" | "lastModified" | "quality", string>;
   statusLabels: Record<ResourceStatusKey, string>;
 }
@@ -59,7 +59,7 @@ export function createAdminDatasetColumns({
   editHref = (dataset) => `/admin/me/datasets/edit?id=${dataset.id}`,
   labels,
   statusLabels,
-}: AdminDatasetColumnsOptions): AdminListColumn<Dataset, AdminDatasetSortField>[] {
+}: AdminDatasetColumnsOptions): AdminListColumn<DatasetListItem, AdminDatasetSortField>[] {
   return [
     {
       id: "title",

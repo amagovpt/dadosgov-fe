@@ -9,7 +9,7 @@ export interface LanguageOption {
   value: string;
   labelKey: string;
   abbr: string;
-  icon: string;
+  icon?: string;
 }
 
 export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: boolean | null }>(
@@ -22,14 +22,12 @@ export const languages: LanguageOption[] = [
   {
     value: "pt",
     labelKey: "header.languages.portuguese",
-    abbr: "PT",
-    icon: "/Icons/languages/pt.svg",
+    abbr: "PT"
   },
   {
     value: "en",
     labelKey: "header.languages.english",
     abbr: "EN",
-    icon: "/Icons/languages/en.svg",
   },
 ];
 
