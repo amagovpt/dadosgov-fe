@@ -29,7 +29,7 @@ export default function EditDiscussionPopup({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!message.trim()) return;
+    if (discussion.closed || isSubmitting || !message.trim()) return;
     if (isMainPost && !title.trim()) return;
     setIsSubmitting(true);
     try {
@@ -84,6 +84,7 @@ export default function EditDiscussionPopup({
           <InputText
             label={t("discussions.title")}
             value={title}
+            disabled={!!discussion.closed || isSubmitting}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
@@ -93,6 +94,7 @@ export default function EditDiscussionPopup({
         <InputTextArea
           label={t("discussions.message")}
           value={message}
+          disabled={!!discussion.closed || isSubmitting}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           required
@@ -106,7 +108,9 @@ export default function EditDiscussionPopup({
           variant="primary"
           appearance="solid"
           onClick={handleSubmit}
-          disabled={isSubmitting || !message.trim() || (isMainPost && !title.trim())}
+          disabled={
+            !!discussion.closed || isSubmitting || !message.trim() || (isMainPost && !title.trim())
+          }
         >
           {isSubmitting ? t("discussions.updating") : t("discussions.update")}
         </Button>

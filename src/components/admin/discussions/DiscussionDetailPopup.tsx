@@ -33,7 +33,7 @@ export default function DiscussionDetailPopup({
   const discussionHref = getDiscussionHref(discussion);
 
   const handleReply = async () => {
-    if (!comment.trim() || isSubmitting) return;
+    if (discussion.closed || !comment.trim() || isSubmitting) return;
     setIsSubmitting(true);
     try {
       const updated = await replyToDiscussion(discussion.id, comment.trim());
@@ -50,7 +50,7 @@ export default function DiscussionDetailPopup({
   };
 
   const handleCloseWithComment = async () => {
-    if (!comment.trim() || isSubmitting) return;
+    if (discussion.closed || !comment.trim() || isSubmitting) return;
     setIsSubmitting(true);
     try {
       const updated = await closeDiscussion(discussion.id, comment.trim());

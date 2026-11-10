@@ -37,13 +37,13 @@ interface DiscussionSectionProps {
 }
 
 interface ReplyFormProps {
-  discId: string;
+  discussion: Discussion;
   user: NonNullable<ReturnType<typeof useAuth>["user"]>;
   onClose: () => void;
   onSubmitted: (updated: Discussion) => void;
 }
 
-const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitted }) => {
+const ReplyForm: React.FC<ReplyFormProps> = ({ discussion, user, onClose, onSubmitted }) => {
   const { t } = useTranslation("common");
   const [replyMessage, setReplyMessage] = useState("");
   const [isReplying, setIsReplying] = useState(false);
@@ -92,7 +92,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
             label=""
             hideLabel
             placeholder={t("discussions.identitySearchPlaceholder")}
-            id={`reply-identity-${discId}`}
+            id={`reply-identity-${discussion.id}`}
             onChangeRef={identityRef}
             searchable
             searchInputPlaceholder={t("discussions.identitySearchPlaceholder")}
@@ -115,14 +115,15 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
         <Button
           variant="primary"
           appearance="solid"
-          disabled={isReplying || !replyMessage.trim()}
+          disabled={!!discussion.closed || isReplying || !replyMessage.trim()}
           onClick={async () => {
+            if (discussion.closed || isReplying || !replyMessage.trim()) return;
             setIsReplying(true);
             const org =
               identityRef.current && identityRef.current !== "user"
                 ? identityRef.current
                 : undefined;
-            const updated = await replyToDiscussion(discId, replyMessage.trim(), {
+            const updated = await replyToDiscussion(discussion.id, replyMessage.trim(), {
               organization: org,
             });
             if (updated) onSubmitted(updated);
@@ -414,7 +415,7 @@ export function DiscussionSection({
                   </div>
                 </div>
                 <div className="flex gap-[18px]">
-                  {disc.permissions.edit && (
+                  {!disc.closed && disc.permissions.edit && (
                     <Button
                       variant="primary"
                       appearance="outline"
@@ -507,7 +508,7 @@ export function DiscussionSection({
                           </p>
                         </div>
                         <div className="flex gap-[18px]">
-                          {msg.permissions.edit && (
+                          {!disc.closed && msg.permissions.edit && (
                             <Button
                               variant="primary"
                               appearance="outline"
@@ -587,9 +588,13 @@ export function DiscussionSection({
                   ))}
                 </div>
               )}
-              {replyingTo === disc.id && user ? (
+              {disc.closed ? (
+                <p role="status" className="mt-32 text-s-regular text-neutral-700">
+                  {t("discussions.closed")}
+                </p>
+              ) : replyingTo === disc.id && user ? (
                 <ReplyForm
-                  discId={disc.id}
+                  discussion={disc}
                   user={user}
                   onClose={() => setReplyingTo(null)}
                   onSubmitted={(updated) => {
