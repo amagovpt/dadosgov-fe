@@ -384,4 +384,174 @@ export function getBeneficiariesOfPortugal2020() {
 
 /** BENEFICIARY SHEET **/
 
+export function getPT2020BeneficiaryMeta(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPT2020BeneficiaryMeta {
+      findFichaDeBeneficiarioSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+            }
+          }
+        }
+      }
+    }
+  `);
+}
+
+export function getPT2020BeneficiaryData(locale: string = "pt") {
+  return gql(/* GraphQL */ `
+    query getPT2020Beneficiary($nif: String!) {
+      findFichaDeBeneficiarioSingleton {
+        data {
+          hero {
+            ${locale} {
+              title
+              description
+              breadcrumbs {
+                url
+                label
+              }
+              index {
+                title
+                anchors {
+                  anchor {
+                    href
+                    children
+                  }
+                }
+              }
+              breadcrumbs {
+                label
+                url
+              }
+            }
+          }
+          beneficiarySheet {
+            ${locale} {
+              id
+              title
+            }
+          }
+          consortiums {
+            ${locale} {
+              id
+              title
+              subtitle
+            }
+          }
+          distribution {
+            ${locale} {
+              id
+              iconName
+              title
+              subtitle
+              cards {
+                card {
+                  title
+                  icon
+                  subtitle
+                  description
+                  anchorGroup {
+                    children
+                  }
+                }
+              }
+            }
+          }
+          projects {
+            ${locale} {
+              id
+              iconName
+              title
+              cards {
+                card {
+                  title
+                  anchor {
+                    href
+                    icon
+                    children
+                  }
+                }
+              }
+            }
+          }
+          datasets {
+            ${locale} {
+              schemaName
+              id
+              active
+              title
+              datasets {
+                image {
+                  url
+                }
+                createdAt
+                organizationName
+                title
+                description
+                slug
+              }
+            }
+          }
+        }
+      }
+      queryBeneficiarySheetOfPortugal2020(nif: $nif) {
+        data {
+          approvedValue
+          entityName
+          entityNif
+          paidValue
+          beneficiarySheet {
+            approvedValue
+            entityName
+            entityNif
+            projectsAmount
+            paidValue
+          }
+          values {
+            approvedValue
+            executedValue
+            percentageExecutedValue
+            paidValue
+          }
+        }
+        sourceInfo {
+          format
+          modificationDate
+          publicationDate
+          referenceDate
+          source
+          sourceLink
+          title
+          updateDate
+          url
+        }
+      }
+    }
+  `);
+}
+
+export const queryLoadMorePT2020ProjectsByBeneficiary = gql(/* GraphQL */ `
+  query loadMoreProjectsByBeneficiary($nif: String!, $entityRole: EntityRole!, $page: Int) {
+    queryProjectsByBeneficiarySheetOfPortugal2020(nif: $nif, entityRole: $entityRole, page: $page) {
+      limit
+      page
+      total
+      data {
+        approvedValue
+        effectiveConclusionDate
+        operationCode
+        operationName
+      }
+    }
+  }
+`);
+
+export function loadMorePT2020ProjectsByBeneficiary() {
+  return queryLoadMorePT2020ProjectsByBeneficiary;
+}
+
 /* -------------------------------------------------------------------------------------------------------------------------------- */

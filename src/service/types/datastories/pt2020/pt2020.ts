@@ -177,4 +177,79 @@ export type PT2020ProjectSheetBeneficiaryResponse = {
 
 /** BENEFICIARY **/
 
+export type Beneficiary = {
+  hero: DatastoryHero;
+  beneficiarySheet: Section;
+  consortiums: Section;
+  distribution: Section;
+  projects: Section;
+  datasets: SourceSection;
+};
+
+/* ------------------------------------------------------------- */
+
+export type NIF = string;
+
+export type BeneficiaryEntityRole =
+  | "Beneficiário Principal"
+  | "Outros Beneficiários"
+  | "Fornecedor"
+  | string;
+
+/* ------------------------------------------------------------- */
+
+export type BeneficiarySheet = {
+  entityNif: NIF;
+  entityName: string;
+  projectsAmount: number;
+  approvedValue: number;
+};
+
+/* ------------------------------------------------------------- */
+
+export type Values = {
+  approvedValue: number;
+  executedValue: number;
+  paidValue: number;
+  percentageExecutedValue: number;
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2020Beneficiary = {
+  data: {
+    entityNif: NIF;
+    entityName: string;
+    approvedValue: number;
+    beneficiarySheet: BeneficiarySheet[];
+    values: Values[];
+  };
+  sourceInfo: SourceInfo[];
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2020BeneficiariesResponse = {
+  data: Beneficiary[];
+  total: number;
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2020Projects = {
+  operationCode: string;
+  operationName: string;
+  approvedValue: number;
+  effectiveConclusionDate: string | null;
+};
+
+/* ------------------------------------------------------------- */
+
+export type PT2020ProjectsResponse = {
+  limit: number;
+  page: number;
+  total: number;
+  data: PT2020Projects[];
+};
+
 // ----------------------------------------------------------------------------------------------
