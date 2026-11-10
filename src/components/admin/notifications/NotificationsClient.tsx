@@ -7,6 +7,7 @@ import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchNotifications, markNotificationRead } from "@/service/api/notifications";
 import { fetchTransfers } from "@/service/api/transfers";
+import { fetchDiscussion } from "@/service/api/discussions-topics";
 import type { Transfer } from "@/service/types/transfer-system";
 import type {
   Notification,
@@ -17,8 +18,15 @@ import {
   harvesterValidationLink,
   isHarvesterValidation,
   isTransferRequest,
+  isDiscussionNotification,
+  isMembershipRequest,
+  isMembershipResponse,
 } from "@/components/admin/notifications/notification-helpers";
 import TransferNotificationRow from "@/components/admin/notifications/TransferNotificationRow";
+import {
+  DiscussionNotificationRow,
+  MembershipNotificationRow,
+} from "@/components/admin/notifications/ActivityNotificationRow";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
 import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
@@ -154,6 +162,19 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
                       );
                     }}
                   />
+                ) : isDiscussionNotification(n.details) ? (
+                  <DiscussionNotificationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                    loadDiscussion={fetchDiscussion}
+                  />
+                ) : isMembershipRequest(n.details) || isMembershipResponse(n.details) ? (
+                  <MembershipNotificationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                  />
                 ) : (
                   <GenericRow
                     createdAt={n.created_at}
@@ -242,6 +263,7 @@ function GenericRow({ createdAt, handledAt, readAction }: GenericRowProps) {
           <Icon name="agora-line-mega-phone" className="h-20 w-20" />
           <span className="text-base font-medium text-primary-900">{t("generic.title")}</span>
         </div>
+        <p className="text-base text-neutral-700">{t("generic.description")}</p>
         <p className="text-sm text-neutral-500">
           {format(new Date(createdAt), "dd/MM/yyyy HH:mm")}
           {handledAt && ` · ${t("read")}`}

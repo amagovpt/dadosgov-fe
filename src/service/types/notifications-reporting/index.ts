@@ -1,6 +1,7 @@
 export type {
   DiscussionNotificationDetails,
   MembershipRequestNotificationDetails,
+  MembershipResponseNotificationDetails,
   TransferRequestNotificationDetails,
   ValidateHarvesterNotificationSource,
   ValidateHarvesterNotificationDetails,
@@ -9,4 +10,4 @@ export type {
   ReportReason,
   ReportCreatePayload,
   Report,
-} from './notifications-reporting';
+} from "./notifications-reporting";
