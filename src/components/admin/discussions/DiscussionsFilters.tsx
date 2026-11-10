@@ -43,7 +43,7 @@ export default function DiscussionsFilters({
   return (
     <div className="flex flex-col gap-32">
       <div
-        className={`grid grid-cols-1 items-end gap-32 ${identityFilter ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}
+        className={`grid grid-cols-1 items-start gap-32 ${identityFilter ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}
       >
         <div className="admin-search-wrapper min-w-0">
           <AdminSearch
@@ -81,6 +81,7 @@ export default function DiscussionsFilters({
               id="discussion-filter-identity"
               label={t("filters.identity.label")}
               placeholder={t("filters.identity.placeholder")}
+              helperText={t("filters.identity.helperText")}
               value={identityFilter.value}
               required={false}
               onChange={identityFilter.onChange}

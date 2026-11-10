@@ -66,6 +66,7 @@
       "closed": "Closed"
     },
     "identity": {
+      "helperText": "Filter by content associated with an organization or the user who started the discussion.",
       "label": "Organization or user",
       "placeholder": "Search for an organization or user",
       "user": "User",

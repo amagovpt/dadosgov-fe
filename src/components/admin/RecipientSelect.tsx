@@ -24,6 +24,7 @@ interface RecipientSelectProps {
   onChange: (selection: RecipientSelection | null) => void;
   hasError?: boolean;
   errorFeedbackText?: string;
+  helperText?: string;
 }
 
 const DEBOUNCE_MS = 300;
@@ -39,6 +40,7 @@ export default function RecipientSelect({
   onChange,
   hasError,
   errorFeedbackText,
+  helperText,
 }: RecipientSelectProps) {
   const { t } = useTranslation("admin-common");
   const [users, setUsers] = useState<UserSuggestion[]>([]);
@@ -146,6 +148,7 @@ export default function RecipientSelect({
       searchNoResultsText={noResultsText}
       hasError={hasError}
       errorFeedbackText={errorFeedbackText}
+      helperText={helperText}
       onChangeCallback={handleChange}
       onSearchCallback={setSearchQuery}
     >

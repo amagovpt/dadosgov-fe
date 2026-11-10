@@ -66,6 +66,7 @@
       "closed": "Fechada"
     },
     "identity": {
+      "helperText": "Filtre por conteúdo associado a uma organização ou pelo utilizador que iniciou a discussão.",
       "label": "Organização ou utilizador",
       "placeholder": "Pesquise uma organização ou utilizador",
       "user": "Utilizador",
