@@ -7,7 +7,7 @@ import { AdminSearch } from "@/components/admin/lists/AdminSearch";
 import Button from "@/components/Primitives/Button";
 
 const filterTagClassName =
-  "h-auto! min-h-[44px]! max-w-full px-16! py-8! [&>.children-wrapper]:min-w-0 [&>.children-wrapper]:text-s-regular! [&>.children-wrapper]:text-neutral-700 [&>.children-wrapper]:[overflow-wrap:anywhere] [&>.icon-wrapper]:shrink-0 [&>.icon-wrapper_svg]:fill-neutral-700";
+  "min-h-[44px] max-w-full px-16 py-8 [&>.children-wrapper]:text-s-regular! [&>.children-wrapper]:text-neutral-700 [&>.icon-wrapper_svg]:fill-neutral-700";
 
 interface DiscussionsFiltersProps {
   searchValue: string;
