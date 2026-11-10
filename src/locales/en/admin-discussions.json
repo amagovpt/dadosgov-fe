@@ -1,20 +1,33 @@
 {
   "title": "Discussions",
+  "description": "Manage community discussions, following the topics created by users, their status and associated activity.",
   "tabs": {
+    "label": "Discussion scope",
     "content": "Content",
     "organization": "Organization"
   },
   "popup": {
     "title": "Discussion"
   },
+  "resultsTitle": "Discussion list",
   "columns": {
     "title": "Title",
     "author": "Author",
+    "contentType": "Content type",
     "status": "Status",
     "date": "Date",
     "messages": "Messages",
     "createdAt": "Created at",
-    "closedAt": "Closed at"
+    "closedAt": "Closed at",
+    "createdDate": "Creation date",
+    "closedDate": "Completion date"
+  },
+  "contentTypes": {
+    "dataset": "Dataset",
+    "reuse": "Reuse",
+    "dataservice": "API",
+    "organization": "Organization",
+    "unknown": "Other"
   },
   "status": {
     "open": "OPEN",
@@ -23,12 +36,20 @@
   "filters": {
     "all": "All",
     "search": {
+      "toolbarLabel": "Search",
       "label": "Search discussions",
       "placeholder": "Search by discussion title or content"
     },
     "status": {
-      "placeholder": "Filter by status"
-    }
+      "label": "Status",
+      "placeholder": "Select discussion status",
+      "open": "Active",
+      "closed": "Closed"
+    },
+    "applied": "Applied filters ({{count}})",
+    "clear": "Clear applied filters",
+    "removeSearch": "Remove search filter: {{query}}",
+    "removeStatus": "Remove status filter: {{status}}"
   },
   "empty": {
     "descriptionOrganization": "There are no discussions about this organization yet."
@@ -43,6 +64,7 @@
   },
   "commentLabel": "Write your comment",
   "actions": {
+    "goToDiscussion": "Go to discussion",
     "delete": "Delete",
     "addComment": "Add comment",
     "commentAndClose": "Comment and close"
