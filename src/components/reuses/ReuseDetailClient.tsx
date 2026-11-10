@@ -32,7 +32,7 @@ import { localizeReuseTypeId } from "@/lib/reuse-labels";
 import { normalizeRemoteDatasets } from "@/lib/reuse-remote-datasets";
 import TextLink from "@/components/Primitives/TextLink";
 import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
-import { formatMetricValue } from "@/utils/formatNumber";
+import { MetricItem } from "@/components/Shared/MetricItem";
 import { useTranslation } from "react-i18next";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
@@ -215,22 +215,16 @@ export default function ReuseDetailClient({
                       <span className="font-semibold text-neutral-900">
                         {localizeReuseTypeId(reuse.type) || tr("detail.defaultType")}
                       </span>
-                      <span className="flex items-center gap-8">
-                        <Icon
-                          name="agora-line-eye"
-                          className="h-20 w-20 fill-[var(--color-neutral-900)]"
-                        />
-                        <span className="text-neutral-900">
-                          {formatMetricValue(reuse.metrics?.views, 0)}
-                        </span>
-                      </span>
-                      <span className="flex items-center gap-8">
-                        <Icon
-                          name="agora-line-layers-menu"
-                          className="h-20 w-20 fill-[var(--color-neutral-900)]"
-                        />
-                        <span className="text-neutral-900">{datasetRefs.length}</span>
-                      </span>
+                      <MetricItem
+                        icon="agora-line-eye"
+                        value={reuse.metrics?.views}
+                        label={tr("card.views")}
+                      />
+                      <MetricItem
+                        icon="agora-line-layers-menu"
+                        value={datasetRefs.length}
+                        label={tr("card.datasets")}
+                      />
                     </span>
                   </CardDescription>
                 </BodySectionContainer>

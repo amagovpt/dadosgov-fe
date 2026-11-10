@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CardLinks, Button } from "@ama-pt/agora-design-system";
@@ -15,6 +15,7 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { DataStoriesFilters } from "@/components/datastories/DataStoriesFilters";
 import { DATA_STORIES_PAGE_SIZE } from "@/utils/dataStoriesListingQuery";
 import { useDataStoriesListing } from "@/hooks/useDataStoriesListing";
+import { useDatastoriesViews } from "@/hooks/useDatastoriesViews";
 import { twJoin } from "tailwind-merge";
 import { useTranslation } from "react-i18next";
 import FoNoResults from "../common/FoNoResults";
@@ -55,7 +56,9 @@ export default function DataStoriesClient({
     stories,
     activeFilters,
   });
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  // Only the cards on screen: the request follows the page, the search and the filters.
+  const views = useDatastoriesViews(pagedStories.map((story) => story.slug));
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
@@ -133,7 +136,7 @@ export default function DataStoriesClient({
                     <div key={story.slug} className="h-full">
                       <CardLinks
                         onClick={() => router.push(`/datastories/${story.slug}`)}
-                        className="!h-full cursor-pointer text-neutral-900 [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse [&_.text-content]:!w-full"
+                        className="h-full! cursor-pointer text-neutral-900 [&_.card-links-container]:h-full! [&_.content]:flex-col! [&_.content]:xl:flex-row-reverse! [&_.text-content]:w-full!"
                         variant="transparent"
                         image={{
                           src:
@@ -154,6 +157,25 @@ export default function DataStoriesClient({
                             {t("publishedTimeAgo", { timeAgo: timeAgo })}
                           </span>
                         }*/
+                        links={
+                          views
+                            ? [
+                                {
+                                  href: "#",
+                                  hasIcon: true,
+                                  leadingIcon: "agora-line-eye",
+                                  leadingIconHover: "agora-solid-eye",
+                                  trailingIcon: "",
+                                  trailingIconHover: "",
+                                  trailingIconActive: "",
+                                  children: (views[story.slug] ?? 0).toLocaleString(i18n.language),
+                                  title: t("card.views"),
+                                  onClick: (e: MouseEvent) => e.preventDefault(),
+                                  className: "text-[#034AD8]",
+                                },
+                              ]
+                            : undefined
+                        }
                         mainLink={
                           <Link href={`/datastories/${story.slug}`}>
                             <span className="underline">{story.title}</span>
