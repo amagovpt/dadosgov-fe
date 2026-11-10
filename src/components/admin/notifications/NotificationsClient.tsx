@@ -29,6 +29,7 @@ import {
 } from "@/components/admin/notifications/ActivityNotificationRow";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
+import { TabPagination } from "@/components/Shared/TabPagination";
 import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { BoNotificationsPage } from "@/service/types/admin/notifications";
@@ -37,12 +38,19 @@ interface NotificationsClientProps {
   pageContent: BoNotificationsPage;
 }
 
+const PAGE_SIZE = 10;
+
 export default function NotificationsClient({ pageContent }: NotificationsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-notifications"]);
   const { notifyApiError } = useApiErrorHandler();
   const [items, setItems] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const initialNotificationRequest = useRef<ReturnType<typeof fetchNotifications> | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const notificationRequest = useRef<{
+    page: number;
+    request: ReturnType<typeof fetchNotifications>;
+  } | null>(null);
   // Share each recipient's request across all rows and Strict Mode effects.
   // Keep rejected promises too: only an explicit retry should issue another
   // request after a failure such as a rate limit. This cache lives on the page.
@@ -64,8 +72,21 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
     const loadNotifications = async () => {
       setIsLoading(true);
       try {
-        const res = await (initialNotificationRequest.current ??= fetchNotifications(1, 50));
+        if (notificationRequest.current?.page !== currentPage) {
+          notificationRequest.current = {
+            page: currentPage,
+            request: fetchNotifications(currentPage, PAGE_SIZE),
+          };
+        }
+        const res = await notificationRequest.current.request;
         if (!isCancelled) {
+          const total = res.total ?? 0;
+          const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+          setTotalItems(total);
+          if (currentPage > lastPage) {
+            setCurrentPage(lastPage);
+            return;
+          }
           setItems(res.data ?? []);
         }
       } catch (error) {
@@ -85,7 +106,7 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [currentPage]);
 
   const handleMarkRead = useCallback(
     async (id: string) => {
@@ -187,6 +208,12 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
           })}
         </ul>
       )}
+      <TabPagination
+        total={totalItems}
+        pageSize={PAGE_SIZE}
+        currentPage={currentPage}
+        onChange={setCurrentPage}
+      />
     </AdminLayout>
   );
 }
