@@ -3,11 +3,7 @@ import {
   DataStoriesPage,
   DataStoryMetadata,
 } from "@/service/types/datastories/datastories";
-import {
-  Datastory,
-  DatastorySection,
-  RelatedSection,
-} from "@/service/types/datastories/datastory";
+import { Datastory, DatastorySection, RelatedSection } from "@/service/types/datastories/datastory";
 import { FoListPageHero } from "@/service/types/shared";
 import apolloClient from "@/service/utils/apollo-client";
 import { activeDatastories, DatastoryRef } from "@/utils/activeDatastories";
@@ -127,7 +123,6 @@ export async function getDataStories(locale: string = "pt") {
 
 /* -------------------------------------------------------------------------------------------------------------------------------- */
 
-
 type RelatedDatastory = RelatedSection["datastories"][number];
 
 /**
@@ -209,6 +204,12 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 label
                 url
               }
+              modal {
+                button
+                title
+                subtitle
+                description
+              }
             }
           }
           sections {
@@ -258,6 +259,11 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     classNameIframeBackground
                     classNames
                     source
+                  }
+                  button {
+                    children
+                    href
+                    icon
                   }
                 }
                 ... on SectionDatastoryOtherResourcesComponent {

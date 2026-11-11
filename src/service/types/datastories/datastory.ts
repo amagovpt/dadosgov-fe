@@ -35,12 +35,20 @@ type Index = {
   anchors: IndexAnchor[];
 };
 
+export type DatastoryHeroModal = {
+  button: string;
+  title: string;
+  subtitle: string;
+  description: string;
+};
+
 export type DatastoryHero = {
   pretitle?: string;
   title: string;
   description?: string;
   index: Index;
   breadcrumbs: BreadcrumbItem[];
+  modal: DatastoryHeroModal;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -133,6 +141,7 @@ export type IframeSection = {
   description?: string;
   links?: Anchor[];
   iframe: Iframe[];
+  button?: Anchor;
 };
 
 // ----------------------------------------------------------------------------------------------
