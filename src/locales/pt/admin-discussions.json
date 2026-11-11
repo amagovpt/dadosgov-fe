@@ -1,6 +1,25 @@
 {
   "title": "Discussões",
+  "system": {
+    "title": "Discussões",
+    "description": "Consulte e faça a gestão das discussões da comunidade em todo o portal.",
+    "emptyTitle": "Ainda não existem discussões",
+    "emptyDescription": "As discussões iniciadas pela comunidade aparecem aqui.",
+    "noResultsTitle": "Nenhuma discussão encontrada",
+    "noResultsDescription": "Experimente alterar a pesquisa ou limpar os filtros aplicados.",
+    "unknownAuthor": "Utilizador indisponível"
+  },
+  "personal": {
+    "title": "As minhas discussões",
+    "description": "Acompanhe as discussões que iniciou na comunidade e responda aos comentários.",
+    "noResultsTitle": "Nenhuma discussão encontrada",
+    "noResultsDescription": "Experimente alterar a pesquisa ou limpar os filtros aplicados.",
+    "emptyTitle": "Ainda não iniciou discussões",
+    "emptyDescription": "Pode iniciar uma discussão nas páginas dos conjuntos de dados, reutilizações, APIs e organizações."
+  },
   "description": "Gerir as discussões da comunidade, acompanhando os tópicos criados pelos utilizadores, o seu estado e a atividade associada.",
+  "loadError": "Não foi possível carregar as discussões. Tente novamente.",
+  "retry": "Tentar novamente",
   "tabs": {
     "label": "Âmbito das discussões",
     "content": "Conteúdos",
@@ -46,6 +65,14 @@
       "open": "Ativa",
       "closed": "Fechada"
     },
+    "identity": {
+      "helperText": "Filtre por conteúdo associado a uma organização ou pelo utilizador que iniciou a discussão.",
+      "label": "Organização ou utilizador",
+      "placeholder": "Pesquise uma organização ou utilizador",
+      "user": "Utilizador",
+      "organization": "Organização"
+    },
+    "removeIdentity": "Remover filtro: {{name}}",
     "applied": "Filtros aplicados ({{count}})",
     "clear": "Limpar filtros aplicados",
     "removeSearch": "Remover filtro de pesquisa: {{query}}",
