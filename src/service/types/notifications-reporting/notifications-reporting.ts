@@ -11,6 +11,12 @@ export interface DiscussionNotificationDetails {
 export interface MembershipRequestNotificationDetails {
   request_organization: Organization | null;
   request_user: UserRef | null;
+  kind?: "request" | "invitation";
+}
+
+export interface MembershipResponseNotificationDetails {
+  class: "MembershipAcceptedNotificationDetails" | "MembershipRefusedNotificationDetails";
+  organization: Pick<Organization, "id" | "name" | "slug"> | null;
 }
 
 export interface TransferRequestNotificationDetails {
@@ -49,6 +55,7 @@ export interface ValidateHarvesterNotificationDetails {
 export type NotificationDetails =
   | DiscussionNotificationDetails
   | MembershipRequestNotificationDetails
+  | MembershipResponseNotificationDetails
   | TransferRequestNotificationDetails
   | ValidateHarvesterNotificationDetails;
 
