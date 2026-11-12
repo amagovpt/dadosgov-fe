@@ -509,7 +509,10 @@
       "localizacao_sede": "Localização da sede"
     },
     "tooltips": {
-      "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus."
+      "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus.",
+      "valor_financiamento_beneficiario": "Valor total de financiamento atribuído ao beneficiário.",
+      "total_projetos": "Número de projetos",
+      "total_financiado": "Total financiado"
     },
     "noGrade": "Não se aplica",
     "byArea": "Por {{area}}",

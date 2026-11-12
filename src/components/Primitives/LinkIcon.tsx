@@ -11,6 +11,7 @@ interface LinkIconProps {
   onClick?: () => void;
   title: string;
   className?: string;
+  classNameIcon?: string;
   target?: "_blank" | "_self" | "_parent" | "_top";
   variant?: AnchorVariant;
   darkMode?: boolean;
@@ -32,6 +33,7 @@ export function LinkIcon({
   onClick,
   title,
   className,
+  classNameIcon,
   target = "_self",
   variant = "neutral",
   darkMode = false,
@@ -93,14 +95,19 @@ export function LinkIcon({
             <Icon
               aria-hidden
               name={name}
-              className={twMerge("group-hover:hidden", style === "button" ? "text-white" : "")}
+              className={twMerge(
+                "group-hover:hidden",
+                style === "button" ? "text-white" : "",
+                classNameIcon
+              )}
             />
             <Icon
               aria-hidden
               name={hoverName}
               className={twMerge(
                 "hidden group-hover:block",
-                style === "button" ? "text-white" : ""
+                style === "button" ? "text-white" : "",
+                classNameIcon
               )}
             />
           </>
