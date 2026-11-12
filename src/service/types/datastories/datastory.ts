@@ -48,7 +48,7 @@ export type DatastoryHero = {
   description?: string;
   index: Index;
   breadcrumbs: BreadcrumbItem[];
-  modal: DatastoryHeroModal;
+  modal?: DatastoryHeroModal;
 };
 
 // ----------------------------------------------------------------------------------------------

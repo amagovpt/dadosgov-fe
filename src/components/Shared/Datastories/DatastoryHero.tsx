@@ -54,11 +54,13 @@ export default function DatastoryHero({
   const { show } = useModalContext();
 
   const openModalHandler = () => {
-    show(<ModalContent modal={modal} />, {
-      title: modal.title,
-      closeButtonLabel: t("close"),
-      darkMode: true,
-    } as ModalConfiguration);
+    if (modal) {
+      show(<ModalContent modal={modal} />, {
+        title: modal.title,
+        closeButtonLabel: t("close"),
+        darkMode: true,
+      } as ModalConfiguration);
+    }
   };
 
   return (
