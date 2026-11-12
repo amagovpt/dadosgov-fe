@@ -1,9 +1,16 @@
 "use client";
 
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+  BodySectionContainer,
+  CardDescription,
+  CardGeneralV2,
+  CardTitle,
+  HeaderSectionContainer,
+} from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
-import AppIcon from "@/components/Primitives/AppIcon";
-import CardIllustrative from "@/components/Primitives/Cards/CardIllustrative";
-import { LocalizedLink } from "@/components/Shared/LocalizedLink";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import type { UserGuideSummary } from "@/service/types/user-guides";
 
 export const USER_GUIDES_PATH = "/recursos/como-usar-o-portal/guias-do-utilizador";
@@ -13,28 +20,38 @@ interface UserGuideCardProps {
   className?: string;
 }
 
-/** Outlined card with title, description and an arrow link to the guide. */
 export function UserGuideCard({ guide, className }: UserGuideCardProps) {
   const { t } = useTranslation("user-guides");
+  const router = useRouter();
+  const href = useLocalizedHref()(`${USER_GUIDES_PATH}/${guide.id}`);
+
+  const onClickCapture = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(href);
+  };
 
   return (
-    <CardIllustrative
-      variant="white"
-      isCardHorizontal
-      // The DS card is sized for illustrations (96px top padding, 24px title); the guide
-      // cards are compact text cards.
-      className={`border! border-primary-600! h-full p-32! [&_.card-inner-container]:pt-0! [&_.title]:text-l-bold! [&_.title]:text-primary-900! [&_.description]:text-s-regular! [&_.description]:text-neutral-900! ${className ?? ""}`}
-      title={guide.title}
-      description={guide.cardDescription || undefined}
-      mainLink={
-        <LocalizedLink
-          href={`${USER_GUIDES_PATH}/${guide.id}`}
-          aria-label={t("openGuide", { title: guide.title })}
-          className="flex items-center h-full text-primary-600"
-        >
-          <AppIcon name="agora-line-arrow-right-circle" className="w-24 h-24" />
-        </LocalizedLink>
-      }
-    />
+    <CardGeneralV2
+      variant="primary-500-outline"
+      isBlockedLink
+      className={`h-full ${className ?? ""}`}
+      onClickCapture={onClickCapture}
+      sideAnchor={{ href, "aria-label": t("openGuide", { title: guide.title }) }}
+    >
+      {[
+        <HeaderSectionContainer key="header">
+          <CardTitle as="h3">{guide.title}</CardTitle>
+        </HeaderSectionContainer>,
+        ...(guide.cardDescription
+          ? [
+              <BodySectionContainer key="body">
+                <CardDescription>{guide.cardDescription}</CardDescription>
+              </BodySectionContainer>,
+            ]
+          : []),
+      ]}
+    </CardGeneralV2>
   );
 }

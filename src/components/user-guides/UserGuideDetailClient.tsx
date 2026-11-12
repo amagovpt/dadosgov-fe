@@ -35,7 +35,7 @@ export function UserGuideDetailClient({ guide }: { guide: UserGuide }) {
 
   const onTaskActivation = (index: number) => {
     const task = guide.tasks[index];
-    if (task) window.history.replaceState(null, "", `#${task.id}`);
+    if (task) window.history.replaceState(window.history.state, "", `#${task.id}`);
   };
 
   return (
@@ -95,8 +95,6 @@ export function UserGuideDetailClient({ guide }: { guide: UserGuide }) {
       </section>
 
       {guide.tasks.length > 0 && (
-        // The task panel bleeds to the right edge of the viewport, as in the design: a spread
-        // shadow in the panel colour, clipped so it only extends rightwards.
         <section
           className="container pb-80 [&_.desktop_.tab-panel]:shadow-[0_0_0_100vmax_var(--color-primary-100)] [&_.desktop_.tab-panel]:[clip-path:inset(0_-100vmax_0_0)]"
           aria-label={t("tasksLabel")}

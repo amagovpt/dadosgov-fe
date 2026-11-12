@@ -29,6 +29,7 @@ const searchParams = vi.hoisted(() => ({ current: new URLSearchParams() }));
 vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams.current,
   useParams: () => ({ locale: "pt" }),
+  useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/pt/recursos/como-usar-o-portal/guias-do-utilizador",
 }));
 
