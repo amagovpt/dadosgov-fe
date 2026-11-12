@@ -319,6 +319,8 @@
   },
   "retry": "Tentar novamente",
   "discussions": {
+    "closed": "Esta discussão está fechada.",
+    "linkUnavailable": "Não foi possível encontrar a discussão indicada nesta página.",
     "title": "Título *",
     "message": "Mensagem *",
     "cancel": "Cancelar",

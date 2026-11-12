@@ -13,7 +13,7 @@ export function DatasetWizardHelp({
   if (!item || item.hidden) return null;
   return (
     <Accordion
-      className={`w-full border-b border-neutral-700 ${background === "white" ? "bg-white" : "bg-primary-100"} [&_.accordion-header]:p-32 [&_.accordion-header_.title]:text-m-bold [&_[class*='auxiliar-list']]:p-0 [&_[class*='auxiliar-list']]:text-m-regular [&_[class*='auxiliar-list']]:text-neutral-900`}
+      className={` bg-primary-100`}
       headingTitle={item.title}
       headingLevel="h3"
       hasIcon

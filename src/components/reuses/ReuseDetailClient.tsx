@@ -2,7 +2,8 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useDiscussionTab } from "@/hooks/useDiscussionDeepLink";
 import {
   Button,
   Icon,
@@ -51,8 +52,7 @@ export default function ReuseDetailClient({
   const { i18n } = useTranslation("common");
   const { t: tr } = useTranslation("reuses");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
+  const { isDiscussionTab, tabsKey } = useDiscussionTab();
   const { user } = useAuth();
 
   const canEdit = reuse.permissions?.edit ?? false;
@@ -242,7 +242,7 @@ export default function ReuseDetailClient({
 
       {/* Tabs Section */}
       <section className="w-full">
-        <Tabs>
+        <Tabs key={tabsKey}>
           <Tab>
             <TabHeader>{tr("detail.description")}</TabHeader>
             <TabBodyWrapper bleedClassName="bg-neutral-50">
@@ -303,7 +303,7 @@ export default function ReuseDetailClient({
               </div>
             </TabBodyWrapper>
           </Tab>
-          <Tab active={tabParam === "discussions" || undefined}>
+          <Tab active={isDiscussionTab || undefined}>
             <TabHeader>{tr("detail.discussions", { count: discussionCount })}</TabHeader>
             <TabBodyWrapper bleedClassName="bg-neutral-50">
               <div>

@@ -1,13 +1,18 @@
 "use client";
 
 import { Suspense, use, useState, type ReactNode } from "react";
+import { useDiscussionTab } from "@/hooks/useDiscussionDeepLink";
 import { useTranslation } from "react-i18next";
 import { Tabs, Tab, TabHeader } from "@ama-pt/agora-design-system";
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import type { DataserviceDiscussionsResult } from "@/service/types/dataservice/detail";
 
-function StreamedDiscussions({ id, discussions, onCountChange }: {
+function StreamedDiscussions({
+  id,
+  discussions,
+  onCountChange,
+}: {
   id: string;
   discussions: Promise<DataserviceDiscussionsResult>;
   onCountChange: (count: number) => void;
@@ -15,10 +20,23 @@ function StreamedDiscussions({ id, discussions, onCountChange }: {
   const result = use(discussions);
   const { t } = useTranslation("dataservices");
   if (!result) return <p role="alert">{t("tabs.discussionsError")}</p>;
-  return <DiscussionSection key={id} entityId={id} entityClass="Dataservice" initialData={result} onCountChange={onCountChange} />;
+  return (
+    <DiscussionSection
+      key={id}
+      entityId={id}
+      entityClass="Dataservice"
+      initialData={result}
+      onCountChange={onCountChange}
+    />
+  );
 }
 
-export function DataserviceTabs({ id, discussionCount: initialCount, discussions, information }: {
+export function DataserviceTabs({
+  id,
+  discussionCount: initialCount,
+  discussions,
+  information,
+}: {
   id: string;
   discussionCount: number;
   discussions: Promise<DataserviceDiscussionsResult>;
@@ -26,19 +44,24 @@ export function DataserviceTabs({ id, discussionCount: initialCount, discussions
 }) {
   const { t } = useTranslation("dataservices");
   const [discussionCount, setDiscussionCount] = useState(initialCount);
+  const { isDiscussionTab, tabsKey } = useDiscussionTab();
   return (
     <div className="w-full">
-      <Tabs>
+      <Tabs key={tabsKey}>
         <Tab>
           <TabHeader>{t("tabs.info")}</TabHeader>
           <TabBodyWrapper>{information}</TabBodyWrapper>
         </Tab>
-        <Tab>
+        <Tab active={isDiscussionTab || undefined}>
           <TabHeader>{t("tabs.discussions", { count: discussionCount })}</TabHeader>
           <TabBodyWrapper>
             <div data-testid="dataservice-discussions">
               <Suspense fallback={<p role="status">{t("tabs.loadingDiscussions")}</p>}>
-                <StreamedDiscussions id={id} discussions={discussions} onCountChange={setDiscussionCount} />
+                <StreamedDiscussions
+                  id={id}
+                  discussions={discussions}
+                  onCountChange={setDiscussionCount}
+                />
               </Suspense>
             </div>
           </TabBodyWrapper>
