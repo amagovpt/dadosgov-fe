@@ -40,7 +40,7 @@ export interface ResourceUpdatePayload {
   filetype?: string;
   format?: string;
   mime?: string;
-  filesize?: number;
+  filesize?: number | null;
 }
 
 export interface DatasetPermissions {
@@ -101,6 +101,23 @@ export interface Dataset {
   permissions?: DatasetPermissions;
 }
 
+export type DatasetListItem = Pick<
+  Dataset,
+  | "id"
+  | "title"
+  | "slug"
+  | "organization"
+  | "owner"
+  | "private"
+  | "archived"
+  | "deleted"
+  | "last_modified"
+  | "last_update"
+  | "created_at"
+  | "quality"
+  | "permissions"
+>;
+
 export interface DatasetCreatePayload {
   title: string;
   description: string;
@@ -133,6 +150,7 @@ export interface DatasetUpdatePayload {
   featured?: boolean;
   archived?: string | null;
   organization?: string;
+  contact_points?: string[];
   extras?: Record<string, unknown>;
 }
 

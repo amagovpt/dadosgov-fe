@@ -24,13 +24,17 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import type { AdminCard } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
-import { getDatasetPublicationIssues } from "@/utils/datasetPublication";
+import {
+  getDatasetPublicationIssues,
+  type DatasetPublicationMetadata,
+} from "@/utils/datasetPublication";
 import { DatasetContentDescription } from "../DatasetContentProvider";
 
 export interface DatasetWizardStep4Props {
   redesigned?: boolean;
   publishStepCard?: AdminCard;
   createdDataset: Dataset | null;
+  previewDataset?: DatasetPublicationMetadata;
   datasetTitle: string;
   datasetDescription: string;
   onPublish: () => void;
@@ -49,8 +53,9 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
     onSaveDraft,
     isSubmitting,
   } = props;
-  const publicationIssues = createdDataset ? getDatasetPublicationIssues(createdDataset) : [];
-  const publicationBlocked = !createdDataset || publicationIssues.length > 0;
+  const previewDataset = props.previewDataset ?? createdDataset;
+  const publicationIssues = previewDataset ? getDatasetPublicationIssues(previewDataset) : [];
+  const publicationBlocked = !previewDataset || publicationIssues.length > 0;
   const publicationFeedback =
     publicationIssues.length > 0 ? (
       <StatusCard
@@ -78,8 +83,8 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
     : `/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
 
   if (props.redesigned) {
-    const producer = createdDataset?.organization;
-    const owner = createdDataset?.owner;
+    const producer = previewDataset?.organization;
+    const owner = previewDataset?.owner;
     const producerName =
       producer?.name ||
       [owner?.first_name, owner?.last_name].filter(Boolean).join(" ") ||
@@ -96,7 +101,6 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
             })
             .replaceAll("/", ".")
         : null;
-    const disabled = isSubmitting || !createdDataset;
     return (
       <div className="flex w-full min-w-0 flex-col gap-64" aria-busy={isSubmitting}>
         {createdDataset && (
@@ -140,11 +144,14 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
                 )}
               </CardSubtitle>
               <CardTitle as="h2" className="text-l-bold! text-neutral-900!">
-                {createdDataset?.title || datasetTitle || t("form.untitledFallback")}
+                {previewDataset?.title || datasetTitle || t("form.untitledFallback")}
               </CardTitle>
             </HeaderSectionContainer>
             <BodySectionContainer className="gap-8!">
-              <CardStatus className="w-full [&_.agora-card-general-status-icon]:hidden [&_.agora-card-general-status-text]:w-full">
+              <CardStatus
+                hidden={!createdDataset?.quality}
+                className="w-full [&_.agora-card-general-status-icon]:hidden [&_.agora-card-general-status-text]:w-full"
+              >
                 <ProgressBar
                   current
                   value={qualityScore}
@@ -156,7 +163,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
               </CardStatus>
               <CardDescription className="text-m-regular! text-neutral-900!">
                 <span className="block whitespace-pre-line">
-                  {createdDataset?.description ||
+                  {previewDataset?.description ||
                     datasetDescription ||
                     t("form.withoutDescription")}
                 </span>
@@ -196,7 +203,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
               leadingIcon="agora-line-check-circle"
               leadingIconHover="agora-solid-check-circle"
               onClick={onPublish}
-              disabled={disabled || publicationBlocked}
+              disabled={isSubmitting || publicationBlocked}
             >
               {isSubmitting ? t("form.publishingDataset") : t("review.publishAction")}
             </Button>

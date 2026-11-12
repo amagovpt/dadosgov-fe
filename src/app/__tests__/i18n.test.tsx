@@ -97,9 +97,15 @@ describe("i18next interpolation is still safe to render", () => {
  * of its call sites even though none uses it today. A new sink anywhere else
  * fails here, and whoever sees this failure has to decide whether the value
  * reaching it can come from `t()` — and sanitise at that call site if it can.
+ *
+ * `GoogleAnalytics` is the other: its inline gtag bootstrap interpolates only
+ * `JSON.stringify(GA_ID)`, read from the environment, so no `t()` reaches it.
  */
 describe("no translation output can reach a raw-HTML sink", () => {
-  const ALLOWED = new Set(["src/components/Shared/Generics/Typograph.tsx"]);
+  const ALLOWED = new Set([
+    "src/components/Shared/Generics/Typograph.tsx",
+    "src/Scripts/GoogleAnalytics.tsx",
+  ]);
 
   it("keeps dangerouslySetInnerHTML confined to the known pass-through", () => {
     const root = path.resolve(__dirname, "..", "..");
@@ -113,7 +119,8 @@ describe("no translation output can reach a raw-HTML sink", () => {
           continue;
         }
         if (!/\.tsx?$/.test(entry.name)) continue;
-        const relative = path.relative(path.resolve(root, ".."), full);
+        // POSIX separators, so the allowlist also matches on Windows.
+        const relative = path.relative(path.resolve(root, ".."), full).split(path.sep).join("/");
         if (ALLOWED.has(relative)) continue;
         // Usage, not mentions: a JSX prop or an object key. Prose about the
         // sink -- this file, the comment in i18n.ts -- is not a sink.

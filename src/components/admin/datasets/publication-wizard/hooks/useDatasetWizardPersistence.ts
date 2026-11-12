@@ -19,8 +19,6 @@ interface UseDatasetWizardPersistenceParams {
   creationId?: string;
   datasetId?: string | null;
   licenseDefaultValue: string;
-  currentStep: number;
-  redesigned: boolean;
 }
 
 export function useDatasetWizardPersistence({
@@ -29,18 +27,9 @@ export function useDatasetWizardPersistence({
   creationId,
   datasetId,
   licenseDefaultValue,
-  currentStep,
-  redesigned,
 }: UseDatasetWizardPersistenceParams) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
-  const {
-    restoreForm,
-    localState: formState,
-    uploadedFiles,
-    createdDataset,
-    setCreatedDataset,
-    setApiError,
-  } = form;
+  const { restoreForm, localState: formState, uploadedFiles, setApiError } = form;
   const storageKey = storageScope && creationId ? `${storageScope}:${creationId}` : null;
   const [restoredKey, setRestoredKey] = useState<string | null>(null);
   const [localSaveError, setLocalSaveError] = useState(false);
@@ -115,23 +104,6 @@ export function useDatasetWizardPersistence({
     hadStoredFiles.current = uploadedFiles.length > 0;
     void saveWizardFiles(storageKey, uploadedFiles).catch(() => setLocalSaveError(true));
   }, [storageKey, restoredKey, uploadedFiles]);
-
-  const reviewDatasetId = createdDataset?.id;
-  useEffect(() => {
-    if (!redesigned || currentStep !== 4 || !reviewDatasetId) return;
-    let cancelled = false;
-    // Resource uploads can change the quality score after the draft was first created.
-    fetchDataset(reviewDatasetId)
-      .then((dataset) => {
-        if (!cancelled) setCreatedDataset(dataset);
-      })
-      .catch(() => {
-        if (!cancelled) setApiError(t("admin-datasets:review.refreshError"));
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [currentStep, redesigned, reviewDatasetId, setCreatedDataset, setApiError, t]);
 
   const clearSession = useCallback(() => {
     sessionClosed.current = true;

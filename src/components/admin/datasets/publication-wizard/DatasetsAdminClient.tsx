@@ -36,7 +36,6 @@ interface DatasetsAdminClientProps {
   creationId?: string;
   onNextStep?: () => void;
   onPreviousStep?: () => void;
-  onDatasetCreated?: (datasetId: string) => void;
   onComplete?: () => void;
 }
 
@@ -50,7 +49,6 @@ export default function DatasetsAdminClient({
   creationId,
   onNextStep,
   onPreviousStep,
-  onDatasetCreated,
   onComplete,
 }: DatasetsAdminClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
@@ -77,8 +75,6 @@ export default function DatasetsAdminClient({
     creationId,
     datasetId,
     licenseDefaultValue: options.licenseDefaultValue,
-    currentStep,
-    redesigned,
   });
   const contacts = useDatasetWizardContactActions(form);
   const completeWizard = () => {
@@ -94,18 +90,9 @@ export default function DatasetsAdminClient({
     handleStep2Next,
     handleStep3Next,
   } = useDatasetWizardSubmissionActions({
-    currentStep,
     optionalContacts: redesigned,
-    datasetId,
     ...form,
     uploadProgressKey: persistence.uploadProgressKey,
-    onDatasetCreated: (id) => {
-      if (onDatasetCreated) onDatasetCreated(id);
-      else
-        router.push(
-          localizeHref(`${draftScope}/datasets/new?step=${currentStep + 1}&datasetId=${id}`, locale)
-        );
-    },
     onNextStep: handleNextStep,
     onDraftSaved: (id) => {
       persistence.clearSession();
@@ -116,11 +103,6 @@ export default function DatasetsAdminClient({
       router.push(localizeHref(editPath, locale));
     },
     onComplete: completeWizard,
-    navigateToStep: (nextStep, nextDatasetId) => {
-      router.push(
-        localizeHref(`/admin/me/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`, locale)
-      );
-    },
     finishWizard: () => {
       router.push(localizeHref("/admin/me/datasets", locale));
     },
@@ -135,13 +117,6 @@ export default function DatasetsAdminClient({
       contactDraftRequired: t("admin-datasets:form.contactPointRequired"),
     },
     restoreErrors: {
-      missingDataset: t("admin-datasets:form.missingDatasetError"),
-      loadDataset: t("admin-datasets:form.step3LoadError"),
-      saveDataset: t("admin-datasets:form.step2SaveError"),
-      saveResource: t("admin-datasets:form.step3SaveError", { message: "{{message}}" }),
-      saveResourceRetry: t("admin-datasets:form.step3SaveRetryError", {
-        statusHint: "{{statusHint}}",
-      }),
       publish: t("admin-datasets:form.publishError"),
       saveDraft: t("admin-datasets:form.saveDraftError"),
     },
@@ -344,8 +319,6 @@ export default function DatasetsAdminClient({
               setUploadedFiles={form.setUploadedFiles}
               resourceUrls={form.resourceUrls}
               setResourceUrls={form.setResourceUrls}
-              showFileError={form.showFileError}
-              setShowFileError={form.setShowFileError}
               allowedExtensions={options.allowedExtensions}
               resourceTypes={options.resourceTypes}
               resourceMetadata={form.resourceMetadata}
@@ -364,7 +337,7 @@ export default function DatasetsAdminClient({
               datasetTitle={form.datasetTitle}
               datasetDescription={form.datasetDescription}
               onPublish={handlePublish}
-              onSaveDraft={handleSaveDraft}
+              onSaveDraft={completeWizard}
               isSubmitting={form.isSubmitting}
             />
           )}
