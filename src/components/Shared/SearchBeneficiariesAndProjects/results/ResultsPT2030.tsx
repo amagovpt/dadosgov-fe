@@ -11,7 +11,8 @@ export type { INoResults } from "./ResultsShared";
 
 export default function ResultsPT2030({ noResults }: { noResults?: INoResults }) {
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "en" ? "en" : "pt";
   const subject = useSearchBenProjStore((state) => state.subject);
   const apiRoute = useSearchBenProjStore((state) => state.apiRoute);
   const indicator = useSearchBenProjStore((state) => state.indicator);
@@ -27,6 +28,7 @@ export default function ResultsPT2030({ noResults }: { noResults?: INoResults })
             indicator,
             pathname,
             t,
+            locale,
             financedLabel: isPrr ? "fundingAmount" : "financingValue",
             paidLabel: "paidValue",
           });

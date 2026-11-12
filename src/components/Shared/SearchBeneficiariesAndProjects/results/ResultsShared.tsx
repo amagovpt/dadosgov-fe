@@ -8,11 +8,11 @@ import Image from "next/image";
 import { type MouseEvent, type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Typograph } from "../../Generics/Typograph";
-import ResultsNumber from "./ResultsNumber";
 import useMobile from "@/hooks/useMobile";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useLoader } from "@/hooks/useLoader";
 import { getAssets } from "@/utils/getAssets";
+import { formatDateLong } from "@/utils/formatDate";
 
 export interface INoResults {
   image: string;
@@ -35,6 +35,7 @@ type ProjectResultOptions = {
   indicator: string;
   pathname: string;
   t: TFunction;
+  locale: "pt" | "en";
   financedLabel: string;
   paidLabel: string;
 };
@@ -78,10 +79,8 @@ export function ResultsLayout({
   children: ReactNode;
 }) {
   const { showLoader, hideLoader } = useLoader();
-  const isMobile = useMobile();
   const loading = useSearchBenProjStore((state) => state.loading);
   const data = useSearchBenProjStore((state) => state.data);
-  const showFilters = useSearchBenProjStore((state) => state.showFilters);
 
   useEffect(() => {
     if (loading) showLoader();
@@ -152,6 +151,7 @@ export function buildProjectResult({
   indicator,
   pathname,
   t,
+  locale,
   financedLabel,
   paidLabel,
 }: ProjectResultOptions) {
@@ -175,7 +175,7 @@ export function buildProjectResult({
   const description = [
     "<p>",
     `<strong>${t("operationCode")}</strong>   ${operationCode}`,
-    `<br><strong>${t(`searchBenProj.fields.${conclusionLabel}`)}</strong>   ${String(conclusionDate)}`,
+    `<br><strong>${t(`searchBenProj.fields.${conclusionLabel}`)}</strong>   ${formatDateLong(String(conclusionDate), locale)}`,
     `<br><br><strong>${t(valueLabel)}</strong>   ${formatCurrency(Number(item[valueKey] ?? 0), t)}`,
     "</p>",
   ].join("");
