@@ -137,6 +137,18 @@ describe("normalizeUserGuidesPage", () => {
     ]);
   });
 
+  it("drops only the themes explicitly marked inactive", () => {
+    const page = normalizeUserGuidesPage({
+      themes: [
+        { id: "ativo", isActive: true, title: "Ativo" },
+        { id: "inativo", isActive: false, title: "Inativo" },
+        { id: "sem-flag", isActive: null, title: "Sem flag" },
+      ],
+    });
+
+    expect(page.themes.map((theme) => theme.id)).toEqual(["ativo", "sem-flag"]);
+  });
+
   it("returns an empty page for missing data", () => {
     expect(normalizeUserGuidesPage(undefined)).toMatchObject({ title: "", themes: [] });
   });

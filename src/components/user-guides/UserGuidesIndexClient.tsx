@@ -47,7 +47,7 @@ export function UserGuidesIndexClient({ themes }: UserGuidesIndexClientProps) {
         <SimpleSiteMap
           title={t("onThisPage")}
           anchor={anchors}
-          className="[&_.children-wrapper]:text-s-regular!"
+          className="[&_.children-wrapper]:text-m-regular!"
         />
       </nav>
       <div className="col-span-12 md:col-span-8 flex flex-col gap-64">

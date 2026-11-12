@@ -106,6 +106,7 @@ export function normalizeUserGuidesPage(raw: unknown): UserGuidesPage {
     heroImage: records(raw.heroImage) as unknown as Image[],
     updatedAt: str(raw.updatedAt),
     themes: records(raw.themes)
+      .filter((theme) => theme.isActive === true)
       .map(toTheme)
       .filter((theme) => theme.id && theme.title),
   };

@@ -29,6 +29,7 @@ export async function getUserGuidesPage(locale: string = "pt"): Promise<UserGuid
           themes {
             ${lang} {
               id
+              isActive
               title
               description
               guides {
