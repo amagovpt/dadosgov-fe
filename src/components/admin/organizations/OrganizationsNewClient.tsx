@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
+import { useAuth } from "@/context/AuthContext";
 import { suggestOrganizations, createOrganization, uploadOrgLogo } from "@/service/api/organizations";
 import type { OrganizationSuggestion } from "@/service/types/identity";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -27,6 +28,7 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
   const { t } = useTranslation(["admin-common", "admin-organizations"]);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { refresh } = useAuth();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.createHero?.title ?? "";
@@ -94,6 +96,8 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
         await uploadOrgLogo(organization.id, orgLogo);
       }
 
+      // Update memberships so the new organization is available in the profile switcher.
+      await refresh();
       router.push(`/organizations/${organization.slug}`);
     } catch (error) {
       setApiError(

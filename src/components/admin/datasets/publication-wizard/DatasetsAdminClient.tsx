@@ -102,7 +102,12 @@ export default function DatasetsAdminClient({
           : `${draftScope}/datasets/edit?id=${encodeURIComponent(id)}`;
       router.push(localizeHref(editPath, locale));
     },
-    onComplete: completeWizard,
+    onComplete: () => {
+      persistence.clearSession();
+      const producerId = form.createdDataset?.organization?.id;
+      const producerPath = producerId ? `/admin/org/${producerId}` : "/admin/me";
+      router.push(localizeHref(`${producerPath}/datasets`, locale));
+    },
     finishWizard: () => {
       router.push(localizeHref("/admin/me/datasets", locale));
     },

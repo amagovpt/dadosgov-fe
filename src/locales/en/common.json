@@ -325,6 +325,8 @@
   },
   "retry": "Try again",
   "discussions": {
+    "closed": "This discussion is closed.",
+    "linkUnavailable": "The requested discussion could not be found on this page.",
     "title": "Title *",
     "message": "Message *",
     "cancel": "Cancel",

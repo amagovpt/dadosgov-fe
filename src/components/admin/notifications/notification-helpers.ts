@@ -1,10 +1,44 @@
 import type {
   Notification,
   NotificationDetails,
+  DiscussionNotificationDetails,
+  MembershipRequestNotificationDetails,
+  MembershipResponseNotificationDetails,
   TransferRequestNotificationDetails,
   ValidateHarvesterNotificationDetails,
 } from "@/service/types/notifications-reporting";
 import type { Transfer } from "@/service/types/transfer-system";
+
+export function isDiscussionNotification(
+  details: NotificationDetails
+): details is DiscussionNotificationDetails {
+  return details !== null && typeof details === "object" && "discussion" in details;
+}
+
+export function isMembershipRequest(
+  details: NotificationDetails
+): details is MembershipRequestNotificationDetails {
+  return details !== null && typeof details === "object" && "request_organization" in details;
+}
+
+export function isMembershipResponse(
+  details: NotificationDetails
+): details is MembershipResponseNotificationDetails {
+  return (
+    details !== null &&
+    typeof details === "object" &&
+    "class" in details &&
+    (details.class === "MembershipAcceptedNotificationDetails" ||
+      details.class === "MembershipRefusedNotificationDetails")
+  );
+}
+
+export function getNotificationDiscussionId(reference: string | null): string | null {
+  // The API currently serializes references as Discussion(<ObjectId>).
+  if (typeof reference !== "string") return null;
+  const match = /^(?:Discussion\(([a-f\d]{24})\)|([a-f\d]{24}))$/i.exec(reference);
+  return match?.[1] ?? match?.[2] ?? null;
+}
 
 export function isTransferRequest(
   details: NotificationDetails

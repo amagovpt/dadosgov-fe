@@ -264,6 +264,9 @@
     "archivedBanner": "This dataset is archived and its public page is not available."
   },
   "contacts": {
+    "loading": "Loading contact points...",
+    "loadError": "Could not load the organization's contact points. Existing assignments have been preserved.",
+    "retry": "Try again",
     "assignments": "Assignments and contact points",
     "active": "Active contact",
     "edit": "Edit contact",

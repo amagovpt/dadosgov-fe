@@ -1,4 +1,5 @@
 import { Icon } from "@ama-pt/agora-design-system";
+import { getDiscussionHref } from "@/utils/discussionLinks";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import StatusDot from "@/components/admin/StatusDot";
 import type { Discussion } from "@/service/types/discussion";
@@ -18,6 +19,14 @@ interface OrgDiscussionColumnsOptions {
   onOpenDiscussion: (discussion: Discussion) => void;
   formatDate: (date: string) => string;
   labels: DiscussionColumnLabels;
+  contentTypeColumn?: {
+    label: string;
+    getValue: (discussion: Discussion) => string;
+  };
+  authorColumn?: {
+    label: string;
+    getValue: (discussion: Discussion) => string;
+  };
 }
 
 export interface DiscussionColumnLabels {
@@ -33,7 +42,7 @@ export interface DiscussionColumnLabels {
 }
 
 export function createDiscussionColumns(
-  labels: DiscussionColumnLabels,
+  labels: DiscussionColumnLabels
 ): AdminListColumn<Discussion, DiscussionListSortField>[] {
   return [
     {
@@ -91,6 +100,8 @@ export function createOrgDiscussionColumns({
   onOpenDiscussion,
   formatDate,
   labels,
+  contentTypeColumn,
+  authorColumn,
 }: OrgDiscussionColumnsOptions): AdminListColumn<Discussion, DiscussionSortField>[] {
   return [
     {
@@ -101,17 +112,48 @@ export function createOrgDiscussionColumns({
       sortType: "string",
       renderCell: (discussion) => (
         <button
-          className="text-left text-primary-600 underline"
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpenDiscussion(discussion);
-          }}
+          className="cursor-pointer text-left [overflow-wrap:anywhere] text-primary-600 underline"
+          onClick={() => onOpenDiscussion(discussion)}
         >
           {discussion.title}
         </button>
       ),
       exportValue: (discussion) => discussion.title,
+      exportUrl: (discussion) => getDiscussionHref(discussion) ?? undefined,
     },
+    {
+      id: "status",
+      header: labels.status,
+      renderCell: (discussion) => (
+        <StatusDot
+          variant={discussion.closed ? "neutral" : "success"}
+          dotClassName={discussion.closed ? "size-8 bg-neutral-400!" : "size-8"}
+        >
+          {discussion.closed ? labels.closed : labels.open}
+        </StatusDot>
+      ),
+      exportValue: (discussion) => (discussion.closed ? labels.closed : labels.open),
+    },
+    ...(contentTypeColumn
+      ? [
+          {
+            id: "contentType",
+            header: contentTypeColumn.label,
+            renderCell: contentTypeColumn.getValue,
+            exportValue: contentTypeColumn.getValue,
+          },
+        ]
+      : []),
+    ...(authorColumn
+      ? [
+          {
+            id: "author",
+            header: authorColumn.label,
+            renderCell: authorColumn.getValue,
+            exportValue: authorColumn.getValue,
+          },
+        ]
+      : []),
     {
       id: "created",
       header: labels.createdAt,
@@ -125,7 +167,7 @@ export function createOrgDiscussionColumns({
       header: labels.closedAt,
       sortField: "closed",
       sortType: "date",
-      renderCell: (discussion) => (discussion.closed ? formatDate(discussion.closed) : "-"),
+      renderCell: (discussion) => (discussion.closed ? formatDate(discussion.closed) : "N/A"),
       exportValue: (discussion) => (discussion.closed ? formatDate(discussion.closed) : ""),
     },
   ];
