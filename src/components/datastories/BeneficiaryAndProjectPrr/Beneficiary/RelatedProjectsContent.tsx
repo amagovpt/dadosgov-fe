@@ -118,11 +118,12 @@ function ProjectsByRoleList({ role, group, labels, nif }: ProjectsByRoleListProp
               </div>
             )}
 
-            <div className="right-28 absolute top-1/2 -translate-y-1/2 xl:right-32">
+            <div className="absolute top-1/2 right-24 -translate-y-1/2 xl:right-32">
               <LinkIcon
                 title=""
                 href={href}
                 className="p-0! leading-none!"
+                variant="primary"
                 icon={{
                   name: "agora-line-arrow-right-circle",
                   hoverName: "agora-solid-arrow-right-circle",

@@ -41,7 +41,7 @@ export default function BeneficiarySheetContent({
           />
           <BenProjSheet.Item
             title={labels.totalProjects}
-            value={String(beneficiaryData.totalProjects ?? 0)}
+            value={formatByThree(beneficiaryData.totalProjects ?? 0)}
           />
         </div>
 

@@ -192,7 +192,7 @@ export default function DistributionValuesChart({
     return (
       <div className="col-span-12 flex flex-col gap-64 pb-64 md:col-span-9">
         <div className="grid grid-cols-9 items-center gap-16">
-          <div className="col-span-9 md:col-span-5">
+          <div className="col-span-12 md:col-span-5">
             <BenProjSheet.CardIcon
               icon={{
                 name: roleIcon[roleData.role],
@@ -201,7 +201,7 @@ export default function DistributionValuesChart({
               }}
               title={title}
               description={description}
-              className="w-full max-w-[488px] bg-white"
+              className="w-full bg-white md:max-w-[488px]"
             >
               <BenProjSheet.BigValue
                 value={formatValuesWithSuffix(approvedValueByRole)}
@@ -217,8 +217,8 @@ export default function DistributionValuesChart({
               )}
             </BenProjSheet.CardIcon>
           </div>
-          <div className="col-span-9 mr-1/2 h-64 border-r border-dashed border-neutral-500 md:col-span-1 md:mr-0 md:h-0 md:border-t" />
-          <div className="col-span-9 md:col-span-3">
+          <div className="col-span-12 mr-1/2 h-64 border-r border-dashed border-neutral-500 md:col-span-1 md:mr-0 md:h-0 md:border-t" />
+          <div className="col-span-12 md:col-span-3">
             <BenProjSheet.CardGraph
               description={graphDescription}
               graphValue={percentageExecutedValue}
@@ -228,7 +228,7 @@ export default function DistributionValuesChart({
           </div>
         </div>
 
-        <div className="flex flex-col gap-24 max-w-3/4">
+        <div className="flex w-full flex-col gap-24 md:max-w-3/4">
           <BenProjSheet.AreaValuelist
             areaTitle={roleLabels.areaTitle}
             items={[
@@ -312,7 +312,7 @@ export default function DistributionValuesChart({
           <BenProjSheet.CardLined
             title={formatValuesWithSuffix(approvedValue)}
             description={labels.financedValue}
-            className="w-sm"
+            className="w-full md:w-sm"
           />
         </div>
         <div className="col-span-12 md:col-span-9" />

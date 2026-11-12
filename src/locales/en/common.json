@@ -510,7 +510,10 @@
       "localizacao_sede": "Headquarters location"
     },
     "tooltips": {
-      "codigo_projeto": "A code that identifies each project carried out with European funds."
+      "codigo_projeto": "A code that identifies each project carried out with European funds.",
+      "valor_financiamento_beneficiario": "Total funded amount assigned to the beneficiary.",
+      "total_projetos": "Total number of projects",
+      "total_financiado": "Total financed"
     },
     "noGrade": "Not applicable",
     "byArea": "By {{area}}",
