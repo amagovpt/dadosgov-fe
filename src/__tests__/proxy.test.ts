@@ -89,8 +89,15 @@ describe("proxy CSP", () => {
     expect(csp["script-src"]).toContain("https://web.cmp.usercentrics.eu");
     expect(csp["img-src"]).toContain("https://*.usercentrics.eu");
     expect(csp["frame-src"]).toEqual(
-      expect.arrayContaining(["https://app.powerbi.com", "https://www.google.com"])
+      expect.arrayContaining([
+        "https://app.powerbi.com",
+        "https://www.google.com",
+        "https://www.youtube-nocookie.com",
+        "https://player.vimeo.com",
+      ])
     );
+    // Guide videos only embed the privacy-enhanced YouTube domain.
+    expect(csp["frame-src"]).not.toContain("https://www.youtube.com");
   });
 
   it("no longer allows cdnjs: Swagger UI is served same-origin", async () => {

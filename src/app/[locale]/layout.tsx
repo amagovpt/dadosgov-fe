@@ -37,6 +37,7 @@ const namespaces = [
   "organizations",
   "dataservices",
   "support",
+  "user-guides",
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",
