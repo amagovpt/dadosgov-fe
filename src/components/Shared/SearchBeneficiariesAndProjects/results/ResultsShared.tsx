@@ -8,7 +8,6 @@ import Image from "next/image";
 import { type MouseEvent, type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Typograph } from "../../Generics/Typograph";
-import useMobile from "@/hooks/useMobile";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useLoader } from "@/hooks/useLoader";
 import { getAssets } from "@/utils/getAssets";
