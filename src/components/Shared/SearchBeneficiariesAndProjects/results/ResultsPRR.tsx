@@ -14,6 +14,7 @@ import {
   HeaderSectionContainer,
 } from "@ama-pt/agora-design-system";
 import { Typograph } from "../../Generics/Typograph";
+import Link from "next/link";
 
 export type { INoResults } from "./ResultsShared";
 
@@ -93,52 +94,55 @@ export default function ResultsPRR({ noResults }: { noResults?: INoResults }) {
           }
         }
 
-
         return (
-          <CardGeneralV2
+          <Link
             key={`beneficiary-${String(item.entityNif ?? "")}-${index}`}
-            layout="text"
-            className=""
-            sideAnchor={{
-              href: `${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`,
-              target: "_blank",
-              children: "",
-            }}
+            href={`${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`}
+            className="border-b border-neutral-900 last:border-b-0"
           >
-            <HeaderSectionContainer>
-              <CardTitle>{title}</CardTitle>
-            </HeaderSectionContainer>
-            <BodySectionContainer className="mt-8">
-              <CardDescription className="flex flex-col gap-24">
-                <div className="flex flex-col">
-                  <Typograph
-                    tag="p"
-                    className="text-m-regular text-neutral-900 first-letter:uppercase"
-                  >
-                    <strong>{t("nif")}</strong> {formatByThree(String(item.entityNif ?? ""))}
-                  </Typograph>
-                  <Typograph tag="p" className="text-m-regular text-neutral-900">
-                    {String(item.projectsAmount ?? 0)} {projectLabel}
-                  </Typograph>
-                </div>
-                {values.length > 0 && (
-                  <div className="flex flex-row flex-wrap gap-16">
+            <CardGeneralV2
+              layout="text"
+              sideAnchor={{
+                href: `${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`,
+                children: "",
+              }}
+              className="prr-results"
+            >
+              <HeaderSectionContainer>
+                <CardTitle>{title}</CardTitle>
+              </HeaderSectionContainer>
+              <BodySectionContainer className="mt-8">
+                <CardDescription className="flex flex-col gap-24">
+                  <div className="flex flex-col">
                     <Typograph
                       tag="p"
-                      className="text-m-bold text-neutral-900 first-letter:uppercase"
+                      className="text-m-regular text-neutral-900 first-letter:uppercase"
                     >
-                      {valueLabel}
+                      <strong>{t("nif")}</strong> {formatByThree(String(item.entityNif ?? ""))}
                     </Typograph>
-                    {values.map((value) => (
-                      <Typograph key={value} tag="p" className="text-m-regular text-neutral-900">
-                        {value}
-                      </Typograph>
-                    ))}
+                    <Typograph tag="p" className="text-m-regular text-neutral-900">
+                      {String(item.projectsAmount ?? 0)} {projectLabel}
+                    </Typograph>
                   </div>
-                )}
-              </CardDescription>
-            </BodySectionContainer>
-          </CardGeneralV2>
+                  {values.length > 0 && (
+                    <div className="flex flex-row flex-wrap gap-x-16 gap-y-0">
+                      <Typograph
+                        tag="p"
+                        className="text-m-bold text-neutral-900 first-letter:uppercase"
+                      >
+                        {valueLabel}
+                      </Typograph>
+                      {values.map((value) => (
+                        <Typograph key={value} tag="p" className="text-m-regular text-neutral-900">
+                          {value}
+                        </Typograph>
+                      ))}
+                    </div>
+                  )}
+                </CardDescription>
+              </BodySectionContainer>
+            </CardGeneralV2>
+          </Link>
         );
       })}
     </ResultsLayout>
