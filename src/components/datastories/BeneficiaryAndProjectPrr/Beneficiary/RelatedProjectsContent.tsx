@@ -6,6 +6,7 @@ import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCompactEUR } from "@/utils/formatCurrency";
+import { formatPortalDate } from "@/utils/formatDate";
 import {
   Beneficiary,
   PRRBeneficiaryProjectGroup,
@@ -50,6 +51,8 @@ type RelatedProjectsContentProps = {
     titleByRole: Record<DisplayRole, string>;
   };
   nif: string;
+  /** optional date-fns pattern for the project date (e.g. "dd.MM.yyyy") */
+  dateFormat?: string;
 };
 
 type ProjectsByRoleListProps = {
@@ -57,9 +60,10 @@ type ProjectsByRoleListProps = {
   group: PRRBeneficiaryProjectGroup;
   labels: RelatedProjectsContentProps["labels"];
   nif: string;
+  dateFormat?: string;
 };
 
-function ProjectsByRoleList({ role, group, labels, nif }: ProjectsByRoleListProps) {
+function ProjectsByRoleList({ role, group, labels, nif, dateFormat }: ProjectsByRoleListProps) {
   const { i18n, t } = useTranslation();
   const [totalItems, setTotalItems] = useState<number | undefined>(Number(group.total ?? 0));
 
@@ -67,6 +71,9 @@ function ProjectsByRoleList({ role, group, labels, nif }: ProjectsByRoleListProp
     const [finValue, finSuffix] = formatCompactEUR(Number(value));
     return `${finValue} ${t(finSuffix)} €`;
   };
+
+  const formatProjectDate = (value: string) =>
+    dateFormat ? formatPortalDate(value, dateFormat, "pt", value) : value;
 
   const handleLoadMore = useCallback(
     async (page: number) => {
@@ -100,19 +107,19 @@ function ProjectsByRoleList({ role, group, labels, nif }: ProjectsByRoleListProp
               {project.date && (
                 <Typograph tag="p" className="text-m-regular text-neutral-900">
                   <span className="text-m-semibold">{labels.conclusionDate}</span>
-                  <span className="ml-8">{project.date}</span>
+                  <span className="ml-8">{formatProjectDate(project.date)}</span>
                 </Typograph>
               )}
             </div>
 
             {role !== "partner" && (
-              <div className="mt-32 flex flex-col">
+              <div className="mt-32 flex flex-row flex-wrap gap-16">
                 <Typograph tag="p" className="text-m-regular text-neutral-900">
-                  <span className="text-m-semibold">{labels.receivedFinancing}</span>
+                  <span className="text-m-regular">{labels.receivedFinancing}</span>
                   <span className="ml-8">{formatValuesWithSuffix(project.amount)}</span>
                 </Typograph>
                 <Typograph tag="p" className="text-m-regular text-neutral-900">
-                  <span className="text-m-semibold">{labels.receivedValue}</span>
+                  <span className="text-m-regular">{labels.receivedValue}</span>
                   <span className="ml-8">{formatValuesWithSuffix(project.paid)}</span>
                 </Typograph>
               </div>
@@ -142,6 +149,7 @@ export default function RelatedProjectsContent({
   relatedProjects,
   labels,
   nif,
+  dateFormat,
 }: RelatedProjectsContentProps) {
   const relatedProjectRows: Array<{
     role: DisplayRole;
@@ -191,7 +199,13 @@ export default function RelatedProjectsContent({
                 </div>
               </div>
               <div className="order-2 col-span-12 xl:order-1 xl:col-span-7">
-                <ProjectsByRoleList role={role} group={group} labels={labels} nif={nif} />
+                <ProjectsByRoleList
+                  role={role}
+                  group={group}
+                  labels={labels}
+                  nif={nif}
+                  dateFormat={dateFormat}
+                />
               </div>
             </div>
           </div>

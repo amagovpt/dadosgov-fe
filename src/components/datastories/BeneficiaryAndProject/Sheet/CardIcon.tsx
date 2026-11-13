@@ -34,12 +34,12 @@ export default function CardIcon({
   children,
 }: ICardIcon) {
   return (
-    <article className={twMerge("flex flex-col gap-32 p-32 w-full", className)}>
+    <article className={twMerge("flex w-full flex-col gap-32 p-32", className)}>
       {!hideIcon && (
         <div
           className={twJoin(
-            "flex items-center justify-center w-56 h-56 rounded-full",
-            icon.backgroundColor,
+            "flex h-56 w-56 items-center justify-center rounded-full",
+            icon.backgroundColor
           )}
         >
           <IconComponent name={icon.name} color={icon.color} />
@@ -48,17 +48,14 @@ export default function CardIcon({
 
       <div className={twMerge("flex flex-col gap-8", classNameContent)}>
         {title && (
-          <Typograph
-            tag="h3"
-            className={twMerge("text-l-bold", classNameTitle)}
-          >
+          <Typograph tag="h3" className={twMerge("text-l-bold", classNameTitle)}>
             {title}
           </Typograph>
         )}
         {description && (
           <InfoBlockDescription
             description={description}
-            className="!text-s-regular text-neutral-700"
+            className="text-s-regular! text-neutral-700 italic"
           />
         )}
       </div>

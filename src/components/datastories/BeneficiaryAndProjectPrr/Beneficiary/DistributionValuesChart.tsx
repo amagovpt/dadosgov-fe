@@ -43,6 +43,7 @@ type DistributionValuesChartProps = {
     financedValue: string;
     receivedValue: string;
     totalFunded: string;
+    totalPaid: string;
     suppliers: string;
     fundedValue: string;
     paidValue: string;
@@ -235,6 +236,10 @@ export default function DistributionValuesChart({
               {
                 area: labels.totalFunded,
                 value: approvedValueByRole,
+              },
+              {
+                area: labels.totalPaid,
+                value: paidValueByRole,
               },
             ]}
           />
