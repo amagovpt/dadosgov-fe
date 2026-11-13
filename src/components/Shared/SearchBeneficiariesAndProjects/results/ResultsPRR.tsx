@@ -5,10 +5,17 @@ import { formatByThree } from "@/utils/formatByThree";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { type INoResults, ResultCard, ResultsLayout } from "./ResultsShared";
+import { type INoResults, ResultsLayout } from "./ResultsShared";
+import {
+  BodySectionContainer,
+  CardDescription,
+  CardGeneralV2,
+  CardTitle,
+  HeaderSectionContainer,
+} from "@ama-pt/agora-design-system";
+import { Typograph } from "../../Generics/Typograph";
 
 export type { INoResults } from "./ResultsShared";
-
 
 const ROLE_VALUE_KEYS = {
   financed: {
@@ -90,14 +97,57 @@ export default function ResultsPRR({ noResults }: { noResults?: INoResults }) {
 
         description += "</p>";
 
-        return (
-          <ResultCard
+        /**
+         <ResultCard
             key={`beneficiary-${String(item.entityNif ?? "")}-${index}`}
             title={title}
             description={description}
             href={`${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`}
             isLast={index === data.length - 1}
           />
+         */
+
+        return (
+          <CardGeneralV2
+            key={`beneficiary-${String(item.entityNif ?? "")}-${index}`}
+            layout="text"
+            className=""
+            sideAnchor={{
+              href: `${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`,
+              target: "_blank",
+              children: "",
+            }}
+          >
+            <HeaderSectionContainer>
+              <CardTitle>{title}</CardTitle>
+            </HeaderSectionContainer>
+            <BodySectionContainer className="mt-8">
+              <CardDescription className="flex flex-col gap-24">
+                <div className="flex flex-col">
+                  <Typograph
+                    tag="p"
+                    className="text-m-regular text-neutral-900 first-letter:uppercase"
+                  >
+                    <strong>{t("nif")}</strong> {formatByThree(String(item.entityNif ?? ""))}
+                  </Typograph>
+                  <Typograph tag="p" className="text-m-regular text-neutral-900">
+                    {String(item.projectsAmount ?? 0)} {projectLabel}
+                  </Typograph>
+                </div>
+                <div className="flex flex-row flex-wrap gap-16">
+                  <Typograph
+                    tag="p"
+                    className="text-m-bold text-neutral-900 first-letter:uppercase"
+                  >
+                    {t("fundingAmount")}
+                  </Typograph>
+                  <Typograph tag="p" className="text-m-regular text-neutral-900">
+                    {String(item.projectsAmount ?? 0)} {projectLabel}
+                  </Typograph>
+                </div>
+              </CardDescription>
+            </BodySectionContainer>
+          </CardGeneralV2>
         );
       })}
     </ResultsLayout>
