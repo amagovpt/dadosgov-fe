@@ -56,56 +56,43 @@ export default function ResultsPRR({ noResults }: { noResults?: INoResults }) {
         const title = String(item.entityName ?? "");
         const projectLabel =
           item.projectsAmount === 1 ? t("searchBenProj.project") : t("searchBenProj.projects");
-        let description = [
-          "<p>",
-          `<strong>${t("nif")}</strong> ${formatByThree(String(item.entityNif ?? ""))}`,
-          `<br>${String(item.projectsAmount ?? 0)} ${projectLabel}`,
-        ].join("");
-
         const normalizedRole = String(item.entityRole ?? "")
           .normalize("NFD")
           .replace(/[̀-ͯ]/g, "")
           .toLowerCase();
         const isPartner = normalizedRole.includes("partner") || normalizedRole.includes("parceir");
 
+        // one entry per role with an amount; an empty list means the value row is hidden
+        let values: string[] = [];
         if (!isPartner && !showOnlyPartners) {
-          const values: string[] = [];
-          const intermediateValue = Number(item[roleKeys.intermediateBeneficiaries] ?? 0);
-          const beneficiaryValue = Number(item[roleKeys.beneficiaries] ?? 0);
-          const supplierValue = Number(item[roleKeys.suppliers] ?? 0);
+          const roleValues = [
+            {
+              label: t("searchBenProj.roles.intermediateBeneficiary"),
+              value: Number(item[roleKeys.intermediateBeneficiaries] ?? 0),
+            },
+            {
+              label: t("searchBenProj.roles.beneficiary"),
+              value: Number(item[roleKeys.beneficiaries] ?? 0),
+            },
+            {
+              label: t("searchBenProj.roles.supplier"),
+              value: Number(item[roleKeys.suppliers] ?? 0),
+            },
+            {
+              label: t("searchBenProj.roles.partner"),
+              value: Number(item[roleKeys.partners] ?? 0),
+            },
+          ];
+          values = roleValues
+            .filter(({ value }) => value > 0)
+            .map(({ label, value }) => `${label} ${formatCurrency(value, t)}`);
 
-          if (intermediateValue > 0) {
-            values.push(
-              `${t("searchBenProj.roles.intermediateBeneficiary")} ${formatCurrency(intermediateValue, t)}`
-            );
-          }
-          if (beneficiaryValue > 0) {
-            values.push(
-              `${t("searchBenProj.roles.beneficiary")} ${formatCurrency(beneficiaryValue, t)}`
-            );
-          }
-          if (supplierValue > 0) {
-            values.push(`${t("searchBenProj.roles.supplier")} ${formatCurrency(supplierValue, t)}`);
-          }
-
-          if (values.length > 0) {
-            description += `<br><br><strong>${valueLabel}</strong>   ${values.join("   ")}`;
-          } else if (Number(item[roleKeys.partners] ?? 0) === 0) {
-            description += `<br><br><strong>${valueLabel}</strong>   ${formatCurrency(Number(item[valueKey] ?? 0), t)}`;
+          // no per-role breakdown: fall back to the entity total, unless the amount is a partner
+          if (values.length === 0 && Number(item[roleKeys.partners] ?? 0) === 0) {
+            values = [formatCurrency(Number(item[valueKey] ?? 0), t)];
           }
         }
 
-        description += "</p>";
-
-        /**
-         <ResultCard
-            key={`beneficiary-${String(item.entityNif ?? "")}-${index}`}
-            title={title}
-            description={description}
-            href={`${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`}
-            isLast={index === data.length - 1}
-          />
-         */
 
         return (
           <CardGeneralV2
@@ -134,17 +121,21 @@ export default function ResultsPRR({ noResults }: { noResults?: INoResults }) {
                     {String(item.projectsAmount ?? 0)} {projectLabel}
                   </Typograph>
                 </div>
-                <div className="flex flex-row flex-wrap gap-16">
-                  <Typograph
-                    tag="p"
-                    className="text-m-bold text-neutral-900 first-letter:uppercase"
-                  >
-                    {t("fundingAmount")}
-                  </Typograph>
-                  <Typograph tag="p" className="text-m-regular text-neutral-900">
-                    {String(item.projectsAmount ?? 0)} {projectLabel}
-                  </Typograph>
-                </div>
+                {values.length > 0 && (
+                  <div className="flex flex-row flex-wrap gap-16">
+                    <Typograph
+                      tag="p"
+                      className="text-m-bold text-neutral-900 first-letter:uppercase"
+                    >
+                      {valueLabel}
+                    </Typograph>
+                    {values.map((value) => (
+                      <Typograph key={value} tag="p" className="text-m-regular text-neutral-900">
+                        {value}
+                      </Typograph>
+                    ))}
+                  </div>
+                )}
               </CardDescription>
             </BodySectionContainer>
           </CardGeneralV2>
