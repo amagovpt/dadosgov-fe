@@ -14,6 +14,7 @@ import {
 } from "@/utils/publicationsListing";
 import { formatDateLong } from "@/utils/formatDate";
 import { getAssets } from "@/utils/getAssets";
+import { getFileExtension } from "@/components/admin/FileUploadModal/utils";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { Toggle, ToggleGroup } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
@@ -88,6 +89,21 @@ export default function PublicationsClient({
       </div>
       {publications.length > 0 ? (
         publications.map((pubs) => {
+          const localDocument = pubs.document?.[0];
+          const documentHref = localDocument
+            ? getAssets(localDocument.slug)
+            : pubs.urlDocument || undefined;
+          const fileType = localDocument
+            ? localDocument.fileType
+            : pubs.urlDocument
+              ? getFileExtension(pubs.urlDocument, true).replace(/^\./, "")
+              : "";
+          const documentDetails = [
+            fileType,
+            localDocument?.metadataText,
+            pubs.pageCount !== null ? t("publications.pages", { count: pubs.pageCount }) : null,
+          ].filter(Boolean);
+
           return (
             <div key={pubs.metaDetails.id} className="h-full w-full">
               <CardLinks
@@ -108,35 +124,35 @@ export default function PublicationsClient({
                         {formatHtmlParagraphs(pubs.metaDetails.description)}
                       </p>
                     </div>
-                    {pubs.document && pubs.document[0] && (
+                    {documentHref && (
                       <div className="flex gap-32 items-center">
                         <Anchor
                           target="_blank"
+                          rel="noopener noreferrer"
                           hasIcon
-                          href={getAssets(pubs.document[0].slug)}
+                          href={documentHref}
                           leadingIcon="agora-line-download"
                           leadingIconActive="agora-line-download"
                           leadingIconHover="agora-solid-download"
                         >
                           {t("publications.downloadFile")}
                         </Anchor>
-                        <div className="text-neutral-900 text-m-light flex gap-4">
-                          <span className="text-neutral-900 text-m-light uppercase">
-                            {pubs.document && pubs.document[0].fileType}
-                          </span>
-                          ·
-                          <span className="text-neutral-900 text-m-light">
-                            {pubs.document && pubs.document[0].metadataText}
-                          </span>
-                          {pubs.pageCount !== null && (
-                            <>
-                              ·
-                              <span className="text-neutral-900 text-m-light">
-                                {t("publications.pages", { count: pubs.pageCount })}
+                        {documentDetails.length > 0 && (
+                          <div className="text-neutral-900 text-m-light flex gap-4">
+                            {documentDetails.map((detail, i) => (
+                              <span key={i} className="flex gap-4">
+                                {i > 0 && "·"}
+                                <span
+                                  className={`text-neutral-900 text-m-light${
+                                    i === 0 && fileType ? " uppercase" : ""
+                                  }`}
+                                >
+                                  {detail}
+                                </span>
                               </span>
-                            </>
-                          )}
-                        </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
