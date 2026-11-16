@@ -28,5 +28,5 @@ export default async function DataStoryDetailPage({
 
   const datastory = await getDatastory(datastorySlug, locale);
 
-  return <DatastoryDetailsPage datastory={datastory} slug={datastorySlug} />;
+  return <DatastoryDetailsPage datastory={datastory} />;
 }
