@@ -1,0 +1,27 @@
+{
+  "eyebrow": "Guia do utilizador",
+  "downloadGuide": "Transferir guia",
+  "onThisPage": "Nesta página",
+  "searchLabel": "Diga-nos o que procura",
+  "searchPlaceholder": "Pesquisar",
+  "searchAction": "Pesquisar",
+  "noResults": {
+    "title": "Não encontrámos guias para \"{{query}}\"",
+    "subtitle": "Experimente outras palavras ou termos mais gerais.",
+    "description": "Apague a pesquisa para voltar a ver todos os temas."
+  },
+  "empty": "Ainda não existem guias disponíveis.",
+  "openGuide": "Abrir o guia {{title}}",
+  "tasksLabel": "Tarefas do guia",
+  "unavailableTitle": "Ainda não disponível no portal público",
+  "audience": "Para",
+  "objective": "Objetivo",
+  "whatToDo": "O que fazer",
+  "example": "Exemplo",
+  "video": "Vídeo",
+  "videoFallbackTitle": "Vídeo da tarefa {{title}}",
+  "watchVideo": "Ver o vídeo",
+  "tip": "Dica",
+  "relatedGuides": "Guias relacionados",
+  "usefulResources": "Recursos úteis"
+}
