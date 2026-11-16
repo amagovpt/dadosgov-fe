@@ -3,6 +3,7 @@ import BigValue from "./BigValue";
 import CardGraph from "./CardGraph";
 import CardIcon from "./CardIcon";
 import CardLined from "./CardLined";
+import LinkCard from "./LinkCard";
 import SheetBenProjItem from "./Item";
 import SheetBenProjList from "./List";
 import MediumValue from "./MediumValue";
@@ -19,6 +20,7 @@ export const BenProjSheet = {
   CardLined: CardLined,
   CardGraph: CardGraph,
   CardIcon: CardIcon,
+  LinkCard: LinkCard,
   BigValue: BigValue,
   MediumValue: MediumValue,
   AreaValuelist: AreaValuelist,

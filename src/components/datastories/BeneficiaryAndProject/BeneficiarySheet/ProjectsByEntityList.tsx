@@ -4,7 +4,10 @@ import { useCallback, useState } from "react";
 import { formatCompactEUR } from "@/utils/formatCurrency";
 import { PT2030ProjectsByBeneficiary } from "@/service/types/datastories/pt2030/pt2030";
 import { LoadMoreWrapper } from "@/components/Shared/Wrappers/LoadMoreWrapper";
-import { ResultCard } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsShared";
+import {
+  ResultCard,
+  ResultCardText,
+} from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsShared";
 
 type EntityRole = "BENEFICIARIO_PRINCIPAL" | "OUTROS_BENEFICIARIOS";
 
@@ -65,21 +68,26 @@ export default function ProjectsByEntityList({
       onLoadMore={handleLoadMore}
       seeMoreText={t("projects").toLowerCase()}
       renderItem={(project, index) => {
-        const dateStr = project.effectiveConclusionDate
-          ? `<strong>${t("conclusionDate")}</strong> ${project.effectiveConclusionDate}`
-          : "";
-        const valueStr = `<strong>${t("financingValue")}</strong> ${formatValuesWithSuffix(project.approvedValue)}`;
-        const descStr = `<p>${dateStr}<br><br>${valueStr}</p>`;
-
         const href = `/${i18n.language}/datastories/portugal-2030/projetos-do-portugal-2030/${project.operationCode}`;
 
         return (
           <ResultCard
             key={`card-${entityRole.replaceAll(" ", "-")}-${index}`}
             title={project.operationName}
-            description={descStr}
             href={href}
-            isLast={index === data.length - 1}
+            description={
+              <>
+                {project.effectiveConclusionDate && (
+                  <ResultCardText className="first-letter:uppercase">
+                    <strong>{t("conclusionDate")}</strong> {project.effectiveConclusionDate}
+                  </ResultCardText>
+                )}
+                <ResultCardText className="first-letter:uppercase">
+                  <strong>{t("financingValue")}</strong>{" "}
+                  {formatValuesWithSuffix(project.approvedValue)}
+                </ResultCardText>
+              </>
+            }
           />
         );
       }}

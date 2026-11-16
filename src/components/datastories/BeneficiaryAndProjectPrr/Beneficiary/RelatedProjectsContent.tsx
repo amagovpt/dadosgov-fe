@@ -1,7 +1,6 @@
 "use client";
 
 import ButtonGeneral from "@/components/Primitives/Button";
-import { LinkIcon } from "@/components/Primitives/LinkIcon";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -95,9 +94,11 @@ function ProjectsByRoleList({ role, group, labels, nif, dateFormat }: ProjectsBy
         const href = `/${i18n.language}/datastories/prr/projetos-do-prr/${encodeURIComponent(project.id)}`;
 
         return (
-          <div
+          <BenProjSheet.LinkCard
             key={`project-${role}-${project.id}-${index}`}
-            className="relative w-full gap-16 rounded-4 bg-white p-32"
+            href={href}
+            variant="primary"
+            className="w-full gap-16 p-32 pr-72"
           >
             <div className="flex flex-col gap-8">
               <Typograph tag="h2" className="text-l-bold text-neutral-900">
@@ -124,20 +125,7 @@ function ProjectsByRoleList({ role, group, labels, nif, dateFormat }: ProjectsBy
                 </Typograph>
               </div>
             )}
-
-            <div className="absolute top-1/2 right-24 -translate-y-1/2 xl:right-32">
-              <LinkIcon
-                title=""
-                href={href}
-                className="p-0! leading-none!"
-                variant="primary"
-                icon={{
-                  name: "agora-line-arrow-right-circle",
-                  hoverName: "agora-solid-arrow-right-circle",
-                }}
-              />
-            </div>
-          </div>
+          </BenProjSheet.LinkCard>
         );
       }}
     />

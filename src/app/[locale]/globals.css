@@ -808,11 +808,11 @@ li.section-name:empty {
   height: 100%;
 }
 
-.prr-results .agora-card-general-side-anchor {
+.result-card-v2 .agora-card-general-side-anchor {
   display: block !important;
 }
 
-.prr-results .agora-card-general-anchor-mobile {
+.result-card-v2 .agora-card-general-anchor-mobile {
   display: none !important;
 }
 

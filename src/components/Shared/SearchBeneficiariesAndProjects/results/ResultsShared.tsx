@@ -1,12 +1,20 @@
 "use client";
 
-import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
+import {
+  BodySectionContainer,
+  CardDescription,
+  CardGeneralV2,
+  CardTitle,
+  HeaderSectionContainer,
+} from "@ama-pt/agora-design-system";
 import { useSearchBenProjStore } from "@/hooks/useSearchBenProj";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { TFunction } from "i18next";
 import Image from "next/image";
-import { type MouseEvent, type ReactNode, useEffect } from "react";
+import Link from "next/link";
+import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { twMerge } from "tailwind-merge";
 import { Typograph } from "../../Generics/Typograph";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useLoader } from "@/hooks/useLoader";
@@ -23,10 +31,14 @@ export interface INoResults {
 
 type ResultCardProps = {
   title: string;
-  description: string;
+  description: ReactNode;
   href: string;
-  isLast: boolean;
-  linkEnabled?: boolean;
+  className?: string;
+};
+
+type ResultCardTextProps = {
+  className?: string;
+  children: ReactNode;
 };
 
 type ProjectResultOptions = {
@@ -99,49 +111,31 @@ export function ResultsLayout({
   );
 }
 
-export function ResultCard({
-  title,
-  description,
-  href,
-  isLast,
-  linkEnabled = true,
-}: ResultCardProps) {
-  const formattedDescription = formatHtmlParagraphs(
-    description,
-    "text-m-regular !text-neutral-900 first-letter:uppercase"
-  );
-  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (!linkEnabled) event.preventDefault();
-  };
-
+/**
+ * Whole-card link to a result sheet. The bottom border is dropped on the last sibling, so the
+ * cards must be direct children of the list container.
+ */
+export function ResultCard({ title, description, href, className }: ResultCardProps) {
   return (
-    <>
-      <div className={"result-card relative" + (isLast ? " " : " border-b")}>
-        <a
-          href={href}
-          className="absolute inset-0 z-10"
-          aria-label={title}
-          tabIndex={-1}
-          onClick={handleClick}
-        />
-        <CardGeneral
-          isCardHorizontal
-          titleText={title}
-          descriptionText={formattedDescription as unknown as string}
-          anchor={{
-            children: "",
-            href,
-            hasIcon: true,
-            appearance: "link",
-            trailingIcon: "agora-line-arrow-right-circle",
-            trailingIconHover: "agora-solid-arrow-right-circle",
-            trailingIconActive: "agora-solid-arrow-right-circle",
-            onClick: handleClick,
-          }}
-        />
-      </div>
-      {/*!isLast && <ResultsLine />*/}
-    </>
+    <Link href={href} className={twMerge("border-b border-neutral-900 last:border-b-0", className)}>
+      <CardGeneralV2 layout="text" sideAnchor={{ href, children: "" }} className="result-card-v2">
+        <HeaderSectionContainer>
+          <CardTitle>{title}</CardTitle>
+        </HeaderSectionContainer>
+        <BodySectionContainer className="mt-8">
+          <CardDescription className="flex flex-col gap-24">{description}</CardDescription>
+        </BodySectionContainer>
+      </CardGeneralV2>
+    </Link>
+  );
+}
+
+/** A line of text inside a ResultCard description, with the card's default typography. */
+export function ResultCardText({ className, children }: ResultCardTextProps) {
+  return (
+    <Typograph tag="p" className={twMerge("text-m-regular text-neutral-900", className)}>
+      {children}
+    </Typograph>
   );
 }
 
@@ -171,13 +165,22 @@ export function buildProjectResult({
         ? "executedAmount"
         : paidLabel;
 
-  const description = [
-    "<p>",
-    `<strong>${t("operationCode")}</strong>   ${operationCode}`,
-    `<br><strong>${t(`searchBenProj.fields.${conclusionLabel}`)}</strong>   ${formatDateLong(String(conclusionDate), locale)}`,
-    `<br><br><strong>${t(valueLabel)}</strong>   ${formatCurrency(Number(item[valueKey] ?? 0), t)}`,
-    "</p>",
-  ].join("");
+  const description = (
+    <>
+      <div className="flex flex-col">
+        <ResultCardText className="first-letter:uppercase">
+          <strong>{t("operationCode")}</strong> {operationCode}
+        </ResultCardText>
+        <ResultCardText className="first-letter:uppercase">
+          <strong>{t(`searchBenProj.fields.${conclusionLabel}`)}</strong>{" "}
+          {formatDateLong(String(conclusionDate), locale)}
+        </ResultCardText>
+      </div>
+      <ResultCardText className="first-letter:uppercase">
+        <strong>{t(valueLabel)}</strong> {formatCurrency(Number(item[valueKey] ?? 0), t)}
+      </ResultCardText>
+    </>
+  );
 
   return {
     title,

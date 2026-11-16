@@ -1,12 +1,13 @@
 "use client";
 import { useTranslation } from "react-i18next";
 import { useCallback, useState } from "react";
-import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { formatCompactEUR } from "@/utils/formatCurrency";
 import { PT2030ProjectSheetBeneficiary } from "@/service/types/datastories/pt2030/pt2030";
-import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
 import { LoadMoreWrapper } from "@/components/Shared/Wrappers/LoadMoreWrapper";
-import { ResultCard } from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsShared";
+import {
+  ResultCard,
+  ResultCardText,
+} from "@/components/Shared/SearchBeneficiariesAndProjects/results/ResultsShared";
 
 type BeneficiaryType = "MAIN" | "MORE";
 
@@ -69,18 +70,19 @@ export default function BeneficiariesList({
       onLoadMore={handleLoadMore}
       seeMoreText={t("beneficiaries").toLowerCase()}
       renderItem={(beneficiary, index) => {
-        const valueStr = `<strong>${t("financingValue")}</strong> ${formatValuesWithSuffix(beneficiary.financingAmount)}`;
-        const descStr = `<p>${valueStr}</p>`;
-
         const href = `/${i18n.language}/datastories/portugal-2030/beneficiarios-do-portugal-2030/${beneficiary.entityNif}`;
 
         return (
           <ResultCard
             key={`card-${beneficiaryType}-${index}`}
             title={beneficiary.name}
-            description={descStr}
             href={href}
-            isLast={index === data.length - 1}
+            description={
+              <ResultCardText className="first-letter:uppercase">
+                <strong>{t("financingValue")}</strong>{" "}
+                {formatValuesWithSuffix(beneficiary.financingAmount)}
+              </ResultCardText>
+            }
           />
         );
       }}

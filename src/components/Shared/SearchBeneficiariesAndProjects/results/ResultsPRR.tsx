@@ -5,16 +5,7 @@ import { formatByThree } from "@/utils/formatByThree";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { type INoResults, ResultsLayout } from "./ResultsShared";
-import {
-  BodySectionContainer,
-  CardDescription,
-  CardGeneralV2,
-  CardTitle,
-  HeaderSectionContainer,
-} from "@ama-pt/agora-design-system";
-import { Typograph } from "../../Generics/Typograph";
-import Link from "next/link";
+import { type INoResults, ResultCard, ResultCardText, ResultsLayout } from "./ResultsShared";
 
 export type { INoResults } from "./ResultsShared";
 
@@ -95,54 +86,33 @@ export default function ResultsPRR({ noResults }: { noResults?: INoResults }) {
         }
 
         return (
-          <Link
+          <ResultCard
             key={`beneficiary-${String(item.entityNif ?? "")}-${index}`}
+            title={title}
             href={`${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`}
-            className="border-b border-neutral-900 last:border-b-0"
-          >
-            <CardGeneralV2
-              layout="text"
-              sideAnchor={{
-                href: `${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`,
-                children: "",
-              }}
-              className="prr-results"
-            >
-              <HeaderSectionContainer>
-                <CardTitle>{title}</CardTitle>
-              </HeaderSectionContainer>
-              <BodySectionContainer className="mt-8">
-                <CardDescription className="flex flex-col gap-24">
-                  <div className="flex flex-col">
-                    <Typograph
-                      tag="p"
-                      className="text-m-regular text-neutral-900 first-letter:uppercase"
-                    >
-                      <strong>{t("nif")}</strong> {formatByThree(String(item.entityNif ?? ""))}
-                    </Typograph>
-                    <Typograph tag="p" className="text-m-regular text-neutral-900">
-                      {String(item.projectsAmount ?? 0)} {projectLabel}
-                    </Typograph>
+            description={
+              <>
+                <div className="flex flex-col">
+                  <ResultCardText className="first-letter:uppercase">
+                    <strong>{t("nif")}</strong> {formatByThree(String(item.entityNif ?? ""))}
+                  </ResultCardText>
+                  <ResultCardText>
+                    {String(item.projectsAmount ?? 0)} {projectLabel}
+                  </ResultCardText>
+                </div>
+                {values.length > 0 && (
+                  <div className="flex flex-row flex-wrap gap-x-16 gap-y-0">
+                    <ResultCardText className="text-m-bold first-letter:uppercase">
+                      {valueLabel}
+                    </ResultCardText>
+                    {values.map((value) => (
+                      <ResultCardText key={value}>{value}</ResultCardText>
+                    ))}
                   </div>
-                  {values.length > 0 && (
-                    <div className="flex flex-row flex-wrap gap-x-16 gap-y-0">
-                      <Typograph
-                        tag="p"
-                        className="text-m-bold text-neutral-900 first-letter:uppercase"
-                      >
-                        {valueLabel}
-                      </Typograph>
-                      {values.map((value) => (
-                        <Typograph key={value} tag="p" className="text-m-regular text-neutral-900">
-                          {value}
-                        </Typograph>
-                      ))}
-                    </div>
-                  )}
-                </CardDescription>
-              </BodySectionContainer>
-            </CardGeneralV2>
-          </Link>
+                )}
+              </>
+            }
+          />
         );
       })}
     </ResultsLayout>
