@@ -51,8 +51,8 @@ export class MilestonesTarget {
 
 @ObjectType()
 export class Investment {
-  @Field(() => Boolean)
-  finished: boolean;
+  @Field(() => Boolean, { nullable: true })
+  finished: boolean | null;
 
   @Field(() => Float)
   loanValue: number;
@@ -63,8 +63,8 @@ export class Investment {
   @Field(() => String)
   cdInvestment: string;
 
-  @Field(() => String)
-  idInvestment: string;
+  @Field(() => String, { nullable: true })
+  idInvestment: string | null;
 
   @Field(() => Float)
   assignedAmount: number;

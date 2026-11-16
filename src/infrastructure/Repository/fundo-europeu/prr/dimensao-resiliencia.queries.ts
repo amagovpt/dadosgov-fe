@@ -333,7 +333,7 @@ investimentos_detalhe AS (
         jsonb_agg(
             jsonb_build_object(
                 'milestoneOrTarget', mb.milestone_ou_target,
-    			'executionIndicatorId', md5(mb.nome_indicador_execucao),
+                'executionIndicatorId', md5(mb.nome_indicador_execucao),
                 'executionIndicatorName', COALESCE(mb.nome_indicador_execucao, ''),
                 'dsExecutionIndicator', COALESCE(mb.ds_indicador_execucao, ''),
                 'dtConclusionMilestoneTarget',
@@ -379,13 +379,42 @@ investimentos_final AS (
         idt.valor_emprestimos,
         idt.valor_fundo_perdido,
         idt.terminado,
-        idt.data_conclusao,
+        idt.data_conclusao::text AS data_conclusao,
         idt.milestones_targets
     FROM investimentos_detalhe idt
     LEFT JOIN investimentos_execucao ie
         ON ie.cd_investimento = idt.cd_investimento
     LEFT JOIN inv_latest i
         ON i.cd_investimento = idt.cd_investimento
+
+    UNION ALL
+
+    /* Investimentos SEM milestones — existem em inv_latest mas não
+       entram no mview_base (que parte das milestones). Adicionados aqui
+       com lista de milestones vazia e NA nos campos dependentes. */
+    SELECT
+        i.cd_componente,
+        NULL::text AS id_investimento,
+        i.cd_investimento,
+        i.ds_investimento AS nome_investimento,
+        ''::text AS descricao_investimento,
+        ''::text AS data_conclusao_investimento,
+        ie.percentagem_conclusao_execucao AS percentagem_conclusao,
+        COALESCE(i.montante_programado, 0::numeric) AS valor_atribuido,
+        COALESCE(p.valor_gasto, 0::numeric)        AS valor_gasto,
+        COALESCE(i.montante_emprestimos, 0::numeric) AS valor_emprestimos,
+        COALESCE(i.montante_subvencoes, 0::numeric)  AS valor_fundo_perdido,
+        NULL::boolean AS terminado,
+        'NA'::text AS data_conclusao,
+        '[]'::jsonb AS milestones_targets
+    FROM inv_latest i
+    LEFT JOIN investimentos_execucao ie
+        ON ie.cd_investimento = i.cd_investimento
+    LEFT JOIN projetos_tmp p
+        ON p.cd_investimento = i.cd_investimento
+    WHERE i.cd_investimento NOT IN (
+        SELECT cd_investimento FROM investimentos_detalhe
+    )
 ),
 
 /* =====================================================
@@ -467,7 +496,7 @@ FROM (
                                 'completionDate', inf.data_conclusao,
                                 'milestonesTargets', inf.milestones_targets
                             )
-                            ORDER BY inf.data_conclusao, inf.nome_investimento
+                            ORDER BY (inf.data_conclusao = 'NA'), inf.data_conclusao, inf.nome_investimento
                         )
                         FROM investimentos_final inf
                         WHERE inf.cd_componente = cr.id
