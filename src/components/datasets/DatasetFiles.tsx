@@ -82,7 +82,9 @@ function FileSection({ datasetId, section }: { datasetId: string; section: Resou
         id={headingId}
         className={`text-xl-bold ${section.type === "main" ? "text-primary-900" : "text-neutral-900"}`}
       >
-        {t(`resources.types.${section.type}`)}
+        {t(`resources.types.${section.type}`, {
+          count: section.result?.total ?? result?.total ?? 1,
+        })}
       </h3>
       <SearchFilter
         id={`${headingId}-search`}

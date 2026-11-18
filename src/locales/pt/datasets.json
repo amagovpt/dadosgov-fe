@@ -303,13 +303,25 @@
       "copyUrl": "Copiar URL"
     },
     "types": {
-      "main": "Ficheiros principais",
-      "file": "Ficheiros principais",
+      "main": "Ficheiro principal",
+      "main_one": "Ficheiro principal",
+      "main_other": "Ficheiros principais",
+      "file": "Ficheiro principal",
       "documentation": "Documentação",
+      "documentation_one": "Documentação",
+      "documentation_other": "Documentações",
       "api": "API",
-      "update": "Atualizações",
-      "code": "Código",
-      "other": "Outros ficheiros"
+      "api_one": "API",
+      "api_other": "APIs",
+      "update": "Atualização",
+      "update_one": "Atualização",
+      "update_other": "Atualizações",
+      "code": "Repositório de código",
+      "code_one": "Repositório de código",
+      "code_other": "Repositórios de código",
+      "other": "Outro",
+      "other_one": "Outro",
+      "other_other": "Outros"
     },
     "extrasKeys": {
       "check_id": "verificação:id",

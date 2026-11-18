@@ -301,13 +301,25 @@
       "copyUrl": "Copy URL"
     },
     "types": {
-      "main": "Main files",
-      "file": "Main files",
+      "main": "Main file",
+      "main_one": "Main file",
+      "main_other": "Main files",
+      "file": "Main file",
       "documentation": "Documentation",
+      "documentation_one": "Documentation",
+      "documentation_other": "Documentation",
       "api": "API",
-      "update": "Updates",
-      "code": "Code",
-      "other": "Other files"
+      "api_one": "API",
+      "api_other": "APIs",
+      "update": "Update",
+      "update_one": "Update",
+      "update_other": "Updates",
+      "code": "Code repository",
+      "code_one": "Code repository",
+      "code_other": "Code repositories",
+      "other": "Other",
+      "other_one": "Other",
+      "other_other": "Others"
     },
     "extrasKeys": {
       "check_id": "check:id",
