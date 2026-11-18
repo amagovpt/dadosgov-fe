@@ -60,16 +60,22 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     notFound();
   }
 
-  const resourceSections = await Promise.all(
-    RESOURCE_SECTION_TYPES.map(async (type) => {
-      try {
-        return { type, result: await fetchDatasetResources(dataset.id, { type }, { forwarded }) };
-      } catch (error) {
-        rethrowControlFlow(error);
-        return { type, result: null };
-      }
-    })
-  );
+  const resourceSections =
+    dataset.resources.total === 0
+      ? []
+      : await Promise.all(
+          RESOURCE_SECTION_TYPES.map(async (type) => {
+            try {
+              return {
+                type,
+                result: await fetchDatasetResources(dataset.id, { type }, { forwarded }),
+              };
+            } catch (error) {
+              rethrowControlFlow(error);
+              return { type, result: null };
+            }
+          })
+        );
 
   return <DatasetDetailClient dataset={dataset} resourceSections={resourceSections} />;
 }
