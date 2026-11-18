@@ -4,6 +4,7 @@ import React from "react";
 import { StatusCard, Toggle, ToggleGroup } from "@ama-pt/agora-design-system";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { useSupportForm } from "./hooks/useSupportForm";
 import { anchorFaqSections, shouldPreselectFeedbackFromUrl, SUPPORT_ANCHORS } from "./utils";
@@ -75,6 +76,9 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
     getActiveItemFromHash(hash, faqSections, currentAnchorId, helpAnchorId) ??
     (shouldPreselectFeedbackFromUrl() ? helpAnchorId : currentAnchorId);
   const form = useSupportForm({ executeRecaptcha });
+  // below the lg breakpoint (1024px) the toggles no longer fits side by side.
+  const isToggleGroupVertical = useMediaQuery("(max-width: 1023px)");
+  const toggleOrientation = isToggleGroupVertical ? "vertical" : "horizontal";
 
   const handleToggleChange = (val: string[]) => {
     const selected = val.length > 0 ? val[0] : null;
@@ -91,21 +95,12 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
         : null;
 
   return (
-    <main id={currentAnchorId} className="flex-grow bg-white pb-64 !scroll-mt-[200px]">
+    <main id={currentAnchorId} className="grow scroll-mt-[200px]! bg-white pb-64">
       <SupportHero content={pageContent.hero} />
 
-      <div className="container mx-auto px-4 py-64">
-        <div className="grid gap-32 md:grid-cols-3 xl:grid-cols-12">
-          <div className="max-w-ch xl:col-span-8 xl:block">
-            <FaqSection
-              title={t("faq.title")}
-              updatedDate={pageContent.faqUpdatedDate}
-              categories={faqSections}
-              hash={hash}
-            />
-          </div>
-
-          <div className="sticky top-[190px] h-fit self-start xl:col-span-4 xl:block">
+      <div className="container mx-auto px-32 py-64">
+        <div className="grid grid-cols-1 gap-32 md:grid-cols-12">
+          <div className="h-fit self-start md:sticky md:top-[190px] md:order-2 md:col-span-4">
             <SupportSidebar
               activeItem={activeItem}
               categories={faqSections}
@@ -115,31 +110,43 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
               helpLabel={pageContent.helpCard.title ?? t("help.title")}
             />
           </div>
+
+          <div className="max-w-ch md:order-1 md:col-span-8">
+            <FaqSection
+              title={t("faq.title")}
+              updatedDate={pageContent.faqUpdatedDate}
+              categories={faqSections}
+              hash={hash}
+            />
+          </div>
         </div>
 
         <div className="mt-80 border-neutral-200 pt-64">
           <h2
             id={helpAnchorId}
-            className="mb-24 text-24 font-bold text-[#021C51] !scroll-mt-[200px]"
+            className="mb-24 scroll-mt-[200px]! text-24 font-bold text-[#021C51]"
           >
             {pageContent.helpCard.title}
           </h2>
-          <h3 className="mb-16 text-[20px] font-[500] text-[#021C51]">
+          <h3 className="mb-16 text-[20px] font-medium text-[#021C51]">
             {pageContent.helpCard.subtitle}
           </h3>
 
-          <div className="mb-8 text-[16px] text-neutral-800">
+          <div className="mb-8 text-base text-neutral-800">
             {formatHtmlParagraphs(
               pageContent.helpCard.description ?? "",
               "text-[16px] text-neutral-800"
             )}
           </div>
-          <p className="mb-24 text-[16px] text-neutral-800">{t("help.optionIntro")}</p>
+          <p className="mb-24 text-base text-neutral-800">{t("help.optionIntro")}</p>
 
           <ToggleGroup
+            key={toggleOrientation}
+            orientation={toggleOrientation}
             multiple={false}
             value={form.selectedToggle ?? ""}
             onChange={handleToggleChange}
+            className="w-full lg:w-auto"
           >
             <Toggle
               value="question"
