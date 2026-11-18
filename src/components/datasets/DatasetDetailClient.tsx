@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Button, ModalProvider } from "@ama-pt/agora-design-system";
 import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
-import { Dataset } from "@/service/types/dataset";
+import type { DatasetDetail, ResourceSectionPage } from "@/service/types/dataset/detail";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -17,10 +17,14 @@ import { DatasetDetailSidebar } from "@/components/datasets/DatasetDetailSidebar
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 
 interface DatasetDetailClientProps {
-  dataset: Dataset;
+  dataset: DatasetDetail;
+  resourceSections: ResourceSectionPage[];
 }
 
-export default function DatasetDetailClient({ dataset }: DatasetDetailClientProps) {
+export default function DatasetDetailClient({
+  dataset,
+  resourceSections,
+}: DatasetDetailClientProps) {
   const { t: tds } = useTranslation("datasets");
   const { user, isAdmin } = useAuth();
   const { organizations } = useActiveOrganization();
@@ -128,7 +132,7 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
         </div>
 
         {/* Tabs */}
-        <DatasetTabs dataset={dataset} />
+        <DatasetTabs dataset={dataset} resourceSections={resourceSections} />
       </main>
     </ModalProvider>
   );

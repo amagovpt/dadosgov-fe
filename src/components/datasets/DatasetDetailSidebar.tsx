@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState, type ComponentProps, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { Anchor, CardExpandable, Icon, Pill, ProgressBar } from "@ama-pt/agora-design-system";
-import type { Dataset } from "@/service/types/dataset";
+import type { DatasetMetadata } from "@/service/types/dataset/detail";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA, getQualityMissing } from "@/utils/datasetQuality";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
@@ -41,7 +41,7 @@ function PublisherImage({ src, name, isOwner }: { src?: string; name: string; is
 }
 
 interface DatasetDetailSidebarProps {
-  dataset: Dataset;
+  dataset: DatasetMetadata;
   sidebarRef: RefObject<HTMLDivElement | null>;
 }
 

@@ -237,6 +237,18 @@
     "other": "Outro"
   },
   "resources": {
+    "search": "Pesquisar",
+    "searchPlaceholder": "Pesquise o título do recurso adicionado",
+    "resultsList": "Lista de resultados",
+    "resultCount_one": "{{count}} resultado",
+    "resultCount_zero": "0 resultados",
+    "resultCount_other": "{{count}} resultados",
+    "loading": "A carregar ficheiros...",
+    "loadError": "Não foi possível carregar os ficheiros.",
+    "retry": "Tentar novamente",
+    "noResults": "Não foram encontrados ficheiros",
+    "noResultsHelp": "Experimente pesquisar por outro título.",
+    "noFiles": "Este conjunto de dados não tem ficheiros.",
     "mainFiles_one": "Ficheiro principal",
     "mainFiles_other": "Ficheiros principais",
     "documentation_one": "Documentação",
@@ -293,7 +305,11 @@
     "types": {
       "main": "Ficheiros principais",
       "file": "Ficheiros principais",
-      "documentation": "Documentação"
+      "documentation": "Documentação",
+      "api": "API",
+      "update": "Atualizações",
+      "code": "Código",
+      "other": "Outros ficheiros"
     },
     "extrasKeys": {
       "check_id": "verificação:id",

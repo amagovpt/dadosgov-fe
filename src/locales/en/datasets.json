@@ -237,6 +237,18 @@
     "other": "Other"
   },
   "resources": {
+    "search": "Search",
+    "searchPlaceholder": "Search by resource title",
+    "resultsList": "Results list",
+    "resultCount_one": "{{count}} result",
+    "resultCount_zero": "0 results",
+    "resultCount_other": "{{count}} results",
+    "loading": "Loading files...",
+    "loadError": "Could not load the files.",
+    "retry": "Try again",
+    "noResults": "No files found",
+    "noResultsHelp": "Try searching for another title.",
+    "noFiles": "This dataset has no files.",
     "mainFiles_one": "{{count}} MAIN FILE",
     "mainFiles_other": "{{count}} MAIN FILES",
     "documentation_one": "{{count}} DOCUMENTATION",
@@ -291,7 +303,11 @@
     "types": {
       "main": "Main files",
       "file": "Main files",
-      "documentation": "Documentation"
+      "documentation": "Documentation",
+      "api": "API",
+      "update": "Updates",
+      "code": "Code",
+      "other": "Other files"
     },
     "extrasKeys": {
       "check_id": "check:id",

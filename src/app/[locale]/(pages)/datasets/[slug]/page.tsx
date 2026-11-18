@@ -1,5 +1,6 @@
 import DatasetDetailClient from "@/components/datasets/DatasetDetailClient";
-import { fetchDataset } from "@/service/api/datasets";
+import { fetchDatasetDetail, fetchDatasetResources } from "@/service/api/datasets/detail";
+import { RESOURCE_SECTION_TYPES } from "@/service/types/dataset/detail";
 import { getFrontOfficeMetadata } from "@/service/queries/common";
 import { rethrowControlFlow } from "@/service/utils/rethrowControlFlow";
 import { serverAuthHeaders } from "@/service/utils/serverForwardedHeaders";
@@ -9,6 +10,8 @@ import { notFound } from "next/navigation";
 
 const PLACEHOLDER = "/images/placeholders/organization.png";
 
+const getDataset = async (slug: string) => fetchDatasetDetail(slug, await serverAuthHeaders());
+
 export async function generateMetadata({
   params,
 }: {
@@ -16,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   try {
-    const dataset = await fetchDataset(slug);
+    const dataset = await getDataset(slug);
     const description = stripHtmlTags(dataset.description);
     const image = dataset.organization?.logo || dataset.owner?.avatar_thumbnail || PLACEHOLDER;
 
@@ -47,7 +50,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
   let dataset;
   try {
-    dataset = await fetchDataset(slug, forwarded);
+    dataset = await getDataset(slug);
   } catch (error) {
     // Only a dataset that genuinely is not there is a 404. A refusal (401, 403)
     // or a backend failure reaches the error boundary instead, which can say
@@ -57,5 +60,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     notFound();
   }
 
-  return <DatasetDetailClient dataset={dataset} />;
+  const resourceSections = await Promise.all(
+    RESOURCE_SECTION_TYPES.map(async (type) => {
+      try {
+        return { type, result: await fetchDatasetResources(dataset.id, { type }, { forwarded }) };
+      } catch (error) {
+        rethrowControlFlow(error);
+        return { type, result: null };
+      }
+    })
+  );
+
+  return <DatasetDetailClient dataset={dataset} resourceSections={resourceSections} />;
 }
