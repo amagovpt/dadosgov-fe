@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, StatusCard } from "@ama-pt/agora-design-system";
 import SearchFilter from "@/components/Shared/SearchFilter";
@@ -154,9 +155,28 @@ export function DatasetFiles({
   sections: ResourceSectionPage[];
 }) {
   const { t } = useTranslation("datasets");
+  const router = useRouter();
+  const [retrying, startRetry] = useTransition();
+  const allFailed = sections.length > 0 && sections.every((section) => section.result === null);
   const visibleSections = sections.filter(
     (section) => section.result === null || section.result.total > 0
   );
+
+  if (allFailed) {
+    return (
+      <div className="flex flex-col items-start gap-16 pb-32" aria-busy={retrying}>
+        <StatusCard variant="danger" description={t("resources.loadError")} showIcon />
+        <Button
+          appearance="outline"
+          disabled={retrying}
+          onClick={() => startRetry(() => router.refresh())}
+        >
+          {retrying ? t("resources.loading") : t("resources.retry")}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-64 pb-32">
       {visibleSections.length ? (
