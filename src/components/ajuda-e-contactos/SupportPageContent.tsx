@@ -4,6 +4,7 @@ import React from "react";
 import { StatusCard, Toggle, ToggleGroup } from "@ama-pt/agora-design-system";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { useSupportForm } from "./hooks/useSupportForm";
 import { anchorFaqSections, shouldPreselectFeedbackFromUrl, SUPPORT_ANCHORS } from "./utils";
@@ -75,6 +76,9 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
     getActiveItemFromHash(hash, faqSections, currentAnchorId, helpAnchorId) ??
     (shouldPreselectFeedbackFromUrl() ? helpAnchorId : currentAnchorId);
   const form = useSupportForm({ executeRecaptcha });
+  // below the lg breakpoint (1024px) the toggles no longer fits side by side.
+  const isToggleGroupVertical = useMediaQuery("(max-width: 1023px)");
+  const toggleOrientation = isToggleGroupVertical ? "vertical" : "horizontal";
 
   const handleToggleChange = (val: string[]) => {
     const selected = val.length > 0 ? val[0] : null;
@@ -94,7 +98,7 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
     <main id={currentAnchorId} className="grow scroll-mt-[200px]! bg-white pb-64">
       <SupportHero content={pageContent.hero} />
 
-      <div className="container mx-auto px-8 py-64">
+      <div className="container mx-auto px-32 py-64">
         <div className="grid grid-cols-1 gap-32 md:grid-cols-12">
           <div className="h-fit self-start md:sticky md:top-[190px] md:order-2 md:col-span-4">
             <SupportSidebar
@@ -137,9 +141,12 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
           <p className="mb-24 text-base text-neutral-800">{t("help.optionIntro")}</p>
 
           <ToggleGroup
+            key={toggleOrientation}
+            orientation={toggleOrientation}
             multiple={false}
             value={form.selectedToggle ?? ""}
             onChange={handleToggleChange}
+            className="w-full lg:w-auto"
           >
             <Toggle
               value="question"
