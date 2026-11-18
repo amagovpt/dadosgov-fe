@@ -20,12 +20,23 @@ export async function fetchDatasetDetail(
   if (!response.ok) throw new Error(`Failed to fetch dataset: ${response.status}`);
   const dataset: DatasetV2 = await response.json();
   const license = typeof dataset.license === "object" ? dataset.license : null;
+  const spatial = dataset.spatial;
   return {
     ...dataset,
     license: license?.id ?? (typeof dataset.license === "string" ? dataset.license : null),
     license_title: license?.title ?? null,
     license_url: license?.url ?? null,
     frequency: typeof dataset.frequency === "string" ? dataset.frequency : dataset.frequency.id,
+    spatial: spatial
+      ? {
+          ...spatial,
+          zones: spatial.zones.map((zone) => (typeof zone === "string" ? zone : zone.id)),
+          granularity:
+            typeof spatial.granularity === "string"
+              ? spatial.granularity
+              : (spatial.granularity?.id ?? null),
+        }
+      : spatial,
   };
 }
 
