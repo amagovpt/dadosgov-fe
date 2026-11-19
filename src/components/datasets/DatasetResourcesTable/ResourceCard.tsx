@@ -68,7 +68,7 @@ export const ResourceCard: FC<{
         </p>
 
         <div className="flex flex-col gap-8">
-          <h4 className="inline-flex max-w-[592px] items-center gap-8 text-xl-bold text-neutral-900">
+          <h4 className="inline-flex max-w-[592px] items-center gap-8 text-xl-bold wrap-anywhere text-neutral-900">
             {resource.title}
           </h4>
 
