@@ -9,16 +9,21 @@ const subscribeHydration = () => () => {};
 const clientReady = () => true;
 const serverReady = () => false;
 
-export function useDiscussionTab() {
+export function useDiscussionTab({ remountOnHydration = false } = {}) {
   const searchParams = useSearchParams();
   const isDiscussionTab =
     searchParams.get("tab") === "discussions" || Boolean(searchParams.get("discussion_id"));
   const hydrated = useSyncExternalStore(subscribeHydration, clientReady, serverReady);
-  // Agora measures width during hydration. Remount linked tabs once on the client
+  // Agora measures width during hydration. Remount opted-in tabs once on the client
   // so their mobile panels do not retain the server's desktop `hidden` attributes.
   return {
     isDiscussionTab,
-    tabsKey: isDiscussionTab && hydrated ? "linked-discussion" : "default",
+    tabsKey:
+      hydrated && (isDiscussionTab || remountOnHydration)
+        ? isDiscussionTab
+          ? "linked-discussion"
+          : "hydrated"
+        : "default",
   };
 }
 

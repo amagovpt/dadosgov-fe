@@ -336,7 +336,6 @@ export default function DatasetsAdminClient({
 
           {currentStep === 4 && (
             <DatasetWizardStep4
-              redesigned={redesigned}
               publishStepCard={pageContent.publishStepCard}
               createdDataset={form.createdDataset}
               datasetTitle={form.datasetTitle}
