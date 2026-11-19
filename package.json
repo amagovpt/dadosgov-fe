@@ -19,7 +19,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "@ama-pt/agora-design-system": "^4.0.1",
+    "@ama-pt/agora-design-system": "^4.0.4",
     "@apollo/client": "^4.1.7",
     "@tailwindcss/postcss": "^4.3.3",
     "@tiptap/extension-code-block": "^3.31.3",
