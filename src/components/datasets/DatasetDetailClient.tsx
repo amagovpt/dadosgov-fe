@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button, ModalProvider } from "@ama-pt/agora-design-system";
-import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
+import { Hero } from "@/components/Shared/Hero";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import type { DatasetDetail, ResourceSectionPage } from "@/service/types/dataset/detail";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
@@ -32,7 +32,7 @@ export default function DatasetDetailClient({
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
+  const descriptionHeadingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -71,67 +71,75 @@ export default function DatasetDetailClient({
 
   return (
     <ModalProvider>
-      <main className="flex w-full flex-col items-center justify-center gap-64">
-        {/* Breadcrumb */}
-        <div className="container flex items-center justify-between py-64">
-          <BreadcrumbDynamic darkMode={false} overrides={{ [dataset.slug]: dataset.title }} />
-        </div>
+      <main className="flex w-full flex-col">
+        <Hero.Root variant="light">
+          <Hero.Breadcrumb darkMode={false} currentLabel={dataset.title} />
+          <Hero.Content className="max-w-[592px]">
+            <Hero.Title className="text-3xl-bold! leading-normal wrap-anywhere text-primary-900">
+              {dataset.title}
+            </Hero.Title>
+            <DatasetBadges badges={dataset.badges} />
+          </Hero.Content>
+        </Hero.Root>
 
-        {/* Actions */}
-        <div className="container flex items-center justify-end gap-16">
-          <ResourceStatusBadge item={dataset} display="pill" hidePublic />
-          <Button
-            variant="neutral"
-            appearance="link"
-            hasIcon={true}
-            leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
-            leadingIconHover="agora-solid-star"
-            className="flex-shrink-0"
-            onClick={handleToggleFavorite}
-            disabled={isTogglingFavorite}
-          >
-            {isFavorite ? tds("detail.removeFavorite") : tds("detail.addFavorite")}
-          </Button>
-          {(isAdmin ||
-            (user && dataset.owner?.id === user.id) ||
-            (dataset.organization &&
-              organizations.some((org) => org.id === dataset.organization?.id))) && (
-            <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
-              <Button
-                variant="primary"
-                hasIcon={true}
-                leadingIcon="agora-line-edit"
-                leadingIconHover="agora-solid-edit"
-              >
-                {tds("detail.edit")}
-              </Button>
-            </Link>
-          )}
-        </div>
-
-        <div className="container grid gap-32 xl:grid-cols-12">
-          {/* Main Content Column */}
-          <div className="xl:col-span-6 xl:block">
-            <div className="flex flex-col gap-4" ref={titleRef}>
-              <h1 className="mb-24 text-xl-bold leading-tight text-primary-900">{dataset.title}</h1>
-              <DatasetBadges badges={dataset.badges} className="mb-24" />
+        <div className="flex flex-col items-center gap-32 pt-32 pb-64">
+          <div className="container flex flex-col items-start gap-16">
+            <div className="flex flex-wrap items-center gap-32">
+              <ResourceStatusBadge
+                item={dataset}
+                display="pill"
+                className="px-16 py-4"
+                labels={{ public: tds("detail.published") }}
+              />
+              {(isAdmin ||
+                (user && dataset.owner?.id === user.id) ||
+                (dataset.organization &&
+                  organizations.some((org) => org.id === dataset.organization?.id))) && (
+                <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
+                  <Button
+                    variant="neutral"
+                    appearance="link"
+                    className="p-[14px]"
+                    hasIcon
+                    leadingIcon="agora-line-edit"
+                    leadingIconHover="agora-solid-edit"
+                  >
+                    {tds("detail.edit")}
+                  </Button>
+                </Link>
+              )}
             </div>
-
-            {/* Description */}
-            <DescriptionWithReadMore
-              text={dataset.description}
-              sidebarRef={sidebarRef}
-              titleRef={titleRef}
-            />
+            <Button
+              variant="neutral"
+              appearance="outline"
+              className="p-[14px]"
+              hasIcon
+              leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
+              leadingIconHover="agora-solid-star"
+              onClick={handleToggleFavorite}
+              disabled={isTogglingFavorite}
+            >
+              {isFavorite ? tds("detail.removeFavorite") : tds("detail.addFavorite")}
+            </Button>
           </div>
 
-          {/* Sidebar */}
-          <div className="min-w-0 xl:col-span-6">
-            <DatasetDetailSidebar dataset={dataset} sidebarRef={sidebarRef} />
+          <div className="container grid gap-32 xl:grid-cols-12">
+            <div className="min-w-0 xl:col-span-6">
+              <div ref={descriptionHeadingRef} className="pb-32">
+                <h2 className="text-xl-bold text-neutral-900">{tds("labels.description")}:</h2>
+              </div>
+              <DescriptionWithReadMore
+                text={dataset.description}
+                sidebarRef={sidebarRef}
+                titleRef={descriptionHeadingRef}
+              />
+            </div>
+            <div className="min-w-0 xl:col-span-6">
+              <DatasetDetailSidebar dataset={dataset} sidebarRef={sidebarRef} />
+            </div>
           </div>
         </div>
 
-        {/* Tabs */}
         <DatasetTabs dataset={dataset} resourceSections={resourceSections} />
       </main>
     </ModalProvider>
