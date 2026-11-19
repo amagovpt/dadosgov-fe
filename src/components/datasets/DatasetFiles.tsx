@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, StatusCard } from "@ama-pt/agora-design-system";
@@ -19,10 +27,18 @@ function FileSection({ datasetId, section }: { datasetId: string; section: Resou
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(section.result === null);
   const [currentPage, setCurrentPage] = useState(1);
+  const sectionRef = useRef<HTMLElement>(null);
+  const scrollAfterPageLoad = useRef(false);
   const request = useRef({ q: "", page: 1 });
   const controller = useRef<AbortController | null>(null);
 
   useEffect(() => () => controller.current?.abort(), []);
+  //Pagination scrolls to the top of the section file/resource type when changing pages
+  useLayoutEffect(() => {
+    if (loading || !scrollAfterPageLoad.current) return;
+    scrollAfterPageLoad.current = false;
+    sectionRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
+  }, [loading, result, error]);
 
   const load = useCallback(
     async (q: string, page: number) => {
@@ -56,14 +72,20 @@ function FileSection({ datasetId, section }: { datasetId: string; section: Resou
   // and ignore that report so hydrated first pages aren't fetched twice.
   const changePage = useCallback(
     (page: number) => {
-      if (page !== request.current.page) void load(request.current.q, page);
+      if (page !== request.current.page) {
+        scrollAfterPageLoad.current = true;
+        void load(request.current.q, page);
+      }
     },
     [load]
   );
 
   const search = useCallback(
     (q: string) => {
-      if (q !== request.current.q || request.current.page !== 1 || error) void load(q, 1);
+      if (q !== request.current.q || request.current.page !== 1 || error) {
+        scrollAfterPageLoad.current = false;
+        void load(q, 1);
+      }
     },
     [load, error]
   );
@@ -75,8 +97,9 @@ function FileSection({ datasetId, section }: { datasetId: string; section: Resou
 
   return (
     <section
+      ref={sectionRef}
       aria-labelledby={headingId}
-      className="flex min-w-0 flex-col gap-32"
+      className="flex min-w-0 scroll-mt-32 flex-col gap-32"
       data-resource-type={section.type}
     >
       <h3
