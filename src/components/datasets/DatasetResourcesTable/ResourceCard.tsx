@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Resource } from "@/service/types/dataset";
 import { formatDateLong } from "@/utils/formatDate";
@@ -24,17 +24,20 @@ export const ResourceCard: FC<{
   const { t, i18n } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
   const { show, hide } = useModalContext();
+  const cardId = useId();
+  const modalOpenCount = useRef(0);
 
   const locale = i18n.language as "pt" | "en";
   const hasLongDescription = (resource.description?.length ?? 0) > DESCRIPTION_COLLAPSE_LIMIT;
 
   const openModal = () => {
+    const contentKey = `${cardId}-${++modalOpenCount.current}`;
     show(
       <div className="flex flex-col gap-64">
         <Typograph tag="h2" className="text-2xl-bold text-neutral-900">
           {tds("resources.details")}
         </Typograph>
-        <ResourceExpandedContent resource={resource} />
+        <ResourceExpandedContent key={contentKey} resource={resource} />
         <div className="w-fit self-end">
           <Button
             appearance="outline"
@@ -65,7 +68,7 @@ export const ResourceCard: FC<{
         </p>
 
         <div className="flex flex-col gap-8">
-          <h4 className="inline-flex max-w-[592px] items-center gap-8 text-xl-bold text-neutral-900">
+          <h4 className="inline-flex max-w-[592px] items-center gap-8 text-xl-bold wrap-anywhere text-neutral-900">
             {resource.title}
           </h4>
 
