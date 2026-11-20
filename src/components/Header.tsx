@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  KeyboardEvent,
   MouseEvent,
   useCallback,
   useEffect,
@@ -33,18 +34,15 @@ import {
   EcosystemPanelAnchor,
   EcosystemPanelTitle,
   NavigationBar,
-  NavigationFreestyle,
   NavigationLink,
   NavigationRoot,
   NavigationSection,
-  Button,
   Icon,
   HeaderElement,
   NavigationArea,
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { AdminProfileSwitcher } from "@/components/admin/AdminProfileSwitcher";
-import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
 import { stripLocale } from "@/utils/stripLocale";
@@ -65,6 +63,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
 
   const headerRef = useRef<HeaderElement>(null);
   const wrapperRef = useRef<HTMLElement>(null);
+  const submenuReturnFocusRef = useRef<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   // usePathname() is locale-prefixed (`/pt/login`); normalize for route
@@ -108,12 +107,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   // Mark header when on auth pages so CSS can style the "Autenticar" button
   const isAuthPage = localePath === "/login";
 
-  // Reset submenu when clicking anywhere outside the card grid. The grid is now
-  // `.header-nav-cards` (we render it inside <NavigationFreestyle>); it used to be
-  // the AgoraDS 3 `.links` container, which the DS no longer renders for us.
   const handleHeaderClickCapture = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (!target.closest(".header-nav-cards")) {
+    if (!target.closest(".header-menu-link")) {
       setSubmenu(null);
     }
   }, []);
@@ -122,22 +118,34 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     const submenuTitles: Record<string, string> = Object.fromEntries(
       allSubmenus.map((s) => [s.id, s.label])
     );
-    const titleEl = document.querySelector(
-      ".agora-header .navigation-links-layout > .title"
-    ) as HTMLElement | null;
-    if (!titleEl) return;
-    if (submenu && submenuTitles[submenu]) {
-      if (!titleEl.dataset.originalTitle) {
-        titleEl.dataset.originalTitle = titleEl.textContent || "Recursos";
+    const titleEl = wrapperRef.current?.querySelector<HTMLElement>(
+      ".navigation-links-layout > .title"
+    );
+    if (titleEl) {
+      if (submenu && submenuTitles[submenu]) {
+        if (!titleEl.dataset.originalTitle) {
+          titleEl.dataset.originalTitle = titleEl.textContent || "Recursos";
+        }
+        titleEl.textContent = submenuTitles[submenu];
+      } else if (titleEl.dataset.originalTitle) {
+        titleEl.textContent = titleEl.dataset.originalTitle;
+        delete titleEl.dataset.originalTitle;
       }
-      titleEl.textContent = submenuTitles[submenu];
-    } else if (titleEl.dataset.originalTitle) {
-      titleEl.textContent = titleEl.dataset.originalTitle;
-      delete titleEl.dataset.originalTitle;
     }
+
+    const links = wrapperRef.current?.querySelectorAll<HTMLAnchorElement>(".header-menu-link");
+    const focusTarget = Array.from(links ?? []).find(
+      (link) =>
+        link.offsetWidth > 0 &&
+        (submenu
+          ? link.classList.contains("header-menu-back")
+          : submenuReturnFocusRef.current && link.dataset.submenu === submenuReturnFocusRef.current)
+    );
+    focusTarget?.focus();
+    submenuReturnFocusRef.current = null;
   }, [submenu, allSubmenus]);
 
-  const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleLinkClick = (href: string) => {
     // Close all menus/panels via design system API
     if (headerRef.current?.closeAll) {
       headerRef.current.closeAll();
@@ -149,68 +157,58 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
     }
   };
 
-  // Renders one HeaderCard as a direct grid item of `.header-nav-cards`. Cards with
-  // `opensSubmenu` get the button wrapper that switches the active submenu instead
-  // of navigating. The `data-group` attribute is what the submenu CSS keys off.
-  //
-  // Deliberately NOT wrapped in <NavigationLink>: in AgoraDS 4 that component's
-  // props are AnchorProps and it renders an <a>, so the card — which carries its
-  // own anchor — would end up nested inside one. See <NavigationFreestyle> below.
-  const renderCard = (card: HeaderNavCard, dataGroup: string) => {
-    const cardEl = (
-      <HeaderCard
-        iconDefault={card.iconDefault}
-        iconHover={card.iconHover}
-        title={card.title}
-        description={card.description}
-        href={card.href}
-        onLinkClick={handleLinkClick}
-      />
-    );
-    return card.opensSubmenu ? (
-      <div
-        key={card.id}
-        data-group={dataGroup}
-        role="button"
-        tabIndex={0}
-        onClickCapture={(e) => {
-          e.preventDefault();
-          setSubmenu(card.opensSubmenu!);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setSubmenu(card.opensSubmenu!);
-          }
-        }}
-        className="cursor-pointer"
-      >
-        {cardEl}
-      </div>
-    ) : (
-      <div key={card.id} data-group={dataGroup}>
-        {cardEl}
-      </div>
-    );
+  const handleMenuButtonKeyDown = (e: KeyboardEvent<HTMLAnchorElement>) => {
+    if (e.key === " ") {
+      e.preventDefault();
+      e.currentTarget.click();
+    }
   };
 
-  // "Voltar" button that closes the active submenu.
+  const renderMenuLink = (card: HeaderNavCard) => (
+    <NavigationLink
+      key={card.id}
+      className="header-menu-link"
+      fullWidth
+      hasIcon
+      leadingIcon={card.iconDefault}
+      leadingIconHover={card.iconHover}
+      trailingIcon="agora-line-arrow-right-circle"
+      trailingIconHover="agora-solid-arrow-right-circle"
+      href={card.opensSubmenu ? "#" : localizeHref(card.href)}
+      role={card.opensSubmenu ? "button" : undefined}
+      data-submenu={card.opensSubmenu ?? undefined}
+      onKeyDown={card.opensSubmenu ? handleMenuButtonKeyDown : undefined}
+      onClick={(e) => {
+        e.preventDefault();
+        if (card.opensSubmenu) {
+          setSubmenu(card.opensSubmenu);
+        } else {
+          handleLinkClick(card.href);
+        }
+      }}
+    >
+      {card.title}
+    </NavigationLink>
+  );
+
   const renderBackButton = (submenuId: string) => (
-    <div key={`back-${submenuId}`} data-group={`submenu-${submenuId}`} data-is-back="true">
-      <Button
-        appearance="link"
-        variant="neutral"
-        hasIcon
-        leadingIcon="agora-line-arrow-left-anchor"
-        leadingIconHover="agora-solid-arrow-left-anchor"
-        onClick={(e) => {
-          e.stopPropagation();
-          setSubmenu(null);
-        }}
-      >
-        {t("header.back")}
-      </Button>
-    </div>
+    <NavigationLink
+      key={`back-${submenuId}`}
+      className="header-menu-link header-menu-back"
+      href="#"
+      role="button"
+      hasIcon
+      leadingIcon="agora-line-arrow-left-anchor"
+      leadingIconHover="agora-solid-arrow-left-anchor"
+      onKeyDown={handleMenuButtonKeyDown}
+      onClick={(e) => {
+        e.preventDefault();
+        submenuReturnFocusRef.current = submenuId;
+        setSubmenu(null);
+      }}
+    >
+      {t("header.back")}
+    </NavigationLink>
   );
 
   return (
@@ -239,10 +237,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
           </Brand>
 
           <GeneralBar aria-label={t("header.generalNavigation")}>
-            <Languages
-              aria-label={t("header.selectLanguage")}
-              onChange={handleLanguageChange}
-            >
+            <Languages aria-label={t("header.selectLanguage")} onChange={handleLanguageChange}>
               {languages.map((lang) => (
                 <Language
                   key={lang.value}
@@ -317,7 +312,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   {user.first_name} {user.last_name}
                   <Icon
                     name="agora-line-x"
-                    className="absolute right-16 top-1/2 size-24 -translate-y-1/2 fill-white"
+                    className="absolute top-1/2 right-16 size-24 -translate-y-1/2 fill-white"
                     aria-hidden
                   />
                 </AuthenticatedHeader>
@@ -390,9 +385,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             modalCloseLabel={t("header.close")}
           >
             <NavigationSection>
-              <NavigationArea
-                className="header-institutional absolute hover:cursor-text hover:no-underline [&.navigation-area.selected]:border-t-0! [&.navigation-area.selected]:bg-transparent! left-0! top-[-68px]!"
-              >
+              <NavigationArea className="header-institutional absolute top-[-68px]! left-0! hover:cursor-text hover:no-underline [&.navigation-area.selected]:border-t-0! [&.navigation-area.selected]:bg-transparent!">
                 {data.institutional}
               </NavigationArea>
               {[
@@ -404,7 +397,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                       href={localizeHref(link.href)}
                       onClick={(e) => {
                         e.preventDefault();
-                        handleLinkClick(e, link.href);
+                        handleLinkClick(link.href);
                       }}
                     >
                       {link.label}
@@ -412,30 +405,22 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   )),
                 ...dropdowns
                   .filter((d) => isEnabled(d.root, !!user))
-                  .map((d) => (
-                    <NavigationRoot key={d.root.id} label={d.root.label}>
-                      <NavigationFreestyle>
-                        <div className="header-nav-cards">
-                          {d.root.cards
-                            .filter((card) => isEnabled(card, !!user))
-                            .flatMap((card) => {
-                              const mainEl = renderCard(card, "main");
-                              const submenu = card.opensSubmenu
-                                ? d.submenus.find((s) => s.id === card.opensSubmenu)
-                                : undefined;
-                              if (!submenu) return [mainEl];
-                              return [
-                                mainEl,
-                                renderBackButton(submenu.id),
-                                ...submenu.cards
-                                  .filter((c) => isEnabled(c, !!user))
-                                  .map((c) => renderCard(c, `submenu-${submenu.id}`)),
-                              ];
-                            })}
-                        </div>
-                      </NavigationFreestyle>
-                    </NavigationRoot>
-                  )),
+                  .map((d) => {
+                    const activeSubmenu = d.submenus.find((item) => item.id === submenu);
+                    const cards = activeSubmenu?.cards ?? d.root.cards;
+                    return (
+                      <NavigationRoot
+                        key={d.root.id}
+                        label={d.root.label}
+                        linksAriaLabel={activeSubmenu?.label ?? d.root.label}
+                      >
+                        {[
+                          ...(activeSubmenu ? [renderBackButton(activeSubmenu.id)] : []),
+                          ...cards.filter((card) => isEnabled(card, !!user)).map(renderMenuLink),
+                        ]}
+                      </NavigationRoot>
+                    );
+                  }),
               ]}
             </NavigationSection>
           </NavigationBar>
