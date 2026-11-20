@@ -1293,6 +1293,11 @@ div.agora-dialog {
   display: block !important;
 }
 
+/* Glossary: tighter letter grid so A–Z fits the 3-column sidebar */
+#glossary-letters-navbar .glossary-container {
+  gap: 8px 32px !important;
+}
+
 /* ==========================================================================
    [07] ADMIN LAYOUT
    ========================================================================== */
