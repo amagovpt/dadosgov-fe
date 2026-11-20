@@ -1338,7 +1338,7 @@ div.agora-dialog {
 
 .datastory-page .ranged-number-filter .feedback-right .agora-input-text-wrapper div.feedback {
   flex-direction: row-reverse;
-
+}
 
 /* Glossary: tighter letter grid so A–Z fits the 3-column sidebar */
 #glossary-letters-navbar .glossary-container {
