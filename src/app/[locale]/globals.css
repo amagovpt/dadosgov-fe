@@ -291,6 +291,10 @@ body {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
+.navigation-links-layout .header-menu-link:not(.header-menu-back) {
+  padding: 0px 8px 0px 32px;
+}
+
 .agora-header .navigation-links-layout > .title {
   display: none;
 }
