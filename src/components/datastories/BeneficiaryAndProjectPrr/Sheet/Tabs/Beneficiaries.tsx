@@ -1,6 +1,6 @@
 "use client";
 
-import { LinkIcon } from "@/components/Primitives/LinkIcon";
+import { BenProjSheet } from "@/components/datastories/BeneficiaryAndProject/Sheet";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { LoadMoreWrapper } from "@/components/Shared/Wrappers/LoadMoreWrapper";
 import {
@@ -33,7 +33,7 @@ export default function BenProjSheetTabBeneficiariesPRR({
   beneficiaries,
   beneficiaryData,
 }: IBenProjSheetTabBeneficiariesPRR) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const cards = beneficiaries as Card[];
   const groups = [
@@ -75,9 +75,10 @@ export default function BenProjSheetTabBeneficiariesPRR({
         : t("sheetBenProj.fields.valor_financiamento");
 
     return (
-      <div
+      <BenProjSheet.LinkCard
         key={`prr-beneficiaries-card-${groupType}-${index}`}
-        className="relative flex flex-col gap-16 rounded-4 bg-white p-32 pr-72"
+        href={`/${i18n.language}/datastories/prr/beneficiarios-do-prr/${encodeURIComponent(item.nif_entidade)}`}
+        className="gap-16 p-32 pr-72"
       >
         <div className="flex flex-col gap-8">
           <Typograph tag="h4" className="text-l-bold text-neutral-900">
@@ -89,18 +90,7 @@ export default function BenProjSheetTabBeneficiariesPRR({
             </Typograph>
           )}
         </div>
-        <div className="absolute top-1/2 right-24 -translate-y-1/2">
-          <LinkIcon
-            title=""
-            href="#"
-            className="p-0! leading-none!"
-            icon={{
-              name: "agora-line-arrow-right-circle",
-              hoverName: "agora-solid-arrow-right-circle",
-            }}
-          />
-        </div>
-      </div>
+      </BenProjSheet.LinkCard>
     );
   };
 

@@ -5,10 +5,9 @@ import { formatByThree } from "@/utils/formatByThree";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { type INoResults, ResultCard, ResultsLayout } from "./ResultsShared";
+import { type INoResults, ResultCard, ResultCardText, ResultsLayout } from "./ResultsShared";
 
 export type { INoResults } from "./ResultsShared";
-
 
 const ROLE_VALUE_KEYS = {
   financed: {
@@ -49,54 +48,70 @@ export default function ResultsPRR({ noResults }: { noResults?: INoResults }) {
         const title = String(item.entityName ?? "");
         const projectLabel =
           item.projectsAmount === 1 ? t("searchBenProj.project") : t("searchBenProj.projects");
-        let description = [
-          "<p>",
-          `<strong>${t("nif")}</strong> ${formatByThree(String(item.entityNif ?? ""))}`,
-          `<br>${String(item.projectsAmount ?? 0)} ${projectLabel}`,
-        ].join("");
-
         const normalizedRole = String(item.entityRole ?? "")
           .normalize("NFD")
           .replace(/[̀-ͯ]/g, "")
           .toLowerCase();
         const isPartner = normalizedRole.includes("partner") || normalizedRole.includes("parceir");
 
+        // one entry per role with an amount; an empty list means the value row is hidden
+        let values: string[] = [];
         if (!isPartner && !showOnlyPartners) {
-          const values: string[] = [];
-          const intermediateValue = Number(item[roleKeys.intermediateBeneficiaries] ?? 0);
-          const beneficiaryValue = Number(item[roleKeys.beneficiaries] ?? 0);
-          const supplierValue = Number(item[roleKeys.suppliers] ?? 0);
+          const roleValues = [
+            {
+              label: t("searchBenProj.roles.intermediateBeneficiary"),
+              value: Number(item[roleKeys.intermediateBeneficiaries] ?? 0),
+            },
+            {
+              label: t("searchBenProj.roles.beneficiary"),
+              value: Number(item[roleKeys.beneficiaries] ?? 0),
+            },
+            {
+              label: t("searchBenProj.roles.supplier"),
+              value: Number(item[roleKeys.suppliers] ?? 0),
+            },
+            {
+              label: t("searchBenProj.roles.partner"),
+              value: Number(item[roleKeys.partners] ?? 0),
+            },
+          ];
+          values = roleValues
+            .filter(({ value }) => value > 0)
+            .map(({ label, value }) => `${label} ${formatCurrency(value, t)}`);
 
-          if (intermediateValue > 0) {
-            values.push(
-              `${t("searchBenProj.roles.intermediateBeneficiary")} ${formatCurrency(intermediateValue, t)}`
-            );
-          }
-          if (beneficiaryValue > 0) {
-            values.push(
-              `${t("searchBenProj.roles.beneficiary")} ${formatCurrency(beneficiaryValue, t)}`
-            );
-          }
-          if (supplierValue > 0) {
-            values.push(`${t("searchBenProj.roles.supplier")} ${formatCurrency(supplierValue, t)}`);
-          }
-
-          if (values.length > 0) {
-            description += `<br><br><strong>${valueLabel}</strong>   ${values.join("   ")}`;
-          } else if (Number(item[roleKeys.partners] ?? 0) === 0) {
-            description += `<br><br><strong>${valueLabel}</strong>   ${formatCurrency(Number(item[valueKey] ?? 0), t)}`;
+          // no per-role breakdown: fall back to the entity total, unless the amount is a partner
+          if (values.length === 0 && Number(item[roleKeys.partners] ?? 0) === 0) {
+            values = [formatCurrency(Number(item[valueKey] ?? 0), t)];
           }
         }
-
-        description += "</p>";
 
         return (
           <ResultCard
             key={`beneficiary-${String(item.entityNif ?? "")}-${index}`}
             title={title}
-            description={description}
             href={`${pathname}/${encodeURIComponent(String(item.entityNif ?? ""))}`}
-            isLast={index === data.length - 1}
+            description={
+              <>
+                <div className="flex flex-col">
+                  <ResultCardText className="first-letter:uppercase">
+                    <strong>{t("nif")}</strong> {formatByThree(String(item.entityNif ?? ""))}
+                  </ResultCardText>
+                  <ResultCardText>
+                    {String(item.projectsAmount ?? 0)} {projectLabel}
+                  </ResultCardText>
+                </div>
+                {values.length > 0 && (
+                  <div className="flex flex-row flex-wrap gap-x-16 gap-y-0">
+                    <ResultCardText className="text-m-bold first-letter:uppercase">
+                      {valueLabel}
+                    </ResultCardText>
+                    {values.map((value) => (
+                      <ResultCardText key={value}>{value}</ResultCardText>
+                    ))}
+                  </div>
+                )}
+              </>
+            }
           />
         );
       })}
