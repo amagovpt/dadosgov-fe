@@ -270,54 +270,6 @@ body {
 
 /* 3.1 Main Header */
 
-.agora-header .navigation-bar {
-  max-width: 1216px;
-  margin-inline: auto;
-  padding-inline: 32px;
-}
-
-@media (min-width: 768px) {
-  .agora-header .navigation-bar {
-    padding-inline: 64px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .agora-header .navigation-bar {
-    padding-inline: 0;
-  }
-}
-
-.agora-header .navigation-links-layout > .title,
-.agora-header .navigation-links-layout .freestyle,
-.agora-header .navigation-links-layout .links-container {
-  width: 100%;
-  max-width: 1216px;
-  margin-inline: auto;
-  padding-inline: 32px;
-}
-
-@media (min-width: 768px) {
-  .agora-header .navigation-links-layout > .title,
-  .agora-header .navigation-links-layout .freestyle,
-  .agora-header .navigation-links-layout .links-container {
-    padding-inline: 64px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .agora-header .navigation-links-layout > .title,
-  .agora-header .navigation-links-layout .freestyle,
-  .agora-header .navigation-links-layout .links-container {
-    padding-inline: 0;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1279px) {
-  .agora-header .general-bar .panels-menu ul {
-    gap: 16px;
-  }
-}
 
 .agora-header .logo {
   width: 254px;
@@ -342,10 +294,6 @@ body {
   .header-nav-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-}
-
-.search-panel-menu .panel-menu-content-children {
-  overflow: visible !important;
 }
 
 .search-panel-menu ul[role="listbox"] {
@@ -425,11 +373,6 @@ body {
   line-height: 28px;
 }
 
-.agora-header .card-general .description {
-  font-size: 14px;
-  line-height: 24px;
-}
-
 .agora-header .navigation-links-layout .card-general .p-16 {
   padding: 0;
   padding-left: 16px;
@@ -507,10 +450,8 @@ header[data-submenu="usar-dados"] .header-nav-cards > [data-group="submenu-usar-
   display: block;
 }
 
-/* The "Voltar" row, in the desktop dropdown: lifted out of the grid flow and parked in
-   the 80px of padding reserved at the top of the panel. The offset parent is
-   `.navigation-links-layout`, which AgoraDS 4 renders `position: absolute` — see the note
-   above about not setting `position` on it ourselves. */
+/* Keep "Voltar" in the panel's reserved top padding. Agora's relative
+   `.navigation-bar-portal` is its containing block. */
 .navigation-links-layout .header-nav-cards > [data-is-back] {
   grid-column: 1 / -1 !important;
   position: absolute;
@@ -580,37 +521,10 @@ header[data-auth-page][data-no-user]
   fill: var(--color-primary-600);
 }
 
-@media (max-width: 767px) {
-  header.sticky .panels-menu .search-panel-menu .children-wrapper,
-  header.sticky .panels-menu .unauthenticated-panel-menu .children-wrapper {
-    display: none;
-  }
-}
-
 /* The DS jumps straight from one column to four at 768px. */
 @media (min-width: 768px) and (max-width: 1279px) {
   .ecosystem-panel-menu-content .ecosystem-panel-anchor-container {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.ecosystem-panel-menu-content {
-  max-width: 1216px;
-  margin-inline: auto;
-  padding-inline: 32px;
-}
-
-@media (min-width: 768px) {
-  .ecosystem-panel-menu-content {
-    padding-inline: 64px;
-  }
-}
-
-/* Past 1280px the 1216px box is narrower than the screen, so the gutter comes from
-   the centring — this is what the DS's own `container` utility does. */
-@media (min-width: 1280px) {
-  .ecosystem-panel-menu-content {
-    padding-inline: 0;
   }
 }
 

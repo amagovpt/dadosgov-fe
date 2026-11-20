@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -80,32 +79,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const initials = user
     ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase()
     : "";
-
-  const [generalBarLabelPortalNode, setGeneralBarLabelPortalNode] =
-    useState<HTMLSpanElement | null>(null);
-
-  useLayoutEffect(() => {
-    const generalBar = document.querySelector("header.sticky .general-bar");
-    if (!generalBar) return;
-
-    let container = generalBar.querySelector(".general-bar-label-menu") as HTMLSpanElement | null;
-    if (!container) {
-      container = document.createElement("span");
-      container.className = "general-bar-label-menu";
-      container.style.display = "flex";
-      container.style.alignItems = "center";
-    }
-    generalBar.appendChild(container);
-
-    queueMicrotask(() => {
-      setGeneralBarLabelPortalNode(container);
-    });
-
-    return () => {
-      generalBar.querySelector(".general-bar-label-menu")?.remove();
-      setGeneralBarLabelPortalNode(null);
-    };
-  }, []);
 
   const [submenu, setSubmenu] = useState<string | null>(null);
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -475,17 +448,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
           />
         )}
       </header>
-      {generalBarLabelPortalNode &&
-        createPortal(
-          // Shown only from xl: below it the general bar has no room to spare, and this
-          // is the one item on the row without a min-width, so it absorbs the squeeze by
-          // wrapping. `text-m-regular` is the DS token — `text-sm`/`font-regular` are not
-          // in the DS theme and emitted nothing (same markup as the admin header).
-          <span className="whitespace-nowrap text-m-regular hidden text-primary-900 xl:inline">
-            {t("generalBarLabel")}
-          </span>,
-          generalBarLabelPortalNode
-        )}
     </>
   );
 };
