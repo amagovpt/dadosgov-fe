@@ -17,17 +17,18 @@ export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: b
   isAuthenticated: boolean
 ): boolean => item.enabled !== false && (!item.requiresAuth || isAuthenticated);
 
-
 export const languages: LanguageOption[] = [
   {
     value: "pt",
     labelKey: "header.languages.portuguese",
-    abbr: "PT"
+    abbr: "PT",
+    icon: "/Icons/languages/pt.svg",
   },
   {
     value: "en",
     labelKey: "header.languages.english",
     abbr: "EN",
+    icon: "/Icons/languages/en.svg",
   },
 ];
 
