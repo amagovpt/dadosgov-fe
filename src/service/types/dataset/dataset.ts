@@ -7,7 +7,7 @@ export interface Resource {
   description?: string;
   format: string;
   url: string;
-  latest?: string;
+  latest: string;
   filetype?: string;
   type?: string;
   mime?: string;
