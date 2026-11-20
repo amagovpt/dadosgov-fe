@@ -271,7 +271,8 @@
     "guias-do-utilizador": "User guides",
     "login": "Authentication",
     "reset-password": "Reset password",
-    "migrate-account": "Migrate account"
+    "migrate-account": "Migrate account",
+    "glossario": "Glossary"
   },
   "close": "Close",
   "cancel": "Cancel",
@@ -609,5 +610,17 @@
       "supportValues": "Grants",
       "loanValues": "Loans"
     }
+  },
+  "glossary": {
+    "title": "Glossary",
+    "subtitle": "Explanation of the technical terms used on the portal.",
+    "searchLabel": "Search word",
+    "searchPlaceholder": "Enter the word you are looking for in the glossary",
+    "searchActionAltText": "Search the glossary",
+    "lettersNavigation": "Glossary letter navigation",
+    "linkForLetter": "Go to letter {{letter}}",
+    "foundResults_one": "{{count}} result",
+    "foundResults_other": "{{count}} results",
+    "noResults": "No terms found."
   }
 }
