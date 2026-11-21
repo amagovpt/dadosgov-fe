@@ -1,3 +1,5 @@
+"use client";
+
 import { RelatedSection } from "@/service/types/datastories/datastory";
 import Section from "../../Section";
 import { InfoBlock } from "../../InfoBlock";
