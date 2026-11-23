@@ -99,7 +99,7 @@ export default function DatasetsEditResourceEditPopup({
         url: resourceUrl.trim() || undefined,
         format: resourceFormat.trim() || undefined,
         mime: mime.trim() || undefined,
-        filesize: filesize ? Number(filesize) : undefined,
+        filesize: filesize ? Number(filesize) : resource.filetype === "remote" ? null : undefined,
         type: resourceTypeRef.current,
       });
       hide();

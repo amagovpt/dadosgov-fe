@@ -25,6 +25,7 @@ interface DatasetEditPayloadValues {
   keywords: string;
   license: string;
   frequency: string;
+  contactPointIds?: string[];
   temporalStart: string;
   temporalEnd: string;
   spatialGeom?: object | null;
@@ -80,6 +81,7 @@ export function buildDatasetEditPayload(
     tags,
     license: values.license || undefined,
     frequency: values.frequency || undefined,
+    ...(values.contactPointIds !== undefined ? { contact_points: values.contactPointIds } : {}),
     temporal_coverage: values.temporalStart
       ? {
           start: toPortugueseDateIso(values.temporalStart),

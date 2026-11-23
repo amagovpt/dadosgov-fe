@@ -101,7 +101,7 @@ export function ResourceItem({
     return (
       <button
         type="button"
-        className="text-left break-words text-primary-600 underline hover:text-primary-700"
+        className="text-left text-primary-600 underline hover:text-primary-700"
         onClick={handleEdit}
       >
         {displayName}

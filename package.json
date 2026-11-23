@@ -1,6 +1,6 @@
 {
   "name": "dados-gov",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,7 +19,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "@ama-pt/agora-design-system": "^4.0.1",
+    "@ama-pt/agora-design-system": "^4.0.4",
     "@apollo/client": "^4.1.7",
     "@tailwindcss/postcss": "^4.3.3",
     "@tiptap/extension-code-block": "^3.31.3",
@@ -44,8 +44,8 @@
     "graphql": "^16.13.2",
     "i18next": "26.3.1",
     "i18next-resources-to-backend": "1.2.1",
-    "lucide-react": "^1.66.0",
-    "next": "^16.3",
+    "lucide-react": "^1.78.0",
+    "next": "^16.4.6",
     "next-i18n-router": "5.5.8",
     "react": "19.2.3",
     "react-chartjs-2": "5.3.0",

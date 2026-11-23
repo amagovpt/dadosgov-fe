@@ -19,7 +19,7 @@ import { guardFiles } from "@/lib/security/uploadGuard";
 import { validateFileExtensions } from "@/lib/files/validateFileExtensions";
 import type { ResourceType } from "@/service/types/catalog";
 import type { Resource } from "@/service/types/dataset";
-import { formatFileSize, getFileExtension, getMimeTypeForExtension } from "./utils";
+import { formatFileSize, getFileExtension, getMimeTypeForExtension, parseFileSize } from "./utils";
 import type { PendingResourceMeta } from "./types";
 
 export interface ResourceEditPendingPopupContentProps {
@@ -105,7 +105,9 @@ function PendingResourceForm({
   const resourceTypeRef = useRef(defaultType);
   const [description, setDescription] = useState(initialMeta.description || "");
   const [url, setUrl] = useState(isUrl ? name : "");
-  const [filesize, setFilesize] = useState(initialMeta.filesize ?? "");
+  const initialFilesize =
+    initialMeta.filesize == null ? "" : formatFileSize(Number(initialMeta.filesize), i18n.language);
+  const [filesize, setFilesize] = useState(initialFilesize);
   const [format, setFormat] = useState(initialMeta.format || fileExt.slice(1).toLowerCase());
   const defaultMime =
     initialMeta.mime || (isUrl ? getMimeTypeForExtension(fileExt) : file?.type) || "";
@@ -162,6 +164,11 @@ function PendingResourceForm({
 
   async function save() {
     if (savingRef.current || checkingFile) return;
+    // Keep the exact byte count when a rounded display value has not been edited.
+    const filesizeBytes =
+      filesize === initialFilesize && initialMeta.filesize != null
+        ? Number(initialMeta.filesize)
+        : parseFileSize(filesize);
     const nextErrors: Record<string, string> = {};
     const required = td("form.fieldRequired");
     if (!title.trim()) nextErrors.title = required;
@@ -173,11 +180,7 @@ function PendingResourceForm({
       } catch {
         nextErrors.url = t("fileUpload.url.invalid");
       }
-      if (
-        filesize.trim() &&
-        (!/^\d+$/.test(filesize.trim()) || !Number.isSafeInteger(Number(filesize)))
-      )
-        nextErrors.size = label("invalidSize");
+      if (filesizeBytes === null) nextErrors.size = label("invalidSize");
     }
     setErrors(nextErrors);
     setSaveError(null);
@@ -196,7 +199,9 @@ function PendingResourceForm({
         : fileFormat.toLowerCase() || undefined,
       mime: isUrl ? mimeRef.current.trim() || undefined : fileMime || undefined,
       filesize: isUrl
-        ? filesize.trim() || undefined
+        ? filesizeBytes == null
+          ? undefined
+          : String(filesizeBytes)
         : fileSize === undefined
           ? undefined
           : String(fileSize),
@@ -377,7 +382,8 @@ function PendingResourceForm({
                 <InputText
                   id={field("size")}
                   label={label("size")}
-                  inputMode="numeric"
+                  placeholder={label("sizePlaceholder")}
+                  required={false}
                   value={filesize}
                   hasError={!!errors.size}
                   hasFeedback={!!errors.size}

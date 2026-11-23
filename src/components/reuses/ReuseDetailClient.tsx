@@ -2,7 +2,8 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useDiscussionTab } from "@/hooks/useDiscussionDeepLink";
 import {
   Button,
   Icon,
@@ -32,7 +33,7 @@ import { localizeReuseTypeId } from "@/lib/reuse-labels";
 import { normalizeRemoteDatasets } from "@/lib/reuse-remote-datasets";
 import TextLink from "@/components/Primitives/TextLink";
 import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
-import { formatMetricValue } from "@/utils/formatNumber";
+import { MetricItem } from "@/components/Shared/MetricItem";
 import { useTranslation } from "react-i18next";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
@@ -51,8 +52,7 @@ export default function ReuseDetailClient({
   const { i18n } = useTranslation("common");
   const { t: tr } = useTranslation("reuses");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
+  const { isDiscussionTab, tabsKey } = useDiscussionTab();
   const { user } = useAuth();
 
   const canEdit = reuse.permissions?.edit ?? false;
@@ -215,22 +215,16 @@ export default function ReuseDetailClient({
                       <span className="font-semibold text-neutral-900">
                         {localizeReuseTypeId(reuse.type) || tr("detail.defaultType")}
                       </span>
-                      <span className="flex items-center gap-8">
-                        <Icon
-                          name="agora-line-eye"
-                          className="h-20 w-20 fill-[var(--color-neutral-900)]"
-                        />
-                        <span className="text-neutral-900">
-                          {formatMetricValue(reuse.metrics?.views, 0)}
-                        </span>
-                      </span>
-                      <span className="flex items-center gap-8">
-                        <Icon
-                          name="agora-line-layers-menu"
-                          className="h-20 w-20 fill-[var(--color-neutral-900)]"
-                        />
-                        <span className="text-neutral-900">{datasetRefs.length}</span>
-                      </span>
+                      <MetricItem
+                        icon="agora-line-eye"
+                        value={reuse.metrics?.views}
+                        label={tr("card.views")}
+                      />
+                      <MetricItem
+                        icon="agora-line-layers-menu"
+                        value={datasetRefs.length}
+                        label={tr("card.datasets")}
+                      />
                     </span>
                   </CardDescription>
                 </BodySectionContainer>
@@ -242,7 +236,7 @@ export default function ReuseDetailClient({
 
       {/* Tabs Section */}
       <section className="w-full">
-        <Tabs>
+        <Tabs key={tabsKey}>
           <Tab>
             <TabHeader>{tr("detail.description")}</TabHeader>
             <TabBodyWrapper bleedClassName="bg-neutral-50">
@@ -303,7 +297,7 @@ export default function ReuseDetailClient({
               </div>
             </TabBodyWrapper>
           </Tab>
-          <Tab active={tabParam === "discussions" || undefined}>
+          <Tab active={isDiscussionTab || undefined}>
             <TabHeader>{tr("detail.discussions", { count: discussionCount })}</TabHeader>
             <TabBodyWrapper bleedClassName="bg-neutral-50">
               <div>

@@ -2,17 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Reply } from "lucide-react";
 import { useSearchParams, useRouter, useParams, usePathname } from "next/navigation";
-import {
-  Button,
-  StatusCard,
-  Tabs,
-  Tab,
-  TabHeader,
-  TabBody,
-  usePopupContext,
-} from "@ama-pt/agora-design-system";
+import { Button, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import { DatasetContentProvider } from "../DatasetContentProvider";
 import { adminProfileBasePath, useActiveProfile } from "@/context/ActiveProfileContext";
 import { Dropdown } from "@/components/Primitives/Dropdown";
@@ -39,7 +33,7 @@ import type {
   Activity,
   ResourceType,
 } from "@/service/types/catalog";
-import type { Dataset } from "@/service/types/dataset";
+import type { ContactPoint, Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
 import DatasetLifecycleConfirmationDialog from "@/components/admin/datasets/edit-dialogs/DatasetLifecycleConfirmationDialog";
 import DatasetsEditTransferPopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditTransferPopup";
@@ -55,6 +49,8 @@ import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { useDatasetLifecycleActions } from "@/components/admin/datasets/hooks/useDatasetLifecycleActions";
 import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/useDatasetMetadataActions";
+import { useDatasetEditContactActions } from "@/components/admin/datasets/hooks/useDatasetEditContactActions";
+import { DatasetWizardContacts } from "@/components/admin/datasets/publication-wizard/DatasetWizardContacts";
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
@@ -106,7 +102,8 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
   const [confirmationAction, setConfirmationAction] = useState<"delete" | "archive" | null>(null);
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const isUploadingRef = useRef(false);
-  const tabsRef = useRef<HTMLDivElement>(null);
+  const sectionsRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState("metadata");
   const [apiError, setApiError] = useState<string | null>(null);
   const {
     message: apiSuccess,
@@ -135,6 +132,14 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
   const [loadedSpatialGranularity, setLoadedSpatialGranularity] = useState("");
   const [loadedSpatialZones, setLoadedSpatialZones] = useState<string[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
+  const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
+  const contactActions = useDatasetEditContactActions({
+    datasetId: dataset?.id ?? "",
+    producerId: dataset?.organization?.id ?? "",
+    setContacts: setOrgContactPoints,
+    setSelectedIds: setSelectedContactPointIds,
+  });
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(false);
   const [discussionsLoaded, setDiscussionsLoaded] = useState(false);
@@ -153,6 +158,8 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
           fetchResourceTypes(),
         ]);
         setDataset(ds);
+        setOrgContactPoints(ds.contact_points ?? []);
+        setSelectedContactPointIds(ds.contact_points?.map((contact) => contact.id) ?? []);
         setTitle(ds.title);
         setAcronym(ds.acronym || "");
         setLoadedTitle(ds.title);
@@ -360,6 +367,7 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
     featured,
     temporalStart,
     temporalEnd,
+    selectedContactPointIds,
     keywordsRef,
     selectedLicenseRef,
     selectedFrequencyRef,
@@ -377,7 +385,7 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
     focusAfterSave: () => {
       requestAnimationFrame(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
-        tabsRef.current?.focus({ preventScroll: true });
+        sectionsRef.current?.focus({ preventScroll: true });
       });
     },
   });
@@ -501,17 +509,18 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
             variant="primary"
             hasIcon
             appearance={dataset.private ? "solid" : "outline"}
-            leadingIcon={
-              dataset.private ? "agora-line-document" : "/Icons/move-to-draft.svg"
-            }
-            leadingIconHover={
-              dataset.private ? "agora-solid-document" : "/Icons/move-to-draft.svg"
-            }
+            leadingIcon={dataset.private ? "agora-line-calendar" : undefined}
+            leadingIconHover={dataset.private ? "agora-solid-calendar" : undefined}
             disabled={isSubmitting || publicationBlocked}
             aria-describedby={publicationBlocked ? "dataset-publication-requirements" : undefined}
             onClick={dataset.private ? handlePublishDataset : handleMoveToDraft}
           >
-            {t(dataset.private ? "review.publishAction" : "resourceEditing.moveToDraft")}
+            <span className="flex items-center gap-8">
+              {!dataset.private && (
+                <Reply className="fill-none!" aria-hidden />
+              )}
+              {t(dataset.private ? "review.publishAction" : "resourceEditing.moveToDraft")}
+            </span>
           </Button>
         ) : null
       }
@@ -608,151 +617,210 @@ function DatasetsEditContent({ pageContent }: DatasetsEditClientProps) {
         </Button>
       </div>
 
-      <div ref={tabsRef} tabIndex={-1} className="outline-none min-[1440px]:-mx-112">
-        <Tabs
-          fullWidth
-          currentType="primary"
-          className={[
-            "[&_.accordion-body>.children-wrapper]:min-w-0 [&_.tab-list.mobile_.accordion-body-block]:p-16!",
-            "[&_.tab-panel]:border-0! [&_:is(.tab-panel,.tab-list-item.active)]:bg-neutral-100!",
-          ].join(" ")}
-          onTabActivation={(index: number) => {
+      <div
+        ref={sectionsRef}
+        tabIndex={-1}
+        className="min-w-0 outline-none"
+        onKeyUp={(event) => {
+          // Agora prevents native keyboard activation for controlled toggles.
+          if (
+            (event.code === "Space" || event.code === "Enter") &&
+            event.target instanceof HTMLInputElement &&
+            event.target.closest("#dataset-edit-sections")
+          ) {
+            event.preventDefault();
+            event.target.click();
+          }
+        }}
+      >
+        <StatusFilterSelect
+          id="dataset-edit-sections"
+          value={activeSection}
+          wrapperClassName="overflow-visible py-0"
+          options={[
+            { value: "metadata", label: t("edit.tabs.metadata"), icon: "agora-line-document" },
+            { value: "resources", label: t("editPage.resourcesTab"), icon: "agora-line-folder" },
+            { value: "discussions", label: t("edit.tabs.discussions"), icon: "agora-line-chat" },
+            { value: "activity", label: t("editPage.activityTab"), icon: "agora-line-clock" },
+          ]}
+          onChange={(section) => {
+            setActiveSection(section);
             setApiError(null);
             setApiSuccess(null);
-            if (index === 2) loadDiscussions();
-            if (index === 3) loadActivities();
+            if (section === "discussions") loadDiscussions();
+            if (section === "activity") loadActivities();
           }}
-        >
-          <Tab>
-            <TabHeader>{t("edit.tabs.metadata")}</TabHeader>
-            <TabBody>
-              <DatasetsEditMetadataTab
-                feedback={feedback}
-                onCancel={() => router.push(listUrl)}
-                auxiliaryItems={pageContent.editAuxiliaryItems}
-                dataset={dataset}
-                isSubmitting={isSubmitting}
-                formErrors={formErrors}
-                loadedTitle={loadedTitle}
-                loadedAcronym={loadedAcronym}
-                description={description}
-                loadedKeywords={loadedKeywords}
-                selectedKeywords={selectedKeywords}
-                keywordOptions={keywordOptions}
-                loadedLicense={loadedLicense}
-                licenseOptions={licenseOptions}
-                loadedFrequency={loadedFrequency}
-                frequencyOptions={frequencyOptions}
-                temporalStart={temporalStart}
-                temporalEnd={temporalEnd}
-                loadedSpatialZones={loadedSpatialZones}
-                spatialCoverageValue={selectedSpatialZonesValue}
-                spatialCoverageOptions={spatialCoverageOptions}
-                selectedZoneObjects={selectedZoneObjects}
-                effectiveSpatialIds={effectiveSpatialIds}
-                loadedSpatialGranularity={loadedSpatialGranularity}
-                spatialGranularityOptions={spatialGranularityOptions}
-                keywordsRef={keywordsRef}
-                selectedLicenseRef={selectedLicenseRef}
-                selectedFrequencyRef={selectedFrequencyRef}
-                spatialCoverageRef={spatialCoverageRef}
-                spatialGranularityRef={spatialGranularityRef}
-                onTitleChange={handleTitleChange}
-                onAcronymChange={setAcronym}
-                onDescriptionChange={(html) => {
-                  setDescription(html);
-                  if (html.trim()) clearError("description");
-                }}
-                onKeywordSearch={(q) => {
-                  setKeywordSearch(q);
-                }}
-                onKeywordsChange={(value) => {
-                  setLoadedKeywords(value);
-                  registerSelectedKeywordValue(value);
-                }}
-                onRemoveKeyword={(keyword) => {
-                  const next = selectedKeywords
-                    .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
-                    .join(",");
-                  setLoadedKeywords(next);
-                  keywordsRef.current = next;
-                }}
-                onTemporalStartChange={setTemporalStart}
-                onTemporalEndChange={setTemporalEnd}
-                onSpatialCoverageChange={handleSpatialCoverageChange}
-                onSpatialSearch={(q) => {
-                  if (q.length < 2) {
+        />
+        <div className="pt-64">
+          <div
+            hidden={activeSection !== "metadata"}
+            role="region"
+            aria-label={t("edit.tabs.metadata")}
+          >
+            <DatasetsEditMetadataTab
+              feedback={feedback}
+              contacts={
+                dataset.organization && (
+                  <div className="flex min-w-0 flex-col gap-16" aria-busy={contactActions.isLoading}>
+                    {contactActions.isLoading && (
+                      <p role="status" className="text-m-regular text-primary-900">
+                        {t("contacts.loading")}
+                      </p>
+                    )}
+                    {contactActions.loadError && (
+                      <>
+                        <StatusCard variant="danger" showIcon description={t("contacts.loadError")} />
+                        <Button
+                          type="button"
+                          appearance="outline"
+                          disabled={isSubmitting || !canEdit}
+                          onClick={contactActions.retry}
+                        >
+                          {t("contacts.retry")}
+                        </Button>
+                      </>
+                    )}
+                    <DatasetWizardContacts
+                      producerId={dataset.organization.id}
+                      contacts={orgContactPoints}
+                      selectedIds={selectedContactPointIds}
+                      disabled={
+                        isSubmitting || contactActions.isLoading || !canEdit || !!dataset.deleted
+                      }
+                      onToggle={contactActions.toggleContact}
+                      onSaved={contactActions.handleContactSaved}
+                      onRemove={contactActions.handleRemoveContact}
+                    />
+                  </div>
+                )
+              }
+              onCancel={() => router.push(listUrl)}
+              auxiliaryItems={pageContent.editAuxiliaryItems}
+              dataset={dataset}
+              isSubmitting={isSubmitting}
+              formErrors={formErrors}
+              loadedTitle={loadedTitle}
+              loadedAcronym={loadedAcronym}
+              description={description}
+              loadedKeywords={loadedKeywords}
+              selectedKeywords={selectedKeywords}
+              keywordOptions={keywordOptions}
+              loadedLicense={loadedLicense}
+              licenseOptions={licenseOptions}
+              loadedFrequency={loadedFrequency}
+              frequencyOptions={frequencyOptions}
+              temporalStart={temporalStart}
+              temporalEnd={temporalEnd}
+              loadedSpatialZones={loadedSpatialZones}
+              spatialCoverageValue={selectedSpatialZonesValue}
+              spatialCoverageOptions={spatialCoverageOptions}
+              selectedZoneObjects={selectedZoneObjects}
+              effectiveSpatialIds={effectiveSpatialIds}
+              loadedSpatialGranularity={loadedSpatialGranularity}
+              spatialGranularityOptions={spatialGranularityOptions}
+              keywordsRef={keywordsRef}
+              selectedLicenseRef={selectedLicenseRef}
+              selectedFrequencyRef={selectedFrequencyRef}
+              spatialCoverageRef={spatialCoverageRef}
+              spatialGranularityRef={spatialGranularityRef}
+              onTitleChange={handleTitleChange}
+              onAcronymChange={setAcronym}
+              onDescriptionChange={(html) => {
+                setDescription(html);
+                if (html.trim()) clearError("description");
+              }}
+              onKeywordSearch={(q) => {
+                setKeywordSearch(q);
+              }}
+              onKeywordsChange={(value) => {
+                setLoadedKeywords(value);
+                registerSelectedKeywordValue(value);
+              }}
+              onRemoveKeyword={(keyword) => {
+                const next = selectedKeywords
+                  .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                  .join(",");
+                setLoadedKeywords(next);
+                keywordsRef.current = next;
+              }}
+              onTemporalStartChange={setTemporalStart}
+              onTemporalEndChange={setTemporalEnd}
+              onSpatialCoverageChange={handleSpatialCoverageChange}
+              onSpatialSearch={(q) => {
+                if (q.length < 2) {
+                  spatialZoneSearchRef.current = [];
+                  setSpatialZoneSearch([]);
+                  return;
+                }
+                suggestSpatialZones(q, 50)
+                  .then((results) => {
+                    spatialZoneSearchRef.current = results ?? [];
+                    setSpatialZoneSearch(results ?? []);
+                  })
+                  .catch(() => {
                     spatialZoneSearchRef.current = [];
                     setSpatialZoneSearch([]);
-                    return;
-                  }
-                  suggestSpatialZones(q, 50)
-                    .then((results) => {
-                      spatialZoneSearchRef.current = results ?? [];
-                      setSpatialZoneSearch(results ?? []);
-                    })
-                    .catch(() => {
-                      spatialZoneSearchRef.current = [];
-                      setSpatialZoneSearch([]);
-                    });
-                }}
-                onRemoveSpatialZone={(zoneId) => {
-                  const next = effectiveSpatialIds.filter((id) => id !== zoneId).join(",");
-                  setSelectedSpatialZonesValue(next);
-                  spatialCoverageRef.current = next;
-                  setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
-                }}
-                onSaveMetadata={handleSaveMetadata}
-              />
-            </TabBody>
-          </Tab>
+                  });
+              }}
+              onRemoveSpatialZone={(zoneId) => {
+                const next = effectiveSpatialIds.filter((id) => id !== zoneId).join(",");
+                setSelectedSpatialZonesValue(next);
+                spatialCoverageRef.current = next;
+                setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
+              }}
+              onSaveMetadata={handleSaveMetadata}
+            />
+          </div>
 
-          <Tab>
-            <TabHeader>{t("editPage.resourcesTab")}</TabHeader>
-            <TabBody>
-              {feedback}
-              <DatasetsEditResourcesTab
-                uploadFeedback={uploadFeedback}
-                onClearUploadFeedback={clearUploadFeedback}
-                dataset={dataset}
-                resourceTypes={resourceTypes}
-                allowedExtensions={allowedExtensions}
-                auxiliaryItems={pageContent.resourceAuxiliaryItems}
-                introduction={pageContent.resourceIntroduction}
-                isSubmitting={isSubmitting}
-                onFilesUpload={handleFilesUpload}
-                onUrlAdd={handleUrlAdd}
-                onResourceClick={handleResourceClick}
-                onResourceDelete={handleDeleteResource}
-              />
-            </TabBody>
-          </Tab>
+          <div
+            hidden={activeSection !== "resources"}
+            role="region"
+            aria-label={t("editPage.resourcesTab")}
+          >
+            {feedback}
+            <DatasetsEditResourcesTab
+              uploadFeedback={uploadFeedback}
+              onClearUploadFeedback={clearUploadFeedback}
+              dataset={dataset}
+              resourceTypes={resourceTypes}
+              allowedExtensions={allowedExtensions}
+              auxiliaryItems={pageContent.resourceAuxiliaryItems}
+              introduction={pageContent.resourceIntroduction}
+              isSubmitting={isSubmitting}
+              onFilesUpload={handleFilesUpload}
+              onUrlAdd={handleUrlAdd}
+              onResourceClick={handleResourceClick}
+              onResourceDelete={handleDeleteResource}
+            />
+          </div>
 
-          <Tab>
-            <TabHeader>{t("edit.tabs.discussions")}</TabHeader>
-            <TabBody>
-              {feedback}
-              <DatasetsEditDiscussionsTab
-                discussionsLoading={discussionsLoading}
-                discussionsLoaded={discussionsLoaded}
-                discussions={discussions}
-              />
-            </TabBody>
-          </Tab>
+          <div
+            hidden={activeSection !== "discussions"}
+            role="region"
+            aria-label={t("edit.tabs.discussions")}
+          >
+            {feedback}
+            <DatasetsEditDiscussionsTab
+              discussionsLoading={discussionsLoading}
+              discussionsLoaded={discussionsLoaded}
+              discussions={discussions}
+            />
+          </div>
 
-          <Tab>
-            <TabHeader>{t("editPage.activityTab")}</TabHeader>
-            <TabBody>
-              {feedback}
-              <DatasetsEditActivitiesTab
-                activitiesLoading={activitiesLoading}
-                activitiesLoaded={activitiesLoaded}
-                activities={activities}
-                translateActivityLabel={(label) => translateActivityLabel(label, t)}
-              />
-            </TabBody>
-          </Tab>
-        </Tabs>
+          <div
+            hidden={activeSection !== "activity"}
+            role="region"
+            aria-label={t("editPage.activityTab")}
+          >
+            {feedback}
+            <DatasetsEditActivitiesTab
+              activitiesLoading={activitiesLoading}
+              activitiesLoaded={activitiesLoaded}
+              activities={activities}
+              translateActivityLabel={(label) => translateActivityLabel(label, t)}
+            />
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );

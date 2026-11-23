@@ -32,6 +32,7 @@ interface IsolatedSelectProps {
   type?: "checkbox" | "text";
   hasError?: boolean;
   errorFeedbackText?: string;
+  helperText?: string;
   hideLabel?: boolean;
   hideSectionNames?: boolean;
   searchable?: boolean;
@@ -74,6 +75,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
   type,
   hasError,
   errorFeedbackText,
+  helperText,
   hideLabel,
   hideSectionNames,
   searchable,
@@ -142,6 +144,8 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       hasFeedback={hasError}
       feedbackState="danger"
       errorFeedbackText={errorFeedbackText}
+      hasHelperText={Boolean(helperText)}
+      helperText={helperText}
       required={required}
       hideSectionNames={hideSectionNames}
     >

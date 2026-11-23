@@ -16,6 +16,76 @@ interface DiscussionFilters {
   sort?: string;
 }
 
+interface SystemDiscussionFilters extends DiscussionFilters {
+  user?: string;
+  org?: string;
+}
+
+/** Global, paginated listing for the system administration view. */
+export async function fetchSystemDiscussions(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: SystemDiscussionFilters
+): Promise<APIResponse<Discussion>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+    sort: filters?.sort ?? "-created",
+  });
+  if (filters?.q) params.set("q", filters.q);
+  if (filters?.closed !== undefined) params.set("closed", String(filters.closed));
+  if (filters?.user) params.set("user", filters.user);
+  if (filters?.org) params.set("org", filters.org);
+
+  const response = await fetch(`${API_AUTH_URL}/discussions/?${params}`, {
+    cache: "no-store",
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error(`Failed to fetch system discussions: ${response.statusText}`);
+  return await response.json();
+}
+
+/** Lists discussions started by this user, not every discussion they replied to. */
+export async function fetchUserDiscussions(
+  userId: string,
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: DiscussionFilters
+): Promise<APIResponse<Discussion>> {
+  if (!userId) throw new Error("A user is required to fetch personal discussions");
+
+  const params = new URLSearchParams({
+    user: userId,
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  if (filters?.q) params.set("q", filters.q);
+  if (filters?.closed !== undefined) params.set("closed", String(filters.closed));
+  if (filters?.sort) params.set("sort", filters.sort);
+
+  const response = await fetch(`${API_AUTH_URL}/discussions/?${params}`, {
+    cache: "no-store",
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error(`Failed to fetch personal discussions: ${response.statusText}`);
+  return await response.json();
+}
+
+export async function fetchDiscussion(id: string): Promise<Discussion | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/discussions/${encodeURIComponent(id)}/`, {
+      cache: "no-store",
+    });
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error(`Failed to fetch discussion: ${response.statusText}`);
+    return await response.json();
+  } catch (error) {
+    rethrowControlFlow(error);
+    console.error("Error fetching discussion:", error);
+    return null;
+  }
+}
+
 export async function fetchOrgDiscussions(
   orgId: string,
   page: number = 1,

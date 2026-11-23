@@ -5,6 +5,7 @@ export type {
   DatasetPermissions,
   DatasetQuality,
   Dataset,
+  DatasetListItem,
   DatasetCreatePayload,
   DatasetUpdatePayload,
   DatasetRef,

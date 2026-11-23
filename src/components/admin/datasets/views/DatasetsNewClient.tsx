@@ -91,9 +91,6 @@ function DatasetsNewContent({ pageContent, orgId }: DatasetsNewClientProps) {
         onPreviousStep={() =>
           router.push(currentStep > 1 ? buildStepUrl(currentStep - 1) : listUrl)
         }
-        onDatasetCreated={(id) => {
-          router.push(buildStepUrl(currentStep + 1, id));
-        }}
         onComplete={() => router.push(listUrl)}
       />
     </AdminLayout>

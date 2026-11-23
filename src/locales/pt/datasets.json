@@ -47,6 +47,7 @@
     }
   },
   "detail": {
+    "published": "Publicado",
     "draft": "Rascunho",
     "archived": "Arquivado",
     "addFavorite": "Adicionar aos favoritos",
@@ -56,6 +57,9 @@
     "authorAlt": "Autor",
     "lastUpdate": "Última atualização:",
     "license": "Licença:",
+    "updatedOn": "Atualizado a {{date}}",
+    "transfers": "Transferências",
+    "contacts": "Atribuições e pontos de contacto",
     "contactForm": "Formulário de contacto",
     "views": "Visualizações",
     "downloads": "Downloads",
@@ -63,6 +67,8 @@
       "title": "Qualidade dos metadados",
       "expand": "Ver mais informação",
       "collapse": "Fechar informação",
+      "improvements": "Lista de melhorias",
+      "complete": "Todos os critérios de qualidade estão preenchidos.",
       "missing": "{{label}} dos dados não preenchidos"
     }
   },
@@ -232,6 +238,18 @@
     "other": "Outro"
   },
   "resources": {
+    "search": "Pesquisar",
+    "searchPlaceholder": "Pesquise o título do recurso adicionado",
+    "resultsList": "Lista de resultados",
+    "resultCount_one": "{{count}} resultado",
+    "resultCount_zero": "0 resultados",
+    "resultCount_other": "{{count}} resultados",
+    "loading": "A carregar ficheiros...",
+    "loadError": "Não foi possível carregar os ficheiros.",
+    "retry": "Tentar novamente",
+    "noResults": "Não foram encontrados ficheiros",
+    "noResultsHelp": "Experimente pesquisar por outro título.",
+    "noFiles": "Este conjunto de dados não tem ficheiros.",
     "mainFiles_one": "Ficheiro principal",
     "mainFiles_other": "Ficheiros principais",
     "documentation_one": "Documentação",
@@ -286,9 +304,25 @@
       "copyUrl": "Copiar URL"
     },
     "types": {
-      "main": "Ficheiros principais",
-      "file": "Ficheiros principais",
-      "documentation": "Documentação"
+      "main": "Ficheiro principal",
+      "main_one": "Ficheiro principal",
+      "main_other": "Ficheiros principais",
+      "file": "Ficheiro principal",
+      "documentation": "Documentação",
+      "documentation_one": "Documentação",
+      "documentation_other": "Documentações",
+      "api": "API",
+      "api_one": "API",
+      "api_other": "APIs",
+      "update": "Atualização",
+      "update_one": "Atualização",
+      "update_other": "Atualizações",
+      "code": "Repositório de código",
+      "code_one": "Repositório de código",
+      "code_other": "Repositórios de código",
+      "other": "Outro",
+      "other_one": "Outro",
+      "other_other": "Outros"
     },
     "extrasKeys": {
       "check_id": "verificação:id",

@@ -37,7 +37,29 @@ export function getMimeTypeForExtension(extension: string): string | undefined {
   return Object.hasOwn(MIME_TYPES_BY_EXTENSION, key) ? MIME_TYPES_BY_EXTENSION[key] : undefined;
 }
 
-export function formatFileSize(bytes: number): string {
-  const sizeKB = (bytes / 1024).toFixed(1);
-  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${sizeKB} KB`;
+export function formatFileSize(bytes: number, locale?: string): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const isMegabytes = bytes >= 1024 * 1024;
+  const size = bytes / (isMegabytes ? 1024 * 1024 : 1024);
+  const formatted = locale
+    ? size.toLocaleString(locale, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+        useGrouping: false,
+      })
+    : size.toFixed(1);
+  return `${formatted} ${isMegabytes ? "MB" : "KB"}`;
+}
+
+export function parseFileSize(value: string): number | null | undefined {
+  if (!value.trim()) return undefined;
+  const match = value.trim().match(/^(\d+(?:[.,]\d+)?)\s*(B|KB|MB|GB|TB)$/i);
+  if (!match) return null;
+  const amount = Number(match[1].replace(",", "."));
+  const unit = match[2].toUpperCase();
+  const exponent = ["B", "KB", "MB", "GB", "TB"].indexOf(unit);
+  const bytes = amount * 1024 ** exponent;
+  if (unit === "B" && !Number.isInteger(bytes)) return null;
+  const rounded = Math.round(bytes);
+  return Number.isSafeInteger(rounded) ? rounded : null;
 }

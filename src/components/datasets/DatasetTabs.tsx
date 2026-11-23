@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useDiscussionTab } from '@/hooks/useDiscussionDeepLink';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { Tabs, Tab, TabHeader, CardNoResults, Icon, StatusCard, Button } from '@ama-pt/agora-design-system';
@@ -9,7 +9,8 @@ import { TabBodyWrapper } from '@/components/Shared/Wrappers/TabBodyWrapper';
 import { ReuseCardLinks } from '@/components/Shared/ReuseCardLinks';
 import { DataserviceCardLinks } from '@/components/Shared/DataserviceCardLinks';
 import { CommunityResource } from "@/service/types/community-resource";
-import { Dataset } from "@/service/types/dataset";
+import type { DatasetDetail, ResourceSectionPage } from "@/service/types/dataset/detail";
+import { DatasetFiles } from "./DatasetFiles";
 import { Reuse } from "@/service/types/reuse";
 import { Dataservice } from "@/service/types/dataservice";
 import { fetchCommunityResourcesByDataset } from "@/service/api/community-resources";
@@ -20,13 +21,13 @@ import { DatasetInfo } from './DatasetInfo';
 import { DiscussionSection } from '@/components/discussions/DiscussionSection';
 
 interface DatasetTabsProps {
-    dataset: Dataset;
+    dataset: DatasetDetail;
+    resourceSections: ResourceSectionPage[];
 }
 
-export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
+export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset, resourceSections }) => {
     const { t: tds } = useTranslation('datasets');
-    const searchParams = useSearchParams();
-    const tabParam = searchParams.get('tab');
+    const { isDiscussionTab, tabsKey } = useDiscussionTab({ remountOnHydration: true });
     const [reuses, setReuses] = useState<Reuse[]>([]);
     const [reuseCount, setReuseCount] = useState(dataset.metrics.reuses || 0);
     const [dataservices, setDataservices] = useState<Dataservice[]>([]);
@@ -57,11 +58,11 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     }, [dataset.id]);
     return (
         <div className="w-full">
-            <Tabs>
+            <Tabs key={tabsKey}>
                 <Tab>
-                    <TabHeader>{tds('tabs.files', { count: dataset.resources.length })}</TabHeader>
+                    <TabHeader>{tds('tabs.files', { count: dataset.resources.total })}</TabHeader>
                     <TabBodyWrapper>
-                        <DatasetResourcesTable resources={dataset.resources} />
+                        <DatasetFiles datasetId={dataset.id} sections={resourceSections} />
                     </TabBodyWrapper>
                 </Tab>
                 <Tab>
@@ -120,7 +121,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                         </div>
                     </TabBodyWrapper>
                 </Tab>
-                <Tab active={tabParam === 'discussions' || undefined}>
+                <Tab active={isDiscussionTab || undefined}>
                     <TabHeader>
                         {tds('tabs.discussions', { count: discussionCount })}
                     </TabHeader>
@@ -185,7 +186,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                         </Button>
                                     </Link>
                                 </div>
-                                <DatasetResourcesTable resources={[]} communityResources={communityResources} />
+                                <DatasetResourcesTable communityResources={communityResources} />
                             </div>
                         )}
                     </TabBodyWrapper>

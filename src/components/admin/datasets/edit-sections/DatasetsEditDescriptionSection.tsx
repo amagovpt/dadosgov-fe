@@ -63,7 +63,7 @@ export default function DatasetsEditDescriptionSection({
     </span>
   );
   const help = (key: string) => (
-    <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, key)} background="white" />
+    <DatasetWizardHelp item={getDatasetAuxiliarItem(auxiliaryItems, key)} />
   );
   return (
     <section className="flex min-w-0 flex-col gap-32">

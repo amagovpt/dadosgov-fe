@@ -8,10 +8,8 @@ import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { buildApiSortParam, paginateItems } from "@/utils/admin-lists/listHelpers";
-import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
-import { fetchOrgDatasets } from "@/service/api/organizations";
-import { Dataset } from "@/service/types/dataset";
-import type { DatasetFilters } from "@/service/types/dataset";
+import { fetchAdminDatasetList } from "@/service/api/datasets";
+import type { DatasetFilters, DatasetListItem } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
@@ -65,7 +63,7 @@ export default function DatasetsClient({
         ? "systemEmptySubtitle"
         : "emptySubtitle";
 
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [datasets, setDatasets] = useState<DatasetListItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -102,23 +100,16 @@ export default function DatasetsClient({
 
     return {
       ...(scope === "personal" ? { owner: user?.id } : {}),
+      ...(scope === "organization" ? { organization: orgId } : {}),
       q: searchQuery.trim() || undefined,
-      sort: sortParam,
+      sort: sortParam ?? (scope === "organization" ? "-created" : undefined),
       ...statusFilters,
     };
-  }, [scope, searchQuery, sortParam, statusFilter, user?.id]);
+  }, [orgId, scope, searchQuery, sortParam, statusFilter, user?.id]);
 
   const fetchDatasetPage = useCallback(
-    async (page: number, size: number) => {
-      const response =
-        scope === "organization"
-          ? await fetchOrgDatasets(orgId!, page, size, filters)
-          : await fetchAdminDatasets(page, size, filters);
-      return scope === "system" && response.total === 0 && !searchQuery.trim() && !statusFilter
-        ? fetchDatasets(page, size, filters)
-        : response;
-    },
-    [filters, orgId, scope, searchQuery, statusFilter]
+    (page: number, size: number) => fetchAdminDatasetList(page, size, filters),
+    [filters]
   );
 
   const loadDatasets = useCallback(

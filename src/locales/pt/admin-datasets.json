@@ -264,6 +264,9 @@
     "archivedBanner": "Este conjunto de dados está arquivado e a sua página pública não está disponível."
   },
   "contacts": {
+    "loading": "A carregar os pontos de contacto...",
+    "loadError": "Não foi possível carregar os pontos de contacto da organização. As atribuições existentes foram mantidas.",
+    "retry": "Tentar novamente",
     "assignments": "Atribuições e pontos de contacto",
     "active": "Contacto ativo",
     "edit": "Editar contacto",
@@ -337,6 +340,7 @@
     "editorFileHint": "Os ficheiros serão guardados após confirmar os metadados do recurso."
   },
   "publication": {
+    "reviewRequired": "Conclua o passo anterior para guardar o conjunto de dados e os seus recursos antes de publicar.",
     "incomplete": "Preencha e guarde os campos obrigatórios antes de publicar: {{fields}}.",
     "draftMinimum": "Indique um produtor, um título e uma descrição para guardar o rascunho.",
     "fields": {
@@ -384,7 +388,7 @@
   "resourceEditor": {
     "title": "Metadados do recurso",
     "availability": "Disponibilidade do recurso",
-    "pendingAvailability": "O recurso está a ser analisado",
+    "pendingAvailability": "A disponibilidade do recurso está a ser analisada",
     "metadata": "Metadados do recurso",
     "requiredFields": "Todos os campos são obrigatórios, exceto aqueles marcados como opcionais.",
     "titleField": "Título",
@@ -394,7 +398,8 @@
     "format": "Formato",
     "mime": "MIME Type",
     "size": "Tamanho",
-    "invalidSize": "Indique um número inteiro de bytes igual ou superior a zero.",
+    "invalidSize": "Indique a unidade (B, KB, MB, GB ou TB), por exemplo 4,2 MB.",
+    "sizePlaceholder": "Ex.: 4,2 MB",
     "url": "URL",
     "origin": "Origem do recurso",
     "external": "Link externo",

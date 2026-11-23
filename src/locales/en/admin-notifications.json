@@ -41,7 +41,38 @@
       "refused": "Transfer refused"
     }
   },
+  "discussion": {
+    "new": "New discussion",
+    "comment": "New reply in a discussion",
+    "closed": "Discussion closed",
+    "updated": "Discussion updated",
+    "unavailable": "The details of this discussion are unavailable.",
+    "view": "View discussion"
+  },
+  "membership": {
+    "accepted": {
+      "title": "Membership request accepted",
+      "description": "Your request to join the organisation was accepted."
+    },
+    "refused": {
+      "title": "Membership request refused",
+      "description": "Your request to join the organisation was refused."
+    },
+    "request": {
+      "title": "Organisation membership request",
+      "description": "A request to join this organisation was received."
+    },
+    "invitation": {
+      "title": "Organisation membership invitation",
+      "description": "You were invited to join this organisation."
+    },
+    "from": "Sent by {{user}}",
+    "organizationUnavailable": "The details of this organisation are unavailable.",
+    "viewOrganization": "View organisation",
+    "viewRequests": "Manage membership requests"
+  },
   "generic": {
-    "title": "New notification"
+    "title": "Notification",
+    "description": "The details of this notification are unavailable."
   }
 }
