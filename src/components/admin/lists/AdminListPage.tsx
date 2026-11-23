@@ -3,14 +3,7 @@
 import { useState } from "react";
 import type { ChangeEvent, ComponentProps, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
-import {
-  Tab,
-  TabBody,
-  TabHeader,
-  Table,
-  Tabs,
-  useToastContext,
-} from "@ama-pt/agora-design-system";
+import { Tab, TabBody, TabHeader, Table, Tabs, useToastContext } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { AdminLayoutProps } from "@/components/Layout/AdminLayout";
@@ -70,12 +63,15 @@ interface AdminListPageProps extends Pick<
   setPageSize?: (pageSize: number) => void;
   search?: SearchConfig;
   filters?: ReactNode;
+  /** Replaces the default search/filter layout for lists with a custom toolbar. */
+  toolbar?: ReactNode;
   toolbarActions?: ReactNode;
   feedback?: ReactNode;
   emptyState: ReactNode;
   children: ComponentProps<typeof Table>["children"];
   loadingContent?: ReactNode;
   resultsCount?: ReactNode;
+  resultsTitle?: ReactNode;
   showResultsSummary?: boolean;
   paginationOptions?: CreatePaginationPropsOptions;
   /** Shows the table download action. */
@@ -111,12 +107,14 @@ export default function AdminListPage({
   setPageSize,
   search,
   filters,
+  toolbar,
   toolbarActions,
   feedback,
   emptyState,
   children,
   loadingContent,
   resultsCount,
+  resultsTitle,
   showResultsSummary = true,
   paginationOptions,
   onDownloadCsv,
@@ -133,7 +131,10 @@ export default function AdminListPage({
   const visibleSearch = showListControls ? search : undefined;
   const visibleFilters = showListControls ? filters : undefined;
   const canDownloadCsv = Boolean(onDownloadCsv) && showListControls;
-  const shouldRenderToolbar = Boolean(visibleSearch || visibleFilters || toolbarActions);
+  const visibleToolbar = showListControls ? toolbar : undefined;
+  const shouldRenderToolbar = Boolean(
+    visibleToolbar || visibleSearch || visibleFilters || toolbarActions
+  );
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false);
   const isDownloadCsvDisabled = isDownloadingCsv || !shouldRenderTable;
   const defaultLoadingContent = <p className="text-sm text-neutral-700">{t("loading")}</p>;
@@ -174,48 +175,53 @@ export default function AdminListPage({
           {listTitle}
         </h2>
       )}
-      {shouldRenderToolbar && (
-        <div className="flex flex-col gap-32">
-          {visibleFilters}
-          {(visibleSearch || toolbarActions) && (
-            <div className="flex flex-wrap items-end justify-between gap-16">
-              {visibleSearch && (
-                <div className="admin-search-wrapper w-full max-w-[592px]">
-                  {visibleSearch.appearance === "bar" ? (
-                    <AdminSearchBar
-                      hasVoiceActionButton={false}
-                      defaultValue={visibleSearch.defaultValue}
-                      label={visibleSearch.label}
-                      placeholder={visibleSearch.placeholder}
-                      aria-label={
-                        visibleSearch.ariaLabel ?? visibleSearch.label ?? visibleSearch.placeholder
-                      }
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        visibleSearch.onChange?.(event.target.value)
-                      }
-                    />
-                  ) : (
-                    <AdminSearch
-                      required={false}
-                      defaultValue={visibleSearch.defaultValue}
-                      label={visibleSearch.label}
-                      placeholder={visibleSearch.placeholder}
-                      aria-label={
-                        visibleSearch.ariaLabel ?? visibleSearch.label ?? visibleSearch.placeholder
-                      }
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        visibleSearch.onChange?.(e.target.value);
-                      }}
-                    />
-                  )}
-                </div>
-              )}
+      {visibleToolbar ??
+        (shouldRenderToolbar && (
+          <div className="flex flex-col gap-32">
+            {visibleFilters}
+            {(visibleSearch || toolbarActions) && (
+              <div className="flex flex-wrap items-end justify-between gap-16">
+                {visibleSearch && (
+                  <div className="admin-search-wrapper w-full max-w-[592px]">
+                    {visibleSearch.appearance === "bar" ? (
+                      <AdminSearchBar
+                        hasVoiceActionButton={false}
+                        defaultValue={visibleSearch.defaultValue}
+                        label={visibleSearch.label}
+                        placeholder={visibleSearch.placeholder}
+                        aria-label={
+                          visibleSearch.ariaLabel ??
+                          visibleSearch.label ??
+                          visibleSearch.placeholder
+                        }
+                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                          visibleSearch.onChange?.(event.target.value)
+                        }
+                      />
+                    ) : (
+                      <AdminSearch
+                        required={false}
+                        defaultValue={visibleSearch.defaultValue}
+                        label={visibleSearch.label}
+                        placeholder={visibleSearch.placeholder}
+                        aria-label={
+                          visibleSearch.ariaLabel ??
+                          visibleSearch.label ??
+                          visibleSearch.placeholder
+                        }
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          visibleSearch.onChange?.(e.target.value);
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
 
-              {toolbarActions && <div className="flex flex-wrap gap-16">{toolbarActions}</div>}
-            </div>
-          )}
-        </div>
-      )}
+                {toolbarActions && <div className="flex flex-wrap gap-16">{toolbarActions}</div>}
+              </div>
+            )}
+          </div>
+        ))}
 
       <div className="flex flex-col gap-16">
         {feedback}
@@ -224,7 +230,9 @@ export default function AdminListPage({
           <div className="flex flex-wrap items-center justify-between gap-16">
             {showResultsSummary && (
               <div className="flex flex-col gap-8">
-                <h2 className="text-l-medium text-primary-900">{t("resultsTitle")}</h2>
+                <h2 className="text-l-medium text-primary-900">
+                  {resultsTitle ?? t("resultsTitle")}
+                </h2>
                 {resultsCount ?? (
                   <ResultsCount count={count} isLoading={isInitialLoading} className="mb-0" />
                 )}

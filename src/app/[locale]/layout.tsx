@@ -37,6 +37,7 @@ const namespaces = [
   "organizations",
   "dataservices",
   "support",
+  "user-guides",
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",
@@ -123,8 +124,8 @@ export default async function RootLayout({
           draft={analytics.cmpDraft}
           nonce={nonce}
         />
-        <GoogleConsentDefault gaId={analytics.gaId} nonce={nonce} />
         <GoogleAnalytics gaId={analytics.gaId} />
+        <GoogleConsentDefault gaId={analytics.gaId} nonce={nonce} />
       </head>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <RuntimeConfigProvider value={runtimeConfig}>

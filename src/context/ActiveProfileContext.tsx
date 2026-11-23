@@ -104,6 +104,10 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
   const activeProfile = useMemo<ActiveProfile>(() => {
     if (!user) return PERSONAL_PROFILE;
 
+    // Public entry points (notifications, publishing) start in the personal
+    // profile. Remember another profile only while navigating within the BO.
+    if (pathname !== "/admin" && !pathname.startsWith("/admin/")) return PERSONAL_PROFILE;
+
     const validate = (profile: ActiveProfile): ActiveProfile => {
       if (profile.type === "system" && !isAdmin) return PERSONAL_PROFILE;
       if (

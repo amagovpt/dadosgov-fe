@@ -401,6 +401,7 @@ export async function fetchOrgContactPoints(
   orgId: string,
   page: number = 1,
   pageSize: number = 100,
+  options: { throwOnError?: boolean } = {},
 ): Promise<APIResponse<ContactPoint>> {
   try {
     const res = await fetch(
@@ -413,6 +414,7 @@ export async function fetchOrgContactPoints(
   } catch (error) {
     rethrowControlFlow(error);
     console.error("Error fetching org contact points:", error);
+    if (options.throwOnError) throw error;
     return {
       data: [], page: 1, page_size: pageSize,
       total: 0, next_page: null, previous_page: null,

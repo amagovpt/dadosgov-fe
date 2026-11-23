@@ -1,0 +1,27 @@
+{
+  "eyebrow": "User guide",
+  "downloadGuide": "Download guide",
+  "onThisPage": "On this page",
+  "searchLabel": "Tell us what you are looking for",
+  "searchPlaceholder": "Search",
+  "searchAction": "Search",
+  "noResults": {
+    "title": "We found no guides for \"{{query}}\"",
+    "subtitle": "Try other words or more general terms.",
+    "description": "Clear the search to see every theme again."
+  },
+  "empty": "There are no guides available yet.",
+  "openGuide": "Open the guide {{title}}",
+  "tasksLabel": "Guide tasks",
+  "unavailableTitle": "Not yet available on the public portal",
+  "audience": "For",
+  "objective": "Objective",
+  "whatToDo": "What to do",
+  "example": "Example",
+  "video": "Video",
+  "videoFallbackTitle": "Video for the task {{title}}",
+  "watchVideo": "Watch the video",
+  "tip": "Tip",
+  "relatedGuides": "Related guides",
+  "usefulResources": "Useful resources"
+}

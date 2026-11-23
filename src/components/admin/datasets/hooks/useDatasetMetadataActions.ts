@@ -22,6 +22,7 @@ interface UseDatasetMetadataActionsParams {
   featured: boolean;
   temporalStart: string;
   temporalEnd: string;
+  selectedContactPointIds: string[];
   keywordsRef: React.MutableRefObject<string>;
   selectedLicenseRef: React.MutableRefObject<string>;
   selectedFrequencyRef: React.MutableRefObject<string>;
@@ -48,6 +49,7 @@ export function useDatasetMetadataActions({
   featured,
   temporalStart,
   temporalEnd,
+  selectedContactPointIds,
   keywordsRef,
   selectedLicenseRef,
   selectedFrequencyRef,
@@ -153,6 +155,7 @@ export function useDatasetMetadataActions({
           keywords: keywordsRef.current,
           license: selectedLicenseRef.current,
           frequency: selectedFrequencyRef.current,
+          contactPointIds: dataset.organization ? selectedContactPointIds : undefined,
           temporalStart,
           temporalEnd,
           spatialGeom: dataset.spatial?.geom,

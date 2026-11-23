@@ -41,7 +41,38 @@
       "refused": "Transferência recusada"
     }
   },
+  "discussion": {
+    "new": "Nova discussão",
+    "comment": "Nova resposta numa discussão",
+    "closed": "Discussão encerrada",
+    "updated": "Atualização numa discussão",
+    "unavailable": "Os detalhes desta discussão não estão disponíveis.",
+    "view": "Ver discussão"
+  },
+  "membership": {
+    "accepted": {
+      "title": "Pedido de adesão aceite",
+      "description": "O seu pedido de adesão à organização foi aceite."
+    },
+    "refused": {
+      "title": "Pedido de adesão recusado",
+      "description": "O seu pedido de adesão à organização foi recusado."
+    },
+    "request": {
+      "title": "Pedido de adesão à organização",
+      "description": "Foi recebido um pedido para aderir a esta organização."
+    },
+    "invitation": {
+      "title": "Convite para aderir à organização",
+      "description": "Foi convidado a aderir a esta organização."
+    },
+    "from": "Enviado por {{user}}",
+    "organizationUnavailable": "Os detalhes desta organização não estão disponíveis.",
+    "viewOrganization": "Ver organização",
+    "viewRequests": "Gerir pedidos de adesão"
+  },
   "generic": {
-    "title": "Nova notificação"
+    "title": "Notificação",
+    "description": "Os detalhes desta notificação não estão disponíveis."
   }
 }

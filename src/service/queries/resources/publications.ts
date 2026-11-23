@@ -44,6 +44,9 @@ export async function getPublicationsPage(locale: string = "pt"): Promise<Public
                                         metadataText
                                     }
                                 }
+                                urlDocument {
+                                    iv
+                                }
                             }
                         }
                     }

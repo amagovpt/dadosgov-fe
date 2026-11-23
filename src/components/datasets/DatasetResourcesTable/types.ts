@@ -1,9 +1,7 @@
 import { CommunityResource } from "@/service/types/community-resource";
-import { Resource } from "@/service/types/dataset";
 
 export interface DatasetResourcesTableProps {
-  resources: Resource[];
-  communityResources?: CommunityResource[];
+  communityResources: CommunityResource[];
 }
 
 export interface ColumnInfo {

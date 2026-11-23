@@ -9,7 +9,6 @@ export interface LanguageOption {
   value: string;
   labelKey: string;
   abbr: string;
-  icon?: string;
 }
 
 export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: boolean | null }>(
@@ -17,12 +16,11 @@ export const isEnabled = <T extends { enabled?: boolean | null; requiresAuth?: b
   isAuthenticated: boolean
 ): boolean => item.enabled !== false && (!item.requiresAuth || isAuthenticated);
 
-
 export const languages: LanguageOption[] = [
   {
     value: "pt",
     labelKey: "header.languages.portuguese",
-    abbr: "PT"
+    abbr: "PT",
   },
   {
     value: "en",
