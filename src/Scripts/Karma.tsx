@@ -11,6 +11,7 @@ export default function KarmaAnalytics({ settingsId, draft, nonce }: KarmaAnalyt
         <>
             {/* eslint-disable-next-line @next/next/no-sync-scripts -- must block parsing so it runs before any other script (Usercentrics requirement) */}
             <script
+                type="application/javascript"
                 id="usercentrics-autoblocker"
                 src="https://web.cmp.usercentrics.eu/modules/autoblocker.js"
                 nonce={nonce}
