@@ -6,11 +6,13 @@ import { twMerge } from "tailwind-merge";
 
 export type UrlWrapperI = {
   url: string;
+  label?: string;
   className?: string;
 };
 
-export default function UrlWrapper({ url, className }: UrlWrapperI) {
+export default function UrlWrapper({ url, label, className }: UrlWrapperI) {
   const { t: tds } = useTranslation("datasets");
+  const fieldLabel = label ?? tds("labels.url");
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url);
@@ -19,11 +21,11 @@ export default function UrlWrapper({ url, className }: UrlWrapperI) {
   return (
     <div className={twMerge("flex w-full flex-col gap-16", className)}>
       <Typograph tag="p" className="flex flex-row gap-8">
-        <span className="text-m-medium text-neutral-900">{tds("labels.url")}</span>
+        <span className="text-m-medium text-neutral-900">{fieldLabel}</span>
         <Icon name="agora-line-copy" className="cursor-pointer" onClick={() => handleCopy()} />
       </Typograph>
       <InputText
-        label={tds("labels.url")}
+        label={fieldLabel}
         hideLabel
         value={url}
         readOnly

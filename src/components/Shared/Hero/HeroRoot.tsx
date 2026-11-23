@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 export interface IHeroRootProps {
   children?: React.ReactNode;
   className?: string;
+  variant?: "dark" | "light";
   /**
    * Background image for the band. Pass `null` for a flat `bg-primary-900` band
    * with no image and no gradient overlay.
@@ -15,15 +16,18 @@ export interface IHeroRootProps {
 export default function HeroRoot({
   children,
   className,
+  variant = "dark",
   backgroundImageUrl = "/Banner/hero-bg.jpg",
   hasMinHeight = true,
 }: IHeroRootProps) {
-  const hasBackground = !!backgroundImageUrl;
+  const isLight = variant === "light";
+  const hasBackground = !isLight && !!backgroundImageUrl;
 
   return (
     <div
       className={twMerge(
-        "w-full bg-primary-900",
+        "w-full",
+        isLight ? "bg-primary-100" : "bg-primary-900 xl:min-h-[396px]",
         hasBackground && [
           "bg-(image:--hero-bg) bg-no-repeat",
           // mobile/tablet: fill the band, centered
@@ -44,6 +48,7 @@ export default function HeroRoot({
       <div
         className={twMerge(
           "flex w-full flex-col items-center justify-center",
+          !isLight && "xl:min-h-[396px]",
           hasBackground &&
             "bg-linear-to-r from-secondary-900 via-secondary-900/64 to-secondary-900/24",
           hasMinHeight && "min-h-[396px]"

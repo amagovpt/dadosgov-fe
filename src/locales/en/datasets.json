@@ -47,6 +47,7 @@
     }
   },
   "detail": {
+    "published": "Published",
     "draft": "Draft",
     "archived": "Archived",
     "addFavorite": "Add to favorites",

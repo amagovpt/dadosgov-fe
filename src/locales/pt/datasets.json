@@ -47,6 +47,7 @@
     }
   },
   "detail": {
+    "published": "Publicado",
     "draft": "Rascunho",
     "archived": "Arquivado",
     "addFavorite": "Adicionar aos favoritos",

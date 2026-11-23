@@ -8,6 +8,7 @@ export interface IHeroBreadcrumbProps {
   overrides?: Record<string, React.ReactNode>;
   /** Label for the last crumb (a CMS/API title). */
   currentLabel?: React.ReactNode;
+  darkMode?: boolean;
   className?: string;
 }
 
@@ -15,15 +16,20 @@ export interface IHeroBreadcrumbProps {
  * Route-derived breadcrumb for the hero. Rendering the slot is what turns the
  * breadcrumb on — there is no `hasBreadcrumb` flag any more.
  *
- * `darkMode` is deliberately not forwarded: the hero band is always
- * `bg-primary-900`, and `BreadcrumbDynamic` already defaults to dark.
+ * Dark breadcrumbs are the default; light heroes opt out with `darkMode={false}`.
  */
 export default function HeroBreadcrumb({
   overrides,
   currentLabel,
+  darkMode = true,
   className,
 }: IHeroBreadcrumbProps) {
   return (
-    <BreadcrumbDynamic overrides={overrides} currentLabel={currentLabel} className={className} />
+    <BreadcrumbDynamic
+      overrides={overrides}
+      currentLabel={currentLabel}
+      darkMode={darkMode}
+      className={className}
+    />
   );
 }
