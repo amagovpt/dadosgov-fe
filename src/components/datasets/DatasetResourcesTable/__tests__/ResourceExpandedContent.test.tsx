@@ -120,6 +120,7 @@ const REMOTE_INGESTED: Resource = {
   filetype: "remote",
   created_at: "2026-01-05T10:00:00+00:00",
   last_modified: "2026-02-01T10:00:00+00:00",
+  latest: "2026-02-01T10:00:00+00:00",
   extras: {
     "analysis:parsing:finished_at": "2026-08-18T03:12:00+00:00",
     "analysis:parsing:parsing_table": "7fdf88f7f45cde7028f03dcbf252e139",
@@ -134,6 +135,7 @@ const NOT_INGESTED: Resource = {
   url: "https://dados.gov.pt/s/resources/ocorrencias.csv",
   filetype: "file",
   created_at: "2026-03-10T09:00:00+00:00",
+  latest: "2026-03-10T09:00:00+00:00",
   extras: {},
 };
 
