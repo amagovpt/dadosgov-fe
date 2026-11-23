@@ -18,6 +18,7 @@ export function DatasetWizardHelp({
       headingLevel="h3"
       hasIcon
       leadingIcon="agora-line-info-mark"
+      leadingIconHover="agora-line-info-mark"
     >
       {item.content}
     </Accordion>
