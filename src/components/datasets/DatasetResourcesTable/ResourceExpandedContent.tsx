@@ -324,6 +324,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                   </div>
 
                   <UrlWrapper url={resource.url} />
+                  <UrlWrapper url={resource.latest} label={tds("labels.latest")} />
 
                   <div className="flex w-full flex-col gap-32 lg:flex-row">
                     <DataFieldWrapper
