@@ -244,7 +244,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   value={lang.value}
                   label={t(lang.labelKey)}
                   abbr={lang.abbr}
-                  icon={lang.icon}
                   checked={currentLocale === lang.value}
                 />
               ))}
