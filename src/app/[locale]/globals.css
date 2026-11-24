@@ -824,8 +824,10 @@ li.section-name:empty {
 }
 
 @media (max-width: 375px) {
-  .glossary-page .nav-pages div:first-child,
-  .glossary-page .nav-pages div:last-child {
+  /* Hide the boundary items, except when they are the current page or sit right next to it
+     (pages 1-2 and the last two), where there is no ellipsis between them. */
+  .glossary-page .nav-pages div:first-child:not(:has(.current)):not(:has(+ div .current)),
+  .glossary-page .nav-pages div:last-child:not(:has(.current)):not(div:has(.current) + div) {
     display: none !important;
   }
 }

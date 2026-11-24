@@ -43,8 +43,12 @@ export default async function GlossaryPage({ params, searchParams }: GlossaryPag
   const { hero, glossary } = await getHero(locale);
 
   return (
-    <main className="flex h-full w-full flex-col items-center justify-center">
-      <Hero.Root backgroundImageUrl={"/Banner/hero-bg.jpg"} hasMinHeight={false}>
+    <main className="glossary-page flex h-full w-full flex-col items-center justify-center">
+      <Hero.Root
+        backgroundImageUrl={"/Banner/hero-bg.jpg"}
+        hasMinHeight={false}
+        className="xl:bg-position-[center_93.5%]"
+      >
         <Hero.Breadcrumb />
         <Hero.Content>
           <Hero.Title>{hero.title}</Hero.Title>

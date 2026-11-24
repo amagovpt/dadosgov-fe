@@ -130,7 +130,7 @@ export function GlossaryClient({ entries, initialQuery = "" }: GlossaryClientPro
   };
 
   return (
-    <div className="glossary-page container flex w-full flex-col gap-32 pt-24 pb-64 lg:gap-64">
+    <div className="container flex w-full flex-col gap-32 pt-24 pb-64 lg:gap-64">
       <div className="max-w-[800px]">
         <InputSearch
           id="glossary-search"
