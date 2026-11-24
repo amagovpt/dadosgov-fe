@@ -15,6 +15,8 @@ import {
   groupByFirstLetter,
   paginateGroups,
 } from "@/utils/glossary";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import InputSearch from "../Primitives/InputSearch";
 
 const SEARCH_PARAM = "pesquisar";
 const SEARCH_DEBOUNCE_MS = 300;
@@ -26,10 +28,13 @@ interface GlossaryClientProps {
 
 export function GlossaryClient({ entries, initialQuery = "" }: GlossaryClientProps) {
   const { t } = useTranslation("common");
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   const [query, setQuery] = useState(initialQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
   const pendingScroll = useRef<string | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -125,17 +130,14 @@ export function GlossaryClient({ entries, initialQuery = "" }: GlossaryClientPro
   };
 
   return (
-    <div className="container flex w-full flex-col gap-32 pt-24 pb-64 lg:gap-64">
+    <div className="glossary-page container flex w-full flex-col gap-32 pt-24 pb-64 lg:gap-64">
       <div className="max-w-[800px]">
-        <InputSearchBar
+        <InputSearch
           id="glossary-search"
           label={t("glossary.searchLabel")}
           placeholder={t("glossary.searchPlaceholder")}
-          searchActionAltText={t("glossary.searchActionAltText")}
-          hasVoiceActionButton={false}
           value={query}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-          onSearchActivate={(term: string) => setQuery(term)}
         />
       </div>
 
@@ -146,8 +148,8 @@ export function GlossaryClient({ entries, initialQuery = "" }: GlossaryClientPro
         {t("glossary.foundResults", { count: resultCount })}
       </Typograph>
 
-      <div className="grid grid-cols-12 items-start gap-32 xl:gap-0">
-        <div className="sticky top-64 z-10 col-span-12 hidden self-start bg-white pb-32 xl:col-span-3 xl:block xl:pb-0">
+      <div className="flex flex-row items-start gap-32 xl:gap-0">
+        <div className="sticky top-64 z-10 hidden self-start bg-white pb-32 xl:block xl:max-w-[280px] xl:pb-0">
           <div className="flex flex-col gap-32 xl:gap-64">
             <GlossaryLetters
               id="glossary-letters-navbar"
@@ -160,7 +162,7 @@ export function GlossaryClient({ entries, initialQuery = "" }: GlossaryClientPro
 
         <div
           ref={resultsRef}
-          className="col-span-12 flex scroll-mt-64 flex-col gap-64 xl:col-span-9 xl:pl-128"
+          className="flex w-full scroll-mt-64 flex-col gap-64 xl:max-w-[696px] xl:pl-128"
         >
           {groups.length === 0 ? (
             <Typograph tag="p" className="text-m-regular text-neutral-700">
@@ -185,7 +187,7 @@ export function GlossaryClient({ entries, initialQuery = "" }: GlossaryClientPro
                     </Typograph>
                   </div>
                   {group.items.map((item) => (
-                    <div key={item.word} className="flex flex-col gap-8 text-pretty md:w-[80%]">
+                    <div key={item.word} className="flex flex-col gap-8 text-pretty">
                       <Typograph
                         tag="h3"
                         className="text-xl-bold! text-neutral-900 [&_span]:text-xl-bold!"
@@ -208,6 +210,7 @@ export function GlossaryClient({ entries, initialQuery = "" }: GlossaryClientPro
             totalItems={resultCount}
             pageSize={GLOSSARY_PAGE_SIZE}
             onPageChange={handlePageChange}
+            siblingCount={isMobile ? 0 : 1}
           />
         </div>
       </div>
