@@ -15,6 +15,8 @@ interface PaginationProps {
   // such as the resource preview, where the route must not change).
   onPageChange?: (page: number) => void;
   isOnUrl?: boolean;
+  boundaryCount?: number;
+  siblingCount?: number;
 }
 
 export function buildPageUrl(page: number): string {
@@ -35,6 +37,8 @@ export const Pagination = ({
   pageSize,
   onPageChange,
   isOnUrl = true,
+  boundaryCount = 1,
+  siblingCount = 1,
 }: PaginationProps) => {
   const { t } = useTranslation("common");
 
@@ -64,8 +68,8 @@ export const Pagination = ({
       label={t("pagination.pagination")}
       nextPageAriaLabel={t("pagination.next")}
       previousPageAriaLabel={t("pagination.previous")}
-      boundaryCount={1}
-      siblingCount={1}
+      boundaryCount={boundaryCount}
+      siblingCount={siblingCount}
     />
   );
 };
