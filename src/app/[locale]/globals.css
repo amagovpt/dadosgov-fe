@@ -822,6 +822,8 @@ li.section-name:empty {
   padding: 32px 64px 32px 32px;
 }
 
+/* 5.9 Pagination */
+
 .agora-search-pagination {
   padding-left: 50px;
   padding-right: 50px;
@@ -829,6 +831,22 @@ li.section-name:empty {
 
 .agora-search-pagination .nav-arrows {
   border-color: var(--color-primary-600);
+}
+
+@media (max-width: 768px) {
+  .glossary-page .agora-search-pagination {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (max-width: 375px) {
+  /* Hide the boundary items, except when they are the current page or sit right next to it
+     (pages 1-2 and the last two), where there is no ellipsis between them. */
+  .glossary-page .nav-pages div:first-child:not(:has(.current)):not(:has(+ div .current)),
+  .glossary-page .nav-pages div:last-child:not(:has(.current)):not(div:has(.current) + div) {
+    display: none !important;
+  }
 }
 
 /* 5.10 Toggle (Organizations Filters) */
