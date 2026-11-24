@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
-import { Dataset } from "@/service/types/dataset";
+import type { DatasetMetadata } from "@/service/types/dataset/detail";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { formatDateLong } from "@/utils/formatDate";
@@ -11,7 +11,7 @@ import { getDatasetLastUpdate } from "@/utils/datasetDates";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 
 interface DatasetInfoProps {
-  dataset: Dataset;
+  dataset: DatasetMetadata;
 }
 
 const formatZone = (zone: string): string => {

@@ -7,6 +7,7 @@ import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchNotifications, markNotificationRead } from "@/service/api/notifications";
 import { fetchTransfers } from "@/service/api/transfers";
+import { fetchDiscussion } from "@/service/api/discussions-topics";
 import type { Transfer } from "@/service/types/transfer-system";
 import type {
   Notification,
@@ -17,10 +18,18 @@ import {
   harvesterValidationLink,
   isHarvesterValidation,
   isTransferRequest,
+  isDiscussionNotification,
+  isMembershipRequest,
+  isMembershipResponse,
 } from "@/components/admin/notifications/notification-helpers";
 import TransferNotificationRow from "@/components/admin/notifications/TransferNotificationRow";
+import {
+  DiscussionNotificationRow,
+  MembershipNotificationRow,
+} from "@/components/admin/notifications/ActivityNotificationRow";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
+import { TabPagination } from "@/components/Shared/TabPagination";
 import { useApiErrorHandler } from "@/providers/ApiErrorProvider";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import type { BoNotificationsPage } from "@/service/types/admin/notifications";
@@ -29,12 +38,19 @@ interface NotificationsClientProps {
   pageContent: BoNotificationsPage;
 }
 
+const PAGE_SIZE = 10;
+
 export default function NotificationsClient({ pageContent }: NotificationsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-notifications"]);
   const { notifyApiError } = useApiErrorHandler();
   const [items, setItems] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const initialNotificationRequest = useRef<ReturnType<typeof fetchNotifications> | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const notificationRequest = useRef<{
+    page: number;
+    request: ReturnType<typeof fetchNotifications>;
+  } | null>(null);
   // Share each recipient's request across all rows and Strict Mode effects.
   // Keep rejected promises too: only an explicit retry should issue another
   // request after a failure such as a rate limit. This cache lives on the page.
@@ -56,8 +72,21 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
     const loadNotifications = async () => {
       setIsLoading(true);
       try {
-        const res = await (initialNotificationRequest.current ??= fetchNotifications(1, 50));
+        if (notificationRequest.current?.page !== currentPage) {
+          notificationRequest.current = {
+            page: currentPage,
+            request: fetchNotifications(currentPage, PAGE_SIZE),
+          };
+        }
+        const res = await notificationRequest.current.request;
         if (!isCancelled) {
+          const total = res.total ?? 0;
+          const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+          setTotalItems(total);
+          if (currentPage > lastPage) {
+            setCurrentPage(lastPage);
+            return;
+          }
           setItems(res.data ?? []);
         }
       } catch (error) {
@@ -77,7 +106,7 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [currentPage]);
 
   const handleMarkRead = useCallback(
     async (id: string) => {
@@ -154,6 +183,19 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
                       );
                     }}
                   />
+                ) : isDiscussionNotification(n.details) ? (
+                  <DiscussionNotificationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                    loadDiscussion={fetchDiscussion}
+                  />
+                ) : isMembershipRequest(n.details) || isMembershipResponse(n.details) ? (
+                  <MembershipNotificationRow
+                    createdAt={n.created_at}
+                    details={n.details}
+                    readAction={readAction}
+                  />
                 ) : (
                   <GenericRow
                     createdAt={n.created_at}
@@ -166,6 +208,12 @@ export default function NotificationsClient({ pageContent }: NotificationsClient
           })}
         </ul>
       )}
+      <TabPagination
+        total={totalItems}
+        pageSize={PAGE_SIZE}
+        currentPage={currentPage}
+        onChange={setCurrentPage}
+      />
     </AdminLayout>
   );
 }
@@ -242,6 +290,7 @@ function GenericRow({ createdAt, handledAt, readAction }: GenericRowProps) {
           <Icon name="agora-line-mega-phone" className="h-20 w-20" />
           <span className="text-base font-medium text-primary-900">{t("generic.title")}</span>
         </div>
+        <p className="text-base text-neutral-700">{t("generic.description")}</p>
         <p className="text-sm text-neutral-500">
           {format(new Date(createdAt), "dd/MM/yyyy HH:mm")}
           {handledAt && ` · ${t("read")}`}

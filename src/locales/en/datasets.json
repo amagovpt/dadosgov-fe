@@ -47,6 +47,7 @@
     }
   },
   "detail": {
+    "published": "Published",
     "draft": "Draft",
     "archived": "Archived",
     "addFavorite": "Add to favorites",
@@ -237,6 +238,18 @@
     "other": "Other"
   },
   "resources": {
+    "search": "Search",
+    "searchPlaceholder": "Search by resource title",
+    "resultsList": "Results list",
+    "resultCount_one": "{{count}} result",
+    "resultCount_zero": "0 results",
+    "resultCount_other": "{{count}} results",
+    "loading": "Loading files...",
+    "loadError": "Could not load the files.",
+    "retry": "Try again",
+    "noResults": "No files found",
+    "noResultsHelp": "Try searching for another title.",
+    "noFiles": "This dataset has no files.",
     "mainFiles_one": "{{count}} MAIN FILE",
     "mainFiles_other": "{{count}} MAIN FILES",
     "documentation_one": "{{count}} DOCUMENTATION",
@@ -289,9 +302,25 @@
       "copyUrl": "Copy URL"
     },
     "types": {
-      "main": "Main files",
-      "file": "Main files",
-      "documentation": "Documentation"
+      "main": "Main file",
+      "main_one": "Main file",
+      "main_other": "Main files",
+      "file": "Main file",
+      "documentation": "Documentation",
+      "documentation_one": "Documentation",
+      "documentation_other": "Documentation",
+      "api": "API",
+      "api_one": "API",
+      "api_other": "APIs",
+      "update": "Update",
+      "update_one": "Update",
+      "update_other": "Updates",
+      "code": "Code repository",
+      "code_one": "Code repository",
+      "code_other": "Code repositories",
+      "other": "Other",
+      "other_one": "Other",
+      "other_other": "Others"
     },
     "extrasKeys": {
       "check_id": "check:id",

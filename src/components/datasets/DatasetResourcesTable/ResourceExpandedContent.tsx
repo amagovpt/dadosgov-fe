@@ -265,8 +265,8 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
   >;
 
   const formatFileType = (type?: string) => {
-    if (type === "main") return tds("labels.fileTypes.main");
-    if (type === "doc") return tds("labels.fileTypes.doc");
+    if (type === "doc") return tds("resources.types.documentation");
+    if (type && type !== "community") return tds(`resources.types.${type}`, { defaultValue: type });
     return tds("labels.fileTypes.community");
   };
 
@@ -324,6 +324,7 @@ export const ResourceExpandedContent: FC<{ resource: Resource }> = ({ resource }
                   </div>
 
                   <UrlWrapper url={resource.url} />
+                  <UrlWrapper url={resource.latest} label={tds("labels.latest")} />
 
                   <div className="flex w-full flex-col gap-32 lg:flex-row">
                     <DataFieldWrapper

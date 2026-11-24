@@ -12,6 +12,7 @@ export interface Publication {
   metaDetails: MetaDetails;
   cover: Image[];
   document?: FileDocument[];
+  urlDocument?: string | null;
 }
 
 export interface PublicationPage {

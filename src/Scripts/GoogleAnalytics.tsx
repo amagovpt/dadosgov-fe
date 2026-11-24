@@ -13,7 +13,10 @@ export const GA_USERCENTRICS_SERVICE = "Google Analytics 4";
  * keeps the browser from running it, and the CMP flips it on once the visitor
  * consents to the GA service. This works wherever the autoblocker ends up in
  * <head> (Next/React always hoist their own chunks ahead of it). The `js` /
- * `config` commands are queued by GoogleConsentDefault.
+ * `config` commands are queued by GoogleConsentDefault, which the root layout
+ * renders after this tag (it must be the last head script, see the layout);
+ * the inline script still runs first because this one stays inert until the
+ * deferred CMP loader activates it.
  */
 export default function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
     if (!gaId) return null;

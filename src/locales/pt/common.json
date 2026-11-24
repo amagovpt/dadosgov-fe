@@ -262,9 +262,11 @@
     "acesso-via-sparql": "Acesso via SPARQL",
     "aprender": "Aprender",
     "minicursos": "Minicursos",
+    "guias-do-utilizador": "Guias do utilizador",
     "login": "Autenticação",
     "reset-password": "Redefinir palavra-passe",
-    "migrate-account": "Migrar conta"
+    "migrate-account": "Migrar conta",
+    "glossario": "Glossário"
   },
   "close": "Fechar",
   "cancel": "Cancelar",
@@ -319,6 +321,8 @@
   },
   "retry": "Tentar novamente",
   "discussions": {
+    "closed": "Esta discussão está fechada.",
+    "linkUnavailable": "Não foi possível encontrar a discussão indicada nesta página.",
     "title": "Título *",
     "message": "Mensagem *",
     "cancel": "Cancelar",
@@ -357,5 +361,17 @@
     "deleteMessageConfirm": "Tem certeza de que deseja apagar esta mensagem?",
     "noDiscussionsTitle": "Sem discussões",
     "noDiscussionsDescription": "Ainda não existem discussões."
+  },
+  "glossary": {
+    "title": "Glossário",
+    "subtitle": "Explicação dos termos técnicos usados no portal.",
+    "searchLabel": "Pesquisar palavra",
+    "searchPlaceholder": "Insira a palavra que procura no glossário",
+    "searchActionAltText": "Pesquisar no glossário",
+    "lettersNavigation": "Navegação por letras do glossário",
+    "linkForLetter": "Ir para a letra {{letter}}",
+    "foundResults_one": "{{count}} resultado",
+    "foundResults_other": "{{count}} resultados",
+    "noResults": "Nenhum termo encontrado."
   }
 }

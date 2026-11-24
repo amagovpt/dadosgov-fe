@@ -62,7 +62,7 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
 
     useEffect(() => {
         if (activeId) {
-            window.history.replaceState(null, "", `#${activeId}`);
+            window.history.replaceState(window.history.state, "", `#${activeId}`);
         }
     }, [activeId]);
 

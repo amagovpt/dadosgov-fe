@@ -5,17 +5,23 @@ import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { formatDateLong } from "@/utils/formatDate";
 import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
 import { useTranslation } from "react-i18next";
+import { MetricItem } from "@/components/Shared/MetricItem";
+import { useDatastoriesViews } from "@/hooks/useDatastoriesViews";
 
 // ----------------------------------------------------------------------------------------------------------------
 
 export type RelatedDatastoriesI = RelatedSection;
 
-type DatastoryCardI = RelatedDatastoriesI["datastories"][number];
+type DatastoryCardI = RelatedDatastoriesI["datastories"][number] & {
+  /** Left out (undefined) until the section's counts arrive, or if they fail. */
+  views?: number;
+};
 
 // ----------------------------------------------------------------------------------------------------------------
 
-function DatastoryCard({ createdAt, title, description, slug }: DatastoryCardI) {
+function DatastoryCard({ createdAt, title, description, slug, views }: DatastoryCardI) {
   const { t, i18n } = useTranslation("common");
+  const paragraphs = formatHtmlParagraphs(description) as string[];
 
   return (
     <CardGeneral
@@ -27,7 +33,20 @@ function DatastoryCard({ createdAt, title, description, slug }: DatastoryCardI) 
         date: formatDateLong(createdAt, i18n.language as "pt" | "en"),
       })}
       titleText={title}
-      descriptionText={formatHtmlParagraphs(description) as string[]}
+      // CardGeneral has no other slot that takes React nodes, so the metric follows the
+      // description, in spans like everywhere MetricItem sits inside text.
+      descriptionText={
+        views === undefined ? (
+          paragraphs
+        ) : (
+          <>
+            {paragraphs}
+            <span className="mt-16 flex">
+              <MetricItem icon="agora-line-eye" value={views} label={t("card.views")} />
+            </span>
+          </>
+        )
+      }
       anchor={{
         target: "_blank",
         href: `/datastories/${slug}`,
@@ -45,6 +64,9 @@ function DatastoryCard({ createdAt, title, description, slug }: DatastoryCardI) 
 // ----------------------------------------------------------------------------------------------------------------
 
 export function RelatedDatastories({ id, title, description, datastories }: RelatedDatastoriesI) {
+  // One request for the whole section, not one per card.
+  const views = useDatastoriesViews(datastories.map((datastory) => datastory.slug));
+
   return (
     <Section
       id={id}
@@ -73,7 +95,7 @@ export function RelatedDatastories({ id, title, description, datastories }: Rela
 
         {datastories.length === 1 && (
           <div className="w-full lg:w-1/3">
-            <DatastoryCard {...datastories[0]} />
+            <DatastoryCard {...datastories[0]} views={views?.[datastories[0].slug]} />
           </div>
         )}
 
@@ -86,7 +108,7 @@ export function RelatedDatastories({ id, title, description, datastories }: Rela
                     className="col-span-12 h-full md:col-span-6 lg:col-span-4"
                     key={`bignumber-${index}`}
                   >
-                    <DatastoryCard {...datastory} />
+                    <DatastoryCard {...datastory} views={views?.[datastory.slug]} />
                   </div>
                 );
               })}

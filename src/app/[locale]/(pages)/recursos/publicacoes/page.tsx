@@ -5,6 +5,8 @@ import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
 import { fetchPdfPageCount } from "@/lib/pdfPageCount";
 import PublicationsClient from "@/components/resources/PublicationsClient";
+import { getFileExtension } from "@/components/admin/FileUploadModal/utils";
+import { Publication } from "@/service/types/resources/publications";
 import {
   PUBLICATIONS_PAGE_SIZE,
   parsePublicationsSort,
@@ -18,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { hero } = await getPublicationsPage(locale);
 
   return {
-    title: `${hero.title} - Dados Gov PT`,
+    title: `${hero.title}`,
     description: hero.description,
   };
 }
@@ -37,9 +39,16 @@ export default async function PublicationsPage({
 
   const { hero, publications } = await getPublicationsPage(locale);
 
-  const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
-    if (pdfDocument === "#") return null;
-    return fetchPdfPageCount(`${getCmsBaseUrl()}/api/assets/${pdfDocument}`);
+  const getPagesNum = async (p: Publication): Promise<number | null> => {
+    const slug = p.document?.[0]?.slug;
+    if (slug) {
+      if (slug === "#") return null;
+      return fetchPdfPageCount(`${getCmsBaseUrl()}/api/assets/${slug}`);
+    }
+    if (p.urlDocument && getFileExtension(p.urlDocument, true).toLowerCase() === ".pdf") {
+      return fetchPdfPageCount(p.urlDocument);
+    }
+    return null;
   };
 
   const sorted = sortPublications(publications, sort);
@@ -49,9 +58,7 @@ export default async function PublicationsPage({
     currentPage * PUBLICATIONS_PAGE_SIZE
   );
 
-  const pageCounts = await Promise.all(
-    paged.map((p) => (p.document?.[0] ? getPagesNum(p.document[0].slug) : null))
-  );
+  const pageCounts = await Promise.all(paged.map(getPagesNum));
 
   const pagedWithCounts = paged.map((p, i) => ({ ...p, pageCount: pageCounts[i] }));
 

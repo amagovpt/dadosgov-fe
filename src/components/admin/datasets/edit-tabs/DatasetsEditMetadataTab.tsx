@@ -26,6 +26,7 @@ type DatasetsEditMetadataTabProps = {
   auxiliaryItems?: AdminAuxiliaryItem[];
   dataset: Dataset;
   feedback?: ReactNode;
+  contacts?: ReactNode;
   onCancel: () => void;
   isSubmitting: boolean;
   formErrors: Partial<Record<string, boolean | string>>;
@@ -81,6 +82,7 @@ export default function DatasetsEditMetadataTab({
   auxiliaryItems,
   dataset,
   feedback,
+  contacts,
   onCancel,
   isSubmitting,
   formErrors,
@@ -161,7 +163,7 @@ export default function DatasetsEditMetadataTab({
         )}
         <fieldset
           disabled={isSubmitting || !canEdit}
-          className="mt-32 flex w-full min-w-0 max-w-[800px] flex-col gap-64"
+          className="flex w-full min-w-0 max-w-[800px] flex-col gap-64"
         >
           <section className="flex flex-col gap-32">
             <div className="flex max-w-[592px] flex-col gap-16 text-primary-900">
@@ -185,6 +187,7 @@ export default function DatasetsEditMetadataTab({
                 </DropdownOption>
               </DropdownSection>
             </InputSelect>
+            {contacts}
           </section>
           <DatasetsEditDescriptionSection
             formErrors={formErrors}
