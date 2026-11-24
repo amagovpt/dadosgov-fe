@@ -3,7 +3,6 @@ import initTranslations from "@/app/i18n";
 import { Hero } from "@/components/Shared/Hero";
 import { GlossaryClient } from "@/components/glossary/GlossaryClient";
 import { getGlossaryPage } from "@/service/queries/glossary";
-import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 
 export const dynamic = "force-dynamic";
 
