@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Tab, TabBody, TabHeader, Tabs } from "@ama-pt/agora-design-system";
 import { useTranslation } from "react-i18next";
 import Button from "@/components/Primitives/Button";
@@ -28,12 +28,20 @@ export function UserGuideDetailClient({ guide }: { guide: UserGuide }) {
 
   // The DS Tabs only read `active` on mount, so the hash-selected tab is applied by remounting.
   const [initialTask, setInitialTask] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const hashReady = useRef(false);
   useEffect(() => {
+    const applyHash = () => setInitialTask(taskIndexFromHash(guide));
+    applyHash();
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInitialTask(taskIndexFromHash(guide));
+    setMounted(true);
+    hashReady.current = true;
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
   }, [guide]);
 
   const onTaskActivation = (index: number) => {
+    if (!hashReady.current) return;
     const task = guide.tasks[index];
     if (task) window.history.replaceState(window.history.state, "", `#${task.id}`);
   };
@@ -96,18 +104,18 @@ export function UserGuideDetailClient({ guide }: { guide: UserGuide }) {
 
       {guide.tasks.length > 0 && (
         <section
-          className="container pb-80 [&_.desktop_.tab-panel]:shadow-[0_0_0_100vmax_var(--color-primary-100)] [&_.desktop_.tab-panel]:[clip-path:inset(0_-100vmax_0_0)]"
+          className="container pb-80 [&_.tab-list-item]:text-left [&_.desktop_.tab-panel]:shadow-[0_0_0_100vmax_var(--color-primary-100)] [&_.desktop_.tab-panel]:[clip-path:inset(0_-100vmax_0_0)]"
           aria-label={t("tasksLabel")}
         >
           <Tabs
-            key={initialTask}
+            key={mounted ? `task-${initialTask}` : "ssr"}
             vertically
             currentType="primary"
             onTabActivation={onTaskActivation}
           >
             {guide.tasks.map((task, index) => (
               <Tab key={task.id} active={index === initialTask}>
-                <TabHeader>{task.title}</TabHeader>
+                <TabHeader className="text-left!">{task.title}</TabHeader>
                 <TabBody>
                   <UserGuideTaskContent task={task} />
                 </TabBody>
