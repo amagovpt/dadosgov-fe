@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Button, ModalProvider, Toggle } from "@ama-pt/agora-design-system";
+import { Button, ModalProvider, StatusCard, Toggle } from "@ama-pt/agora-design-system";
 import { Hero } from "@/components/Shared/Hero";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import type { DatasetDetail, ResourceSectionPage } from "@/service/types/dataset/detail";
@@ -17,6 +17,7 @@ import { DatasetDetailSidebar } from "@/components/datasets/DatasetDetailSidebar
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
 import { formatPortalDate } from "@/utils/formatDate";
+import { buildLoginHref } from "@/utils/buildLoginHref";
 
 interface DatasetDetailClientProps {
   dataset: DatasetDetail;
@@ -30,9 +31,11 @@ export default function DatasetDetailClient({
   const { t: tds } = useTranslation("datasets");
   const { user, isAdmin } = useAuth();
   const { organizations } = useActiveOrganization();
-  const router = useRouter();
+  const pathname = usePathname();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [showFavoriteAuth, setShowFavoriteAuth] = useState(false);
+  const favoriteAuthRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const descriptionHeadingRef = useRef<HTMLDivElement>(null);
   const lastUpdate = getDatasetLastUpdate(dataset);
@@ -50,9 +53,15 @@ export default function DatasetDetailClient({
     };
   }, [user, user?.id, dataset.id]);
 
+  useEffect(() => {
+    if (showFavoriteAuth && !user) {
+      favoriteAuthRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [showFavoriteAuth, user]);
+
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/login");
+      setShowFavoriteAuth(true);
       return;
     }
     if (isTogglingFavorite) return;
@@ -91,6 +100,25 @@ export default function DatasetDetailClient({
         </Hero.Root>
 
         <div className="flex flex-col items-center gap-32 pt-32 pb-64">
+          {showFavoriteAuth && !user && (
+            <div ref={favoriteAuthRef} className="container" role="alert">
+              <StatusCard
+                variant="warning"
+                showIcon
+                title={tds("detail.favoriteAuth.title")}
+                description={tds("detail.favoriteAuth.description")}
+                anchor={{
+                  href: buildLoginHref(pathname),
+                  children: tds("detail.favoriteAuth.signIn"),
+                  variant: "neutral",
+                  appearance: "link",
+                  hasIcon: true,
+                  trailingIcon: "agora-line-arrow-right-circle",
+                  trailingIconHover: "agora-solid-arrow-right-circle",
+                }}
+              />
+            </div>
+          )}
           <div className="container flex flex-col items-start gap-16 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-16">
               <ResourceStatusBadge
