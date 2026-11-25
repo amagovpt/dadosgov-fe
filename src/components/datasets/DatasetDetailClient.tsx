@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Button, ModalProvider } from "@ama-pt/agora-design-system";
+import { Button, ModalProvider, Toggle } from "@ama-pt/agora-design-system";
 import { Hero } from "@/components/Shared/Hero";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import type { DatasetDetail, ResourceSectionPage } from "@/service/types/dataset/detail";
@@ -15,6 +15,8 @@ import { DatasetTabs } from "@/components/datasets/DatasetTabs";
 import { DatasetBadges } from "@/components/datasets/DatasetBadges";
 import { DatasetDetailSidebar } from "@/components/datasets/DatasetDetailSidebar";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
+import { getDatasetLastUpdate } from "@/utils/datasetDates";
+import { formatPortalDate } from "@/utils/formatDate";
 
 interface DatasetDetailClientProps {
   dataset: DatasetDetail;
@@ -33,6 +35,7 @@ export default function DatasetDetailClient({
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const descriptionHeadingRef = useRef<HTMLDivElement>(null);
+  const lastUpdate = getDatasetLastUpdate(dataset);
 
   useEffect(() => {
     if (!user) return;
@@ -80,11 +83,16 @@ export default function DatasetDetailClient({
             </Hero.Title>
             <DatasetBadges badges={dataset.badges} />
           </Hero.Content>
+          {lastUpdate && (
+            <time dateTime={lastUpdate} className="text-m-regular text-primary-900">
+              {tds("detail.updatedOn", { date: formatPortalDate(lastUpdate, "dd.MM.yyyy") })}
+            </time>
+          )}
         </Hero.Root>
 
         <div className="flex flex-col items-center gap-32 pt-32 pb-64">
-          <div className="container flex flex-col items-start gap-16">
-            <div className="flex flex-wrap items-center gap-32">
+          <div className="container flex flex-col items-start gap-16 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-16">
               <ResourceStatusBadge
                 item={dataset}
                 display="pill"
@@ -109,18 +117,25 @@ export default function DatasetDetailClient({
                 </Link>
               )}
             </div>
-            <Button
-              variant="neutral"
-              appearance="outline"
-              className="p-[14px]"
+            <Toggle
+              id="dataset-favorite"
+              name="dataset-favorite"
+              appearance="text"
+              className="min-h-[60px]! px-[14px]"
               hasIcon
-              leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
-              leadingIconHover="agora-solid-star"
-              onClick={handleToggleFavorite}
+              leadingIcon={isFavorite ? "agora-solid-bookmark" : "agora-line-bookmark"}
+              leadingIconHover="agora-solid-bookmark"
+              checked={isFavorite}
+              onChange={handleToggleFavorite}
+              onKeyUp={(event) => {
+                if (event.code === "Space" || event.code === "Enter") {
+                  void handleToggleFavorite();
+                }
+              }}
               disabled={isTogglingFavorite}
             >
               {isFavorite ? tds("detail.removeFavorite") : tds("detail.addFavorite")}
-            </Button>
+            </Toggle>
           </div>
 
           <div className="container grid gap-32 xl:grid-cols-12">
