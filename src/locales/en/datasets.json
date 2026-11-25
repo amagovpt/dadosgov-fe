@@ -257,6 +257,7 @@
     "copyTitle": "Copy title",
     "copy": "Copy {{label}}",
     "copied": "Copied!",
+    "copyFailed": "Could not copy.",
     "updatedOn": "Updated on {{date}}",
     "by": "By",
     "format": "{{format}} format",

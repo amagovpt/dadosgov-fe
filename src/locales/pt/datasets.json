@@ -259,6 +259,7 @@
     "copyTitle": "Copiar título",
     "copy": "Copiar {{label}}",
     "copied": "Copiado!",
+    "copyFailed": "Não foi possível copiar.",
     "updatedOn": "Atualizado em {{date}}",
     "by": "Por",
     "format": "Formato {{format}}",
