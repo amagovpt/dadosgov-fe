@@ -29,7 +29,6 @@ import { formatMetricValue } from "@/utils/formatNumber";
 import { formatDateLong, formatDateToTimeAgo } from "@/utils/formatDate";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
-import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
 import { DataserviceCardLinks } from "@/components/Shared/DataserviceCardLinks";
 import { getDatasetLastUpdate } from "@/utils/datasetDates";
 
@@ -106,47 +105,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
   return (
     <div className="w-full">
     <Tabs key={tabsKey}>
-        {/* Tab 1: Descrição */}
-        <Tab>
-          <TabHeader>{tOrg("tabs.description")}</TabHeader>
-          <TabBodyWrapper>
-            <div className="mt-6 grid gap-32 xl:grid-cols-12">
-              {/* Main Content */}
-              <div className="max-w-ch xl:col-span-8">
-                <div className="prose prose-lg relative max-w-none leading-relaxed text-neutral-700">
-                  <h2 className="mb-32 text-base font-medium uppercase text-neutral-900">
-                    {tOrg("tabs.description")}
-                  </h2>
-                  {organization.description ? (
-                    <>
-                      <ExpandableMarkdownDescription
-                        variant="fixedClamp"
-                        markdown={organization.description}
-                        maxHeightPx={400}
-                      />
-                    </>
-                  ) : (
-                    <p className="text-neutral-500">{tOrg("tabs.noDescription")}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Sidebar Metadata */}
-              <aside className="flex flex-col gap-16 md:pt-64 xl:col-span-4 xl:block">
-                <div className="rounded-4 bg-white p-32">
-                  <h3 className="text-sm mb-8 font-bold tracking-wider">{tOrg("tabs.createdAt")}</h3>
-                  <p className="font-medium text-neutral-900">
-                    {organization.created_at
-                      ? formatDateLong(organization.created_at, language)
-                      : "—"}
-                  </p>
-                </div>
-              </aside>
-            </div>
-          </TabBodyWrapper>
-        </Tab>
-
-        {/* Tab 2: Conjuntos de dados */}
+        {/* Conjuntos de dados */}
         <Tab>
           <TabHeader>
             {" "}
@@ -249,7 +208,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           </TabBodyWrapper>
         </Tab>
 
-        {/* Tab 3: Reutilizações e APIs */}
+        {/* Reutilizações e APIs */}
         <Tab>
           <TabHeader>
             {tOrg("tabs.reusesAndApis", {
@@ -297,7 +256,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
         </Tab>
 
 
-        {/* Tab 5: Discussões */}
+        {/* Discussões */}
         <Tab active={isDiscussionTab || undefined}>
           <TabHeader>{tOrg("tabs.discussions", { count: discussionCount })}</TabHeader>
           <TabBodyWrapper>
@@ -308,7 +267,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
             />
           </TabBodyWrapper>
         </Tab>
-        {/* Tab 6: Informações (Statistics, Members, Technical Info) */}
+        {/* Informações (Statistics, Members, Technical Info) */}
         <Tab>
           <TabHeader>{tOrg("tabs.info")}</TabHeader>
           <TabBodyWrapper>
