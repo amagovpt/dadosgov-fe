@@ -2,12 +2,10 @@
 
 import { useCallback, useRef, useState, type ComponentProps, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
-import { Anchor, CardExpandable, Icon, Pill, ProgressBar } from "@ama-pt/agora-design-system";
+import { Anchor, CardExpandable, Icon, ProgressBar } from "@ama-pt/agora-design-system";
 import type { DatasetMetadata } from "@/service/types/dataset/detail";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA, getQualityMissing } from "@/utils/datasetQuality";
-import { getDatasetLastUpdate } from "@/utils/datasetDates";
-import { formatPortalDate } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
 
 function SidebarLink(props: ComponentProps<typeof Anchor>) {
@@ -67,7 +65,6 @@ export function DatasetDetailSidebar({ dataset, sidebarRef }: DatasetDetailSideb
       ? `/users/${dataset.owner.slug}`
       : null;
   const image = dataset.organization?.logo || dataset.owner?.avatar_thumbnail || undefined;
-  const lastUpdate = getDatasetLastUpdate(dataset);
   const qualityScore = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
   const qualityMissing = getQualityMissing(dataset.quality);
   const metrics = [
@@ -105,13 +102,6 @@ export function DatasetDetailSidebar({ dataset, sidebarRef }: DatasetDetailSideb
           >
             {dataset.license_title || dataset.license}
           </SidebarLink>
-        )}
-        {lastUpdate && (
-          <Pill variant="primary" size="large" className="w-fit px-16">
-            <time dateTime={lastUpdate} className="text-s-regular">
-              {t("detail.updatedOn", { date: formatPortalDate(lastUpdate, "dd.MM.yyyy") })}
-            </time>
-          </Pill>
         )}
       </div>
 

@@ -260,10 +260,9 @@ export default function AdminListPage({
         {isInitialLoading ? (
           (loadingContent ?? defaultLoadingContent)
         ) : shouldRenderTable ? (
-          // Agora's closed pagination dropdown extends 8px below its trigger.
           <div
             aria-busy={isRefreshing}
-            className="-mb-8 flex flex-col gap-16 overflow-x-auto pb-8 xl:overflow-hidden [&_.agora-table-pagination]:w-full!"
+            className="flex min-w-0 flex-col gap-16 [&_.agora-table-pagination]:w-full!"
           >
             <AdminPaginatedTable
               tableClassName={tableClassName}

@@ -55,8 +55,9 @@ export function UserGuidesIndexClient({ themes }: UserGuidesIndexClientProps) {
           <section key={theme.id} id={theme.id} className="flex flex-col gap-24 scroll-mt-120">
             <div className="flex flex-col gap-8">
               <h2 className="text-xl-bold text-primary-900">{theme.title}</h2>
-              {theme.description && (
+              {theme.description && (<div className="max-w-[592px]">
                 <p className="text-s-regular text-neutral-900">{theme.description}</p>
+              </div>
               )}
             </div>
             <ul className="grid grid-cols-1 lg:grid-cols-2 gap-32">
