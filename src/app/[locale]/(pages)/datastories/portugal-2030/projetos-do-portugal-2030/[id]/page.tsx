@@ -11,7 +11,7 @@ import {
   getPT2030ProjectData,
   getPT2030ProjectMeta,
   queryLoadMoreBeneficiariesInProjectSheetOfPortugal2030,
-} from "@/service/queries/datastories/datastory";
+} from "@/service/queries/datastories/datastories-pt2030";
 import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Project,

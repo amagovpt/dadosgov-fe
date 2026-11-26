@@ -1,4 +1,4 @@
-import { queryLoadMorePT2030ProjectsByBeneficiary } from "@/service/queries/datastories/datastory";
+import { queryLoadMorePT2030ProjectsByBeneficiary } from "@/service/queries/datastories/datastories-pt2030";
 import { PT2030ProjectsByBeneficiaryResponse } from "@/service/types/datastories/pt2030/pt2030";
 import apolloClient from "@/service/utils/apollo-client";
 
