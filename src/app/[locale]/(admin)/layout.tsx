@@ -1,18 +1,10 @@
 import { Suspense } from "react";
 import CompleteRegistrationGate from "@/components/login/CompleteRegistrationGate";
 import { MigrationInviteGate } from "@/components/login/MigrationInviteGate";
-import { adminNamespaces } from "@/config/i18nConfig";
-import { RouteTranslations } from "@/providers/RouteTranslations";
 
-export default function AdminGroupLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
+export default function AdminGroupLayout({ children }: { children: React.ReactNode }) {
   return (
-    <RouteTranslations params={params} namespaces={adminNamespaces}>
+    <>
       <Suspense fallback={null}>
         <CompleteRegistrationGate />
       </Suspense>
@@ -21,6 +13,6 @@ export default function AdminGroupLayout({
           straight to /admin, and may never load a public page while
           authenticated (LEDG-2527). */}
       <MigrationInviteGate>{children}</MigrationInviteGate>
-    </RouteTranslations>
+    </>
   );
 }

@@ -3,7 +3,6 @@
 import {
   KeyboardEvent,
   MouseEvent,
-  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -253,14 +252,12 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
             <Search label={t("header.search")}>
               <CustomSearch>
                 <div className="max-w-xl">
-                  <Suspense fallback={null}>
-                    <SearchDropdown
-                      id="header-search"
-                      hasVoiceActionButton={false}
-                      label={t("header.searchLabel")}
-                      placeholder={t("header.searchPlaceholder")}
-                    />
-                  </Suspense>
+                  <SearchDropdown
+                    id="header-search"
+                    hasVoiceActionButton={false}
+                    label={t("header.searchLabel")}
+                    placeholder={t("header.searchPlaceholder")}
+                  />
                 </div>
               </CustomSearch>
             </Search>

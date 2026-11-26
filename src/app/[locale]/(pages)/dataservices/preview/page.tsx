@@ -41,7 +41,7 @@ function DataservicePreviewContent() {
             hasIcon={true}
             leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
             leadingIconHover="agora-solid-star"
-            className="shrink-0"
+            className="flex-shrink-0"
             onClick={() => setIsFavorite(!isFavorite)}
           >
             {isFavorite ? tDs("detail.removeFavorite") : tDs("detail.addFavorite")}

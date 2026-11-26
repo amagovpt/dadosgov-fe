@@ -32,16 +32,16 @@ function MaintenanceNotice() {
             name="agora-line-hardware-settings"
             aria-hidden
             focusable={false}
-            className="h-[280px]! min-h-[280px]! w-[280px]! min-w-[280px]! shrink-0 fill-white!"
+            className="!h-[280px] !min-h-[280px] !w-[280px] !min-w-[280px] shrink-0 !fill-white"
           />
         </Suspense>
         <div className="flex flex-col gap-32">
-          <h1 className="text-2xl-bold! md:text-3xl-bold! text-white!">
+          <h1 className="!text-2xl-bold md:!text-3xl-bold !text-white">
             {t("errorMaintenance.title")}
           </h1>
           <div className="flex w-full flex-col gap-16">
-            <span className="text-m-bold! text-white!">{t("errorMaintenance.subtitle")}</span>
-            <span className="text-m-regular! text-white! max-w-xl">
+            <span className="!text-m-bold !text-white">{t("errorMaintenance.subtitle")}</span>
+            <span className="!text-m-regular !text-white max-w-xl">
               {t("errorMaintenance.description")}
             </span>
           </div>
