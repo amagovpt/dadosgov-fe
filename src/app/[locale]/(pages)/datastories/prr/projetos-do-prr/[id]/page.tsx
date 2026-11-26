@@ -13,7 +13,7 @@ import {
   getPrrProjectMeta,
   getPrrProjectSheet,
   loadMorePrrProjectSheetBeneficiaryFinancing,
-} from "@/service/queries/datastories/datastory";
+} from "@/service/queries/datastories/datastories-prr";
 import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Project,

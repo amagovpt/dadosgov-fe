@@ -28,6 +28,11 @@ const RELATED_DATASETS = {
     ownOrganizationId: "600850ac454ae38cbce87116",
     includeOwnOrganization: false,
   },
+  pt2020: {
+    terms: ["pt2020"],
+    ownOrganizationId: "600850ac454ae38cbce87116",
+    includeOwnOrganization: false,
+  },
 } satisfies Record<string, RelatedDatasetsSearch>;
 
 export type RelatedDatasetsProgram = keyof typeof RELATED_DATASETS;

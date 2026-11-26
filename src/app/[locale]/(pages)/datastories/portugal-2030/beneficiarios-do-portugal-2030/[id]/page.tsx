@@ -13,7 +13,7 @@ import {
   getPT2030BeneficiaryData,
   getPT2030BeneficiaryMeta,
   queryLoadMorePT2030ProjectsByBeneficiary,
-} from "@/service/queries/datastories/datastory";
+} from "@/service/queries/datastories/datastories-pt2030";
 import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import {
   Beneficiary,

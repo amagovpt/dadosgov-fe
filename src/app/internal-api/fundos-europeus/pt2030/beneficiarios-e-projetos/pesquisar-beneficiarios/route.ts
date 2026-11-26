@@ -1,5 +1,5 @@
 import { print } from "graphql";
-import { getBeneficiariesOfPortugal2030 } from "@/service/queries/datastories/datastory";
+import { getBeneficiariesOfPortugal2030 } from "@/service/queries/datastories/datastories-pt2030";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
 import { FilterValue } from "@/store/searchBenProj-store";
 
