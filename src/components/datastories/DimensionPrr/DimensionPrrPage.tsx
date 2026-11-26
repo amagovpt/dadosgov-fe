@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getDimensionData, getDimensionPage } from "@/service/queries/datastories/datastory";
+import { getDimensionData, getDimensionPage } from "@/service/queries/datastories/datastories-prr";
 import { getTechnicalSheetData } from "@/service/queries/modal/technical-sheet";
 import { Datastory } from "@/components/Shared/Datastories";
 import { InfoBlock } from "@/components/Shared/InfoBlock";
