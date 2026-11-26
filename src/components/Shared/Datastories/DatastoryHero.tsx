@@ -28,7 +28,7 @@ function ModalContent({ modal }: { modal: DatastoryHeroModal }) {
             {modal.subtitle}
           </Typograph>
         </div>
-        <div className="flex flex-col gap-16 text-white [&_p]:text-l-bold">
+        <div className="flex flex-col gap-16 text-white [&_p:has(+ol)]:text-l-bold [&_p:has(+ul)]:text-l-bold">
           {formatHtmlParagraphs(modal.description)}
         </div>
       </div>

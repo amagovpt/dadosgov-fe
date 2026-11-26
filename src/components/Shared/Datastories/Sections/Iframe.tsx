@@ -83,7 +83,7 @@ export default function Iframe({
         );
       })}
       {button && (
-        <InfoBlock.Root>
+        <InfoBlock.Root className="pb-64">
           <InfoBlock.Content className="flex w-full flex-col items-start gap-32">
             <Link href={button.href} target="_blank" className="">
               <Button
