@@ -569,6 +569,14 @@ li.section-name:empty {
   height: 100%;
 }
 
+.result-card-v2 .agora-card-general-side-anchor {
+  display: block !important;
+}
+
+.result-card-v2 .agora-card-general-anchor-mobile {
+  display: none !important;
+}
+
 /* 5.5 Cards (Illustrative) - Mini-courses */
 .mini-courses-cards .agora-card-illustrative.horizontal {
   align-items: center;
@@ -814,6 +822,8 @@ li.section-name:empty {
   padding: 32px 64px 32px 32px;
 }
 
+/* 5.9 Pagination */
+
 .agora-search-pagination {
   padding-left: 50px;
   padding-right: 50px;
@@ -821,6 +831,22 @@ li.section-name:empty {
 
 .agora-search-pagination .nav-arrows {
   border-color: var(--color-primary-600);
+}
+
+@media (max-width: 768px) {
+  .glossary-page .agora-search-pagination {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (max-width: 375px) {
+  /* Hide the boundary items, except when they are the current page or sit right next to it
+     (pages 1-2 and the last two), where there is no ellipsis between them. */
+  .glossary-page .nav-pages div:first-child:not(:has(.current)):not(:has(+ div .current)),
+  .glossary-page .nav-pages div:last-child:not(:has(.current)):not(div:has(.current) + div) {
+    display: none !important;
+  }
 }
 
 /* 5.10 Toggle (Organizations Filters) */
@@ -1063,11 +1089,7 @@ div.agora-dialog {
   display: block !important;
 }
 
-/* Glossary: tighter letter grid so A–Z fits the 3-column sidebar */
-#glossary-letters-navbar .glossary-container {
-  gap: 8px 32px !important;
-}
-
+<<<<<<<<< Temporary merge branch 1
 .datastory-page .result-card .card-general,
 .datastory-page .result-card .card-general .content,
 .datastory-page .result-card .card-general .content div:first-child {
@@ -1096,6 +1118,11 @@ div.agora-dialog {
 
 .datastory-page .ranged-number-filter .feedback-right .agora-input-text-wrapper div.feedback {
   flex-direction: row-reverse;
+}
+
+/* Glossary: tighter letter grid so A–Z fits the 3-column sidebar */
+#glossary-letters-navbar .glossary-container {
+  gap: 8px 32px !important;
 }
 
 /* ==========================================================================

@@ -72,9 +72,8 @@ export function InvestmentsAndReformsDetail({
   const autoId = useId();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const itemCountLabel = t(
-    type === "investments" ? "prr.dimensions.investments" : "prr.dimensions.reforms"
-  );
+  const itemCountKey =
+    type === "investments" ? "prr.dimensions.investments" : "prr.dimensions.reforms";
 
   return (
     <div className={`w-full ${className}`}>
@@ -95,7 +94,7 @@ export function InvestmentsAndReformsDetail({
                     tag="span"
                     className="w-full text-m-regular text-neutral-900 md:max-w-[248px]"
                   >
-                    {category.itemCount} {itemCountLabel}
+                    {t(itemCountKey, { count: category.itemCount })}
                   </Typograph>
                   <div className="flex w-full flex-col gap-8 md:max-w-[416px]">
                     <ProgressBar

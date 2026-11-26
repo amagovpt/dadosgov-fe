@@ -1,7 +1,6 @@
 "use client";
 
 import { BenProjSheet } from "@/components/datastories/BeneficiaryAndProject/Sheet";
-import { LinkIcon } from "@/components/Primitives/LinkIcon";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 import {
   ProjectSheetContestAndContractsTab,
@@ -95,37 +94,41 @@ export default function BenProjSheetTabPublicContractingPRR({
 
           {detailContracts.length > 0 && (
             <div className="grid grid-cols-1 gap-16 xl:grid-cols-2">
-              {detailContracts.map((contract, index) => (
-                <div
-                  key={`prr-contract-${index}`}
-                  className="relative flex flex-col gap-8 rounded-4 bg-white p-24 pr-64"
-                >
-                  <Typograph tag="h4" className="text-m-bold text-primary-900">
-                    {contract.name ?? "-"}
-                  </Typograph>
-                  <Typograph tag="p" className="text-s-regular text-neutral-800">
-                    {t("prr.sheet.value")}{" "}
-                    <span className="text-primary-900">
-                      {contract.value !== null && contract.value !== undefined
-                        ? formatCurrency(contract.value, t)
-                        : "-"}
-                    </span>
-                  </Typograph>
-                  {contract.link && (
-                    <div className="absolute top-1/2 right-24 -translate-y-1/2">
-                      <LinkIcon
-                        title=""
-                        href={contract.link}
-                        className="p-0! leading-none!"
-                        icon={{
-                          name: "agora-line-arrow-right-circle",
-                          hoverName: "agora-solid-arrow-right-circle",
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
+              {detailContracts.map((contract, index) => {
+                const content = (
+                  <>
+                    <Typograph tag="h4" className="text-m-bold text-primary-900">
+                      {contract.name ?? "-"}
+                    </Typograph>
+                    <Typograph tag="p" className="text-s-regular text-neutral-800">
+                      {t("prr.sheet.value")}{" "}
+                      <span className="text-primary-900">
+                        {contract.value !== null && contract.value !== undefined
+                          ? formatCurrency(contract.value, t)
+                          : "-"}
+                      </span>
+                    </Typograph>
+                  </>
+                );
+
+                // without a link the card has no arrow and is not clickable
+                return contract.link ? (
+                  <BenProjSheet.LinkCard
+                    key={`prr-contract-${index}`}
+                    href={contract.link}
+                    className="gap-8 p-24 pr-64"
+                  >
+                    {content}
+                  </BenProjSheet.LinkCard>
+                ) : (
+                  <div
+                    key={`prr-contract-${index}`}
+                    className="flex flex-col gap-8 rounded-4 bg-white p-24 pr-64"
+                  >
+                    {content}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

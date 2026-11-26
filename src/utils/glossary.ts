@@ -33,3 +33,29 @@ export function filterGlossary(entries: GlossaryEntry[], query: string): Glossar
 }
 
 export const GLOSSARY_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+export const GLOSSARY_PAGE_SIZE = 16;
+
+/**
+ * Slices the sorted groups into pages of `pageSize` entries, keeping the letter grouping.
+ * A letter whose entries cross a page boundary is repeated on each page it appears in.
+ */
+export function paginateGroups(
+  groups: GlossaryGroup[],
+  pageSize: number = GLOSSARY_PAGE_SIZE
+): GlossaryGroup[][] {
+  const flat = groups.flatMap((group) => group.items.map((item) => ({ letter: group.letter, item })));
+  const pages: GlossaryGroup[][] = [];
+
+  for (let start = 0; start < flat.length; start += pageSize) {
+    const pageGroups: GlossaryGroup[] = [];
+    for (const { letter, item } of flat.slice(start, start + pageSize)) {
+      const last = pageGroups[pageGroups.length - 1];
+      if (last && last.letter === letter) last.items.push(item);
+      else pageGroups.push({ letter, items: [item] });
+    }
+    pages.push(pageGroups);
+  }
+
+  return pages;
+}

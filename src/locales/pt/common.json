@@ -137,6 +137,7 @@
     "articlesLabel": "O que procura nas novidades?",
     "articlesPlaceholder": "Pesquisar artigos, notícias, webinars...",
     "voiceAction": "Pesquisar por voz",
+    "voiceActionStop": "Parar pesquisa por voz",
     "types": {
       "datasets": "Conjunto de dados",
       "reuses": "Reutilizações",
@@ -367,18 +368,7 @@
     "noDiscussionsTitle": "Sem discussões",
     "noDiscussionsDescription": "Ainda não existem discussões."
   },
-  "glossary": {
-    "title": "Glossário",
-    "subtitle": "Explicação dos termos técnicos usados no portal.",
-    "searchLabel": "Pesquisar palavra",
-    "searchPlaceholder": "Insira a palavra que procura no glossário",
-    "searchActionAltText": "Pesquisar no glossário",
-    "lettersNavigation": "Navegação por letras do glossário",
-    "linkForLetter": "Ir para a letra {{letter}}",
-    "foundResults_one": "{{count}} resultado",
-    "foundResults_other": "{{count}} resultados",
-    "noResults": "Nenhum termo encontrado."
-  },
+<<<<<<<<< Temporary merge branch 1
   "searchBenProj": {
     "beneficiary": "beneficiário",
     "project": "projeto",
@@ -516,13 +506,17 @@
       "ben_name": "Nome",
       "total_projetos": "Total de projetos",
       "total_financiado": "Total financiado",
+      "total_pago": "Total pago",
       "financiamento_recebido": "Financiamento recebido",
       "valor_recebido": "Valor recebido",
       "atividade_economica": "Atividade económica",
       "localizacao_sede": "Localização da sede"
     },
     "tooltips": {
-      "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus."
+      "codigo_projeto": "Código que identifica cada projeto efetuado com recurso a fundos europeus.",
+      "valor_financiamento_beneficiario": "Valor total de financiamento atribuído ao beneficiário.",
+      "total_projetos": "Número de projetos",
+      "total_financiado": "Total financiado"
     },
     "noGrade": "Não se aplica",
     "byArea": "Por {{area}}",
@@ -585,8 +579,10 @@
     },
     "dimensions": {
       "completionPercentage": "Percentagem de conclusão",
-      "investments": "Investimentos",
-      "reforms": "Reformas",
+      "investments_one": "{{count}} Investimento",
+      "investments_other": "{{count}} Investimentos",
+      "reforms_one": "{{count}} Reforma",
+      "reforms_other": "{{count}} Reformas",
       "investment": "Investimento",
       "reform": "Reforma",
       "seeMore": "Ver mais",
@@ -612,5 +608,17 @@
       "supportValues": "Apoios",
       "loanValues": "Empréstimos"
     }
+  },
+  "glossary": {
+    "title": "Glossário",
+    "subtitle": "Explicação dos termos técnicos usados no portal.",
+    "searchLabel": "Pesquisar palavra",
+    "searchPlaceholder": "Insira a palavra que procura no glossário",
+    "searchActionAltText": "Pesquisar no glossário",
+    "lettersNavigation": "Navegação por letras do glossário",
+    "linkForLetter": "Ir para a letra {{letter}}",
+    "foundResults_one": "{{count}} resultado",
+    "foundResults_other": "{{count}} resultados",
+    "noResults": "Nenhum termo encontrado."
   }
 }

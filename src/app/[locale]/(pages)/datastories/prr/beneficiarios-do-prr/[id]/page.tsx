@@ -192,6 +192,7 @@ export default async function BeneficiaryPage({
     financedValue: t("sheetBenProj.fields.valor_financiamento"),
     receivedValue: t("sheetBenProj.fields.valor_recebido"),
     totalFunded: t("sheetBenProj.fields.total_financiado"),
+    totalPaid: t("sheetBenProj.fields.total_pago"),
     suppliers: suppliersLabel,
     fundedValue: t("financingValue"),
     paidValue: t("paidValue"),
@@ -314,6 +315,7 @@ export default async function BeneficiaryPage({
               relatedProjects={beneficiaryRelatedProjects}
               labels={relatedProjectsLabels}
               nif={id}
+              dateFormat="dd.MM.yyyy"
             />
           </InfoBlock.Content>
         </InfoBlock.Root>
