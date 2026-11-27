@@ -11,6 +11,7 @@
   },
   "sort": {
     "visualizacoes": "Views",
+    "titulo": "A-Z",
     "recentes": "Newest",
     "antigos": "Oldest",
     "favoritos": "Favorites",

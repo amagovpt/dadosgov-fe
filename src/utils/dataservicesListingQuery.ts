@@ -4,6 +4,7 @@ import { DataserviceListFilters } from "@/service/api/dataservices";
 // (generated from the model's sortable fields), not the underlying columns.
 export const DATASERVICE_SORT_OPTIONS: Record<string, string> = {
   visualizacoes: "-views",
+  titulo: "title",
   recentes: "-created",
   antigos: "created",
   favoritos: "-followers",

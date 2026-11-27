@@ -57,6 +57,7 @@ export default function DataservicesClient({
 
   const DATASERVICE_SORT_LABELS: Record<string, string> = {
     visualizacoes: tDs("sort.visualizacoes"),
+    titulo: tDs("sort.titulo"),
     recentes: tDs("sort.recentes"),
     antigos: tDs("sort.antigos"),
     // Hidden for now; uncomment to show the favorites sort.
