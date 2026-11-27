@@ -1,6 +1,6 @@
 import { fetchOrganizationsListing } from "@/service/api/organizations";
 import OrganizationsClient from '@/components/organizations/OrganizationsClient';
-import { OrganizationFilters } from "@/service/types/identity";
+import { parseOrganizationsFilters } from "@/utils/organizationsListingQuery";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 import { Metadata } from 'next';
 import { getFrontOfficeMetadata, getFrontOfficePage } from "@/service/queries/common";
@@ -47,17 +47,14 @@ export default async function OrganizationsPage({
     const resolved = await searchParams;
     const page = Number(resolved?.page) || 1;
 
-    const filters: OrganizationFilters = {};
-    if (resolved?.q) filters.q = String(resolved.q);
-    if (resolved?.badge) filters.badge = resolved.badge;
-    if (resolved?.organization) filters.organization = resolved.organization;
-    if (resolved?.sort) filters.sort = String(resolved.sort);
-
-    // Relevance sort: when no search query, fall back to default (most recent first)
-    const apiFilters = { ...filters };
-    if (!apiFilters.sort && !apiFilters.q) {
-        apiFilters.sort = '-last_modified';
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(resolved ?? {})) {
+        if (value === undefined) continue;
+        for (const item of Array.isArray(value) ? value : [value]) {
+            queryParams.append(key, item);
+        }
     }
+    const apiFilters = parseOrganizationsFilters(queryParams);
 
     // LEDG-1836: one aggregated call replaces the prior Promise.all of 3 + N (badge) fetches.
     // Relay the real client IP on the SSR fetch (which, on a listing-cache miss,

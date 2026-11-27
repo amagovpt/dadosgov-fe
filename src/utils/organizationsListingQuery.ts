@@ -1,10 +1,11 @@
 import { OrganizationFilters } from "@/service/types/identity";
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  mais_dados: "-datasets",
-  mais_reutilizacoes: "-reuses",
-  subscritores: "-followers",
+  dados: "-datasets",
+  alfabetica: "name",
+  reutilizacoes: "-reuses",
+  recentes: "-created",
+  antigos: "created",
 };
 
 export function parseOrganizationsFilters(params: URLSearchParams): OrganizationFilters {
@@ -20,8 +21,8 @@ export function parseOrganizationsFilters(params: URLSearchParams): Organization
     }),
   };
 
-  if (!filters.sort && !filters.q) {
-    filters.sort = "-last_modified";
+  if (!filters.sort) {
+    filters.sort = "-created";
   }
 
   return filters;
@@ -29,8 +30,8 @@ export function parseOrganizationsFilters(params: URLSearchParams): Organization
 
 export function getOrganizationSortDefault(sortParam: string | null): string {
   return (
-    Object.entries(ORGANIZATION_SORT_OPTIONS).find(([, value]) => value === (sortParam || ""))?.[0] ||
-    "relevancia"
+    Object.entries(ORGANIZATION_SORT_OPTIONS).find(
+      ([, value]) => value === (sortParam || "-created")
+    )?.[0] || "recentes"
   );
 }
-
