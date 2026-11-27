@@ -23,7 +23,7 @@ export function parseOrganizationsFilters(params: URLSearchParams): Organization
   };
 
   if (!filters.sort) {
-    filters.sort = "-created";
+    filters.sort = "-views";
   }
 
   return filters;
@@ -32,7 +32,7 @@ export function parseOrganizationsFilters(params: URLSearchParams): Organization
 export function getOrganizationSortDefault(sortParam: string | null): string {
   return (
     Object.entries(ORGANIZATION_SORT_OPTIONS).find(
-      ([, value]) => value === (sortParam || "-created")
-    )?.[0] || "recentes"
+      ([, value]) => value === (sortParam || "-views")
+    )?.[0] || "visualizacoes"
   );
 }

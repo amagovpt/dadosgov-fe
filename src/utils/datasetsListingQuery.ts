@@ -83,7 +83,7 @@ export function parseDatasetsFilters(params: URLSearchParams): DatasetFilters {
   }
 
   if (!filters.sort) {
-    filters.sort = "-created";
+    filters.sort = "-views";
   }
 
   return filters;
@@ -112,7 +112,7 @@ export function parseDatasetsFiltersFromSearchParams(
 export function getDatasetSortDefault(sortParam: string | null): string {
   return (
     Object.entries(DATASET_SORT_OPTIONS).find(
-      ([, value]) => value === (sortParam || "-created")
-    )?.[0] || "recentes"
+      ([, value]) => value === (sortParam || "-views")
+    )?.[0] || "visualizacoes"
   );
 }

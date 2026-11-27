@@ -17,7 +17,7 @@ export function parseDataservicesFilters(params: URLSearchParams): DataserviceLi
 
   return {
     ...(params.get("q") && { q: params.get("q") as string }),
-    sort: params.get("sort") || "-created",
+    sort: params.get("sort") || "-views",
     ...(params.get("access_type") && { access_type: params.get("access_type") as string }),
     ...(params.get("organization_badge") && {
       organization_badge: params.get("organization_badge") as string,
@@ -34,7 +34,7 @@ export function parseDataservicesFilters(params: URLSearchParams): DataserviceLi
 export function getDataserviceSortDefault(sortParam: string | null): string {
   return (
     Object.entries(DATASERVICE_SORT_OPTIONS).find(
-      ([, value]) => value === (sortParam || "-created")
-    )?.[0] || "recentes"
+      ([, value]) => value === (sortParam || "-views")
+    )?.[0] || "visualizacoes"
   );
 }

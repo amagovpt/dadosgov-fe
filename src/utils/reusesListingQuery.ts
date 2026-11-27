@@ -26,7 +26,7 @@ export function parseReusesFilters(params: URLSearchParams): ReuseFilters {
   };
 
   if (!filters.sort) {
-    filters.sort = "-created";
+    filters.sort = "-views";
   }
 
   return filters;
@@ -35,7 +35,7 @@ export function parseReusesFilters(params: URLSearchParams): ReuseFilters {
 export function getReuseSortDefault(sortParam: string | null): string {
   return (
     Object.entries(REUSE_SORT_OPTIONS).find(
-      ([, value]) => value === (sortParam || "-created")
-    )?.[0] || "recentes"
+      ([, value]) => value === (sortParam || "-views")
+    )?.[0] || "visualizacoes"
   );
 }
