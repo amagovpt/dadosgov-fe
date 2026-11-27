@@ -1,10 +1,11 @@
 import { DatasetFilters } from "@/service/types/dataset";
 
 export const DATASET_SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  criacao: "-created",
-  antigo: "created",
-  subscritores: "-followers",
+  visualizacoes: "-views",
+  reutilizacoes: "-reuses",
+  recentes: "-created",
+  antigos: "created",
+  favoritos: "-followers",
 };
 
 // Query params the dataset API accepts more than once, each repeat OR'ed with
@@ -81,7 +82,7 @@ export function parseDatasetsFilters(params: URLSearchParams): DatasetFilters {
     filters[name] = values.length === 1 ? values[0] : values;
   }
 
-  if (!filters.sort && !filters.q) {
+  if (!filters.sort) {
     filters.sort = "-created";
   }
 
@@ -110,7 +111,8 @@ export function parseDatasetsFiltersFromSearchParams(
 
 export function getDatasetSortDefault(sortParam: string | null): string {
   return (
-    Object.entries(DATASET_SORT_OPTIONS).find(([, value]) => value === (sortParam || ""))?.[0] ||
-    "relevancia"
+    Object.entries(DATASET_SORT_OPTIONS).find(
+      ([, value]) => value === (sortParam || "-created")
+    )?.[0] || "recentes"
   );
 }
