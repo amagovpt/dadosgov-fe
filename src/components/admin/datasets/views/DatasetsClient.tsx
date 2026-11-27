@@ -186,6 +186,7 @@ export default function DatasetsClient({
           status: t("admin-datasets:list.columns.status"),
           producer: t("admin-datasets:list.columns.producer"),
           lastModified: t("admin-datasets:list.columns.lastChanged"),
+          resources: t("admin-datasets:list.columns.resources"),
           quality: t("admin-datasets:list.columns.metadataQuality"),
         },
         statusLabels: {

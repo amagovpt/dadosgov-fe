@@ -51,7 +51,7 @@ export function sortAdminDatasets(
 
 interface AdminDatasetColumnsOptions {
   editHref?: (dataset: DatasetListItem) => string;
-  labels: Record<"title" | "status" | "producer" | "lastModified" | "quality", string>;
+  labels: Record<"title" | "status" | "producer" | "lastModified" | "resources" | "quality", string>;
   statusLabels: Record<ResourceStatusKey, string>;
 }
 
@@ -93,6 +93,12 @@ export function createAdminDatasetColumns({
       sortType: "date",
       renderCell: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
       exportValue: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
+    },
+    {
+      id: "resources",
+      header: labels.resources,
+      renderCell: (dataset) => dataset.resources?.total ?? 0,
+      exportValue: (dataset) => dataset.resources?.total ?? 0,
     },
     {
       id: "quality",
