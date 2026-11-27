@@ -1,6 +1,7 @@
 import { OrganizationFilters } from "@/service/types/identity";
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, string> = {
+  visualizacoes: "-views",
   dados: "-datasets",
   alfabetica: "name",
   reutilizacoes: "-reuses",
