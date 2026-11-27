@@ -59,7 +59,8 @@ export default function DataservicesClient({
     visualizacoes: tDs("sort.visualizacoes"),
     recentes: tDs("sort.recentes"),
     antigos: tDs("sort.antigos"),
-    favoritos: tDs("sort.favoritos"),
+    // Hidden for now; uncomment to show the favorites sort.
+    // favoritos: tDs("sort.favoritos"),
   };
 
   return (

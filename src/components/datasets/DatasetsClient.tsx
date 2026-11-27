@@ -56,7 +56,8 @@ export default function DatasetsClient({
     reutilizacoes: tds("sort.reutilizacoes"),
     recentes: tds("sort.recentes"),
     antigos: tds("sort.antigos"),
-    favoritos: tds("sort.favoritos"),
+    // Hidden for now; uncomment to show the favorites sort.
+    // favoritos: tds("sort.favoritos"),
   };
 
   const { show, hide } = usePopupContext();

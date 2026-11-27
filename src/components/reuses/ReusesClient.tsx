@@ -50,7 +50,8 @@ export default function ReusesClient({
     dados: tr("sort.dados"),
     recentes: tr("sort.recentes"),
     antigos: tr("sort.antigos"),
-    favoritos: tr("sort.favoritos"),
+    // Hidden for now; uncomment to show the favorites sort.
+    // favoritos: tr("sort.favoritos"),
   };
 
   const router = useRouter();
