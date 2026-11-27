@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import DatastoryDetailsPage from "@/components/Shared/Datastories/DatastoryDetailsPage";
-import { getDatastory, getDatastoryMetadata } from "@/service/queries/datastories/datastory";
+import { getDatastory, getDatastoryMetadata } from "@/service/queries/datastories/datastories";
 
 export async function generateMetadata({
   params,
@@ -28,5 +28,5 @@ export default async function DataStoryDetailPage({
 
   const datastory = await getDatastory(datastorySlug, locale);
 
-  return <DatastoryDetailsPage datastory={datastory} slug={datastorySlug} />;
+  return <DatastoryDetailsPage datastory={datastory} slug={datastorySlug}/>;
 }

@@ -52,6 +52,11 @@
     "archived": "Arquivado",
     "addFavorite": "Adicionar aos favoritos",
     "removeFavorite": "Remover dos favoritos",
+    "favoriteAuth": {
+      "title": "Autenticação necessária",
+      "description": "Só os utilizadores autenticados podem adicionar conteúdos aos favoritos.",
+      "signIn": "Autenticar"
+    },
     "edit": "Editar",
     "noAuthor": "Sem autor",
     "authorAlt": "Autor",
@@ -259,6 +264,7 @@
     "copyTitle": "Copiar título",
     "copy": "Copiar {{label}}",
     "copied": "Copiado!",
+    "copyFailed": "Não foi possível copiar.",
     "updatedOn": "Atualizado em {{date}}",
     "by": "Por",
     "format": "Formato {{format}}",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import NextImage from "next/image";
 import { useTranslation } from "react-i18next";
 import { Button, RadioButton } from "@ama-pt/agora-design-system";
@@ -32,6 +32,7 @@ export function CmdTab({
   onOpenModal: () => void;
 }) {
   const { t } = useTranslation("login");
+  const citizenTypeId = useId();
   const [citizenType, setCitizenType] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -73,15 +74,15 @@ export function CmdTab({
             <div className="mt-8 flex flex-col gap-16">
               <RadioButton
                 label={t("cmd.citizenNational")}
-                id="nacional"
-                name="citizen-type"
+                id={`nacional-${citizenTypeId}`}
+                name={`citizen-type-${citizenTypeId}`}
                 className="text-lg text-neutral-900"
                 onChange={() => setCitizenType(CITIZEN_NATIONAL)}
               />
               <RadioButton
                 label={t("cmd.citizenForeign")}
-                id="estrangeiro"
-                name="citizen-type"
+                id={`estrangeiro-${citizenTypeId}`}
+                name={`citizen-type-${citizenTypeId}`}
                 className="text-lg text-neutral-900"
                 onChange={() => setCitizenType(CITIZEN_FOREIGN)}
               />

@@ -11,53 +11,22 @@ import ScrollTop from "@/components/ScrollTop";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
 import { ReactNode } from "react";
-import { i18nConfig } from "@/config/i18nConfig";
+import { i18nConfig, rootNamespaces } from "@/config/i18nConfig";
 import initTranslations from "../i18n";
 import TranslationsProvider from "@/providers/TranslationProvider";
 import { getInitialSession } from "@/service/api/auth/server";
 import Footer from "@/components/Footer";
 import { loadShellData } from "@/service/commom/shell";
 import { ShellProvider } from "@/providers/ShellProvider";
+import { LoaderProvider } from "@/providers/LoaderProvider";
 import { RuntimeConfigProvider } from "@/providers/RuntimeConfigProvider";
 import { getAnalyticsConfig, getRuntimeConfig } from "@/config/runtimeConfig";
 import KarmaAnalytics from "@/Scripts/Karma";
 import GoogleConsentDefault from "@/Scripts/GoogleConsentDefault";
 import GoogleAnalytics from "@/Scripts/GoogleAnalytics";
 
-const namespaces = [
-  "common",
-  "footer",
-  "datastories",
-  "datasets",
-  "login",
-  "learning",
-  "documentation",
-  "profile",
-  "reuses",
-  "organizations",
-  "dataservices",
-  "support",
-  "user-guides",
-  "admin-common",
-  "admin-harvesters",
-  "admin-dataservices",
-  "admin-datasets",
-  "admin-community-resources",
-  "admin-organizations",
-  "admin-reuses",
-  "admin-discussions",
-  "admin-notifications",
-  "admin-users",
-  "admin-members",
-  "admin-profile",
-  "admin-posts",
-  "admin-topics",
-  "admin-jobs",
-  "admin-migrations",
-  "admin-logs",
-  "admin-editorial",
-  "admin-statistics",
-];
+// Route segments add their own namespaces through `RouteTranslations`.
+const namespaces = rootNamespaces;
 
 export async function generateMetadata({
   params,
@@ -134,15 +103,17 @@ export default async function RootLayout({
               <ApolloWrapper>
                 <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
                   <ToastProviderWrapper>
-                    <ApiErrorProvider>
-                      <PopupProviderWrapper>
-                        <ShellProvider headerNavigation={headerNavigation}>
-                          <ScrollTop />
-                          {children}
-                          <Footer data={footerData} />
-                        </ShellProvider>
-                      </PopupProviderWrapper>
-                    </ApiErrorProvider>
+                    <LoaderProvider>
+                      <ApiErrorProvider>
+                        <PopupProviderWrapper>
+                          <ShellProvider headerNavigation={headerNavigation}>
+                            <ScrollTop />
+                            {children}
+                            <Footer data={footerData} />
+                          </ShellProvider>
+                        </PopupProviderWrapper>
+                      </ApiErrorProvider>
+                    </LoaderProvider>
                   </ToastProviderWrapper>
                 </TranslationsProvider>
               </ApolloWrapper>

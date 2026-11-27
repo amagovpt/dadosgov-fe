@@ -1,4 +1,5 @@
 ﻿import { BreadcrumbItem } from "../shared";
+import type { Badge, UserRef } from "../identity";
 
 type Anchor = {
   children: string;
@@ -34,11 +35,20 @@ type Index = {
   anchors: IndexAnchor[];
 };
 
-export type DatastoryHero = {
+export type DatastoryHeroModal = {
+  button: string;
   title: string;
+  subtitle: string;
   description: string;
+};
+
+export type DatastoryHero = {
+  pretitle?: string;
+  title: string;
+  description?: string;
   index: Index;
   breadcrumbs: BreadcrumbItem[];
+  modal?: DatastoryHeroModal;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -131,6 +141,7 @@ export type IframeSection = {
   description?: string;
   links?: Anchor[];
   iframe: Iframe[];
+  button?: Anchor;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -153,13 +164,24 @@ export type RelatedSection = {
 
 // ----------------------------------------------------------------------------------------------
 
-type Metadata = {
+// Squidex fills only the base fields; datasets read from the API also carry what the /datasets
+// card shows (metrics, quality, badges and the owner of datasets without an organization)
+export type SourceDataset = {
   image?: string[];
   slug: string;
   organizationName: string;
   title: string;
   description: string;
   createdAt: string;
+  metrics?: {
+    views?: number;
+    resources_downloads?: number;
+    reuses?: number;
+    followers?: number;
+  };
+  quality?: { score: number };
+  badges?: Badge[];
+  owner?: Pick<UserRef, "slug" | "first_name" | "last_name" | "avatar_thumbnail"> | null;
 };
 
 export type SourceSection = {
@@ -167,7 +189,7 @@ export type SourceSection = {
   id: string;
   active?: boolean;
   title: string;
-  datasets: Metadata[];
+  datasets: SourceDataset[];
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -218,8 +240,6 @@ export type DatastorySections = {
   sections: DatastorySection[];
 };
 
-// ----------------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
 
 export type Datastory = {

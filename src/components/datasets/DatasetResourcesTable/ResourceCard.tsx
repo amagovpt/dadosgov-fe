@@ -6,7 +6,7 @@ import { Resource } from "@/service/types/dataset";
 import { formatDateLong } from "@/utils/formatDate";
 import { downloadUrl, formatBytes } from "./utils";
 import Button from "@/components/Primitives/Button";
-import { ModalConfiguration, useModalContext } from "@ama-pt/agora-design-system";
+import { useModalContext } from "@ama-pt/agora-design-system";
 import { ResourceExpandedContent } from "./ResourceExpandedContent";
 import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { twMerge } from "tailwind-merge";
@@ -25,6 +25,7 @@ export const ResourceCard: FC<{
   const { show, hide } = useModalContext();
   const cardId = useId();
   const modalOpenCount = useRef(0);
+  const detailsButtonRef = useRef<HTMLButtonElement>(null);
 
   const locale = i18n.language as "pt" | "en";
   const hasLongDescription = (resource.description?.length ?? 0) > DESCRIPTION_COLLAPSE_LIMIT;
@@ -50,10 +51,11 @@ export const ResourceCard: FC<{
         </div>
       </div>,
       {
-        title: tds("resources.details"),
+        "aria-label": tds("resources.details"),
         closeButtonLabel: t("close"),
         darkMode: false,
-      } as ModalConfiguration
+        onHide: () => detailsButtonRef.current?.focus(),
+      }
     );
   };
 
@@ -91,6 +93,7 @@ export const ResourceCard: FC<{
 
         <div className="flex flex-wrap gap-32">
           <Button
+            ref={detailsButtonRef}
             appearance="link"
             hasIcon
             trailingIcon="agora-line-eye"
