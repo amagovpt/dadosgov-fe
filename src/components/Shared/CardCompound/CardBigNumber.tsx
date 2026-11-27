@@ -6,20 +6,24 @@ export type CardBigNumberProps = {
     className?: string,
     number: number | string,
     locale?: string,
-    detail?: string,
+    type?: "qtd" | "value",
+    unit?: string
 }
 
 
-export default function CardBigNumber(args: CardBigNumberProps) {
-    const { extense, numberResolve } = formatNumberExtense(args.number, args.locale)
+export default function CardBigNumber({ number, className, locale, type = "value", unit }: CardBigNumberProps) {
+    const { extense, numberResolve } = formatNumberExtense(number, locale)
     return (
-        <div className={twJoin('text-white flex gap-8 items-baseline', args.className)}>
+        <div className={twJoin('text-white flex gap-8 items-baseline', className)}>
             <span className='text-3xl-bold number-resolve'>
-                {args.detail ? args.number : numberResolve}
+                {type === "qtd" ? number.toLocaleString("de-DE") : numberResolve}
             </span>
-            <span className='text-xl-light extense-resolve'>
-                {args.detail ?? extense}
-            </span>
+            {type === "value" && (
+                <span className='text-xl-light extense-resolve'>
+                    {unit ? `${extense} ${unit}` : extense}
+                </span>
+            )}
+
         </div>
     )
 }
