@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { Checkbox, Icon, StatusCard } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
 import Link from "next/link";
@@ -72,6 +72,8 @@ export function TermsSection({
 }) {
   const { t } = useTranslation("login");
 
+  const checkboxId = `${id}-${useId()}`;
+
   return (
     <div className="mt-8 flex flex-col gap-8">
       <Typograph tag="h3" className="text-l-bold text-brand-blue-dark">
@@ -87,7 +89,7 @@ export function TermsSection({
         </TextLink>
       </Typograph>
       <Checkbox
-        id={id}
+        id={checkboxId}
         className="text-sm leading-relaxed text-neutral-700"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
