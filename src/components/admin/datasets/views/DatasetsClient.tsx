@@ -72,7 +72,8 @@ export default function DatasetsClient({
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
-  const usesLocalSort = sortField === "producer" || sortField === "quality";
+  const usesLocalSort =
+    sortField === "producer" || sortField === "resources" || sortField === "quality";
   const sortsAllPersonalDatasets = scope === "personal" && usesLocalSort;
 
   const sortParam = useMemo(
@@ -186,6 +187,7 @@ export default function DatasetsClient({
           status: t("admin-datasets:list.columns.status"),
           producer: t("admin-datasets:list.columns.producer"),
           lastModified: t("admin-datasets:list.columns.lastChanged"),
+          resources: t("admin-datasets:list.columns.resources"),
           quality: t("admin-datasets:list.columns.metadataQuality"),
         },
         statusLabels: {

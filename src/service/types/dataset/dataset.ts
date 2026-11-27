@@ -1,5 +1,6 @@
 import type { Badge, Organization, UserRef } from '@/service/types/identity';
 import type { Checksum, Metric, SchemaRef, SpatialCoverage, TemporalCoverage } from '@/service/types/shared';
+import type { DatasetResourceLink } from './detail';
 
 export interface Resource {
   id: string;
@@ -116,7 +117,9 @@ export type DatasetListItem = Pick<
   | "created_at"
   | "quality"
   | "permissions"
->;
+> & {
+  resources: DatasetResourceLink;
+};
 
 export interface DatasetCreatePayload {
   title: string;

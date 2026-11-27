@@ -1,11 +1,11 @@
 import type { CSSProperties, ReactNode } from "react";
 import {
   TableHeader,
-  TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
+import TableHeaderCell from "@/components/Shared/Table/TableHeaderCell";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
 export interface AdminListColumn<T, F extends string = never> {

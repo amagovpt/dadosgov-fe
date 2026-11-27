@@ -16,12 +16,13 @@ import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 import { formatDatasetDate } from "./datasetsListConfig";
 
-export type AdminDatasetSortField = "title" | "producer" | "last_modified" | "quality";
+export type AdminDatasetSortField = "title" | "producer" | "last_modified" | "resources" | "quality";
 
 export const adminDatasetSortFieldMap: Record<AdminDatasetSortField, string | null> = {
   title: "title",
   producer: null,
   last_modified: "last_update",
+  resources: null,
   quality: null,
 };
 
@@ -45,13 +46,14 @@ export function sortAdminDatasets(
     title: createLocaleStringSorter((dataset) => dataset.title),
     producer: createLocaleStringSorter(getDatasetProducer),
     last_modified: createDateSorter((dataset) => getDatasetLastUpdate(dataset)),
+    resources: (a, b) => (a.resources?.total ?? 0) - (b.resources?.total ?? 0),
     quality: (a, b) => getQualityScore(a) - getQualityScore(b),
   });
 }
 
 interface AdminDatasetColumnsOptions {
   editHref?: (dataset: DatasetListItem) => string;
-  labels: Record<"title" | "status" | "producer" | "lastModified" | "quality", string>;
+  labels: Record<"title" | "status" | "producer" | "lastModified" | "resources" | "quality", string>;
   statusLabels: Record<ResourceStatusKey, string>;
 }
 
@@ -93,6 +95,14 @@ export function createAdminDatasetColumns({
       sortType: "date",
       renderCell: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
       exportValue: (dataset) => formatDatasetDate(getDatasetLastUpdate(dataset)),
+    },
+    {
+      id: "resources",
+      header: labels.resources,
+      sortField: "resources",
+      sortType: "numeric",
+      renderCell: (dataset) => dataset.resources?.total ?? 0,
+      exportValue: (dataset) => dataset.resources?.total ?? 0,
     },
     {
       id: "quality",

@@ -9,13 +9,13 @@ import {
   TableBody,
   TableCell,
   TableHeader,
-  TableHeaderCell,
   TableRow,
   TableSelectionCell,
   Toggle,
   ToggleGroup,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import TableHeaderCell from "@/components/Shared/Table/TableHeaderCell";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import { AdminSearch } from "@/components/admin/lists/AdminSearch";
 import ResultsCount from "@/components/admin/ResultsCount";
