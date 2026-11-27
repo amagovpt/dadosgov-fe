@@ -1,16 +1,11 @@
 import { ReuseFilters } from "@/service/types/reuse";
 
 export const REUSE_SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  recentes: "-last_modified",
-  antigos: "last_modified",
-  subscritores: "-followers",
-};
-
-const REUSE_SORT_REVERSE_MAP: Record<string, string> = {
-  "-last_modified": "recentes",
-  last_modified: "antigos",
-  "-followers": "subscritores",
+  visualizacoes: "-views",
+  dados: "-datasets",
+  recentes: "-created",
+  antigos: "created",
+  favoritos: "-followers",
 };
 
 export function parseReusesFilters(params: URLSearchParams): ReuseFilters {
@@ -30,14 +25,17 @@ export function parseReusesFilters(params: URLSearchParams): ReuseFilters {
     }),
   };
 
-  if (!filters.sort && !filters.q) {
-    filters.sort = "-last_modified";
+  if (!filters.sort) {
+    filters.sort = "-created";
   }
 
   return filters;
 }
 
 export function getReuseSortDefault(sortParam: string | null): string {
-  return REUSE_SORT_REVERSE_MAP[sortParam || ""] || "relevancia";
+  return (
+    Object.entries(REUSE_SORT_OPTIONS).find(
+      ([, value]) => value === (sortParam || "-created")
+    )?.[0] || "recentes"
+  );
 }
-

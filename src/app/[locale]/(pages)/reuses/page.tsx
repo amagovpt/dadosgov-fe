@@ -1,6 +1,6 @@
 import { fetchReusesListing } from "@/service/api/reuses";
 import ReusesClient from '@/components/reuses/ReusesClient';
-import { ReuseFilters } from "@/service/types/reuse";
+import { parseReusesFilters } from "@/utils/reusesListingQuery";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 import { Metadata } from 'next';
 import { getFrontOfficeMetadata, getFrontOfficePage } from "@/service/queries/common";
@@ -47,19 +47,14 @@ export default async function ReusesPage({
     const { locale } = await params;
     const resolvedSearchParams = await searchParams;
     const page = Number(resolvedSearchParams?.page) || 1;
-    const filters: ReuseFilters = {
-        ...(resolvedSearchParams?.q && { q: resolvedSearchParams.q }),
-        ...(resolvedSearchParams?.type && { type: resolvedSearchParams.type }),
-        ...(resolvedSearchParams?.tag && { tag: resolvedSearchParams.tag }),
-        ...(resolvedSearchParams?.organization && { organization: resolvedSearchParams.organization }),
-        ...(resolvedSearchParams?.sort && { sort: resolvedSearchParams.sort }),
-        ...(resolvedSearchParams?.modified_since && { modified_since: resolvedSearchParams.modified_since }),
-    };
-    // Relevance sort: when no search query, fall back to default (most recent first)
-    const apiFilters = { ...filters };
-    if (!apiFilters.sort && !apiFilters.q) {
-        apiFilters.sort = '-last_modified';
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(resolvedSearchParams ?? {})) {
+        if (value === undefined) continue;
+        for (const item of Array.isArray(value) ? value : [value]) {
+            queryParams.append(key, item);
+        }
     }
+    const apiFilters = parseReusesFilters(queryParams);
 
     // LEDG-1836: one aggregated call replaces the prior Promise.all of 6 fetches.
     // Relay the real client IP on the SSR fetch (which, on a listing-cache miss,

@@ -6,10 +6,11 @@
     "placeholder": "Search reuses..."
   },
   "sort": {
-    "relevancia": "Relevance",
-    "recentes": "Most recent",
+    "visualizacoes": "Views",
+    "dados": "Datasets",
+    "recentes": "Newest",
     "antigos": "Oldest",
-    "subscritores": "Subscribers",
+    "favoritos": "Favorites",
     "ariaLabel": "Sort by {{label}}"
   },
   "card": {

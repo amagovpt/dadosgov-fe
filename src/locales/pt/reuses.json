@@ -6,10 +6,11 @@
     "placeholder": "Pesquisar reutilizações..."
   },
   "sort": {
-    "relevancia": "Relevância",
-    "recentes": "Mais recente",
-    "antigos": "Mais antigo",
-    "subscritores": "Subscritores",
+    "visualizacoes": "Visualizações",
+    "dados": "Dados",
+    "recentes": "Recente",
+    "antigos": "Antigo",
+    "favoritos": "Favoritos",
     "ariaLabel": "Ordenar por {{label}}"
   },
   "card": {
