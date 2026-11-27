@@ -19,9 +19,9 @@ export function SupportHero({ content }: SupportHeroProps) {
       <Hero.Breadcrumb />
       <Hero.Content>
         <Hero.Title>
-          <span className="mb-[10px] text-32 font-[500] text-white">{content.title} </span>
+          <span className="text-2xl-medium text-white">{content.title}</span>
           {content.highlight ? (
-            <span className="text-32 font-[500] text-white">{content.highlight}</span>
+            <span className="text-2xl-medium text-white">{content.highlight}</span>
           ) : null}
         </Hero.Title>
         <Hero.Description
