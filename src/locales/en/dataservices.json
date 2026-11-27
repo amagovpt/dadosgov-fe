@@ -10,8 +10,10 @@
     "examples": "Examples: \"geolocation\", \"transport\", \"health\""
   },
   "sort": {
-    "relevancia": "Relevance",
-    "recentes": "Most recent",
+    "visualizacoes": "Views",
+    "recentes": "Newest",
+    "antigos": "Oldest",
+    "favoritos": "Favorites",
     "ariaLabel": "Sort by {{label}}"
   },
   "noResults": {

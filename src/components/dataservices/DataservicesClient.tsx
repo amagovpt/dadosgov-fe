@@ -56,8 +56,10 @@ export default function DataservicesClient({
   const { data: dataservices, total, page_size } = listData;
 
   const DATASERVICE_SORT_LABELS: Record<string, string> = {
-    relevancia: tDs("sort.relevancia"),
+    visualizacoes: tDs("sort.visualizacoes"),
     recentes: tDs("sort.recentes"),
+    antigos: tDs("sort.antigos"),
+    favoritos: tDs("sort.favoritos"),
   };
 
   return (
@@ -127,8 +129,8 @@ export default function DataservicesClient({
               multiple={false}
               value={sortDefault}
               onChange={(val) => {
-                const selected = val.length > 0 ? val[0] : "relevancia";
-                if (selected !== sortDefault) {
+                const selected = val[0];
+                if (selected && selected !== sortDefault) {
                   handleSortChange(selected);
                 }
               }}
