@@ -95,7 +95,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
       header: labels.title,
       headerLabel: labels.titleShort,
       sortField: "title" as ReuseSortFieldByDatasets<TSortableDatasets>,
-      sortType: "numeric",
+      sortType: "string",
       renderCell: (reuse) =>
         linkStyle === "textLink" ? (
           <TextLink href={`/reuses/${reuse.slug}`}>{reuse.title}</TextLink>

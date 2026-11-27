@@ -136,7 +136,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       header: labels.title,
       headerLabel: labels.titleShort,
       sortField: "title" as DatasetColumnField<TVariant>,
-      sortType: "date",
+      sortType: "string",
       renderCell: (dataset) => (
         <TextLink href={`/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
       ),
@@ -194,7 +194,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       header: labels.resources,
       headerLabel: labels.resources,
       sortField: "resources" as DatasetColumnField<TVariant>,
-      sortType: "date",
+      sortType: "numeric",
       renderCell: (dataset) => dataset.resources?.length || 0,
       exportValue: (dataset) => dataset.resources?.length || 0,
     });

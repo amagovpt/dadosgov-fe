@@ -76,7 +76,7 @@ export function createDataserviceColumns({
       header: labels.title,
       headerLabel: labels.titleShort,
       sortField: "title",
-      sortType: "numeric",
+      sortType: "string",
       renderCell: (api) => <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>,
       exportValue: (api) => api.title,
       exportUrl: (api) => `/dataservices/${api.slug}`,

@@ -112,7 +112,7 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
       header: titleHeader ?? labels.title,
       headerLabel: labels.title,
       sortField: "title" as CommunityResourceColumnField<TIncludeFormat>,
-      sortType: "date",
+      sortType: "string",
       renderCell: (resource) => (
         <div>
           <span className={titleCellStyle === "primary" ? "text-primary-600" : "text-neutral-900"}>
