@@ -52,10 +52,12 @@ export default function DatasetsClient({
   const { language } = i18n;
 
   const DATASET_SORT_LABELS: Record<string, string> = {
-    relevancia: tds("sort.relevancia"),
-    criacao: tds("sort.criacao"),
-    antigo: tds("sort.antigo"),
-    subscritores: tds("sort.subscritores"),
+    visualizacoes: tds("sort.visualizacoes"),
+    reutilizacoes: tds("sort.reutilizacoes"),
+    recentes: tds("sort.recentes"),
+    antigos: tds("sort.antigos"),
+    // Hidden for now; uncomment to show the favorites sort.
+    // favoritos: tds("sort.favoritos"),
   };
 
   const { show, hide } = usePopupContext();
@@ -165,8 +167,8 @@ export default function DatasetsClient({
               multiple={false}
               value={sortDefault}
               onChange={(val) => {
-                const selected = val.length > 0 ? val[0] : "relevancia";
-                if (selected !== sortDefault) {
+                const selected = val[0];
+                if (selected && selected !== sortDefault) {
                   handleSortChange(selected);
                 }
               }}

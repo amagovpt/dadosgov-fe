@@ -46,10 +46,12 @@ export default function ReusesClient({
   const { language } = i18n;
 
   const REUSE_SORT_LABELS: Record<string, string> = {
-    relevancia: tr("sort.relevancia"),
+    visualizacoes: tr("sort.visualizacoes"),
+    dados: tr("sort.dados"),
     recentes: tr("sort.recentes"),
     antigos: tr("sort.antigos"),
-    subscritores: tr("sort.subscritores"),
+    // Hidden for now; uncomment to show the favorites sort.
+    // favoritos: tr("sort.favoritos"),
   };
 
   const router = useRouter();
@@ -127,8 +129,8 @@ export default function ReusesClient({
               multiple={false}
               value={sortDefault}
               onChange={(val) => {
-                const selected = val.length > 0 ? val[0] : "relevancia";
-                if (selected !== sortDefault) {
+                const selected = val[0];
+                if (selected && selected !== sortDefault) {
                   handleSortChange(selected);
                 }
               }}

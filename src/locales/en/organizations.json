@@ -8,10 +8,11 @@
   },
   "sort": {
     "ariaLabel": "Sort by {{label}}",
-    "relevancia": "Relevance",
-    "mais_dados": "Most data",
-    "mais_reutilizacoes": "Most reuses",
-    "subscritores": "Subscribers"
+    "dados": "Datasets",
+    "alfabetica": "A-Z",
+    "reutilizacoes": "Reuses",
+    "recentes": "Newest",
+    "antigos": "Oldest"
   },
   "noResults": {
     "title": "No organization found",

@@ -14,10 +14,11 @@
   },
   "sort": {
     "ariaLabel": "Sort by {{label}}",
-    "relevancia": "Relevance",
-    "criacao": "Most recent",
-    "antigo": "Oldest",
-    "subscritores": "Subscribers"
+    "visualizacoes": "Views",
+    "reutilizacoes": "Reuses",
+    "recentes": "Newest",
+    "antigos": "Oldest",
+    "favoritos": "Favorites"
   },
   "delete": {
     "delete": "Delete",

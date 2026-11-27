@@ -10,8 +10,11 @@
     "examples": "Exemplos: \"geolocalização\", \"transportes\", \"saúde\""
   },
   "sort": {
-    "relevancia": "Relevância",
-    "recentes": "Mais recentes",
+    "visualizacoes": "Visualizações",
+    "titulo": "A-Z",
+    "recentes": "Recente",
+    "antigos": "Antigo",
+    "favoritos": "Favoritos",
     "ariaLabel": "Ordenar por {{label}}"
   },
   "noResults": {

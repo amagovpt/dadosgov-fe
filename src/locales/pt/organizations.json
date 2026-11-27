@@ -8,10 +8,11 @@
   },
   "sort": {
     "ariaLabel": "Ordenar por {{label}}",
-    "relevancia": "Relevância",
-    "mais_dados": "Mais dados",
-    "mais_reutilizacoes": "Mais reutilizações",
-    "subscritores": "Subscritores"
+    "dados": "Dados",
+    "alfabetica": "A-Z",
+    "reutilizacoes": "Reutilizações",
+    "recentes": "Recente",
+    "antigos": "Antigo"
   },
   "noResults": {
     "title": "Nenhuma organização encontrada",
