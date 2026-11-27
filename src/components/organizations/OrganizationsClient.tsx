@@ -41,10 +41,11 @@ export default function OrganizationsClient({
   const { language } = i18n;
 
   const ORGANIZATION_SORT_LABELS: Record<string, string> = {
-    relevancia: tOrg("sort.relevancia"),
-    mais_dados: tOrg("sort.mais_dados"),
-    mais_reutilizacoes: tOrg("sort.mais_reutilizacoes"),
-    subscritores: tOrg("sort.subscritores"),
+    dados: tOrg("sort.dados"),
+    alfabetica: tOrg("sort.alfabetica"),
+    reutilizacoes: tOrg("sort.reutilizacoes"),
+    recentes: tOrg("sort.recentes"),
+    antigos: tOrg("sort.antigos"),
   };
 
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -120,8 +121,8 @@ export default function OrganizationsClient({
               multiple={false}
               value={sortDefault}
               onChange={(val) => {
-                const selected = val.length > 0 ? val[0] : "relevancia";
-                if (selected !== sortDefault) {
+                const selected = val[0];
+                if (selected && selected !== sortDefault) {
                   handleSortChange(selected);
                 }
               }}
