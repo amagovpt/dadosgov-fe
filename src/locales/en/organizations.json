@@ -8,7 +8,6 @@
   },
   "sort": {
     "ariaLabel": "Sort by {{label}}",
-    "visualizacoes": "Views",
     "dados": "Datasets",
     "alfabetica": "A-Z",
     "reutilizacoes": "Reuses",

@@ -41,7 +41,6 @@ export default function OrganizationsClient({
   const { language } = i18n;
 
   const ORGANIZATION_SORT_LABELS: Record<string, string> = {
-    visualizacoes: tOrg("sort.visualizacoes"),
     dados: tOrg("sort.dados"),
     alfabetica: tOrg("sort.alfabetica"),
     reutilizacoes: tOrg("sort.reutilizacoes"),

@@ -1,7 +1,6 @@
 import { OrganizationFilters } from "@/service/types/identity";
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, string> = {
-  visualizacoes: "-views",
   dados: "-datasets",
   alfabetica: "name",
   reutilizacoes: "-reuses",
@@ -23,7 +22,7 @@ export function parseOrganizationsFilters(params: URLSearchParams): Organization
   };
 
   if (!filters.sort) {
-    filters.sort = "-views";
+    filters.sort = "-datasets";
   }
 
   return filters;
@@ -32,7 +31,7 @@ export function parseOrganizationsFilters(params: URLSearchParams): Organization
 export function getOrganizationSortDefault(sortParam: string | null): string {
   return (
     Object.entries(ORGANIZATION_SORT_OPTIONS).find(
-      ([, value]) => value === (sortParam || "-views")
-    )?.[0] || "visualizacoes"
+      ([, value]) => value === (sortParam || "-datasets")
+    )?.[0] || "dados"
   );
 }
